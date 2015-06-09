@@ -21,12 +21,12 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     }
 
     @Override
-    public void init(QueryNode topQueryNode) throws IntermediateQueryBuilderException {
+    public void init(ProjectionNode rootProjectionNode) throws IntermediateQueryBuilderException {
         if (hasBeenInitialized)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
         hasBeenInitialized = true;
 
-        queryDAG.addVertex(topQueryNode);
+        queryDAG.addVertex(rootProjectionNode);
         canEdit = true;
     }
 

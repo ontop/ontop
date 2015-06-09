@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * TODO: explain
  */
-public class RuleUtils {
+public class IntermediateQueryUtils {
 
     /**
      * TODO: describe
      */
-    public static Optional<Rule> mergeDefinitions(List<Rule> predicateDefinitions) {
+    public static Optional<Rule> mergeDefinitions(List<IntermediateQuery> predicateDefinitions) {
         throw new RuntimeException("TODO: implement it");
     }
 }

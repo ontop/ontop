@@ -56,7 +56,7 @@ public class Datalog2IntermediateQueryConverter {
 
         Multimap<Predicate, CQIE> ruleIndex = dependencyGraph.getRuleIndex();
 
-        IntermediateQuery intermediateQuery = initIntermediateQuery(
+        IntermediateQuery intermediateQuery = createTopIntermediateQuery(
                 extractRootHeadAtom(rootPredicate, ruleIndex),
                 queryProgram.getQueryModifiers());
 
@@ -90,20 +90,26 @@ public class Datalog2IntermediateQueryConverter {
      * TODO: explain
      * TODO: find a better name
      */
-    private static IntermediateQuery initIntermediateQuery(Function rootDatalogAtom,
-                                                           OBDAQueryModifiers queryModifiers)
+    private static IntermediateQuery createTopIntermediateQuery(Function rootDatalogAtom,
+                                                                OBDAQueryModifiers queryModifiers)
             throws InvalidDatalogProgramException {
         try {
             IntermediateQueryBuilder builder = new IntermediateQueryBuilderImpl();
-            DataNode topDataNode = createDataNode(convertFromDatalogDataAtom(rootDatalogAtom),
-                    ImmutableList.<Predicate>of());
+            DataAtom dataAtom = convertFromDatalogDataAtom(rootDatalogAtom);
 
+            ProjectionNode rootNode;
             if (queryModifiers.hasModifiers()) {
-                throw new RuntimeException("Modifiers not yet supported. TODO: implement it !");
+                // TODO: explain
+                ImmutableQueryModifiers immutableQueryModifiers = new ImmutableQueryModifiersImpl(queryModifiers);
+                rootNode = new ProjectionNodeImpl(dataAtom, immutableQueryModifiers);
+            } else {
+                rootNode = new ProjectionNodeImpl(dataAtom);
             }
-            else {
-                builder.init(topDataNode);
-            }
+
+            DataNode dataNode = createDataNode(dataAtom, ImmutableList.<Predicate>of());
+
+            builder.init(rootNode);
+            builder.addChild(rootNode, dataNode);
 
             return builder.build();
         }
@@ -122,31 +128,27 @@ public class Datalog2IntermediateQueryConverter {
             throws InvalidDatalogProgramException {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
-        List<Rule> convertedRules = new ArrayList<>();
+        List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
         for (CQIE datalogAtomDefinition : atomDefinitions) {
-            convertedRules.add(convertDatalogRule(datalogAtomDefinition, tablePredicates));
+            convertedDefinitions.add(convertDatalogRule(datalogAtomDefinition, tablePredicates));
         }
 
-        return RuleUtils.mergeDefinitions(convertedRules);
+        return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions);
     }
 
-    private static Rule convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates) throws InvalidDatalogProgramException {
+    /**
+     * TODO: describe
+     */
+    private static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates) throws InvalidDatalogProgramException {
         DataAtom headAtom = convertFromDatalogDataAtom(datalogRule.getHead());
-        IntermediateQuery body = convertDatalogBody(datalogRule.getBody(), tablePredicates);
 
-        return new RuleImpl(headAtom, body);
-    }
-
-    private static IntermediateQuery convertDatalogBody(List<Function> datalogBodyAtoms,
-                                                        Collection<Predicate> tablePredicates)
-            throws InvalidDatalogProgramException {
-
+        fj.data.List<Function> bodyAtoms = fj.data.List.iterableList(datalogRule.getBody());
         P2<fj.data.List<Function>, fj.data.List<Function>> atomClassification = classifyAtoms(
-                fj.data.List.iterableList(datalogBodyAtoms));
+                bodyAtoms);
         fj.data.List<Function> dataAndCompositeAtoms = atomClassification._1();
         fj.data.List<Function> booleanAtoms = atomClassification._2();
 
-        return createIntermediateQuery(tablePredicates, dataAndCompositeAtoms, booleanAtoms);
+        return createDefinition(headAtom, tablePredicates, dataAndCompositeAtoms, booleanAtoms);
     }
 
     private static P2<fj.data.List<Function>, fj.data.List<Function>> classifyAtoms(fj.data.List<Function> atoms)
@@ -166,35 +168,41 @@ public class Datalog2IntermediateQueryConverter {
         return P.p(dataAndCompositeAtoms, booleanAtoms);
     }
 
-
-
     /**
      * TODO: explain
      */
-    private static IntermediateQuery createIntermediateQuery(Collection<Predicate> tablePredicates,
-                                                             fj.data.List<Function> dataAndCompositeAtoms,
-                                                             fj.data.List<Function> booleanAtoms)
+    private static IntermediateQuery createDefinition(DataAtom definedAtom, Collection<Predicate> tablePredicates,
+                                                      fj.data.List<Function> dataAndCompositeAtoms,
+                                                      fj.data.List<Function> booleanAtoms)
             throws InvalidDatalogProgramException {
-            /**
-             * TODO: explain
-             */
-        Optional<QueryNode> optionalRootNode = createOptionalRootNode(dataAndCompositeAtoms, booleanAtoms);
+        /**
+         * TODO: explain
+         */
+        Optional<QueryNode> optionalViceTopNode = createViceTopNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
         IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+        ProjectionNode rootNode = new ProjectionNodeImpl(definedAtom);
 
         try {
+            queryBuilder.init(rootNode);
+
             /**
              * TODO: explain
              */
-            if (optionalRootNode.isPresent()) {
-                queryBuilder.init(optionalRootNode.get());
+            QueryNode quasiTopNode;
+            if (optionalViceTopNode.isPresent()) {
+                quasiTopNode = optionalViceTopNode.get();
+                queryBuilder.addChild(rootNode, quasiTopNode);
+            }
+            else {
+                quasiTopNode = rootNode;
             }
 
             /**
              * TODO: explain
              */
-            queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, optionalRootNode,
+            queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, quasiTopNode,
                         tablePredicates);
             return queryBuilder.build();
         }
@@ -206,8 +214,8 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain
      */
-    private static Optional<QueryNode> createOptionalRootNode(fj.data.List<Function> dataAndCompositeAtoms,
-                                                              fj.data.List<Function> booleanAtoms) {
+    private static Optional<QueryNode> createViceTopNode(fj.data.List<Function> dataAndCompositeAtoms,
+                                                         fj.data.List<Function> booleanAtoms) {
         Optional<BooleanExpression> optionalFilter = createFilterExpression(booleanAtoms);
 
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
@@ -257,7 +265,7 @@ public class Datalog2IntermediateQueryConverter {
      */
     private static IntermediateQueryBuilder convertDataOrCompositeAtoms(final fj.data.List<Function> atoms,
                                                                         IntermediateQueryBuilder queryBuilder,
-                                                                        final Optional<QueryNode> optionalParentNode,
+                                                                        final QueryNode parentNode,
                                                                         Collection<Predicate> tablePredicates)
             throws IntermediateQueryBuilderException, InvalidDatalogProgramException {
         /**
@@ -290,26 +298,14 @@ public class Datalog2IntermediateQueryConverter {
              * Creates the node
              */
             QueryNode currentNode = createQueryNode(atom, tablePredicates, optionalFilterCondition);
-
-            /**
-             * If has a parent
-             */
-            if (optionalParentNode.isPresent()) {
-                queryBuilder.addChild(optionalParentNode.get(), currentNode);
-            }
-            /**
-             * Otherwise is supposed to be the root
-             */
-            else {
-                queryBuilder.init(currentNode);
-            }
+            queryBuilder.addChild(parentNode, currentNode);
 
             /**
              * Recursive call for composite atoms
              */
             if (optionalSubDataOrCompositeAtoms.isPresent()) {
                 queryBuilder = convertDataOrCompositeAtoms(optionalSubDataOrCompositeAtoms.get(), queryBuilder,
-                        Optional.of(currentNode), tablePredicates);
+                        currentNode, tablePredicates);
             }
         }
 

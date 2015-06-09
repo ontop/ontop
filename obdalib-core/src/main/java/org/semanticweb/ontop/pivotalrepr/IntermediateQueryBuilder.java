@@ -7,7 +7,7 @@ package org.semanticweb.ontop.pivotalrepr;
  */
 public interface IntermediateQueryBuilder {
 
-    void init(QueryNode topQueryNode) throws IntermediateQueryBuilderException;
+    void init(ProjectionNode rootProjectionNode) throws IntermediateQueryBuilderException;
 
     void addChild(QueryNode parentNode, QueryNode child) throws IntermediateQueryBuilderException;
 
