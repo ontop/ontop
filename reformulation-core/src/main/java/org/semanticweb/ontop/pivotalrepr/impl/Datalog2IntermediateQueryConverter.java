@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.DatalogTools;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;

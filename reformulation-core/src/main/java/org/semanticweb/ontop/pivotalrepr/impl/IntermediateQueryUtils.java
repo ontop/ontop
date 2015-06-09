@@ -1,6 +1,10 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
+import org.semanticweb.ontop.pivotalrepr.DataAtom;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.pivotalrepr.ProjectionNode;
+import org.semanticweb.ontop.pivotalrepr.QueryMergingException;
 
 import java.util.List;
 

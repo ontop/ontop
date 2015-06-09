@@ -10,7 +10,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.ArrayList;
 
-import static org.semanticweb.ontop.model.DatalogTools.*;
+import static org.semanticweb.ontop.model.impl.DatalogTools.*;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.

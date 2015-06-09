@@ -9,15 +9,15 @@ import fj.data.List;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
 import java.util.*;
 import java.util.Set;
 
-import static org.semanticweb.ontop.model.DatalogTools.constructNewFunction;
-import static org.semanticweb.ontop.model.DatalogTools.isDataOrLeftJoinOrJoinAtom;
-import static org.semanticweb.ontop.model.DatalogTools.isLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.impl.DatalogTools.constructNewFunction;
+import static org.semanticweb.ontop.model.impl.DatalogTools.isDataOrLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.impl.DatalogTools.isLeftJoinOrJoinAtom;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.*;
 

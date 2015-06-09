@@ -7,7 +7,7 @@ import fj.data.HashMap;
 import fj.data.List;
 import fj.data.Option;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;

@@ -30,7 +30,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 
 import java.util.List;
 import java.util.Vector;

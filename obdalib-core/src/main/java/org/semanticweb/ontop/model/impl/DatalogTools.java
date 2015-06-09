@@ -1,8 +1,9 @@
-package org.semanticweb.ontop.model;
+package org.semanticweb.ontop.model.impl;
 
 import fj.F;
 import fj.F2;
 import fj.data.List;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
