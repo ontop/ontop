@@ -10,4 +10,14 @@ import org.semanticweb.ontop.model.Function;
 public interface DataAtom extends Function {
 
     AtomPredicate getPredicate();
+
+    /**
+     * Effective arity (number of sub-terms).
+     */
+    int getArity();
+
+    /**
+     * TODO: find a better name
+     */
+    boolean shareReferenceToTheSameAbstraction(DataAtom headAtom2);
 }

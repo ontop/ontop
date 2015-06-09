@@ -155,7 +155,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public void mergeSubQuery(IntermediateQuery subQuery) throws RuleMergingException {
+    public void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException {
         resetCache();
         // TODO: implement it
     }

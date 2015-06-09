@@ -25,4 +25,21 @@ public class DataAtomImpl extends FunctionalTermImpl implements DataAtom {
     public AtomPredicate getPredicate() {
         return predicate;
     }
+
+    @Override
+    public int getArity() {
+        return getTerms().size();
+    }
+
+    @Override
+    public boolean shareReferenceToTheSameAbstraction(DataAtom otherAtom) {
+        if (!predicate.equals(getPredicate()))
+            return false;
+
+        if (getArity() != otherAtom.getArity())
+            return false;
+
+        return true;
+    }
+
 }

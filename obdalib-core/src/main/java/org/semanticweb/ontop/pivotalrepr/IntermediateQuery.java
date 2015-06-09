@@ -32,6 +32,6 @@ public interface IntermediateQuery {
     /**
      * TODO: find an exception to throw
      */
-    void mergeSubQuery(IntermediateQuery subQuery) throws RuleMergingException;
+    void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
 
 }

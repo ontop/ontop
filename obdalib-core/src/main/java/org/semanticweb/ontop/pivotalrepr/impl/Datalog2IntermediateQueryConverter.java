@@ -68,7 +68,7 @@ public class Datalog2IntermediateQueryConverter {
             if (optionalSubQuery.isPresent()) {
                 try {
                     intermediateQuery.mergeSubQuery(optionalSubQuery.get());
-                } catch (RuleMergingException e) {
+                } catch (QueryMergingException e) {
                     throw new InvalidDatalogProgramException(e.getMessage());
                 }
             }
@@ -133,7 +133,11 @@ public class Datalog2IntermediateQueryConverter {
             convertedDefinitions.add(convertDatalogRule(datalogAtomDefinition, tablePredicates));
         }
 
-        return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions);
+        try {
+            return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions);
+        } catch (QueryMergingException e) {
+            throw new InvalidDatalogProgramException(e.getLocalizedMessage());
+        }
     }
 
     /**
