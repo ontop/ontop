@@ -2,12 +2,13 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
 import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
 import org.semanticweb.ontop.pivotalrepr.DataAtom;
 
 import java.util.List;
 
-public class DataAtomImpl extends FunctionalTermImpl implements DataAtom {
+public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAtom {
 
     private final AtomPredicate predicate;
 
@@ -27,7 +28,7 @@ public class DataAtomImpl extends FunctionalTermImpl implements DataAtom {
     }
 
     @Override
-    public int getArity() {
+    public int getEffectiveArity() {
         return getTerms().size();
     }
 
@@ -36,7 +37,7 @@ public class DataAtomImpl extends FunctionalTermImpl implements DataAtom {
         if (!predicate.equals(getPredicate()))
             return false;
 
-        if (getArity() != otherAtom.getArity())
+        if (getEffectiveArity() != otherAtom.getEffectiveArity())
             return false;
 
         return true;
