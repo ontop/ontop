@@ -120,6 +120,5 @@ public interface SQLDialectAdapter {
 
 	public String dateTimezone(String date);
 
-
-
+	public String dateMonth(String date);
 }

@@ -383,14 +383,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionNow(){
 		return getFunction(OBDAVocabulary.NOW);
 		}
+	
 	@Override
 	public Function getFunctionYear(Term arg){
 		return getFunction(OBDAVocabulary.YEAR, arg);
 		}
+	
 	@Override
 	public Function getFunctionDay(Term arg){
 		return getFunction(OBDAVocabulary.DAY, arg);
 		}
+	
+	@Override
+	public Function getFunctionMonth(Term arg){
+		return getFunction(OBDAVocabulary.MONTH, arg);
+		}
+	
 	@Override
 	public Function getFunctionMinutes(Term arg){
 		return getFunction(OBDAVocabulary.MINUTES, arg);

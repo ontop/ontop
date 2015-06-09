@@ -171,10 +171,13 @@ public class BindTestWithFunctions {
 		}
 	}
 	
+	/*
+	 * Tests for numeric functions
+	 */
 	
 	@Ignore
 	@Test
-    public void testBindWithNumeric() throws Exception {
+    public void testCeil() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -185,21 +188,103 @@ public class BindTestWithFunctions {
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount\n"
-                + "   BIND (ROUND(ABS(?p*(1-?discount))) AS ?w)\n"
-                + "   FILTER(CEIL(?w) < 20) \n"
+                + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
+                + "   BIND (CEIL(?discount) AS ?w)\n"
                 + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"17.0\"");
-        expectedValues.add("\"9.0\"");
+        expectedValues.add("\"1.0\"");
+        expectedValues.add("\"1.0\"");
+        expectedValues.add("\"1.0\"");
+        expectedValues.add("\"1.0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
+	
 	@Ignore
 	@Test
-    public void testBindWithHash() throws Exception {
+    public void testFloor() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (FLOOR(?discount) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"0.0\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+	
+	@Ignore
+	@Test
+    public void testRound() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (CONCAT(ROUND(?discount),', ',ROUND(?p)) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.0, 43.0\"");
+        expectedValues.add("\"0.0, 23.0\"");
+        expectedValues.add("\"0.0, 34.0\"");
+        expectedValues.add("\"0.0, 10.0\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+	
+	@Test
+    public void testAbs() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"8.6\"");
+        expectedValues.add("\"5.75\"");
+        expectedValues.add("\"6.8\"");
+        expectedValues.add("\"1.50\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+	}	
+	
+	/*
+	 * Tests for hash functions. H2 supports only SHA25 algorithm.
+	 */
+	
+	@Test
+    public void testHash() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -213,13 +298,13 @@ public class BindTestWithFunctions {
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (SHA256(\"The\") AS ?w)\n"
+                + "   BIND (SHA256(?title) AS ?w)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>(); 
         try{
 	          MessageDigest digest = MessageDigest.getInstance("SHA-256");
-	          byte[] hash = digest.digest("The".getBytes("UTF-8"));
+	          byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
 	          StringBuffer hexString = new StringBuffer();
 
 	          for (int i = 0; i < hash.length; i++) {
@@ -254,9 +339,13 @@ public class BindTestWithFunctions {
 	  }
 	}
 	
+	/*
+	 * Tests for functions on strings.
+	 */
+	
 	@Ignore
     @Test
-    public void testStrEncode() throws Exception {
+    public void testURIEncoding() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -270,6 +359,7 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
                 + "   FILTER (STRSTARTS(?title,\"The\"))\n"
                 + "   BIND (ENCODE_FOR_URI(?title) AS ?w)\n"
              + "}";
@@ -280,31 +370,8 @@ public class BindTestWithFunctions {
         expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
     } 
-    
-    
-    @Test
-    public void testNow() throws Exception {
+	
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   BIND (TIMEZONE(\"2015-06-08 15:58:33.562\") AS ?w)\n"
-             + "}";
-
-
-        List<String> expectedValues = new ArrayList<>();
- 
-        checkReturnedValues(p, queryBind, expectedValues);
-    } 
     
     @Ignore
     @Test
@@ -356,7 +423,7 @@ public class BindTestWithFunctions {
 
     }    
     
-   /* 
+  
     @Test
     public void testBindWithUcase() throws Exception {
 
@@ -380,6 +447,9 @@ public class BindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"");
         expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"");
+        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
+        "The Logic Book: Introduction, Second Edition\"".toUpperCase());
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
@@ -407,6 +477,9 @@ public class BindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"SPARQL Tutorial sparql tutorial\"");
         expectedValues.add("\"The Semantic Web the semantic web\"");
+        expectedValues.add("\"Crime and Punishment crime and punishment\"");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
+        "The Logic Book: Introduction, Second Edition\"".toLowerCase());
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
@@ -426,14 +499,15 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRBEFORE(?title,\"L\") AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (STRBEFORE(?title,\" \") AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial SPARQ\"");
-        expectedValues.add("\"The Semantic Web \"");
+        expectedValues.add("\"SPARQL\"");
+        expectedValues.add("\"The\"");
+        expectedValues.add("\"Crime\"");
+        expectedValues.add("\"The\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
@@ -453,8 +527,7 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRAFTER(?title,\"S\") AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
              + "}";
 
 
@@ -466,102 +539,38 @@ public class BindTestWithFunctions {
     }
     
     
-/*
-    @Test
-    public void testBindWithConcatLanguage() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   BIND (CONCAT(?title, ?title) AS ?w)\n"
-                + "}";
-
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL TutorialSPARQL Tutorial\"@en");
-        expectedValues.add("\"The Semantic WebThe Semantic Web\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
-
-
-
-    }
-
-    //language tag are not supported when they are stored in different columns or
-    // when one of the two is stored in the database
-    //the correct results would have been with "@en" language tag
-    @Test
-    public void testBindWithConcatLanguageinDatabase() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   ?x dc:description ?desc .\n"
-                + "   BIND (CONCAT(?desc, ?title) AS ?w)\n"
-                + "}";
-
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"goodSPARQL Tutorial\"");
-        expectedValues.add("\"badThe Semantic Web\"");
-        checkReturnedValues(p, queryBind, expectedValues);
-
-
-
-    }
-*/
-/*
-    //CAST function not supported
-    //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
-    @Test
-    public void testBindWithCast() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-                + "SELECT  ?title ?price WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount\n"
-                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
-                + "   ?x dc:title ?title .\n"
-                + "}";
-
-        try {
-            OWLObject price = runTests(p, queryBind);
-
-        } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
-
-        }
-
-    } 
+	/*
+	 * Tests for functions on date and time
+	 */
     
-    */
+    @Ignore
+    @Test
+    public void testMonth() throws Exception {
 
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND (MONTH(?year) AS ?w)\n"
+             + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"6\"");        
+        expectedValues.add("\"12\""); 
+        expectedValues.add("\"7\"");      
+        expectedValues.add("\"11\"");        
+        checkReturnedValues(p, queryBind, expectedValues);
+    } 
 
         private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 

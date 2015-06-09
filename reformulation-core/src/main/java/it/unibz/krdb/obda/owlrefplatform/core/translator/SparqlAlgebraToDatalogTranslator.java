@@ -737,7 +737,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getLower(List<ValueExpr> args) {
-		if (args.size() != 2){
+		if (args.size() != 1){
             throw new UnsupportedOperationException("Wrong number of arguments (found " 
 		+ args.size() + ", only 1 supported) for SQL LOWER function");					
 		}
@@ -748,7 +748,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	private Term getUpper(List<ValueExpr> args) {
-		if (args.size() != 2){
+		if (args.size() != 1){
             throw new UnsupportedOperationException("Wrong number of arguments (found " 
 		+ args.size() + ", only 1 supported) for SQL UPPER function");					
 		}
@@ -910,6 +910,17 @@ public class SparqlAlgebraToDatalogTranslator {
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionDay(arg);
+		return term;	
+	}
+	
+	private Term getMonth(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL MONTH function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionMonth(arg);
 		return term;	
 	}
 	
@@ -1117,6 +1128,9 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#day-from-dateTime":
             	return getDay(expr.getArgs());
             	
+            case "http://www.w3.org/2005/xpath-functions#month-from-dateTime":
+            	return getMonth(expr.getArgs());	
+           
             case "http://www.w3.org/2005/xpath-functions#hours-from-dateTime":
             	return getHours(expr.getArgs());
 	

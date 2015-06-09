@@ -87,6 +87,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
   	}
     
     @Override
+  	public String dateMonth(String str) {
+    	return String.format("EXTRACT(MONTH FROM %s)",str);
+  	}
+    
+    @Override
   	public String dateMinutes(String str) {
     	return String.format("EXTRACT(MINUTE FROM %s)",str);
   	}
@@ -150,28 +155,25 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return String.format("UPPER(%s)", str);
 	} 
 	
-	/*public String strEncodeForUri(String str) {	
-		return String.format("utl_url.escape(%s)", str);} //PL/SQL package */
-	
 	@Override
 	public String strBefore(String str, String before) {
 		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
-	} //Nika
+	} 
 	
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("RIGHT(%s,LENGTH(%s) - CHARINDEX(%s,%s) )", str, str, after, str);
-	} //Nika
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s) + LENGTH(%s))", str, after, str, after);
+	} 
 	
 	@Override
 	public String strLcase(String str) {
 		return String.format("LOWER(%s)", str);
-	} //Nika
+	}
 	
 	@Override
 	public String strLength(String str) {
 		return String.format("LENGTH(%s)", str);
-	} //Nika
+	} 
 	
 	@Override
 	public String strSubstr(String str, String start, String end) {

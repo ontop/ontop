@@ -151,6 +151,9 @@ public class OBDAVocabulary {
 	public static final StringOperationPredicate DAY = new StringOperationPredicateImpl(
 			"DAY", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
+	public static final StringOperationPredicate MONTH = new StringOperationPredicateImpl(
+			"MONTH", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	
 	public static final StringOperationPredicate HOURS = new StringOperationPredicateImpl(
 			"HOURS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	

@@ -1339,13 +1339,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		/* If its not constant, or variable its a function */
-
+		
 		Function function = (Function) term;
+		List<Term> terms = function.getTerms();
+		Term term1 = null;
+		if (terms.size() > 0){
+			 term1 = function.getTerms().get(0);
+		} 
+
 		Predicate functionSymbol = function.getFunctionSymbol();
 		int size = function.getTerms().size();
 
 		if (functionSymbol instanceof DatatypePredicate) {
-			Term term1 = function.getTerms().get(0);
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
@@ -1356,7 +1361,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return getSQLStringForTemplateFunction(function, index);
 			}
 		} else if (functionSymbol.isBooleanPredicate() ) {
-			Term term1 = function.getTerms().get(0);
 			// atoms of the form EQ(x,y)
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			if (isUnary(function)) {
@@ -1416,13 +1420,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
-			Term term1 = function.getTerms().get(0);
 			String expressionFormat = getNumericalOperatorString(functionSymbol);
 			String leftOp = getSQLString(term1, index, true);
 				if (isUnary(function)){
 					String result = String.format(expressionFormat, leftOp);
 					return result;
-				} else {
+				} 
+				
+				if (!isUnary(function) & !isBinary(function)){
+					return expressionFormat;
+				}
+				
+				
+				
+				else {
 					Term term2 = function.getTerms().get(1);
 					String rightOp = getSQLString(term2, index, true);
 					String result = String.format(expressionFormat, leftOp, rightOp); 
@@ -1487,7 +1498,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String result = sqladapter.dateDay(literal);
 				return result;
 				
-			} else if (functionName.equals(OBDAVocabulary.SECONDS.getName())) {
+			}  else if (functionName.equals(OBDAVocabulary.MONTH.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateMonth(literal);
+				return result;
+				
+			}  else if (functionName.equals(OBDAVocabulary.SECONDS.getName())) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateSeconds(literal);
 				return result;
