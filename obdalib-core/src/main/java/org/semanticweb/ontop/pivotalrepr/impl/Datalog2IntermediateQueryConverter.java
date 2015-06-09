@@ -64,10 +64,10 @@ public class Datalog2IntermediateQueryConverter {
          * Rules
          */
         for (Predicate datalogAtomPredicate : topDownPredicates) {
-            Optional<Rule> optionalRule = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex, tablePredicates);
-            if (optionalRule.isPresent()) {
+            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex, tablePredicates);
+            if (optionalSubQuery.isPresent()) {
                 try {
-                    intermediateQuery.mergeRule(optionalRule.get());
+                    intermediateQuery.mergeSubQuery(optionalSubQuery.get());
                 } catch (RuleMergingException e) {
                     throw new InvalidDatalogProgramException(e.getMessage());
                 }
@@ -122,7 +122,7 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain and comment
      */
-    private static Optional<Rule> convertDatalogDefinitions(Predicate datalogAtomPredicate,
+    private static Optional<IntermediateQuery> convertDatalogDefinitions(Predicate datalogAtomPredicate,
                                                             Multimap<Predicate, CQIE> datalogRuleIndex,
                                                             Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException {

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
  */
 public interface IntermediateQuery {
 
+    ProjectionNode getRootProjectionNode();
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();
 
@@ -31,6 +32,6 @@ public interface IntermediateQuery {
     /**
      * TODO: find an exception to throw
      */
-    void mergeRule(Rule rule) throws RuleMergingException;
+    void mergeSubQuery(IntermediateQuery subQuery) throws RuleMergingException;
 
 }
