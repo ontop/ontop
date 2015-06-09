@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 /**
@@ -22,5 +21,13 @@ public abstract class QueryNodeImpl implements QueryNode {
     @Override
     public boolean isRejected() {
         return isRejected;
+    }
+
+    /**
+     * See https://stackoverflow.com/questions/6837362/the-inherited-method-object-clone-cannot-hide-the-public-abstract-method
+     */
+    @Override
+    public QueryNode clone() {
+        throw new RuntimeException("This method must be override. Tricks the compiler");
     }
 }

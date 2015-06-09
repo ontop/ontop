@@ -160,7 +160,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         // TODO: implement it
     }
 
-
     /**
      * Dependency: edge from a QueryNode to its sub-node.
      */

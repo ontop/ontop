@@ -12,7 +12,7 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     private boolean hasBeenInitialized;
 
     /**
-     * TODO: construct with Guice
+     * TODO: construct with Guice?
      */
     public IntermediateQueryBuilderImpl() {
         queryDAG = new DirectedAcyclicGraph<>(DefaultEdge.class);

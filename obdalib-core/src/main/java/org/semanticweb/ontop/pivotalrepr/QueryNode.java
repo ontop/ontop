@@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableList;
  * Golden rule: after mutation, the node must be semantically equivalent (for instance, not specialized).
  *
  */
-public interface QueryNode {
+public interface QueryNode extends Cloneable {
 
     /**
      * "Accept" method for the "Visitor" pattern.
@@ -20,7 +20,13 @@ public interface QueryNode {
      *
      * TODO: check if visitor is the proper name.
      */
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
+    Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
 
-    public boolean isRejected();
+    boolean isRejected();
+
+    /**
+     * Since a QueryNode is mutable (under some control however),
+     * cloning is needed (at a limited number of places).
+     */
+    QueryNode clone();
 }

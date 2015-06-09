@@ -10,4 +10,6 @@ public interface ProjectionNode extends QueryNode {
     DataAtom getHeadAtom();
 
     Optional<ImmutableQueryModifiers> getOptionalModifiers();
+
+    ProjectionNode clone();
 }

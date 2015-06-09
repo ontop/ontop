@@ -1,10 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.DataAtom;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ProjectionNode;
-import org.semanticweb.ontop.pivotalrepr.QueryMergingException;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
 
@@ -32,6 +29,47 @@ public class IntermediateQueryUtils {
             mergedDefinition = mergeDefinitions(mergedDefinition, definition);
         }
         return Optional.of(mergedDefinition);
+    }
+
+    /**
+     * TODO: explain
+     * TODO: find a better name
+     *
+     * TODO: avoid the use of a recursive method. Use a stack instead.
+     *
+     */
+    public static IntermediateQueryBuilder convertToBuilder(IntermediateQuery originalQuery)
+            throws IntermediateQueryBuilderException {
+        IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+
+        // Clone of the original root node (because is mutable)
+        ProjectionNode newRootNode = originalQuery.getRootProjectionNode().clone();
+
+        queryBuilder.init(newRootNode);
+
+
+        return copyNodesToBuilder(originalQuery, queryBuilder, newRootNode);
+    }
+
+    /**
+     * TODO: replace this implementation by a non-recursive one.
+     */
+    private static IntermediateQueryBuilder copyNodesToBuilder(final IntermediateQuery originalQuery,
+                                                               IntermediateQueryBuilder queryBuilder,
+                                                               final QueryNode parentNode)
+            throws IntermediateQueryBuilderException {
+        for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(parentNode)) {
+
+            // QueryNode are mutable
+            QueryNode newChildNode = originalChildNode.clone();
+
+            queryBuilder.addChild(parentNode, newChildNode);
+
+            // Recursive call
+            queryBuilder = copyNodesToBuilder(originalQuery, queryBuilder, newChildNode);
+        }
+
+        return queryBuilder;
     }
 
     /**

@@ -146,7 +146,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	@Override
-	public FunctionalTermImpl clone() {
+	public Function clone() {
 		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size());
 		
 		for (Term term: terms) {

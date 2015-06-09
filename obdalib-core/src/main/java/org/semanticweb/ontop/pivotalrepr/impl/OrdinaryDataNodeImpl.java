@@ -8,4 +8,9 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     public OrdinaryDataNodeImpl(DataAtom atom) {
         super(atom);
     }
+
+    @Override
+    public OrdinaryDataNode clone() {
+        return new OrdinaryDataNodeImpl(getAtom());
+    }
 }

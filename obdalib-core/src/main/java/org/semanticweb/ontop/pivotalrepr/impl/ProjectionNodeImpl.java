@@ -29,6 +29,17 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
         return optionalModifiers;
     }
 
+    /**
+     * Immutable fields, can be shared.
+     */
+    @Override
+    public ProjectionNode clone() {
+        if (optionalModifiers.isPresent()) {
+            return new ProjectionNodeImpl(dataAtom, optionalModifiers.get());
+        }
+        return new ProjectionNodeImpl(dataAtom);
+    }
+
     @Override
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);

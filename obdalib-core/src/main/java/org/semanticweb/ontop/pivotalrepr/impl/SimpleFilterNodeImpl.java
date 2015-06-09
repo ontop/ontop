@@ -17,4 +17,11 @@ public class SimpleFilterNodeImpl extends FilterNodeImpl implements SimpleFilter
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
+
+    @Override
+    public SimpleFilterNode clone() {
+        BooleanExpression filterCondition = getOptionalFilterCondition().get();
+
+        return new SimpleFilterNodeImpl(filterCondition.clone());
+    }
 }

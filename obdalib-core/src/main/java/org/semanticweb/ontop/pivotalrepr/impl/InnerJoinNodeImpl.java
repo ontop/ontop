@@ -15,4 +15,20 @@ public class InnerJoinNodeImpl extends AbstractJoinNodeImpl implements InnerJoin
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
+
+    @Override
+    public InnerJoinNode clone() {
+        Optional<BooleanExpression> originalOptionalFilter = getOptionalFilterCondition();
+        Optional<BooleanExpression> newOptionalFilter;
+        if (originalOptionalFilter.isPresent()) {
+            // Not yet safe --> must be cloned. TODO: make it immutable
+            BooleanExpression newFilter = originalOptionalFilter.get().clone();
+            newOptionalFilter = Optional.of(newFilter);
+        }
+        else{
+            newOptionalFilter = Optional.absent();
+        }
+
+        return new InnerJoinNodeImpl(newOptionalFilter);
+    }
 }

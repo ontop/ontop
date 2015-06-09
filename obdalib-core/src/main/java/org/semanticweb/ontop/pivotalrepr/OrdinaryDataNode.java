@@ -5,4 +5,7 @@ package org.semanticweb.ontop.pivotalrepr;
  * TODO: find a better name
  */
 public interface OrdinaryDataNode extends DataNode {
+
+    @Override
+    OrdinaryDataNode clone();
 }
