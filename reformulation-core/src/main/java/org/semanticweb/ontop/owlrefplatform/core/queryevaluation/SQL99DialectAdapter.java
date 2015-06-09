@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {

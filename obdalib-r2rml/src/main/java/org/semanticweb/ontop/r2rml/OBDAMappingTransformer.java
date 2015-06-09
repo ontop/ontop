@@ -51,7 +51,6 @@ import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.URITemplates;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
 
 import eu.optique.api.mapping.LogicalTable;
 import eu.optique.api.mapping.MappingFactory;

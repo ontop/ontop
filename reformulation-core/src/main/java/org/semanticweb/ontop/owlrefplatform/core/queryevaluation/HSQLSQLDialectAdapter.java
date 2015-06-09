@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+
+import org.semanticweb.ontop.model.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;

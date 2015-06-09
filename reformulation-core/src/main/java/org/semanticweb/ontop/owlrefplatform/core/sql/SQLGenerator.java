@@ -23,7 +23,6 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
 
 import com.google.common.collect.*;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;

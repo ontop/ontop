@@ -54,7 +54,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	protected DatalogProgramImpl() {
-		modifiers = new OBDAQueryModifiers();
+		modifiers = new MutableQueryModifiersImpl();
 		rules = new LinkedList<CQIE>();
 		predicateIndex = new HashMap<Predicate, List<CQIE>>();
 	}
