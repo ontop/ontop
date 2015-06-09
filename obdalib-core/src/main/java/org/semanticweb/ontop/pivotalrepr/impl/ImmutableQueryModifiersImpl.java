@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  * BUT DOES NOT SUPPORT ANY MUTABLE OPERATION.
  *
  */
-public class ImmutableQueryModifiersImpl implements QueryModifiers, OBDAQueryModifiers {
+public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers, OBDAQueryModifiers {
 
     private final boolean isDistinct;
     private final boolean isCount;
