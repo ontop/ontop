@@ -44,4 +44,9 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
+
+    @Override
+    public boolean isTyped() {
+        return dataAtom.isTyped();
+    }
 }

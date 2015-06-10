@@ -24,7 +24,7 @@ public abstract class QueryNodeImpl implements QueryNode {
     }
 
     /**
-     * See https://stackoverflow.com/questions/6837362/the-inherited-method-object-clone-cannot-hide-the-public-abstract-method
+     * See https://stackoverflow.com/questions/6837362/
      */
     @Override
     public QueryNode clone() {

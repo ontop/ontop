@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
@@ -33,7 +34,7 @@ public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAto
     }
 
     @Override
-    public boolean shareReferenceToTheSameAbstraction(DataAtom otherAtom) {
+    public boolean referSameAbstraction(DataAtom otherAtom) {
         if (!predicate.equals(getPredicate()))
             return false;
 
@@ -41,6 +42,15 @@ public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAto
             return false;
 
         return true;
+    }
+
+    @Override
+    public boolean isTyped() {
+        for (Term term : getTerms()) {
+            if (term instanceof Function)
+                return true;
+        }
+        return false;
     }
 
 }

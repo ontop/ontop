@@ -12,4 +12,6 @@ public interface ProjectionNode extends QueryNode {
     Optional<ImmutableQueryModifiers> getOptionalModifiers();
 
     ProjectionNode clone();
+
+    boolean isTyped();
 }

@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.Variable;
 
 /**
  *
@@ -12,6 +13,8 @@ public interface IntermediateQuery {
     ImmutableList<QueryNode> getNodesInBottomUpOrder();
 
     ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
+
+    boolean contains(QueryNode node);
 
     /**
      * TODO: describe
@@ -30,8 +33,30 @@ public interface IntermediateQuery {
             throws InvalidLocalOptimizationProposalException;
 
     /**
+     * TODO: describe
+     *
+     */
+    @Deprecated
+    QueryNode applyDetypingProposal(DetypingProposal proposal)
+            throws InvalidLocalOptimizationProposalException;
+
+    /**
      * TODO: find an exception to throw
      */
     void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
 
+    /**
+     * TODO: explain
+     */
+    boolean isTyped();
+
+    /**
+     * TODO: explain
+     * Does nothing if the node is not "typed".
+     */
+    @Deprecated
+    public void detypeNode(QueryNode nodeToDetype);
+
+
+    Variable createNewVariable();
 }

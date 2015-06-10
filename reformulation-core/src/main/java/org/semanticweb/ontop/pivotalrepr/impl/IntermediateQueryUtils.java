@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
+import fj.P2;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
@@ -75,11 +76,62 @@ public class IntermediateQueryUtils {
     /**
      * TODO: implement it
      */
-    private static IntermediateQuery mergeDefinitions(IntermediateQuery definition1, IntermediateQuery definition2)
+    private static IntermediateQuery mergeDefinitions(IntermediateQuery accumulatedQuery,
+                                                      IntermediateQuery newDefinition)
         throws QueryMergingException {
-        checkDefinitionProjections(definition1, definition2);
+        checkDefinitionProjections(accumulatedQuery, newDefinition);
 
-        // TODO: continue
+        /**
+         * TODO: explain the strategy
+         */
+        IntermediateQuery mergedDefinition = prepareNewQueryForMerging(accumulatedQuery);
+        mergedDefinition.mergeSubQuery(newDefinition);
+
+        return mergedDefinition;
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private static IntermediateQuery prepareNewQueryForMerging(IntermediateQuery originalQuery)
+            throws QueryMergingException {
+        try {
+            P2<IntermediateQueryBuilder, UnionNode> preparationPair = prepareUnion(originalQuery);
+            IntermediateQueryBuilder newQueryBuilder = preparationPair._1();
+            UnionNode unionNode = preparationPair._2();
+
+            /**
+             * TODO: explain
+             */
+            DataAtom headAtom = originalQuery.getRootProjectionNode().getHeadAtom();
+            DataAtom intentionalDataAtom = detypeDataAtom(headAtom, newQueryBuilder);
+            DataNode intentionalDataNode = new OrdinaryDataNodeImpl(intentionalDataAtom);
+
+            newQueryBuilder.addChild(unionNode, intentionalDataNode);
+
+            return newQueryBuilder.build();
+        } catch (IntermediateQueryBuilderException e) {
+            throw new QueryMergingException(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: keep it?
+     *
+     *
+     */
+    private static DataAtom detypeDataAtom(DataAtom atom, IntermediateQueryBuilder newQueryBuilder) {
+        // TODO: implement it;
+        return null;
+    }
+
+    /**
+     * TODO: explain and find a better name
+     */
+    private static P2<IntermediateQueryBuilder, UnionNode> prepareUnion(IntermediateQuery originalQuery) {
         return null;
     }
 
@@ -95,7 +147,7 @@ public class IntermediateQueryUtils {
         DataAtom headAtom1 = root1.getHeadAtom();
         DataAtom headAtom2 = root2.getHeadAtom();
 
-        if (!headAtom1.shareReferenceToTheSameAbstraction(headAtom2)) {
+        if (!headAtom1.referSameAbstraction(headAtom2)) {
             throw new QueryMergingException("Two definitions of different things: "
                     + headAtom1 + " != " + headAtom2);
         }

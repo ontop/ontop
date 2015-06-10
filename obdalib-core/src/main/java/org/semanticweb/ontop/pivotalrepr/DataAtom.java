@@ -19,7 +19,16 @@ public interface DataAtom extends ImmutableFunctionalTerm {
     int getEffectiveArity();
 
     /**
+     * TODO: explain
+     */
+    boolean referSameAbstraction(DataAtom headAtom2);
+
+    /**
+     * Returns true if the atom contains
+     * some functional terms.
+     *
      * TODO: find a better name
      */
-    boolean shareReferenceToTheSameAbstraction(DataAtom headAtom2);
+    boolean isTyped();
+
 }

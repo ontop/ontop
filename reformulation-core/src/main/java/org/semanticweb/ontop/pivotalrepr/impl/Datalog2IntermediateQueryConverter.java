@@ -41,7 +41,9 @@ public class Datalog2IntermediateQueryConverter {
      * TODO: explain
      *
      */
-    public static IntermediateQuery convertFromDatalog(DatalogProgram queryProgram, Collection<Predicate> tablePredicates) throws InvalidDatalogProgramException {
+    public static IntermediateQuery convertFromDatalog(DatalogProgram queryProgram,
+                                                       Collection<Predicate> tablePredicates)
+            throws InvalidDatalogProgramException {
         List<CQIE> rules = queryProgram.getRules();
 
         DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
@@ -62,10 +64,11 @@ public class Datalog2IntermediateQueryConverter {
                 queryProgram.getQueryModifiers());
 
         /**
-         * Rules
+         * Rules (sub-queries)
          */
         for (Predicate datalogAtomPredicate : topDownPredicates) {
-            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex, tablePredicates);
+            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex,
+                    tablePredicates);
             if (optionalSubQuery.isPresent()) {
                 try {
                     intermediateQuery.mergeSubQuery(optionalSubQuery.get());
@@ -144,7 +147,8 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: describe
      */
-    private static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates) throws InvalidDatalogProgramException {
+    private static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates)
+            throws InvalidDatalogProgramException {
         DataAtom headAtom = convertFromDatalogDataAtom(datalogRule.getHead());
 
         fj.data.List<Function> bodyAtoms = fj.data.List.iterableList(datalogRule.getBody());
@@ -255,13 +259,14 @@ public class Datalog2IntermediateQueryConverter {
      * All the other atoms are currently presumed to be boolean atoms
      * TODO: go beyond this restriction to support GROUP
      */
-    private static void checkNonDataOrCompositeAtomSupport(fj.data.List<Function> otherAtoms, fj.data.List<Function> booleanAtoms)
+    private static void checkNonDataOrCompositeAtomSupport(fj.data.List<Function> otherAtoms,
+                                                           fj.data.List<Function> booleanAtoms)
         throws NotSupportedConversionException{
         if (booleanAtoms.length() < otherAtoms.length()) {
             HashSet<Function> unsupportedAtoms = new HashSet<>(otherAtoms.toCollection());
             unsupportedAtoms.removeAll(booleanAtoms.toCollection());
-            throw new NotSupportedConversionException("Conversion of the following atoms to the intermediate query is not (yet) supported: "
-                    + unsupportedAtoms);
+            throw new NotSupportedConversionException("Conversion of the following atoms to the intermediate query " +
+                    "is not (yet) supported: " + unsupportedAtoms);
         }
     }
 

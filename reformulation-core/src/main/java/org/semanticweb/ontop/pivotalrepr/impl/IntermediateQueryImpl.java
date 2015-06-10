@@ -1,11 +1,18 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.owlrefplatform.core.optimization.DetypingOptimizer;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +40,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * Implementation detail: this object must NOT BE SHARED with the other classes.
      */
     private final DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG;
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntermediateQueryImpl.class);
 
     /**
      * MAKE SURE it remains the "root" of the tree/DAG.
@@ -63,13 +71,13 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          */
         this.nodesInAntiTopologicalOrder = null;
         this.rootProjectionNode = null;
-        computeCache();
+        computeNodeTopologyCache();
     }
 
     @Override
     public ProjectionNode getRootProjectionNode() throws IllegalDAGException {
         if (rootProjectionNode == null) {
-            computeCache();
+            computeNodeTopologyCache();
         }
         return rootProjectionNode;
     }
@@ -81,7 +89,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          * Computes the list if not cached
          */
         if (nodesInAntiTopologicalOrder == null) {
-            computeCache();
+            computeNodeTopologyCache();
         }
 
         return nodesInAntiTopologicalOrder;
@@ -98,13 +106,19 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return nodeListBuilder.build();
     }
 
+    @Override
+    public boolean contains(QueryNode node) {
+        return queryDAG.containsVertex(node);
+    }
+
 
     /**
      * The order of sub-node selection is ignored.
      */
     @Override
-    public QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal) throws InvalidLocalOptimizationProposalException {
-        resetCache();
+    public QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
+            throws InvalidLocalOptimizationProposalException {
+        resetNodeTopologyCache();
         QueryNode currentNode = proposal.getQueryNode();
 
         Set<QueryNode> proposedSubNodesToConsider = new HashSet<>(proposal.getSubNodes());
@@ -150,21 +164,60 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        resetCache();
+        resetNodeTopologyCache();
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public void detypeNode(QueryNode nodeToDetype) {
+
+        if (!contains(nodeToDetype)) {
+            throw new IllegalArgumentException("The node is not contained in the query");
+        }
+
+        DetypingOptimizer optimizer = new DetypingOptimizer(this);
+        Optional<LocalOptimizationProposal> optionalProposal = nodeToDetype.acceptOptimizer(optimizer);
+
+        if (!optionalProposal.isPresent()) {
+            LOGGER.debug(nodeToDetype + " was not typed (thus nothing to detype).");
+        }
+        else {
+            try {
+                optionalProposal.get().apply();
+            }
+            /**
+             * Should not happen since we created the proposal here
+             */
+            catch (InvalidLocalOptimizationProposalException e) {
+                throw new RuntimeException("Internal error while detyping a node: " + e.getLocalizedMessage());
+            }
+        }
+    }
+
+    @Override
+    @Deprecated
+    public QueryNode applyDetypingProposal(DetypingProposal proposal)
+            throws InvalidLocalOptimizationProposalException {
         return null;
     }
 
     @Override
     public void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException {
-        resetCache();
+        resetNodeTopologyCache();
         // TODO: implement it
+    }
+
+    @Override
+    public boolean isTyped() {
+        return getRootProjectionNode().isTyped();
     }
 
     /**
      * Dependency: edge from a QueryNode to its sub-node.
      */
     private void removeDependency(DefaultEdge dependencyEdge) {
-        resetCache();
+        resetNodeTopologyCache();
 
         QueryNode subNode = (QueryNode) dependencyEdge.getTarget();
         queryDAG.removeEdge(dependencyEdge);
@@ -182,7 +235,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * TODO: describe
      */
-    private void computeCache() throws IllegalDAGException {
+    private void computeNodeTopologyCache() throws IllegalDAGException {
         nodesInAntiTopologicalOrder = extractNodeOrder(queryDAG);
         rootProjectionNode = extractRootProjectionNode(nodesInAntiTopologicalOrder);
     }
@@ -190,7 +243,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * TODO: describe
      */
-    private void resetCache() {
+    private void resetNodeTopologyCache() {
         nodesInAntiTopologicalOrder = null;
         rootProjectionNode = null;
     }
@@ -224,6 +277,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
 
         return (ProjectionNode) rootNode;
+    }
+
+    /**
+     * TODO: implement it
+     */
+    @Override
+    public Variable createNewVariable() {
+        throw new RuntimeException("TODO: implement it");
     }
 
 }
