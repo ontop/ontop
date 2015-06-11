@@ -1,7 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import fj.P2;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
@@ -19,17 +22,83 @@ public class IntermediateQueryUtils {
         if (predicateDefinitions.isEmpty())
             return Optional.absent();
 
+        IntermediateQuery firstDefinition = predicateDefinitions.get(0);
+        if (predicateDefinitions.size() == 1) {
+            return Optional.of(firstDefinition);
+        }
+
+        DataAtom headAtom = firstDefinition.getRootProjectionNode().getHeadAtom();
+
         // Non final definition
         IntermediateQuery mergedDefinition = null;
 
         for (IntermediateQuery definition : predicateDefinitions) {
             if (mergedDefinition == null) {
-                mergedDefinition = definition;
-                continue;
+                mergedDefinition = initMergedDefinition(headAtom);
+            } else {
+                mergedDefinition = prepareForMergingNewDefinition(mergedDefinition);
             }
-            mergedDefinition = mergeDefinitions(mergedDefinition, definition);
+
+            checkDefinitionRootProjections(mergedDefinition, definition);
+            mergedDefinition.mergeSubQuery(definition);
         }
         return Optional.of(mergedDefinition);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static IntermediateQuery initMergedDefinition(DataAtom headAtom) throws QueryMergingException {
+        ProjectionNode rootNode = new ProjectionNodeImpl(headAtom, new NeutralSubstitution());
+        UnionNode unionNode = new UnionNodeImpl();
+        OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(headAtom);
+
+        IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+        try {
+            queryBuilder.init(rootNode);
+            queryBuilder.addChild(rootNode, unionNode);
+            queryBuilder.addChild(unionNode, dataNode);
+            return queryBuilder.build();
+        } catch (IntermediateQueryBuilderException e) {
+            throw new QueryMergingException(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static IntermediateQuery prepareForMergingNewDefinition(IntermediateQuery mergedDefinition)
+            throws QueryMergingException {
+        try {
+            IntermediateQueryBuilder queryBuilder = convertToBuilder(mergedDefinition);
+            ProjectionNode rootProjectionNode = queryBuilder.getRootProjectionNode();
+            DataAtom dataAtom = rootProjectionNode.getHeadAtom();
+
+            UnionNode unionNode = extractUnionNode(queryBuilder, rootProjectionNode);
+
+            OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(dataAtom);
+            queryBuilder.addChild(unionNode, dataNode);
+
+            return queryBuilder.build();
+        } catch (IntermediateQueryBuilderException e) {
+            throw new QueryMergingException(e.getLocalizedMessage());
+        }
+    }
+
+    private static UnionNode extractUnionNode(IntermediateQueryBuilder queryBuilder,
+                                              ProjectionNode rootProjectionNode)
+            throws IntermediateQueryBuilderException {
+        ImmutableList<QueryNode> rootChildren = queryBuilder.getSubNodesOf(rootProjectionNode);
+        if (rootChildren.size() != 1) {
+            throw new RuntimeException("BUG: merged definition query without a unique UNION" +
+                    " below the root projection node");
+        }
+        QueryNode rootChild = rootChildren.get(0);
+
+        if (!(rootChild instanceof UnionNode)) {
+            throw new RuntimeException("BUG: the root child of a merged definition is not a UNION");
+        }
+        return (UnionNode) rootChild;
     }
 
     /**
@@ -49,15 +118,15 @@ public class IntermediateQueryUtils {
         queryBuilder.init(newRootNode);
 
 
-        return copyNodesToBuilder(originalQuery, queryBuilder, newRootNode);
+        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, newRootNode);
     }
 
     /**
      * TODO: replace this implementation by a non-recursive one.
      */
-    private static IntermediateQueryBuilder copyNodesToBuilder(final IntermediateQuery originalQuery,
-                                                               IntermediateQueryBuilder queryBuilder,
-                                                               final QueryNode parentNode)
+    private static IntermediateQueryBuilder copyChildrenNodesToBuilder(final IntermediateQuery originalQuery,
+                                                                       IntermediateQueryBuilder queryBuilder,
+                                                                       final QueryNode parentNode)
             throws IntermediateQueryBuilderException {
         for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(parentNode)) {
 
@@ -67,79 +136,17 @@ public class IntermediateQueryUtils {
             queryBuilder.addChild(parentNode, newChildNode);
 
             // Recursive call
-            queryBuilder = copyNodesToBuilder(originalQuery, queryBuilder, newChildNode);
+            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, newChildNode);
         }
 
         return queryBuilder;
     }
 
     /**
-     * TODO: implement it
-     */
-    private static IntermediateQuery mergeDefinitions(IntermediateQuery accumulatedQuery,
-                                                      IntermediateQuery newDefinition)
-        throws QueryMergingException {
-        checkDefinitionProjections(accumulatedQuery, newDefinition);
-
-        /**
-         * TODO: explain the strategy
-         */
-        IntermediateQuery mergedDefinition = prepareNewQueryForMerging(accumulatedQuery);
-        mergedDefinition.mergeSubQuery(newDefinition);
-
-        return mergedDefinition;
-    }
-
-    /**
      * TODO: explain
      *
      */
-    private static IntermediateQuery prepareNewQueryForMerging(IntermediateQuery originalQuery)
-            throws QueryMergingException {
-        try {
-            P2<IntermediateQueryBuilder, UnionNode> preparationPair = prepareUnion(originalQuery);
-            IntermediateQueryBuilder newQueryBuilder = preparationPair._1();
-            UnionNode unionNode = preparationPair._2();
-
-            /**
-             * TODO: explain
-             */
-            DataAtom headAtom = originalQuery.getRootProjectionNode().getHeadAtom();
-            DataAtom intentionalDataAtom = detypeDataAtom(headAtom, newQueryBuilder);
-            DataNode intentionalDataNode = new OrdinaryDataNodeImpl(intentionalDataAtom);
-
-            newQueryBuilder.addChild(unionNode, intentionalDataNode);
-
-            return newQueryBuilder.build();
-        } catch (IntermediateQueryBuilderException e) {
-            throw new QueryMergingException(e.getLocalizedMessage());
-        }
-    }
-
-    /**
-     * TODO: explain
-     *
-     * TODO: keep it?
-     *
-     *
-     */
-    private static DataAtom detypeDataAtom(DataAtom atom, IntermediateQueryBuilder newQueryBuilder) {
-        // TODO: implement it;
-        return null;
-    }
-
-    /**
-     * TODO: explain and find a better name
-     */
-    private static P2<IntermediateQueryBuilder, UnionNode> prepareUnion(IntermediateQuery originalQuery) {
-        return null;
-    }
-
-    /**
-     * TODO: explain
-     *
-     */
-    private static void checkDefinitionProjections(IntermediateQuery definition1, IntermediateQuery definition2)
+    private static void checkDefinitionRootProjections(IntermediateQuery definition1, IntermediateQuery definition2)
             throws QueryMergingException {
         ProjectionNode root1 = definition1.getRootProjectionNode();
         ProjectionNode root2 = definition2.getRootProjectionNode();

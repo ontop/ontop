@@ -2,12 +2,10 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.DetypingOptimizer;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -97,13 +95,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
-        Set<DefaultEdge> outgoingEdges = queryDAG.outgoingEdgesOf(node);
-        ImmutableList.Builder<QueryNode> nodeListBuilder = ImmutableList.builder();
-        for (DefaultEdge edge : outgoingEdges) {
-            nodeListBuilder.add((QueryNode) edge.getTarget());
-        }
-
-        return nodeListBuilder.build();
+        return DAGUtils.getSubNodesOf(queryDAG, node);
     }
 
     @Override

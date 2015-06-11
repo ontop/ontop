@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgraph.graph.DefaultEdge;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -8,6 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
 
     private DirectedAcyclicGraph<QueryNode,DefaultEdge> queryDAG;
+    private ProjectionNode rootProjectionNode;
     private boolean canEdit;
     private boolean hasBeenInitialized;
 
@@ -16,6 +18,7 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
      */
     public IntermediateQueryBuilderImpl() {
         queryDAG = new DirectedAcyclicGraph<>(DefaultEdge.class);
+        rootProjectionNode = null;
         canEdit = false;
         hasBeenInitialized = false;
     }
@@ -27,6 +30,7 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
         hasBeenInitialized = true;
 
         queryDAG.addVertex(rootProjectionNode);
+        this.rootProjectionNode = rootProjectionNode;
         canEdit = true;
     }
 
@@ -63,5 +67,18 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
 
         if (!canEdit)
             throw new IllegalArgumentException("Cannot be edited anymore (the query has already been built).");
+    }
+
+    @Override
+    public ProjectionNode getRootProjectionNode() throws IntermediateQueryBuilderException {
+        checkInitialization();
+        return rootProjectionNode;
+    }
+
+    @Override
+    public ImmutableList<QueryNode> getSubNodesOf(QueryNode node)
+            throws IntermediateQueryBuilderException {
+        checkInitialization();
+        return DAGUtils.getSubNodesOf(queryDAG, node);
     }
 }

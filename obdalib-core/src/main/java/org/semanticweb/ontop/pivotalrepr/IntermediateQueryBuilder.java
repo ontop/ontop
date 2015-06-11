@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * TODO: describe
  *
@@ -12,4 +14,8 @@ public interface IntermediateQueryBuilder {
     void addChild(QueryNode parentNode, QueryNode child) throws IntermediateQueryBuilderException;
 
     IntermediateQuery build() throws IntermediateQueryBuilderException;
+
+    ProjectionNode getRootProjectionNode() throws IntermediateQueryBuilderException;
+
+    ImmutableList<QueryNode> getSubNodesOf(QueryNode node) throws IntermediateQueryBuilderException;
 }
