@@ -345,9 +345,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			if (functionalTerm.isBooleanFunction()) {
 				return;
 			}
+
+			String functionSymbol = functionalTerm.getFunctionSymbol().getName();
+			if (functionSymbol.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+				return;
+			}
 		}
 		else if (term.equals(OBDAVocabulary.FALSE)
 				|| term.equals(OBDAVocabulary.TRUE)) {
+			return;
+		} else if (term instanceof Variable) {
 			return;
 		}
 
