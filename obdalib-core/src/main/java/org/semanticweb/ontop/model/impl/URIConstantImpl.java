@@ -20,13 +20,7 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-
-import java.util.Collections;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.URIConstant;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
@@ -76,8 +70,8 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public Set<Variable> getReferencedVariables() {
-		return Collections.emptySet();
+	public ImmutableSet<Variable> getReferencedVariables() {
+		return ImmutableSet.of();
 	}
 
 	@Override

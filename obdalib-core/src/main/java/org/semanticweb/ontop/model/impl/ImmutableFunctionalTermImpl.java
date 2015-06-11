@@ -1,23 +1,71 @@
 package org.semanticweb.ontop.model.impl;
 
-import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.*;
 
 import java.util.List;
+
+import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
 /**
  * Immutable implementation
  */
-public class ImmutableFunctionalTermImpl extends FunctionalTermImpl
+public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
         implements ImmutableFunctionalTerm {
-    protected ImmutableFunctionalTermImpl(Predicate functor, Term... terms) {
-        super(functor, terms);
+
+    private final ImmutableList<ImmutableTerm> terms;
+
+    /**
+     * Lazy cache for toString()
+     */
+    private String string;
+
+    protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableTerm... terms) {
+        super(functor);
+        this.terms = ImmutableList.<ImmutableTerm>builder().add(terms).build();
+        string = null;
     }
 
-    protected ImmutableFunctionalTermImpl(Predicate functor, List<Term> terms) {
-        super(functor, terms);
+    protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+        super(functor);
+        this.terms = terms;
+        string = null;
     }
+
+    public ImmutableFunctionalTermImpl(Function functionalTermToClone) {
+        this(functionalTermToClone.getFunctionSymbol(), convertTerms(functionalTermToClone));
+    }
+
+    private static ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
+        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+        for (Term term : functionalTermToClone.getTerms()) {
+            builder.add(convertIntoImmutableTerm(term));
+        }
+        return builder.build();
+    }
+
+
+    @Override
+    public ImmutableList<Term> getTerms() {
+        return (ImmutableList<Term>)(ImmutableList<?>) terms;
+    }
+
+    @Override
+    public Term getTerm(int index) {
+        return terms.get(index);
+    }
+
+    @Override
+    public ImmutableList<ImmutableTerm> getImmutableTerms() {
+        return terms;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return ImmutableSet.copyOf(super.getVariables());
+    }
+
 
     @Override
     public void setPredicate(Predicate predicate) {
@@ -34,4 +82,24 @@ public class ImmutableFunctionalTermImpl extends FunctionalTermImpl
         throw new UnsupportedOperationException("A ImmutableFunctionalTermImpl is immutable.");
     }
 
+    @Override
+    public ImmutableSet<Variable> getReferencedVariables() {
+        return ImmutableSet.copyOf(super.getReferencedVariables());
+    }
+
+    @Override
+    public ImmutableFunctionalTerm clone() {
+        return this;
+    }
+
+    /**
+     * Cached toString()
+     */
+    @Override
+    public String toString() {
+        if (string == null) {
+            string = super.toString();
+        }
+        return string;
+    }
 }

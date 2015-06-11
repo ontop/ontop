@@ -1,25 +1,23 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
+import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
 import org.semanticweb.ontop.pivotalrepr.DataAtom;
-
-import java.util.List;
 
 public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAtom {
 
     private final AtomPredicate predicate;
 
-    protected DataAtomImpl(AtomPredicate predicate, List<Term> terms) {
-        super(predicate, terms);
+    protected DataAtomImpl(AtomPredicate predicate, ImmutableList<VariableImpl> variables) {
+        super(predicate, (ImmutableList<ImmutableTerm>)(ImmutableList<?>)variables);
         this.predicate = predicate;
     }
 
-    protected DataAtomImpl(AtomPredicate predicate, Term... terms) {
-        super(predicate, terms);
+    protected DataAtomImpl(AtomPredicate predicate, VariableImpl... variables) {
+        super(predicate, variables);
         this.predicate = predicate;
     }
 
@@ -34,7 +32,7 @@ public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAto
     }
 
     @Override
-    public boolean referSameAbstraction(DataAtom otherAtom) {
+    public boolean isEquivalent(DataAtom otherAtom) {
         if (!predicate.equals(getPredicate()))
             return false;
 
@@ -45,12 +43,7 @@ public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAto
     }
 
     @Override
-    public boolean isTyped() {
-        for (Term term : getTerms()) {
-            if (term instanceof Function)
-                return true;
-        }
-        return false;
+    public ImmutableList<VariableImpl> getVariableTerms() {
+        return (ImmutableList<VariableImpl>)(ImmutableList<?>)getImmutableTerms();
     }
-
 }

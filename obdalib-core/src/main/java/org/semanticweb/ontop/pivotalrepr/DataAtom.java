@@ -1,9 +1,13 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
  * TODO: explain
+ *
+ * Only accepts variables as arguments.
  *
  * Immutable.
  *
@@ -21,14 +25,10 @@ public interface DataAtom extends ImmutableFunctionalTerm {
     /**
      * TODO: explain
      */
-    boolean referSameAbstraction(DataAtom headAtom2);
+    boolean isEquivalent(DataAtom otherAtom);
 
     /**
-     * Returns true if the atom contains
-     * some functional terms.
-     *
-     * TODO: find a better name
+     * Gets the arguments (all of them are variables).
      */
-    boolean isTyped();
-
+    ImmutableList<VariableImpl> getVariableTerms();
 }

@@ -20,12 +20,7 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 
 public class AnonymousVariable implements Variable {
@@ -68,7 +63,7 @@ public class AnonymousVariable implements Variable {
 	}
 
 	@Override
-	public Set<Variable> getReferencedVariables() {
-		return Collections.emptySet();
+	public ImmutableSet<Variable> getReferencedVariables() {
+		return ImmutableSet.of();
 	}
 }
