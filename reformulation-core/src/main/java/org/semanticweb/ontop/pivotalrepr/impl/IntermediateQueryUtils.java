@@ -147,7 +147,7 @@ public class IntermediateQueryUtils {
         DataAtom headAtom1 = root1.getHeadAtom();
         DataAtom headAtom2 = root2.getHeadAtom();
 
-        if (!headAtom1.referSameAbstraction(headAtom2)) {
+        if (!headAtom1.isEquivalent(headAtom2)) {
             throw new QueryMergingException("Two definitions of different things: "
                     + headAtom1 + " != " + headAtom2);
         }

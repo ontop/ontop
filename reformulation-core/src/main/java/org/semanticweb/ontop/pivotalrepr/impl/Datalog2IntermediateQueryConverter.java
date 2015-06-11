@@ -2,13 +2,18 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.DatalogTools;
+import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 
@@ -16,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
 /**
  * TODO: describe
@@ -99,15 +106,24 @@ public class Datalog2IntermediateQueryConverter {
             throws InvalidDatalogProgramException {
         try {
             IntermediateQueryBuilder builder = new IntermediateQueryBuilderImpl();
-            DataAtom dataAtom = convertFromDatalogDataAtom(rootDatalogAtom);
+
+            /**
+             * TODO: explain why a top rule should only have distinct variables in its head.
+             */
+            final boolean allowVariableCreation = false;
+            P2<DataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(rootDatalogAtom,
+                    allowVariableCreation);
+
+            DataAtom dataAtom = pair._1();
+            ImmutableSubstitution substitution = pair._2();
 
             ProjectionNode rootNode;
             if (queryModifiers.hasModifiers()) {
                 // TODO: explain
                 ImmutableQueryModifiers immutableQueryModifiers = new ImmutableQueryModifiersImpl(queryModifiers);
-                rootNode = new ProjectionNodeImpl(dataAtom, immutableQueryModifiers);
+                rootNode = new ProjectionNodeImpl(dataAtom, substitution, immutableQueryModifiers);
             } else {
-                rootNode = new ProjectionNodeImpl(dataAtom);
+                rootNode = new ProjectionNodeImpl(dataAtom, substitution);
             }
 
             DataNode dataNode = createDataNode(dataAtom, ImmutableList.<Predicate>of());
@@ -149,7 +165,8 @@ public class Datalog2IntermediateQueryConverter {
      */
     private static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException {
-        DataAtom headAtom = convertFromDatalogDataAtom(datalogRule.getHead());
+
+        ProjectionNode rootNode = createProjectionNodeWithoutModifier(datalogRule);
 
         fj.data.List<Function> bodyAtoms = fj.data.List.iterableList(datalogRule.getBody());
         P2<fj.data.List<Function>, fj.data.List<Function>> atomClassification = classifyAtoms(
@@ -157,7 +174,26 @@ public class Datalog2IntermediateQueryConverter {
         fj.data.List<Function> dataAndCompositeAtoms = atomClassification._1();
         fj.data.List<Function> booleanAtoms = atomClassification._2();
 
-        return createDefinition(headAtom, tablePredicates, dataAndCompositeAtoms, booleanAtoms);
+        return createDefinition(rootNode, tablePredicates, dataAndCompositeAtoms, booleanAtoms);
+    }
+
+    /**
+     * For non-top datalog rules (that do not access to query modifiers)
+     *
+     * TODO: make sure the GROUP atom cannot be used for such rules.
+     *
+     */
+    private static ProjectionNode createProjectionNodeWithoutModifier(CQIE datalogRule) throws InvalidDatalogProgramException {
+        // Non-top rule so ok.
+        final boolean allowVariableCreation = true;
+
+        P2<DataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(datalogRule.getHead(),
+                allowVariableCreation);
+
+        DataAtom headAtom = pair._1();
+        ImmutableSubstitution substitution = pair._2();
+
+        return new ProjectionNodeImpl(headAtom, substitution);
     }
 
     private static P2<fj.data.List<Function>, fj.data.List<Function>> classifyAtoms(fj.data.List<Function> atoms)
@@ -180,7 +216,7 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery createDefinition(DataAtom definedAtom, Collection<Predicate> tablePredicates,
+    private static IntermediateQuery createDefinition(ProjectionNode rootNode, Collection<Predicate> tablePredicates,
                                                       fj.data.List<Function> dataAndCompositeAtoms,
                                                       fj.data.List<Function> booleanAtoms)
             throws InvalidDatalogProgramException {
@@ -191,7 +227,6 @@ public class Datalog2IntermediateQueryConverter {
 
         // Non final
         IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
-        ProjectionNode rootNode = new ProjectionNodeImpl(definedAtom);
 
         try {
             queryBuilder.init(rootNode);
@@ -323,18 +358,92 @@ public class Datalog2IntermediateQueryConverter {
     }
 
 
-    private static DataAtom convertFromDatalogDataAtom(Function datalogDataAtom) {
+    /**
+     * TODO: explain
+     */
+    private static P2<DataAtom, ImmutableSubstitution> convertFromDatalogDataAtom(Function datalogDataAtom,
+                                                                                  boolean allowVariableCreation)
+        throws InvalidDatalogProgramException {
+
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
 
-        return new DataAtomImpl(atomPredicate, datalogDataAtom.getTerms());
+        ImmutableList.Builder<VariableImpl> varListBuilder = ImmutableList.builder();
+        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionBuilder = ImmutableMap.builder();
+
+        /**
+         * Replaces all the terms by variables.
+         * Makes sure these variables are unique.
+         *
+         * Creates substitution entries if needed (in case of constant of a functional term)
+         */
+        VariableDispatcher variableDispatcher = new VariableDispatcher();
+        for (Term term : datalogDataAtom.getTerms()) {
+            VariableImpl newVariableArgument;
+
+            /**
+             * TODO: describe
+             */
+            if (term instanceof VariableImpl) {
+                newVariableArgument = convertAtomVariable((VariableImpl) term, variableDispatcher,
+                        allowVariableCreation, datalogDataAtom);
+            }
+            /**
+             * TODO: could we consider a sub-class of Function instead?
+             */
+            else if ((term instanceof Constant) || (term instanceof Function)) {
+                if (!allowVariableCreation) {
+                    throw new InvalidDatalogProgramException("Constant/Function " + term +
+                            " in a data atom that should only contain variables " + datalogDataAtom);
+                }
+                newVariableArgument = variableDispatcher.generateNewVariable();
+                substitutionBuilder.put(newVariableArgument, convertIntoImmutableTerm(term));
+            } else {
+                throw new InvalidDatalogProgramException("Unexpected term found in a data atom: " + term);
+            }
+            varListBuilder.add(newVariableArgument);
+        }
+
+        DataAtom dataAtom = new DataAtomImpl(atomPredicate, varListBuilder.build());
+        ImmutableSubstitution substitution = new ImmutableSubstitutionImpl(substitutionBuilder.build());
+
+        return P.p(dataAtom, substitution);
     }
 
+    /**
+     * TODO: describe
+     */
+    private static VariableImpl convertAtomVariable(VariableImpl formerVariable,
+                                                    VariableDispatcher variableDispatcher,
+                                                    boolean allowVariableCreation,
+                                                    Function datalogDataAtom)
+            throws InvalidDatalogProgramException {
+        /**
+         * If the variable was unknown of the variable dispatcher, the variable is not renamed.
+         * Otherwise a new variable is created.
+         */
+        VariableImpl newVariable = variableDispatcher.renameDataAtomVariable(formerVariable);
+
+        boolean hasCreatedVariable = ! newVariable.equals(formerVariable);
+
+        if ((!allowVariableCreation) && (hasCreatedVariable)) {
+            throw new InvalidDatalogProgramException("Multiple occurrences of the variable " + formerVariable
+            + " in the atom " + datalogDataAtom);
+        }
+        return newVariable;
+    }
+
+    /**
+     * TODO: explain
+     */
     private static QueryNode createQueryNode(Function dataOrCompositeAtom, Collection<Predicate> tablePredicates,
                                              Optional<BooleanExpression> optionalFilterCondition)
             throws InvalidDatalogProgramException {
         if (dataOrCompositeAtom.isDataFunction()) {
-            return createDataNode(convertFromDatalogDataAtom(dataOrCompositeAtom),tablePredicates);
+            // No problem here
+            final boolean allowVariableCreation = true;
+            DataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom, allowVariableCreation)._1();
+            return createDataNode(dataAtom,tablePredicates);
         }
 
         Predicate atomPredicate = dataOrCompositeAtom.getFunctionSymbol();

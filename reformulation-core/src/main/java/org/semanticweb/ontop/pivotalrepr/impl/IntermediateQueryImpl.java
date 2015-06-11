@@ -208,11 +208,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         // TODO: implement it
     }
 
-    @Override
-    public boolean isTyped() {
-        return getRootProjectionNode().isTyped();
-    }
-
     /**
      * Dependency: edge from a QueryNode to its sub-node.
      */

@@ -47,11 +47,6 @@ public interface IntermediateQuery {
 
     /**
      * TODO: explain
-     */
-    boolean isTyped();
-
-    /**
-     * TODO: explain
      * Does nothing if the node is not "typed".
      */
     @Deprecated
