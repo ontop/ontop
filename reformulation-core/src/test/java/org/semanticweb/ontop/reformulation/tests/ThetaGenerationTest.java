@@ -366,7 +366,7 @@ public class ThetaGenerationTest extends TestCase {
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
-		FunctionalTermImpl term = (FunctionalTermImpl) sub.getTerm();
+		Function term = (Function) sub.getTerm();
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 
@@ -383,7 +383,7 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
-		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
+		Function ot1 = termFactory.getFunction(fs1, vars1);
 		Term t2 = termFactory.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
@@ -670,7 +670,7 @@ public class ThetaGenerationTest extends TestCase {
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
-		FunctionalTermImpl term = (FunctionalTermImpl) sub.getTerm();
+		Function term = (Function) sub.getTerm();
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 

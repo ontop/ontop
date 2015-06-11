@@ -116,10 +116,10 @@ public class ThetaApplicationTest extends TestCase {
 		assertEquals(5, terms.size());
 
 		VariableImpl term1 = (VariableImpl) terms.get(0);
-		FunctionalTermImpl term2 = (FunctionalTermImpl) terms.get(1);
+		Function term2 = (Function) terms.get(1);
 		ValueConstant term3 = (ValueConstant) terms.get(2);
-		FunctionalTermImpl term4 = (FunctionalTermImpl) terms.get(3);
-		FunctionalTermImpl term5 = (FunctionalTermImpl) terms.get(4);
+		Function term4 = (Function) terms.get(3);
+		Function term5 = (Function) terms.get(4);
 
 		assertEquals("t", term1.getName());
 		assertEquals("elf", term3.getValue());

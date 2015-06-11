@@ -22,18 +22,13 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Substitution;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * An atomic substitution accepts only one variable in its domain.
  */
-public class SingletonSubstitution implements Substitution {
+public class SingletonSubstitution extends LocallyImmutableSubstitutionImpl {
 
     private final VariableImpl variable;
     private final Term term;
@@ -52,21 +47,6 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean compose(Substitution substitution) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Term get(VariableImpl var) {
         if (var.equals(variable))
             return term;
@@ -74,7 +54,7 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public ImmutableMap<VariableImpl, Term> getMap() {
         return ImmutableMap.of(variable, term);
     }
 
@@ -84,7 +64,7 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Set<VariableImpl> keySet() {
+    public ImmutableSet<VariableImpl> keySet() {
         return ImmutableSet.of(variable);
     }
 }

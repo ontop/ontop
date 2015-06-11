@@ -23,18 +23,13 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Substitution;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * TODO: explain
  */
-public class NeutralSubstitution implements Substitution {
+public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution {
 
     @Override
     public Term get(VariableImpl var) {
@@ -42,7 +37,12 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public final ImmutableMap<VariableImpl, Term> getMap() {
+        return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>) getImmutableMap();
+    }
+
+    @Override
+    public ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap() {
         return ImmutableMap.of();
     }
 
@@ -52,7 +52,7 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public Set<VariableImpl> keySet() {
+    public ImmutableSet<VariableImpl> keySet() {
         return ImmutableSet.of();
     }
 
@@ -61,19 +61,5 @@ public class NeutralSubstitution implements Substitution {
 		return "{-/-}";
 	}
 
-    @Override
-    public boolean compose(Substitution s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException();
-    }
 
 }

@@ -31,6 +31,9 @@ import java.util.*;
 
 /**
  * Mutable reference implementation of a Substitution.
+ *
+ * TODO: rename it AppendableSubstitutionImpl
+ *
  */
 public class SubstitutionImpl implements AppendableSubstitution {
 
