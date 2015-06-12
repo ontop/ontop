@@ -72,6 +72,16 @@ public class DetypingOptimizer implements QueryOptimizer {
         throw new RuntimeException("TODO: implement it");
     }
 
+    @Override
+    public Optional<LocalOptimizationProposal> makeProposal(OrdinaryDataNode ordinaryDataNode) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public Optional<LocalOptimizationProposal> makeProposal(TableNode tableNode) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
     /**
      * TODO: explain
      */

@@ -1,13 +1,17 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import org.semanticweb.ontop.pivotalrepr.FunctionFreeDataAtom;
-import org.semanticweb.ontop.pivotalrepr.PureDataAtom;
-import org.semanticweb.ontop.pivotalrepr.OrdinaryDataNode;
+import com.google.common.base.Optional;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNode {
 
     public OrdinaryDataNodeImpl(FunctionFreeDataAtom atom) {
         super(atom);
+    }
+
+    @Override
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
+        return optimizer.makeProposal(this);
     }
 
     @Override

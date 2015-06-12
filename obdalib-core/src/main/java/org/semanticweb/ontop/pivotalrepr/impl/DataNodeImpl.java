@@ -18,10 +18,4 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
     public FunctionFreeDataAtom getAtom() {
         return atom;
     }
-
-    @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
-        // TODO: implement it
-        return null;
-    }
 }
