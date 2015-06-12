@@ -54,4 +54,9 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
+
+    @Override
+    public void acceptVisitor(QueryNodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

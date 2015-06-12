@@ -18,9 +18,16 @@ public interface QueryNode extends Cloneable {
      *
      * To be implemented by leaf classes.
      *
-     * TODO: check if visitor is the proper name.
      */
     Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
+
+    /**
+     * "Accept" method for the "Visitor" pattern.
+     *
+     * To be implemented by leaf classes.
+     *
+     */
+    void acceptVisitor(QueryNodeVisitor visitor);
 
     boolean isRejected();
 

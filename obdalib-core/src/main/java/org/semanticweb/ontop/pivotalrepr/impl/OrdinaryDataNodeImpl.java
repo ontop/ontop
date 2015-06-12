@@ -15,6 +15,11 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     }
 
     @Override
+    public void acceptVisitor(QueryNodeVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public OrdinaryDataNode clone() {
         return new OrdinaryDataNodeImpl(getAtom());
     }

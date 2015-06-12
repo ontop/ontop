@@ -2,10 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.FunctionFreeDataAtom;
-import org.semanticweb.ontop.pivotalrepr.LocalOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.QueryOptimizer;
-import org.semanticweb.ontop.pivotalrepr.TableNode;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 public class TableNodeImpl extends DataNodeImpl implements TableNode {
     public TableNodeImpl(FunctionFreeDataAtom atom) {
@@ -15,6 +12,11 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     @Override
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);
+    }
+
+    @Override
+    public void acceptVisitor(QueryNodeVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

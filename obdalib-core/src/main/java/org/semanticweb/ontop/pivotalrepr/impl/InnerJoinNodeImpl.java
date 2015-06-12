@@ -17,6 +17,11 @@ public class InnerJoinNodeImpl extends AbstractJoinNodeImpl implements InnerJoin
     }
 
     @Override
+    public void acceptVisitor(QueryNodeVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public InnerJoinNode clone() {
         Optional<BooleanExpression> originalOptionalFilter = getOptionalFilterCondition();
         Optional<BooleanExpression> newOptionalFilter;
