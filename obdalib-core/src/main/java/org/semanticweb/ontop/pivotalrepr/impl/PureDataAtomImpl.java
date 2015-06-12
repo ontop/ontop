@@ -35,6 +35,14 @@ public class PureDataAtomImpl extends FunctionFreeDataAtomImpl implements PureDa
         return (ImmutableList<VariableImpl>)(ImmutableList<?>)getImmutableTerms();
     }
 
+    /**
+     * Trivial since a PureDataAtom is only composed of variables.
+     */
+    @Override
+    public boolean subsumes(FunctionFreeDataAtom otherAtom) {
+        return hasSamePredicateAndArity(otherAtom);
+    }
+
     @Override
     public VariableImpl getTerm(int index) {
         return (VariableImpl) super.getTerm(index);
@@ -42,12 +50,7 @@ public class PureDataAtomImpl extends FunctionFreeDataAtomImpl implements PureDa
 
     @Override
     public boolean isEquivalent(FunctionFreeDataAtom otherAtom) {
-        if (!getPredicate().equals(getPredicate()))
-            return false;
-
-        int effectiveArity = getEffectiveArity();
-
-        if (effectiveArity != otherAtom.getEffectiveArity())
+        if (!hasSamePredicateAndArity(otherAtom))
             return false;
 
         return isPureDataAtom(otherAtom);

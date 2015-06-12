@@ -1,30 +1,28 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.NonFunctionalTerm;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Collects all the variables found in the nodes.
  */
 public class VariableCollector implements QueryNodeVisitor {
 
-    private final Set<Variable> collectedVariables;
+    private final ImmutableSet.Builder<VariableImpl> collectedVariableBuilder;
 
     private VariableCollector() {
-        collectedVariables = new HashSet<>();
+        collectedVariableBuilder = ImmutableSet.builder();
     }
 
-    public static Set<Variable> collectVariables(IntermediateQuery query) {
+    public static ImmutableSet<VariableImpl> collectVariables(IntermediateQuery query) {
         VariableCollector collector = new VariableCollector();
 
         for (QueryNode node : query.getNodesInBottomUpOrder()) {
             node.acceptVisitor(collector);
         }
-        return collector.collectedVariables;
+        return collector.collectedVariableBuilder.build();
     }
 
     @Override
@@ -59,12 +57,12 @@ public class VariableCollector implements QueryNodeVisitor {
 
     private void collectFromAtom(FunctionFreeDataAtom atom) {
         for (NonFunctionalTerm term : atom.getNonFunctionalTerms()) {
-            if (term instanceof Variable)
-                collectedVariables.add((Variable)term);
+            if (term instanceof VariableImpl)
+                collectedVariableBuilder.add((VariableImpl)term);
         }
     }
 
     private void collectFromPureAtom(PureDataAtom atom) {
-        collectedVariables.addAll(atom.getVariableTerms());
+        collectedVariableBuilder.addAll(atom.getVariableTerms());
     }
 }

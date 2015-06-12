@@ -30,5 +30,4 @@ public interface FunctionFreeDataAtom extends ImmutableFunctionalTerm {
      * Gets the arguments (none of them are functional terms).
      */
     ImmutableList<NonFunctionalTerm> getNonFunctionalTerms();
-
 }

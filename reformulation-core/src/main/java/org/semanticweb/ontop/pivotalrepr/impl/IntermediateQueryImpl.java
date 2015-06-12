@@ -2,11 +2,13 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.DetypingOptimizer;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.slf4j.Logger;
@@ -194,10 +196,88 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return null;
     }
 
+    /**
+     * TODO: explain
+     */
     @Override
-    public void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException {
+    public void mergeSubQuery(final IntermediateQuery originalSubQuery) throws QueryMergingException {
+        /**
+         * TODO: explain
+         */
+        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootProjectionNode().getHeadAtom());
+        if (localDataNodes.isEmpty())
+            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootProjectionNode().getHeadAtom());
+
+
+        for (OrdinaryDataNode localDataNode : localDataNodes) {
+            // TODO: make it be incremental
+            ImmutableSet<VariableImpl> localVariables = VariableCollector.collectVariables(this);
+
+            IntermediateQuery cloneSubQuery = VariableSubstituter.cloneAndSubstituteVariables(originalSubQuery,
+                    localDataNode.getAtom(), localVariables);
+
+            ProjectionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
+            replaceNode(localDataNode, subQueryRootNode);
+
+            addSubTree(cloneSubQuery, subQueryRootNode);
+        }
         resetNodeTopologyCache();
-        // TODO: implement it
+    }
+
+    /**
+     * Finds ordinary data nodes.
+     *
+     * TODO: explain
+     */
+    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(PureDataAtom subsumingDataAtom) {
+        ImmutableList.Builder<OrdinaryDataNode> listBuilder = ImmutableList.builder();
+        for(QueryNode node : getNodesInBottomUpOrder()) {
+            if (node instanceof OrdinaryDataNode) {
+                OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
+                if (subsumingDataAtom.subsumes(dataNode.getAtom()))
+                    listBuilder.add(dataNode);
+            }
+        }
+        return listBuilder.build();
+    }
+
+    /**
+     * TODO: explain
+     * TODO: replace this recursive implementation but iterative one
+     * Low-level. Tail recursive.
+     */
+    private void addSubTree(IntermediateQuery subQuery, QueryNode parentNode) {
+        for (QueryNode childNode : subQuery.getCurrentSubNodesOf(parentNode)) {
+            queryDAG.addVertex(childNode);
+            try {
+                queryDAG.addDagEdge(parentNode, childNode);
+            } catch (DirectedAcyclicGraph.CycleFoundException e) {
+                throw new RuntimeException("BUG (internal error)" + e.getLocalizedMessage());
+            }
+            // Recursive call
+            addSubTree(subQuery, childNode);
+        }
+    }
+
+    /**
+     * Low-level
+     * TODO: explain
+     */
+    private void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
+        queryDAG.addVertex(replacingNode);
+        try {
+            for (DefaultEdge incomingEdge : queryDAG.incomingEdgesOf(previousNode)) {
+                queryDAG.addDagEdge((QueryNode)incomingEdge.getSource(), replacingNode);
+            }
+
+            for (DefaultEdge outgoingEdge : queryDAG.outgoingEdgesOf(previousNode)) {
+                    queryDAG.addDagEdge(replacingNode, (QueryNode)outgoingEdge.getTarget());
+            }
+
+        } catch (DirectedAcyclicGraph.CycleFoundException e) {
+            throw new RuntimeException("BUG: " + e.getLocalizedMessage());
+        }
+        queryDAG.removeVertex(previousNode);
     }
 
     /**
@@ -269,9 +349,23 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * TODO: implement it
      */
+    @Deprecated
     @Override
     public Variable createNewVariable() {
         throw new RuntimeException("TODO: implement it");
     }
 
+
+    /**
+     * Not appearing in the interface because users do not
+     * have to worry about it.
+     */
+    @Override
+    public IntermediateQuery clone() throws CloneNotSupportedException {
+        try {
+            return IntermediateQueryUtils.convertToBuilder(this).build();
+        } catch (IntermediateQueryBuilderException e) {
+            throw new RuntimeException("BUG (internal error)!" + e.getLocalizedMessage());
+        }
+    }
 }

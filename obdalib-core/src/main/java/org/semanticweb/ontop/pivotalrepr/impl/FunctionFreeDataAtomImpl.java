@@ -42,12 +42,7 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
 
     @Override
     public boolean isEquivalent(FunctionFreeDataAtom otherAtom) {
-        if (!predicate.equals(getPredicate()))
-            return false;
-
-        int effectiveArity = getEffectiveArity();
-
-        if (effectiveArity != otherAtom.getEffectiveArity())
+        if (!hasSamePredicateAndArity(otherAtom))
             return false;
 
 
@@ -59,6 +54,7 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
         /**
          * Checks the arguments
          */
+        int effectiveArity = getEffectiveArity();
         for (int i=0; i < effectiveArity ; i++ ) {
             NonFunctionalTerm localTerm = getTerm(i);
             NonFunctionalTerm otherTerm = otherAtom.getTerm(i);
@@ -104,6 +100,16 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
                     return false;
             }
         }
+
+        return true;
+    }
+
+    protected boolean hasSamePredicateAndArity(FunctionFreeDataAtom otherAtom) {
+        if (!predicate.equals(otherAtom.getPredicate()))
+            return false;
+
+        if (getEffectiveArity() != otherAtom.getEffectiveArity())
+            return false;
 
         return true;
     }
