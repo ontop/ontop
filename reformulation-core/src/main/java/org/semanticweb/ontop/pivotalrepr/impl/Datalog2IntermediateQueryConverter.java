@@ -9,7 +9,6 @@ import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.DatalogTools;
-import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -111,10 +110,10 @@ public class Datalog2IntermediateQueryConverter {
              * TODO: explain why a top rule should only have distinct variables in its head.
              */
             final boolean allowVariableCreation = false;
-            P2<DataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(rootDatalogAtom,
+            P2<PureDataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(rootDatalogAtom,
                     allowVariableCreation);
 
-            DataAtom dataAtom = pair._1();
+            PureDataAtom dataAtom = pair._1();
             ImmutableSubstitution substitution = pair._2();
 
             ProjectionNode rootNode;
@@ -187,10 +186,10 @@ public class Datalog2IntermediateQueryConverter {
         // Non-top rule so ok.
         final boolean allowVariableCreation = true;
 
-        P2<DataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(datalogRule.getHead(),
+        P2<PureDataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(datalogRule.getHead(),
                 allowVariableCreation);
 
-        DataAtom headAtom = pair._1();
+        PureDataAtom headAtom = pair._1();
         ImmutableSubstitution substitution = pair._2();
 
         return new ProjectionNodeImpl(headAtom, substitution);
@@ -361,7 +360,7 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain
      */
-    private static P2<DataAtom, ImmutableSubstitution> convertFromDatalogDataAtom(Function datalogDataAtom,
+    private static P2<PureDataAtom, ImmutableSubstitution> convertFromDatalogDataAtom(Function datalogDataAtom,
                                                                                   boolean allowVariableCreation)
         throws InvalidDatalogProgramException {
 
@@ -404,7 +403,7 @@ public class Datalog2IntermediateQueryConverter {
             varListBuilder.add(newVariableArgument);
         }
 
-        DataAtom dataAtom = new DataAtomImpl(atomPredicate, varListBuilder.build());
+        PureDataAtom dataAtom = new PureDataAtomImpl(atomPredicate, varListBuilder.build());
         ImmutableSubstitution substitution = new ImmutableSubstitutionImpl(substitutionBuilder.build());
 
         return P.p(dataAtom, substitution);
@@ -442,7 +441,7 @@ public class Datalog2IntermediateQueryConverter {
         if (dataOrCompositeAtom.isDataFunction()) {
             // No problem here
             final boolean allowVariableCreation = true;
-            DataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom, allowVariableCreation)._1();
+            PureDataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom, allowVariableCreation)._1();
             return createDataNode(dataAtom,tablePredicates);
         }
 
@@ -461,7 +460,7 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain
      */
-    private static DataNode createDataNode(DataAtom dataAtom, Collection<Predicate> tablePredicates) {
+    private static DataNode createDataNode(PureDataAtom dataAtom, Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
             return new TableNodeImpl(dataAtom);

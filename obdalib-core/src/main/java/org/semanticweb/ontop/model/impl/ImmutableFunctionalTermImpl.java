@@ -52,7 +52,7 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
     }
 
     @Override
-    public Term getTerm(int index) {
+    public ImmutableTerm getTerm(int index) {
         return terms.get(index);
     }
 

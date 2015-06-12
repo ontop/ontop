@@ -25,7 +25,7 @@ package org.semanticweb.ontop.model;
  * that during a calculation is assumed to vary or be capable of varying in
  * value.
  */
-public interface Variable extends ImmutableTerm {
+public interface Variable extends NonFunctionalTerm {
 
 	public String getName();
 }

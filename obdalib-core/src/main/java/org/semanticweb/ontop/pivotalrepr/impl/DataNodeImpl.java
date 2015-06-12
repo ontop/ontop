@@ -1,23 +1,21 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.DataAtom;
-import org.semanticweb.ontop.pivotalrepr.DataNode;
-import org.semanticweb.ontop.pivotalrepr.LocalOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.QueryOptimizer;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 /**
  *
  */
 public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
 
-    private DataAtom atom;
+    private FunctionFreeDataAtom atom;
 
-    protected DataNodeImpl(DataAtom atom) {
+    protected DataNodeImpl(FunctionFreeDataAtom atom) {
         this.atom = atom;
     }
 
-    public DataAtom getAtom() {
+    @Override
+    public FunctionFreeDataAtom getAtom() {
         return atom;
     }
 

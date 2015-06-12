@@ -9,15 +9,15 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
 
     private ImmutableSubstitution substitution;
     private Optional<ImmutableQueryModifiers> optionalModifiers;
-    private DataAtom dataAtom;
+    private PureDataAtom dataAtom;
 
-    public ProjectionNodeImpl(DataAtom dataAtom, ImmutableSubstitution substitution) {
+    public ProjectionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution substitution) {
         this.dataAtom = dataAtom;
         this.optionalModifiers = Optional.absent();
         this.substitution = substitution;
     }
 
-    public ProjectionNodeImpl(DataAtom dataAtom, ImmutableSubstitution substitution,
+    public ProjectionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution substitution,
                               ImmutableQueryModifiers queryModifiers) {
         this.dataAtom = dataAtom;
         this.optionalModifiers = Optional.of(queryModifiers);
@@ -25,7 +25,7 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
     }
 
     @Override
-    public DataAtom getHeadAtom() {
+    public PureDataAtom getHeadAtom() {
         return dataAtom;
     }
 

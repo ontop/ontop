@@ -2,8 +2,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import fj.P2;
-import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.pivotalrepr.*;
 
@@ -27,7 +25,7 @@ public class IntermediateQueryUtils {
             return Optional.of(firstDefinition);
         }
 
-        DataAtom headAtom = firstDefinition.getRootProjectionNode().getHeadAtom();
+        PureDataAtom headAtom = firstDefinition.getRootProjectionNode().getHeadAtom();
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -48,7 +46,7 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery initMergedDefinition(DataAtom headAtom) throws QueryMergingException {
+    private static IntermediateQuery initMergedDefinition(PureDataAtom headAtom) throws QueryMergingException {
         ProjectionNode rootNode = new ProjectionNodeImpl(headAtom, new NeutralSubstitution());
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(headAtom);
@@ -72,7 +70,7 @@ public class IntermediateQueryUtils {
         try {
             IntermediateQueryBuilder queryBuilder = convertToBuilder(mergedDefinition);
             ProjectionNode rootProjectionNode = queryBuilder.getRootProjectionNode();
-            DataAtom dataAtom = rootProjectionNode.getHeadAtom();
+            PureDataAtom dataAtom = rootProjectionNode.getHeadAtom();
 
             UnionNode unionNode = extractUnionNode(queryBuilder, rootProjectionNode);
 
@@ -151,8 +149,8 @@ public class IntermediateQueryUtils {
         ProjectionNode root1 = definition1.getRootProjectionNode();
         ProjectionNode root2 = definition2.getRootProjectionNode();
 
-        DataAtom headAtom1 = root1.getHeadAtom();
-        DataAtom headAtom2 = root2.getHeadAtom();
+        PureDataAtom headAtom1 = root1.getHeadAtom();
+        PureDataAtom headAtom2 = root2.getHeadAtom();
 
         if (!headAtom1.isEquivalent(headAtom2)) {
             throw new QueryMergingException("Two definitions of different things: "

@@ -14,7 +14,7 @@ public interface ProjectionNode extends QueryNode {
     /**
      * TODO: explain
      */
-    DataAtom getHeadAtom();
+    PureDataAtom getHeadAtom();
 
     /**
      * TODO: explain

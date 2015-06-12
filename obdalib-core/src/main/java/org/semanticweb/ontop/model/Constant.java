@@ -24,7 +24,7 @@ package org.semanticweb.ontop.model;
  * This class defines a type of {@link Term} in which it has a constant
  * value.
  */
-public interface Constant extends ImmutableTerm {
+public interface Constant extends NonFunctionalTerm {
 
 	public Predicate.COL_TYPE getType();
 
