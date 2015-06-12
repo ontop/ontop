@@ -250,7 +250,7 @@ public class JDBCConnectionManager {
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 
-		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
+		try (ResultSet rsTables = md.getTables(null, null, null, new String[]{"TABLE", "VIEW"})) {
 			while (rsTables.next()) {
 				Set<String> tableColumns = new HashSet<String>();
 
@@ -355,7 +355,12 @@ public class JDBCConnectionManager {
 			}
 			
 			final List<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
-			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+			final Map<String, Reference> foreignKeys;
+			if (md.getDatabaseProductName().contains("4D")){
+				foreignKeys = getForeignKeyFourD(md, null, tableSchema, tblName);
+			}else{
+				foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+			}
             final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName, primaryKeys);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
@@ -681,7 +686,7 @@ public class JDBCConnectionManager {
 				 * also have worked in the latter case.
 				 */
 				String tableOwner;
-				if( table.getSchema()!=null){
+				if( table.getSchema() != null) {
 					tableOwner = table.getSchema();
 					if(!table.isSchemaQuoted())
 						tableOwner = tableOwner.toUpperCase();
