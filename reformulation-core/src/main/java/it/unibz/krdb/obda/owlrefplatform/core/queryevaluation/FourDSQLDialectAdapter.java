@@ -40,6 +40,8 @@ public class FourDSQLDialectAdapter extends SQL99DialectAdapter {
 
         StringBuilder sql = new StringBuilder();
         String str = "CONCAT("+strings[0]+","+strings[1]+")";
+        if (strings.length == 2)
+            return str;
         sql.append(concat(strings,str,2));
         return sql.toString();
     }

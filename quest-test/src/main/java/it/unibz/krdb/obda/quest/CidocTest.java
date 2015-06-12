@@ -59,12 +59,12 @@ public class CidocTest {
         // Now we are ready for querying
         conn = reasoner.getConnection();
         st = conn.createStatement();
-//        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>" +
-//                "SELECT ?x WHERE {?x a :E25_Man-Made_Feature}";
+        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>" +
+                "SELECT ?x WHERE {?x a :E25_Man-Made_Feature}";
 //        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>"+
 //                "SELECT ?x ?y WHERE {?x a :E41_Appellation; :P3_has_note ?y}";
-        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>"+
-                  "SELECT ?x ?y WHERE {?x a :E7_Activity; :P3_has_note ?y}";
+//        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>"+
+//                  "SELECT ?x ?y WHERE {?x a :E7_Activity; :P3_has_note ?y}";
 
         try {
             long t1 = System.currentTimeMillis();
