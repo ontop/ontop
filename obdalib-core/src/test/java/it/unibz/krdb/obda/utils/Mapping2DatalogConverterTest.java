@@ -233,12 +233,4 @@ public class Mapping2DatalogConverterTest extends TestCase {
                 ":S_{id} a :Student .");
     }
 
-	public void testAnalysisMultipleMappings() throws Exception {
-		runAnalysis(
-				"select id, first_name,course_id from (select id, first_name from Student) JOIN Enrollment ON student_id = id  ",
-				":S_{id} a :Student ; :fname {first_name} ; :hasCourse :C_{course_id}  .\n" +
-						":C_{course_id} a :Course  .\n" +
-						"{first_name} a :Person .");
-	}
-
 }
