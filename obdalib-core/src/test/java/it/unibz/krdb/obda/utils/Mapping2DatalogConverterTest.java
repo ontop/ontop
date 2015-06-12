@@ -219,7 +219,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
     public void testAnalysis_22() throws Exception{
         runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)",
-                ":S_{id} a :RecentStudent ; :fname {first_name} ; :first_name {last_name} .");
+                ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
     }
 
     public void testAnalysis_23() throws Exception{
@@ -227,11 +227,11 @@ public class Mapping2DatalogConverterTest extends TestCase {
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
     }
 
-   	public void testAnalysis_24() throws Exception {
-		runAnalysis(
-				"select id from (select id from Student) JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
-				":S_{id} a :Student .");
-	}
+    public void testAnalysis_24() throws Exception {
+        runAnalysis(
+                "select id from (select id from Student) JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
+                ":S_{id} a :Student .");
+    }
 
 	public void testAnalysisMultipleMappings() throws Exception {
 		runAnalysis(
