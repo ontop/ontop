@@ -9,13 +9,59 @@
 ]>
 
 
-<rdf:RDF xmlns="http://www.example.org/#"
+<rdf:RDF xmlns="http://www.example.org/"
      xml:base="http://www.example.org/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <owl:Ontology rdf:about="http://www.semanticweb.org/xiao/ontologies/2014/9/untitled-ontology-162"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/R -->
+
+    <owl:ObjectProperty rdf:about="http://www.example.org/R"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/S -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/S"/>
+    
+
+
+    <!-- http://www.example.org/S1 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/S1"/>
+    
+
+
+    <!-- http://www.example.org/S2 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/S2"/>
     
 
 
@@ -32,14 +78,16 @@
 
     <!-- http://www.example.org/A1 -->
 
-    <owl:Class rdf:about="http://www.example.org/A1"/>
+    <owl:Class rdf:about="http://www.example.org/A1">
+        <rdfs:subClassOf rdf:resource="http://www.example.org/A2"/>
+    </owl:Class>
     
 
 
     <!-- http://www.example.org/A2 -->
 
     <owl:Class rdf:about="http://www.example.org/A2">
-        <rdfs:subClassOf rdf:resource="http://www.example.org/A1"/>
+        <rdfs:subClassOf rdf:resource="http://www.example.org/A3"/>
     </owl:Class>
     
 
@@ -47,16 +95,14 @@
     <!-- http://www.example.org/A3 -->
 
     <owl:Class rdf:about="http://www.example.org/A3">
-        <rdfs:subClassOf rdf:resource="http://www.example.org/A2"/>
+        <rdfs:subClassOf rdf:resource="http://www.example.org/A4"/>
     </owl:Class>
     
 
 
     <!-- http://www.example.org/A4 -->
 
-    <owl:Class rdf:about="http://www.example.org/A4">
-        <rdfs:subClassOf rdf:resource="http://www.example.org/A3"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.example.org/A4"/>
     
 
 
