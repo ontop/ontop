@@ -876,6 +876,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		String langVariableName = sqladapter.nameTopVariable(signature.get(hpos), langSuffix, sqlVariableNames);
 		sqlVariableNames.add(langVariableName);
+		String dbProductName = this.metadata.getDatabaseProductName();
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
@@ -885,15 +886,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 
             /*4D needs 0 instead of NULL
             * It is bad practice. Should be refactored */
-            if(this.metadata.getDatabaseProductName().contains("4D")){
+
+			if(dbProductName!= null && dbProductName.contains("4D")){
                 if(lang.equals("NULL")){
                     return  (String.format(langStrForSELECT, ((FourDSQLDialectAdapter)sqladapter).sqlNull(), langVariableName));
                 }
             }
-//
 			return (String.format(langStrForSELECT, lang, langVariableName));
 		}
-        if(this.metadata.getDatabaseProductName().contains("4D")){
+        if(dbProductName!= null && dbProductName.contains("4D")){
             return  (String.format(langStrForSELECT, ((FourDSQLDialectAdapter)sqladapter).sqlNull(), langVariableName));
         }
 
@@ -982,7 +983,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		sqlVariableNames.add(typeVariableName);
 
         /*It is bad practice. But 4D needs to cast Quest code*/
-        if(this.metadata.getDatabaseProductName().contains("4D")){
+		String dbProductName = this.metadata.getDatabaseProductName();
+        if(dbProductName!= null && dbProductName.contains("4D")){
             return String.format(typeStrForSELECT, ((FourDSQLDialectAdapter)sqladapter).sqlTypeCode(code), typeVariableName);
         }
 
