@@ -10,4 +10,6 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 public interface ImmutableSubstitution extends LocallyImmutableSubstitution {
 
     ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap();
+
+    boolean isDefining(VariableImpl variable);
 }

@@ -47,6 +47,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public boolean isDefining(VariableImpl variable) {
+        return false;
+    }
+
+    @Override
     public boolean isEmpty() {
         return true;
     }

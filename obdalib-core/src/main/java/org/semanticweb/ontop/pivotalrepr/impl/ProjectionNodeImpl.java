@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode {
@@ -48,6 +49,11 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
             return new ProjectionNodeImpl(dataAtom, substitution, optionalModifiers.get());
         }
         return new ProjectionNodeImpl(dataAtom, substitution);
+    }
+
+    @Override
+    public boolean isAlias(VariableImpl variable) {
+        return substitution.isDefining(variable);
     }
 
     @Override

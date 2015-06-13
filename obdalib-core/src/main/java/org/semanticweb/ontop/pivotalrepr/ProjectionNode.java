@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
  * Head node an IntermediateQuery
@@ -27,4 +28,9 @@ public interface ProjectionNode extends QueryNode {
     Optional<ImmutableQueryModifiers> getOptionalModifiers();
 
     ProjectionNode clone();
+
+    /**
+     * Returns true if the variable is defined by the substitution.
+     */
+    boolean isAlias(VariableImpl variable);
 }

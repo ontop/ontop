@@ -29,6 +29,11 @@ public class ImmutableSubstitutionImpl extends LocallyImmutableSubstitutionImpl 
     }
 
     @Override
+    public boolean isDefining(VariableImpl variable) {
+        return map.containsKey(variable);
+    }
+
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
