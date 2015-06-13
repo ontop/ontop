@@ -3,11 +3,8 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.DetypingOptimizer;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -26,85 +23,64 @@ import java.util.Set;
 public class IntermediateQueryImpl implements IntermediateQuery {
 
     /**
-     * TODO: explain
+     * Thrown when the internal state of the intermediate query is found to be inconsistent.
+     * 
+     * Should not be expected (internal error).
+     *
      */
-    protected static class IllegalDAGException extends RuntimeException {
-        protected IllegalDAGException(String message) {
+    protected static class InconsistentIntermediateQueryException extends RuntimeException {
+        protected InconsistentIntermediateQueryException(String message) {
             super(message);
         }
     }
 
-    /**
-     * TODO: explain.
-     *
-     * Implementation detail: this object must NOT BE SHARED with the other classes.
-     */
-    private final DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(IntermediateQueryImpl.class);
 
     /**
-     * MAKE SURE it remains the "root" of the tree/DAG.
-     * MAY BE NULL!
-     *
-     * TODO: mark it as Nullable.
+     * Highly mutable (low control) so MUST NOT BE SHARED!
      */
-    private ProjectionNode rootProjectionNode;
-
-    /**
-     * Cached value (non final). MAY BE NULL
-     *
-     * * TODO: mark it as Nullable.
-     */
-    private ImmutableList<QueryNode> nodesInAntiTopologicalOrder;
+    private final QueryDAGComponent dagComponent;
 
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
     protected IntermediateQueryImpl(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
-            throws IllegalDAGException {
-        this.queryDAG = queryDAG;
-
-        /**
-         * Cache attributes.
-         * May throw an IllegalDAGException during their computation.
-         *
-         */
-        this.nodesInAntiTopologicalOrder = null;
-        this.rootProjectionNode = null;
-        computeNodeTopologyCache();
+            throws InconsistentIntermediateQueryException {
+        try {
+            dagComponent = new QueryDAGComponentImpl(queryDAG);
+        } catch (IllegalDAGException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
+        }
     }
 
     @Override
-    public ProjectionNode getRootProjectionNode() throws IllegalDAGException {
-        if (rootProjectionNode == null) {
-            computeNodeTopologyCache();
+    public ProjectionNode getRootProjectionNode() throws InconsistentIntermediateQueryException{
+        try {
+            return dagComponent.getRootProjectionNode();
+        } catch (IllegalDAGException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
         }
-        return rootProjectionNode;
     }
 
     @Override
-    public ImmutableList<QueryNode> getNodesInBottomUpOrder() {
-
-        /**
-         * Computes the list if not cached
-         */
-        if (nodesInAntiTopologicalOrder == null) {
-            computeNodeTopologyCache();
+    public ImmutableList<QueryNode> getNodesInBottomUpOrder() throws InconsistentIntermediateQueryException {
+        try {
+            return dagComponent.getNodesInBottomUpOrder();
+        } catch (IllegalDAGException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
         }
-
-        return nodesInAntiTopologicalOrder;
     }
 
     @Override
     public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
-        return DAGUtils.getSubNodesOf(queryDAG, node);
+        return dagComponent.getCurrentSubNodesOf(node);
     }
 
     @Override
     public boolean contains(QueryNode node) {
-        return queryDAG.containsVertex(node);
+        return dagComponent.contains(node);
     }
-
 
     /**
      * The order of sub-node selection is ignored.
@@ -112,43 +88,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        resetNodeTopologyCache();
         QueryNode currentNode = proposal.getQueryNode();
 
-        Set<QueryNode> proposedSubNodesToConsider = new HashSet<>(proposal.getSubNodes());
-
-        /**
-         * Existing sub-nodes: keep or remove
-         */
-        Set<DefaultEdge> outgoingEdges = queryDAG.outgoingEdgesOf(currentNode);
-        for (DefaultEdge dependencyEdge : outgoingEdges) {
-            QueryNode subNode = (QueryNode) dependencyEdge.getTarget();
-            // Kept
-            if (proposedSubNodesToConsider.contains(subNode)) {
-                proposedSubNodesToConsider.remove(subNode);
-            }
-            // Removed
-            else {
-                removeDependency(dependencyEdge);
-            }
+        try {
+            dagComponent.setChildrenNodes(currentNode, proposal.getSubNodes());
+            return currentNode;
+        } catch(IllegalDAGException e) {
+            throw new InvalidLocalOptimizationProposalException(e.getLocalizedMessage());
         }
-
-        /**
-         * New sub-nodes: added to the DAG
-         */
-        for (QueryNode newSubNode : proposedSubNodesToConsider) {
-            if (!queryDAG.containsVertex(newSubNode)) {
-                queryDAG.addVertex(newSubNode);
-            }
-            try {
-                queryDAG.addDagEdge(currentNode, newSubNode);
-            } catch (DirectedAcyclicGraph.CycleFoundException ex) {
-                // Inconsistent proposal (should not introduce a cycle in the DAG) --> throw an exception.
-                throw new InvalidLocalOptimizationProposalException(ex.getMessage());
-            }
-        }
-
-        return currentNode;
     }
 
     /**
@@ -158,8 +105,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        resetNodeTopologyCache();
-        return null;
+        throw new RuntimeException("TODO: implement it");
     }
 
     @Override
@@ -193,7 +139,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Deprecated
     public QueryNode applyDetypingProposal(DetypingProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        return null;
+        throw new RuntimeException("TODO: implement it");
     }
 
     /**
@@ -217,11 +163,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                     localDataNode.getAtom(), localVariables);
 
             ProjectionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
-            replaceNode(localDataNode, subQueryRootNode);
+            dagComponent.replaceNode(localDataNode, subQueryRootNode);
 
-            addSubTree(cloneSubQuery, subQueryRootNode);
+            dagComponent.addSubTree(cloneSubQuery, subQueryRootNode);
         }
-        resetNodeTopologyCache();
     }
 
     /**
@@ -229,130 +174,21 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      *
      * TODO: explain
      */
-    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(PureDataAtom subsumingDataAtom) {
+    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(PureDataAtom subsumingDataAtom)
+            throws InconsistentIntermediateQueryException {
         ImmutableList.Builder<OrdinaryDataNode> listBuilder = ImmutableList.builder();
-        for(QueryNode node : getNodesInBottomUpOrder()) {
-            if (node instanceof OrdinaryDataNode) {
-                OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
-                if (subsumingDataAtom.subsumes(dataNode.getAtom()))
-                    listBuilder.add(dataNode);
+        try {
+            for(QueryNode node : dagComponent.getNodesInBottomUpOrder()) {
+                if (node instanceof OrdinaryDataNode) {
+                    OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
+                    if (subsumingDataAtom.subsumes(dataNode.getAtom()))
+                        listBuilder.add(dataNode);
+                }
             }
+        } catch (IllegalDAGException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
         }
         return listBuilder.build();
-    }
-
-    /**
-     * TODO: explain
-     * TODO: replace this recursive implementation but iterative one
-     * Low-level. Tail recursive.
-     */
-    private void addSubTree(IntermediateQuery subQuery, QueryNode parentNode) {
-        for (QueryNode childNode : subQuery.getCurrentSubNodesOf(parentNode)) {
-            queryDAG.addVertex(childNode);
-            try {
-                queryDAG.addDagEdge(parentNode, childNode);
-            } catch (DirectedAcyclicGraph.CycleFoundException e) {
-                throw new RuntimeException("BUG (internal error)" + e.getLocalizedMessage());
-            }
-            // Recursive call
-            addSubTree(subQuery, childNode);
-        }
-    }
-
-    /**
-     * Low-level
-     * TODO: explain
-     */
-    private void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
-        queryDAG.addVertex(replacingNode);
-        try {
-            for (DefaultEdge incomingEdge : queryDAG.incomingEdgesOf(previousNode)) {
-                queryDAG.addDagEdge((QueryNode)incomingEdge.getSource(), replacingNode);
-            }
-
-            for (DefaultEdge outgoingEdge : queryDAG.outgoingEdgesOf(previousNode)) {
-                    queryDAG.addDagEdge(replacingNode, (QueryNode)outgoingEdge.getTarget());
-            }
-
-        } catch (DirectedAcyclicGraph.CycleFoundException e) {
-            throw new RuntimeException("BUG: " + e.getLocalizedMessage());
-        }
-        queryDAG.removeVertex(previousNode);
-    }
-
-    /**
-     * Dependency: edge from a QueryNode to its sub-node.
-     */
-    private void removeDependency(DefaultEdge dependencyEdge) {
-        resetNodeTopologyCache();
-
-        QueryNode subNode = (QueryNode) dependencyEdge.getTarget();
-        queryDAG.removeEdge(dependencyEdge);
-
-        /**
-         * Checks if the sub-node is still a dependency.
-         *
-         * If not, removes it.
-         */
-        if (queryDAG.incomingEdgesOf(subNode).isEmpty()) {
-            queryDAG.removeVertex(subNode);
-        }
-    }
-
-    /**
-     * TODO: describe
-     */
-    private void computeNodeTopologyCache() throws IllegalDAGException {
-        nodesInAntiTopologicalOrder = extractNodeOrder(queryDAG);
-        rootProjectionNode = extractRootProjectionNode(nodesInAntiTopologicalOrder);
-    }
-
-    /**
-     * TODO: describe
-     */
-    private void resetNodeTopologyCache() {
-        nodesInAntiTopologicalOrder = null;
-        rootProjectionNode = null;
-    }
-
-
-    /**
-     * TODO: describe
-     */
-    private static ImmutableList<QueryNode> extractNodeOrder(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
-        TopologicalOrderIterator<QueryNode, DefaultEdge> it =
-                new TopologicalOrderIterator<>(queryDAG);
-
-        List<QueryNode> nodesInTopologicalOrder = Lists.newArrayList(it);
-        ImmutableList<QueryNode> nodesInAntiTopologicalOrder = ImmutableList.copyOf(Lists.reverse(
-                nodesInTopologicalOrder));
-        return nodesInAntiTopologicalOrder;
-    }
-
-    /**
-     * TODO: describe
-     */
-    private static ProjectionNode extractRootProjectionNode(ImmutableList<QueryNode> nodesInAntiTopologicalOrder)
-        throws IllegalDAGException{
-        if (nodesInAntiTopologicalOrder.isEmpty()) {
-            throw new IllegalDAGException("Empty DAG!");
-        }
-
-        QueryNode rootNode = nodesInAntiTopologicalOrder.get(0);
-        if (!(rootNode instanceof ProjectionNode)) {
-            throw new IllegalDAGException("The root node is not a ProjectionNode: " + rootNode);
-        }
-
-        return (ProjectionNode) rootNode;
-    }
-
-    /**
-     * TODO: implement it
-     */
-    @Deprecated
-    @Override
-    public Variable createNewVariable() {
-        throw new RuntimeException("TODO: implement it");
     }
 
 

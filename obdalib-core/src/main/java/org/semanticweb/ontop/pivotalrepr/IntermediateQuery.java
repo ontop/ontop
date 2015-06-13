@@ -53,7 +53,4 @@ public interface IntermediateQuery {
      */
     @Deprecated
     public void detypeNode(QueryNode nodeToDetype);
-
-
-    Variable createNewVariable();
 }

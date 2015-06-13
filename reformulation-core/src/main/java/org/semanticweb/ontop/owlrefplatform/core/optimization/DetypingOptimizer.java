@@ -47,7 +47,8 @@ public class DetypingOptimizer implements QueryOptimizer {
     private ImmutableMap<Function, Variable> proposeReplacement(ImmutableList<Function> typedFunctionalTerms) {
         ImmutableMap.Builder<Function, Variable> mapBuilder = ImmutableMap.builder();
         for (Function functionalTerm : typedFunctionalTerms) {
-            mapBuilder.put(functionalTerm, queryToOptimize.createNewVariable());
+            // TODO: fix it
+            //mapBuilder.put(functionalTerm, queryToOptimize.createNewVariable());
         }
         return mapBuilder.build();
     }
