@@ -2,8 +2,10 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.*;
@@ -45,8 +47,8 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
-        return (Map<VariableImpl, Term>)(Map<VariableImpl, ?>)map;
+    public ImmutableMap<VariableImpl, Term> getMap() {
+        return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>)map;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
 
     @Override
     @Deprecated
-    public Set<VariableImpl> keySet() {
+    public ImmutableSet<VariableImpl> keySet() {
         return map.keySet();
     }
 
@@ -70,7 +72,7 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
      */
     @Override
     public boolean compose(Substitution otherSubstitution) {
-        throw new UnsupportedOperationException("Not implemented (yet)!");
+        throw new UnsupportedOperationException("Mutable operations are not supported");
     }
 
     /***
@@ -78,7 +80,7 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
      */
     @Override
     public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException("Not implemented (yet)!");
+        throw new UnsupportedOperationException("Mutable operations are not supported");
     }
 
     /***
@@ -86,6 +88,16 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
      */
     @Override
     public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException("Not implemented (yet)!");
+        throw new UnsupportedOperationException("Mutable operations are not supported");
+    }
+
+    @Override
+    public ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap() {
+        return (ImmutableMap<VariableImpl, ImmutableTerm>)(ImmutableMap<VariableImpl, ?>)map;
+    }
+
+    @Override
+    public boolean isDefining(VariableImpl variable) {
+        return map.containsKey(variable);
     }
 }
