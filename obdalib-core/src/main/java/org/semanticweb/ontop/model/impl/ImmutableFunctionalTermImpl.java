@@ -27,9 +27,10 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
         string = null;
     }
 
-    protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+    protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableList<? extends ImmutableTerm> terms) {
         super(functor);
-        this.terms = terms;
+        // No problem since the list is immutable
+        this.terms = (ImmutableList<ImmutableTerm>)terms;
         string = null;
     }
 

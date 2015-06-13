@@ -20,8 +20,8 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
 
     private final AtomPredicate predicate;
 
-    protected FunctionFreeDataAtomImpl(AtomPredicate predicate, ImmutableList<NonFunctionalTerm> nonFunctionalTerms) {
-        super(predicate, (ImmutableList<ImmutableTerm>)(ImmutableList<?>)nonFunctionalTerms);
+    protected FunctionFreeDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends NonFunctionalTerm> nonFunctionalTerms) {
+        super(predicate, nonFunctionalTerms);
         this.predicate = predicate;
     }
 
