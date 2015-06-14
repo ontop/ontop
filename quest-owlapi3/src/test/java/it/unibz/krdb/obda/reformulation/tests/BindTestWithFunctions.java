@@ -373,7 +373,6 @@ public class BindTestWithFunctions {
 	
 
     
-    @Ignore
     @Test
     public void testStrEnds() throws Exception {
 
@@ -484,6 +483,7 @@ public class BindTestWithFunctions {
 
     }
     
+    @Ignore
     @Test
     public void testBindWithBefore() throws Exception {
 
@@ -512,6 +512,7 @@ public class BindTestWithFunctions {
 
     }
     
+    @Ignore
     @Test
     public void testBindWithAfter() throws Exception {
 
@@ -527,7 +528,7 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
+                + "   BIND (STRAFTER(?title,\"a\") AS ?w)\n"
              + "}";
 
 

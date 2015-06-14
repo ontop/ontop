@@ -156,14 +156,30 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	} 
 	
 	@Override
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";	
+	}
+	
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, LENGTH(%2$s)) LIKE %2$s";
+	}
+	
+	@Override
+	public String strContainsOperator(){
+		return "CHARINDEX(%2$s,%1$s) > 0";		
+	}
+	
+	@Override
 	public String strBefore(String str, String before) {
 		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
 	} 
 	
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s) + LENGTH(%s))", str, after, str, after);
-	} 
+		return String.format("SUBSTR(%s,CHARINDEX(REGEXP_REPLACE(%s, (CONCAT('.*',%s) ), ''),%s))",
+				str, str, after,str); //FIXME when no match found should return empty string
+	}
 	
 	@Override
 	public String strLcase(String str) {

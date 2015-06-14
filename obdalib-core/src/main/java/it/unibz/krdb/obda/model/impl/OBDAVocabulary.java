@@ -103,25 +103,25 @@ public class OBDAVocabulary {
 	/* String predicates */
 
 	public static final StringOperationPredicate UCASE = new StringOperationPredicateImpl(
-			"UCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); // added by Nika
+			"UCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
 
 	public static final StringOperationPredicate LCASE = new StringOperationPredicateImpl(
-			"LCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); // added by Nika
+			"LCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
 
 	public static final StringOperationPredicate STRLEN = new StringOperationPredicateImpl(
-			"STRLEN", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); // added by Nika
+			"STRLEN", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
 
 	public static final StringOperationPredicate SUBSTR = new StringOperationPredicateImpl(
 			"SUBSTR", 3, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.INTEGER,
-					COL_TYPE.INTEGER }); // Nika
+					COL_TYPE.INTEGER }); 
 
 	public static final StringOperationPredicate STRBEFORE = new StringOperationPredicateImpl(
 			"STRBEFORE", 2,
-			new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL }); // Nika
+			new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL }); 
 
 	public static final StringOperationPredicate STRAFTER = new StringOperationPredicateImpl(
 			"STRAFTER", 2,
-			new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL }); // Nika
+			new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL }); 
 
 	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
 			"REPLACE", 3, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL,

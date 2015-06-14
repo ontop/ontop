@@ -1673,11 +1673,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
 		} else if (functionSymbol.equals(OBDAVocabulary.STR_STARTS)) {
-			operator = STR_STARTS_OPERATOR;
+			operator = sqladapter.strStartsOperator();
 		} else if (functionSymbol.equals(OBDAVocabulary.STR_ENDS)) {
-			operator = STR_ENDS_OPERATOR;
+			operator = sqladapter.strEndsOperator();
 		} else if (functionSymbol.equals(OBDAVocabulary.CONTAINS)) {
-				operator = CONTAINS_OPERATOR;}
+				operator = sqladapter.strContainsOperator();}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}

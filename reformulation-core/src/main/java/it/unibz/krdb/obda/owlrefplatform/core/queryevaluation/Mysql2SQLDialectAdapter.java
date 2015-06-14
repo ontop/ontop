@@ -43,6 +43,22 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
 	}
 	
+	
+	@Override
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 0, CHAR_LENGTH(%2$s)) LIKE %2$s";	
+	}
+	
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+	
+	@Override
+	public String strContainsOperator(){
+		return "INSTR(%2$s,%1$s) > 0";		
+	}
+	
 	 @Override
 	  	public String SHA1(String str) {
 	  		return String.format("SHA1(%s)", str);
@@ -51,6 +67,11 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	 @Override
 	  	public String MD5(String str) {
 	  		return String.format("MD5(%s)", str);
+	  	}
+	 
+	 @Override
+	  	public String strLength(String str) {
+	  		return String.format("CHAR_LENGTH(%s)", str);
 	  	}
 	
 	@Override

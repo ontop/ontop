@@ -37,6 +37,12 @@ public interface SQLDialectAdapter {
 
 	public String uuid();
 	
+	public String strStartsOperator();
+	
+	public String strEndsOperator();
+	
+	public String strContainsOperator();
+	
 	public String strLength(String str); 
 	
 	public String strUcase(String str);
