@@ -92,7 +92,7 @@ public class ExpressionEvaluator {
 			body.set(atomidx, (Function) newatom);
 		}
 		
-		return InequalitiesSatisfiability.unsatisfiable(q);
+		return ComparisonsSatisfiability.unsatisfiable(q);
 	}
 
 	public Term eval(Term expr) {

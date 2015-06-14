@@ -1,12 +1,10 @@
-package it.unibz.krdb.sql;
+package it.unibz.krdb.obda.unfold;
 
 import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -29,9 +27,9 @@ import java.io.File;
  * The code for this tests is an adaptation from the class 
  * it.unibz.krdb.sql.TestQuestImplicitDBConstraints
  */
-public class TestQuestInequalitiesSatisfiability {
-	private final static String  OWLFILE = "src/test/resources/inequalities/in.owl" ;
-	private final static String OBDAFILE = "src/test/resources/inequalities/in.obda";
+public class ComparisonsSatisfiabilityTest {
+	private final static String  OWLFILE = "src/test/resources/comparisons/in.owl" ;
+	private final static String OBDAFILE = "src/test/resources/comparisons/in.obda";
 	
 	private QuestOWLConnection conn;
 	private QuestOWLFactory factory;
@@ -80,23 +78,23 @@ public class TestQuestInequalitiesSatisfiability {
 
 
 	@After public void clean() throws Exception {
-		if (    conn != null) conn.close();
-		if (reasoner != null) reasoner.dispose();
-		
-		if (!sqlConnection.isClosed()) {
-				sqlConnection.close();
-		}
+		if (conn != null)
+			conn.close();
+		if (reasoner != null)
+			reasoner.dispose();
+		if (!sqlConnection.isClosed())
+			 sqlConnection.close();
 	}
 	
 	@Ignore private String qunfold(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		String result = st.getUnfolding("PREFIX : <http://www.semanticweb.org/ontologies/2015/5/untitled-ontology-1636#> SELECT * WHERE {" + query + "}");
 		log.debug(query + " ==> " + result);
-		System.out.println(query + " ==> " + result);
+		//System.out.println(query + " ==> " + result);
 		return result;
 	}
 	
-	@Test public void test() throws Exception {
+	@Test public void tests() throws Exception {
 		// a > b > c > d > e > f
 		assertTrue(qunfold("?a :Gt ?b . ?b :Gt ?c . ?c :Gt ?d . ?d :Gt ?e . ?e :Gt ?f .") != "");
 		// a =< b =< c =< d =< e =< a, a != c

@@ -34,8 +34,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 
-class InequalitiesSatisfiability {	
-	private static final Logger LOGGER = LoggerFactory.getLogger(InequalitiesSatisfiability.class);
+class ComparisonsSatisfiability {	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ComparisonsSatisfiability.class);
 	private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 	private static final DatatypeFactory DTFACTORY = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
@@ -77,7 +77,7 @@ class InequalitiesSatisfiability {
 	 * @return true if the query is found unsatisfiable, false otherwise.
 	 */
 	public static boolean unsatisfiable(CQIE query) {
-		LOGGER.debug("Checking satisfiability of comparisons in conjunctive query");
+		LOGGER.debug("Checking satisfiability of comparisons in query");
 		return unsatisfiable(query.getBody());
 	}
 
@@ -94,18 +94,7 @@ class InequalitiesSatisfiability {
 		 * for every variable and updated when new constraints are found
 		 * in disequalities.
 		 */
-		Map<Variable, DoubleInterval> mranges = new HashMap<Variable, DoubleInterval>() {
-			private static final long serialVersionUID = 1L;
-			/*
-			 * Override the get method in order to use default intervals  
-			 */
-			@Override
-		    public DoubleInterval get(Object key) {
-		    	if(!containsKey(key)) 
-		    		return new DoubleInterval();
-		    	return super.get(key);
-		    }
-		};
+		Map<Variable, DoubleInterval> mranges = new HashMap<>();
 		
 		/*
 		 * The neq-constraints (!=)
@@ -216,6 +205,7 @@ class InequalitiesSatisfiability {
 		 * Clone the data structures atoms, mranges, neq_constraints, gteGraph
 		 */
 		List<Function> atoms_copy = new ArrayList<>(atoms);
+		// replace the disjunction in the copy with the first disjunct
 		atoms_copy.set(0, (Function) or.getTerm(0));
 		
 		Map<Variable, DoubleInterval> mranges_copy;
@@ -246,6 +236,7 @@ class InequalitiesSatisfiability {
 		if (!unsatisfiable(atoms_copy, mranges_copy, neq_copy, gteGraph_copy)) {
 			return false;
 		} else {
+			// replace the disjunction with the second disjunct
 			atoms.set(0, (Function) or.getTerm(1));
 			return unsatisfiable(atoms, mranges, neq_constraints, gteGraph);
 		}
@@ -320,7 +311,7 @@ class InequalitiesSatisfiability {
 				if (value != Double.NaN) {
 					DoubleInterval interval; 
 					try {
-						interval = mranges.get(var).withLowerBound(value);
+						interval = mranges.getOrDefault(var, new DoubleInterval()).withLowerBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
@@ -332,7 +323,7 @@ class InequalitiesSatisfiability {
 				if (value != Double.NaN) {
 					DoubleInterval interval; 
 					try {
-						interval = mranges.get(var).withUpperBound(value);
+						interval = mranges.getOrDefault(var, new DoubleInterval()).withUpperBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
@@ -387,7 +378,7 @@ class InequalitiesSatisfiability {
 	private static void constrainConstantsOrder(
 			DirectedGraph<Term, DefaultEdge> gteGraph, SortedSet<Double> constants) {
 		
-		//The SortedSet constants is already linearly sorted!
+		// the SortedSet constants is already linearly sorted!
 		Constant curr, last = doubleToConstant(constants.first());
 		for (Double d: constants) {
 			curr = doubleToConstant(d);
