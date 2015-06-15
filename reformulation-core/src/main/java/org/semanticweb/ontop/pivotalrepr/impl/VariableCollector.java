@@ -1,9 +1,12 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.NonFunctionalTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+
+import java.util.List;
 
 /**
  * Collects all the variables found in the nodes.
@@ -17,9 +20,13 @@ public class VariableCollector implements QueryNodeVisitor {
     }
 
     public static ImmutableSet<VariableImpl> collectVariables(IntermediateQuery query) {
+        return collectVariables(query.getNodesInBottomUpOrder());
+    }
+
+    public static ImmutableSet<VariableImpl> collectVariables(List<QueryNode> nodes) {
         VariableCollector collector = new VariableCollector();
 
-        for (QueryNode node : query.getNodesInBottomUpOrder()) {
+        for (QueryNode node : nodes) {
             node.acceptVisitor(collector);
         }
         return collector.collectedVariableBuilder.build();

@@ -16,6 +16,12 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
 
+    /**
+     * EXCLUDES the root of the sub-tree (currentNode).
+     * TODO: find a better name
+     */
+    ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
+
     boolean contains(QueryNode node);
 
     /**

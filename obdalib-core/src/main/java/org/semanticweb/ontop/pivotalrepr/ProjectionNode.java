@@ -20,7 +20,7 @@ public interface ProjectionNode extends QueryNode {
     /**
      * TODO: explain
      */
-    ImmutableSubstitution getSubstitution();
+    ImmutableSubstitution getAliasDefinition();
 
     /**
      * TODO: explain

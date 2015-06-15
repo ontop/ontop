@@ -11,9 +11,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * TODO: describe
@@ -24,7 +22,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     /**
      * Thrown when the internal state of the intermediate query is found to be inconsistent.
-     * 
+     *
      * Should not be expected (internal error).
      *
      */
@@ -75,6 +73,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
         return dagComponent.getCurrentSubNodesOf(node);
+    }
+
+    @Override
+    public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
+        return dagComponent.getSubTreeNodesInTopDownOrder(currentNode);
     }
 
     @Override
@@ -159,13 +162,17 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             // TODO: make it be incremental
             ImmutableSet<VariableImpl> localVariables = VariableCollector.collectVariables(this);
 
-            IntermediateQuery cloneSubQuery = VariableSubstituter.cloneAndSubstituteVariables(originalSubQuery,
-                    localDataNode.getAtom(), localVariables);
+            try {
+                IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
+                            localDataNode.getAtom(), localVariables);
 
-            ProjectionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
-            dagComponent.replaceNode(localDataNode, subQueryRootNode);
+                ProjectionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
+                dagComponent.replaceNode(localDataNode, subQueryRootNode);
 
-            dagComponent.addSubTree(cloneSubQuery, subQueryRootNode);
+                dagComponent.addSubTree(cloneSubQuery, subQueryRootNode);
+            } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+                throw new QueryMergingException(e.getMessage());
+            }
         }
     }
 

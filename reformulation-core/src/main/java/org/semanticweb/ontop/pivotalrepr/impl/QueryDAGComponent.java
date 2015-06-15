@@ -31,4 +31,6 @@ public interface QueryDAGComponent {
      * Makes sure all the children nodes in the DAG are the listed ones.
      */
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalDAGException;
+
+    ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 }

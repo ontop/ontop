@@ -31,7 +31,7 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
     }
 
     @Override
-    public ImmutableSubstitution getSubstitution() {
+    public ImmutableSubstitution getAliasDefinition() {
         return substitution;
     }
 

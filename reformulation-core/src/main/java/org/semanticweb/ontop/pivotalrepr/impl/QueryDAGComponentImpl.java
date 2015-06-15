@@ -189,6 +189,14 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     }
 
     /**
+     * TODO: implement it
+     */
+    @Override
+    public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    /**
      * TODO: describe
      */
     private void computeNodeTopologyCache() throws IllegalDAGException {
