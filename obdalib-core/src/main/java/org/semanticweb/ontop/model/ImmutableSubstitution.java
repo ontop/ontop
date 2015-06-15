@@ -24,4 +24,9 @@ public interface ImmutableSubstitution extends LocallyImmutableSubstitution {
     ImmutableTerm applyToVariable(VariableImpl variable);
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
+
+    /**
+     * Returns "f o g" where f is this substitution
+     */
+    ImmutableSubstitution composeWith(ImmutableSubstitution g);
 }

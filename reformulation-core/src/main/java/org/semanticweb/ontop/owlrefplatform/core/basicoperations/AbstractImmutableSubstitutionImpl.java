@@ -43,4 +43,10 @@ public abstract class AbstractImmutableSubstitutionImpl extends LocallyImmutable
         OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
         return factory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), subTermsBuilder.build());
     }
+
+    @Override
+    public ImmutableSubstitution composeWith(ImmutableSubstitution g) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
 }

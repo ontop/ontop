@@ -52,6 +52,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public ImmutableSubstitution composeWith(ImmutableSubstitution g) {
+        return g;
+    }
+
+    @Override
     public final ImmutableMap<VariableImpl, Term> getMap() {
         return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>) getImmutableMap();
     }
