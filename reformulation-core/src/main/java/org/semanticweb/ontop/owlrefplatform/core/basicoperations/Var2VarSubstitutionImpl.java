@@ -7,6 +7,7 @@ import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,15 +36,21 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl i
      * Extracts the sub-set of the substitution entries that are var-to-var mappings.
      */
     public static Var2VarSubstitution extractVar2VarSubstitution(Substitution substitution) {
-        ImmutableMap.Builder<VariableImpl, VariableImpl> subsitutionMapBuilder = ImmutableMap.builder();
+        /**
+         * Saves an unnecessary computation.
+         */
+        if (substitution instanceof Var2VarSubstitution)
+            return (Var2VarSubstitution) substitution;
+
+        ImmutableMap.Builder<VariableImpl, VariableImpl> substitutionMapBuilder = ImmutableMap.builder();
 
         for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
             Term target = entry.getValue();
             if (target instanceof VariableImpl) {
-                subsitutionMapBuilder.put(entry.getKey(), (VariableImpl)target);
+                substitutionMapBuilder.put(entry.getKey(), (VariableImpl) target);
             }
         }
-        return new Var2VarSubstitutionImpl(subsitutionMapBuilder.build());
+        return new Var2VarSubstitutionImpl(substitutionMapBuilder.build());
     }
 
 

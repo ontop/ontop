@@ -7,7 +7,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import java.util.Map;
 
 /**
- * Substitution where variables are only mapped to variablesx
+ * Substitution where variables are only mapped to variables
  */
 public interface Var2VarSubstitution extends ImmutableSubstitution {
 
@@ -18,5 +18,4 @@ public interface Var2VarSubstitution extends ImmutableSubstitution {
 
     @Override
     VariableImpl applyToVariable(VariableImpl variable);
-
 }
