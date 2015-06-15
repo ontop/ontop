@@ -32,8 +32,23 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution {
 
     @Override
-    public Term get(VariableImpl var) {
+    public ImmutableTerm get(VariableImpl var) {
         return null;
+    }
+
+    @Override
+    public ImmutableTerm apply(ImmutableTerm term) {
+        return term;
+    }
+
+    @Override
+    public ImmutableTerm applyToVariable(VariableImpl variable) {
+        return variable;
+    }
+
+    @Override
+    public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+        return functionalTerm;
     }
 
     @Override

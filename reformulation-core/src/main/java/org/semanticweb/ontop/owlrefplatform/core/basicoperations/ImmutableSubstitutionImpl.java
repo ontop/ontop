@@ -1,16 +1,16 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
- * Just an wrapper above a ImmutableMap<VariableImpl, ImmutableTerm> map.
+ * Wrapper above a ImmutableMap<VariableImpl, ImmutableTerm> map.
  */
-public class ImmutableSubstitutionImpl extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution {
+public class ImmutableSubstitutionImpl extends AbstractImmutableSubstitutionImpl {
 
     private final ImmutableMap<VariableImpl, ImmutableTerm> map;
 
@@ -19,7 +19,7 @@ public class ImmutableSubstitutionImpl extends LocallyImmutableSubstitutionImpl 
     }
 
     @Override
-    public Term get(VariableImpl var) {
+    public ImmutableTerm get(VariableImpl var) {
         return map.get(var);
     }
 
@@ -46,5 +46,13 @@ public class ImmutableSubstitutionImpl extends LocallyImmutableSubstitutionImpl 
     @Override
     public final ImmutableMap<VariableImpl, Term> getMap() {
         return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>) map;
+    }
+
+
+    @Override
+    public ImmutableTerm applyToVariable(VariableImpl variable) {
+        if (map.containsKey(variable))
+            return map.get(variable);
+        return variable;
     }
 }

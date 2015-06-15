@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
@@ -189,6 +190,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
 		return new FunctionalTermImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		return new ImmutableFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		return new ImmutableFunctionalTermImpl(functor, terms);
 	}
 
 	@Override

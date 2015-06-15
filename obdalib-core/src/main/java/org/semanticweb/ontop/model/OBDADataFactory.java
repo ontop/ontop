@@ -28,6 +28,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
@@ -121,6 +122,11 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunction(Predicate functor, Term... terms);
 
 	public Function getFunction(Predicate functor, List<Term> terms);
+
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
+
 
 	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
 

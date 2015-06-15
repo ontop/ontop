@@ -13,4 +13,10 @@ public interface Var2VarSubstitution extends ImmutableSubstitution {
 
     Map<VariableImpl, VariableImpl> getVar2VarMap();
 
+    @Override
+    VariableImpl get(VariableImpl var);
+
+    @Override
+    VariableImpl applyToVariable(VariableImpl variable);
+
 }

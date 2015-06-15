@@ -12,4 +12,16 @@ public interface ImmutableSubstitution extends LocallyImmutableSubstitution {
     ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap();
 
     boolean isDefining(VariableImpl variable);
+
+    @Override
+    ImmutableTerm get(VariableImpl variable);
+
+   /**
+    * Applies the substitution to an immutable term.
+    */
+    ImmutableTerm apply(ImmutableTerm term);
+
+    ImmutableTerm applyToVariable(VariableImpl variable);
+
+    ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 }

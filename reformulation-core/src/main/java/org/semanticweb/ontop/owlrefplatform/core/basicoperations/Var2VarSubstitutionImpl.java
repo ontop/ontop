@@ -4,10 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.Substitution;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.*;
 
 import java.util.Map;
@@ -16,7 +13,7 @@ import java.util.Set;
 /**
  * Immutable { Variable --> Variable } substitution.
  */
-public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
+public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl implements Var2VarSubstitution {
 
     private final ImmutableMap<VariableImpl, VariableImpl> map;
 
@@ -34,15 +31,36 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
         this.map = ImmutableMap.copyOf(substitutionMap.toMutableMap());
     }
 
+    /**
+     * Extracts the sub-set of the substitution entries that are var-to-var mappings.
+     */
+    public static Var2VarSubstitution extractVar2VarSubstitution(Substitution substitution) {
+        ImmutableMap.Builder<VariableImpl, VariableImpl> subsitutionMapBuilder = ImmutableMap.builder();
+
+        for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
+            Term target = entry.getValue();
+            if (target instanceof VariableImpl) {
+                subsitutionMapBuilder.put(entry.getKey(), (VariableImpl)target);
+            }
+        }
+        return new Var2VarSubstitutionImpl(subsitutionMapBuilder.build());
+    }
+
 
     @Override
     public ImmutableMap<VariableImpl, VariableImpl> getVar2VarMap() {
         return map;
     }
 
+    @Override
+    public VariableImpl applyToVariable(VariableImpl variable) {
+        if (map.containsKey(variable))
+            return map.get(variable);
+        return variable;
+    }
 
     @Override
-    public Term get(VariableImpl var) {
+    public VariableImpl get(VariableImpl var) {
         return map.get(var);
     }
 
@@ -65,30 +83,6 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
     @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
-    }
-
-    /**
-     * Not implemented
-     */
-    @Override
-    public boolean compose(Substitution otherSubstitution) {
-        throw new UnsupportedOperationException("Mutable operations are not supported");
-    }
-
-    /***
-     * Not implemented.
-     */
-    @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException("Mutable operations are not supported");
-    }
-
-    /***
-     * Not implemented.
-     */
-    @Override
-    public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException("Mutable operations are not supported");
     }
 
     @Override
