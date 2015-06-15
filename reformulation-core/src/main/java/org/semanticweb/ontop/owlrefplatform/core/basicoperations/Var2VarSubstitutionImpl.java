@@ -67,6 +67,11 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl i
     }
 
     @Override
+    public ImmutableMap<VariableImpl, NonFunctionalTerm> getFunctionFreeMap() {
+        return (ImmutableMap<VariableImpl, NonFunctionalTerm>)(ImmutableMap<VariableImpl, ?>)map;
+    }
+
+    @Override
     public VariableImpl get(VariableImpl var) {
         return map.get(var);
     }

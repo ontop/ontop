@@ -1,7 +1,5 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
-import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.Map;
@@ -9,7 +7,7 @@ import java.util.Map;
 /**
  * Substitution where variables are only mapped to variables
  */
-public interface Var2VarSubstitution extends ImmutableSubstitution {
+public interface Var2VarSubstitution extends FunctionFreeSubstitution {
 
     Map<VariableImpl, VariableImpl> getVar2VarMap();
 

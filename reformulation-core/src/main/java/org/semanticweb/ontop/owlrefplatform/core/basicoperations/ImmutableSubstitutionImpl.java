@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -17,8 +18,8 @@ public class ImmutableSubstitutionImpl extends AbstractImmutableSubstitutionImpl
 
     private final ImmutableMap<VariableImpl, ImmutableTerm> map;
 
-    public ImmutableSubstitutionImpl(ImmutableMap<VariableImpl, ImmutableTerm> substitutionMap) {
-        this.map = substitutionMap;
+    public ImmutableSubstitutionImpl(ImmutableMap<VariableImpl, ? extends ImmutableTerm> substitutionMap) {
+        this.map = (ImmutableMap<VariableImpl, ImmutableTerm>) substitutionMap;
     }
 
     @Override
@@ -92,5 +93,10 @@ public class ImmutableSubstitutionImpl extends AbstractImmutableSubstitutionImpl
 
 
         return new ImmutableSubstitutionImpl(ImmutableMap.copyOf(substitutionMap));
+    }
+
+    @Override
+    public String toString() {
+        return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
 }
