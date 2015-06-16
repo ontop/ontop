@@ -59,42 +59,6 @@ public class ImmutableSubstitutionImpl extends AbstractImmutableSubstitutionImpl
         return variable;
     }
 
-    /**
-     *" "this o g"
-     *
-     * Equivalent to the function x -> this.apply(g.apply(x))
-     *
-     * Follows the formal definition of a the composition of two substitutions.
-     *
-     */
-    @Override
-    public ImmutableSubstitution composeWith(ImmutableSubstitution g) {
-
-        Map<VariableImpl, ImmutableTerm> substitutionMap = new HashMap<>();
-
-        /**
-         * For all variables in the domain of g
-         */
-        for (Map.Entry<VariableImpl, ImmutableTerm> gEntry :  g.getImmutableMap().entrySet()) {
-            substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
-        }
-
-        /**
-         * For the other variables (in the local domain but not in g)
-         */
-        for (Map.Entry<VariableImpl, ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
-            VariableImpl localVariable = localEntry.getKey();
-
-            if (substitutionMap.containsKey(localVariable))
-                continue;
-
-            substitutionMap.put(localVariable, localEntry.getValue());
-        }
-
-
-        return new ImmutableSubstitutionImpl(ImmutableMap.copyOf(substitutionMap));
-    }
-
     @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);

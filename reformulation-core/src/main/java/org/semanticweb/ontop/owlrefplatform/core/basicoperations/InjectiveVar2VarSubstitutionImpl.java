@@ -10,24 +10,32 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import java.util.Map;
 
 public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements InjectiveVar2VarSubstitution {
+    private final boolean isEmpty;
+
     /**
      * Regular constructor
      */
     public InjectiveVar2VarSubstitutionImpl(Map<VariableImpl, VariableImpl> substitutionMap) {
         super(substitutionMap);
+        isEmpty = substitutionMap.isEmpty();
 
         /**
          * Injectivity constraint
          */
-        ImmutableSet<VariableImpl> valueSet = ImmutableSet.copyOf(substitutionMap.values());
-        if (valueSet.size() < substitutionMap.keySet().size()) {
-            throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
-        }
+        if (!isEmpty) {
+            ImmutableSet<VariableImpl> valueSet = ImmutableSet.copyOf(substitutionMap.values());
+            if (valueSet.size() < substitutionMap.keySet().size()) {
+                throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
+            }
 
+        }
     }
 
     @Override
     public ImmutableSubstitution applyRenaming(ImmutableSubstitution substitutionToRename) {
+        if (isEmpty) {
+            return substitutionToRename;
+        }
 
         ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
 
