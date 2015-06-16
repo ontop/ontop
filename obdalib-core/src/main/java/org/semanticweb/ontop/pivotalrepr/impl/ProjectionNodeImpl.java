@@ -3,22 +3,23 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode {
 
-    private ImmutableSubstitution substitution;
+    private ImmutableSubstitution<ImmutableTerm> substitution;
     private Optional<ImmutableQueryModifiers> optionalModifiers;
     private PureDataAtom dataAtom;
 
-    public ProjectionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution substitution) {
+    public ProjectionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
         this.dataAtom = dataAtom;
         this.optionalModifiers = Optional.absent();
         this.substitution = substitution;
     }
 
-    public ProjectionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution substitution,
+    public ProjectionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution,
                               ImmutableQueryModifiers queryModifiers) {
         this.dataAtom = dataAtom;
         this.optionalModifiers = Optional.of(queryModifiers);
@@ -31,7 +32,7 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
     }
 
     @Override
-    public ImmutableSubstitution getAliasDefinition() {
+    public ImmutableSubstitution<ImmutableTerm> getAliasDefinition() {
         return substitution;
     }
 
@@ -54,6 +55,11 @@ public class ProjectionNodeImpl extends QueryNodeImpl implements ProjectionNode 
     @Override
     public boolean isAlias(VariableImpl variable) {
         return substitution.isDefining(variable);
+    }
+
+    @Override
+    public boolean hasAliases() {
+        return !(substitution.isEmpty());
     }
 
     @Override

@@ -11,8 +11,6 @@ import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.ProjectionNode;
 import org.semanticweb.ontop.pivotalrepr.PureDataAtom;
 
-import java.util.Map;
-
 /**
  * TODO: explain
  *
@@ -24,7 +22,7 @@ public class ProjectionNodeUnification {
      * { conflicting var : newly generated var }
      */
     private final InjectiveVar2VarSubstitution conflictMitigatingSubstitution;
-    private final Var2ConstSubstitution imposedConstantSubstitution;
+    private final ImmutableSubstitution<Constant> imposedConstantSubstitution;
     /**
      * { new var : target (used as another argument) }
      */
@@ -105,40 +103,40 @@ public class ProjectionNodeUnification {
         return originalProjectionNode.getHeadAtom().getVariableTerms();
     }
 
-    /**
-     * Applies two substitutions (a conflict mitigating and then a regular one) on the variables and target terms
-     * of a given ImmutableSubstitution
-     *
-     * Returns the generated substitution.
-     *
-     * TODO: delete it
-     */
-    @Deprecated
-    private static ImmutableSubstitution applySubstitutionsOnSubstitutionVariableAndTerms(
-            ImmutableSubstitution substitutionToUpdate, Var2VarSubstitution conflictMitigatingSubstitution,
-            ImmutableSubstitution regularSubstitutionToApply) {
-
-        Var2VarSubstitution secondVar2VarSubstitution = ImmutableSubstitutionUtilities.extractVar2VarSubstitution(
-                regularSubstitutionToApply);
-
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMap = ImmutableMap.builder();
-        for (Map.Entry<VariableImpl, ImmutableTerm> originalEntry : substitutionToUpdate.getImmutableMap().entrySet()) {
-
-            // Converted variable
-            VariableImpl convertedVariable = secondVar2VarSubstitution.applyToVariable(
-                    conflictMitigatingSubstitution.applyToVariable(
-                            originalEntry.getKey()));
-
-            // Converted target term
-            ImmutableTerm convertedTargetTerm = regularSubstitutionToApply.apply(
-                    conflictMitigatingSubstitution.apply(
-                            originalEntry.getValue()));
-
-            substitutionMap.put(convertedVariable, convertedTargetTerm);
-        }
-
-        return new ImmutableSubstitutionImpl(substitutionMap.build());
-    }
+//    /**
+//     * Applies two substitutions (a conflict mitigating and then a regular one) on the variables and target terms
+//     * of a given ImmutableSubstitution
+//     *
+//     * Returns the generated substitution.
+//     *
+//     * TODO: delete it
+//     */
+//    @Deprecated
+//    private static ImmutableSubstitution applySubstitutionsOnSubstitutionVariableAndTerms(
+//            ImmutableSubstitution substitutionToUpdate, Var2VarSubstitution conflictMitigatingSubstitution,
+//            ImmutableSubstitution regularSubstitutionToApply) {
+//
+//        Var2VarSubstitution secondVar2VarSubstitution = ImmutableSubstitutionUtilities.extractVar2VarSubstitution(
+//                regularSubstitutionToApply);
+//
+//        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMap = ImmutableMap.builder();
+//        for (Map.Entry<VariableImpl, ImmutableTerm> originalEntry : substitutionToUpdate.getImmutableMap().entrySet()) {
+//
+//            // Converted variable
+//            VariableImpl convertedVariable = secondVar2VarSubstitution.applyToVariable(
+//                    conflictMitigatingSubstitution.applyToVariable(
+//                            originalEntry.getKey()));
+//
+//            // Converted target term
+//            ImmutableTerm convertedTargetTerm = regularSubstitutionToApply.apply(
+//                    conflictMitigatingSubstitution.apply(
+//                            originalEntry.getValue()));
+//
+//            substitutionMap.put(convertedVariable, convertedTargetTerm);
+//        }
+//
+//        return new ImmutableSubstitutionImpl(substitutionMap.build());
+//    }
 
     /**
      * TODO: explain
@@ -397,8 +395,8 @@ public class ProjectionNodeUnification {
             return new InjectiveVar2VarSubstitutionImpl(conflictingImposedVariableBuilder.build());
         }
 
-        public Var2ConstSubstitution getImposedConstantSubstitution() {
-            return new Var2ConstSubstitutionImpl(imposedConstantBuilder.build());
+        public ImmutableSubstitution<Constant> getImposedConstantSubstitution() {
+            return new ImmutableSubstitutionImpl<>(imposedConstantBuilder.build());
         }
 
         public Var2VarSubstitutionImpl getArgumentEqualitySubstitution() {

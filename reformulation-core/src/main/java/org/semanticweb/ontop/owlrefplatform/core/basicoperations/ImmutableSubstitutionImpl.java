@@ -14,21 +14,21 @@ import java.util.Map;
 /**
  * Wrapper above a ImmutableMap<VariableImpl, ImmutableTerm> map.
  */
-public class ImmutableSubstitutionImpl extends AbstractImmutableSubstitutionImpl {
+public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends AbstractImmutableSubstitutionImpl<T> {
 
-    private final ImmutableMap<VariableImpl, ImmutableTerm> map;
+    private final ImmutableMap<VariableImpl, T> map;
 
-    public ImmutableSubstitutionImpl(ImmutableMap<VariableImpl, ? extends ImmutableTerm> substitutionMap) {
-        this.map = (ImmutableMap<VariableImpl, ImmutableTerm>) substitutionMap;
+    public ImmutableSubstitutionImpl(ImmutableMap<VariableImpl, ? extends T> substitutionMap) {
+        this.map = (ImmutableMap<VariableImpl, T>) substitutionMap;
     }
 
     @Override
-    public ImmutableTerm get(VariableImpl var) {
+    public T get(VariableImpl var) {
         return map.get(var);
     }
 
     @Override
-    public ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap() {
+    public ImmutableMap<VariableImpl, T> getImmutableMap() {
         return map;
     }
 

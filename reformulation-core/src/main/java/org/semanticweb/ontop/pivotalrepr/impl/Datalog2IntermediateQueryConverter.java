@@ -110,11 +110,11 @@ public class Datalog2IntermediateQueryConverter {
              * TODO: explain why a top rule should only have distinct variables in its head.
              */
             final boolean allowVariableCreation = false;
-            P2<PureDataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(rootDatalogAtom,
+            P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> pair = convertFromDatalogDataAtom(rootDatalogAtom,
                     allowVariableCreation);
 
             PureDataAtom dataAtom = pair._1();
-            ImmutableSubstitution substitution = pair._2();
+            ImmutableSubstitution<ImmutableTerm> substitution = pair._2();
 
             ProjectionNode rootNode;
             if (queryModifiers.hasModifiers()) {
@@ -186,11 +186,11 @@ public class Datalog2IntermediateQueryConverter {
         // Non-top rule so ok.
         final boolean allowVariableCreation = true;
 
-        P2<PureDataAtom, ImmutableSubstitution> pair = convertFromDatalogDataAtom(datalogRule.getHead(),
+        P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> pair = convertFromDatalogDataAtom(datalogRule.getHead(),
                 allowVariableCreation);
 
         PureDataAtom headAtom = pair._1();
-        ImmutableSubstitution substitution = pair._2();
+        ImmutableSubstitution<ImmutableTerm> substitution = pair._2();
 
         return new ProjectionNodeImpl(headAtom, substitution);
     }
@@ -360,7 +360,7 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain
      */
-    private static P2<PureDataAtom, ImmutableSubstitution> convertFromDatalogDataAtom(Function datalogDataAtom,
+    private static P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(Function datalogDataAtom,
                                                                                   boolean allowVariableCreation)
         throws InvalidDatalogProgramException {
 
@@ -404,7 +404,7 @@ public class Datalog2IntermediateQueryConverter {
         }
 
         PureDataAtom dataAtom = new PureDataAtomImpl(atomPredicate, varListBuilder.build());
-        ImmutableSubstitution substitution = new ImmutableSubstitutionImpl(substitutionBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(substitutionBuilder.build());
 
         return P.p(dataAtom, substitution);
     }

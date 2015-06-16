@@ -488,7 +488,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
             @Override
             public List<P2<VariableImpl, VariableImpl>> f(Var2VarSubstitution substitution) {
                 // Transforms the map of the substitution in a list of pairs
-                return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getVar2VarMap()).toStream().toList();
+                return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getImmutableMap()).toStream().toList();
             }
         });
 

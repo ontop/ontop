@@ -39,7 +39,7 @@ public class ImmutableSubstitutionUtilities {
      *         (i) One without functional term
      *         (ii) One containing the rest
      */
-    public static P2<FunctionFreeSubstitution, ImmutableSubstitution> splitFunctionFreeSubstitution(
+    public static P2<ImmutableSubstitution<NonFunctionalTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> splitFunctionFreeSubstitution(
             ImmutableSubstitution substitution) {
 
         ImmutableMap.Builder<VariableImpl, NonFunctionalTerm> functionFreeMapBuilder = ImmutableMap.builder();
@@ -58,11 +58,11 @@ public class ImmutableSubstitutionUtilities {
             }
         }
 
-        FunctionFreeSubstitution functionFreeSubstitution = new FunctionFreeSubstitutionImpl(
+        ImmutableSubstitution<NonFunctionalTerm> functionFreeSubstitution = new ImmutableSubstitutionImpl<>(
                 functionFreeMapBuilder.build());
 
         // TODO: consider adding typing to the ImmutableSubstitutionImpl.
-        ImmutableSubstitution otherSubstitution = new ImmutableSubstitutionImpl(otherMapBuilder.build());
+        ImmutableSubstitution<ImmutableFunctionalTerm> otherSubstitution = new ImmutableSubstitutionImpl<>(otherMapBuilder.build());
 
         return P.p(functionFreeSubstitution, otherSubstitution);
     }

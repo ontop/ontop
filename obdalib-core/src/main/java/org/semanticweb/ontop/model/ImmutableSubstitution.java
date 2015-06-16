@@ -7,14 +7,14 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
  *
  */
-public interface ImmutableSubstitution extends LocallyImmutableSubstitution {
+public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyImmutableSubstitution {
 
-    ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap();
+    ImmutableMap<VariableImpl, T> getImmutableMap();
 
     boolean isDefining(VariableImpl variable);
 
     @Override
-    ImmutableTerm get(VariableImpl variable);
+    T get(VariableImpl variable);
 
    /**
     * Applies the substitution to an immutable term.
@@ -28,5 +28,5 @@ public interface ImmutableSubstitution extends LocallyImmutableSubstitution {
     /**
      * Returns "f o g" where f is this substitution
      */
-    ImmutableSubstitution composeWith(ImmutableSubstitution g);
+    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g);
 }

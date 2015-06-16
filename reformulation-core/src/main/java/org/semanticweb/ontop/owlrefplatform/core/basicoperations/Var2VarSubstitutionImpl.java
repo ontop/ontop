@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * Immutable { Variable --> Variable } substitution.
  */
-public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl implements Var2VarSubstitution {
+public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<VariableImpl> implements Var2VarSubstitution {
 
     private final ImmutableMap<VariableImpl, VariableImpl> map;
 
@@ -33,20 +33,10 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl i
     }
 
     @Override
-    public ImmutableMap<VariableImpl, VariableImpl> getVar2VarMap() {
-        return map;
-    }
-
-    @Override
     public VariableImpl applyToVariable(VariableImpl variable) {
         if (map.containsKey(variable))
             return map.get(variable);
         return variable;
-    }
-
-    @Override
-    public ImmutableMap<VariableImpl, NonFunctionalTerm> getFunctionFreeMap() {
-        return (ImmutableMap<VariableImpl, NonFunctionalTerm>)(ImmutableMap<VariableImpl, ?>)map;
     }
 
     @Override
@@ -76,8 +66,8 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl i
     }
 
     @Override
-    public ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap() {
-        return (ImmutableMap<VariableImpl, ImmutableTerm>)(ImmutableMap<VariableImpl, ?>)map;
+    public ImmutableMap<VariableImpl, VariableImpl> getImmutableMap() {
+        return map;
     }
 
     @Override

@@ -29,7 +29,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 /**
  * TODO: explain
  */
-public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution {
+public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution<ImmutableTerm> {
 
     @Override
     public ImmutableTerm get(VariableImpl var) {
@@ -52,8 +52,8 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
-    public ImmutableSubstitution composeWith(ImmutableSubstitution g) {
-        return g;
+    public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
+        return (ImmutableSubstitution<ImmutableTerm>)g;
     }
 
     @Override
@@ -77,6 +77,7 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    @Deprecated
     public ImmutableSet<VariableImpl> keySet() {
         return ImmutableSet.of();
     }

@@ -32,9 +32,9 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     }
 
     @Override
-    public ImmutableSubstitution applyRenaming(ImmutableSubstitution substitutionToRename) {
+    public ImmutableSubstitution<ImmutableTerm> applyRenaming(ImmutableSubstitution<? extends ImmutableTerm> substitutionToRename) {
         if (isEmpty) {
-            return substitutionToRename;
+            return (ImmutableSubstitution<ImmutableTerm>)substitutionToRename;
         }
 
         ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
@@ -42,7 +42,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
         /**
          * Substitutes the keys and values of the substitution to rename.
          */
-        for (Map.Entry<VariableImpl, ImmutableTerm> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
+        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
 
             VariableImpl convertedVariable = applyToVariable(originalEntry.getKey());
             ImmutableTerm convertedTargetTerm = apply(originalEntry.getValue());
@@ -51,7 +51,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
             substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
         }
 
-        return new ImmutableSubstitutionImpl(substitutionMapBuilder.build());
+        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
     }
 
 }

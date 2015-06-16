@@ -12,8 +12,8 @@ import java.util.Map;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
-public abstract class AbstractImmutableSubstitutionImpl extends LocallyImmutableSubstitutionImpl
-        implements ImmutableSubstitution {
+public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> extends LocallyImmutableSubstitutionImpl
+        implements ImmutableSubstitution<T> {
 
     /**
      *
@@ -59,26 +59,28 @@ public abstract class AbstractImmutableSubstitutionImpl extends LocallyImmutable
      *
      */
     @Override
-    public ImmutableSubstitution composeWith(ImmutableSubstitution g) {
+    public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
         if (isEmpty()) {
-            return g;
+            return (ImmutableSubstitution<ImmutableTerm>)g;
         }
-        if (g.isEmpty())
-            return this;
+        if (g.isEmpty()) {
+            return (ImmutableSubstitution<ImmutableTerm>)this;
+        }
 
         Map<VariableImpl, ImmutableTerm> substitutionMap = new HashMap<>();
 
         /**
          * For all variables in the domain of g
          */
-        for (Map.Entry<VariableImpl, ImmutableTerm> gEntry :  g.getImmutableMap().entrySet()) {
+
+        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> gEntry :  g.getImmutableMap().entrySet()) {
             substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
         }
 
         /**
          * For the other variables (in the local domain but not in g)
          */
-        for (Map.Entry<VariableImpl, ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
+        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
             VariableImpl localVariable = localEntry.getKey();
 
             if (substitutionMap.containsKey(localVariable))
@@ -88,7 +90,7 @@ public abstract class AbstractImmutableSubstitutionImpl extends LocallyImmutable
         }
 
 
-        return new ImmutableSubstitutionImpl(ImmutableMap.copyOf(substitutionMap));
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.copyOf(substitutionMap));
     }
 
 }

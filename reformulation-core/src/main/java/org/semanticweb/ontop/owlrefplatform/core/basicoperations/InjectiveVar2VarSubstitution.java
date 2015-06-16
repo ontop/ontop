@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.ImmutableTerm;
 
 /**
  * Var2VarSubstitution that is injective
@@ -11,5 +12,5 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
     /**
      * Applies it (the Var2VarSubstitution) on the keys and values of the given substitution.
      */
-    ImmutableSubstitution applyRenaming(ImmutableSubstitution substitutionToRename);
+    ImmutableSubstitution<ImmutableTerm> applyRenaming(ImmutableSubstitution<? extends ImmutableTerm> substitutionToRename);
 }
