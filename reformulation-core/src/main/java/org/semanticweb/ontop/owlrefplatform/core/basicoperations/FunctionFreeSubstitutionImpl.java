@@ -10,6 +10,7 @@ public class FunctionFreeSubstitutionImpl extends ImmutableSubstitutionImpl impl
         super(substitutionMap);
     }
 
+
     @Override
     public ImmutableMap<VariableImpl, NonFunctionalTerm> getFunctionFreeMap() {
         return (ImmutableMap<VariableImpl, NonFunctionalTerm>)(ImmutableMap<VariableImpl, ?>) getImmutableMap();

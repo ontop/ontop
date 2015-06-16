@@ -63,7 +63,7 @@ public class ProjectionNodeUnification {
         Var2VarSubstitution safeArgumentRenamingSubstitution = generateSafeArgumentRenamingSubstitution();
 
         ImmutableSubstitution renamedFormerAliasSubstitution = safeArgumentRenamingSubstitution.composeWith(
-                conflictMitigatingSubstitution.composeWith(
+                conflictMitigatingSubstitution.applyRenaming(
                         originalProjectionNode.getAliasDefinition()));
 
         // TODO: now consider constants
@@ -118,7 +118,7 @@ public class ProjectionNodeUnification {
             ImmutableSubstitution substitutionToUpdate, Var2VarSubstitution conflictMitigatingSubstitution,
             ImmutableSubstitution regularSubstitutionToApply) {
 
-        Var2VarSubstitution secondVar2VarSubstitution = Var2VarSubstitutionImpl.extractVar2VarSubstitution(
+        Var2VarSubstitution secondVar2VarSubstitution = ImmutableSubstitutionUtilities.extractVar2VarSubstitution(
                 regularSubstitutionToApply);
 
         ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMap = ImmutableMap.builder();

@@ -32,28 +32,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl i
         this.map = ImmutableMap.copyOf(substitutionMap.toMutableMap());
     }
 
-    /**
-     * Extracts the sub-set of the substitution entries that are var-to-var mappings.
-     */
-    public static Var2VarSubstitution extractVar2VarSubstitution(Substitution substitution) {
-        /**
-         * Saves an unnecessary computation.
-         */
-        if (substitution instanceof Var2VarSubstitution)
-            return (Var2VarSubstitution) substitution;
-
-        ImmutableMap.Builder<VariableImpl, VariableImpl> substitutionMapBuilder = ImmutableMap.builder();
-
-        for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
-            Term target = entry.getValue();
-            if (target instanceof VariableImpl) {
-                substitutionMapBuilder.put(entry.getKey(), (VariableImpl) target);
-            }
-        }
-        return new Var2VarSubstitutionImpl(substitutionMapBuilder.build());
-    }
-
-
     @Override
     public ImmutableMap<VariableImpl, VariableImpl> getVar2VarMap() {
         return map;
