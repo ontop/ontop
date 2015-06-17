@@ -42,6 +42,8 @@ class ComparisonsSatisfiability {
 	private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 	private static final DatatypeFactory DTFACTORY = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
+	private static final DoubleInterval TRIVIAL_INTERVAL = new DoubleInterval();
+	
 	/**
 	 * @return the Double value of a numeric Constant object, or NaN if not a number
 	 */
@@ -280,9 +282,10 @@ class ComparisonsSatisfiability {
 				Variable var = (Variable) t0;
 				Double value = constantValue((Constant) t1);
 				if (value != Double.NaN) {
-					DoubleInterval interval; 
+					DoubleInterval interval = mranges.get(var); 
+					if (interval == null) interval = TRIVIAL_INTERVAL;
 					try {
-						interval = mranges.getOrDefault(var, new DoubleInterval()).tryShrinkWithLowerBound(value);
+						interval = interval.tryShrinkWithLowerBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
@@ -292,9 +295,10 @@ class ComparisonsSatisfiability {
 				Variable var = (Variable) t1;
 				Double value = constantValue((Constant) t0);
 				if (value != Double.NaN) {
-					DoubleInterval interval; 
+					DoubleInterval interval = mranges.get(var);
+					if (interval == null) interval = TRIVIAL_INTERVAL; 
 					try {
-						interval = mranges.getOrDefault(var, new DoubleInterval()).tryShrinkWithUpperBound(value);
+						interval = interval.tryShrinkWithUpperBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
