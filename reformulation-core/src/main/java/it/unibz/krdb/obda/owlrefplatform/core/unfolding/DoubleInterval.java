@@ -32,7 +32,7 @@ public class DoubleInterval {
 	 * only if it is greater than the current one, otherwise
 	 * returns the current object
 	 */
-	public DoubleInterval withLowerBound(double lowerBound) {
+	public DoubleInterval tryShrinkWithLowerBound(double lowerBound) {
 		if (lowerBound <= this.lowerBound)
 			return this;
 		return new DoubleInterval(lowerBound, upperBound);
@@ -43,7 +43,7 @@ public class DoubleInterval {
 	 * only if it is less than the current one, otherwise
 	 * returns the current object
 	 */
-	public DoubleInterval withUpperBound(double upperBound) {
+	public DoubleInterval tryShrinkWithUpperBound(double upperBound) {
 		if (upperBound >= this.upperBound)
 			return this;
 		return new DoubleInterval(lowerBound, upperBound);

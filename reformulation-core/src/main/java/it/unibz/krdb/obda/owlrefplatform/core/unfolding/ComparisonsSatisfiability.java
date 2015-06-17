@@ -21,6 +21,9 @@ import org.jgrapht.graph.DefaultEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,35 +100,21 @@ class ComparisonsSatisfiability {
 		Map<Variable, DoubleInterval> mranges = new HashMap<>();
 		
 		/*
-		 * The neq-constraints (!=)
+		 * The constraints for non-equality (!=)
 		 */
-		Map<Variable, Set<Term>> neq_constraints = new HashMap<Variable, Set<Term>>() {
-			private static final long serialVersionUID = 1L;
-			/*
-			 * Override the get method in order to use default values
-			 */
-			@Override
-			public Set<Term> get(Object key) {
-		    	if(!containsKey(key)) {
-		    		Set<Term> val = new HashSet<>();
-		    		put((Variable) key, val);
-		    		return val;
-		    	}
-		    	return super.get(key);
-			}
-		};
+		Multimap<Variable, Term> neqConstraints = HashMultimap.create();
 		
 		/*
 		 * The directed graph that contains the greater-than-or-equal (gte) relations
 		 */
 		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		
-		return unsatisfiable(atoms, mranges, neq_constraints, gteGraph);
+		return unsatisfiable(atoms, mranges, neqConstraints, gteGraph);
 	}
 
 	private static boolean unsatisfiable(List<Function> atoms,
 			Map<Variable, DoubleInterval> mranges,
-			Map<Variable, Set<Term>> neq_constraints,
+			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 
 		/*
@@ -150,10 +139,10 @@ class ComparisonsSatisfiability {
 			 * Fork the OR's
 			 */
 			if (atom.getFunctionSymbol() == OBDAVocabulary.OR) {
-				return forkOR(atomidx, atoms, mranges, neq_constraints, gteGraph);
+				return forkOR(atomidx, atoms, mranges, neqConstraints, gteGraph);
 			}
 			
-			if (scanAtom(atom, atoms, mranges, neq_constraints, gteGraph))
+			if (scanAtom(atom, atoms, mranges, neqConstraints, gteGraph))
 				return true;	
 		}
 		
@@ -179,7 +168,7 @@ class ComparisonsSatisfiability {
 		/*
 		 * 5) Compute and inspect the strongly connected components of the graph
 		 */
-		return inspectStronglyConnectedComponents(neq_constraints, gteGraph);
+		return inspectStronglyConnectedComponents(neqConstraints, gteGraph);
 	}
 
 	/**
@@ -187,12 +176,11 @@ class ComparisonsSatisfiability {
 	 * in order to handle the cases of a disjunction
 	 * @return true iff the disjunction is found to be unsatisfiable
 	 */
-	@SuppressWarnings("unchecked")
 	private static boolean forkOR(
 			int pos,
 			List<Function> atoms,
-			Map<Variable, DoubleInterval> mranges,
-			Map<Variable, Set<Term>> neq_constraints,
+			Map<Variable, DoubleInterval> mranges, 
+			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 		
 		atoms = atoms.subList(pos, atoms.size());
@@ -202,31 +190,14 @@ class ComparisonsSatisfiability {
 		}
 		
 		/*
-		 * Clone the data structures atoms, mranges, neq_constraints, gteGraph
+		 * Clone the data structures atoms, mranges, neqConstraints, gteGraph
 		 */
 		List<Function> atoms_copy = new ArrayList<>(atoms);
 		// replace the disjunction in the copy with the first disjunct
 		atoms_copy.set(0, (Function) or.getTerm(0));
 		
-		Map<Variable, DoubleInterval> mranges_copy;
-		Map<Variable, Set<Term>> neq_copy;
-		try {
-			mranges_copy = mranges.getClass().newInstance();
-			neq_copy = neq_constraints.getClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		for (Entry<Variable, DoubleInterval> cursor: mranges.entrySet()) {
-			mranges_copy.put(cursor.getKey(), cursor.getValue().clone());
-		}
-		
-		for (Entry<Variable, Set<Term>> cursor: neq_constraints.entrySet()) {
-			Set<Term> tmp = new HashSet<>(cursor.getValue());
-			neq_copy.put(cursor.getKey(), tmp);
-		}		
-		
+		Map<Variable, DoubleInterval> mranges_copy = new HashMap<>(mranges);
+		Multimap<Variable, Term> neq_copy = HashMultimap.create(neqConstraints);		
 		DirectedGraph<Term, DefaultEdge> gteGraph_copy = new DefaultDirectedGraph<>(DefaultEdge.class);
 		Graphs.addGraph(gteGraph_copy, gteGraph);
 		
@@ -238,7 +209,7 @@ class ComparisonsSatisfiability {
 		} else {
 			// replace the disjunction with the second disjunct
 			atoms.set(0, (Function) or.getTerm(1));
-			return unsatisfiable(atoms, mranges, neq_constraints, gteGraph);
+			return unsatisfiable(atoms, mranges, neqConstraints, gteGraph);
 		}
 	}
 
@@ -249,7 +220,7 @@ class ComparisonsSatisfiability {
 	 */
 	private static boolean scanAtom(Function atom, List<Function> atoms,
 			Map<Variable, DoubleInterval> mranges,
-			Map<Variable, Set<Term>> neq_constraints,
+			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 
 		Predicate pred = atom.getFunctionSymbol();
@@ -299,10 +270,10 @@ class ComparisonsSatisfiability {
 
 		if (pred == OBDAVocabulary.NEQ) {
 			if (t0 instanceof Variable) {
-				neq_constraints.get((Variable) t0).add(t1);
+				neqConstraints.get((Variable) t0).add(t1);
 			}
 			if (t1 instanceof Variable) {
-				neq_constraints.get((Variable) t1).add(t0);
+				neqConstraints.get((Variable) t1).add(t0);
 			}
 		} else if (pred == OBDAVocabulary.GTE) {
 			if (t0 instanceof Variable && t1 instanceof Constant) {
@@ -311,7 +282,7 @@ class ComparisonsSatisfiability {
 				if (value != Double.NaN) {
 					DoubleInterval interval; 
 					try {
-						interval = mranges.getOrDefault(var, new DoubleInterval()).withLowerBound(value);
+						interval = mranges.getOrDefault(var, new DoubleInterval()).tryShrinkWithLowerBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
@@ -323,7 +294,7 @@ class ComparisonsSatisfiability {
 				if (value != Double.NaN) {
 					DoubleInterval interval; 
 					try {
-						interval = mranges.getOrDefault(var, new DoubleInterval()).withUpperBound(value);
+						interval = mranges.getOrDefault(var, new DoubleInterval()).tryShrinkWithUpperBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
@@ -394,14 +365,14 @@ class ComparisonsSatisfiability {
 	 * @return whether the gteGraph violates the neq-constraints
 	 */
 	private static boolean inspectStronglyConnectedComponents(
-			Map<Variable, Set<Term>> neq,
+			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 		
 		StrongConnectivityInspector<Term, DefaultEdge> insp = new StrongConnectivityInspector<>(gteGraph);
 		List<Set<Term>> scc = insp.stronglyConnectedSets();
 		
 		for (Set<Term> component: scc) {
-			Constant cur = null;
+			Double cons = null;
 			LOGGER.debug("s-c-component: " + Arrays.toString(component.toArray()));
 			Set<Term> forbidden = new HashSet<>();
 			for (Term t: component) {
@@ -409,14 +380,15 @@ class ComparisonsSatisfiability {
 				 * Check if the component contains two constants that are different
 				 */
 				if (t instanceof Constant) {
-					if (cur == null) {
-						cur = (Constant) t;
-					} else if (!t.equals(cur)) {
+					Double val = constantValue((Constant) t);
+					if (cons == null) {
+						cons = val;
+					} else if (cons != val) {
 						return true;
 					}
-				}
-				if (t instanceof Variable && neq.containsKey((Variable) t))
-					forbidden.addAll(neq.get((Variable) t));
+				} else if (t instanceof Variable)
+					if (neqConstraints.containsKey((Variable) t))
+						forbidden.addAll(neqConstraints.get((Variable) t));
 			}
 			/*
 			 * Check for violation of a neq-constraint
