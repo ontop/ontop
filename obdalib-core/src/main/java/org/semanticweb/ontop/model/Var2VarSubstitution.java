@@ -1,6 +1,5 @@
-package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
+package org.semanticweb.ontop.model;
 
-import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
