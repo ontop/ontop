@@ -4,12 +4,11 @@ import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.BooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 
-public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
+public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
-    public InnerJoinNodeImpl(Optional<BooleanExpression> optionalFilterCondition) {
-        super(optionalFilterCondition);
+    public LeftJoinNodeImpl(Optional<BooleanExpression> optionalJoinCondition) {
+        super(optionalJoinCondition);
     }
-
 
     @Override
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
@@ -22,7 +21,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public InnerJoinNode clone() {
+    public LeftJoinNode clone() {
         Optional<BooleanExpression> originalOptionalFilter = getOptionalFilterCondition();
         Optional<BooleanExpression> newOptionalFilter;
         if (originalOptionalFilter.isPresent()) {
@@ -34,6 +33,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             newOptionalFilter = Optional.absent();
         }
 
-        return new InnerJoinNodeImpl(newOptionalFilter);
+        return new LeftJoinNodeImpl(newOptionalFilter);
     }
 }

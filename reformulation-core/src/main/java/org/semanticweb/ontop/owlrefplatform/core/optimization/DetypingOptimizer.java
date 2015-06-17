@@ -31,14 +31,19 @@ public class DetypingOptimizer implements QueryOptimizer {
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(SimpleFilterNode filterNode) {
+    public Optional<LocalOptimizationProposal> makeProposal(LeftJoinNode leftJoinNode) {
         throw new RuntimeException("TODO: implement it");
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(ProjectionNode projectionNode) {
-        ImmutableMap<Function,Variable> typesToReplace = proposeReplacement(extractTypes(projectionNode.getHeadAtom()));
-        return buildProposal(projectionNode, typesToReplace);
+    public Optional<LocalOptimizationProposal> makeProposal(FilterNode filterNode) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public Optional<LocalOptimizationProposal> makeProposal(ConstructionNode constructionNode) {
+        ImmutableMap<Function,Variable> typesToReplace = proposeReplacement(extractTypes(constructionNode.getProjectionAtom()));
+        return buildProposal(constructionNode, typesToReplace);
     }
 
     /**

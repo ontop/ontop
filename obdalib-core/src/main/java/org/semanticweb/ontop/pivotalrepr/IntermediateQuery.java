@@ -1,16 +1,13 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
  *
  */
 public interface IntermediateQuery {
 
-    ProjectionNode getRootProjectionNode();
+    ConstructionNode getRootProjectionNode();
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();
 

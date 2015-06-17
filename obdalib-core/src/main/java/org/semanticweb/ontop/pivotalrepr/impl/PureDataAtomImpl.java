@@ -5,41 +5,22 @@ import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
-import org.semanticweb.ontop.pivotalrepr.FunctionFreeDataAtom;
+import org.semanticweb.ontop.pivotalrepr.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.PureDataAtom;
 
-public class PureDataAtomImpl extends FunctionFreeDataAtomImpl implements PureDataAtom {
+public class PureDataAtomImpl extends DataAtomImpl implements PureDataAtom {
 
     protected PureDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends VariableImpl> variables) {
         super(predicate, variables);
-
-        // Check constraints
-        if (hasDuplicates(this)) {
-            throw new IllegalArgumentException(variables + " must not have duplicates.");
-        }
     }
 
     protected PureDataAtomImpl(AtomPredicate predicate, VariableImpl... variables) {
         super(predicate, variables);
-
-        // Check constraints
-        if (hasDuplicates(this)) {
-            throw new IllegalArgumentException(variables + " must not have duplicates.");
-        }
-
     }
 
     @Override
     public ImmutableList<VariableImpl> getVariableTerms() {
         return (ImmutableList<VariableImpl>)(ImmutableList<?>)getImmutableTerms();
-    }
-
-    /**
-     * Trivial since a PureDataAtom is only composed of variables.
-     */
-    @Override
-    public boolean subsumes(FunctionFreeDataAtom otherAtom) {
-        return hasSamePredicateAndArity(otherAtom);
     }
 
     @Override
@@ -48,27 +29,21 @@ public class PureDataAtomImpl extends FunctionFreeDataAtomImpl implements PureDa
     }
 
     @Override
-    public boolean isEquivalent(FunctionFreeDataAtom otherAtom) {
+    public boolean isEquivalent(DataAtom otherAtom) {
         if (!hasSamePredicateAndArity(otherAtom))
             return false;
 
         return isPureDataAtom(otherAtom);
     }
 
-    public static boolean isPureDataAtom(FunctionFreeDataAtom atom) {
+    public static boolean isPureDataAtom(DataAtom atom) {
         if (atom instanceof PureDataAtom)
             return true;
 
         return isRespectingPureDataAtomConstraints(atom);
     }
 
-    protected static boolean isRespectingPureDataAtomConstraints(FunctionFreeDataAtom atom) {
-        /**
-         * No duplicate
-         */
-        if (hasDuplicates(atom))
-            return false;
-
+    protected static boolean isRespectingPureDataAtomConstraints(DataAtom atom) {
         /**
          * Only variable
          */

@@ -6,7 +6,7 @@ import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ProjectionNode;
+import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 import java.util.HashSet;
@@ -32,7 +32,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
      *
      * TODO: mark it as Nullable.
      */
-    private ProjectionNode rootProjectionNode;
+    private ConstructionNode rootConstructionNode;
 
     /**
      * Cached value (non final). MAY BE NULL
@@ -51,7 +51,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
          *
          */
         this.nodesInAntiTopologicalOrder = null;
-        this.rootProjectionNode = null;
+        this.rootConstructionNode = null;
         computeNodeTopologyCache();
     }
 
@@ -61,11 +61,11 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     }
 
     @Override
-    public ProjectionNode getRootProjectionNode() throws IllegalDAGException {
-        if (rootProjectionNode == null) {
+    public ConstructionNode getRootConstructionNode() throws IllegalDAGException {
+        if (rootConstructionNode == null) {
             computeNodeTopologyCache();
         }
-        return rootProjectionNode;
+        return rootConstructionNode;
     }
 
     @Override
@@ -201,7 +201,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
      */
     private void computeNodeTopologyCache() throws IllegalDAGException {
         nodesInAntiTopologicalOrder = extractNodeOrder(queryDAG);
-        rootProjectionNode = extractRootProjectionNode(nodesInAntiTopologicalOrder);
+        rootConstructionNode = extractRootProjectionNode(nodesInAntiTopologicalOrder);
     }
 
     /**
@@ -209,7 +209,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
      */
     private void resetNodeTopologyCache() {
         nodesInAntiTopologicalOrder = null;
-        rootProjectionNode = null;
+        rootConstructionNode = null;
     }
 
     /**
@@ -228,18 +228,18 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     /**
      * TODO: describe
      */
-    private static ProjectionNode extractRootProjectionNode(ImmutableList<QueryNode> nodesInAntiTopologicalOrder)
+    private static ConstructionNode extractRootProjectionNode(ImmutableList<QueryNode> nodesInAntiTopologicalOrder)
             throws IllegalDAGException{
         if (nodesInAntiTopologicalOrder.isEmpty()) {
             throw new IllegalDAGException("Empty DAG!");
         }
 
         QueryNode rootNode = nodesInAntiTopologicalOrder.get(0);
-        if (!(rootNode instanceof ProjectionNode)) {
+        if (!(rootNode instanceof ConstructionNode)) {
             throw new IllegalDAGException("The root node is not a ProjectionNode: " + rootNode);
         }
 
-        return (ProjectionNode) rootNode;
+        return (ConstructionNode) rootNode;
     }
 
 }

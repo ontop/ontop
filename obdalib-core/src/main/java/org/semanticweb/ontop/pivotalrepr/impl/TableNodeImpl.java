@@ -5,7 +5,7 @@ import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class TableNodeImpl extends DataNodeImpl implements TableNode {
-    public TableNodeImpl(FunctionFreeDataAtom atom) {
+    public TableNodeImpl(DataAtom atom) {
         super(atom);
     }
 

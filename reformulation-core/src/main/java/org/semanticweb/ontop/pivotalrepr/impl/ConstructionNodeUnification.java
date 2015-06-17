@@ -6,63 +6,68 @@ import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
-import org.semanticweb.ontop.pivotalrepr.FunctionFreeDataAtom;
+import org.semanticweb.ontop.pivotalrepr.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ProjectionNode;
+import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.PureDataAtom;
 
 /**
  * TODO: explain
  *
  */
-public class ProjectionNodeUnification {
+public class ConstructionNodeUnification {
 
     private final ImmutableList<VariableImpl> newDataAtomArguments;
     /**
      * { conflicting var : newly generated var }
      */
     private final InjectiveVar2VarSubstitution conflictMitigatingSubstitution;
-    private final ImmutableSubstitution<Constant> imposedConstantSubstitution;
+    private final ImmutableSubstitution<GroundTerm> imposedGroundTermSubstitution;
     /**
      * { new var : target (used as another argument) }
      */
-    private final Var2VarSubstitution argumentEqualitySubstitution;
-    private final ProjectionNode originalProjectionNode;
+    private final Var2VarSubstitution imposedArgumentEqualitySubstitution;
+    private final ConstructionNode originalConstructionNode;
 
 
-    protected ProjectionNodeUnification(ProjectionNode originalProjectionNode,
-                                        IntermediateQuery originalQuery,
-                                        FunctionFreeDataAtom targetDataAtom,
-                                        ImmutableSet<VariableImpl> reservedVariables,
-                                        VariableGenerator variableGenerator) {
+    protected ConstructionNodeUnification(ConstructionNode originalConstructionNode,
+                                          IntermediateQuery originalQuery,
+                                          DataAtom targetDataAtom,
+                                          ImmutableSet<VariableImpl> reservedVariables,
+                                          VariableGenerator variableGenerator) {
 
-        this.originalProjectionNode = originalProjectionNode;
+        this.originalConstructionNode = originalConstructionNode;
 
-        ArgumentsRenaming argumentRenaming = new ArgumentsRenaming(originalProjectionNode, originalQuery, targetDataAtom,
+        ArgumentsRenaming argumentRenaming = new ArgumentsRenaming(originalConstructionNode, originalQuery, targetDataAtom,
                 reservedVariables, variableGenerator);
 
         newDataAtomArguments = argumentRenaming.getNewDataAtomArguments();
         conflictMitigatingSubstitution = argumentRenaming.getConflictMitigatingSubstitution();
-        imposedConstantSubstitution = argumentRenaming.getImposedConstantSubstitution();
-        argumentEqualitySubstitution = argumentRenaming.getArgumentEqualitySubstitution();
+        imposedGroundTermSubstitution = argumentRenaming.getImposedGroundTermSubstitution();
+        imposedArgumentEqualitySubstitution = argumentRenaming.getArgumentEqualitySubstitution();
     }
 
 
-    public ProjectionNode generateNewProjectionNode() {
+    public ConstructionNode generateNewProjectionNode() {
 
-        PureDataAtom newDataAtom = new PureDataAtomImpl(originalProjectionNode.getHeadAtom().getPredicate(),
+        PureDataAtom newDataAtom = new PureDataAtomImpl(originalConstructionNode.getProjectionAtom().getPredicate(),
                 newDataAtomArguments);
 
-        return new ProjectionNodeImpl(newDataAtom, generateAliasSubstitution());
+        throw new RuntimeException("Not fully implemented yet");
+        // return new ConstructionNodeImpl(newDataAtom, generateAliasSubstitution());
     }
 
-    private ImmutableSubstitution generateAliasSubstitution() {
+    private ImmutableSubstitution<ImmutableTerm> generateAliasSubstitution() {
 
         Var2VarSubstitution safeArgumentRenamingSubstitution = generateSafeArgumentRenamingSubstitution();
 
-        ImmutableSubstitution renamedFormerAliasSubstitution = safeArgumentRenamingSubstitution.composeWith(
-                conflictMitigatingSubstitution.applyRenaming(
-                        originalProjectionNode.getAliasDefinition()));
+//        ImmutableSubstitution renamedFormerAliasSubstitution = safeArgumentRenamingSubstitution.composeWith(
+//                conflictMitigatingSubstitution.applyRenaming(
+//                        originalConstructionNode.getAliasDefinition()));
+
+//        P2<ImmutableSubstitution<NonFunctionalTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> decomposition =
+//                ImmutableSubstitutionUtilities.splitFunctionFreeSubstitution(renamedFormerAliasSubstitution);
+
 
         // TODO: now consider constants
 
@@ -78,7 +83,7 @@ public class ProjectionNodeUnification {
 
         ImmutableMap.Builder<VariableImpl, VariableImpl> substitutionMapBuilder = ImmutableMap.builder();
 
-        ImmutableList<VariableImpl> originalArguments = originalProjectionNode.getHeadAtom().getVariableTerms();
+        ImmutableList<VariableImpl> originalArguments = originalConstructionNode.getProjectionAtom().getVariableTerms();
         int arity = originalArguments.size();
 
         for (int i=0; i < arity ; i++) {
@@ -100,7 +105,7 @@ public class ProjectionNodeUnification {
     }
 
     private ImmutableList<VariableImpl> getFormerLocalVariables() {
-        return originalProjectionNode.getHeadAtom().getVariableTerms();
+        return originalConstructionNode.getProjectionAtom().getVariableTerms();
     }
 
 //    /**
@@ -156,7 +161,7 @@ public class ProjectionNodeUnification {
 //            ImmutableMap<VariableImpl, ImmutableTerm> previousSubstitutionMap = originalProjectionNode.getAliasDefinition().getImmutableMap();
 //
 //
-//            ImmutableList<VariableImpl> previousVariables = originalProjectionNode.getHeadAtom().getVariableTerms();
+//            ImmutableList<VariableImpl> previousVariables = originalProjectionNode.getProjectionAtom().getVariableTerms();
 //
 //            /**
 //             * For each argument of the projection
@@ -167,7 +172,7 @@ public class ProjectionNodeUnification {
 //                VariableImpl newVariable = newDataAtomArguments.get(i);
 //
 //                boolean isNewImposedConstant = imposedConstants.containsKey(newVariable);
-//                boolean wasAlias = originalProjectionNode.isAlias(previousVariable);
+//                boolean wasAlias = originalProjectionNode.isBinding(previousVariable);
 //
 //                if (isNewImposedConstant) {
 //                    Constant newConstant = imposedConstants.get(newVariable);
@@ -198,8 +203,8 @@ public class ProjectionNodeUnification {
 //                         * New equality: set it
 //                         * TODO: check possible conflicts!
 //                         */
-//                        else if (argumentEqualitySubstitution.equals(newVariable)) {
-//                            substitutionMapBuilder.put(newVariable, argumentEqualitySubstitution.get(newVariable));
+//                        else if (imposedArgumentEqualitySubstitution.equals(newVariable)) {
+//                            substitutionMapBuilder.put(newVariable, imposedArgumentEqualitySubstitution.get(newVariable));
 //                        }
 //                        /**
 //                         * Just rename the variable in the substitution
@@ -213,8 +218,8 @@ public class ProjectionNodeUnification {
 //                     * No entry in the previous substitution
 //                     */
 //                    else {
-//                        if (argumentEqualitySubstitution.equals(newVariable)) {
-//                            substitutionMapBuilder.put(newVariable, argumentEqualitySubstitution.get(newVariable));
+//                        if (imposedArgumentEqualitySubstitution.equals(newVariable)) {
+//                            substitutionMapBuilder.put(newVariable, imposedArgumentEqualitySubstitution.get(newVariable));
 //                        }
 //                    }
 //                }
@@ -240,37 +245,37 @@ public class ProjectionNodeUnification {
          * { conflicting var : newly generated var }
          */
         private final ImmutableMap.Builder<VariableImpl, VariableImpl> conflictingImposedVariableBuilder;
-        private final ImmutableMap.Builder<VariableImpl, Constant> imposedConstantBuilder;
+        private final ImmutableMap.Builder<VariableImpl, GroundTerm> imposedGroundTermBuilder;
         /**
          * { new var : target (used as another argument) }
          */
         private final ImmutableMap.Builder<VariableImpl, VariableImpl> variableEqualityBuilder;
         private final ImmutableSet<VariableImpl> subTreeVariables;
 
-        private final ProjectionNode originalProjectionNode;
-        private final FunctionFreeDataAtom targetDataAtom;
+        private final ConstructionNode originalConstructionNode;
+        private final DataAtom targetDataAtom;
         private final ImmutableSet<VariableImpl> reservedVariables;
         private final VariableGenerator variableGenerator;
 
 
-        protected ArgumentsRenaming(ProjectionNode originalProjectionNode,
+        protected ArgumentsRenaming(ConstructionNode originalConstructionNode,
                                     IntermediateQuery originalQuery,
-                                    FunctionFreeDataAtom targetDataAtom,
+                                    DataAtom targetDataAtom,
                                     ImmutableSet<VariableImpl> reservedVariables,
                                     VariableGenerator variableGenerator) {
 
-            this.originalProjectionNode = originalProjectionNode;
+            this.originalConstructionNode = originalConstructionNode;
             this.targetDataAtom = targetDataAtom;
             this.reservedVariables = reservedVariables;
             this.variableGenerator = variableGenerator;
 
             newDataAtomArgumentBuilder = ImmutableList.builder();
             conflictingImposedVariableBuilder = ImmutableMap.builder();
-            imposedConstantBuilder = ImmutableMap.builder();
+            imposedGroundTermBuilder = ImmutableMap.builder();
             variableEqualityBuilder = ImmutableMap.builder();
 
             subTreeVariables = VariableCollector.collectVariables(
-                    originalQuery.getSubTreeNodesInTopDownOrder(this.originalProjectionNode));
+                    originalQuery.getSubTreeNodesInTopDownOrder(this.originalConstructionNode));
 
             computeNewDataAtomArguments();
         }
@@ -282,24 +287,27 @@ public class ProjectionNodeUnification {
          *
          */
         private void computeNewDataAtomArguments() {
-            ImmutableList<VariableImpl> formerLocalVariables = originalProjectionNode.getHeadAtom().getVariableTerms();
-            ImmutableList<NonFunctionalTerm> targetTerms = targetDataAtom.getNonFunctionalTerms();
+            ImmutableList<VariableImpl> formerLocalVariables = originalConstructionNode.getProjectionAtom().getVariableTerms();
+            ImmutableList<VariableOrGroundTerm> targetTerms = targetDataAtom.getVariablesOrGroundTerms();
 
             for (int i = 0; i < formerLocalVariables.size(); i++) {
                 VariableImpl originalLocalVariable = formerLocalVariables.get(i);
-                NonFunctionalTerm targetTerm = targetTerms.get(i);
+                VariableOrGroundTerm targetTerm = targetTerms.get(i);
 
                 VariableImpl newLocalVariable;
 
-                if (targetTerm instanceof Constant) {
-                    newLocalVariable = renameVariableIfTargetConstant(originalLocalVariable);
-                    imposedConstantBuilder.put(newLocalVariable, (Constant) targetTerm);
-                }
                 /**
                  * Variable
                  */
-                else {
+                if (targetTerm instanceof VariableImpl) {
                     newLocalVariable = renameVariableFromTargetVariable((VariableImpl) targetTerm, i);
+                }
+                /**
+                 * Ground term
+                 */
+                else {
+                    newLocalVariable = renameVariableIfTargetConstant(originalLocalVariable);
+                    imposedGroundTermBuilder.put(newLocalVariable, (GroundTerm) targetTerm);
                 }
 
                 newDataAtomArgumentBuilder.add(newLocalVariable);
@@ -349,7 +357,7 @@ public class ProjectionNodeUnification {
          * TODO: explain
          */
         private boolean isConflictingWithRestOfSubQuery(VariableImpl targetVariable, int restStartIndex) {
-            ImmutableList<VariableImpl> formerLocalVariables = originalProjectionNode.getHeadAtom().getVariableTerms();
+            ImmutableList<VariableImpl> formerLocalVariables = originalConstructionNode.getProjectionAtom().getVariableTerms();
 
             /**
              * Checks the remaining former variables of the projection data atom
@@ -395,8 +403,8 @@ public class ProjectionNodeUnification {
             return new InjectiveVar2VarSubstitutionImpl(conflictingImposedVariableBuilder.build());
         }
 
-        public ImmutableSubstitution<Constant> getImposedConstantSubstitution() {
-            return new ImmutableSubstitutionImpl<>(imposedConstantBuilder.build());
+        public ImmutableSubstitution<GroundTerm> getImposedGroundTermSubstitution() {
+            return new ImmutableSubstitutionImpl<>(imposedGroundTermBuilder.build());
         }
 
         public Var2VarSubstitutionImpl getArgumentEqualitySubstitution() {

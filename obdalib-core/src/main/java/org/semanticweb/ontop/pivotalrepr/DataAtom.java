@@ -3,13 +3,14 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
 import org.semanticweb.ontop.model.NonFunctionalTerm;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 
 /**
- * Immutable data atom that only accepts variables and constants as arguments.
+ * Immutable data atom that only accepts variables and ground terms as arguments.
  *
  * In the future, this class could be disassociated from the Function class.
  */
-public interface FunctionFreeDataAtom extends ImmutableFunctionalTerm {
+public interface DataAtom extends ImmutableFunctionalTerm {
 
     AtomPredicate getPredicate();
 
@@ -19,15 +20,17 @@ public interface FunctionFreeDataAtom extends ImmutableFunctionalTerm {
     int getEffectiveArity();
 
     @Override
-    NonFunctionalTerm getTerm(int index);
+    VariableOrGroundTerm getTerm(int index);
 
     /**
      * TODO: explain
      */
-    boolean isEquivalent(FunctionFreeDataAtom otherAtom);
+    boolean isEquivalent(DataAtom otherAtom);
+
+    boolean hasSamePredicateAndArity(DataAtom otherAtom);
 
     /**
-     * Gets the arguments (none of them are functional terms).
+     * Gets the arguments (variables and ground terms).
      */
-    ImmutableList<NonFunctionalTerm> getNonFunctionalTerms();
+    ImmutableList<VariableOrGroundTerm> getVariablesOrGroundTerms();
 }

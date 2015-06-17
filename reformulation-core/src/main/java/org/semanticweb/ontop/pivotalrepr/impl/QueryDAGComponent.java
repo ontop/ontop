@@ -3,7 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import org.jgraph.graph.DefaultEdge;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ProjectionNode;
+import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public interface QueryDAGComponent {
 
     ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
 
-    ProjectionNode getRootProjectionNode() throws IllegalDAGException;
+    ConstructionNode getRootConstructionNode() throws IllegalDAGException;
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalDAGException;
 

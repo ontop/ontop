@@ -2,8 +2,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.pivotalrepr.*;
 
@@ -27,7 +25,7 @@ public class IntermediateQueryUtils {
             return Optional.of(firstDefinition);
         }
 
-        PureDataAtom headAtom = firstDefinition.getRootProjectionNode().getHeadAtom();
+        PureDataAtom headAtom = firstDefinition.getRootProjectionNode().getProjectionAtom();
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -49,7 +47,7 @@ public class IntermediateQueryUtils {
      * TODO: explain
      */
     private static IntermediateQuery initMergedDefinition(PureDataAtom headAtom) throws QueryMergingException {
-        ProjectionNode rootNode = new ProjectionNodeImpl(headAtom, new NeutralSubstitution());
+        ConstructionNode rootNode = new ConstructionNodeImpl(headAtom);
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(headAtom);
 
@@ -71,10 +69,10 @@ public class IntermediateQueryUtils {
             throws QueryMergingException {
         try {
             IntermediateQueryBuilder queryBuilder = convertToBuilder(mergedDefinition);
-            ProjectionNode rootProjectionNode = queryBuilder.getRootProjectionNode();
-            PureDataAtom dataAtom = rootProjectionNode.getHeadAtom();
+            ConstructionNode rootConstructionNode = queryBuilder.getRootConstructionNode();
+            PureDataAtom dataAtom = rootConstructionNode.getProjectionAtom();
 
-            UnionNode unionNode = extractUnionNode(queryBuilder, rootProjectionNode);
+            UnionNode unionNode = extractUnionNode(queryBuilder, rootConstructionNode);
 
             OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(dataAtom);
             queryBuilder.addChild(unionNode, dataNode);
@@ -86,9 +84,9 @@ public class IntermediateQueryUtils {
     }
 
     private static UnionNode extractUnionNode(IntermediateQueryBuilder queryBuilder,
-                                              ProjectionNode rootProjectionNode)
+                                              ConstructionNode rootConstructionNode)
             throws IntermediateQueryBuilderException {
-        ImmutableList<QueryNode> rootChildren = queryBuilder.getSubNodesOf(rootProjectionNode);
+        ImmutableList<QueryNode> rootChildren = queryBuilder.getSubNodesOf(rootConstructionNode);
         if (rootChildren.size() != 1) {
             throw new RuntimeException("BUG: merged definition query without a unique UNION" +
                     " below the root projection node");
@@ -113,7 +111,7 @@ public class IntermediateQueryUtils {
         IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
 
         // Clone of the original root node (because is mutable)
-        ProjectionNode newRootNode = originalQuery.getRootProjectionNode().clone();
+        ConstructionNode newRootNode = originalQuery.getRootProjectionNode().clone();
 
         queryBuilder.init(newRootNode);
 
@@ -148,11 +146,11 @@ public class IntermediateQueryUtils {
      */
     private static void checkDefinitionRootProjections(IntermediateQuery definition1, IntermediateQuery definition2)
             throws QueryMergingException {
-        ProjectionNode root1 = definition1.getRootProjectionNode();
-        ProjectionNode root2 = definition2.getRootProjectionNode();
+        ConstructionNode root1 = definition1.getRootProjectionNode();
+        ConstructionNode root2 = definition2.getRootProjectionNode();
 
-        PureDataAtom headAtom1 = root1.getHeadAtom();
-        PureDataAtom headAtom2 = root2.getHeadAtom();
+        PureDataAtom headAtom1 = root1.getProjectionAtom();
+        PureDataAtom headAtom2 = root2.getProjectionAtom();
 
         if (!headAtom1.isEquivalent(headAtom2)) {
             throw new QueryMergingException("Two definitions of different things: "

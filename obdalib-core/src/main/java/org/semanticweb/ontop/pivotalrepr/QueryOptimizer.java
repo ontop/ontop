@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.impl.*;
+import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
 
 /**
  * TODO: complete it.
@@ -17,16 +17,16 @@ public interface QueryOptimizer {
 
     Optional<LocalOptimizationProposal> makeProposal(InnerJoinNode node);
 
-    Optional<LocalOptimizationProposal> makeProposal(SimpleFilterNode filterNode);
+    Optional<LocalOptimizationProposal> makeProposal(LeftJoinNode leftJoinNode);
 
-    Optional<LocalOptimizationProposal> makeProposal(ProjectionNode projectionNode);
+    Optional<LocalOptimizationProposal> makeProposal(FilterNode filterNode);
+
+    Optional<LocalOptimizationProposal> makeProposal(ConstructionNode constructionNode);
 
     Optional<LocalOptimizationProposal> makeProposal(UnionNode unionNode);
 
     Optional<LocalOptimizationProposal> makeProposal(OrdinaryDataNode ordinaryDataNode);
 
     Optional<LocalOptimizationProposal> makeProposal(TableNode tableNode);
-
-    //TODO: complete the list
 
 }

@@ -9,13 +9,13 @@ import com.google.common.collect.ImmutableList;
  */
 public interface IntermediateQueryBuilder {
 
-    void init(ProjectionNode rootProjectionNode) throws IntermediateQueryBuilderException;
+    void init(ConstructionNode rootConstructionNode) throws IntermediateQueryBuilderException;
 
     void addChild(QueryNode parentNode, QueryNode child) throws IntermediateQueryBuilderException;
 
     IntermediateQuery build() throws IntermediateQueryBuilderException;
 
-    ProjectionNode getRootProjectionNode() throws IntermediateQueryBuilderException;
+    ConstructionNode getRootConstructionNode() throws IntermediateQueryBuilderException;
 
     ImmutableList<QueryNode> getSubNodesOf(QueryNode node) throws IntermediateQueryBuilderException;
 }

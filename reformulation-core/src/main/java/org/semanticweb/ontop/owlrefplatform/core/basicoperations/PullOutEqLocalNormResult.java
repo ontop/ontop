@@ -2,6 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import fj.data.List;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Var2VarSubstitution;
 
 /**
  * TODO: explain

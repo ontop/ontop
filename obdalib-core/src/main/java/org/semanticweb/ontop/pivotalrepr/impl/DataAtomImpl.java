@@ -1,32 +1,29 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.NonFunctionalTerm;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
 import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
-import org.semanticweb.ontop.pivotalrepr.FunctionFreeDataAtom;
+import org.semanticweb.ontop.pivotalrepr.DataAtom;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- */
-public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implements FunctionFreeDataAtom {
+
+public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAtom {
 
     private final AtomPredicate predicate;
 
-    protected FunctionFreeDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends NonFunctionalTerm> nonFunctionalTerms) {
-        super(predicate, nonFunctionalTerms);
+    protected DataAtomImpl(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> variableOrGroundTerms) {
+        super(predicate, variableOrGroundTerms);
         this.predicate = predicate;
     }
 
-    protected FunctionFreeDataAtomImpl(AtomPredicate predicate, NonFunctionalTerm... nonFunctionalTerms) {
-        super(predicate, nonFunctionalTerms);
+    protected DataAtomImpl(AtomPredicate predicate, VariableOrGroundTerm... variableOrGroundTerms) {
+        super(predicate, variableOrGroundTerms);
         this.predicate = predicate;
     }
 
@@ -41,7 +38,7 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
     }
 
     @Override
-    public boolean isEquivalent(FunctionFreeDataAtom otherAtom) {
+    public boolean isEquivalent(DataAtom otherAtom) {
         if (!hasSamePredicateAndArity(otherAtom))
             return false;
 
@@ -56,8 +53,8 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
          */
         int effectiveArity = getEffectiveArity();
         for (int i=0; i < effectiveArity ; i++ ) {
-            NonFunctionalTerm localTerm = getTerm(i);
-            NonFunctionalTerm otherTerm = otherAtom.getTerm(i);
+            VariableOrGroundTerm localTerm = getTerm(i);
+            VariableOrGroundTerm otherTerm = otherAtom.getTerm(i);
 
             boolean localIsVariable = (localTerm instanceof Variable);
             boolean otherIsVariable = (otherTerm instanceof Variable);
@@ -93,7 +90,8 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
                     return false;
             }
             /**
-             * Both are constants: should be equal to be equivalent
+             * Both are ground terms: should be equal to be equivalent
+             * TODO: make sure this works for functional ground terms!
              */
             else {
                 if (!localTerm.equals(otherTerm))
@@ -104,7 +102,8 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
         return true;
     }
 
-    protected boolean hasSamePredicateAndArity(FunctionFreeDataAtom otherAtom) {
+    @Override
+    public boolean hasSamePredicateAndArity(DataAtom otherAtom) {
         if (!predicate.equals(otherAtom.getPredicate()))
             return false;
 
@@ -115,18 +114,18 @@ public class FunctionFreeDataAtomImpl extends ImmutableFunctionalTermImpl implem
     }
 
     @Override
-    public ImmutableList<NonFunctionalTerm> getNonFunctionalTerms() {
-        return (ImmutableList<NonFunctionalTerm>)(ImmutableList<?>)getImmutableTerms();
+    public ImmutableList<VariableOrGroundTerm> getVariablesOrGroundTerms() {
+        return (ImmutableList<VariableOrGroundTerm>)(ImmutableList<?>)getImmutableTerms();
     }
 
     @Override
-    public NonFunctionalTerm getTerm(int index) {
-        return (NonFunctionalTerm) super.getTerm(index);
+    public VariableOrGroundTerm getTerm(int index) {
+        return (VariableOrGroundTerm) super.getTerm(index);
     }
 
-    protected static boolean hasDuplicates(FunctionFreeDataAtom atom) {
-        ImmutableList<NonFunctionalTerm> termList = atom.getNonFunctionalTerms();
-        Set<NonFunctionalTerm> termSet = new HashSet<>(termList);
+    protected static boolean hasDuplicates(DataAtom atom) {
+        ImmutableList<VariableOrGroundTerm> termList = atom.getVariablesOrGroundTerms();
+        Set<VariableOrGroundTerm> termSet = new HashSet<>(termList);
 
         return termSet.size() < termList.size();
     }

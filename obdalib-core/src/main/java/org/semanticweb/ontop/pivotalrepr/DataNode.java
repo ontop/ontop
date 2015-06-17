@@ -5,5 +5,5 @@ package org.semanticweb.ontop.pivotalrepr;
  */
 public interface DataNode extends QueryNode {
 
-    FunctionFreeDataAtom getAtom();
+    DataAtom getAtom();
 }

@@ -5,10 +5,9 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
  * Immutable data atom that only accepts variables as arguments.
- * These variables must NOT be duplicated.
  *
  */
-public interface PureDataAtom extends FunctionFreeDataAtom {
+public interface PureDataAtom extends DataAtom {
 
     @Override
     VariableImpl getTerm(int index);
@@ -17,12 +16,4 @@ public interface PureDataAtom extends FunctionFreeDataAtom {
      * Gets the arguments (all of them are variables).
      */
     ImmutableList<VariableImpl> getVariableTerms();
-
-    /**
-     * This operation is not commutative.
-     *
-     * By A subsumes B, we mean that is exists a substitution S
-     *   such that AS = B
-     */
-    boolean subsumes(FunctionFreeDataAtom atom);
 }

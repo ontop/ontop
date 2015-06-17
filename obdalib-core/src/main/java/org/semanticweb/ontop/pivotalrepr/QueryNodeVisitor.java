@@ -8,15 +8,17 @@ package org.semanticweb.ontop.pivotalrepr;
  */
 public interface QueryNodeVisitor {
 
-    void visit(OrdinaryDataNode ordinaryDataNode);
+    void visit(ConstructionNode constructionNode);
 
-    void visit(TableNode tableNode);
+    void visit(UnionNode unionNode);
 
     void visit(InnerJoinNode innerJoinNode);
 
-    void visit(SimpleFilterNode simpleFilterNode);
+    void visit(LeftJoinNode leftJoinNode);
 
-    void visit(ProjectionNode projectionNode);
+    void visit(FilterNode filterNode);
 
-    void visit(UnionNode unionNode);
+    void visit(OrdinaryDataNode ordinaryDataNode);
+
+    void visit(TableNode tableNode);
 }

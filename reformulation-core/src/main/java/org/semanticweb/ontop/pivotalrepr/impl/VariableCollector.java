@@ -1,8 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.NonFunctionalTerm;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
@@ -48,13 +48,18 @@ public class VariableCollector implements QueryNodeVisitor {
     }
 
     @Override
-    public void visit(SimpleFilterNode simpleFilterNode) {
+    public void visit(LeftJoinNode leftJoinNode) {
         // Collects nothing
     }
 
     @Override
-    public void visit(ProjectionNode projectionNode) {
-        collectFromPureAtom(projectionNode.getHeadAtom());
+    public void visit(FilterNode filterNode) {
+        // Collects nothing
+    }
+
+    @Override
+    public void visit(ConstructionNode constructionNode) {
+        collectFromPureAtom(constructionNode.getProjectionAtom());
     }
 
     @Override
@@ -62,8 +67,8 @@ public class VariableCollector implements QueryNodeVisitor {
         // Collects nothing
     }
 
-    private void collectFromAtom(FunctionFreeDataAtom atom) {
-        for (NonFunctionalTerm term : atom.getNonFunctionalTerms()) {
+    private void collectFromAtom(DataAtom atom) {
+        for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
             if (term instanceof VariableImpl)
                 collectedVariableBuilder.add((VariableImpl)term);
         }

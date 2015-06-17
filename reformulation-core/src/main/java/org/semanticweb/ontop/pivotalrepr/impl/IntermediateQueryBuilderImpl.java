@@ -9,7 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
 
     private DirectedAcyclicGraph<QueryNode,DefaultEdge> queryDAG;
-    private ProjectionNode rootProjectionNode;
+    private ConstructionNode rootConstructionNode;
     private boolean canEdit;
     private boolean hasBeenInitialized;
 
@@ -18,19 +18,19 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
      */
     public IntermediateQueryBuilderImpl() {
         queryDAG = new DirectedAcyclicGraph<>(DefaultEdge.class);
-        rootProjectionNode = null;
+        rootConstructionNode = null;
         canEdit = false;
         hasBeenInitialized = false;
     }
 
     @Override
-    public void init(ProjectionNode rootProjectionNode) throws IntermediateQueryBuilderException {
+    public void init(ConstructionNode rootConstructionNode) throws IntermediateQueryBuilderException {
         if (hasBeenInitialized)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
         hasBeenInitialized = true;
 
-        queryDAG.addVertex(rootProjectionNode);
-        this.rootProjectionNode = rootProjectionNode;
+        queryDAG.addVertex(rootConstructionNode);
+        this.rootConstructionNode = rootConstructionNode;
         canEdit = true;
     }
 
@@ -70,9 +70,9 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     }
 
     @Override
-    public ProjectionNode getRootProjectionNode() throws IntermediateQueryBuilderException {
+    public ConstructionNode getRootConstructionNode() throws IntermediateQueryBuilderException {
         checkInitialization();
-        return rootProjectionNode;
+        return rootConstructionNode;
     }
 
     @Override

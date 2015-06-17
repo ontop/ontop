@@ -2,6 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.Var2VarSubstitution;
 
 /**
  * Var2VarSubstitution that is injective

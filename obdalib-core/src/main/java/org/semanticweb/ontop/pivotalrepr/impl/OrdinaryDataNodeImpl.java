@@ -5,7 +5,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 
 public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNode {
 
-    public OrdinaryDataNodeImpl(FunctionFreeDataAtom atom) {
+    public OrdinaryDataNodeImpl(DataAtom atom) {
         super(atom);
     }
 

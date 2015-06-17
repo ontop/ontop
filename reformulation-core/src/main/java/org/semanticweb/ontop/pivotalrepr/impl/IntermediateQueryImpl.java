@@ -53,9 +53,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ProjectionNode getRootProjectionNode() throws InconsistentIntermediateQueryException{
+    public ConstructionNode getRootProjectionNode() throws InconsistentIntermediateQueryException{
         try {
-            return dagComponent.getRootProjectionNode();
+            return dagComponent.getRootConstructionNode();
         } catch (IllegalDAGException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
@@ -153,9 +153,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * TODO: explain
          */
-        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootProjectionNode().getHeadAtom());
+        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootProjectionNode().getProjectionAtom());
         if (localDataNodes.isEmpty())
-            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootProjectionNode().getHeadAtom());
+            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootProjectionNode().getProjectionAtom());
 
 
         for (OrdinaryDataNode localDataNode : localDataNodes) {
@@ -166,7 +166,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
                             localDataNode.getAtom(), localVariables);
 
-                ProjectionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
+                ConstructionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
                 dagComponent.replaceNode(localDataNode, subQueryRootNode);
 
                 dagComponent.addSubTree(cloneSubQuery, subQueryRootNode);
@@ -188,7 +188,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             for(QueryNode node : dagComponent.getNodesInBottomUpOrder()) {
                 if (node instanceof OrdinaryDataNode) {
                     OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
-                    if (subsumingDataAtom.subsumes(dataNode.getAtom()))
+                    if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getAtom()))
                         listBuilder.add(dataNode);
                 }
             }
