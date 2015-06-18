@@ -4,11 +4,11 @@ dc:  http://purl.org/dc/elements/1.1/
 ns:  http://example.org/ns#
 
 [SourceDeclaration]
-sourceUri	h2
-connectionUrl	jdbc:h2:mem:questjunitdb
-username	sa
+sourceUri	postgress
+connectionUrl	jdbc:postgresql:user
+username	user
 password	
-driverClass	org.h2.Driver
+driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1

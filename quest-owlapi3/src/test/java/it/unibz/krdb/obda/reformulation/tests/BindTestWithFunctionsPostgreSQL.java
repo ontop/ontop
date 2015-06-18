@@ -65,7 +65,7 @@ import static org.junit.Assert.assertTrue;
  * It expands the tests from {@link it.unibz.krdb.obda.reformulation.test.BindTest}.
  */
 
-public class BindTestWithFunctions {
+public class BindTestWithFunctionsPostgreSQL {
 	
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -79,8 +79,9 @@ public class BindTestWithFunctions {
     @Before
 	public void setUp() throws Exception {
 	
-    	String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
+		// String driver = "org.h2.Driver";
+		String url = "jdbc:postgresql:user";
+		String username = "user";
 		String password = "";
 
 		fac = OBDADataFactoryImpl.getInstance();
@@ -90,7 +91,7 @@ public class BindTestWithFunctions {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-create-postgresql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -101,7 +102,7 @@ public class BindTestWithFunctions {
 		in.close();
 		
 		st.executeUpdate(bf.toString()); 
-		conn.commit();
+		//conn.commit();
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -125,7 +126,7 @@ public class BindTestWithFunctions {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-drop-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-drop-postgresql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -137,7 +138,7 @@ public class BindTestWithFunctions {
 		
 		st.executeUpdate(bf.toString());
 		st.close();
-		conn.commit();
+		//conn.commit();
 	}
 
 	private OWLObject runTests(Properties p, String query) throws Exception {
