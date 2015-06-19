@@ -74,7 +74,7 @@ public class BindTestWithFunctionsPostgreSQL {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
-	final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
+	final String obdafile = "src/test/resources/test/bind/sparqlBindPostgreSQL.obda";
 
     @Before
 	public void setUp() throws Exception {
@@ -174,7 +174,6 @@ public class BindTestWithFunctionsPostgreSQL {
 	/*
 	 * Tests for numeric functions
 	 */
-	
 	@Ignore
 	@Test
     public void testCeil() throws Exception {
@@ -195,10 +194,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1.0\"");
-        expectedValues.add("\"1.0\"");
-        expectedValues.add("\"1.0\"");
-        expectedValues.add("\"1.0\"");
+        expectedValues.add("\"1\""); // returns integer unlike H2
+        expectedValues.add("\"1\"");
+        expectedValues.add("\"1\"");
+        expectedValues.add("\"1\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
@@ -221,10 +220,10 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"0\"");
+        expectedValues.add("\"0\"");
+        expectedValues.add("\"0\"");
+        expectedValues.add("\"0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
@@ -247,13 +246,14 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0, 43.0\"");
-        expectedValues.add("\"0.0, 23.0\"");
-        expectedValues.add("\"0.0, 34.0\"");
-        expectedValues.add("\"0.0, 10.0\"");
+        expectedValues.add("\"0, 43\"");
+        expectedValues.add("\"0, 23\"");
+        expectedValues.add("\"0, 34\"");
+        expectedValues.add("\"0, 10\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
+	@Ignore
 	@Test
     public void testAbs() throws Exception {
 
@@ -280,9 +280,10 @@ public class BindTestWithFunctionsPostgreSQL {
 	}	
 	
 	/*
-	 * Tests for hash functions. H2 supports only SHA25 algorithm.
+	 * Tests for hash functions. PostgreSQL supports only MD5 algorithm.
 	 */
 	
+	@Ignore
 	@Test
     public void testHash() throws Exception {
 
@@ -298,7 +299,7 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (SHA256(?title) AS ?w)\n"
+                + "   BIND (MD5(?title) AS ?w)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>(); 
@@ -372,7 +373,7 @@ public class BindTestWithFunctionsPostgreSQL {
     } 
 	
 
-    
+    @Ignore
     @Test
     public void testStrEnds() throws Exception {
 
@@ -390,6 +391,31 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "   ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
                 + "   FILTER(STRENDS(?title,\"b\"))\n"
+             + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"The Semantic Web\"@en");        
+        checkReturnedValues(p, queryBind, expectedValues);
+    } 
+    
+    
+    @Test
+    public void testStrStarts() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(?title AS ?w)\n"
+                + "   FILTER(STRSTARTS(?title,\"The S\"))\n"
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -422,7 +448,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }    
     
-  
+    @Ignore
     @Test
     public void testBindWithUcase() throws Exception {
 
@@ -453,6 +479,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }
     
+    @Ignore
     @Test
     public void testBindWithLcase() throws Exception {
 
@@ -511,6 +538,7 @@ public class BindTestWithFunctionsPostgreSQL {
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
+    
     
     @Ignore
     @Test

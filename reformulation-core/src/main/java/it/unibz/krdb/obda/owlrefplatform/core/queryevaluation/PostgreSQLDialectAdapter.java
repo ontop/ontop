@@ -33,6 +33,11 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     }
     
     @Override
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 0, CHAR_LENGTH(%2$s)) LIKE %2$s";	
+	}
+    
+    @Override
     public String dateTimezone(String str){
     	return String.format("EXTRACT(TIMEZONE_ABBR, %s)", str);
     }
