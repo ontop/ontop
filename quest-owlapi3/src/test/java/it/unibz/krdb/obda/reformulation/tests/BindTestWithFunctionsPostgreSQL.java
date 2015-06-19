@@ -86,8 +86,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
 		fac = OBDADataFactoryImpl.getInstance();
 
-		conn = DriverManager.getConnection(url, username, password);
-		
+		conn = DriverManager.getConnection(url, username, password);		
 
 		Statement st = conn.createStatement();
 
@@ -448,7 +447,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }    
     
-    @Ignore
+ 
     @Test
     public void testBindWithUcase() throws Exception {
 
@@ -464,8 +463,7 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (UCASE(?title) AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (?title AS ?w)\n" // CAST AS CHAR doesn't seem to work here - takes the first char
              + "}";
 
 

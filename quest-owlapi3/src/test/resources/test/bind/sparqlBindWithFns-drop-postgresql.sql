@@ -1,2 +1,2 @@
 
-DELETE FROM books;
+DROP TABLE books;
