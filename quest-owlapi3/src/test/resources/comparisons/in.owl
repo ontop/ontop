@@ -22,23 +22,21 @@
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Declaration>
-        <Class IRI="#Gt3"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Lt1"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#Gt5"/>
-    </Declaration>
-    <Declaration>
         <Class IRI="#Gt3or5"/>
     </Declaration>
     <Declaration>
         <Class IRI="#Lt1or2"/>
     </Declaration>
+    <Declaration>
+        <Class IRI="#Lt1orGt7"/>
+    </Declaration>
+    
     
 	<Declaration>
         <DataProperty IRI="#Gt"/>
+    </Declaration>
+	<Declaration>
+        <DataProperty IRI="#Gte"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#Lt"/>

@@ -10,38 +10,100 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Lt1
-target		:obj{COL} a :Lt1 . :obj{COL} a :Lt1or2 .
+target		:obj{COL} a :Lt1or2 .
 source		SELECT COL FROM "TABLE" WHERE COL < 1
 
 mappingId	Lt2
-target		:obj{COL} a :Lt2 . :obj{COL} a :Lt1or2 .
-source		SELECT COL FROM "TABLE" WHERE COL < 2
+target		:obj{COL} a :Lt1or2 .
+source		SELECT COL FROM "TABLE" WHERE COL < 2.0
 
 mappingId	Gt5
-target		:obj{COL} a :Gt5 . :obj{COL} a :Gt3or5 .
+target		:obj{COL} a :Gt3or5 .
 source		SELECT COL FROM "TABLE" WHERE COL > 5
 
 mappingId	Gt3
-target		:obj{COL} a :Gt3 . :obj{COL} a :Gt3or5 .
-source		SELECT COL FROM "TABLE" WHERE COL > 3
+target		:obj{COL} a :Gt3or5 .
+source		SELECT COL FROM "TABLE" WHERE COL > 3.0
+
+mappingId	LessThan1OrMoreThan7
+target		:obj{COL} a :Lt1orGt7 .
+source		SELECT COL FROM "TABLE" WHERE COL < 1.0 OR COL > 7
+
 
 mappingId	Gt
 target		:obj{COL1} :Gt :obj{COL2} .
 source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL > T2.COL
 
+mappingId	Gt_right_int
+target		:obj{COL1} :Gt {COL2}^^xsd:int .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL > COL2
+
+mappingId	Gt_right_float
+target		:obj{COL1} :Gt {COL2}^^xsd:float .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL > COL2
+
+
+mappingId	Gte
+target		:obj{COL1} :Gte :obj{COL2} .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE"  T1, "TABLE" T2 WHERE T1.COL >= T2.COL
+
+mappingId	Gte_right_int
+target		:obj{COL1} :Gte {COL2}^^xsd:int .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL >= COL2
+
+mappingId	Gte_right_float
+target		:obj{COL1} :Gte {COL2}^^xsd:float .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL >= COL2
+
+
 mappingId	Lt
 target		:obj{COL1} :Lt :obj{COL2} .
 source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL < T2.COL
+
+mappingId	Lt_right_int
+target		:obj{COL1} :Lt {COL2}^^xsd:int .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL < COL2
+
+mappingId	Lt_right_float
+target		:obj{COL1} :Lt {COL2}^^xsd:float .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL < COL2
+
 
 mappingId	Lte
 target		:obj{COL1} :Lte :obj{COL2} .
 source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL <= T2.COL
 
+mappingId	Lte_right_int
+target		:obj{COL1} :Lte {COL2}^^xsd:int .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL <= COL2
+
+mappingId	Lte_right_float
+target		:obj{COL1} :Lte {COL2}^^xsd:float .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL <= COL2
+
+
 mappingId	Neq
 target		:obj{COL1} :Neq :obj{COL2} .
 source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL != T2.COL
 
+mappingId	Neq_right_int
+target		:obj{COL1} :Neq {COL2}^^xsd:int .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL != COL2
+
+mappingId	Neq_right_float
+target		:obj{COL1} :Neq {COL2}^^xsd:float .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL != COL2
+
+
 mappingId	Eq
 target		:obj{COL1} :Eq :obj{COL2} .
 source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL = T2.COL
+
+mappingId	Eq_right_int
+target		:obj{COL1} :Eq {COL2}^^xsd:int .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL = COL2
+
+mappingId	Eq_right_float
+target		:obj{COL1} :Eq {COL2}^^xsd:float .
+source		SELECT T1.COL AS COL1, T2.COL AS COL2 FROM "TABLE" T1, "TABLE" T2 WHERE T1.COL = COL2
 ]]

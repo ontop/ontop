@@ -25,7 +25,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +35,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-
+/**
+ * Checks unsatisfiability of a query with respect to the numerical comparisons
+ * occurring in the atoms in its body.
+ * @author acondolu
+ *
+ */
 class ComparisonsSatisfiability {	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ComparisonsSatisfiability.class);
 	private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
@@ -99,7 +103,7 @@ class ComparisonsSatisfiability {
 		 * for every variable and updated when new constraints are found
 		 * in disequalities.
 		 */
-		Map<Variable, DoubleInterval> mranges = new HashMap<>();
+		Map<Variable, DoubleInterval> minRanges = new HashMap<>();
 		
 		/*
 		 * The constraints for non-equality (!=)
@@ -111,11 +115,11 @@ class ComparisonsSatisfiability {
 		 */
 		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		
-		return unsatisfiable(atoms, mranges, neqConstraints, gteGraph);
+		return unsatisfiable(atoms, minRanges, neqConstraints, gteGraph);
 	}
 
 	private static boolean unsatisfiable(List<Function> atoms,
-			Map<Variable, DoubleInterval> mranges,
+			Map<Variable, DoubleInterval> minRanges,
 			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 
@@ -141,10 +145,10 @@ class ComparisonsSatisfiability {
 			 * Fork the OR's
 			 */
 			if (atom.getFunctionSymbol() == OBDAVocabulary.OR) {
-				return forkOR(atomidx, atoms, mranges, neqConstraints, gteGraph);
+				return forkOR(atomidx, atoms, minRanges, neqConstraints, gteGraph);
 			}
 			
-			if (scanAtom(atom, atoms, mranges, neqConstraints, gteGraph))
+			if (scanAtom(atom, atoms, minRanges, neqConstraints, gteGraph))
 				return true;	
 		}
 		
@@ -157,7 +161,7 @@ class ComparisonsSatisfiability {
 		 * 3) Transport the information gathered with the minimum range of variables
 		 * inside the greater-than-or-equal graph
 		 */
-		constrainVariablesRanges(mranges, gteGraph, constants);
+		constrainVariablesRanges(minRanges, gteGraph, constants);
 		
 		/*
 		 * 4) Encode in the graph the information about the linear ordering of
@@ -181,7 +185,7 @@ class ComparisonsSatisfiability {
 	private static boolean forkOR(
 			int pos,
 			List<Function> atoms,
-			Map<Variable, DoubleInterval> mranges, 
+			Map<Variable, DoubleInterval> minRanges, 
 			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 		
@@ -191,14 +195,16 @@ class ComparisonsSatisfiability {
 			return false;
 		}
 		
+		LOGGER.debug("splitting an OR: " + or.getTerm(0) +" , " + or.getTerm(1));
+		
 		/*
-		 * Clone the data structures atoms, mranges, neqConstraints, gteGraph
+		 * Clone the data structures atoms, minRanges, neqConstraints, gteGraph
 		 */
 		List<Function> atoms_copy = new ArrayList<>(atoms);
 		// replace the disjunction in the copy with the first disjunct
 		atoms_copy.set(0, (Function) or.getTerm(0));
 		
-		Map<Variable, DoubleInterval> mranges_copy = new HashMap<>(mranges);
+		Map<Variable, DoubleInterval> minRanges_copy = new HashMap<>(minRanges);
 		Multimap<Variable, Term> neq_copy = HashMultimap.create(neqConstraints);		
 		DirectedGraph<Term, DefaultEdge> gteGraph_copy = new DefaultDirectedGraph<>(DefaultEdge.class);
 		Graphs.addGraph(gteGraph_copy, gteGraph);
@@ -206,12 +212,12 @@ class ComparisonsSatisfiability {
 		/*
 		 * Call the satisfiability check twice, once for each possibility
 		 */
-		if (!unsatisfiable(atoms_copy, mranges_copy, neq_copy, gteGraph_copy)) {
+		if (!unsatisfiable(atoms_copy, minRanges_copy, neq_copy, gteGraph_copy)) {
 			return false;
 		} else {
 			// replace the disjunction with the second disjunct
 			atoms.set(0, (Function) or.getTerm(1));
-			return unsatisfiable(atoms, mranges, neqConstraints, gteGraph);
+			return unsatisfiable(atoms, minRanges, neqConstraints, gteGraph);
 		}
 	}
 
@@ -221,7 +227,7 @@ class ComparisonsSatisfiability {
 	 * construct the greater-than-or-equal graph, store the not-equals constraints 
 	 */
 	private static boolean scanAtom(Function atom, List<Function> atoms,
-			Map<Variable, DoubleInterval> mranges,
+			Map<Variable, DoubleInterval> minRanges,
 			Multimap<Variable, Term> neqConstraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 
@@ -282,27 +288,27 @@ class ComparisonsSatisfiability {
 				Variable var = (Variable) t0;
 				Double value = constantValue((Constant) t1);
 				if (value != Double.NaN) {
-					DoubleInterval interval = mranges.get(var); 
+					DoubleInterval interval = minRanges.get(var); 
 					if (interval == null) interval = TRIVIAL_INTERVAL;
 					try {
 						interval = interval.tryShrinkWithLowerBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
-					mranges.put(var, interval);
+					minRanges.put(var, interval);
 				}
 			} else if (t0 instanceof Constant && t1 instanceof Variable) {
 				Variable var = (Variable) t1;
 				Double value = constantValue((Constant) t0);
 				if (value != Double.NaN) {
-					DoubleInterval interval = mranges.get(var);
+					DoubleInterval interval = minRanges.get(var);
 					if (interval == null) interval = TRIVIAL_INTERVAL; 
 					try {
 						interval = interval.tryShrinkWithUpperBound(value);
 					} catch (IllegalArgumentException e) {
 						return true;
 					}
-					mranges.put(var, interval);
+					minRanges.put(var, interval);
 				}
 			} else if (t0 instanceof Variable && t1 instanceof Variable) {
 				gteGraph.addVertex(t0);
@@ -319,10 +325,10 @@ class ComparisonsSatisfiability {
 	 * lowerBound <= variable <= upperBound holds.
 	 */
 	private static void constrainVariablesRanges(
-			Map<Variable, DoubleInterval> mranges,
+			Map<Variable, DoubleInterval> minRanges,
 			DirectedGraph<Term, DefaultEdge> gteGraph, Set<Double> constants) {
 		
-		for (Entry<Variable, DoubleInterval> cursor: mranges.entrySet()) {
+		for (Entry<Variable, DoubleInterval> cursor: minRanges.entrySet()) {
 			LOGGER.debug("mrange " + cursor.getKey());
 			DoubleInterval interval = cursor.getValue();
 			Double lowerBound = interval.getLowerBound();
@@ -354,11 +360,13 @@ class ComparisonsSatisfiability {
 			DirectedGraph<Term, DefaultEdge> gteGraph, SortedSet<Double> constants) {
 		
 		// the SortedSet constants is already linearly sorted!
-		Constant curr, last = doubleToConstant(constants.first());
+		Constant curr, last = null;
 		for (Double d: constants) {
 			curr = doubleToConstant(d);
-			gteGraph.addEdge(curr, last);
-			LOGGER.debug("number constraint edge: " + curr.getValue() + "->" + last.getValue());
+			if (last != null) {
+				gteGraph.addEdge(curr, last);
+				LOGGER.debug("number constraint edge: " + curr.getValue() + "->" + last.getValue());
+			}
 			last = curr;
 		}
 	}
@@ -397,8 +405,26 @@ class ComparisonsSatisfiability {
 			/*
 			 * Check for violation of a neq-constraint
 			 */
-			if (!Collections.disjoint(component, forbidden)) {
+			/*if (!Collections.disjoint(component, forbidden)) {
 				return true;
+			}*/
+			/*
+			 * Cannot use the Collections.disjoint method,
+			 * because, concerning Constants, it treats
+			 * for example '1' and '1.0' as different.
+			 * In the case of Constants, we have to compare
+			 * actual values. 
+			 */
+			for (Term e1 : component) {
+				if (e1 instanceof Variable) {
+					if (forbidden.contains(e1))
+						return true;
+				} else for (Term e2 : forbidden) {
+					if(e2 instanceof Constant) {
+						if (constantValue((Constant) e1) == constantValue((Constant) e2))
+							return true;
+					}
+				}
 			}
 		}
 		
