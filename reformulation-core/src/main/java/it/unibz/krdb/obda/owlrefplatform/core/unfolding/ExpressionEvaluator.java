@@ -808,12 +808,19 @@ public class ExpressionEvaluator {
 			}
 		} 
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
-			Constant c1 = (Constant) eval1,
+			if (eval1.equals(eval2)) 
+				return fac.getBooleanConstant(eq);
+			else 
+				return fac.getBooleanConstant(!eq);
+			/*
+			 * FIXME (acondolu)
+			 * is the followin code necessary?
+			 * (?) How to treat the equality when the two constants have different
+			 * datatypes? Should they be cast? For example, the case Eq(1, 1.0) ?
+			 * The code above looks for syntactic equality.
+			 
+			 Constant c1 = (Constant) eval1,
 					 c2 = (Constant) eval2;
-			/* FIXME acondolu
-			 * is this really necessary?
-			 * (?) How to treat the case 1 =?= 1.0
-			 */
 			if (c1.getType() == null || c2.getType() == null) {
 				return term;
 			}
@@ -832,6 +839,7 @@ public class ExpressionEvaluator {
 				     == Double.parseDouble(c2.getValue())
 				));
 			}
+			*/
 		} 
 		else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;

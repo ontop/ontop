@@ -105,14 +105,14 @@ public class ComparisonsSatisfiabilityTest {
 		// x > 3, x > 5, y < x, y < 1
 		assertTrue(qunfold("?x :Gt '3'^^xsd:int; :Gt '5'^^xsd:int. ?y :Lt ?x; :Lt '1'^^xsd:int.") != "");
 		
-		// x < -1, x >= -1.0
-		assertEquals(qunfold("?x :Lt '-1'^^xsd:int. ?x :Gte '-1.0'^^xsd:float."), "");
-		
 		// x = -4, x != -4.0
 		assertTrue(qunfold("?x :Eq '-4'^^xsd:int. ?x :Neq '-4.0'^^xsd:float.") != "");
 	}
 	
 	@Test public void unsatisfiable() throws Exception {
+		// x < -1, x >= -1.0
+		assertEquals(qunfold("?x :Lt '-1'^^xsd:int. ?x :Gte '-1.0'^^xsd:float."), "");
+		
 		// 3 >= a > b > c > d > e > f > 3
 		assertEquals(qunfold("?a :Lte '3'^^xsd:int. ?a :Gt ?b . ?b :Gt ?c . ?c :Gt ?d . ?d :Gt ?e . ?e :Gt ?f . ?f a :Gt3 ."), "");
 		
@@ -149,7 +149,8 @@ public class ComparisonsSatisfiabilityTest {
 		
 		// x > 4 /\ x =< 4.0 /\ ( x > 5 \/ x > 3 )
 		assertEquals(qunfold("?x :Gt '4'^^xsd:int. ?x :Lte '4.0'^^xsd:float. ?x a :Gt3or5."), "");
-		assertEquals(qunfold("?x :Gt '5'^^xsd:int. ?x :Lte '4.0'^^xsd:float. ?x a :Gt3or5."), "");
+		
+		assertEquals(qunfold("?x :Lte '2.0'^^xsd:float. ?x a :Gt3or5."), "");
 		
 		// (x < 1 \/ x < 2) /\ ( x > 5 \/ x > 3 )
 		assertEquals(qunfold("?x a :Lt1or2. ?x a :Gt3or5."), "");
