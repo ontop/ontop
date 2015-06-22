@@ -33,8 +33,24 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     }
     
     @Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,POSITION(%s IN %s)-1)", str, before, str);
+	}
+    
+    @Override
 	public String strStartsOperator(){
-		return "SUBSTRING(%1$s, 0, CHAR_LENGTH(%2$s)) LIKE %2$s";	
+		return "SUBSTRING(%1$s FROM 0 FOR CHARACTER_LENGTH(%2$s)) LIKE %2$s";	
+	} 
+    
+    @Override
+	public String strContainsOperator(){
+		return "POSITION(%2$s IN %1$s) > 0";		
+	}
+    
+    @Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTR(%s,POSITION(REGEXP_REPLACE(%s, (CONCAT('.*',%s) ), '') IN %s))",
+				str, str, after,str); //FIXME when no match found should return empty string
 	}
     
     @Override

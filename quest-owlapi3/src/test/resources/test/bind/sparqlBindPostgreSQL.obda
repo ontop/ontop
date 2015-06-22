@@ -8,7 +8,7 @@ sourceUri	postgres
 connectionUrl	jdbc:postgresql:user
 username	user
 password	
-driverClass	org.posgresql.Driver
+driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1

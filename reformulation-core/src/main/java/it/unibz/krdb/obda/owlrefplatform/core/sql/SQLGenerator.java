@@ -64,10 +64,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String NOT_OPERATOR = "NOT %s";
 	private static final String IS_NULL_OPERATOR = "%s IS NULL";
 	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
-	
-	private static final String STR_STARTS_OPERATOR = "SUBSTRING(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";
-	private static final String STR_ENDS_OPERATOR = "RIGHT(%1$s, LENGTH(%2$s)) LIKE %2$s";
-	private static final String CONTAINS_OPERATOR = "CHARINDEX(%2$s,%1$s) > 0";	
 
 	private static final String ADD_OPERATOR = "%s + %s";
 	private static final String SUBTRACT_OPERATOR = "%s - %s";

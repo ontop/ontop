@@ -173,8 +173,9 @@ public class BindTestWithFunctionsPostgreSQL {
 	/*
 	 * Tests for numeric functions
 	 */
-	@Ignore
-	@Test
+	
+	
+	 @Test
     public void testCeil() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -193,15 +194,15 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1\""); // returns integer unlike H2
         expectedValues.add("\"1\"");
         expectedValues.add("\"1\"");
         expectedValues.add("\"1\"");
+        expectedValues.add("\"1\""); 
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
-	@Ignore
-	@Test
+	
+	 @Test
     public void testFloor() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -224,10 +225,10 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"0\"");
         expectedValues.add("\"0\"");
         checkReturnedValues(p, queryBind, expectedValues);
-    }
+    } 
 	
-	@Ignore
-	@Test
+	
+	 @Test
     public void testRound() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -252,8 +253,7 @@ public class BindTestWithFunctionsPostgreSQL {
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
-	@Ignore
-	@Test
+	 @Test
     public void testAbs() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -279,11 +279,10 @@ public class BindTestWithFunctionsPostgreSQL {
 	}	
 	
 	/*
-	 * Tests for hash functions. PostgreSQL supports only MD5 algorithm.
+	 * Tests for hash functions. H2 supports only SHA25 algorithm.
 	 */
 	
-	
-	@Test
+	 @Test
     public void testHash() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -297,8 +296,8 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
-                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (MD5(?title) AS ?w)\n"
+               // + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (MD5(\"The Semantic Web\") AS ?w)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>(); 
@@ -314,6 +313,10 @@ public class BindTestWithFunctionsPostgreSQL {
 	          }
 
 	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+
 	  } catch(Exception ex){
 	     throw new RuntimeException(ex);
 	  }
@@ -323,7 +326,7 @@ public class BindTestWithFunctionsPostgreSQL {
 	
 	public static String sha256(String base) {
 	      try{
-	          MessageDigest digest = MessageDigest.getInstance("SHA-256");
+	          MessageDigest digest = MessageDigest.getInstance("MD5");
 	          byte[] hash = digest.digest(base.getBytes("UTF-8"));
 	          StringBuffer hexString = new StringBuffer();
 
@@ -343,8 +346,8 @@ public class BindTestWithFunctionsPostgreSQL {
 	 * Tests for functions on strings.
 	 */
 	
-	@Ignore
-    @Test
+	
+     @Test
     public void testURIEncoding() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -360,20 +363,21 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   ?x ns:pubYear ?year .\n"
-                + "   FILTER (STRSTARTS(?title,\"The\"))\n"
                 + "   BIND (ENCODE_FOR_URI(?title) AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL%20Tutorial\"");
         expectedValues.add("\"The%20Semantic%20Web\"");
+        expectedValues.add("\"Crime%20and%20Punishment\"");
         expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
     } 
 	
 
-    @Ignore
-    @Test
+    
+     @Test
     public void testStrEnds() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -397,7 +401,6 @@ public class BindTestWithFunctionsPostgreSQL {
         checkReturnedValues(p, queryBind, expectedValues);
     } 
     
-    
     @Test
     public void testStrStarts() throws Exception {
 
@@ -414,16 +417,18 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
-                + "   FILTER(STRSTARTS(?title,\"The S\"))\n"
+                + "   FILTER(STRSTARTS(?title,\"The\"))\n"
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en");        
+        expectedValues.add("\"The Semantic Web\"@en"); 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");        
+
         checkReturnedValues(p, queryBind, expectedValues);
     } 
     
-    @Ignore
-    @Test
+    
+     @Test
     public void testContains() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -447,8 +452,8 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }    
     
- 
-    @Test
+  
+     @Test
     public void testBindWithUcase() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -463,7 +468,8 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (?title AS ?w)\n" // CAST AS CHAR doesn't seem to work here - takes the first char
+                + "   BIND (UCASE(?title) AS ?v)\n"
+                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
              + "}";
 
 
@@ -477,8 +483,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }
     
-    @Ignore
-    @Test
+     @Test
     public void testBindWithLcase() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -508,8 +513,8 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }
     
-    @Ignore
-    @Test
+    
+     @Test
     public void testBindWithBefore() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -538,8 +543,7 @@ public class BindTestWithFunctionsPostgreSQL {
     }
     
     
-    @Ignore
-    @Test
+     @Test
     public void testBindWithAfter() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -554,24 +558,27 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRAFTER(?title,\"a\") AS ?w)\n"
+                + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial PARQL Tutorial\"");
-        expectedValues.add("\"The Semantic Web emantic Web\"");
+        expectedValues.add("\"SPARQL Tutorial\"");
+        expectedValues.add("\" Semantic Web\"");
+        expectedValues.add("\"Crime and Punishment\"");
+        expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
-    }
+    } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
+    //here instead the whole string is returned
     
     
 	/*
 	 * Tests for functions on date and time
 	 */
     
-    @Ignore
-    @Test
+    
+     @Test
     public void testMonth() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -596,6 +603,34 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"12\""); 
         expectedValues.add("\"7\"");      
         expectedValues.add("\"11\"");        
+        checkReturnedValues(p, queryBind, expectedValues);
+    } 
+    
+     @Test
+    public void testYear() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND (YEAR(?year) AS ?w)\n"
+             + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2014\"");        
+        expectedValues.add("\"2011\""); 
+        expectedValues.add("\"1866\"");      
+        expectedValues.add("\"1967\"");        
         checkReturnedValues(p, queryBind, expectedValues);
     } 
 
