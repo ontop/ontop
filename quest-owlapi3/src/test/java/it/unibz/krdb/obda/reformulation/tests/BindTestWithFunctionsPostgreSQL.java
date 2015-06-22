@@ -282,7 +282,7 @@ public class BindTestWithFunctionsPostgreSQL {
 	 * Tests for hash functions. PostgreSQL supports only MD5 algorithm.
 	 */
 	
-	@Ignore
+	
 	@Test
     public void testHash() throws Exception {
 
@@ -303,7 +303,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
         List<String> expectedValues = new ArrayList<>(); 
         try{
-	          MessageDigest digest = MessageDigest.getInstance("SHA-256");
+	          MessageDigest digest = MessageDigest.getInstance("MD5");
 	          byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
 	          StringBuffer hexString = new StringBuffer();
 

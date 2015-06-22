@@ -122,15 +122,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     	throw new UnsupportedOperationException("SHA512 is not supported in this dialect.");
   	}
       
-   /*   @Override
+   @Override
   	public String MD5(String str) {
       	throw new UnsupportedOperationException("MD5 is not supported in this dialect.");
-  	} */
+  	}
       
-      @Override
-      public String MD5(String str){
-      	return String.format("MD5(%s)", str); //PostgreSQL
-      }
+    
     
     @Override
 	public String uuid() {

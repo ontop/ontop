@@ -12,7 +12,7 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1
-target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@{lang} .
-source	SELECT id, title, price, discount, publication_date, description, lang FROM books
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; dc:description {description}@{lang} .
+source	SELECT id, title, price, discount, description, lang FROM books
 ]]
 

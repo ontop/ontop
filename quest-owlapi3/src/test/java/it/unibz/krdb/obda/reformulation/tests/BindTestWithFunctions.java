@@ -74,7 +74,7 @@ public class BindTestWithFunctions {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
-	final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
+	final String obdafile = "src/test/resources/test/bind/sparqlBindWithFunctions.obda";
 
     @Before
 	public void setUp() throws Exception {
@@ -174,7 +174,7 @@ public class BindTestWithFunctions {
 	 * Tests for numeric functions
 	 */
 	
-	@Ignore
+	
 	@Test
     public void testCeil() throws Exception {
 
@@ -201,7 +201,7 @@ public class BindTestWithFunctions {
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
-	@Ignore
+	
 	@Test
     public void testFloor() throws Exception {
 
@@ -227,7 +227,7 @@ public class BindTestWithFunctions {
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
-	@Ignore
+	
 	@Test
     public void testRound() throws Exception {
 
@@ -342,7 +342,7 @@ public class BindTestWithFunctions {
 	 * Tests for functions on strings.
 	 */
 	
-	@Ignore
+	
     @Test
     public void testURIEncoding() throws Exception {
 
@@ -396,7 +396,33 @@ public class BindTestWithFunctions {
         checkReturnedValues(p, queryBind, expectedValues);
     } 
     
-    @Ignore
+    @Test
+    public void testStrStarts() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(?title AS ?w)\n"
+                + "   FILTER(STRSTARTS(?title,\"The\"))\n"
+             + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"The Semantic Web\"@en"); 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");        
+
+        checkReturnedValues(p, queryBind, expectedValues);
+    } 
+    
+    
     @Test
     public void testContains() throws Exception {
 
@@ -482,7 +508,7 @@ public class BindTestWithFunctions {
 
     }
     
-    @Ignore
+    
     @Test
     public void testBindWithBefore() throws Exception {
 
@@ -511,7 +537,7 @@ public class BindTestWithFunctions {
 
     }
     
-    @Ignore
+    
     @Test
     public void testBindWithAfter() throws Exception {
 
@@ -527,23 +553,26 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRAFTER(?title,\"a\") AS ?w)\n"
+                + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial PARQL Tutorial\"");
-        expectedValues.add("\"The Semantic Web emantic Web\"");
+        expectedValues.add("\"SPARQL Tutorial\"");
+        expectedValues.add("\" Semantic Web\"");
+        expectedValues.add("\"Crime and Punishment\"");
+        expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
-    }
+    } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
+    //here instead the whole string is returned
     
     
 	/*
 	 * Tests for functions on date and time
 	 */
     
-    @Ignore
+    
     @Test
     public void testMonth() throws Exception {
 
@@ -569,6 +598,34 @@ public class BindTestWithFunctions {
         expectedValues.add("\"12\""); 
         expectedValues.add("\"7\"");      
         expectedValues.add("\"11\"");        
+        checkReturnedValues(p, queryBind, expectedValues);
+    } 
+    
+    @Test
+    public void testYear() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND (YEAR(?year) AS ?w)\n"
+             + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2014\"");        
+        expectedValues.add("\"2011\""); 
+        expectedValues.add("\"1866\"");      
+        expectedValues.add("\"1967\"");        
         checkReturnedValues(p, queryBind, expectedValues);
     } 
 
