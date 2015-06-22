@@ -25,6 +25,11 @@ import java.sql.Types;
 public class TeiidSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
+	public String dateNow(){
+		return "NOW()";
+	}
+	
+	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
 		if (type == Types.VARCHAR) {

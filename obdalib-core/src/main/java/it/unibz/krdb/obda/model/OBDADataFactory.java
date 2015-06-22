@@ -153,6 +153,14 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
+	public Function getFunctionSHA1(Term arg);
+
+	public Function getFunctionSHA256(Term arg);
+
+	public Function getFunctionSHA512(Term arg);
+
+	public Function getFunctionMD5(Term arg);
+	
 
 	/*
 	 * Numerical arithmethic functions
@@ -165,9 +173,47 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionSubstract(Term term1, Term term2);
 
 	public Function getFunctionMultiply(Term term1, Term term2);
+	
+	public Function getFunctionAbs(Term term1);
+	
+	public Function getFunctionCeil(Term term1);
+	
+	public Function getFunctionFloor(Term term1);
+	
+	public Function getFunctionRound(Term term1);
+	
+	public Function getFunctionRand();
+	
+	public Function getFunctionUUID();
+
+	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
+    
+ // added by Nika: 
+    
+    public Function getFunctionLength(Term term1); 
+    
+	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
+
+	public Function getFunctionUpper(Term term1);
 	
+	public Function getFunctionLower(Term term1);
+	
+	public Function getFunctionStrBefore(Term term1, Term term2);
+	
+	public Function getFunctionStrAfter(Term term1, Term term2);
+	
+	public Function getFunctionStrStarts(Term term1, Term term2);
+	
+	public Function getFunctionStrEnds(Term term1, Term term2);
+	
+	public Function getFunctionContains(Term term1, Term term2);
+	
+	public Function getFunctionEncodeForUri(Term term);
+	
+
+
 	/*
 	 * Casting values cast(source-value AS destination-type)
 	 */
@@ -305,4 +351,22 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+	public Function getFunctionNow();
+
+	public Function getFunctionYear(Term arg);
+	
+	public Function getFunctionDay(Term arg);
+	
+	public Function getFunctionMinutes(Term arg);
+	
+	public Function getFunctionSeconds(Term arg);
+	
+	public Function getFunctionHours(Term arg);
+	
+	public Function getFunctionTimezone(Term arg);
+
+	public Function getFunctionMonth(Term arg);
+
+	
 }

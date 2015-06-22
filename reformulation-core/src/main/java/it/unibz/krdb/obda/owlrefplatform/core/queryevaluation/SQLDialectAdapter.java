@@ -26,19 +26,49 @@ import java.util.List;
 import java.util.Set;
 
 public interface SQLDialectAdapter {
+	
+	public String MD5(String literal);
+	
+	public String SHA256(String str);
+	
+	public String SHA512(String str);
+	
+	public String SHA1(String str);
 
-	public String strconcat(String[] strings);
+	public String uuid();
+	
+	public String strStartsOperator();
+	
+	public String strEndsOperator();
+	
+	public String strContainsOperator();
+	
+	public String strLength(String str); 
+	
+	public String strUcase(String str);
+	
+	public String strLcase(String str);
+	
+	public String strEncodeForUri(String str);
 
-	public String strreplace(String str, char oldchar, char newchar);
+	public String strBefore(String str, String before);
+	
+	public String strAfter(String str, String after);
+	
+	public String strSubstr(String str, String start, String end); 
 
-	public String strreplace(String str, String oldstr, String newstr);
+	public String strConcat(String[] strings);
 
-	public String strreplace(String str, int start, int end, String with);
+	public String strReplace(String str, char oldchar, char newchar);
 
-	public String strindexOf(String str, char ch);
+	public String strReplace(String str, String oldstr, String newstr);
 
-	public String strindexOf(String str, String strsr);
+	public String strReplace(String str, int start, int end, String with);
 
+	public String strIndexOf(String str, char ch);
+
+	public String strIndexOf(String str, String strsr);
+	
 	/*
 	 * Table/Column name functions
 	 */
@@ -68,7 +98,6 @@ public interface SQLDialectAdapter {
 	
 	public String getDummyTable();
 	
-
 	public String getSQLLexicalFormString(String constant);
 	
 	public String getSQLLexicalFormBoolean(boolean value);
@@ -82,4 +111,20 @@ public interface SQLDialectAdapter {
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
 	 */
 	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
+
+	public String dateNow();
+	
+	public String dateYear(String date);
+
+	public String dateHours(String date);
+
+	public String dateMinutes(String date);
+
+	public String dateSeconds(String date);
+
+	public String dateDay(String date);
+
+	public String dateTimezone(String date);
+
+	public String dateMonth(String date);
 }

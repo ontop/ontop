@@ -27,6 +27,42 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
+    @Override
+    public String MD5(String str){
+    	return String.format("MD5(%s)", str);
+    }
+    
+    @Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s FROM %s FOR %s)", str, start, end);
+	} 
+    
+    @Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,POSITION(%s IN %s)-1)", str, before, str);
+	}
+    
+    @Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";	
+	} 
+    
+    @Override
+	public String strContainsOperator(){
+		return "POSITION(%2$s IN %1$s) > 0";		
+	}
+    
+    @Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTR(%s,POSITION(REGEXP_REPLACE(%s, (CONCAT('.*',%s) ), '') IN %s))",
+				str, str, after,str); //FIXME when no match found should return empty string
+	}
+    
+    @Override
+    public String dateTimezone(String str){
+    	return String.format("EXTRACT(TIMEZONE_ABBR, %s)", str);
+    }
+    
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {
@@ -83,7 +119,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
 
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes

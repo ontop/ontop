@@ -23,9 +23,30 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
-
+	
+	 @Override
+	  	public String SHA256(String str) {
+	    	return String.format("HASHBYTES('SHA_256',%s)", str);
+	  	}
+	    
+	    @Override
+	  	public String SHA1(String str) {
+	    	return String.format("HASHBYTES('SHA1',%s)", str);
+	  	}
+	    
+	    @Override
+	  	public String SHA512(String str) {
+	    	return String.format("HASHBYTES('SHA_512',%s)", str);
+	  	}
+	      
+	      @Override
+	  	public String MD5(String str) {
+		    	return String.format("HASHBYTES('MD5',%s)", str);
+	  	}
+	
+		
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		

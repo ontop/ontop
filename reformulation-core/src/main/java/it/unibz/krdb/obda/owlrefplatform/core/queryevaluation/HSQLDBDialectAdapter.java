@@ -30,7 +30,7 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 
@@ -48,26 +48,26 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public String strreplace(String str, char oldchar, char newchar) {
+	public String strReplace(String str, char oldchar, char newchar) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	@Override
-	public String strreplace(String str, int start, int end, String with) {
+	public String strReplace(String str, int start, int end, String with) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String strindexOf(String str, char ch) {
+	public String strIndexOf(String str, char ch) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String strindexOf(String str, String strsr) {
+	public String strIndexOf(String str, String strsr) {
 		// TODO Auto-generated method stub
 		return null;
 	}
