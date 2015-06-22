@@ -810,7 +810,10 @@ public class ExpressionEvaluator {
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
 			Constant c1 = (Constant) eval1,
 					 c2 = (Constant) eval2;
-			// FIXME TODO acondolu: revert?
+			/* FIXME acondolu
+			 * is this really necessary?
+			 * (?) How to treat the case 1 =?= 1.0
+			 */
 			if (c1.getType() == null || c2.getType() == null) {
 				return term;
 			}
@@ -829,9 +832,6 @@ public class ExpressionEvaluator {
 				     == Double.parseDouble(c2.getValue())
 				));
 			}
-			
-			System.out.println("YAYYAYYA");
-			// TODO 1 =?= 1.0
 		} 
 		else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;
