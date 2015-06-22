@@ -159,7 +159,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	
 	@Override
 	public String strStartsOperator(){
-		return "SUBSTRING(%2$s, 0, CHAR_LENGTH(%1$s)) LIKE %2$s";	
+		return "SUBSTRING(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";	
 	} 
 	
 	@Override
@@ -196,7 +196,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String strSubstr(String str, String start, String end) {
 		return String.format("SUBSTR(%s,%s,%s)", str, start, end);
-	} //Nika
+	} 
 	
 	@Override
 	public String strReplace(String str, char oldchar, char newchar) {

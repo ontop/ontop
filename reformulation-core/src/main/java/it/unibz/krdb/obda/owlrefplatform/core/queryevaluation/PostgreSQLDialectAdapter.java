@@ -33,13 +33,18 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     }
     
     @Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s FROM %s FOR %s)", str, start, end);
+	} 
+    
+    @Override
 	public String strBefore(String str, String before) {
 		return String.format("LEFT(%s,POSITION(%s IN %s)-1)", str, before, str);
 	}
     
     @Override
 	public String strStartsOperator(){
-		return "SUBSTRING(%1$s FROM 0 FOR CHARACTER_LENGTH(%2$s)) LIKE %2$s";	
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";	
 	} 
     
     @Override

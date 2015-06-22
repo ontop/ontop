@@ -428,6 +428,33 @@ public class BindTestWithFunctionsPostgreSQL {
     } 
     
     
+    @Test
+    public void testStrSubstring() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(SUBSTR(?title,1,STRLEN(?title)) AS ?w)\n"
+                + "   FILTER(STRSTARTS(?title,\"The\"))\n"
+             + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"The Semantic Web\""); 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"");        
+
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+    
+    
      @Test
     public void testContains() throws Exception {
 
