@@ -1,8 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.NonFunctionalTerm;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
@@ -29,6 +29,12 @@ public class VariableCollector implements QueryNodeVisitor {
         for (QueryNode node : nodes) {
             node.acceptVisitor(collector);
         }
+        return collector.collectedVariableBuilder.build();
+    }
+
+    public static ImmutableSet<VariableImpl> collectVariables(QueryNode node) {
+        VariableCollector collector = new VariableCollector();
+        node.acceptVisitor(collector);
         return collector.collectedVariableBuilder.build();
     }
 
@@ -59,7 +65,9 @@ public class VariableCollector implements QueryNodeVisitor {
 
     @Override
     public void visit(ConstructionNode constructionNode) {
+
         collectFromPureAtom(constructionNode.getProjectionAtom());
+        collectFromSubstitution(constructionNode.getSubstitution());
     }
 
     @Override
@@ -71,6 +79,16 @@ public class VariableCollector implements QueryNodeVisitor {
         for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
             if (term instanceof VariableImpl)
                 collectedVariableBuilder.add((VariableImpl)term);
+        }
+    }
+
+    private void collectFromSubstitution(ImmutableSubstitution<ImmutableTerm> substitution) {
+        ImmutableMap<VariableImpl, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
+
+        collectedVariableBuilder.addAll(substitutionMap.keySet());
+        for (ImmutableTerm term : substitutionMap.values()) {
+            // TODO: remove this cast!!!
+            collectedVariableBuilder.addAll((ImmutableSet<VariableImpl>)(ImmutableSet<?>)term.getReferencedVariables());
         }
     }
 

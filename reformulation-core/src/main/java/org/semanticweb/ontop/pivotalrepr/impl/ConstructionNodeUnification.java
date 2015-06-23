@@ -14,44 +14,34 @@ import org.semanticweb.ontop.pivotalrepr.PureDataAtom;
 /**
  * TODO: explain
  *
+ * TODO: remove it
+ *
  */
+@Deprecated
 public class ConstructionNodeUnification {
 
-    private final ImmutableList<VariableImpl> newDataAtomArguments;
     /**
-     * { conflicting var : newly generated var }
+     * Substitution that converts the atom
      */
-    private final InjectiveVar2VarSubstitution conflictMitigatingSubstitution;
-    private final ImmutableSubstitution<GroundTerm> imposedGroundTermSubstitution;
-    /**
-     * { new var : target (used as another argument) }
-     */
-    private final Var2VarSubstitution imposedArgumentEqualitySubstitution;
+    private ImmutableSubstitution<ImmutableTerm> dataAtomSubstitution;
     private final ConstructionNode originalConstructionNode;
 
 
     protected ConstructionNodeUnification(ConstructionNode originalConstructionNode,
                                           IntermediateQuery originalQuery,
-                                          DataAtom targetDataAtom,
-                                          ImmutableSet<VariableImpl> reservedVariables,
-                                          VariableGenerator variableGenerator) {
+                                          DataAtom targetDataAtom) {
 
         this.originalConstructionNode = originalConstructionNode;
 
-        ArgumentsRenaming argumentRenaming = new ArgumentsRenaming(originalConstructionNode, originalQuery, targetDataAtom,
-                reservedVariables, variableGenerator);
+        // TODO: complete
 
-        newDataAtomArguments = argumentRenaming.getNewDataAtomArguments();
-        conflictMitigatingSubstitution = argumentRenaming.getConflictMitigatingSubstitution();
-        imposedGroundTermSubstitution = argumentRenaming.getImposedGroundTermSubstitution();
-        imposedArgumentEqualitySubstitution = argumentRenaming.getArgumentEqualitySubstitution();
     }
 
 
     public ConstructionNode generateNewProjectionNode() {
 
-        PureDataAtom newDataAtom = new PureDataAtomImpl(originalConstructionNode.getProjectionAtom().getPredicate(),
-                newDataAtomArguments);
+//        PureDataAtom newDataAtom = new PureDataAtomImpl(originalConstructionNode.getProjectionAtom().getPredicate(),
+//                newDataAtomArguments);
 
         throw new RuntimeException("Not fully implemented yet");
         // return new ConstructionNodeImpl(newDataAtom, generateAliasSubstitution());
@@ -87,9 +77,9 @@ public class ConstructionNodeUnification {
         int arity = originalArguments.size();
 
         for (int i=0; i < arity ; i++) {
-            substitutionMapBuilder.put(
-                    conflictMitigatingSubstitution.applyToVariable(originalArguments.get(i)),
-                    conflictMitigatingSubstitution.applyToVariable(newDataAtomArguments.get(i)));
+//            substitutionMapBuilder.put(
+//                    conflictMitigatingSubstitution.applyToVariable(originalArguments.get(i)),
+//                    conflictMitigatingSubstitution.applyToVariable(newDataAtomArguments.get(i)));
         }
 
         return new Var2VarSubstitutionImpl(substitutionMapBuilder.build());
@@ -238,7 +228,10 @@ public class ConstructionNodeUnification {
      * ///////////////////////////
      *
      * TODO: explain
+     *
+     * TODO: remove it!!
      */
+    @Deprecated
     private static class ArgumentsRenaming {
         private final ImmutableList.Builder<VariableImpl> newDataAtomArgumentBuilder;
         /**
@@ -407,8 +400,8 @@ public class ConstructionNodeUnification {
             return new ImmutableSubstitutionImpl<>(imposedGroundTermBuilder.build());
         }
 
-        public Var2VarSubstitutionImpl getArgumentEqualitySubstitution() {
-            return new Var2VarSubstitutionImpl(variableEqualityBuilder.build());
+        public InjectiveVar2VarSubstitution getArgumentEqualitySubstitution() {
+            return new InjectiveVar2VarSubstitutionImpl(variableEqualityBuilder.build());
         }
     }
 

@@ -18,7 +18,8 @@ import java.util.Map;
  */
 public class QueryNodeTools {
 
-    public static P2<ImmutableSubstitution<GroundTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> sortBindings(
+    @Deprecated
+    public static P2<ImmutableSubstitution<GroundTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> splitBindings(
             ImmutableMap<VariableImpl, ImmutableTerm> allBindings) {
 
         ImmutableMap.Builder<VariableImpl, GroundTerm> groundBindingBuilder = ImmutableMap.builder();

@@ -16,22 +16,10 @@ public interface ConstructionNode extends QueryNode {
      */
     PureDataAtom getProjectionAtom();
 
-
-    /**
-     * Renamings between PROJECTED variables
-     */
-    IndempotentVar2VarSubstitution getRenamings();
-
-    /**
-     * Projected variables --> ground terms
-     */
-    ImmutableSubstitution<GroundTerm> getGroundTermBindings();
-
     /**
      * Projected variables --> transformed variable
      */
-    ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalBindings();
-
+    ImmutableSubstitution<ImmutableTerm> getSubstitution();
 
     /**
      * TODO: explain

@@ -1,12 +1,15 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.ImmutabilityTools;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utilities for the new generation of (immutable) substitutions
@@ -65,6 +68,33 @@ public class ImmutableSubstitutionUtilities {
         ImmutableSubstitution<ImmutableFunctionalTerm> otherSubstitution = new ImmutableSubstitutionImpl<>(otherMapBuilder.build());
 
         return P.p(functionFreeSubstitution, otherSubstitution);
+    }
+
+    /**
+     * TODO: explain
+     */
+    public static ImmutableSubstitution<ImmutableTerm> convertSubstitution(Substitution substitution) {
+        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
+            ImmutableTerm immutableValue = ImmutabilityTools.convertIntoImmutableTerm(entry.getValue());
+
+            substitutionMapBuilder.put(entry.getKey(), immutableValue);
+
+        }
+        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    public static Optional<ImmutableSubstitution<ImmutableTerm>> getMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
+        Substitution mutableSubstitution = UnifierUtilities.getMGU(term1, term2);
+
+        if (mutableSubstitution == null) {
+            return Optional.absent();
+        }
+        return Optional.of(convertSubstitution(mutableSubstitution));
     }
 
 

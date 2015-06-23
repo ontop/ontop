@@ -12,7 +12,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.DatalogTools;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.IndempotentVar2VarSubstitutionImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
@@ -112,21 +112,19 @@ public class Datalog2IntermediateQueryConverter {
              * TODO: remove this consideration (simplify)
              */
             final boolean allowVariableCreation = false;
-            P3<PureDataAtom, ImmutableSubstitution<GroundTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> decomposition =
+            P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                     convertFromDatalogDataAtom(rootDatalogAtom, allowVariableCreation);
 
             PureDataAtom dataAtom = decomposition._1();
-            ImmutableSubstitution<GroundTerm> groundBindings = decomposition._2();
-            ImmutableSubstitution<ImmutableFunctionalTerm> functionalBindings = decomposition._3();
+            ImmutableSubstitution<ImmutableTerm> substitution = decomposition._2();
 
             ConstructionNode rootNode;
             if (queryModifiers.hasModifiers()) {
                 // TODO: explain
                 ImmutableQueryModifiers immutableQueryModifiers = new ImmutableQueryModifiersImpl(queryModifiers);
-                rootNode = new ConstructionNodeImpl(dataAtom, groundBindings, functionalBindings,
-                        immutableQueryModifiers);
+                rootNode = new ConstructionNodeImpl(dataAtom, substitution, immutableQueryModifiers);
             } else {
-                rootNode = new ConstructionNodeImpl(dataAtom, groundBindings, functionalBindings);
+                rootNode = new ConstructionNodeImpl(dataAtom, substitution);
             }
 
             DataNode dataNode = createDataNode(dataAtom, ImmutableList.<Predicate>of());
@@ -190,10 +188,10 @@ public class Datalog2IntermediateQueryConverter {
         // Non-top rule so ok.
         final boolean allowVariableCreation = true;
 
-        P3<PureDataAtom, ImmutableSubstitution<GroundTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> decomposition =
+        P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                 convertFromDatalogDataAtom(datalogRule.getHead(), allowVariableCreation);
 
-        return new ConstructionNodeImpl(decomposition._1(), decomposition._2(), decomposition._3());
+        return new ConstructionNodeImpl(decomposition._1(), decomposition._2());
     }
 
     private static P2<fj.data.List<Function>, fj.data.List<Function>> classifyAtoms(fj.data.List<Function> atoms)
@@ -360,8 +358,10 @@ public class Datalog2IntermediateQueryConverter {
 
     /**
      * TODO: explain
+     *
+     * TODO: should we simplify it?
      */
-    private static P3<PureDataAtom, ImmutableSubstitution<GroundTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>>
+    private static P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>>
                         convertFromDatalogDataAtom(Function datalogDataAtom, boolean allowVariableCreation)
         throws InvalidDatalogProgramException {
 
@@ -404,12 +404,10 @@ public class Datalog2IntermediateQueryConverter {
         }
 
         PureDataAtom dataAtom = new PureDataAtomImpl(atomPredicate, varListBuilder.build());
-
-        P2<ImmutableSubstitution<GroundTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> decomposition =
-                QueryNodeTools.sortBindings(allBindingBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
 
 
-        return P.p(dataAtom, decomposition._1(), decomposition._2());
+        return P.p(dataAtom, substitution);
     }
 
     /**

@@ -11,68 +11,30 @@ import org.semanticweb.ontop.pivotalrepr.*;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
-    private Optional<ImmutableQueryModifiers> optionalModifiers;
-    private PureDataAtom dataAtom;
-    private final IndempotentVar2VarSubstitution renamings;
-    private final ImmutableSubstitution<GroundTerm> groundTermBindings;
-    private final ImmutableSubstitution<ImmutableFunctionalTerm> functionalBindings;
+    private final Optional<ImmutableQueryModifiers> optionalModifiers;
+    private final PureDataAtom dataAtom;
+    private final ImmutableSubstitution<ImmutableTerm> substitution;
 
     /**
      * Without modifier
      */
-    public ConstructionNodeImpl(PureDataAtom dataAtom, IndempotentVar2VarSubstitution renamings,
-                                ImmutableSubstitution<GroundTerm> groundTermBindings,
-                                ImmutableSubstitution<ImmutableFunctionalTerm> functionalBindings) {
+    public ConstructionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
         this.dataAtom = dataAtom;
-        this.renamings = renamings;
-        this.groundTermBindings = groundTermBindings;
-        this.functionalBindings = functionalBindings;
+        this.substitution = substitution;
         this.optionalModifiers = Optional.absent();
     }
 
-    /**
-     * Without renaming and without modifier
-     */
     public ConstructionNodeImpl(PureDataAtom dataAtom,
-                                ImmutableSubstitution<GroundTerm> groundTermBindings,
-                                ImmutableSubstitution<ImmutableFunctionalTerm> functionalBindings) {
-        this.dataAtom = dataAtom;
-        this.renamings = new IndempotentVar2VarSubstitutionImpl(ImmutableMap.<VariableImpl, VariableImpl>of());
-        this.groundTermBindings = groundTermBindings;
-        this.functionalBindings = functionalBindings;
-        this.optionalModifiers = Optional.absent();
-    }
-
-    public ConstructionNodeImpl(PureDataAtom dataAtom, IndempotentVar2VarSubstitution renamings,
-                                ImmutableSubstitution<GroundTerm> groundTermBindings,
-                                ImmutableSubstitution<ImmutableFunctionalTerm> functionalBindings,
+                                ImmutableSubstitution<ImmutableTerm> substitution,
                                 ImmutableQueryModifiers queryModifiers) {
         this.dataAtom = dataAtom;
-        this.renamings = renamings;
-        this.groundTermBindings = groundTermBindings;
-        this.functionalBindings = functionalBindings;
-        this.optionalModifiers = Optional.of(queryModifiers);
-    }
-
-    /**
-     * Without renaming
-     */
-    public ConstructionNodeImpl(PureDataAtom dataAtom,
-                                ImmutableSubstitution<GroundTerm> groundTermBindings,
-                                ImmutableSubstitution<ImmutableFunctionalTerm> functionalBindings,
-                                ImmutableQueryModifiers queryModifiers) {
-        this.dataAtom = dataAtom;
-        this.renamings = new IndempotentVar2VarSubstitutionImpl(ImmutableMap.<VariableImpl, VariableImpl>of());
-        this.groundTermBindings = groundTermBindings;
-        this.functionalBindings = functionalBindings;
+        this.substitution = substitution;
         this.optionalModifiers = Optional.of(queryModifiers);
     }
 
     public ConstructionNodeImpl(PureDataAtom dataAtom) {
         this.dataAtom = dataAtom;
-        this.renamings = new IndempotentVar2VarSubstitutionImpl(ImmutableMap.<VariableImpl, VariableImpl>of());
-        this.groundTermBindings = new ImmutableSubstitutionImpl<>(ImmutableMap.<VariableImpl, GroundTerm>of());
-        this.functionalBindings = new ImmutableSubstitutionImpl<>(ImmutableMap.<VariableImpl, ImmutableFunctionalTerm>of());
+        this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<VariableImpl, ImmutableTerm>of());
         this.optionalModifiers = Optional.absent();
     }
 
@@ -82,18 +44,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public IndempotentVar2VarSubstitution getRenamings() {
-        return renamings;
-    }
-
-    @Override
-    public ImmutableSubstitution<GroundTerm> getGroundTermBindings() {
-        return groundTermBindings;
-    }
-
-    @Override
-    public ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalBindings() {
-        return functionalBindings;
+    public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
+        return substitution;
     }
 
     @Override
@@ -107,10 +59,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public ConstructionNode clone() {
         if (optionalModifiers.isPresent()) {
-            return new ConstructionNodeImpl(dataAtom, renamings, groundTermBindings, functionalBindings,
-                    optionalModifiers.get());
+            return new ConstructionNodeImpl(dataAtom, substitution, optionalModifiers.get());
         }
-        return new ConstructionNodeImpl(dataAtom, renamings, groundTermBindings, functionalBindings);
+        return new ConstructionNodeImpl(dataAtom, substitution);
     }
 
     @Override
