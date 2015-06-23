@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.HashMultimap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -258,9 +259,7 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	@Override
 	public it.unibz.krdb.obda.model.ResultSet execute(String strquery) throws OBDAException {
-
-
-        if (strquery.isEmpty()) {
+		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
 		ParsedQuery pq = null;
@@ -399,7 +398,7 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules());
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules(), HashMultimap.<Predicate, List<Integer>>create());
 			removeNonAnswerQueries(program);
 
 			program = unfolder.unfold(program, OBDAVocabulary.QUEST_QUERY);

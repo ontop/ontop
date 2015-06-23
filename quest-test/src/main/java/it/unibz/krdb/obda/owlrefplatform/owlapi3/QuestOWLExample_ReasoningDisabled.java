@@ -2,7 +2,11 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 
 
-//import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
+import com.google.common.collect.Lists;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -11,47 +15,358 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
-
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class QuestOWLExample_ReasoningDisabled {
 
+    class Constants {
+        static final int NUM_FILTERS = 3;
+        static final int NUM_SQL_JOINS = 4;
+
+        static final int NUM_RUNS = 2;
+        static final int NUM_WARM_UPS = 4;
+    }
+
     interface ParamConst{
-        public static final String MYSQL  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
-        public static final String POSTGRES = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
-        public static final String DB2 = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
-        public static final String MYSQL_VIEW = "src/main/resources/example/disableReasoning/ontowis-5joins-int-view.obda";
-        public static final String POSTGRES_VIEW = "src/main/resources/example/disableReasoning/ontowis-5joins-int-view-postgres.obda";
-        public static final String DB2_VIEW = "src/main/resources/example/disableReasoning/ontowis-5joins-int-view-db2.obda";
+        public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.obda";
+
+        public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
+
+        public static final String DB2_OBDA_FILE = "src/main/resources/example/disableReasoning/db2_obdalin3.obda";
+
+        public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.obda";
+        public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
+        //public static final String DB2_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
+
+
+        static final String[] tMappingConfFiles = {
+                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_1.conf",
+                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_2.conf",
+                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_3.conf",
+                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_4.conf"
+        };
     }
 
-    public QuestOWLExample_ReasoningDisabled(String obdaFile){
-        this.obdafile = obdaFile;
+    enum DbType {
+        MYSQL, POSTGRES, SMALL_POSTGRES, DB2, SMALL_MYSQL
     }
 
-    /*
-     * Use the sample database using H2 from
-     * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
-     *
-     * Please use the pre-bundled H2 server from the above link
-     *
+    public static class Settings {
+        static String obdaFile;
+        static DbType dbType;
+        static String tMappingConfFile;
+        public static String tableFileName;
+    }
+
+    static class QueryFactory {
+        static private int[] getFilters(DbType type) {
+            int[] filters = new int[Constants.NUM_FILTERS];
+
+            switch(type){
+                case MYSQL:
+                    filters[0] = 1; // 0.001
+                    filters[1] = 100; // 0.1%
+                    filters[2] = 1000; //1%
+                    break;
+                case POSTGRES:
+                    filters[0] = 100;   // 0.0001%
+                    filters[1] = 10000;  // 0.01%
+                    filters[2] = 100000; // 0.1%
+                    break;
+                case SMALL_POSTGRES:
+                    filters[0] = 1; // 0.001%
+                    filters[1] = 100; // 0.005%
+                    filters[2] = 1000; // 0.01%
+                    break;
+                case DB2:
+                    filters[0] = 100;
+                    filters[1] = 10000;
+                    filters[2] = 100000;
+                    break;
+                case SMALL_MYSQL:
+                    filters[0] = 1; // 0.001%
+                    filters[1] = 100; // 0.005%
+                    filters[2] = 1000; // 0.01%
+                    break;
+            }
+            return filters;
+        }
+
+        static String prefix = "PREFIX : <http://www.example.org/> \n";
+
+
+        static public List<String> createSPARQLs_three_concepts(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+//            for(int i1 = 1; i1 <= 4; i1++) {
+//                for (int i2 = 1; i2 <= 4; i2++) {
+//                    for (int i3 = 1; i3 <= 4; i3++) {
+            int[][] indexes = {{1, 2, 3}, {1, 3, 4}, {2, 3, 4}, {4, 4, 4}};
+            for(int[] index : indexes){
+                int i1 = index[0];
+                int i2 = index[1];
+                int i3 = index[2];
+                for (int filter : getFilters(dbType)) {
+                    String sparql = String.format(
+                            "PREFIX : <http://www.example.org/> " +
+                                    "SELECT DISTINCT ?x ?y ?z ?w " +
+                                    " WHERE {" +
+                                    "?x a :A%d . ?x :R ?y . " +
+                                    "?y a :A%d . ?y :R ?z . " +
+                                    "?z a :A%d . ?z :S ?w . " +
+                                    "FILTER (?w < %d)  }",
+                            i1, i2, i3, filter);
+                    sparqls.add(sparql);
+                }
+//                        }
+//                    }
+//                }
+            }
+            return sparqls;
+        }
+
+        static public List<String> createSPARQLs_three_concepts_opt(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+//            for(int i1 = 1; i1 <= 4; i1++) {
+//                for (int i2 = 1; i2 <= 4; i2++) {
+//                    for (int i3 = 1; i3 <= 4; i3++) {
+            int[][] indexes = {{1, 2, 3}, {1, 3, 4}, {2, 3, 4}, {4, 4, 4}};
+            for(int[] index : indexes){
+                int i1 = index[0];
+                int i2 = index[1];
+                int i3 = index[2];
+                for (int filter : getFilters(dbType)) {
+                    String sparql = String.format(
+                            "PREFIX : <http://www.example.org/> " +
+                                    "SELECT DISTINCT ?x ?y ?z ?w " +
+                                    " WHERE {" +
+                                    "?x a :A%d . OPTIONAL { ?x :R ?y . " +
+                                    "?y a :A%d . OPTIONAL { ?y :R ?z . " +
+                                    "?z a :A%d . OPTIONAL { ?z :S ?w . " +
+                                    " } } } FILTER (?w < %d) }",
+                            i1, i2, i3, filter);
+                    sparqls.add(sparql);
+                }
+//                        }
+//                    }
+//                }
+            }
+            return sparqls;
+        }
+        
+        static public List<String> createSPARQLs_two_concepts(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+            //for(int i1 = 1; i1 <= 4; i1++) {
+            //    for (int i2 = 1; i2 <= 4; i2++) {
+
+
+            int[][] indexes = {{1, 2}, {2, 3}, {3, 4}, {4, 4}};
+
+
+            for(int[] index : indexes){
+
+                int i1 = index[0];
+                int i2 = index[1];
+                        for (int filter : getFilters(dbType)) {
+                            String sparql = String.format(
+                                    "PREFIX : <http://www.example.org/> " +
+                                            "SELECT DISTINCT ?x ?y ?z   " +
+                                            " WHERE {" +
+                                            "?x a :A%d. ?x :R ?y . " +
+                                            "?y a :A%d. ?y :S ?z   .  " +
+                                            "FILTER (?z < %d) }",
+                                    i1, i2, filter);
+                            sparqls.add(sparql);
+                        }
+            }
+            //    }
+            //}
+            return sparqls;
+        }
+        
+        static public List<String> createSPARQLs_two_concepts_opt(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+            //for(int i1 = 1; i1 <= 4; i1++) {
+            //    for (int i2 = 1; i2 <= 4; i2++) {
+
+
+            int[][] indexes = {{1, 2}, {2, 3}, {3, 4}, {4, 4}};
+
+
+            for(int[] index : indexes){
+
+                int i1 = index[0];
+                int i2 = index[1];
+                        for (int filter : getFilters(dbType)) {
+                            String sparql = String.format(
+                                    "PREFIX : <http://www.example.org/> " +
+                                            "SELECT DISTINCT ?x ?y ?z   " +
+                                            " WHERE {" +
+                                            "?x a :A%d. "
+                                            + "OPTIONAL { ?x :R ?y . " +
+                                            "?y a :A%d. OPTIONAL { ?y :S ?z   .  " +
+                                            " } } FILTER (?z < %d) }",
+                                    i1, i2, filter);
+                            sparqls.add(sparql);
+                        }
+            }
+            //    }
+            //}
+            return sparqls;
+        }
+
+        static public List<String> createSPARQLs_one_concepts(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+            for(int i1 = 1; i1 <= 4; i1++) {
+                    for (int filter : getFilters(dbType)) {
+                        String sparql = String.format(
+                                "PREFIX : <http://www.example.org/> " +
+                                        " SELECT  DISTINCT ?x  ?y     " +
+                                        " WHERE {" +
+                                        "?x a :A%d. ?x :S ?y ." +
+                                        "FILTER (?y < %d) }",
+                                i1, filter);
+                        sparqls.add(sparql);
+
+
+                }
+            }
+            return sparqls;
+        }
+        
+        static public List<String> createSPARQLs_one_concepts_opt(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+            for(int i1 = 1; i1 <= 4; i1++) {
+                    for (int filter : getFilters(dbType)) {
+                        String sparql = String.format(
+                                "PREFIX : <http://www.example.org/> " +
+                                        " SELECT  DISTINCT ?x  ?y     " +
+                                        " WHERE {" +
+                                        "?x a :A%d. OPTIONAL{ ?x :S ?y } FILTER (?y < %d) } " 
+                                        ,
+                                i1, filter);
+                        sparqls.add(sparql);
+
+
+                }
+            }
+            return sparqls;
+        }
+
+        static public  List<String> getWarmUpQueries() {
+            List<String> warmUpQueries = new ArrayList<>();
+            for(int i = 0; i < Constants.NUM_WARM_UPS; i++){
+                int limit = (i * 1000) + 1;
+                warmUpQueries.add(String.format("SELECT ?x WHERE { " +
+                        "?x a <http://www.example.org/%dTab1> } LIMIT " + limit, i));
+            }
+            return warmUpQueries;
+        }
+    }
+
+    public List<Long> average(List<List<Long>> lists ){
+
+        int numList = lists.size();
+
+        int size = lists.get(0).size();
+
+        List<Long> results = new ArrayList<>();
+
+        for(int i = 0 ; i < size; i++){
+            long sum = 0;
+            for (List<Long> list : lists) {
+                sum += list.get(i);
+            }
+            results.add(sum/numList);
+        }
+        return results;
+    }
+
+
+
+    /**
+     * @throws java.io.UnsupportedEncodingException
+     * @throws java.io.FileNotFoundException
      */
-    final String owlfile = "src/main/resources/example/disableReasoning/ontowis-hierarchy.owl";
-    //final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
-    final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
-    final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
+    private void generateFile(List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree, String tableFileName) throws FileNotFoundException, UnsupportedEncodingException {
+        /*
+		 * Generate File !
+		 */
+        //String tableFileName = "table.txt";
+        PrintWriter writer = new PrintWriter("src/main/resources/example/disableReasoning/" + tableFileName, "UTF-8");
+        PrintWriter writerG = new PrintWriter("src/main/resources/example/disableReasoning/graph.txt", "UTF-8");
 
-    // Exclude from T-Mappings
-    final String tMappingsConfFile = "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm.conf";
+        //writer.write(String.format("%s\n", "# group 1"));
+        int j = 0;
+        int g = 0;
+        for(Long result: resultsOne){
+            writer.write(String.format("%d, %d, %d, %d, %d\n", g, j, j / Constants.NUM_FILTERS, j % Constants.NUM_FILTERS, result));
+            j++;
+        }
 
-    public void runQuery() throws Exception {
+        //writer.write(String.format("%s\n", "# group 2"));
+        j = 0;
+        g++;
+        for(Long result: resultsTwo){
+            writer.write(String.format("%d, %d, %d, %d, %d\n", g, j, j / Constants.NUM_FILTERS, j % Constants.NUM_FILTERS, result));
+            j++;
+        }
+
+        //writer.write(String.format("%s\n", "# group 3"));
+        j = 0;
+        g++;
+        for(Long result: resultsThree){
+            writer.write(String.format("%d, %d, %d, %d, %d\n", g, j, j / Constants.NUM_FILTERS, j % Constants.NUM_FILTERS, result));
+            j++;
+        }
+
+        writer.close();
+        writerG.close();
+    }
+
+    /**
+     * @param conn
+     * @throws org.semanticweb.owlapi.model.OWLException
+     */
+    private void closeEverything(QuestOWLConnection conn) throws OWLException {
+		/*
+		 * Close connection and resources
+		 */
+
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+        }
+        this.reasoner.dispose();
+    }
+
+    /**
+     * @throws it.unibz.krdb.obda.model.OBDAException
+     * @throws org.semanticweb.owlapi.model.OWLOntologyCreationException
+     * @throws it.unibz.krdb.obda.exception.InvalidMappingException
+     * @throws it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException
+     * @throws java.io.IOException
+     * @throws OWLException
+     */
+    private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
 
 		/*
 		 * Load the ontology from an external .owl file.
@@ -65,7 +380,7 @@ public class QuestOWLExample_ReasoningDisabled {
         OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
         OBDAModel obdaModel = fac.getOBDAModel();
         ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
+        ioManager.load(Settings.obdaFile);
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -73,7 +388,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 */
         QuestPreferences preference = new QuestPreferences();
         preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
+        preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -82,135 +397,154 @@ public class QuestOWLExample_ReasoningDisabled {
         factory.setOBDAController(obdaModel);
         factory.setPreferenceHolder(preference);
 
-		/*
-		 * USR CONSTRAINTS !!!!
-		 */
-        ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-        factory.setImplicitDBConstraints(constr);
+        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
+        factory.setExcludeFromTMappingsPredicates(config);
 
-//		/*
-//		 * T-Mappings Handling!!
-//		 */
-//        TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-//        factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
+        this.reasoner = reasoner;
 		/*
 		 * Prepare the data connection for querying.
 		 */
         QuestOWLConnection conn = reasoner.getConnection();
 
+        return conn;
+    }
 
-		/*
-		 * Get the book information that is stored in the database
-		 */
-
-        String[] queries = new String[10];
-        String[] results = new String[10];
+    private QuestOWL reasoner;
 
 
+    public QuestOWLExample_ReasoningDisabled(DbType dbType, String obdaFile, String tMappingsConfFile){
+        Settings.obdaFile = obdaFile;
+        Settings.dbType = dbType;
+        Settings.tMappingConfFile = tMappingsConfFile;
+    }
 
+    /*
+     * Use the sample database using H2 from
+     * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
+     *
+     * Please use the pre-bundled H2 server from the above link
+     *
+     */
+    final String owlfile = "src/main/resources/example/disableReasoning/ontowis-hierarchy.owl";
+    //final String obdaFile = "src/main/resources/example/ontowis-5joins-int-view.obda";
+    //final String obdaFile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
 
-        queries[0]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5}  ";
-        queries[1]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4}  ";
-        queries[2]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3}  ";
-        queries[3]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2}  ";
-        queries[4]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1}  ";
+    //private final DbType dbType;
 
-        queries[5]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. ?x a  :B5}  ";
-        queries[6]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. ?x a  :B4}  ";
-        queries[7]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3}  ";
-        queries[8]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2}  ";
-        queries[9]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1}  ";
-/*
-        queries[10]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. FILTER (?x < 1000). }  ";
-        queries[11]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. FILTER (?x < 1000). }  ";
-        queries[12]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. FILTER (?x < 1000). }  ";
-        queries[13]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. FILTER (?x < 1000). }  ";
-        queries[14]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. FILTER (?x < 1000). }  ";
+    // Exclude from T-Mappings
+    String tMappingsConfFile;
 
-        queries[15]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. ?x a  :B5. FILTER (?x < 1000). }  ";
-        queries[16]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. ?x a  :B4. FILTER (?x < 1000). }  ";
-        queries[17]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3. FILTER (?x < 1000). }  ";
-        queries[18]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2. FILTER (?x < 1000). }  ";
-        queries[19]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1. FILTER (?x < 1000). }  ";
+    public void runQuery() throws Exception {
 
-*/
-        /*
-        queries[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 1000)  } ";
-        queries[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 2000)  } ";
-        queries[3]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 5000)  } ";
-        queries[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 10000)  } ";
-        queries[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 50000)  } ";
+        //	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
 
+        // QuestOWLConnection conn =  createStuff();
 
-        queries[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .}  ";
-        queries[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 1000)  } ";
-        queries[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 2000)  } ";
-        queries[9]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 5000)  } ";
-        queries[10]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 10000)  } ";
-        queries[11]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 50000)  } ";
-
-
-        queries[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y .} ";
-        queries[13]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 1000)  }";
-        queries[14]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 2000)  } ";
-        queries[15]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 5000)  } ";
-        queries[16]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 10000)  } ";
-        queries[17]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 50000)  } ";
+        // Results
+        List<List<Long>> resultsOne_list = new ArrayList<>();
+        List<List<Long>> resultsTwo_list = new ArrayList<>();
+        List<List<Long>> resultsThree_list = new ArrayList<>();
 
 
 
+        // for testing TIMEOUT ONLY
 
-        queries[18]="PREFIX :	<http://www.example.org/>  SELECT ?x ?y  WHERE {?x a  :4Tab1 . ?x :Tab5unique2Tab5 ?y .} ";
-        queries[19]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 1000)  } ";
-        queries[20]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 2000)  } ";
-        queries[21]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 5000)  } ";
-        queries[22]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 10000)  } ";
-        queries[23]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 50000)  } ";
+//        int length = QueryFactory.createSPARQLs_three_concepts(Settings.dbType).size();
+//        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts(Settings.dbType).get(length-1)));
+//        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts(Settings.dbType).get(length-1)));
 
+        // System.exit(0);
 
+        runQueries(QueryFactory.getWarmUpQueries());
 
+        for(int i = 0; i < Constants.NUM_RUNS; i++) {
+            List<Long> resultsOne = runQueries(//conn,
+                    QueryFactory.createSPARQLs_one_concepts_opt(Settings.dbType));
+            resultsOne_list.add(resultsOne);
 
-        queries[24]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 . } ";
-*/
+            List<Long> resultsTwo = runQueries(//conn,
+                    QueryFactory.createSPARQLs_two_concepts_opt(Settings.dbType));
+            resultsTwo_list.add(resultsTwo);
 
+            List<Long> resultsThree = runQueries(//conn,
+                    QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType));
+            resultsThree_list.add(resultsThree);
+        }
+        //closeEverything(conn);
 
-        int j=0;
-        while (j < queries.length){
-            String sparqlQuery = queries[j];
-            QuestOWLStatement st = conn.createStatement();
+        List<Long> avg_resultsOne = average(resultsOne_list);
+        List<Long> avg_resultsTwo = average(resultsTwo_list);
+        List<Long> avg_resultsThree = average(resultsThree_list);
+
+        generateFile(avg_resultsOne, avg_resultsTwo, avg_resultsThree, Settings.tableFileName);
+
+    }
+
+    private List<Long> runQueries(//QuestOWLConnection conn,
+                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, OBDAException, IOException {
+
+        //int nWarmUps = Constants.NUM_WARM_UPS;
+        //int nRuns = Constants.NUM_RUNS;
+
+        List<Long> results = new ArrayList<>();
+
+        for(String sparqlQuery:queries){
+            //String sparqlQuery = queries[j];
+
+            QuestOWLConnection conn;
+            QuestOWLStatement st = null;
             try {
+
+                // Warm ups
+//				for (int i=0; i<nWarmUps; ++i){
+//					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+//					int columnSize = rs.getColumnCount();
+//					while (rs.nextRow()) {
+//						for (int idx = 1; idx <= columnSize; idx++) {
+//							@SuppressWarnings("unused")
+//							OWLObject binding = rs.getOWLObject(idx);
+//							//System.out.print(binding.toString() + ", ");
+//						}
+//						//System.out.print("\n");
+//					}
+//				}
+//
 
                 long time = 0;
                 int count = 0;
 
-                for (int i=0; i<4; i++){
-                    long t1 = System.currentTimeMillis();
-                    QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-                    int columnSize = rs.getColumnCount();
-                    count = 0;
-                    while (rs.nextRow()) {
-                        count ++;
-                        for (int idx = 1; idx <= columnSize; idx++) {
-                            OWLObject binding = rs.getOWLObject(idx);
-                            //System.out.print(binding.toString() + ", ");
-                        }
-                        //System.out.print("\n");
-                    }
-                    long t2 = System.currentTimeMillis();
-                    time = time + (t2-t1);
-                    System.out.println("partial time:" + time);
-                    System.out.println("query results:" + count);
-                    rs.close();
-                }
+                conn = createStuff();
 
-	 			/*
+                st = conn.createStatement();
+
+                //for (int i=0; i<nRuns; ++i){
+                long t1 = System.currentTimeMillis();
+                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+                int columnSize = rs.getColumnCount();
+                count = 0;
+                while (rs.nextRow()) {
+                    count ++;
+                    for (int idx = 1; idx <= columnSize; idx++) {
+                        @SuppressWarnings("unused")
+                        OWLObject binding = rs.getOWLObject(idx);
+                        //System.out.print(binding.toString() + ", ");
+                    }
+                    //System.out.print("\n");
+                }
+                long t2 = System.currentTimeMillis();
+                //time = time + (t2-t1);
+                time =  (t2-t1);
+                System.out.println("partial time:" + time);
+                rs.close();
+                //}
+
+				/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                String sqlQuery = st.getUnfolding(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -224,96 +558,100 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");
-                System.out.println((time/4) + "ms");
+                System.out.println(time + "ms");
 
-                results[j] = (time/4) + "ms";
+                results.add(time);
 
                 System.out.println("The number of results:");
                 System.out.println("=====================");
                 System.out.println(count);
+
+                closeEverything(conn);
 
             } finally {
                 if (st != null && !st.isClosed()) {
                     st.close();
                 }
             }
-            j++;
+
         }
 
-		/*
-		 * Close connection and resources
-		 */
-
-        if (conn != null && !conn.isClosed()) {
-            conn.close();
-        }
-        reasoner.dispose();
-
-
-
-		/*
-		 * Printing results !
-		 */
-
-        j=0;
-        while (j<queries.length){
-            System.out.println( results[j]);
-            j++;
-        }
-
-//		String sparqlQuery =
-//				//"PREFIX :	<http://www.example.org/> \n" +
-////						"SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .}  " ;
-//					"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .}    " ;
-
-
-//		FileWriter statsWriter = new FileWriter(statsFile);
-//		statsWriter.write(Statistics.printStats());
-//		statsWriter.flush();
-//		statsWriter.close();
-
+        return results;
     }
+
 
     /**
      * Main client program
      */
     public static void main(String[] args) {
 
-        String obdaFile = null;
+        String arg;
 
-        switch(args[0]){
-            case "--MYSQL":{
-                obdaFile = ParamConst.MYSQL;
-                break;
-            }
-            case "--POSTGRES":{
-                obdaFile = ParamConst.POSTGRES;
-                break;
-            }
-            case "--DB2" :{
-                obdaFile = ParamConst.DB2;
-                break;
-            }
-            case "--MYSQL-VIEW":{
-                obdaFile = ParamConst.MYSQL_VIEW;
-                break;
-            }
-            case "--POSTGRES-VIEW":{ //In the old jar, view is uncapitalized
-                obdaFile = ParamConst.POSTGRES_VIEW;
-                break;
-            }
-            case "--DB2-VIEW":{
-                obdaFile = ParamConst.DB2_VIEW;
-                break;
-            }
-
-
+        if(args.length > 0){
+            arg = args[0];
+            Settings.tMappingConfFile = ParamConst.tMappingConfFiles[Integer.parseInt(args[1])];
+            Settings.tableFileName = String.format("table-%s.txt", args[1]);
+        } else {
+            arg = "--MYSQL-SMALL";
+            Settings.tMappingConfFile = ParamConst.tMappingConfFiles[0];
+            Settings.tableFileName = "table-0.txt";
         }
+
+        defaults(arg);
+
         try {
-            QuestOWLExample_ReasoningDisabled example = new QuestOWLExample_ReasoningDisabled(obdaFile);
+            QuestOWLExample_ReasoningDisabled example = new QuestOWLExample_ReasoningDisabled(
+                    Settings.dbType, Settings.obdaFile, Settings.tMappingConfFile);
             example.runQuery();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private static void defaults(String string) {
+
+        switch(string){
+            case "--MYSQL-SMALL":{
+                Settings.obdaFile = ParamConst.MYSQL_SMALL_OBDA_FILE;
+                Settings.dbType = DbType.MYSQL;
+                break;
+            }
+            case "--MYSQL":{
+                Settings.obdaFile = ParamConst.MYSQL_OBDA_FILE;
+                Settings.dbType = DbType.MYSQL;
+                break;
+            }
+            case "--POSTGRES-SMALL":{
+                Settings.obdaFile = ParamConst.POSTGRES_SMALL_OBDA_FILE;
+                Settings.dbType = DbType.SMALL_POSTGRES;
+                break;
+            }
+            case "--POSTGRES":{
+                Settings.obdaFile = ParamConst.POSTGRES_OBDA_FILE;
+                Settings.dbType = DbType.POSTGRES;
+                break;
+            }
+            case "--DB2":{
+                Settings.obdaFile = ParamConst.DB2_OBDA_FILE;
+                Settings.dbType = DbType.DB2;
+                break;
+            }
+
+            default :{
+                System.out.println(
+                        "Options:\n\n"
+                                + "\n\n"
+                                + "--MYSQL-SMALL; "
+                                + "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
+                                + "--DB2; "
+                                + "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
+                                + "\n\n"
+                                + "The concepts for which T-mappings should"
+                                + "be disabled are defined the file tMappingsConf.conf");
+                System.exit(0);
+                break;
+            }
+        }
+    }
+
 }

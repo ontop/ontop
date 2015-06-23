@@ -193,14 +193,19 @@ public class TMappingProcessor {
 	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
-			boolean full) {
-		
+			boolean full, TMappingExclusionConfig excludeFromTMappings) {
+
 		for (Equivalences<ObjectPropertyExpression> propertySet : dag) {
 
 			ObjectPropertyExpression current = propertySet.getRepresentative();
 			if (current.isInverse())
 				continue;
-			
+
+			// for optimization
+			if(excludeFromTMappings.contains(current)){
+				continue;
+			}
+
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
@@ -277,12 +282,16 @@ public class TMappingProcessor {
 	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag, 
-			boolean full) {
+			boolean full, TMappingExclusionConfig excludeFromTMappings) {
 		
 		for (Equivalences<DataPropertyExpression> propertySet : dag) {
 
 			DataPropertyExpression current = propertySet.getRepresentative();
-			
+
+			// for optimization
+			if(excludeFromTMappings.contains(current)){
+				continue;
+			}
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
@@ -344,8 +353,12 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc) {
-
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+		
+		if(excludeFromTMappings == null){
+			throw new NullPointerException("excludeFromTMappings");
+		}
+		
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<>();
 
 		Map<Predicate, List<TMappingRule>> originalMappingIndex = new HashMap<>();
@@ -383,8 +396,8 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), full);
-		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), full);
+		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), full, excludeFromTMappings);
+		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), full, excludeFromTMappings);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
@@ -398,6 +411,12 @@ public class TMappingProcessor {
 
 			OClass current = (OClass)classSet.getRepresentative();
 
+			// FIXME: consider equivalences
+            // USE OF excludeFromTMappings
+			if(excludeFromTMappings.contains(current)){
+				continue;
+			}
+
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
@@ -405,7 +424,8 @@ public class TMappingProcessor {
 			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
 				for (ClassExpression childDescription : descendants) {
 
-					/* adding the mappings of the children as own mappings, the new
+
+                    /* adding the mappings of the children as own mappings, the new
 					 * mappings. There are three cases, when the child is a named
 					 * class, or when it is an \exists P or \exists \inv P. 
 					 */
@@ -419,6 +439,14 @@ public class TMappingProcessor {
 						childPredicate = ((OClass) childDescription).getPredicate();
 						isClass = true;
 						isInverse = false;
+
+                        /*
+                         * USE OF excludeFromTMappings
+                         */
+                        if(excludeFromTMappings.contains((OClass) childDescription)){
+                            continue;
+                        }
+
 					} 
 					else if (childDescription instanceof ObjectSomeValuesFrom) {
 						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
