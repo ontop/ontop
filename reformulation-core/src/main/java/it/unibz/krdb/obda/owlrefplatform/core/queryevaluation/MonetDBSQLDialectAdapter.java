@@ -103,7 +103,7 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
             return "";
         }
         else if ((limit >= 0) && (offset >= 0)) {
-            return String.format("LIMIT %d, %d", offset, limit);
+            return String.format("LIMIT %d OFFSET %d", offset, limit);
         }
         else if (offset < 0) {
             return String.format("LIMIT %d", limit);

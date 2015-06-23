@@ -19,6 +19,9 @@ public class MonetDBTest {
         final String owlfile = "src/test/resources/example/booktutorial.owl";
         final String obdafile = "src/test/resources/example/booktutorial.obda";
 
+//    final String owlfile = "src/test/resources/example/exampleBooks.owl";
+//    final String obdafile = "src/test/resources/example/exampleBooks.obda";
+
         @Test
         public void runQuery() throws Exception {
             /* 
@@ -48,7 +51,14 @@ public class MonetDBTest {
             QuestOWLFactory factory = new QuestOWLFactory();
             factory.setOBDAController(obdaModel);
             factory.setPreferenceHolder(preference);
-            Class.forName("nl.cwi.monetdb.jdbc.MonetDriver");
+
+            try {
+                Class.forName("nl.cwi.monetdb.jdbc.MonetDriver");
+            }catch (ClassNotFoundException e){
+                //do nothing
+            }
+
+
             QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
             /* 
@@ -61,15 +71,19 @@ public class MonetDBTest {
             * Get the book information that is stored in the database 
             */
             String sparqlQuery =
-//                    "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
-//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-//                    "select ?x ?y where {?x rdf:type :Author. ?x :name ?y}";
                     "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "select ?title ?author ?genre ?edition where {\n" +
-                    "?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z.\n" +
-                            "?y a :Author; :name ?author.\n"+
-                        "?z a :Edition; :editionNumber ?edition}";
+                    "select ?x ?y where {?x rdf:type :Author. ?x :name ?y. FILTER regex(?y,\"Carr\")}";
+//                    "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                    "select ?title ?author ?genre ?edition where {\n" +
+//                    "?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z.\n" +
+//                            "?y a :Author; :name ?author.\n"+
+//                        "?z a :Edition; :editionNumber ?edition}";
+//                    "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n"+
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
+//                    "select ?x ?y ?z where {?x rdf:type :SpecialEdition. ?x :dateOfPublication ?y. ?x :editionNumber ?z}";
+
             try {
                 long t1 = System.currentTimeMillis();
                 QuestOWLResultSet rs = st.executeTuple(sparqlQuery);

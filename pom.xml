@@ -538,7 +538,8 @@
             <dependency>
                 <groupId>monetdb</groupId>
                 <artifactId>monetdb-jdbc</artifactId>
-                <version>2.15</version>
+                <!--<version>2.15</version>-->
+                <version>11.19.15</version>
             </dependency>
 			
 			<!-- Optique R2RML API -->
@@ -557,7 +558,17 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<repositories>	
+	<repositories>
+
+        <repository>
+            <!-- for monetdb -->
+            <id>clojars.org</id>
+            <url>http://clojars.org/repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+
 		<repository>
 			<!-- for R2RML api -->
 			<id>bolzano-nexus-public</id>
