@@ -25,7 +25,7 @@ public class IntermediateQueryUtils {
             return Optional.of(firstDefinition);
         }
 
-        PureDataAtom headAtom = firstDefinition.getRootProjectionNode().getProjectionAtom();
+        DataAtom headAtom = firstDefinition.getRootProjectionNode().getProjectionAtom();
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -46,7 +46,7 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery initMergedDefinition(PureDataAtom headAtom) throws QueryMergingException {
+    private static IntermediateQuery initMergedDefinition(DataAtom headAtom) throws QueryMergingException {
         ConstructionNode rootNode = new ConstructionNodeImpl(headAtom);
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(headAtom);
@@ -70,7 +70,7 @@ public class IntermediateQueryUtils {
         try {
             IntermediateQueryBuilder queryBuilder = convertToBuilder(mergedDefinition);
             ConstructionNode rootConstructionNode = queryBuilder.getRootConstructionNode();
-            PureDataAtom dataAtom = rootConstructionNode.getProjectionAtom();
+            DataAtom dataAtom = rootConstructionNode.getProjectionAtom();
 
             UnionNode unionNode = extractUnionNode(queryBuilder, rootConstructionNode);
 
@@ -149,8 +149,8 @@ public class IntermediateQueryUtils {
         ConstructionNode root1 = definition1.getRootProjectionNode();
         ConstructionNode root2 = definition2.getRootProjectionNode();
 
-        PureDataAtom headAtom1 = root1.getProjectionAtom();
-        PureDataAtom headAtom2 = root2.getProjectionAtom();
+        DataAtom headAtom1 = root1.getProjectionAtom();
+        DataAtom headAtom2 = root2.getProjectionAtom();
 
         if (!headAtom1.isEquivalent(headAtom2)) {
             throw new QueryMergingException("Two definitions of different things: "

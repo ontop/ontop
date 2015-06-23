@@ -14,7 +14,7 @@ public interface ConstructionNode extends QueryNode {
     /**
      * Data atom containing the projected variables
      */
-    PureDataAtom getProjectionAtom();
+    DataAtom getProjectionAtom();
 
     /**
      * Projected variables --> transformed variable

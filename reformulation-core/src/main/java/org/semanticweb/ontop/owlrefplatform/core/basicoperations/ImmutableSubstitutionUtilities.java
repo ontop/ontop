@@ -1,13 +1,20 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutabilityTools;
+import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
+import org.semanticweb.ontop.pivotalrepr.impl.AtomPredicateImpl;
 
+import javax.xml.crypto.Data;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +22,9 @@ import java.util.Set;
  * Utilities for the new generation of (immutable) substitutions
  */
 public class ImmutableSubstitutionUtilities {
+
+    private static String PREDICATE_STR = "pred";
+
 
     /**
      * Extracts the sub-set of the substitution entries that are var-to-var mappings.
@@ -88,7 +98,7 @@ public class ImmutableSubstitutionUtilities {
      * TODO: explain
      *
      */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> getMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
+    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
         Substitution mutableSubstitution = UnifierUtilities.getMGU(term1, term2);
 
         if (mutableSubstitution == null) {
@@ -97,5 +107,50 @@ public class ImmutableSubstitutionUtilities {
         return Optional.of(convertSubstitution(mutableSubstitution));
     }
 
+    /**
+     * TODO: explain
+     *
+     */
+    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUU(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
+                                                                             ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
 
+        ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
+
+        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution1.getImmutableMap().entrySet()) {
+            firstArgListBuilder.add(entry.getKey());
+            secondArgListBuilder.add(entry.getValue());
+        }
+
+        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution2.getImmutableMap().entrySet()) {
+            firstArgListBuilder.add(entry.getKey());
+            secondArgListBuilder.add(entry.getValue());
+        }
+
+        ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
+        ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
+
+        OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
+        Predicate predicate = new AtomPredicateImpl(PREDICATE_STR, firstArgList.size());
+
+        ImmutableFunctionalTerm functionalTerm1 = factory.getImmutableFunctionalTerm(predicate, firstArgList);
+        ImmutableFunctionalTerm functionalTerm2 = factory.getImmutableFunctionalTerm(predicate, secondArgList);
+
+        return computeMGU(functionalTerm1, functionalTerm2);
+    }
+
+    /**
+     * TODO: explain
+     */
+    public static ImmutableSubstitution<ImmutableTerm> renameSubstitution(final ImmutableSubstitution<ImmutableTerm> substitutionToRename,
+                                                                          final ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions) {
+
+        // Non-final
+        ImmutableSubstitution<ImmutableTerm> renamedSubstitution = substitutionToRename;
+        for (InjectiveVar2VarSubstitution renamingSubstitution : renamingSubstitutions) {
+            renamedSubstitution = renamingSubstitution.applyRenaming(renamedSubstitution);
+        }
+
+        return renamedSubstitution;
+    }
 }

@@ -12,34 +12,33 @@ import org.semanticweb.ontop.pivotalrepr.*;
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
-    private final PureDataAtom dataAtom;
+    private final DataAtom dataAtom;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
 
     /**
      * Without modifier
      */
-    public ConstructionNodeImpl(PureDataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
+    public ConstructionNodeImpl(DataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
         this.dataAtom = dataAtom;
         this.substitution = substitution;
         this.optionalModifiers = Optional.absent();
     }
 
-    public ConstructionNodeImpl(PureDataAtom dataAtom,
-                                ImmutableSubstitution<ImmutableTerm> substitution,
+    public ConstructionNodeImpl(DataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution,
                                 ImmutableQueryModifiers queryModifiers) {
         this.dataAtom = dataAtom;
         this.substitution = substitution;
         this.optionalModifiers = Optional.of(queryModifiers);
     }
 
-    public ConstructionNodeImpl(PureDataAtom dataAtom) {
+    public ConstructionNodeImpl(DataAtom dataAtom) {
         this.dataAtom = dataAtom;
         this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<VariableImpl, ImmutableTerm>of());
         this.optionalModifiers = Optional.absent();
     }
 
     @Override
-    public PureDataAtom getProjectionAtom() {
+    public DataAtom getProjectionAtom() {
         return dataAtom;
     }
 

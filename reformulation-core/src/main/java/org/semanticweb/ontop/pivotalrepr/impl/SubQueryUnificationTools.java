@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -9,6 +10,9 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.model.Var2VarSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
@@ -77,8 +81,8 @@ public class SubQueryUnificationTools {
     /**
      * TODO: explain
      */
-    protected static P2<ConstructionNode, Var2VarSubstitution> unifyConstructionNode(ConstructionNode constructionNode,
-                                                                                     DataAtom targetAtom)
+    protected static P2<ConstructionNode, ImmutableSubstitution<VariableOrGroundTerm>> unifyConstructionNode(ConstructionNode constructionNode,
+                                                                                                             DataAtom targetAtom)
             throws SubQueryUnificationException{
 
         if (!haveDisjunctVariableSets(constructionNode, targetAtom)) {
@@ -89,15 +93,146 @@ public class SubQueryUnificationTools {
         ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution = extractAtomSubstitution(
                 constructionNode.getProjectionAtom(), targetAtom);
 
-        // TODO: continue
+        P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableSubstitution<VariableOrGroundTerm>> decomposition
+                = splitAtomSubstitution(atomSubstitution);
+
+        ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions = decomposition._1();
+        ImmutableSubstitution<VariableOrGroundTerm> additionalConstraintSubstitution = decomposition._2();
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = ImmutableSubstitutionUtilities.computeMGUU(
+                additionalConstraintSubstitution, constructionNode.getSubstitution());
+
+        if (!optionalConstraintUnifier.isPresent()) {
+            // TODO: Is it an internal error?
+            throw new SubQueryUnificationException("Constraints could not be unified");
+        }
+        ImmutableSubstitution<ImmutableTerm> constraintUnifier = optionalConstraintUnifier.get();
+
+        ImmutableSubstitution<ImmutableTerm> filteredConstraintSubstitution = extractConstraintsNotEncodedInAtom(
+                constraintUnifier, additionalConstraintSubstitution);
+
+
+        ImmutableSubstitution<ImmutableTerm> newConstructionNodeSubstitution = ImmutableSubstitutionUtilities.renameSubstitution(
+                filteredConstraintSubstitution, renamingSubstitutions);
+
+        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = extractSubstitutionToPropagate(atomSubstitution,
+                constraintUnifier, filteredConstraintSubstitution);
+
+
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution);
+        return P.p(newConstructionNode, substitutionToPropagate);
+    }
+
+    /**
+     * TODO: implement it
+     */
+    private static ImmutableSubstitution<VariableOrGroundTerm> extractSubstitutionToPropagate(
+            ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution,
+            ImmutableSubstitution<ImmutableTerm> constraintUnifier,
+            ImmutableSubstitution<ImmutableTerm> filteredConstraintSubstitution) {
+        throw new RuntimeException("Not fully implemented yet");
+    }
+
+    /**
+     * TODO: explain it
+     */
+    private static ImmutableSubstitution<ImmutableTerm> extractConstraintsNotEncodedInAtom(
+            ImmutableSubstitution<ImmutableTerm> constraintUnifier,
+            ImmutableSubstitution<VariableOrGroundTerm> constraintsFromAtoms) {
+        if (constraintsFromAtoms.isEmpty())
+            return constraintUnifier;
+
+        ImmutableSet<VariableImpl> variablesToFilterOut = constraintsFromAtoms.getImmutableMap().keySet();
+        ImmutableMap<VariableImpl, ImmutableTerm> constraintMap = constraintUnifier.getImmutableMap();
+
+        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (VariableImpl variable : constraintMap.keySet()) {
+            if (!variablesToFilterOut.contains(variable)) {
+                substitutionMapBuilder.put(variable, constraintMap.get(variable));
+            }
+        }
+
+        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private static P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableSubstitution<VariableOrGroundTerm>>
+                splitAtomSubstitution(ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution) {
+
+        ImmutableMap<VariableImpl, VariableOrGroundTerm> originalMap = atomSubstitution.getImmutableMap();
+        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> constraintMapBuilder = ImmutableMap.builder();
+        Set<VariableImpl> originalVariablesToRename = new HashSet<>();
 
         /**
-         * TODO: fill data
+         * Extracts var-to-ground-term constraints and collects original variables that will be renamed
          */
-        ConstructionNode newConstructionNode = null;
-        Var2VarSubstitution propagatedSubstitution = null;
-        return P.p(newConstructionNode, propagatedSubstitution);
+        for (Map.Entry<VariableImpl, VariableOrGroundTerm> entry : originalMap.entrySet()) {
+            VariableOrGroundTerm targetTerm = entry.getValue();
+            VariableImpl originalVariable = entry.getKey();
+
+            if (targetTerm instanceof GroundTerm) {
+                constraintMapBuilder.put(originalVariable, targetTerm);
+            }
+            else {
+                originalVariablesToRename.add(originalVariable);
+            }
+        }
+
+        /**
+         * Extracts the injective renaming substitutions and some additional constraints.
+         */
+        P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<VariableImpl, VariableOrGroundTerm>> extractedPair
+                = extractRenamingSubstitutions(originalMap, originalVariablesToRename);
+        ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions = extractedPair._1();
+        constraintMapBuilder.putAll(extractedPair._2());
+
+        ImmutableSubstitution<VariableOrGroundTerm> constraintSubstitution = new ImmutableSubstitutionImpl<>(
+                constraintMapBuilder.build());
+        return P.p(renamingSubstitutions, constraintSubstitution);
     }
+
+    /**
+     * Creates the injective renaming substitutions and extracts additional constraints.
+     *
+     * TODO: Further explain
+     *
+     */
+    private static P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<VariableImpl, VariableOrGroundTerm>>
+                extractRenamingSubstitutions(ImmutableMap<VariableImpl, VariableOrGroundTerm> originalMap,
+                                             Set<VariableImpl> originalVariablesToRenameLater) {
+
+        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> additionalConstraintMapBuilder = ImmutableMap.builder();
+
+        ImmutableList.Builder<InjectiveVar2VarSubstitution> renamingListBuilder = ImmutableList.builder();
+
+        while (!originalVariablesToRenameLater.isEmpty()) {
+            Map<VariableImpl, VariableImpl> renamingMap = new HashMap<>();
+
+            Set<VariableImpl> originalVariablesToRenameNow = originalVariablesToRenameLater;
+            originalVariablesToRenameLater = new HashSet<>();
+
+            for (VariableImpl originalVariable : originalVariablesToRenameNow) {
+                VariableImpl targetVariable = (VariableImpl) originalMap.get(originalVariable);
+
+                if (renamingMap.values().contains(targetVariable)) {
+                    originalVariablesToRenameLater.add(originalVariable);
+                    additionalConstraintMapBuilder.put(targetVariable, originalVariable);
+                }
+                else {
+                    renamingMap.put(originalVariable, targetVariable);
+                }
+            }
+            // Creates a new renaming substitution
+            renamingListBuilder.add(new InjectiveVar2VarSubstitutionImpl(renamingMap));
+        }
+
+        return P.p(renamingListBuilder.build(), additionalConstraintMapBuilder.build());
+    }
+
+
 
     /**
      * TODO: explain

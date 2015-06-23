@@ -63,9 +63,9 @@ public class DetypingOptimizer implements QueryOptimizer {
      *
      * TODO: see how to behave with aggregates.
      */
-    private ImmutableList<Function> extractTypes(PureDataAtom headAtom) {
+    private ImmutableList<Function> extractTypes(DataAtom headAtom) {
         ImmutableList.Builder<Function> typeBuilder = ImmutableList.builder();
-        for (Term term : headAtom.getTerms()) {
+        for (Term term : headAtom.getImmutableTerms()) {
             if (term instanceof Function) {
                 typeBuilder.add((Function) term);
             }

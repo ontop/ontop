@@ -66,7 +66,7 @@ public class VariableCollector implements QueryNodeVisitor {
     @Override
     public void visit(ConstructionNode constructionNode) {
 
-        collectFromPureAtom(constructionNode.getProjectionAtom());
+        collectFromAtom(constructionNode.getProjectionAtom());
         collectFromSubstitution(constructionNode.getSubstitution());
     }
 
@@ -90,9 +90,5 @@ public class VariableCollector implements QueryNodeVisitor {
             // TODO: remove this cast!!!
             collectedVariableBuilder.addAll((ImmutableSet<VariableImpl>)(ImmutableSet<?>)term.getReferencedVariables());
         }
-    }
-
-    private void collectFromPureAtom(PureDataAtom atom) {
-        collectedVariableBuilder.addAll(atom.getVariableTerms());
     }
 }

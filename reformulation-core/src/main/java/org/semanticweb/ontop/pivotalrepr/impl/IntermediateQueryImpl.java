@@ -181,7 +181,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      *
      * TODO: explain
      */
-    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(PureDataAtom subsumingDataAtom)
+    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(DataAtom subsumingDataAtom)
             throws InconsistentIntermediateQueryException {
         ImmutableList.Builder<OrdinaryDataNode> listBuilder = ImmutableList.builder();
         try {

@@ -9,7 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
  */
 public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
 
-    protected AtomPredicateImpl(String name, int arity) {
+    public AtomPredicateImpl(String name, int arity) {
         super(name, arity, null);
     }
 
