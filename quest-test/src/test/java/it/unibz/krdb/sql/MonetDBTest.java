@@ -52,13 +52,6 @@ public class MonetDBTest {
             factory.setOBDAController(obdaModel);
             factory.setPreferenceHolder(preference);
 
-            try {
-                Class.forName("nl.cwi.monetdb.jdbc.MonetDriver");
-            }catch (ClassNotFoundException e){
-                //do nothing
-            }
-
-
             QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
             /* 

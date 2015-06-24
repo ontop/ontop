@@ -315,6 +315,13 @@ public class ModelIOManager {
             } else if (parameter.equals(Label.password.name())) {
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, inputParamter);
             } else if (parameter.equals(Label.driverClass.name())) {
+                //Class.forName was added for MonetDB driver.
+                // Because it does not work without it.
+                try {
+                    Class.forName(inputParamter);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);
             } else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", parameter, lineNumber);
