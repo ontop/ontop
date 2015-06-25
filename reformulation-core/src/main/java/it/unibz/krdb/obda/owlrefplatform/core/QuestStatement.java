@@ -689,14 +689,14 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * Returns the number of tuples returned by the query
 	 */
-	public int getTupleCount(String query) throws Exception {
+	public long getTupleCount(String query) throws Exception {
 
 		String unf = getUnfolding(query);
 		String newsql = "SELECT count(*) FROM (" + unf + ") t1";
 		if (!canceled) {
 			ResultSet set = sqlstatement.executeQuery(newsql);
 			if (set.next()) {
-				return set.getInt(1);
+				return set.getLong(1);
 			} else {
 				throw new Exception("Tuple count failed due to empty result set.");
 			}
