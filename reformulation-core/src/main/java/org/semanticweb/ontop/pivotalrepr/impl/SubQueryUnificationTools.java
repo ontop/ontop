@@ -59,16 +59,18 @@ public class SubQueryUnificationTools {
                 unifyConstructionNode(renamer.transform(originalRootNode), targetDataAtom);
         final ConstructionNode unifiedRoot = rootUnificationResults._1();
 
-        // Non-final
-        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = rootUnificationResults._2();
+        SubstitutionPropagator substitutionPropagator = new SubstitutionPropagator(rootUnificationResults._2());
 
         try {
             IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
             queryBuilder.init(unifiedRoot);
 
+            /**
+             * TODO: explain
+             */
+            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, unifiedRoot, substitutionPropagator);
 
-            // TODO: continue
-            throw new RuntimeException("Not fully implemented yet");
+            return queryBuilder.build();
 
             /**
              * TODO: should we expect this exception? Not just an internal error?
@@ -76,6 +78,43 @@ public class SubQueryUnificationTools {
         } catch(IntermediateQueryBuilderException e) {
             throw new RuntimeException(e.getLocalizedMessage());
         }
+    }
+
+    /**
+     * TODO: explain
+     *
+     * Recursive
+     */
+    private static IntermediateQueryBuilder propagateToChildren(IntermediateQueryBuilder queryBuilder,
+                                                                IntermediateQuery originalSubQuery,
+                                                                QueryNode originalParentNode,
+                                                                QueryNode unifiedParentNode,
+                                                                SubstitutionPropagator substitutionPropagator)
+            throws IntermediateQueryBuilderException {
+        for(QueryNode originalChild : originalSubQuery.getCurrentSubNodesOf(originalParentNode)) {
+            QueryNode newChild;
+            SubstitutionPropagator propagatorForChild;
+            try {
+                newChild = originalChild.acceptNodeTransformer(substitutionPropagator);
+                propagatorForChild = substitutionPropagator;
+
+                /**
+                 * New substitution
+                 * TODO: further explain
+                 */
+            } catch (SubstitutionPropagator.NewSubstitutionException e) {
+                newChild = e.getTransformedNode();
+                propagatorForChild = new SubstitutionPropagator(e.getSubstitution());
+            } catch (QueryNodeTransformationException e) {
+                throw new RuntimeException("Unexpected: " + e.getLocalizedMessage());
+            }
+            queryBuilder.addChild(unifiedParentNode, newChild);
+
+            // Recursive call
+            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalChild, newChild,
+                    propagatorForChild);
+        }
+        return queryBuilder;
     }
 
     /**
