@@ -39,11 +39,12 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-api</artifactId>
 		</dependency> 
-		<dependency>
+		
+	<!-- 	<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency> 
-
+ -->
  		<dependency>
   			<groupId>net.sf.jgrapht</groupId>
   			<artifactId>jgrapht</artifactId>
@@ -72,8 +73,24 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.8.7</version>
+		</dependency>
+		
 
-			
+<!-- Imported source code of tomcat-jdbc 
+ that depends on  tomcat juli -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-juli</artifactId>
+			<version>7.0.27</version>
+		</dependency>
+
+
+			<!-- 
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
@@ -83,6 +100,7 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 	</dependencies>
+	
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

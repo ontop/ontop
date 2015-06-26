@@ -11,12 +11,12 @@
 			<artifactId>ontop-obdalib-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
-			<exclusions>
+			<!--  <exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
-			</exclusions>
+			</exclusions>  -->
 		</dependency>
 	
 		<dependency>
