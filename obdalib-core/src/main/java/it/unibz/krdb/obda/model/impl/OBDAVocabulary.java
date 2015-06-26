@@ -221,6 +221,9 @@ public class OBDAVocabulary {
 	
 	public static final String GEOSPARQL_WKT_LITERAL_DATATYPE = "http://www.opengis.net/ont/geosparql#wktLiteral";
 
+	public static final Predicate GEOSPARQL_WKT_LITERAL = new DataTypePredicateImpl(
+			GEOSPARQL_WKT_LITERAL_DATATYPE, COL_TYPE.GEOMETRY);
+	
 
 	/* Common namespaces and prefixes */
 

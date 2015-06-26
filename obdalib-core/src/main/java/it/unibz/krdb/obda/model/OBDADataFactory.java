@@ -88,6 +88,8 @@ public interface OBDADataFactory extends Serializable {
 	public JdbcTypeMapper getJdbcTypeMapper();
 
 	
+	
+
 
 	/*
 	 * Built-in function predicates
@@ -346,4 +348,6 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+	Predicate getDataTypePredicateGeosparql();
 }

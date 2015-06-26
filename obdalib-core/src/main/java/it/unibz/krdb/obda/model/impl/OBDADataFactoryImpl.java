@@ -272,6 +272,14 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate pred = new BNodePredicateImpl(terms.size());
 		return getFunction(pred, terms);
 	}
+	
+	@Override
+	public Predicate getDataTypePredicateGeosparql() {
+		return OBDAVocabulary.GEOSPARQL_WKT_LITERAL;
+	}
+
+	@Override
+	}
 
 
 	@Override

@@ -1582,6 +1582,26 @@ public class TurtleOBDAParser extends Parser {
 					      value = dfac.getTypedTerm(var, type);
 
 						
+					      }
+					      Predicate functionSymbol = null;
+					      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateLiteral();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateString();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateInteger();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateDecimal();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateDouble();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateDateTime();
+					      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+					          functionSymbol = dfac.getDataTypePredicateBoolean();
+					      } else if (functionName.equals(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE)){ 
+					    	  functionSymbol = dfac.getDataTypePredicateGeosparql();
+					      }else {
+					    	  throw new RecognitionException();
 					     
 					}
 					break;
@@ -2058,6 +2078,10 @@ public class TurtleOBDAParser extends Parser {
 			            throw new RuntimeException("Unsupported datatype: " + functionName);
 			          }
 			          value = dfac.getTypedTerm(constant, type);
+			      } else if (functionName.equals(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE)){ 
+			    	functionSymbol = dfac.getDataTypePredicateGeosparql();
+			      }  else {
+			    	  throw new RuntimeException("Unknown datatype: " + functionName);
 			      }
 			  
 			}
