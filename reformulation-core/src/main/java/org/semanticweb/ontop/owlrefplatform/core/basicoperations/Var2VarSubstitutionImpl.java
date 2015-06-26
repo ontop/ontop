@@ -38,6 +38,20 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
+    public VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term) {
+        if (term instanceof Variable) {
+            return applyToVariable((VariableImpl)term);
+        }
+
+        return term;
+    }
+
+    @Override
+    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+        return (ImmutableBooleanExpression) apply(booleanExpression);
+    }
+
+    @Override
     public VariableImpl get(VariableImpl var) {
         return map.get(var);
     }

@@ -53,7 +53,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ConstructionNode getRootProjectionNode() throws InconsistentIntermediateQueryException{
+    public ConstructionNode getRootConstructionNode() throws InconsistentIntermediateQueryException{
         try {
             return dagComponent.getRootConstructionNode();
         } catch (IllegalDAGException e) {
@@ -153,9 +153,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * TODO: explain
          */
-        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootProjectionNode().getProjectionAtom());
+        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
         if (localDataNodes.isEmpty())
-            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootProjectionNode().getProjectionAtom());
+            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootConstructionNode().getProjectionAtom());
 
 
         for (OrdinaryDataNode localDataNode : localDataNodes) {
@@ -166,7 +166,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
                             localDataNode.getAtom(), localVariables);
 
-                ConstructionNode subQueryRootNode = cloneSubQuery.getRootProjectionNode();
+                ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
                 dagComponent.replaceNode(localDataNode, subQueryRootNode);
 
                 dagComponent.addSubTree(cloneSubQuery, subQueryRootNode);

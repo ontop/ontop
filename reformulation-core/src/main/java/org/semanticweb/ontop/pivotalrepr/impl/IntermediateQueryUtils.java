@@ -2,7 +2,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class IntermediateQueryUtils {
             return Optional.of(firstDefinition);
         }
 
-        DataAtom headAtom = firstDefinition.getRootProjectionNode().getProjectionAtom();
+        DataAtom headAtom = firstDefinition.getRootConstructionNode().getProjectionAtom();
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -111,7 +110,7 @@ public class IntermediateQueryUtils {
         IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
 
         // Clone of the original root node (because is mutable)
-        ConstructionNode newRootNode = originalQuery.getRootProjectionNode().clone();
+        ConstructionNode newRootNode = originalQuery.getRootConstructionNode().clone();
 
         queryBuilder.init(newRootNode);
 
@@ -146,8 +145,8 @@ public class IntermediateQueryUtils {
      */
     private static void checkDefinitionRootProjections(IntermediateQuery definition1, IntermediateQuery definition2)
             throws QueryMergingException {
-        ConstructionNode root1 = definition1.getRootProjectionNode();
-        ConstructionNode root2 = definition2.getRootProjectionNode();
+        ConstructionNode root1 = definition1.getRootConstructionNode();
+        ConstructionNode root2 = definition2.getRootConstructionNode();
 
         DataAtom headAtom1 = root1.getProjectionAtom();
         DataAtom headAtom2 = root2.getProjectionAtom();

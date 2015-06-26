@@ -178,6 +178,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getBooleanExpression((BooleanOperationPredicate)functor, arguments);
+		}
+
+		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}
 
@@ -186,19 +191,49 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new BooleanExpressionImpl(functor, arguments);
 	}
 
+	@Override
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments) {
+		return new BooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments) {
+		return new ImmutableBooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+																	ImmutableList<ImmutableTerm> arguments) {
+		return new ImmutableBooleanExpressionImpl(functor, arguments);
+	}
 
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getBooleanExpression((BooleanOperationPredicate)functor, arguments);
+		}
+
+		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		}
+
+		// Default constructor
 		return new ImmutableFunctionalTermImpl(functor, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		}
+
+		// Default constructor
 		return new ImmutableFunctionalTermImpl(functor, terms);
 	}
 

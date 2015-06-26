@@ -2,10 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.LocalOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.QueryNodeVisitor;
-import org.semanticweb.ontop.pivotalrepr.QueryOptimizer;
-import org.semanticweb.ontop.pivotalrepr.UnionNode;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
@@ -21,5 +18,10 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public UnionNode clone() {
         return new UnionNodeImpl();
+    }
+
+    @Override
+    public UnionNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
     }
 }

@@ -121,6 +121,13 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public Function getFunction(Predicate functor, Term... terms);
 
+	BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments);
+
+	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments);
+
+	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+															 ImmutableList<ImmutableTerm> arguments);
+
 	public Function getFunction(Predicate functor, List<Term> terms);
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);

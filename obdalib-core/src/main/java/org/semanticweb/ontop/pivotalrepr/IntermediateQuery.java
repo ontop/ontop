@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
  */
 public interface IntermediateQuery {
 
-    ConstructionNode getRootProjectionNode();
+    ConstructionNode getRootConstructionNode();
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();
 

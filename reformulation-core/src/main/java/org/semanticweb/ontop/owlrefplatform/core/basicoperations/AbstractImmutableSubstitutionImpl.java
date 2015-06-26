@@ -47,7 +47,18 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-        return factory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), subTermsBuilder.build());
+        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+
+        /**
+         * Distinguishes the BooleanExpression from the other functional terms.
+         */
+        if (functionSymbol instanceof BooleanOperationPredicate) {
+            return factory.getImmutableBooleanExpression((BooleanOperationPredicate) functionSymbol,
+                    subTermsBuilder.build());
+        }
+        else {
+            return factory.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
+        }
     }
 
     /**

@@ -23,4 +23,9 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     public TableNode clone() {
         return new TableNodeImpl(getAtom());
     }
+
+    @Override
+    public TableNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
 }

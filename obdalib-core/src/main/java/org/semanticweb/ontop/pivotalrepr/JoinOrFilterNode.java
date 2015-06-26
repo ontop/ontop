@@ -1,12 +1,12 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.model.BooleanExpression;
+import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 
 /**
  * TODO: explain
  */
 public interface JoinOrFilterNode extends QueryNode {
 
-    public Optional<BooleanExpression> getOptionalFilterCondition();
+    public Optional<ImmutableBooleanExpression> getOptionalFilterCondition();
 }

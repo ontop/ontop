@@ -1,9 +1,6 @@
 package org.semanticweb.ontop.model.impl;
 
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
-import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 
 public class ImmutabilityTools {
 
@@ -23,5 +20,9 @@ public class ImmutabilityTools {
          * Other terms (constant and variable) are immutable.
          */
         return (ImmutableTerm) term;
+    }
+
+    public static ImmutableBooleanExpression convertIntoImmutableBooleanExpression(BooleanExpression expression) {
+        return new ImmutableBooleanExpressionImpl(expression);
     }
 }

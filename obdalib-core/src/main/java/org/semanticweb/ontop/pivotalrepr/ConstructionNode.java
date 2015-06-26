@@ -26,5 +26,10 @@ public interface ConstructionNode extends QueryNode {
      */
     Optional<ImmutableQueryModifiers> getOptionalModifiers();
 
+    @Override
     ConstructionNode clone();
+
+    @Override
+    ConstructionNode acceptNodeTransformer(QueryNodeTransformer transformer)
+            throws QueryNodeTransformationException;
 }

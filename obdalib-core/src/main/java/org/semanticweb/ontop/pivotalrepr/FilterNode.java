@@ -7,4 +7,7 @@ public interface FilterNode extends JoinOrFilterNode {
 
     @Override
     FilterNode clone();
+
+    @Override
+    FilterNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
 }

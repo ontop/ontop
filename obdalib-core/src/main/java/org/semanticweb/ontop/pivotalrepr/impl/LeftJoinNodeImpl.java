@@ -2,11 +2,12 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.BooleanExpression;
+import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
-    public LeftJoinNodeImpl(Optional<BooleanExpression> optionalJoinCondition) {
+    public LeftJoinNodeImpl(Optional<ImmutableBooleanExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
     }
 
@@ -22,17 +23,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public LeftJoinNode clone() {
-        Optional<BooleanExpression> originalOptionalFilter = getOptionalFilterCondition();
-        Optional<BooleanExpression> newOptionalFilter;
-        if (originalOptionalFilter.isPresent()) {
-            // Not yet safe --> must be cloned. TODO: make it immutable
-            BooleanExpression newFilter = originalOptionalFilter.get().clone();
-            newOptionalFilter = Optional.of(newFilter);
-        }
-        else{
-            newOptionalFilter = Optional.absent();
-        }
+        return new LeftJoinNodeImpl(getOptionalFilterCondition());
+    }
 
-        return new LeftJoinNodeImpl(newOptionalFilter);
+    @Override
+    public LeftJoinNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
     }
 }

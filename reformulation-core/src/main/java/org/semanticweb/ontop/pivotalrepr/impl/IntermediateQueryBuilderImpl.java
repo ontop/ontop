@@ -24,7 +24,7 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     }
 
     @Override
-    public void init(ConstructionNode rootConstructionNode) throws IntermediateQueryBuilderException {
+    public void init(ConstructionNode rootConstructionNode){
         if (hasBeenInitialized)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
         hasBeenInitialized = true;

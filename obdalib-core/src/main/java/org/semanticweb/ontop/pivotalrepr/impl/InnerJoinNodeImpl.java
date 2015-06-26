@@ -2,11 +2,12 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.BooleanExpression;
+import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
-    public InnerJoinNodeImpl(Optional<BooleanExpression> optionalFilterCondition) {
+    public InnerJoinNodeImpl(Optional<ImmutableBooleanExpression> optionalFilterCondition) {
         super(optionalFilterCondition);
     }
 
@@ -23,17 +24,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode clone() {
-        Optional<BooleanExpression> originalOptionalFilter = getOptionalFilterCondition();
-        Optional<BooleanExpression> newOptionalFilter;
-        if (originalOptionalFilter.isPresent()) {
-            // Not yet safe --> must be cloned. TODO: make it immutable
-            BooleanExpression newFilter = originalOptionalFilter.get().clone();
-            newOptionalFilter = Optional.of(newFilter);
-        }
-        else{
-            newOptionalFilter = Optional.absent();
-        }
+        return new InnerJoinNodeImpl(getOptionalFilterCondition());
+    }
 
-        return new InnerJoinNodeImpl(newOptionalFilter);
+    @Override
+    public InnerJoinNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
     }
 }

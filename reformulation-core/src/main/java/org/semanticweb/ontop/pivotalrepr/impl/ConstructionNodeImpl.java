@@ -64,6 +64,12 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public ConstructionNode acceptNodeTransformer(QueryNodeTransformer transformer)
+            throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }

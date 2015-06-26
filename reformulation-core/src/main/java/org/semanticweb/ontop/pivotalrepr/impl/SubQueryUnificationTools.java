@@ -8,14 +8,11 @@ import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.model.Var2VarSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
-import org.semanticweb.ontop.pivotalrepr.DataAtom;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,12 +43,7 @@ public class SubQueryUnificationTools {
                                                   final ImmutableSet<VariableImpl> reservedVariables)
             throws SubQueryUnificationException {
 
-        ConstructionNode originalRootNode = originalSubQuery.getRootProjectionNode();
-        ImmutableSet<VariableImpl> originalVariables = VariableCollector.collectVariables(originalSubQuery);
-        ImmutableSet<Variable> allKnownVariables = ImmutableSet.<Variable>builder()
-                .addAll(reservedVariables)
-                .addAll(originalVariables)
-                .build();
+        ConstructionNode originalRootNode = originalSubQuery.getRootConstructionNode();
 
         /**
          * Should have already been checked.
@@ -60,38 +52,75 @@ public class SubQueryUnificationTools {
             throw new IllegalArgumentException("The target data atom is not compatible with the query");
         }
 
-        VariableGenerator variableGenerator = new VariableGenerator(allKnownVariables);
+        final QueryNodeRenamer renamer = new QueryNodeRenamer(
+                computeRenamingSubstitution(originalSubQuery, reservedVariables));
 
-//        ConstructionNodeUnification rootRenaming = new ConstructionNodeUnification(originalRootNode, originalSubQuery,
-//                targetDataAtom, reservedVariables, variableGenerator);
-//
-//        ConstructionNode newRootNode = rootRenaming.generateNewProjectionNode();
-//        Var2VarSubstitution conflictSubstitution =  rootRenaming.generateConflictSubstitutionForSubTree();
-//        // TODO: create a sub-type of immutable substitution
-//        ImmutableSubstitution normalSubstitution =  rootRenaming.generateNormalSubstitutionForSubTree();
+        P2<ConstructionNode, ImmutableSubstitution<VariableOrGroundTerm>> rootUnificationResults =
+                unifyConstructionNode(renamer.transform(originalRootNode), targetDataAtom);
+        final ConstructionNode unifiedRoot = rootUnificationResults._1();
+
+        // Non-final
+        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = rootUnificationResults._2();
+
+        try {
+            IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+            queryBuilder.init(unifiedRoot);
 
 
-        // TODO: continue
+            // TODO: continue
+            throw new RuntimeException("Not fully implemented yet");
 
-
-        throw new RuntimeException("Not fully implemented yet");
+            /**
+             * TODO: should we expect this exception? Not just an internal error?
+             */
+        } catch(IntermediateQueryBuilderException e) {
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
     }
 
+    /**
+     * TODO: explain
+     *
+     */
+    private static InjectiveVar2VarSubstitution computeRenamingSubstitution(IntermediateQuery subQuery,
+                                                                            ImmutableSet<VariableImpl> reservedVariables) {
+        ImmutableSet<VariableImpl> subQueryVariables = VariableCollector.collectVariables(subQuery);
+        ImmutableSet<Variable> allKnownVariables = ImmutableSet.<Variable>builder()
+                .addAll(reservedVariables)
+                .addAll(subQueryVariables)
+                .build();
+        VariableGenerator variableGenerator = new VariableGenerator(allKnownVariables);
+
+        ImmutableMap.Builder<VariableImpl, VariableImpl> renamingBuilder = ImmutableMap.builder();
+
+        for (VariableImpl subQueryVariable : subQueryVariables) {
+            /**
+             * If there is a conflict: creates a new variable and
+             * adds an entry in the renaming substitution
+             */
+            if (reservedVariables.contains(subQueryVariable)) {
+                VariableImpl newVariable = variableGenerator.generateNewVariableFromVar(subQueryVariable);
+                renamingBuilder.put(subQueryVariable, newVariable);
+            }
+        }
+
+        return new InjectiveVar2VarSubstitutionImpl(renamingBuilder.build());
+    }
 
     /**
      * TODO: explain
      */
-    protected static P2<ConstructionNode, ImmutableSubstitution<VariableOrGroundTerm>> unifyConstructionNode(ConstructionNode constructionNode,
-                                                                                                             DataAtom targetAtom)
+    protected static P2<ConstructionNode, ImmutableSubstitution<VariableOrGroundTerm>> unifyConstructionNode(
+            ConstructionNode renamedConstructionNode, DataAtom targetAtom)
             throws SubQueryUnificationException{
 
-        if (!haveDisjunctVariableSets(constructionNode, targetAtom)) {
+        if (!haveDisjunctVariableSets(renamedConstructionNode, targetAtom)) {
             throw new IllegalArgumentException("The variable sets of the construction node and the target atom must " +
                     "be disjunct!");
         }
 
         ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution = extractAtomSubstitution(
-                constructionNode.getProjectionAtom(), targetAtom);
+                renamedConstructionNode.getProjectionAtom(), targetAtom);
 
         P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableSubstitution<VariableOrGroundTerm>> decomposition
                 = splitAtomSubstitution(atomSubstitution);
@@ -100,7 +129,7 @@ public class SubQueryUnificationTools {
         ImmutableSubstitution<VariableOrGroundTerm> additionalConstraintSubstitution = decomposition._2();
 
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = ImmutableSubstitutionUtilities.computeMGUU(
-                additionalConstraintSubstitution, constructionNode.getSubstitution());
+                additionalConstraintSubstitution, renamedConstructionNode.getSubstitution());
 
         if (!optionalConstraintUnifier.isPresent()) {
             // TODO: Is it an internal error?
@@ -115,7 +144,7 @@ public class SubQueryUnificationTools {
         ImmutableSubstitution<ImmutableTerm> newConstructionNodeSubstitution = ImmutableSubstitutionUtilities.renameSubstitution(
                 filteredConstraintSubstitution, renamingSubstitutions);
 
-        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = extractSubstitutionToPropagate(atomSubstitution,
+        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = extractSubstitutionToPropagate(renamingSubstitutions,
                 constraintUnifier, filteredConstraintSubstitution);
 
 
@@ -124,13 +153,45 @@ public class SubQueryUnificationTools {
     }
 
     /**
-     * TODO: implement it
+     * TODO: explain
      */
     private static ImmutableSubstitution<VariableOrGroundTerm> extractSubstitutionToPropagate(
-            ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution,
+            ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions,
             ImmutableSubstitution<ImmutableTerm> constraintUnifier,
             ImmutableSubstitution<ImmutableTerm> filteredConstraintSubstitution) {
-        throw new RuntimeException("Not fully implemented yet");
+        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
+
+        /**
+         * Extracts renaming mappings that are not in the filtered constraint substitution
+         */
+        for(InjectiveVar2VarSubstitution renamingSubstitution : renamingSubstitutions) {
+            for (Map.Entry<VariableImpl, VariableImpl> entry : renamingSubstitution.getImmutableMap().entrySet()) {
+                VariableImpl varToRename = entry.getKey();
+
+                if (!filteredConstraintSubstitution.isDefining(varToRename)) {
+                    mapBuilder.put(varToRename, entry.getValue());
+                }
+            }
+        }
+
+        /**
+         * Extracts the mappings of the unifier that are not in the filtered constraint substitution
+         */
+        for (Map.Entry<VariableImpl, ImmutableTerm> entry : constraintUnifier.getImmutableMap().entrySet()) {
+            VariableImpl varToRename = entry.getKey();
+
+            if (!filteredConstraintSubstitution.isDefining(varToRename)) {
+                ImmutableTerm newTerm =  entry.getValue();
+
+                if (!(newTerm instanceof VariableOrGroundTerm)) {
+                    throw new IllegalArgumentException("Inconsistent filteredConstraintSubstitution " +
+                            "regarding the constraintUnifier");
+                }
+                mapBuilder.put(varToRename,(VariableOrGroundTerm) newTerm);
+            }
+        }
+
+        return new ImmutableSubstitutionImpl<>(mapBuilder.build());
     }
 
     /**

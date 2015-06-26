@@ -23,4 +23,9 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     public OrdinaryDataNode clone() {
         return new OrdinaryDataNodeImpl(getAtom());
     }
+
+    @Override
+    public OrdinaryDataNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
 }

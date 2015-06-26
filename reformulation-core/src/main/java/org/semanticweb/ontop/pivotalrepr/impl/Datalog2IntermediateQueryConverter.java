@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableBooleanExpression;
 import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
 /**
@@ -258,7 +259,7 @@ public class Datalog2IntermediateQueryConverter {
      */
     private static Optional<QueryNode> createViceTopNode(fj.data.List<Function> dataAndCompositeAtoms,
                                                          fj.data.List<Function> booleanAtoms) {
-        Optional<BooleanExpression> optionalFilter = createFilterExpression(booleanAtoms);
+        Optional<ImmutableBooleanExpression> optionalFilter = createFilterExpression(booleanAtoms);
 
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
         Optional<QueryNode> optionalRootNode;
@@ -282,10 +283,10 @@ public class Datalog2IntermediateQueryConverter {
     }
 
 
-    private static Optional<BooleanExpression> createFilterExpression(fj.data.List<Function> booleanAtoms) {
+    private static Optional<ImmutableBooleanExpression> createFilterExpression(fj.data.List<Function> booleanAtoms) {
         if (booleanAtoms.isEmpty())
             return Optional.absent();
-        return Optional.of(DatalogTools.foldBooleanConditions(booleanAtoms));
+        return Optional.of(convertIntoImmutableBooleanExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
     }
 
     /**
@@ -317,7 +318,7 @@ public class Datalog2IntermediateQueryConverter {
         for (Function atom : atoms) {
 
             Optional<fj.data.List<Function>> optionalSubDataOrCompositeAtoms;
-            Optional<BooleanExpression> optionalFilterCondition;
+            Optional<ImmutableBooleanExpression> optionalFilterCondition;
 
             /**
              * If the atom is composite, extracts sub atoms
@@ -437,7 +438,7 @@ public class Datalog2IntermediateQueryConverter {
      * TODO: explain
      */
     private static QueryNode createQueryNode(Function dataOrCompositeAtom, Collection<Predicate> tablePredicates,
-                                             Optional<BooleanExpression> optionalFilterCondition)
+                                             Optional<ImmutableBooleanExpression> optionalFilterCondition)
             throws InvalidDatalogProgramException {
         if (dataOrCompositeAtom.isDataFunction()) {
             // No problem here
