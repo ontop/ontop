@@ -122,7 +122,7 @@ public class RDB2RDFScenarioParent extends TestCase {
 
 	protected Repository createRepository() throws Exception {
 		try {
-			SesameVirtualRepo repo = new SesameVirtualRepo(testURI, mappingFileURL, false, "TreeWitness");
+			SesameVirtualRepo repo = new SesameVirtualRepo(testURI, mappingFileURL, "TreeWitness");
 			repo.initialize();
 			return repo;
 		} catch (Exception e) {
