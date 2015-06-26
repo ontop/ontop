@@ -73,7 +73,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	//Also,  some of the families use common semantics for their common operators
 	//Should be considered in the higher level
 	
-	private static final String OVERLAPS_OPERATOR = "%s @ %s";
+	private static final String OVERLAPS_OPERATOR = "ST_Overlaps(%s,%s)";
 	
 	public static final String SFEQUALS_OPERATOR = "ST_Equals(%s,%s)";
 	public static final String SFDISJOINT_OPERATOR = "ST_Disjoint(%s,%s)";
@@ -91,7 +91,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	public static final String EHINSIDE_OPERATOR = "ST_Within(%s,%s)";
 	public static final String EHCONTAINS_OPERATOR = "ST_Contains(%s,%s)";
 	
-	private static final String GEOMFROMWKT_OPERATOR = "ST_GeomFromText(%s)";
+	private static final String GEOMFROMWKT_OPERATOR = "ST_GeomFromText(%s, 4326)";
 
 	private static final String ADD_OPERATOR = "%s + %s";
 	private static final String SUBTRACT_OPERATOR = "%s - %s";
@@ -1259,7 +1259,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					List<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
 						if (a.getName().equals(col)) {
-							if (a.getType()== 1111) 
+							if (a.getType()== 1111 || a.getType()== 2004) //1111 for postgis, 2004 for spatialite
 								return true;
 							else
 								return false;

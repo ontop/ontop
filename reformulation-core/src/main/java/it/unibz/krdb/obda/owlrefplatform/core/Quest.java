@@ -84,6 +84,7 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sqlite.SQLiteConfig;
 
 
 public class Quest implements Serializable, RepositoryChangedListener {
@@ -469,8 +470,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		localConnection = DriverManager.getConnection(url, username, password);
+		
+		 
 
+		if(driver.equals("org.sqlite.JDBC")){
+			SQLiteConfig config = new SQLiteConfig();
+		       config.enableLoadExtension( true );
+		       config.setReadOnly( true );
+		       System.out.println("URL: "+ url);
+		       localConnection = DriverManager.getConnection( "jdbc:sqlite:/home/constant/test-2.3.sqlite",   config.toProperties() );
+
+		} else {
+			localConnection = DriverManager.getConnection(url, username, password);
+		}
 		if (localConnection != null) {
 			return true;
 		}
@@ -508,10 +520,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		//TODO: check and remove this block
 		/*
 		 * Fixing the typing of predicates, in case they are not properly given.
-		 */
+		 
 		if (inputOBDAModel != null && !inputOntology.getVocabulary().isEmpty()) {
 			MappingVocabularyRepair.fixOBDAModel(inputOBDAModel, inputOntology.getVocabulary());
-		}
+		}*/
 
 		unfoldingOBDAModel = fac.getOBDAModel();
 
@@ -925,7 +937,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 		try {
-			conn = DriverManager.getConnection(url, username, password);
+				conn = DriverManager.getConnection(url, username, password);
+			
+			
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		} catch (Exception e) {
