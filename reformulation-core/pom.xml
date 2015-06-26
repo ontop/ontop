@@ -82,15 +82,15 @@
 		
 
 <!-- Imported source code of tomcat-jdbc 
- that depends on  tomcat juli -->
+ that depends on  tomcat juli 
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-juli</artifactId>
 			<version>7.0.27</version>
 		</dependency>
+-->
 
-
-			<!-- 
+			 
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
