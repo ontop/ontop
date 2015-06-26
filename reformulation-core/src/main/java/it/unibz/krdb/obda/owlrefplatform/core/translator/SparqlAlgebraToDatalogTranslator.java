@@ -50,6 +50,7 @@ import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
+import org.openrdf.query.algebra.evaluation.function.FunctionRegistry;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -732,7 +733,7 @@ public class SparqlAlgebraToDatalogTranslator {
             // second parameter is a string
             ValueExpr second = expressions.get(1);
             Term out_string = getExpression(second);
-
+				
             /*
              * Term t3 is optional: no string means delete occurrences of second param
 	         */
@@ -743,9 +744,14 @@ public class SparqlAlgebraToDatalogTranslator {
             } 
             else {
                 in_string = ofac.getConstantLiteral("");
+		
+	//	org.openrdf.query.algebra.evaluation.function.Function fc = FunctionRegistry.getInstance().get(((org.openrdf.query.algebra.FunctionCall)expr).getURI());
+
             }
 
             return ofac.getFunctionReplace(t1, out_string, in_string);
+			//Function function = FunctionRegistry.getInstance().get(expr.toString());
+
         } 
         else
             throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");		

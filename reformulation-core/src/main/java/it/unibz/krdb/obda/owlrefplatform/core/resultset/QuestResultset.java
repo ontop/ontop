@@ -216,6 +216,7 @@ public class QuestResultset implements TupleResultSet {
 
 
                         Timestamp value = set.getTimestamp(column);
+						//String debug = set.getObject(9).toString();
                         result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 
                     }
