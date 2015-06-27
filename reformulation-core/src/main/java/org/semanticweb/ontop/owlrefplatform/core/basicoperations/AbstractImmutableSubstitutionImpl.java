@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.model.DataAtom;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,8 @@ import java.util.Map;
  */
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> extends LocallyImmutableSubstitutionImpl
         implements ImmutableSubstitution<T> {
+
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     /**
      *
@@ -45,20 +49,47 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         for (ImmutableTerm subTerm : functionalTerm.getImmutableTerms()) {
             subTermsBuilder.add(apply(subTerm));
         }
-
-        OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
 
         /**
          * Distinguishes the BooleanExpression from the other functional terms.
          */
         if (functionSymbol instanceof BooleanOperationPredicate) {
-            return factory.getImmutableBooleanExpression((BooleanOperationPredicate) functionSymbol,
+            return DATA_FACTORY.getImmutableBooleanExpression((BooleanOperationPredicate) functionSymbol,
                     subTermsBuilder.build());
         }
         else {
-            return factory.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
+            return DATA_FACTORY.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
         }
+    }
+
+    @Override
+    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+        return (ImmutableBooleanExpression) apply(booleanExpression);
+    }
+
+    @Override
+    public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
+        ImmutableFunctionalTerm newFunctionalTerm = applyToFunctionalTerm(atom);
+
+        if (newFunctionalTerm instanceof DataAtom)
+            return (DataAtom) newFunctionalTerm;
+
+        AtomPredicate predicate = (AtomPredicate) newFunctionalTerm.getFunctionSymbol();
+
+        /**
+         * Casts all the sub-terms into VariableOrGroundTerm
+         *
+         * Throws a ConversionException if this cast is impossible.
+         */
+        ImmutableList.Builder<VariableOrGroundTerm> argBuilder = ImmutableList.builder();
+        for (ImmutableTerm subTerm : newFunctionalTerm.getImmutableTerms()) {
+            if (!(subTerm instanceof VariableOrGroundTerm))
+                throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
+            argBuilder.add((VariableOrGroundTerm)subTerm);
+
+        }
+        return DATA_FACTORY.getDataAtom(predicate, argBuilder.build());
     }
 
     /**

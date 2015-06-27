@@ -11,6 +11,4 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<VariableImpl>
     VariableImpl applyToVariable(VariableImpl variable);
 
     VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term);
-
-    ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression);
 }

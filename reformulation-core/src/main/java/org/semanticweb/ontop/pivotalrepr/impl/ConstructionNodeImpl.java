@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.IndempotentVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {

@@ -1,8 +1,8 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.model.impl;
 
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.PredicateImpl;
-import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
+import org.semanticweb.ontop.model.AtomPredicate;
 
 /**
  * TODO: in the future, make it independent from PredicateImpl
@@ -13,7 +13,7 @@ public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
         super(name, arity, null);
     }
 
-    protected AtomPredicateImpl(Predicate datalogPredicate) {
+    public AtomPredicateImpl(Predicate datalogPredicate) {
         super(datalogPredicate.getName(), datalogPredicate.getArity(), null);
 
         if (!datalogPredicate.isDataPredicate())

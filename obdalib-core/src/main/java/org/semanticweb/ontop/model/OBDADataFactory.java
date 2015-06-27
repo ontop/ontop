@@ -134,6 +134,16 @@ public interface OBDADataFactory extends Serializable {
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 
+	/**
+	 * Beware: a DataAtom is immutable
+	 */
+	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms);
+
+	/**
+	 * Beware: a DataAtom is immutable
+	 */
+	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms);
+
 
 	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
 
@@ -326,5 +336,6 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);	
+	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
 }

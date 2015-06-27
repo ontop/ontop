@@ -33,6 +33,8 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
@@ -210,7 +212,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
 		if (functor instanceof BooleanOperationPredicate) {
-			return getBooleanExpression((BooleanOperationPredicate)functor, arguments);
+			return getBooleanExpression((BooleanOperationPredicate) functor, arguments);
 		}
 
 		// Default constructor
@@ -235,6 +237,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 		// Default constructor
 		return new ImmutableFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms) {
+		return new DataAtomImpl(predicate, terms);
+	}
+
+	@Override
+	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
+		return new DataAtomImpl(predicate, terms);
 	}
 
 	@Override

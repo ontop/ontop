@@ -1,9 +1,6 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.model;
 
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
-import org.semanticweb.ontop.model.NonFunctionalTerm;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
 
 /**
  * Immutable data atom that only accepts variables and ground terms as arguments.

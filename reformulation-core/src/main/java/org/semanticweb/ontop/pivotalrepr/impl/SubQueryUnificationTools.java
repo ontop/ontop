@@ -52,23 +52,23 @@ public class SubQueryUnificationTools {
             throw new IllegalArgumentException("The target data atom is not compatible with the query");
         }
 
-        final QueryNodeRenamer renamer = new QueryNodeRenamer(
+        QueryNodeRenamer renamer = new QueryNodeRenamer(
                 computeRenamingSubstitution(originalSubQuery, reservedVariables));
 
-        P2<ConstructionNode, ImmutableSubstitution<VariableOrGroundTerm>> rootUnificationResults =
+        P2<ConstructionNode, SubstitutionPropagator> rootUnificationResults =
                 unifyConstructionNode(renamer.transform(originalRootNode), targetDataAtom);
-        final ConstructionNode unifiedRoot = rootUnificationResults._1();
-
-        SubstitutionPropagator substitutionPropagator = new SubstitutionPropagator(rootUnificationResults._2());
+        ConstructionNode unifiedRootNode = rootUnificationResults._1();
+        SubstitutionPropagator substitutionPropagator = rootUnificationResults._2();
 
         try {
             IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
-            queryBuilder.init(unifiedRoot);
+            queryBuilder.init(unifiedRootNode);
 
             /**
              * TODO: explain
              */
-            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, unifiedRoot, substitutionPropagator);
+            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, unifiedRootNode,
+                    substitutionPropagator, renamer);
 
             return queryBuilder.build();
 
@@ -89,13 +89,16 @@ public class SubQueryUnificationTools {
                                                                 IntermediateQuery originalSubQuery,
                                                                 QueryNode originalParentNode,
                                                                 QueryNode unifiedParentNode,
-                                                                SubstitutionPropagator substitutionPropagator)
-            throws IntermediateQueryBuilderException {
+                                                                SubstitutionPropagator substitutionPropagator,
+                                                                QueryNodeRenamer renamer)
+            throws IntermediateQueryBuilderException, SubQueryUnificationException {
         for(QueryNode originalChild : originalSubQuery.getCurrentSubNodesOf(originalParentNode)) {
             QueryNode newChild;
             SubstitutionPropagator propagatorForChild;
             try {
-                newChild = originalChild.acceptNodeTransformer(substitutionPropagator);
+                newChild = originalChild
+                        .acceptNodeTransformer(renamer)
+                        .acceptNodeTransformer(substitutionPropagator);
                 propagatorForChild = substitutionPropagator;
 
                 /**
@@ -105,6 +108,13 @@ public class SubQueryUnificationTools {
             } catch (SubstitutionPropagator.NewSubstitutionException e) {
                 newChild = e.getTransformedNode();
                 propagatorForChild = new SubstitutionPropagator(e.getSubstitution());
+
+                /**
+                 * Unification rejected by a sub-construction node.
+                 */
+            } catch(SubstitutionPropagator.UnificationException e) {
+                throw new SubQueryUnificationException(e.getMessage());
+
             } catch (QueryNodeTransformationException e) {
                 throw new RuntimeException("Unexpected: " + e.getLocalizedMessage());
             }
@@ -112,7 +122,7 @@ public class SubQueryUnificationTools {
 
             // Recursive call
             queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalChild, newChild,
-                    propagatorForChild);
+                    propagatorForChild, renamer);
         }
         return queryBuilder;
     }
@@ -148,14 +158,24 @@ public class SubQueryUnificationTools {
 
     /**
      * TODO: explain
+     *
+     * TODO: support quer modifiers
+     *
      */
-    protected static P2<ConstructionNode, ImmutableSubstitution<VariableOrGroundTerm>> unifyConstructionNode(
+    protected static P2<ConstructionNode, SubstitutionPropagator> unifyConstructionNode(
             ConstructionNode renamedConstructionNode, DataAtom targetAtom)
             throws SubQueryUnificationException{
 
         if (!haveDisjunctVariableSets(renamedConstructionNode, targetAtom)) {
             throw new IllegalArgumentException("The variable sets of the construction node and the target atom must " +
                     "be disjunct!");
+        }
+
+        /**
+         * TODO: support it
+         */
+        if (renamedConstructionNode.getOptionalModifiers().isPresent()) {
+            throw new RuntimeException("TODO: support query modifiers at unification time");
         }
 
         ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution = extractAtomSubstitution(
@@ -188,7 +208,7 @@ public class SubQueryUnificationTools {
 
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution);
-        return P.p(newConstructionNode, substitutionToPropagate);
+        return P.p(newConstructionNode, new SubstitutionPropagator(substitutionToPropagate));
     }
 
     /**

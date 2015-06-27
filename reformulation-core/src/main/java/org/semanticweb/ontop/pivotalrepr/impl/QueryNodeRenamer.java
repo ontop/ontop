@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import org.semanticweb.ontop.pivotalrepr.*;
 
@@ -11,6 +12,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
  */
 public class QueryNodeRenamer implements QueryNodeTransformer {
 
+    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final InjectiveVar2VarSubstitution renamingSubstitution;
 
     public QueryNodeRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
@@ -67,7 +69,7 @@ public class QueryNodeRenamer implements QueryNodeTransformer {
         for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
             argListBuilder.add(renamingSubstitution.applyToVariableOrGroundTerm(term));
         }
-        return new DataAtomImpl(atom.getPredicate(), argListBuilder.build());
+        return DATA_FACTORY.getDataAtom(atom.getPredicate(), argListBuilder.build());
     }
 
     private Optional<ImmutableBooleanExpression> renameOptionalBooleanExpression(

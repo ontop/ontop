@@ -25,6 +25,17 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
+    ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression);
+
+    /**
+     * Only guaranteed for T extends VariableOrGroundTerm.
+     *
+     * If T == ImmutableTerm, throws a ConversionException if
+     * a substituted term is not a VariableOrGroundTerm.
+     *
+     */
+    DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
+
     /**
      * Returns "f o g" where f is this substitution
      */

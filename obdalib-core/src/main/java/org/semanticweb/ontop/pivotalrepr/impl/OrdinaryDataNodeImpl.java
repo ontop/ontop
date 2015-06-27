@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
+import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNode {

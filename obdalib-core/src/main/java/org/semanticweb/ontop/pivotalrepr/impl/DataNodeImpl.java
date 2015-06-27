@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 /**

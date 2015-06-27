@@ -3,20 +3,15 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutabilityTools;
-import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
-import org.semanticweb.ontop.pivotalrepr.impl.AtomPredicateImpl;
+import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 
-import javax.xml.crypto.Data;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Utilities for the new generation of (immutable) substitutions

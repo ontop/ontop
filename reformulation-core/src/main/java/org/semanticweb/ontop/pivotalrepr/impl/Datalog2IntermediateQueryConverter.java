@@ -7,11 +7,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import fj.P;
 import fj.P2;
-import fj.P3;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.DatalogTools;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.impl.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -29,6 +26,8 @@ import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmu
  * TODO: describe
  */
 public class Datalog2IntermediateQueryConverter {
+
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     public static class NotSupportedConversionException extends RuntimeException {
         public NotSupportedConversionException(String message) {
@@ -113,10 +112,10 @@ public class Datalog2IntermediateQueryConverter {
              * TODO: remove this consideration (simplify)
              */
             final boolean allowVariableCreation = false;
-            P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
+            P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                     convertFromDatalogDataAtom(rootDatalogAtom, allowVariableCreation);
 
-            PureDataAtom dataAtom = decomposition._1();
+            DataAtom dataAtom = decomposition._1();
             ImmutableSubstitution<ImmutableTerm> substitution = decomposition._2();
 
             ConstructionNode rootNode;
@@ -189,7 +188,7 @@ public class Datalog2IntermediateQueryConverter {
         // Non-top rule so ok.
         final boolean allowVariableCreation = true;
 
-        P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
+        P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                 convertFromDatalogDataAtom(datalogRule.getHead(), allowVariableCreation);
 
         return new ConstructionNodeImpl(decomposition._1(), decomposition._2());
@@ -362,7 +361,7 @@ public class Datalog2IntermediateQueryConverter {
      *
      * TODO: should we simplify it?
      */
-    private static P2<PureDataAtom, ImmutableSubstitution<ImmutableTerm>>
+    private static P2<DataAtom, ImmutableSubstitution<ImmutableTerm>>
                         convertFromDatalogDataAtom(Function datalogDataAtom, boolean allowVariableCreation)
         throws InvalidDatalogProgramException {
 
@@ -404,7 +403,7 @@ public class Datalog2IntermediateQueryConverter {
             varListBuilder.add(newVariableArgument);
         }
 
-        PureDataAtom dataAtom = new PureDataAtomImpl(atomPredicate, varListBuilder.build());
+        DataAtom dataAtom = DATA_FACTORY.getDataAtom(atomPredicate, varListBuilder.build());
         ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
 
 
@@ -443,7 +442,7 @@ public class Datalog2IntermediateQueryConverter {
         if (dataOrCompositeAtom.isDataFunction()) {
             // No problem here
             final boolean allowVariableCreation = true;
-            PureDataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom, allowVariableCreation)._1();
+            DataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom, allowVariableCreation)._1();
             return createDataNode(dataAtom,tablePredicates);
         }
 
@@ -462,7 +461,7 @@ public class Datalog2IntermediateQueryConverter {
     /**
      * TODO: explain
      */
-    private static DataNode createDataNode(PureDataAtom dataAtom, Collection<Predicate> tablePredicates) {
+    private static DataNode createDataNode(DataAtom dataAtom, Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
             return new TableNodeImpl(dataAtom);

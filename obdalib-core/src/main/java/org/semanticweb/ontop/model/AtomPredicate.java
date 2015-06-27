@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.model;
 
 import org.semanticweb.ontop.model.Predicate;
 

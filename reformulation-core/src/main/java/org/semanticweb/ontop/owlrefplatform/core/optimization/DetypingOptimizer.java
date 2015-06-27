@@ -3,6 +3,7 @@ package org.semanticweb.ontop.owlrefplatform.core.optimization;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;

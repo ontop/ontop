@@ -52,6 +52,16 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+        return booleanExpression;
+    }
+
+    @Override
+    public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
+        return atom;
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
         return (ImmutableSubstitution<ImmutableTerm>)g;
     }

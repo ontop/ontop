@@ -1,7 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import com.google.common.base.Optional;
+import fj.P2;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 /**
@@ -18,6 +19,7 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
 
         public NewSubstitutionException(ImmutableSubstitution<VariableOrGroundTerm> substitution,
                                         QueryNode transformedNode) {
+            super();
             this.substitution = substitution;
             this.transformedNode = transformedNode;
        }
@@ -31,46 +33,112 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
         }
     }
 
+    /**
+     * TODO: explain
+     */
+    public static class UnificationException extends QueryNodeTransformationException {
+        public UnificationException(String message) {
+            super(message);
+        }
+
+    }
+
+
     private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
 
     public SubstitutionPropagator(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
         this.substitution = substitution;
     }
 
+    public ImmutableSubstitution<VariableOrGroundTerm>  getSubstitution() {
+        return substitution;
+    }
+
     @Override
     public FilterNode transform(FilterNode filterNode){
-        throw new RuntimeException("TODO: implement it");
+        return new FilterNodeImpl(transformBooleanExpression(filterNode.getFilterCondition()));
     }
 
     @Override
     public TableNode transform(TableNode tableNode) {
-        throw new RuntimeException("TODO: implement it");
+        return new TableNodeImpl(transformDataAtom(tableNode.getAtom()));
     }
 
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
-        throw new RuntimeException("TODO: implement it");
+        return new LeftJoinNodeImpl(
+                transformOptionalBooleanExpression(leftJoinNode.getOptionalFilterCondition()));
     }
 
     @Override
     public UnionNode transform(UnionNode unionNode) {
-        throw new RuntimeException("TODO: implement it");
+        return unionNode.clone();
     }
 
     @Override
     public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) {
-        throw new RuntimeException("TODO: implement it");
+        return new OrdinaryDataNodeImpl(transformDataAtom(ordinaryDataNode.getAtom()));
     }
 
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
-        throw new RuntimeException("TODO: implement it");
+        return new InnerJoinNodeImpl(
+                transformOptionalBooleanExpression(innerJoinNode.getOptionalFilterCondition())
+        );
     }
 
+    /**
+     * TODO: implement
+     */
     @Override
-    public ConstructionNode transform(ConstructionNode constructionNode) throws NewSubstitutionException {
-        throw new RuntimeException("TODO: implement it");
+    public ConstructionNode transform(ConstructionNode constructionNode)
+            throws NewSubstitutionException, UnificationException {
+        DataAtom newProjectionAtom = transformDataAtom(constructionNode.getProjectionAtom());
+
+        try {
+            /**
+             * TODO: explain why it makes sense (interface)
+             */
+            P2<ConstructionNode, SubstitutionPropagator> unificationResults =
+                    SubQueryUnificationTools.unifyConstructionNode(constructionNode, newProjectionAtom);
+
+            ConstructionNode newConstructionNode = unificationResults._1();
+            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
+                    unificationResults._2().getSubstitution();
+
+            /**
+             * If the substitution has changed, throws the new substitution
+             * and the new construction node so that the "client" can continue
+             * with the new substitution (for the children nodes).
+             */
+            if (!substitution.equals(newSubstitutionToPropagate)) {
+                throw new NewSubstitutionException(newSubstitutionToPropagate,
+                        newConstructionNode);
+            }
+
+            /**
+             * Otherwise, continues with the current substitution
+             */
+            return newConstructionNode;
+
+        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+            throw new UnificationException(e.getMessage());
+        }
     }
 
+    private ImmutableBooleanExpression transformBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+        return substitution.applyToBooleanExpression(booleanExpression);
+    }
 
+    private DataAtom transformDataAtom(DataAtom atom) {
+        return substitution.applyToDataAtom(atom);
+    }
+
+    private Optional<ImmutableBooleanExpression> transformOptionalBooleanExpression(
+            Optional<ImmutableBooleanExpression> optionalFilterCondition) {
+        if (optionalFilterCondition.isPresent()) {
+            return Optional.of(transformBooleanExpression(optionalFilterCondition.get()));
+        }
+        return Optional.absent();
+    }
 }

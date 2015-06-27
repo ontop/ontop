@@ -1,11 +1,11 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
-import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
-import org.semanticweb.ontop.pivotalrepr.DataAtom;
+import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.model.DataAtom;
 
 import java.util.HashMap;
 import java.util.HashSet;

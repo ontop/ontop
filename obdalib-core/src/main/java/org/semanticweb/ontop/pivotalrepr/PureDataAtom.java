@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**

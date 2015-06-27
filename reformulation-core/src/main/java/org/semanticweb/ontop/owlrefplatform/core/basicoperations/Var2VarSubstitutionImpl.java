@@ -47,11 +47,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
-        return (ImmutableBooleanExpression) apply(booleanExpression);
-    }
-
-    @Override
     public VariableImpl get(VariableImpl var) {
         return map.get(var);
     }

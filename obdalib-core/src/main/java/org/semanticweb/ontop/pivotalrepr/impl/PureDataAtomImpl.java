@@ -3,9 +3,10 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.DataAtomImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.pivotalrepr.AtomPredicate;
-import org.semanticweb.ontop.pivotalrepr.DataAtom;
+import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.PureDataAtom;
 
 public class PureDataAtomImpl extends DataAtomImpl implements PureDataAtom {
