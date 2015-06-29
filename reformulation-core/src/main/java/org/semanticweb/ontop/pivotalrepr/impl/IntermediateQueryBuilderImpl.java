@@ -38,8 +38,8 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     public void addChild(QueryNode parentNode, QueryNode childNode) throws IntermediateQueryBuilderException {
         checkEditMode();
 
-        if (queryDAG.addVertex(childNode)) {
-            throw new IntermediateQueryBuilderException("Node " + childNode + "already in the graph");
+        if (!queryDAG.addVertex(childNode)) {
+            throw new IntermediateQueryBuilderException("Node " + childNode + " already in the graph");
         }
         try {
             queryDAG.addDagEdge(parentNode, childNode);

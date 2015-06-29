@@ -107,13 +107,8 @@ public class Datalog2IntermediateQueryConverter {
         try {
             IntermediateQueryBuilder builder = new IntermediateQueryBuilderImpl();
 
-            /**
-             * TODO: is there a problem with a top rule with non-distinct variables in its head?
-             * TODO: remove this consideration (simplify)
-             */
-            final boolean allowVariableCreation = false;
             P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                    convertFromDatalogDataAtom(rootDatalogAtom, allowVariableCreation);
+                    convertFromDatalogDataAtom(rootDatalogAtom);
 
             DataAtom dataAtom = decomposition._1();
             ImmutableSubstitution<ImmutableTerm> substitution = decomposition._2();
@@ -185,11 +180,8 @@ public class Datalog2IntermediateQueryConverter {
      *
      */
     private static ConstructionNode createProjectionNodeWithoutModifier(CQIE datalogRule) throws InvalidDatalogProgramException {
-        // Non-top rule so ok.
-        final boolean allowVariableCreation = true;
-
         P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                convertFromDatalogDataAtom(datalogRule.getHead(), allowVariableCreation);
+                convertFromDatalogDataAtom(datalogRule.getHead());
 
         return new ConstructionNodeImpl(decomposition._1(), decomposition._2());
     }
@@ -362,7 +354,7 @@ public class Datalog2IntermediateQueryConverter {
      * TODO: should we simplify it?
      */
     private static P2<DataAtom, ImmutableSubstitution<ImmutableTerm>>
-                        convertFromDatalogDataAtom(Function datalogDataAtom, boolean allowVariableCreation)
+                        convertFromDatalogDataAtom(Function datalogDataAtom)
         throws InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
@@ -391,10 +383,6 @@ public class Datalog2IntermediateQueryConverter {
              * TODO: could we consider a sub-class of Function instead?
              */
             else if ((term instanceof Constant) || (term instanceof Function)) {
-                if (!allowVariableCreation) {
-                    throw new InvalidDatalogProgramException("Constant/Function " + term +
-                            " in a data atom that should only contain variables " + datalogDataAtom);
-                }
                 newVariableArgument = variableDispatcher.generateNewVariable();
                 allBindingBuilder.put(newVariableArgument, convertIntoImmutableTerm(term));
             } else {
@@ -440,9 +428,7 @@ public class Datalog2IntermediateQueryConverter {
                                              Optional<ImmutableBooleanExpression> optionalFilterCondition)
             throws InvalidDatalogProgramException {
         if (dataOrCompositeAtom.isDataFunction()) {
-            // No problem here
-            final boolean allowVariableCreation = true;
-            DataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom, allowVariableCreation)._1();
+            DataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom)._1();
             return createDataNode(dataAtom,tablePredicates);
         }
 

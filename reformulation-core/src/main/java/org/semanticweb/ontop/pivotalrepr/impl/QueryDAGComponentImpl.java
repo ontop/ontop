@@ -236,7 +236,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
 
         QueryNode rootNode = nodesInAntiTopologicalOrder.get(0);
         if (!(rootNode instanceof ConstructionNode)) {
-            throw new IllegalDAGException("The root node is not a ProjectionNode: " + rootNode);
+            throw new IllegalDAGException("The root node is not a ConstructionNode: " + rootNode);
         }
 
         return (ConstructionNode) rootNode;
