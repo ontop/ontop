@@ -17,4 +17,12 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     public Optional<ImmutableBooleanExpression> getOptionalFilterCondition() {
         return optionalFilterCondition;
     }
+
+    protected String getOptionalFilterString() {
+        if (optionalFilterCondition.isPresent()) {
+            return " " + optionalFilterCondition.get().toString();
+        }
+
+        return "";
+    }
 }

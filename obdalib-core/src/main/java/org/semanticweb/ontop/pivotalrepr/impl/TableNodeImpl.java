@@ -6,6 +6,8 @@ import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class TableNodeImpl extends DataNodeImpl implements TableNode {
+    private static final String TABLE_NODE_STR = "TABLE";
+
     public TableNodeImpl(DataAtom atom) {
         super(atom);
     }
@@ -28,5 +30,10 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     @Override
     public TableNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + TABLE_NODE_STR + " " + getAtom() + ")";
     }
 }

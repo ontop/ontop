@@ -7,6 +7,8 @@ import org.semanticweb.ontop.pivotalrepr.*;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
+    private static final String JOIN_NODE_STR = "JOIN" ;
+
     public InnerJoinNodeImpl(Optional<ImmutableBooleanExpression> optionalFilterCondition) {
         super(optionalFilterCondition);
     }
@@ -30,5 +32,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + JOIN_NODE_STR + getOptionalFilterString() + ")";
     }
 }

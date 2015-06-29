@@ -7,6 +7,8 @@ import org.semanticweb.ontop.pivotalrepr.*;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
+    private static final String FILTER_NODE_STR = "FILTER";
+
     public FilterNodeImpl(ImmutableBooleanExpression filterCondition) {
         super(Optional.of(filterCondition));
     }
@@ -34,5 +36,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public ImmutableBooleanExpression getFilterCondition() {
         return getOptionalFilterCondition().get();
+    }
+
+    @Override
+    public String toString() {
+        return "(" + FILTER_NODE_STR + getOptionalFilterString() + ")";
     }
 }
