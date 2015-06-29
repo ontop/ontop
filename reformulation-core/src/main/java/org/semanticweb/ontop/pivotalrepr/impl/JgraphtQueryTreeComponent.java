@@ -19,7 +19,7 @@ import java.util.Set;
  * TODO: debug it
  *
  */
-public class QueryJgraphtDAGComponent implements QueryTreeComponent {
+public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     /**
      * TODO: explain.
@@ -44,7 +44,7 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
     private ImmutableList<QueryNode> nodesInAntiTopologicalOrder;
 
 
-    protected QueryJgraphtDAGComponent(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
+    protected JgraphtQueryTreeComponent(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
             throws IllegalTreeException {
         this.queryDAG = queryDAG;
         /**

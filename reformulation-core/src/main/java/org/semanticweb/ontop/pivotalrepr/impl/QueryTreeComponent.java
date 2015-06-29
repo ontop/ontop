@@ -26,7 +26,7 @@ public interface QueryTreeComponent {
     void addSubTree(IntermediateQuery subQuery, QueryNode parentNode);
 
     /**
-     * Makes sure all the children nodes in the DAG are the listed ones.
+     * Makes sure all the children nodes in the tree are the listed ones.
      */
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 

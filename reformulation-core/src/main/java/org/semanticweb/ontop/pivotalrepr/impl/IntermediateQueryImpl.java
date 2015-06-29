@@ -3,8 +3,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.DetypingOptimizer;
@@ -49,13 +47,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    protected IntermediateQueryImpl(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
-            throws InconsistentIntermediateQueryException {
-        try {
-            treeComponent = new QueryJgraphtDAGComponent(queryDAG);
-        } catch (IllegalTreeException e) {
-            throw new InconsistentIntermediateQueryException(e.getMessage());
-        }
+    protected IntermediateQueryImpl(QueryTreeComponent treeComponent) {
+        this.treeComponent = treeComponent;
     }
 
     @Override

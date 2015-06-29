@@ -53,7 +53,12 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = new IntermediateQueryImpl(queryDAG);
+        IntermediateQuery query;
+        try {
+            query = new IntermediateQueryImpl(new JgraphtQueryTreeComponent(queryDAG));
+        } catch (IllegalTreeException e) {
+            throw new IntermediateQueryBuilderException(e.getMessage());
+        }
         canEdit = false;
         return query;
     }
@@ -80,6 +85,6 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     public ImmutableList<QueryNode> getSubNodesOf(QueryNode node)
             throws IntermediateQueryBuilderException {
         checkInitialization();
-        return QueryJgraphtDAGComponent.getSubNodesOf(queryDAG, node);
+        return JgraphtQueryTreeComponent.getSubNodesOf(queryDAG, node);
     }
 }
