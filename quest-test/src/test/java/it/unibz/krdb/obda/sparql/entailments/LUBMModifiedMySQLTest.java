@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.sparql.entailments;
 
 /*
  * #%L
@@ -49,7 +49,7 @@ import static org.junit.Assert.assertEquals;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBM1MySQLTest  {
+public class LUBMModifiedMySQLTest {
 
 	private OBDADataFactory fac;
 
@@ -58,9 +58,9 @@ public class LUBM1MySQLTest  {
 	private OWLOntology ontology;
 
 	String owlfile =
-			"src/test/resources/test/entailments/univ-benchModified.owl";
+			"src/test/resources/subclass/univ-benchModified.owl";
 	String obdafile =
-			"src/test/resources/test/entailments/univ1-bench.obda";
+			"src/test/resources/subclass/univ1-bench.obda";
 
 	@Before
 	public void setUp() throws Exception {
@@ -559,7 +559,7 @@ public class LUBM1MySQLTest  {
 			System.exit(0);
 		}
 
-		LUBM1MySQLTest benchmark = new LUBM1MySQLTest();
+		LUBMModifiedMySQLTest benchmark = new LUBMModifiedMySQLTest();
 		benchmark.owlfile = args[0];
 		benchmark.obdafile = args[1];
 		benchmark.setUp();

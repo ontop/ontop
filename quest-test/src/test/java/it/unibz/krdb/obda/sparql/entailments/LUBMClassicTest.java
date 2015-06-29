@@ -213,6 +213,7 @@ public class LUBMClassicTest {
 		assertEquals(67, individualsDomainClass.size());
 	}
 
+	@Test
 	public void testRanges() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

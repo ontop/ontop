@@ -27,8 +27,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass
@@ -48,7 +50,7 @@ import java.util.*;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBM500MySQLTest extends TestCase {
+public class LUBM500MySQLTest {
 
 	private OBDADataFactory fac;
 
@@ -164,7 +166,7 @@ public class LUBM500MySQLTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-	@Test
+	@Ignore
 	public void testLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -331,7 +333,7 @@ public class LUBM500MySQLTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-	@Test
+	@Ignore // OutOfMemoryError
 	public void test3runLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -548,7 +550,7 @@ public class LUBM500MySQLTest extends TestCase {
 		
 		
 	}
-	@Test
+	@Ignore
 	public void test1runLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

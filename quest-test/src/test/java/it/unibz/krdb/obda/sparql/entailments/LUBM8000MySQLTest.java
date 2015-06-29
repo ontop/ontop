@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -165,7 +166,7 @@ public class LUBM8000MySQLTest {
 			reasoner.dispose();
 		}
 	}
-	@Test
+	@Ignore
 	public void testLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -332,7 +333,7 @@ public class LUBM8000MySQLTest {
 			reasoner.dispose();
 		}
 	}
-	@Test
+	@Ignore
 	public void test3runLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -547,7 +548,7 @@ public class LUBM8000MySQLTest {
 		
 		
 	}
-	@Test
+	@Ignore
 	public void test1runLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
