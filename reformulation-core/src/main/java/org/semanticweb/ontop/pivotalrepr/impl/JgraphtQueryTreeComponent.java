@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -41,7 +40,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      *
      * * TODO: mark it as Nullable.
      */
-    private ImmutableList<QueryNode> nodesInAntiTopologicalOrder;
+    private ImmutableList<QueryNode> bottomUpOrderedNodes;
 
 
     protected JgraphtQueryTreeComponent(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
@@ -49,10 +48,10 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         this.queryDAG = queryDAG;
         /**
          * Cache attributes.
-         * May throw an IllegalDAGException during their computation.
+         * May throw an IllegalTreeException during their computation.
          *
          */
-        this.nodesInAntiTopologicalOrder = null;
+        this.bottomUpOrderedNodes = null;
         this.rootConstructionNode = null;
         computeNodeTopologyCache();
     }
@@ -76,11 +75,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         /**
          * Computes the list if not cached
          */
-        if (nodesInAntiTopologicalOrder == null) {
+        if (bottomUpOrderedNodes == null) {
             computeNodeTopologyCache();
         }
 
-        return nodesInAntiTopologicalOrder;
+        return bottomUpOrderedNodes;
     }
 
     @Override
@@ -94,47 +93,24 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      */
     @Override
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
+        resetNodeTopologyCache();
+
         queryDAG.addVertex(replacingNode);
         try {
             for (DefaultEdge incomingEdge : queryDAG.incomingEdgesOf(previousNode)) {
-                queryDAG.addDagEdge((QueryNode)incomingEdge.getSource(), replacingNode);
+                QueryNode child = queryDAG.getEdgeSource(incomingEdge);
+                queryDAG.addDagEdge(child, replacingNode);
             }
 
             for (DefaultEdge outgoingEdge : queryDAG.outgoingEdgesOf(previousNode)) {
-
-                // UGLY but was happening...
-                if (outgoingEdge.getTarget() == null || outgoingEdge.getSource() == null) {
-                    continue;
-                }
-                queryDAG.addDagEdge(replacingNode, (QueryNode)outgoingEdge.getTarget());
+                QueryNode parent = queryDAG.getEdgeTarget(outgoingEdge);
+                queryDAG.addDagEdge(replacingNode, parent);
             }
 
         } catch (DirectedAcyclicGraph.CycleFoundException e) {
             throw new RuntimeException("BUG: " + e.getLocalizedMessage());
         }
         queryDAG.removeVertex(previousNode);
-    }
-
-    /**
-     * Dependency: edge from a QueryNode to its sub-node.
-     *
-     * TODO: simplify it if we decide to switch to a tree.
-     *
-     */
-    private void removeDependency(DefaultEdge dependencyEdge) {
-        resetNodeTopologyCache();
-
-        QueryNode subNode = (QueryNode) dependencyEdge.getSource();
-        queryDAG.removeEdge(dependencyEdge);
-
-        /**
-         * Checks if the sub-node is still a dependency.
-         *
-         * If not, removes it.
-         */
-        if (queryDAG.outgoingEdgesOf(subNode).isEmpty()) {
-            queryDAG.removeVertex(subNode);
-        }
     }
 
     /**
@@ -165,15 +141,15 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
          * Existing sub-nodes: keep or remove
          */
         Set<DefaultEdge> incomingEdges = queryDAG.incomingEdgesOf(parentNode);
-        for (DefaultEdge dependencyEdge : incomingEdges) {
-            QueryNode subNode = (QueryNode) dependencyEdge.getTarget();
+        for (DefaultEdge subNodeEdge : incomingEdges) {
+            QueryNode subNode = queryDAG.getEdgeSource(subNodeEdge);
             // Kept
             if (proposedSubNodesToConsider.contains(subNode)) {
                 proposedSubNodesToConsider.remove(subNode);
             }
             // Removed
             else {
-                removeDependency(dependencyEdge);
+                removeSubTree(subNode);
             }
         }
 
@@ -195,6 +171,29 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     /**
+     * Removes all the nodes of a sub-tree,
+     * all the edges between them and WITH THE REST OF TREE.
+     *
+     * Recursive
+     */
+    private void removeSubTree(QueryNode subTreeRoot) {
+        for (DefaultEdge subNodeEdge : queryDAG.incomingEdgesOf(subTreeRoot)) {
+            QueryNode childNode = queryDAG.getEdgeSource(subNodeEdge);
+            /**
+             * Recursive call.
+             * Removing this edge is the responsibility of the child node.
+             */
+            removeSubTree(childNode);
+        }
+
+        for (DefaultEdge parentEdge : queryDAG.outgoingEdgesOf(subTreeRoot)) {
+            queryDAG.removeEdge(parentEdge);
+        }
+
+        queryDAG.removeVertex(subTreeRoot);
+    }
+
+    /**
      * TODO: implement it
      */
     @Override
@@ -206,41 +205,38 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      * TODO: describe
      */
     private void computeNodeTopologyCache() throws IllegalTreeException {
-        nodesInAntiTopologicalOrder = extractNodeOrder(queryDAG);
-        rootConstructionNode = extractRootProjectionNode(nodesInAntiTopologicalOrder);
+        bottomUpOrderedNodes = extractBottomUpOrderedNodes(queryDAG);
+        rootConstructionNode = extractRootProjectionNode(bottomUpOrderedNodes);
     }
 
     /**
      * TODO: describe
      */
     private void resetNodeTopologyCache() {
-        nodesInAntiTopologicalOrder = null;
+        bottomUpOrderedNodes = null;
         rootConstructionNode = null;
     }
 
     /**
      * TODO: describe
      */
-    private static ImmutableList<QueryNode> extractNodeOrder(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
+    private static ImmutableList<QueryNode> extractBottomUpOrderedNodes(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
         TopologicalOrderIterator<QueryNode, DefaultEdge> it =
                 new TopologicalOrderIterator<>(queryDAG);
 
-        List<QueryNode> nodesInTopologicalOrder = Lists.newArrayList(it);
-        ImmutableList<QueryNode> nodesInAntiTopologicalOrder = ImmutableList.copyOf(Lists.reverse(
-                nodesInTopologicalOrder));
-        return nodesInAntiTopologicalOrder;
+        return ImmutableList.copyOf(it);
     }
 
     /**
      * TODO: describe
      */
-    private static ConstructionNode extractRootProjectionNode(ImmutableList<QueryNode> nodesInAntiTopologicalOrder)
+    private static ConstructionNode extractRootProjectionNode(ImmutableList<QueryNode> topDownOrderedNodes)
             throws IllegalTreeException {
-        if (nodesInAntiTopologicalOrder.isEmpty()) {
+        if (topDownOrderedNodes.isEmpty()) {
             throw new IllegalTreeException("Empty DAG!");
         }
 
-        QueryNode rootNode = nodesInAntiTopologicalOrder.get(0);
+        QueryNode rootNode = topDownOrderedNodes.get(topDownOrderedNodes.size() - 1);
         if (!(rootNode instanceof ConstructionNode)) {
             throw new IllegalTreeException("The root node is not a ConstructionNode: " + rootNode);
         }
@@ -262,13 +258,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         Set<DefaultEdge> incomingEdges = queryDAG.incomingEdgesOf(node);
         ImmutableList.Builder<QueryNode> nodeListBuilder = ImmutableList.builder();
         for (DefaultEdge edge : incomingEdges) {
-
-            // UGLY!!!
-            if (edge.getSource() == null || edge.getTarget() == null) {
-                throw new RuntimeException("Internal error! Edge where the source or the target is missing!" + edge);
-            }
-
-            nodeListBuilder.add((QueryNode) edge.getSource());
+            nodeListBuilder.add(queryDAG.getEdgeSource(edge));
         }
 
         return nodeListBuilder.build();
