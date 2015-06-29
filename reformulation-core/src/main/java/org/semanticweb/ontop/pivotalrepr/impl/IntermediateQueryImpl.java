@@ -36,6 +36,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntermediateQueryImpl.class);
 
     /**
+     * TODO: use Guice to replace it.
+     */
+    private static final IntermediateQueryPrinter PRINTER = new BasicQueryTreePrinter();
+
+
+    /**
      * Highly mutable (low control) so MUST NOT BE SHARED!
      */
     private final QueryTreeComponent treeComponent;
@@ -214,6 +220,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public String toString() {
-        return treeComponent.toString();
+        return PRINTER.stringify(this);
     }
 }
