@@ -23,8 +23,6 @@ public interface QueryTreeComponent {
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
 
-    void removeDependency(DefaultEdge dependencyEdge);
-
     void addSubTree(IntermediateQuery subQuery, QueryNode parentNode);
 
     /**

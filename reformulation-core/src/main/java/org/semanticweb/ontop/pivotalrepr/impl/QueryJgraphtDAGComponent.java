@@ -59,7 +59,7 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
 
     @Override
     public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
-        return DAGUtils.getSubNodesOf(queryDAG, node);
+        return getSubNodesOf(queryDAG, node);
     }
 
     @Override
@@ -121,11 +121,10 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
      * TODO: simplify it if we decide to switch to a tree.
      *
      */
-    @Override
-    public void removeDependency(DefaultEdge dependencyEdge) {
+    private void removeDependency(DefaultEdge dependencyEdge) {
         resetNodeTopologyCache();
 
-        QueryNode subNode = (QueryNode) dependencyEdge.getTarget();
+        QueryNode subNode = (QueryNode) dependencyEdge.getSource();
         queryDAG.removeEdge(dependencyEdge);
 
         /**
@@ -133,7 +132,7 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
          *
          * If not, removes it.
          */
-        if (queryDAG.incomingEdgesOf(subNode).isEmpty()) {
+        if (queryDAG.outgoingEdgesOf(subNode).isEmpty()) {
             queryDAG.removeVertex(subNode);
         }
     }
@@ -148,7 +147,7 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
         for (QueryNode childNode : subQuery.getCurrentSubNodesOf(parentNode)) {
             queryDAG.addVertex(childNode);
             try {
-                queryDAG.addDagEdge(parentNode, childNode);
+                queryDAG.addDagEdge(childNode, parentNode);
             } catch (DirectedAcyclicGraph.CycleFoundException e) {
                 throw new RuntimeException("BUG (internal error)" + e.getLocalizedMessage());
             }
@@ -165,8 +164,8 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
         /**
          * Existing sub-nodes: keep or remove
          */
-        Set<DefaultEdge> outgoingEdges = queryDAG.outgoingEdgesOf(parentNode);
-        for (DefaultEdge dependencyEdge : outgoingEdges) {
+        Set<DefaultEdge> incomingEdges = queryDAG.incomingEdgesOf(parentNode);
+        for (DefaultEdge dependencyEdge : incomingEdges) {
             QueryNode subNode = (QueryNode) dependencyEdge.getTarget();
             // Kept
             if (proposedSubNodesToConsider.contains(subNode)) {
@@ -252,6 +251,27 @@ public class QueryJgraphtDAGComponent implements QueryTreeComponent {
     @Override
     public String toString() {
         return queryDAG.toString();
+    }
+
+
+    /**
+     * Edges are directed from the child to the parent.
+     */
+    protected static ImmutableList<QueryNode> getSubNodesOf(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG,
+                                                            QueryNode node) {
+        Set<DefaultEdge> incomingEdges = queryDAG.incomingEdgesOf(node);
+        ImmutableList.Builder<QueryNode> nodeListBuilder = ImmutableList.builder();
+        for (DefaultEdge edge : incomingEdges) {
+
+            // UGLY!!!
+            if (edge.getSource() == null || edge.getTarget() == null) {
+                throw new RuntimeException("Internal error! Edge where the source or the target is missing!" + edge);
+            }
+
+            nodeListBuilder.add((QueryNode) edge.getSource());
+        }
+
+        return nodeListBuilder.build();
     }
 
 }

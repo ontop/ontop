@@ -80,6 +80,6 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     public ImmutableList<QueryNode> getSubNodesOf(QueryNode node)
             throws IntermediateQueryBuilderException {
         checkInitialization();
-        return DAGUtils.getSubNodesOf(queryDAG, node);
+        return QueryJgraphtDAGComponent.getSubNodesOf(queryDAG, node);
     }
 }
