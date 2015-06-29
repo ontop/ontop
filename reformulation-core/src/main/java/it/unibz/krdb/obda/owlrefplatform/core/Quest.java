@@ -866,7 +866,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 
 		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
-										reformulationReasoner, metadata, inputOntology);
+										reformulationReasoner, metadata, inputOntology, sparqlOwlEntailment);
 
 
 	}

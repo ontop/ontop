@@ -376,12 +376,13 @@ public class QuestUnfolder {
 	}
 	
 	
-	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, DBMetadata metadata, Ontology inputOntology) throws OBDAException {
+	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, DBMetadata metadata, Ontology inputOntology, boolean sparqlEntailment) throws OBDAException {
 
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
 
-		addEntailmentsToFactRule(inputOntology);
-		
+		if(sparqlEntailment) {
+			addEntailmentsToFactRule(inputOntology);
+		}
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
 		applyTMappings(reformulationReasoner, false, metadata, TMappingExclusionConfig.empty());

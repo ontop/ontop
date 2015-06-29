@@ -54,7 +54,7 @@ public class QuestPreferences extends Properties {
 
 	public static final String  REWRITE 	= "rewrite";
 	
-	public static final String  SPARQL_OWL_ENTAILMENT = "SPARQL_OWL_ENTAILMENT";
+	public static final String  SPARQL_OWL_ENTAILMENT = "org.obda.owlreformulationplatform.sparql_owl_entailment";
 	
 	
 	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
