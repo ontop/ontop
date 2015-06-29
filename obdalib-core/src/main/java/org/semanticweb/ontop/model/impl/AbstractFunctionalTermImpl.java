@@ -90,6 +90,7 @@ public abstract class AbstractFunctionalTermImpl implements Function {
      *            the term in question.
      * @return true if the function contains the term, or false otherwise.
      */
+    @Override
     public boolean containsTerm(Term t) {
         List<Term> terms = getTerms();
         for (int i = 0; i < terms.size(); i++) {

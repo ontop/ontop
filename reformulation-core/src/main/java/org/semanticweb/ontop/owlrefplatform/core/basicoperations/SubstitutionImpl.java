@@ -225,7 +225,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
                 return new NeutralSubstitution();
             }
 
-            if ((term1 instanceof VariableImpl) || (term1 instanceof FunctionalTermImpl)
+            if ((term1 instanceof VariableImpl) || (term1 instanceof Function)
                     || (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
 
                 // ROMAN: why is BNodeConstantImpl not mentioned?
@@ -265,8 +265,8 @@ public class SubstitutionImpl implements AppendableSubstitution {
         else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
             return new SingletonSubstitution(t1, t2);
         }
-        else if (t2 instanceof FunctionalTermImpl) {
-            FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
+        else if (t2 instanceof Function) {
+            Function fterm = (Function) t2;
             if (fterm.containsTerm(t1))
                 return null;
             else
