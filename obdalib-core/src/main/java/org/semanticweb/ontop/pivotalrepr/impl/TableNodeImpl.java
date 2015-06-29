@@ -34,6 +34,6 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
 
     @Override
     public String toString() {
-        return "(" + TABLE_NODE_STR + " " + getAtom() + ")";
+        return TABLE_NODE_STR + " " + getAtom();
     }
 }

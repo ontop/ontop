@@ -40,6 +40,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public String toString() {
-        return "(" + FILTER_NODE_STR + getOptionalFilterString() + ")";
+        return FILTER_NODE_STR + getOptionalFilterString();
     }
 }

@@ -35,6 +35,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public String toString() {
-        return "(" + LEFT_JOIN_NODE_STR + getOptionalFilterString() + ")";
+        return LEFT_JOIN_NODE_STR + getOptionalFilterString();
     }
 }

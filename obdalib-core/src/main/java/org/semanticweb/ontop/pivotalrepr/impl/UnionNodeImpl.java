@@ -5,8 +5,8 @@ import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
-    
-    private static final String UNION_NODE_FULL_STR = "(UNION)";
+
+    private static final String UNION_NODE_STR = "UNION";
 
     @Override
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
@@ -30,6 +30,6 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public String toString() {
-        return UNION_NODE_FULL_STR;
+        return UNION_NODE_STR;
     }
 }

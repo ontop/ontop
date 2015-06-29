@@ -36,6 +36,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public String toString() {
-        return "(" + JOIN_NODE_STR + getOptionalFilterString() + ")";
+        return JOIN_NODE_STR + getOptionalFilterString();
     }
 }

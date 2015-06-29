@@ -14,7 +14,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private final DataAtom dataAtom;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
 
-    private static final String CONSTRUCTION_NODE_STR = "CONSTR";
+    private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
     /**
      * Without modifier
@@ -83,7 +83,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public String toString() {
         // TODO: display the query modifiers
-        return "(" + CONSTRUCTION_NODE_STR + " " + dataAtom + " " + "[" +substitution + "])" ;
+        return CONSTRUCTION_NODE_STR + " " + dataAtom + " " + "[" +substitution + "]" ;
     }
 
 }

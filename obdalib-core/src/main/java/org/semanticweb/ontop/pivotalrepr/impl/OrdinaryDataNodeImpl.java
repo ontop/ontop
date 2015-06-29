@@ -34,6 +34,6 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
 
     @Override
     public String toString() {
-        return "(" + ORDINARY_DATA_NODE_STR + " " + getAtom() + ")";
+        return ORDINARY_DATA_NODE_STR + " " + getAtom();
     }
 }
