@@ -27,7 +27,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -48,6 +50,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass owl:equivalentProperty 
@@ -55,7 +59,7 @@ import java.util.Properties;
  * QuestPreferences has SPARQL_OWL_ENTAILMENT  set to true.
  *
  */
-public class HierarchyVirtualTest extends TestCase {
+public class HierarchyVirtualTest  {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -70,7 +74,7 @@ public class HierarchyVirtualTest extends TestCase {
 	 final String obdafile =
 	 "src/test/resources/subclass/test-hierarchy-extended.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		/*
@@ -110,7 +114,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		try {
 			dropTables();
@@ -224,6 +228,7 @@ public class HierarchyVirtualTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSubDescription() throws Exception {
 		
 		QuestPreferences p = new QuestPreferences();
@@ -243,7 +248,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-		assertEquals(61, individualsClass.size());
+		assertEquals(18, individualsClass.size());
 
 		log.info("Find subClass");
 		List<String> classes = runSingleNamedIndividualTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:subClassOf :Man }", "rdfs:subClassOf");
@@ -251,6 +256,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 	}
 
+	@Test
 	public void testEquivalences() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -261,7 +267,7 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find equivalent classes");
 		List<String> individualsEquivClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
-		assertEquals(31, individualsEquivClass.size());
+		assertEquals(12, individualsEquivClass.size());
 
 		List<String> equivClass = runSingleNamedIndividualTests(p,
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> select * where {?x owl:equivalentClass :Woman }", "owl:equivalentClass");
@@ -275,7 +281,7 @@ public class HierarchyVirtualTest extends TestCase {
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> select * where {?x owl:equivalentProperty :isSibling }", "owl:equivalentProperty");
 		assertEquals(2, equivProperty.size());
 	}
-
+	@Test
 	public void testDomains() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -286,9 +292,9 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(3, individualsDomainClass.size());
+		assertEquals(10, individualsDomainClass.size());
 	}
-
+	@Test
 	public void testRanges() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -299,9 +305,9 @@ public class HierarchyVirtualTest extends TestCase {
 
 		log.info("Find range");
 		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://obda.inf.unibz.it/sparql/test-hierarchy.owl#> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
-		assertEquals(4, individualsRangeClass.size());
+		assertEquals(11, individualsRangeClass.size());
 	}
-
+	@Test
 	public void testDisjoint() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -319,7 +325,7 @@ public class HierarchyVirtualTest extends TestCase {
 		assertEquals(24, individualsDisjProp.size());
 
 	}
-	
+	@Test
 	public void testInverseOf() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

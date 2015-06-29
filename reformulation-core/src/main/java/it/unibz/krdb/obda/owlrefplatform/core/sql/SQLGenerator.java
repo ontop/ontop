@@ -39,7 +39,6 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -92,6 +91,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private boolean generatingREPLACE = true;
 	private boolean distinctResultSet = false;
+	private boolean sparqlOwlEntailment = false;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
@@ -113,10 +113,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param uriid is null in case we are not in the SI mode
 	 */
 
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, SemanticIndexURIMap uriid) {
+	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, boolean sparqlOwlEntailment, SemanticIndexURIMap uriid) {
 		this(metadata, sqladapter);
 		this.generatingREPLACE = sqlGenerateReplace;
 		this.distinctResultSet = distinctResultSet;
+		this.sparqlOwlEntailment = sparqlOwlEntailment;
 		if (uriid != null) {
 			this.isSI = true;
 			this.uriRefIds = uriid;
@@ -148,7 +149,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (limit != -1 || offset != -1) {
 				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
 			}
-			String sql = "SELECT DISTINCT *\n";
+			String sql = "SELECT" ;
+					if(sparqlOwlEntailment) {
+						sql += " DISTINCT" ;
+					}
+					sql+= " *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
@@ -250,13 +255,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Iterator<String> queryStringIterator = queriesStrings.iterator();
 		StringBuilder result = new StringBuilder();
-		result.append("SELECT DISTINCT *\n FROM\n ( ");
+		if(sparqlOwlEntailment) {
+			result.append("SELECT DISTINCT *\n FROM\n ( ");
+		}
 		if (queryStringIterator.hasNext()) {
 			result.append(queryStringIterator.next());
 		}
 
 		String UNION = null;
-		if (isDistinct && !distinctResultSet) {
+		if (isDistinct && !distinctResultSet ) {
 			UNION = "UNION";
 		} else {
 			UNION = "UNION ALL";
@@ -267,8 +274,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			result.append("\n");
 			result.append(queryStringIterator.next());
 		}
-
-		result.append(") FinalView" );
+		if(sparqlOwlEntailment) {
+			result.append(") FinalView");
+		}
 
 		return result.toString();
 	}
@@ -737,10 +745,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		List<Term> headterms = query.getHead().getTerms();
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("SELECT DISTINCT ");
-//		if (distinct  && !distinctResultSet) {
-//			sb.append("DISTINCT ");
-//		}
+		sb.append("SELECT ");
+		if (distinct && !distinctResultSet || sparqlOwlEntailment) {
+			sb.append("DISTINCT ");
+		}
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");

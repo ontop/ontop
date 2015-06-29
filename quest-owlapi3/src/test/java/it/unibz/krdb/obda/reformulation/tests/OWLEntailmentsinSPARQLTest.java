@@ -286,7 +286,7 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(12, individualsDomainClass.size());
+		assertEquals(18, individualsDomainClass.size());
 
 		log.info("Find one domain");
 		List<String> domain = runSingleNamedIndividualTests(p,
@@ -306,7 +306,7 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 
 		log.info("Find range");
 		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
-		assertEquals(10, individualsRangeClass.size());
+		assertEquals(19, individualsRangeClass.size());
 		
 		log.info("Find one range");
 		List<String> range = runSingleNamedIndividualTests(p,

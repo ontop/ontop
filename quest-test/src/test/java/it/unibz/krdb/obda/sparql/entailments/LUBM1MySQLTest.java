@@ -26,38 +26,22 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
@@ -66,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBM1MySQLTest extends TestCase {
+public class LUBM1MySQLTest {
 
 	private OBDADataFactory fac;
 
@@ -75,11 +59,11 @@ public class LUBM1MySQLTest extends TestCase {
 	private OWLOntology ontology;
 
 	final String owlfile =
-			"src/test/resources/subclass/univ-bench2.owl";
+			"src/test/resources/subclass/univ-benchQL.owl";
 	final String obdafile =
 			"src/test/resources/subclass/univ1-bench.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		// Loading the OWL file
@@ -182,7 +166,7 @@ public class LUBM1MySQLTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-
+	@Test
 	public void testLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -399,7 +383,7 @@ public class LUBM1MySQLTest extends TestCase {
 		
 		
 	}
-
+	@Test
 	public void testSubDescription() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -410,14 +394,14 @@ public class LUBM1MySQLTest extends TestCase {
 
 		log.info("Find subProperty");
 		List<String> individualsProperty = runTests(p, "PREFIX :<http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
-		assertEquals(106, individualsProperty.size());
+		assertEquals(117, individualsProperty.size());
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-		assertEquals(283, individualsClass.size());
+		assertEquals(120, individualsClass.size());
 
 	}
-
+	@Test
 	public void testEquivalences() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -428,16 +412,16 @@ public class LUBM1MySQLTest extends TestCase {
 
 		log.info("Find equivalent classes");
 		List<String> individualsEquivClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
-		assertEquals(119, individualsEquivClass.size());
+		assertEquals(43, individualsEquivClass.size());
 
 		//
 		log.info("Find equivalent properties");
 		List<String> individualsEquivProperties = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x owl:equivalentProperty ?y }", "owl:equivalentProperty");
-		assertEquals(76, individualsEquivProperties.size());
+		assertEquals(71, individualsEquivProperties.size());
 
 		//
 	}
-
+	@Test
 	public void testDomains() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -448,9 +432,9 @@ public class LUBM1MySQLTest extends TestCase {
 
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(41, individualsDomainClass.size());
+		assertEquals(90, individualsDomainClass.size());
 	}
-
+	@Test
 	public void testRanges() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -461,7 +445,7 @@ public class LUBM1MySQLTest extends TestCase {
 
 		log.info("Find range");
 		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
-		assertEquals(41, individualsRangeClass.size());
+		assertEquals(86, individualsRangeClass.size());
 	}
 
 	public void testDisjoint() throws Exception {
@@ -481,7 +465,7 @@ public class LUBM1MySQLTest extends TestCase {
 		assertEquals(0, individualsDisjProp.size());
 
 	}
-
+	@Test
 	public void testInverseOf() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -492,7 +476,7 @@ public class LUBM1MySQLTest extends TestCase {
 
 		log.info("Find inverse");
 		List<String> individualsInverse = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x owl:inverseOf ?y }", "owl:inverseOf");
-		assertEquals(76, individualsInverse.size());
+		assertEquals(64, individualsInverse.size());
 
 	}
 

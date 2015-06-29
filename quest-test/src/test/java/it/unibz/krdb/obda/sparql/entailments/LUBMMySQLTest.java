@@ -27,7 +27,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -44,7 +45,7 @@ import java.util.Map;
  * and with SPARQLDL queries. 
  * Modify the value obdafile  to test with LUBM9, LUBM20 or LUBM500.
  */
-public class LUBMMySQLTest extends TestCase {
+public class LUBMMySQLTest  {
 
 	private OBDADataFactory fac;
 
@@ -55,7 +56,7 @@ public class LUBMMySQLTest extends TestCase {
 	String owlfile = "src/test/resources/subclass/univ-benchQL.owl";
 	String obdafile = "src/test/resources/subclass/univ-benchQL.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		// // Loading the OWL file
@@ -71,7 +72,7 @@ public class LUBMMySQLTest extends TestCase {
 		// ioManager.load(obdafile);
 
 	}
-
+	@Test
 	public void testSpecial() throws Exception {
 
 		long start1 = System.currentTimeMillis();
@@ -212,6 +213,7 @@ public class LUBMMySQLTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void test3runLUBM() throws Exception {
 
 		long start1 = System.currentTimeMillis();
@@ -421,7 +423,7 @@ public class LUBMMySQLTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testSPARQLDL() throws Exception {
 
 		long start1 = System.currentTimeMillis();

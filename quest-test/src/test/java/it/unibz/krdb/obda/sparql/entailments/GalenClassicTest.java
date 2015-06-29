@@ -20,25 +20,11 @@ package it.unibz.krdb.obda.sparql.entailments;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -47,6 +33,14 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass owl:equivalentProperty 
@@ -54,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * QuestPreferences has SPARQL_OWL_ENTAILMENT  set to true.
  *
  */
-public class GalenClassicTest extends TestCase {
+public class GalenClassicTest  {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
@@ -63,7 +57,7 @@ public class GalenClassicTest extends TestCase {
 	 final String owlfile =
 	 "src/test/resources/subclass/galen-ians-full-doctored.owl";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		// Loading the OWL file
@@ -160,7 +154,7 @@ public class GalenClassicTest extends TestCase {
 		}
 	}
 
-	
+	@Ignore
 	public void testSubClass() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -220,6 +214,8 @@ public class GalenClassicTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
+
+	@Ignore
 	public void testSubDescription() throws Exception {
 		
 		QuestPreferences p = new QuestPreferences();

@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
-
 import com.google.common.collect.Multimap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -27,7 +26,6 @@ import it.unibz.krdb.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -378,9 +376,11 @@ public class QuestUnfolder {
 	}
 	
 	
-	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, DBMetadata metadata) throws OBDAException {
+	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, DBMetadata metadata, Ontology inputOntology) throws OBDAException {
 
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
+
+		addEntailmentsToFactRule(inputOntology);
 		
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles

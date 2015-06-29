@@ -26,11 +26,17 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,15 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
@@ -62,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBMVirtualTest extends TestCase {
+public class LUBMVirtualTest  {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -76,7 +74,7 @@ public class LUBMVirtualTest extends TestCase {
 	final String obdafile =
 			"src/test/resources/subclass/LUBM.fss.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		/*
@@ -116,7 +114,7 @@ public class LUBMVirtualTest extends TestCase {
 
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		try {
 			dropTables();
@@ -186,7 +184,7 @@ public class LUBMVirtualTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-
+	@Test
 	private List<String> runSingleNamedIndividualTests(Properties p, String query, String function) throws Exception {
 
 		// Creating a new instance of the reasoner
@@ -231,6 +229,7 @@ public class LUBMVirtualTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -391,7 +390,7 @@ public class LUBMVirtualTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-
+	@Test
 	public void testSubDescription() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -402,14 +401,14 @@ public class LUBMVirtualTest extends TestCase {
 
 		log.info("Find subProperty");
 		List<String> individualsProperty = runTests(p, "PREFIX :<http://example.org/university.owl#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
-		assertEquals(106, individualsProperty.size());
+		assertEquals(87, individualsProperty.size());
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://example.org/university.owl#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-		assertEquals(284, individualsClass.size());
+		assertEquals(99, individualsClass.size());
 
 	}
-
+	@Test
 	public void testEquivalences() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -420,16 +419,16 @@ public class LUBMVirtualTest extends TestCase {
 
 		log.info("Find equivalent classes");
 		List<String> individualsEquivClass = runTests(p, "PREFIX : <http://example.org/university.owl#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
-		assertEquals(119, individualsEquivClass.size());
+		assertEquals(43, individualsEquivClass.size());
 
 		//
 		log.info("Find equivalent properties");
 		List<String> individualsEquivProperties = runTests(p, "PREFIX : <http://example.org/university.owl#> SELECT * WHERE { ?x owl:equivalentProperty ?y }", "owl:equivalentProperty");
-		assertEquals(76, individualsEquivProperties.size());
+		assertEquals(65, individualsEquivProperties.size());
 
 		//
 	}
-
+	@Test
 	public void testDomains() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -440,9 +439,9 @@ public class LUBMVirtualTest extends TestCase {
 
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://example.org/university.owl#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(41, individualsDomainClass.size());
+		assertEquals(67, individualsDomainClass.size());
 	}
-
+	@Test
 	public void testRanges() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -453,9 +452,9 @@ public class LUBMVirtualTest extends TestCase {
 
 		log.info("Find range");
 		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://example.org/university.owl#> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
-		assertEquals(41, individualsRangeClass.size());
+		assertEquals(63, individualsRangeClass.size());
 	}
-
+	@Test
 	public void testDisjoint() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -473,7 +472,7 @@ public class LUBMVirtualTest extends TestCase {
 		assertEquals(0, individualsDisjProp.size());
 
 	}
-
+	@Test
 	public void testInverseOf() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -484,7 +483,7 @@ public class LUBMVirtualTest extends TestCase {
 
 		log.info("Find inverse");
 		List<String> individualsInverse = runTests(p, "PREFIX : <http://example.org/university.owl#> SELECT * WHERE { ?x owl:inverseOf ?y }", "owl:inverseOf");
-		assertEquals(76, individualsInverse.size());
+		assertEquals(58, individualsInverse.size());
 
 	}
 

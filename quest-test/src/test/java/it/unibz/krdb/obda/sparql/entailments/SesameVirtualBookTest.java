@@ -19,20 +19,23 @@ package it.unibz.krdb.obda.sparql.entailments;
  * limitations under the License.
  * #L%
  */
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-
 import sesameWrapper.SesameVirtualRepo;
+
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Test the ontology exampleBooks for sparql owl entailments.
@@ -42,13 +45,13 @@ import sesameWrapper.SesameVirtualRepo;
  *
  */
 		
-public class SesameVirtualBookTest extends TestCase {
+public class SesameVirtualBookTest  {
 
 	
 	RepositoryConnection con = null;
 	Repository repo = null;
 
-	@Override
+	@Before
 	public void setUp() {
 
 		try {
@@ -69,7 +72,7 @@ public class SesameVirtualBookTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testSubClasses() throws Exception
 	{
 
@@ -80,7 +83,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -88,7 +91,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(62, countResult);
+				assertEquals(18, countResult);
 			} finally {
 				result.close();
 			}
@@ -104,7 +107,7 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-
+	@Test
 	public void testOneSubClass() {
 
 		try {
@@ -115,7 +118,7 @@ public class SesameVirtualBookTest extends TestCase {
 			List<String> valuesResult = new LinkedList<String>();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 
@@ -127,10 +130,10 @@ public class SesameVirtualBookTest extends TestCase {
 					countResult++;
 				}
 
-				assertEquals(8, countResult);
+				assertEquals(3, countResult);
 				assertEquals("http://meraka/moss/exampleBooks.owl#Edition", valuesResult.get(2));
-				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(7));
-				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(6));
+				assertEquals("http://meraka/moss/exampleBooks.owl#SpecialEdition", valuesResult.get(1));
+				assertEquals("http://meraka/moss/exampleBooks.owl#EconomicEdition", valuesResult.get(0));
 			} finally {
 				result.close();
 			}
@@ -146,7 +149,7 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-
+	@Test
 	public void testEquivalences() {
 
 		try {
@@ -156,7 +159,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -164,7 +167,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(33, countResult);
+				assertEquals(11, countResult);
 			} finally {
 				result.close();
 			}
@@ -181,7 +184,7 @@ public class SesameVirtualBookTest extends TestCase {
 		System.out.println("Done.");
 
 	}
-
+	@Test
 	public void testOneEquivalence() {
 
 		try {
@@ -192,7 +195,7 @@ public class SesameVirtualBookTest extends TestCase {
 			List<String> valuesResult = new LinkedList<String>();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 
@@ -204,7 +207,7 @@ public class SesameVirtualBookTest extends TestCase {
 					countResult++;
 				}
 
-				assertEquals(2, countResult);
+				assertEquals(1, countResult);
 
 			} finally {
 				result.close();
@@ -221,7 +224,7 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-
+	@Test
 	public void testEquivalentProperties() {
 
 		try {
@@ -231,7 +234,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -239,7 +242,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(18, countResult);
+				assertEquals(12, countResult);
 			} finally {
 				result.close();
 			}
@@ -256,7 +259,7 @@ public class SesameVirtualBookTest extends TestCase {
 		System.out.println("Done.");
 
 	}
-
+	@Test
 	public void testRanges() {
 
 		try {
@@ -266,7 +269,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -274,7 +277,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(17, countResult);
+				assertEquals(12, countResult);
 			} finally {
 				result.close();
 			}
@@ -291,7 +294,7 @@ public class SesameVirtualBookTest extends TestCase {
 		System.out.println("Done.");
 
 	}
-
+	@Test
 	public void testDomains() {
 
 		try {
@@ -301,7 +304,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -309,7 +312,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(17, countResult);
+				assertEquals(11, countResult);
 			} finally {
 				result.close();
 			}
@@ -326,7 +329,7 @@ public class SesameVirtualBookTest extends TestCase {
 		System.out.println("Done.");
 
 	}
-
+	@Test
 	public void testDisjoints() {
 
 		try {
@@ -336,7 +339,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -344,7 +347,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(8, countResult);
+				assertEquals(6, countResult);
 			} finally {
 				result.close();
 			}
@@ -360,7 +363,7 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-
+	@Test
 	public void testInverseOf() {
 
 		try {
@@ -370,7 +373,7 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
 				List<String> bindings = result.getBindingNames();
-				assertTrue(result.hasNext());
+
 				int countResult = 0;
 				while (result.hasNext()) {
 					BindingSet bindingSet = result.next();
@@ -378,7 +381,7 @@ public class SesameVirtualBookTest extends TestCase {
 						System.out.println(bindingSet.getBinding(b));
 					countResult++;
 				}
-				assertEquals(18, countResult);
+				assertEquals(6, countResult);
 			} finally {
 				result.close();
 			}
@@ -394,7 +397,7 @@ public class SesameVirtualBookTest extends TestCase {
 
 		System.out.println("Done.");
 	}
-
+	@Test
 	public void testPropertyDisjoints() {
 
 		try {
@@ -403,16 +406,9 @@ public class SesameVirtualBookTest extends TestCase {
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 			TupleQueryResult result = tupleQuery.evaluate();
 			try {
-				List<String> bindings = result.getBindingNames();
+
 				assertFalse(result.hasNext());
-				int countResult = 0;
-				while (result.hasNext()) {
-					BindingSet bindingSet = result.next();
-					for (String b : bindings)
-						System.out.println(bindingSet.getBinding(b));
-					countResult++;
-				}
-				assertEquals(0, countResult);
+
 			} finally {
 				result.close();
 			}

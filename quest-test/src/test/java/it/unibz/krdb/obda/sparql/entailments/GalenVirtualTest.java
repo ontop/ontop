@@ -27,7 +27,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -49,6 +51,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass owl:equivalentProperty 
@@ -56,7 +60,7 @@ import java.util.Properties;
  * QuestPreferences has SPARQL_OWL_ENTAILMENT  set to true.
  *
  */
-public class GalenVirtualTest extends TestCase {
+public class GalenVirtualTest {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -71,7 +75,7 @@ public class GalenVirtualTest extends TestCase {
 	 final String obdafile =
 	 "src/test/resources/subclass/galen-ians-full-doctored.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		/*
@@ -111,7 +115,7 @@ public class GalenVirtualTest extends TestCase {
 
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		try {
 			dropTables();
@@ -225,7 +229,7 @@ public class GalenVirtualTest extends TestCase {
 		}
 	}
 
-	
+	@Ignore
 	public void testSubClass() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -285,9 +289,9 @@ public class GalenVirtualTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-	
-	
-	
+
+
+	@Ignore
 	//does not return any result stackoverflow
 	public void testSubDescription() throws Exception {
 		
@@ -319,7 +323,7 @@ public class GalenVirtualTest extends TestCase {
 		assertEquals(2, classes.size());
 
 	}
-
+	@Ignore
 	//does not return any result stackoverflow
 	public void testSubClasses() throws Exception {
 

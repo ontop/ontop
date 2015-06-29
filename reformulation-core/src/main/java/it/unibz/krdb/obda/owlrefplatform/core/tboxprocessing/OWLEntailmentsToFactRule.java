@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -86,7 +87,7 @@ public class OWLEntailmentsToFactRule {
 		// add owl:disjointWith
 		addDisjointClasses(onto.getDisjointClassesAxioms());
 
-		log.info("propertyDisjointWith");
+		log.info("addpropertyDisjointWith");
 		// add owl:propertyDisjointWith
 		addDisjointObjectProperties(onto.getDisjointObjectPropertiesAxioms());
 		addDisjointDataProperties(onto.getDisjointDataPropertiesAxioms());
@@ -225,6 +226,11 @@ public class OWLEntailmentsToFactRule {
 
 				DataPropertyExpression propertyItem = iteq.next();
 
+				// We need to make sure we make no mappings for Auxiliary roles
+				// introduced by the Ontology translation process.
+				if (OntologyVocabularyImpl.isAuxiliaryProperty(propertyItem))
+					continue;
+
 				// add to datalog program
 				// owl:equivalentProperty of data properties
 
@@ -273,6 +279,8 @@ public class OWLEntailmentsToFactRule {
 		while (properties.hasNext()) {
 
 			DataPropertyExpression propertyItem2 = properties.next();
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(propertyItem2))
+				continue;
 
 			/*
 			 * Add owl:equivalentProperty to the datalog program
@@ -313,6 +321,12 @@ public class OWLEntailmentsToFactRule {
 
 				DataPropertyExpression subPropertyItem = itcl.next();
 
+				// We need to make sure we make no mappings for Auxiliary roles
+				// introduced by the Ontology translation process.
+				if (OntologyVocabularyImpl.isAuxiliaryProperty(subPropertyItem))
+					continue;
+
+
 						/*
 						 * Add to datalog program rdfs:subproperty
 						 */
@@ -346,6 +360,11 @@ public class OWLEntailmentsToFactRule {
 			while (iteq.hasNext()) {
 
 				ObjectPropertyExpression propertyItem = iteq.next();
+
+				// We need to make sure we make no mappings for Auxiliary roles
+				// introduced by the Ontology translation process.
+				if (OntologyVocabularyImpl.isAuxiliaryProperty(propertyItem))
+					continue;
 
 				// add to datalog program owl:inversesOf and
 				// owl:equivalentProperty
@@ -387,6 +406,11 @@ public class OWLEntailmentsToFactRule {
 		while (properties.hasNext()) {
 
 			ObjectPropertyExpression propertyItem2 = properties.next();
+
+			// We need to make sure we make no mappings for Auxiliary roles
+			// introduced by the Ontology translation process.
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(propertyItem2))
+				continue;
 
 			/*
 			 * Add owl:equivalentProperty to the datalog program
@@ -430,6 +454,11 @@ public class OWLEntailmentsToFactRule {
 			while (itcl.hasNext()) {
 
 				ObjectPropertyExpression subPropertyItem = itcl.next();
+
+				// We need to make sure we make no mappings for Auxiliary roles
+				// introduced by the Ontology translation process.
+				if (OntologyVocabularyImpl.isAuxiliaryProperty(subPropertyItem))
+					continue;
 
 						/*
 						 * Add to datalog program rdfs:subproperty

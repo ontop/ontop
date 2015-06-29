@@ -125,7 +125,7 @@ public class EntailmentsStockTest  {
 	public void testSubClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subClassOf ?y }";
 		int numbersub = runTests(query, "rdfs:subClassOf");
-		assertEquals(523, numbersub);
+		assertEquals(43, numbersub);
 
 	}
 	@Test
@@ -216,7 +216,7 @@ public class EntailmentsStockTest  {
 	public void testEquivalentClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentClass ?y }";
 		int equivalent = runTests(query, "owl:equivalentClass");
-		assertEquals(300, equivalent);
+		assertEquals(23, equivalent);
 
 	}
 	@Test
@@ -305,7 +305,7 @@ public class EntailmentsStockTest  {
 	public void testRange() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:range ?y }";
 		int range = runTests(query, "rdfs:range");
-		assertEquals(43, range);
+		assertEquals(61, range);
 
 	}
 	@Test
@@ -346,7 +346,7 @@ public class EntailmentsStockTest  {
 	public void testDomain() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:domain ?y }";
 		int domain = runTests(query, "rdfs:domain");
-		assertEquals(46, domain);
+		assertEquals(73, domain);
 
 	}
 	@Test

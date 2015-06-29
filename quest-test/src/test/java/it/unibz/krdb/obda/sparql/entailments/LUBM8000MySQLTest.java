@@ -27,7 +27,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -39,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass
@@ -46,7 +49,7 @@ import java.util.*;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBM8000MySQLTest extends TestCase {
+public class LUBM8000MySQLTest {
 
 	private OBDADataFactory fac;
 
@@ -55,11 +58,11 @@ public class LUBM8000MySQLTest extends TestCase {
 	private OWLOntology ontology;
 
 	String owlfile =
-			"src/test/resources/subclass/univ-bench.owl";
+			"src/test/resources/subclass/univ-benchQL.owl";
 	String obdafile =
 			"src/test/resources/subclass/univ8000-bench.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		// Loading the OWL file
@@ -162,7 +165,7 @@ public class LUBM8000MySQLTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-
+	@Test
 	public void testLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -329,7 +332,7 @@ public class LUBM8000MySQLTest extends TestCase {
 			reasoner.dispose();
 		}
 	}
-	
+	@Test
 	public void test3runLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -544,7 +547,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		
 		
 	}
-
+	@Test
 	public void test1runLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -759,6 +762,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		
 		
 	}
+	@Test
 	public void testSubDescription() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -776,7 +780,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		assertEquals(283, individualsClass.size());
 
 	}
-
+	@Test
 	public void testEquivalences() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -796,7 +800,7 @@ public class LUBM8000MySQLTest extends TestCase {
 
 		//
 	}
-
+	@Test
 	public void testDomains() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -809,7 +813,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
 		assertEquals(41, individualsDomainClass.size());
 	}
-
+	@Test
 	public void testRanges() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -822,7 +826,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		List<String> individualsRangeClass = runTests(p, "PREFIX : <http://swat.cse.lehigh.edu/onto/univ-bench.owl#> SELECT * WHERE { ?x rdfs:range ?y }", "rdfs:range");
 		assertEquals(41, individualsRangeClass.size());
 	}
-
+	@Test
 	public void testDisjoint() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -840,7 +844,7 @@ public class LUBM8000MySQLTest extends TestCase {
 		assertEquals(0, individualsDisjProp.size());
 
 	}
-
+	@Test
 	public void testInverseOf() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
