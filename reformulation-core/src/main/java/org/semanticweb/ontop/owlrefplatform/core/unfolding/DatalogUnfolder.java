@@ -22,6 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -117,6 +118,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		this.primaryKeys = Collections.unmodifiableMap(primaryKeys);
 		this.mappings = Collections.unmodifiableMap(ruleIndex);
 		this.extensionalPredicates = Collections.unmodifiableList(new ArrayList<>(leafPredicates));
+	}
+
+	public ImmutableList<Predicate> getExtensionalPredicates() {
+		return ImmutableList.copyOf(extensionalPredicates);
 	}
 
 	/**
