@@ -105,7 +105,7 @@ public class Datalog2IntermediateQueryConverter {
                                                                 OBDAQueryModifiers queryModifiers)
             throws InvalidDatalogProgramException {
         try {
-            IntermediateQueryBuilder builder = new IntermediateQueryBuilderImpl();
+            IntermediateQueryBuilder builder = new JgraphtIntermediateQueryBuilder();
 
             P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                     convertFromDatalogDataAtom(rootDatalogAtom);
@@ -216,7 +216,7 @@ public class Datalog2IntermediateQueryConverter {
         Optional<QueryNode> optionalViceTopNode = createViceTopNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
 
         try {
             queryBuilder.init(rootNode);

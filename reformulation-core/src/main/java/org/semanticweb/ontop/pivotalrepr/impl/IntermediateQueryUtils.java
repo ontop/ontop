@@ -51,7 +51,7 @@ public class IntermediateQueryUtils {
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(headAtom);
 
-        IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
         try {
             queryBuilder.init(rootNode);
             queryBuilder.addChild(rootNode, unionNode);
@@ -108,7 +108,7 @@ public class IntermediateQueryUtils {
      */
     public static IntermediateQueryBuilder convertToBuilder(IntermediateQuery originalQuery)
             throws IntermediateQueryBuilderException {
-        IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
 
         // Clone of the original root node (because is mutable)
         ConstructionNode newRootNode = originalQuery.getRootConstructionNode().clone();

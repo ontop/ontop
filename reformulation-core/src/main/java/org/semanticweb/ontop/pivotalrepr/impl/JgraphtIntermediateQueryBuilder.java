@@ -6,7 +6,7 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgraph.graph.DefaultEdge;
 import org.semanticweb.ontop.pivotalrepr.*;
 
-public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
+public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private DirectedAcyclicGraph<QueryNode,DefaultEdge> queryDAG;
     private ConstructionNode rootConstructionNode;
@@ -16,7 +16,7 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     /**
      * TODO: construct with Guice?
      */
-    public IntermediateQueryBuilderImpl() {
+    public JgraphtIntermediateQueryBuilder() {
         queryDAG = new DirectedAcyclicGraph<>(DefaultEdge.class);
         rootConstructionNode = null;
         canEdit = false;
@@ -42,7 +42,8 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
             throw new IntermediateQueryBuilderException("Node " + childNode + " already in the graph");
         }
         try {
-            queryDAG.addDagEdge(parentNode, childNode);
+            // child --> parent!!
+            queryDAG.addDagEdge(childNode, parentNode);
         } catch (DirectedAcyclicGraph.CycleFoundException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }

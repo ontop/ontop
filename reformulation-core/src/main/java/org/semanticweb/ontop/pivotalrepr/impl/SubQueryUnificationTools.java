@@ -61,7 +61,7 @@ public class SubQueryUnificationTools {
         SubstitutionPropagator substitutionPropagator = rootUnificationResults._2();
 
         try {
-            IntermediateQueryBuilder queryBuilder = new IntermediateQueryBuilderImpl();
+            IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
             queryBuilder.init(unifiedRootNode);
 
             /**

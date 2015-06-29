@@ -33,13 +33,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
     }
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(IntermediateQueryImpl.class);
 
     /**
      * Highly mutable (low control) so MUST NOT BE SHARED!
      */
-    private final QueryDAGComponent dagComponent;
+    private final QueryTreeComponent treeComponent;
 
     /**
      * For IntermediateQueryBuilders ONLY!!
@@ -47,8 +46,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     protected IntermediateQueryImpl(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
             throws InconsistentIntermediateQueryException {
         try {
-            dagComponent = new QueryDAGComponentImpl(queryDAG);
-        } catch (IllegalDAGException e) {
+            treeComponent = new QueryJgraphtDAGComponent(queryDAG);
+        } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
     }
@@ -56,8 +55,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ConstructionNode getRootConstructionNode() throws InconsistentIntermediateQueryException{
         try {
-            return dagComponent.getRootConstructionNode();
-        } catch (IllegalDAGException e) {
+            return treeComponent.getRootConstructionNode();
+        } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
     }
@@ -65,25 +64,25 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getNodesInBottomUpOrder() throws InconsistentIntermediateQueryException {
         try {
-            return dagComponent.getNodesInBottomUpOrder();
-        } catch (IllegalDAGException e) {
+            return treeComponent.getNodesInBottomUpOrder();
+        } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
     }
 
     @Override
     public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
-        return dagComponent.getCurrentSubNodesOf(node);
+        return treeComponent.getCurrentSubNodesOf(node);
     }
 
     @Override
     public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
-        return dagComponent.getSubTreeNodesInTopDownOrder(currentNode);
+        return treeComponent.getSubTreeNodesInTopDownOrder(currentNode);
     }
 
     @Override
     public boolean contains(QueryNode node) {
-        return dagComponent.contains(node);
+        return treeComponent.contains(node);
     }
 
     /**
@@ -95,9 +94,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         QueryNode currentNode = proposal.getQueryNode();
 
         try {
-            dagComponent.setChildrenNodes(currentNode, proposal.getSubNodes());
+            treeComponent.setChildrenNodes(currentNode, proposal.getSubNodes());
             return currentNode;
-        } catch(IllegalDAGException e) {
+        } catch(IllegalTreeException e) {
             throw new InvalidLocalOptimizationProposalException(e.getLocalizedMessage());
         }
     }
@@ -168,9 +167,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                             localDataNode.getAtom(), localVariables);
 
                 ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
-                dagComponent.replaceNode(localDataNode, subQueryRootNode);
+                treeComponent.replaceNode(localDataNode, subQueryRootNode);
 
-                dagComponent.addSubTree(cloneSubQuery, subQueryRootNode);
+                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode);
             } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
                 throw new QueryMergingException(e.getMessage());
             }
@@ -186,14 +185,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             throws InconsistentIntermediateQueryException {
         ImmutableList.Builder<OrdinaryDataNode> listBuilder = ImmutableList.builder();
         try {
-            for(QueryNode node : dagComponent.getNodesInBottomUpOrder()) {
+            for(QueryNode node : treeComponent.getNodesInBottomUpOrder()) {
                 if (node instanceof OrdinaryDataNode) {
                     OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
                     if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getAtom()))
                         listBuilder.add(dataNode);
                 }
             }
-        } catch (IllegalDAGException e) {
+        } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
         return listBuilder.build();
@@ -211,5 +210,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         } catch (IntermediateQueryBuilderException e) {
             throw new RuntimeException("BUG (internal error)!" + e.getLocalizedMessage());
         }
+    }
+
+    @Override
+    public String toString() {
+        return treeComponent.toString();
     }
 }

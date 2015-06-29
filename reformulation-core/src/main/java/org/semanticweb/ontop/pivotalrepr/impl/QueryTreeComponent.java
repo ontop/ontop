@@ -11,13 +11,13 @@ import java.util.List;
 /**
  * Mutable component used for internal implementations of IntermediateQuery.
  */
-public interface QueryDAGComponent {
+public interface QueryTreeComponent {
 
     ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
 
-    ConstructionNode getRootConstructionNode() throws IllegalDAGException;
+    ConstructionNode getRootConstructionNode() throws IllegalTreeException;
 
-    ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalDAGException;
+    ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalTreeException;
 
     boolean contains(QueryNode node);
 
@@ -30,7 +30,7 @@ public interface QueryDAGComponent {
     /**
      * Makes sure all the children nodes in the DAG are the listed ones.
      */
-    void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalDAGException;
+    void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 }

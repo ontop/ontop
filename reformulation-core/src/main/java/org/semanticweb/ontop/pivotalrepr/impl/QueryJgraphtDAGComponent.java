@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Basic implementation
+ * Basic implementation based on a JGrapht DAG.
+ *
+ * TODO: debug it
  *
  */
-public class QueryDAGComponentImpl implements QueryDAGComponent {
+public class QueryJgraphtDAGComponent implements QueryTreeComponent {
 
     /**
      * TODO: explain.
@@ -27,7 +29,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     private final DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG;
 
     /**
-     * MAKE SURE it remains the "root" of the tree/DAG.
+     * MAKE SURE it remains the "root" of the tree.
      * MAY BE NULL!
      *
      * TODO: mark it as Nullable.
@@ -42,8 +44,8 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     private ImmutableList<QueryNode> nodesInAntiTopologicalOrder;
 
 
-    protected QueryDAGComponentImpl(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
-            throws IllegalDAGException {
+    protected QueryJgraphtDAGComponent(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
+            throws IllegalTreeException {
         this.queryDAG = queryDAG;
         /**
          * Cache attributes.
@@ -61,7 +63,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     }
 
     @Override
-    public ConstructionNode getRootConstructionNode() throws IllegalDAGException {
+    public ConstructionNode getRootConstructionNode() throws IllegalTreeException {
         if (rootConstructionNode == null) {
             computeNodeTopologyCache();
         }
@@ -69,7 +71,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     }
 
     @Override
-    public ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalDAGException {
+    public ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalTreeException {
 
         /**
          * Computes the list if not cached
@@ -99,6 +101,11 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
             }
 
             for (DefaultEdge outgoingEdge : queryDAG.outgoingEdgesOf(previousNode)) {
+
+                // UGLY but was happening...
+                if (outgoingEdge.getTarget() == null || outgoingEdge.getSource() == null) {
+                    continue;
+                }
                 queryDAG.addDagEdge(replacingNode, (QueryNode)outgoingEdge.getTarget());
             }
 
@@ -151,7 +158,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     }
 
     @Override
-    public void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalDAGException {
+    public void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException {
 
         Set<QueryNode> proposedSubNodesToConsider = new HashSet<>(allChildrenNodes);
 
@@ -183,7 +190,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
             } catch (DirectedAcyclicGraph.CycleFoundException ex) {
                 // Inconsistent proposal (should not introduce a cycle in the DAG) --> throw an exception.
                 // TODO: return a non- RuntimeException.
-                throw new IllegalDAGException(ex.getMessage());
+                throw new IllegalTreeException(ex.getMessage());
             }
         }
     }
@@ -199,7 +206,7 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
     /**
      * TODO: describe
      */
-    private void computeNodeTopologyCache() throws IllegalDAGException {
+    private void computeNodeTopologyCache() throws IllegalTreeException {
         nodesInAntiTopologicalOrder = extractNodeOrder(queryDAG);
         rootConstructionNode = extractRootProjectionNode(nodesInAntiTopologicalOrder);
     }
@@ -229,17 +236,22 @@ public class QueryDAGComponentImpl implements QueryDAGComponent {
      * TODO: describe
      */
     private static ConstructionNode extractRootProjectionNode(ImmutableList<QueryNode> nodesInAntiTopologicalOrder)
-            throws IllegalDAGException{
+            throws IllegalTreeException {
         if (nodesInAntiTopologicalOrder.isEmpty()) {
-            throw new IllegalDAGException("Empty DAG!");
+            throw new IllegalTreeException("Empty DAG!");
         }
 
         QueryNode rootNode = nodesInAntiTopologicalOrder.get(0);
         if (!(rootNode instanceof ConstructionNode)) {
-            throw new IllegalDAGException("The root node is not a ConstructionNode: " + rootNode);
+            throw new IllegalTreeException("The root node is not a ConstructionNode: " + rootNode);
         }
 
         return (ConstructionNode) rootNode;
+    }
+
+    @Override
+    public String toString() {
+        return queryDAG.toString();
     }
 
 }
