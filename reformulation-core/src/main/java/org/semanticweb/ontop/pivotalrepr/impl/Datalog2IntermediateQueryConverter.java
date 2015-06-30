@@ -166,7 +166,7 @@ public class Datalog2IntermediateQueryConverter {
     private static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException {
 
-        ConstructionNode rootNode = createProjectionNodeWithoutModifier(datalogRule);
+        ConstructionNode rootNode = createConstructionNodeWithoutModifier(datalogRule);
 
         fj.data.List<Function> bodyAtoms = fj.data.List.iterableList(datalogRule.getBody());
         P2<fj.data.List<Function>, fj.data.List<Function>> atomClassification = classifyAtoms(
@@ -183,7 +183,7 @@ public class Datalog2IntermediateQueryConverter {
      * TODO: make sure the GROUP atom cannot be used for such rules.
      *
      */
-    private static ConstructionNode createProjectionNodeWithoutModifier(CQIE datalogRule) throws InvalidDatalogProgramException {
+    private static ConstructionNode createConstructionNodeWithoutModifier(CQIE datalogRule) throws InvalidDatalogProgramException {
         P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                 convertFromDatalogDataAtom(datalogRule.getHead());
 
@@ -319,7 +319,8 @@ public class Datalog2IntermediateQueryConverter {
              * If the atom is composite, extracts sub atoms
              */
             if (atom.isAlgebraFunction()) {
-                P2<fj.data.List<Function>, fj.data.List<Function>> atomClassification = classifyAtoms(atoms);
+                fj.data.List<Function> subAtoms = fj.data.List.iterableList((List<Function>)(List<?>)atom.getTerms());
+                P2<fj.data.List<Function>, fj.data.List<Function>> atomClassification = classifyAtoms(subAtoms);
                 optionalSubDataOrCompositeAtoms = Optional.of(atomClassification._1());
                 fj.data.List<Function> booleanSubAtoms = atomClassification._2();
 
