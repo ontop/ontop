@@ -184,7 +184,7 @@ public class LUBMVirtualTest  {
 			reasoner.dispose();
 		}
 	}
-	@Test
+
 	private List<String> runSingleNamedIndividualTests(Properties p, String query, String function) throws Exception {
 
 		// Creating a new instance of the reasoner
