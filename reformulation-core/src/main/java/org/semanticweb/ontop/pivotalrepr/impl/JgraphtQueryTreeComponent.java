@@ -21,6 +21,13 @@ import java.util.*;
  */
 public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
+    private static final Optional<ArgumentPosition> NO_POSITION = Optional.absent();
+    private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
+    private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
+
+    /**
+     * TODO: explain
+     */
     public static class LabeledEdge extends DefaultEdge implements Comparable<LabeledEdge> {
 
         private final Optional<ArgumentPosition> optionalPosition;
@@ -167,7 +174,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         for (QueryNode childNode : subQuery.getCurrentSubNodesOf(parentNode)) {
             queryDAG.addVertex(childNode);
             try {
-                queryDAG.addDagEdge(childNode, parentNode);
+                Optional<ArgumentPosition> optionalPosition = subQuery.getOptionalPosition(parentNode, childNode);
+                queryDAG.addDagEdge(childNode, parentNode, new LabeledEdge(optionalPosition));
             } catch (DirectedAcyclicGraph.CycleFoundException e) {
                 throw new RuntimeException("BUG (internal error)" + e.getLocalizedMessage());
             }
@@ -178,6 +186,12 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException {
+        boolean isAsymmetric = (parentNode instanceof BinaryAsymmetricOperatorNode);
+
+        if (isAsymmetric && allChildrenNodes.size() != 2) {
+            throw new IllegalTreeException("A BinaryAsymmetricOperatorNode requires two children, " +
+                    "not " + allChildrenNodes);
+        }
 
         Set<QueryNode> proposedSubNodesToConsider = new HashSet<>(allChildrenNodes);
 
@@ -200,17 +214,31 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         /**
          * New sub-nodes: added to the DAG
          */
+        int i = 0;
         for (QueryNode newSubNode : proposedSubNodesToConsider) {
             if (!queryDAG.containsVertex(newSubNode)) {
                 queryDAG.addVertex(newSubNode);
             }
+            LabeledEdge edge;
+            if (isAsymmetric) {
+                if (i == 0) {
+                    edge = new LabeledEdge(LEFT_POSITION);
+                }
+                else {
+                    edge = new LabeledEdge(RIGHT_POSITION);
+                }
+            }
+            else {
+                edge = new LabeledEdge(NO_POSITION);
+            }
             try {
-                queryDAG.addDagEdge(parentNode, newSubNode);
+                queryDAG.addDagEdge(parentNode, newSubNode, edge);
             } catch (DirectedAcyclicGraph.CycleFoundException ex) {
                 // Inconsistent proposal (should not introduce a cycle in the DAG) --> throw an exception.
                 // TODO: return a non- RuntimeException.
                 throw new IllegalTreeException(ex.getMessage());
             }
+            i++;
         }
     }
 
