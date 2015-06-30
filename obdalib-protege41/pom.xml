@@ -122,15 +122,9 @@
 		</dependency>
 
 		<dependency>
-  			<groupId>net.sf.jgrapht</groupId>
-  			<artifactId>jgrapht</artifactId>
+				<groupId>org.javabits.jgrapht</groupId>
+				<artifactId>jgrapht-core</artifactId>		
 		</dependency>
-		
-		<dependency>
-			<groupId>jgraph</groupId>
-			<artifactId>jgraph</artifactId>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.optique-project</groupId>

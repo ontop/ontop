@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
@@ -14,8 +15,8 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	
-	
+
+
 	<inceptionYear>2009</inceptionYear>
 	<organization>
 		<name>Free University of Bozen-Bolzano</name>
@@ -46,18 +47,16 @@
 			<id>skomlaebri</id>
 			<name>Sarah Komla-Ebri</name>
 		</developer>
-        <developer>
-            <id>bcogrel</id>
-            <name>Benjamin Cogrel</name>
-        </developer>
-        <developer>
-            <id>elemguzel</id>
-            <name>Elem Güzel</name>
-        </developer>
+		<developer>
+			<id>bcogrel</id>
+			<name>Benjamin Cogrel</name>
+		</developer>
+		<developer>
+			<id>elemguzel</id>
+			<name>Elem Güzel</name>
+		</developer>
 	</developers>
 
-	<dependencies>
-	</dependencies>
 
 	<modules>
 		<module>obdalib-core</module>
@@ -74,9 +73,9 @@
 		<module>quest-rdb2rdf-compliance</module>
 
 		<module>quest-test</module>
-        <module>ontop-cli</module>
+		<module>ontop-cli</module>
 
-    </modules>
+	</modules>
 
 	<profiles>
 		<profile>
@@ -105,34 +104,34 @@
 				</plugins>
 			</build>
 		</profile>
-        <profile>
-            <id>doclint-java8-disable</id>
-            <activation>
-                <jdk>[1.8,</jdk>
-            </activation>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,</jdk>
+			</activation>
 
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+
 		<!-- for org.codehaus.mojo:license-maven-plugin -->
 		<license.licenseName>apache_v2</license.licenseName>
 		<license.roots>src/main/java,src/test/java</license.roots>
-        <sesame.version>2.7.10</sesame.version>
-        <owlapi.version>3.4.10</owlapi.version>
+		<sesame.version>2.7.10</sesame.version>
+		<owlapi.version>3.4.10</owlapi.version>
 	</properties>
 
 	<build>
@@ -178,11 +177,11 @@
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>2.4.0</version>
 				</plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.5</version>
-                </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -290,17 +289,17 @@
 				<artifactId>xercesImpl</artifactId>
 				<version>2.7.1</version>
 			</dependency>
+
+			<!-- <dependency> <groupId>net.sf.jgrapht</groupId> <artifactId>jgrapht</artifactId> 
+				<version>0.8.3</version> </dependency> <dependency> <groupId>jgraph</groupId> 
+				<artifactId>jgraph</artifactId> <version>5.13.0.0</version> </dependency> -->
+
 			<dependency>
-  				<groupId>net.sf.jgrapht</groupId>
-  				<artifactId>jgrapht</artifactId>
-  				<version>0.8.3</version>
+				<groupId>org.javabits.jgrapht</groupId>
+				<artifactId>jgrapht-core</artifactId>
+				<version>0.9.3</version>
 			</dependency>
-			<dependency>
-				<groupId>jgraph</groupId>
-				<artifactId>jgraph</artifactId>
-				<version>5.13.0.0</version>
-			</dependency>
-			
+
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>log4j-over-slf4j</artifactId>
@@ -329,28 +328,23 @@
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
-    			<groupId>com.github.jsqlparser</groupId>
-    			<artifactId>jsqlparser</artifactId>
-    			<version>0.9.1</version>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>0.9.1</version>
 			</dependency>
 			<dependency>
-    			<groupId>com.google.guava</groupId>
-    			<artifactId>guava</artifactId>
-    			<version>15.0</version>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>15.0</version>
 			</dependency>
 
-            <!--
-            <dependency>
-                <groupId>io.airlift</groupId>
-                <artifactId>airline</artifactId>
-                <version>0.7</version>
-            </dependency>
-            -->
-            <dependency>
-                <groupId>com.github.rvesse</groupId>
-                <artifactId>airline</artifactId>
-                <version>0.9.1</version>
-            </dependency>
+			<!-- <dependency> <groupId>io.airlift</groupId> <artifactId>airline</artifactId> 
+				<version>0.7</version> </dependency> -->
+			<dependency>
+				<groupId>com.github.rvesse</groupId>
+				<artifactId>airline</artifactId>
+				<version>0.9.1</version>
+			</dependency>
 
 			<!-- OWL API -->
 			<dependency>
@@ -378,7 +372,7 @@
 				<artifactId>owlapi-oboformat</artifactId>
 				<version>${owlapi.version}</version>
 			</dependency>
-			
+
 			<!-- Sesame API -->
 
 			<dependency>
@@ -502,14 +496,14 @@
 				<artifactId>sesame-rio-languages</artifactId>
 				<version>${sesame.version}</version>
 			</dependency>
-			
+
 			<!-- JDBC Drivers -->
 
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>9.4-1201-jdbc41</version>
-            </dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>9.4-1201-jdbc41</version>
+			</dependency>
 			<dependency>
 				<groupId>com.ibm</groupId>
 				<artifactId>db2jcc4.jar</artifactId>
@@ -535,24 +529,24 @@
 				<artifactId>mysql-connector-java</artifactId>
 				<version>5.1.35</version>
 			</dependency>
-			
+
 			<!-- Optique R2RML API -->
 			<dependency>
 				<groupId>org.optique-project</groupId>
 				<artifactId>r2rml-api</artifactId>
 				<version>0.1.3</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.optique-project</groupId>
 				<artifactId>r2rml-api-sesame-bridge</artifactId>
 				<version>0.1.3</version>
 			</dependency>
-			
+
 		</dependencies>
 	</dependencyManagement>
 
-	<repositories>	
+	<repositories>
 		<repository>
 			<!-- for R2RML api -->
 			<id>bolzano-nexus-public</id>
@@ -565,7 +559,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
+
 
 	<reporting>
 		<plugins>
