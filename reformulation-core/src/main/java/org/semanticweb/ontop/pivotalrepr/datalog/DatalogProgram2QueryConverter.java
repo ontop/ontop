@@ -128,12 +128,9 @@ public class DatalogProgram2QueryConverter {
         try {
             IntermediateQueryBuilder builder = new JgraphtIntermediateQueryBuilder();
 
-            P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                    convertFromDatalogDataAtom(rootDatalogAtom);
-
-            DataAtom dataAtom = decomposition._1();
+            DataAtom dataAtom = convertFromDatalogDataAtom(rootDatalogAtom)._1();
             /**
-             * No substitution for the top construction node since we ignore its "body".
+             * Empty substitution for the top construction node (stay abstract).
              */
             ImmutableSubstitution<ImmutableTerm> substitution = new NeutralSubstitution();
 

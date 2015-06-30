@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableBooleanExpression;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl.splitLeftJoinSubAtoms;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.createDataNode;
 
@@ -33,7 +34,7 @@ public class DatalogRule2QueryConverter {
         ConstructionNode rootNode = createConstructionNodeWithoutModifier(datalogRule);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
-        P2<List<Function>, List<Function>> atomClassification = classifyAtoms(
+        P2<List<Function>, List<Function>> atomClassification = classifyJoinSubAtoms(
                 bodyAtoms);
         List<Function> dataAndCompositeAtoms = atomClassification._1();
         List<Function> booleanAtoms = atomClassification._2();
@@ -55,7 +56,7 @@ public class DatalogRule2QueryConverter {
         return new ConstructionNodeImpl(decomposition._1(), decomposition._2());
     }
 
-    private static P2<List<Function>, List<Function>> classifyAtoms(List<Function> atoms)
+    private static P2<List<Function>, List<Function>> classifyJoinSubAtoms(List<Function> atoms)
             throws InvalidDatalogProgramException {
         List<Function> dataAndCompositeAtoms = DatalogTools.filterDataAndCompositeAtoms(atoms);
         List<Function> otherAtoms = DatalogTools.filterNonDataAndCompositeAtoms(atoms);
@@ -176,10 +177,6 @@ public class DatalogRule2QueryConverter {
          * For each atom
          */
         for (Function atom : atoms) {
-
-            Optional<List<Function>> optionalSubDataOrCompositeAtoms;
-            Optional<ImmutableBooleanExpression> optionalFilterCondition;
-
             /**
              * If the atom is composite, extracts sub atoms
              */
@@ -187,36 +184,125 @@ public class DatalogRule2QueryConverter {
                 List<Function> subAtoms = List.iterableList(
                         (java.util.List<Function>)(java.util.List<?>)atom.getTerms());
 
-                P2<List<Function>, List<Function>> atomClassification = classifyAtoms(subAtoms);
-                optionalSubDataOrCompositeAtoms = Optional.of(atomClassification._1());
-                List<Function> booleanSubAtoms = atomClassification._2();
-
-                optionalFilterCondition = createFilterExpression(booleanSubAtoms);
+                Predicate atomPredicate = atom.getFunctionSymbol();
+                if (atomPredicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
+                    queryBuilder = convertJoinAtom(queryBuilder, parentNode, subAtoms, tablePredicates);
+                }
+                else if(atomPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+                    queryBuilder = convertLeftJoinAtom(queryBuilder, parentNode, subAtoms, tablePredicates);
+                }
+                else {
+                    throw new InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
+                }
             }
             /**
-             * Data atom: nothing to extract
+             * Data atom: creates a DataNode and adds it to the tree
              */
+            else if (atom.isDataFunction()) {
+
+                /**
+                 * Creates the node
+                 */
+                DataAtom dataAtom = convertFromDatalogDataAtom(atom)._1();
+                DataNode currentNode = createDataNode(dataAtom,tablePredicates);
+                queryBuilder.addChild(parentNode, currentNode);
+            }
             else {
-                optionalSubDataOrCompositeAtoms = Optional.absent();
-                optionalFilterCondition = Optional.absent();
-            }
-
-            /**
-             * Creates the node
-             */
-            QueryNode currentNode = createQueryNode(atom, tablePredicates, optionalFilterCondition);
-            queryBuilder.addChild(parentNode, currentNode);
-
-            /**
-             * Recursive call for composite atoms
-             */
-            if (optionalSubDataOrCompositeAtoms.isPresent()) {
-                queryBuilder = convertDataOrCompositeAtoms(optionalSubDataOrCompositeAtoms.get(), queryBuilder,
-                        currentNode, tablePredicates);
+                throw new InvalidDatalogProgramException("Unsupported non-data atom: " + atom);
             }
         }
 
         return queryBuilder;
+    }
+
+    private static IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
+                                                                QueryNode parentNodeOfTheLJ,
+                                                                List<Function> subAtomsOfTheLJ,
+                                                                Collection<Predicate> tablePredicates)
+            throws InvalidDatalogProgramException, IntermediateQueryBuilderException {
+
+        P2<List<Function>, List<Function>> decomposition = splitLeftJoinSubAtoms(subAtomsOfTheLJ);
+        final List<Function> leftAtoms = decomposition._1();
+        final List<Function> rightAtoms = decomposition._2();
+
+        /**
+         * TODO: explain why we just care about the right
+         */
+        P2<List<Function>, List<Function>> rightSubAtomClassification = classifyJoinSubAtoms(rightAtoms);
+        List<Function> rightSubDataOrCompositeAtoms = rightSubAtomClassification._1();
+        List<Function> rightBooleanSubAtoms = rightSubAtomClassification._2();
+
+        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(rightBooleanSubAtoms);
+
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(optionalFilterCondition);
+        queryBuilder.addChild(parentNodeOfTheLJ, ljNode);
+
+        /**
+         * Adds the left part
+         *
+         * TODO: Is this approach enough for distinguishing the left from the right????????
+         */
+        queryBuilder = convertJoinAtom(queryBuilder, ljNode, leftAtoms, tablePredicates);
+
+        /**
+         * Adds the right part
+         */
+        return convertDataOrCompositeAtoms(rightSubDataOrCompositeAtoms, queryBuilder, ljNode, tablePredicates);
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private static IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
+                                                            QueryNode parentNodeOfTheJoinNode,
+                                                            List<Function> subAtomsOfTheJoin,
+                                                            Collection<Predicate> tablePredicates)
+            throws InvalidDatalogProgramException, IntermediateQueryBuilderException {
+
+        P2<List<Function>, List<Function>> subAtomClassification = classifyJoinSubAtoms(subAtomsOfTheJoin);
+        List<Function> subDataOrCompositeAtoms = subAtomClassification._1();
+        List<Function> booleanSubAtoms = subAtomClassification._2();
+
+        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(booleanSubAtoms);
+
+        if (subDataOrCompositeAtoms.isEmpty()) {
+            throw new InvalidDatalogProgramException("Empty join found");
+        }
+        /**
+         * May happen because this method can also be called after the LJ conversion
+         */
+        else if (subDataOrCompositeAtoms.length() == 1) {
+            if (optionalFilterCondition.isPresent()) {
+                FilterNode filterNode = new FilterNodeImpl(optionalFilterCondition.get());
+                queryBuilder.addChild(parentNodeOfTheJoinNode, filterNode);
+
+                return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, filterNode,
+                        tablePredicates);
+            }
+            /**
+             * Otherwise, no need for intermediate query node.
+             */
+            else {
+                return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, parentNodeOfTheJoinNode,
+                        tablePredicates);
+            }
+        }
+        /**
+         * Normal case
+         */
+        else {
+            InnerJoinNode joinNode = new InnerJoinNodeImpl(optionalFilterCondition);
+            queryBuilder.addChild(parentNodeOfTheJoinNode, joinNode);
+
+            /**
+             * Indirect recursive call for composite atoms
+             */
+            return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, joinNode, tablePredicates);
+        }
+
+
+
     }
 
     /**
