@@ -10,6 +10,7 @@ import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
@@ -111,7 +112,10 @@ public class Datalog2IntermediateQueryConverter {
                     convertFromDatalogDataAtom(rootDatalogAtom);
 
             DataAtom dataAtom = decomposition._1();
-            ImmutableSubstitution<ImmutableTerm> substitution = decomposition._2();
+            /**
+             * No substitution for the top construction node since we ignore its "body".
+             */
+            ImmutableSubstitution<ImmutableTerm> substitution = new NeutralSubstitution();
 
             ConstructionNode rootNode;
             if (queryModifiers.hasModifiers()) {
