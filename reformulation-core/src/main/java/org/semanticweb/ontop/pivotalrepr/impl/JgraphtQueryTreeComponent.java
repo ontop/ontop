@@ -1,16 +1,17 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Basic implementation based on a JGrapht DAG.
@@ -20,12 +21,53 @@ import java.util.Set;
  */
 public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
+    public static class LabeledEdge extends DefaultEdge implements Comparable<LabeledEdge> {
+
+        private final Optional<ArgumentPosition> optionalPosition;
+
+        public LabeledEdge() {
+            this.optionalPosition = Optional.absent();
+        }
+
+        public LabeledEdge(Optional<ArgumentPosition> optionalPosition) {
+            this.optionalPosition = optionalPosition;
+        }
+
+        public LabeledEdge(ArgumentPosition position) {
+            this.optionalPosition = Optional.of(position);
+        }
+
+        public Optional<ArgumentPosition> getOptionalPosition() {
+            return optionalPosition;
+        }
+
+        @Override
+        public int compareTo(LabeledEdge o) {
+            Optional<ArgumentPosition> otherOptionalPosition = o.getOptionalPosition();
+
+            if (optionalPosition.isPresent()) {
+                if (otherOptionalPosition.isPresent()) {
+                    return optionalPosition.get().compareTo(otherOptionalPosition.get());
+                }
+                else {
+                    return -1;
+                }
+            }
+            else if (otherOptionalPosition.isPresent()) {
+                return 1;
+            }
+
+            return 0;
+         }
+    }
+
+
     /**
      * TODO: explain.
      *
      * Implementation detail: this object must NOT BE SHARED with the other classes.
      */
-    private final DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG;
+    private final DirectedAcyclicGraph<QueryNode, LabeledEdge> queryDAG;
 
     /**
      * MAKE SURE it remains the "root" of the tree.
@@ -43,7 +85,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     private ImmutableList<QueryNode> bottomUpOrderedNodes;
 
 
-    protected JgraphtQueryTreeComponent(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG)
+    protected JgraphtQueryTreeComponent(DirectedAcyclicGraph<QueryNode, LabeledEdge> queryDAG)
             throws IllegalTreeException {
         this.queryDAG = queryDAG;
         /**
@@ -90,6 +132,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     /**
      * TODO: explain
+     *
+     * TODO: make it safe for LJ!!!!
      */
     @Override
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
@@ -97,14 +141,14 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
         queryDAG.addVertex(replacingNode);
         try {
-            for (DefaultEdge incomingEdge : queryDAG.incomingEdgesOf(previousNode)) {
+            for (LabeledEdge incomingEdge : queryDAG.incomingEdgesOf(previousNode)) {
                 QueryNode child = queryDAG.getEdgeSource(incomingEdge);
-                queryDAG.addDagEdge(child, replacingNode);
+                queryDAG.addDagEdge(child, replacingNode, new LabeledEdge(incomingEdge.getOptionalPosition()));
             }
 
-            for (DefaultEdge outgoingEdge : queryDAG.outgoingEdgesOf(previousNode)) {
+            for (LabeledEdge outgoingEdge : queryDAG.outgoingEdgesOf(previousNode)) {
                 QueryNode parent = queryDAG.getEdgeTarget(outgoingEdge);
-                queryDAG.addDagEdge(replacingNode, parent);
+                queryDAG.addDagEdge(replacingNode, parent, new LabeledEdge(outgoingEdge.getOptionalPosition()));
             }
 
         } catch (DirectedAcyclicGraph.CycleFoundException e) {
@@ -140,8 +184,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         /**
          * Existing sub-nodes: keep or remove
          */
-        Set<DefaultEdge> incomingEdges = queryDAG.incomingEdgesOf(parentNode);
-        for (DefaultEdge subNodeEdge : incomingEdges) {
+        Set<LabeledEdge> incomingEdges = queryDAG.incomingEdgesOf(parentNode);
+        for (LabeledEdge subNodeEdge : incomingEdges) {
             QueryNode subNode = queryDAG.getEdgeSource(subNodeEdge);
             // Kept
             if (proposedSubNodesToConsider.contains(subNode)) {
@@ -177,7 +221,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      * Recursive
      */
     private void removeSubTree(QueryNode subTreeRoot) {
-        for (DefaultEdge subNodeEdge : queryDAG.incomingEdgesOf(subTreeRoot)) {
+        for (LabeledEdge subNodeEdge : queryDAG.incomingEdgesOf(subTreeRoot)) {
             QueryNode childNode = queryDAG.getEdgeSource(subNodeEdge);
             /**
              * Recursive call.
@@ -186,7 +230,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
             removeSubTree(childNode);
         }
 
-        for (DefaultEdge parentEdge : queryDAG.outgoingEdgesOf(subTreeRoot)) {
+        for (LabeledEdge parentEdge : queryDAG.outgoingEdgesOf(subTreeRoot)) {
             queryDAG.removeEdge(parentEdge);
         }
 
@@ -199,6 +243,15 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
         throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
+        LabeledEdge edge = queryDAG.getEdge(childNode, parentNode);
+        if (edge == null)
+            return Optional.absent();
+
+        return edge.getOptionalPosition();
     }
 
     /**
@@ -220,8 +273,9 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     /**
      * TODO: describe
      */
-    private static ImmutableList<QueryNode> extractBottomUpOrderedNodes(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
-        TopologicalOrderIterator<QueryNode, DefaultEdge> it =
+    private static ImmutableList<QueryNode> extractBottomUpOrderedNodes(
+            DirectedAcyclicGraph<QueryNode, LabeledEdge> queryDAG) {
+        TopologicalOrderIterator<QueryNode, LabeledEdge> it =
                 new TopologicalOrderIterator<>(queryDAG);
 
         return ImmutableList.copyOf(it);
@@ -253,15 +307,28 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     /**
      * Edges are directed from the child to the parent.
      */
-    protected static ImmutableList<QueryNode> getSubNodesOf(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG,
+    protected static ImmutableList<QueryNode> getSubNodesOf(DirectedAcyclicGraph<QueryNode, LabeledEdge> queryDAG,
                                                             QueryNode node) {
-        Set<DefaultEdge> incomingEdges = queryDAG.incomingEdgesOf(node);
+
+        Collection<LabeledEdge> incomingEdges = sortEdgesIfNecessary(queryDAG.incomingEdgesOf(node), node);
         ImmutableList.Builder<QueryNode> nodeListBuilder = ImmutableList.builder();
-        for (DefaultEdge edge : incomingEdges) {
+        for (LabeledEdge edge : incomingEdges) {
             nodeListBuilder.add(queryDAG.getEdgeSource(edge));
         }
 
         return nodeListBuilder.build();
+    }
+
+    private static Collection<LabeledEdge> sortEdgesIfNecessary(Set<LabeledEdge> edges, QueryNode parentNode) {
+        if (parentNode instanceof BinaryAsymmetricOperatorNode) {
+            List<LabeledEdge> edgeList = new ArrayList<>(edges);
+            Collections.sort(edgeList);
+            return edgeList;
+        }
+        /**
+         * By default, does nothing
+         */
+        return edges;
     }
 
 }

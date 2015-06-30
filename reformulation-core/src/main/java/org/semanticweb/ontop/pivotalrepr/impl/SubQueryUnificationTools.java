@@ -13,6 +13,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubsti
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,7 +119,9 @@ public class SubQueryUnificationTools {
             } catch (QueryNodeTransformationException e) {
                 throw new RuntimeException("Unexpected: " + e.getLocalizedMessage());
             }
-            queryBuilder.addChild(unifiedParentNode, newChild);
+            Optional<ArgumentPosition> optionalPosition = originalSubQuery.getOptionalPosition(originalParentNode,
+                    originalChild);
+            queryBuilder.addChild(unifiedParentNode, newChild, optionalPosition);
 
             // Recursive call
             queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalChild, newChild,

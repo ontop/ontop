@@ -15,6 +15,7 @@ import java.util.HashSet;
 
 import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableBooleanExpression;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl.splitLeftJoinSubAtoms;
+import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.*;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.createDataNode;
 
@@ -24,6 +25,10 @@ import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.c
  * Note here List are from Functional Java, not java.util.List.
  */
 public class DatalogRule2QueryConverter {
+
+    private static final Optional<ArgumentPosition> NO_POSITION = Optional.absent();
+    private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
+    private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
 
     /**
      * TODO: describe
@@ -106,7 +111,7 @@ public class DatalogRule2QueryConverter {
             /**
              * TODO: explain
              */
-            queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, quasiTopNode,
+            queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, quasiTopNode, NO_POSITION,
                     tablePredicates);
             return queryBuilder.build();
         }
@@ -160,8 +165,9 @@ public class DatalogRule2QueryConverter {
         if (booleanAtoms.length() < otherAtoms.length()) {
             HashSet<Function> unsupportedAtoms = new HashSet<>(otherAtoms.toCollection());
             unsupportedAtoms.removeAll(booleanAtoms.toCollection());
-            throw new DatalogProgram2QueryConverter.NotSupportedConversionException("Conversion of the following atoms to the intermediate query " +
-                    "is not (yet) supported: " + unsupportedAtoms);
+            throw new DatalogProgram2QueryConverter.NotSupportedConversionException(
+                    "Conversion of the following atoms to the intermediate query is not (yet) supported: "
+                            + unsupportedAtoms);
         }
     }
 
@@ -171,6 +177,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
                                                                         IntermediateQueryBuilder queryBuilder,
                                                                         final QueryNode parentNode,
+                                                                        Optional<ArgumentPosition> optionalPosition,
                                                                         Collection<Predicate> tablePredicates)
             throws IntermediateQueryBuilderException, InvalidDatalogProgramException {
         /**
@@ -186,10 +193,12 @@ public class DatalogRule2QueryConverter {
 
                 Predicate atomPredicate = atom.getFunctionSymbol();
                 if (atomPredicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
-                    queryBuilder = convertJoinAtom(queryBuilder, parentNode, subAtoms, tablePredicates);
+                    queryBuilder = convertJoinAtom(queryBuilder, parentNode, subAtoms, optionalPosition,
+                            tablePredicates);
                 }
                 else if(atomPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
-                    queryBuilder = convertLeftJoinAtom(queryBuilder, parentNode, subAtoms, tablePredicates);
+                    queryBuilder = convertLeftJoinAtom(queryBuilder, parentNode, subAtoms, optionalPosition,
+                            tablePredicates);
                 }
                 else {
                     throw new InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
@@ -205,7 +214,7 @@ public class DatalogRule2QueryConverter {
                  */
                 DataAtom dataAtom = convertFromDatalogDataAtom(atom)._1();
                 DataNode currentNode = createDataNode(dataAtom,tablePredicates);
-                queryBuilder.addChild(parentNode, currentNode);
+                queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
             else {
                 throw new InvalidDatalogProgramException("Unsupported non-data atom: " + atom);
@@ -218,6 +227,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                                 QueryNode parentNodeOfTheLJ,
                                                                 List<Function> subAtomsOfTheLJ,
+                                                                Optional<ArgumentPosition> optionalPosition,
                                                                 Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
@@ -235,19 +245,19 @@ public class DatalogRule2QueryConverter {
         Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(rightBooleanSubAtoms);
 
         LeftJoinNode ljNode = new LeftJoinNodeImpl(optionalFilterCondition);
-        queryBuilder.addChild(parentNodeOfTheLJ, ljNode);
+        queryBuilder.addChild(parentNodeOfTheLJ, ljNode, optionalPosition);
 
         /**
          * Adds the left part
-         *
-         * TODO: Is this approach enough for distinguishing the left from the right????????
          */
-        queryBuilder = convertJoinAtom(queryBuilder, ljNode, leftAtoms, tablePredicates);
+        queryBuilder = convertJoinAtom(queryBuilder, ljNode, leftAtoms, LEFT_POSITION,
+                tablePredicates);
 
         /**
          * Adds the right part
          */
-        return convertDataOrCompositeAtoms(rightSubDataOrCompositeAtoms, queryBuilder, ljNode, tablePredicates);
+        return convertDataOrCompositeAtoms(rightSubDataOrCompositeAtoms, queryBuilder, ljNode, RIGHT_POSITION,
+                tablePredicates);
     }
 
     /**
@@ -257,6 +267,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                             QueryNode parentNodeOfTheJoinNode,
                                                             List<Function> subAtomsOfTheJoin,
+                                                            Optional<ArgumentPosition> optionalPosition,
                                                             Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
@@ -275,9 +286,9 @@ public class DatalogRule2QueryConverter {
         else if (subDataOrCompositeAtoms.length() == 1) {
             if (optionalFilterCondition.isPresent()) {
                 FilterNode filterNode = new FilterNodeImpl(optionalFilterCondition.get());
-                queryBuilder.addChild(parentNodeOfTheJoinNode, filterNode);
+                queryBuilder.addChild(parentNodeOfTheJoinNode, filterNode, optionalPosition);
 
-                return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, filterNode,
+                return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, filterNode, NO_POSITION,
                         tablePredicates);
             }
             /**
@@ -285,7 +296,7 @@ public class DatalogRule2QueryConverter {
              */
             else {
                 return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, parentNodeOfTheJoinNode,
-                        tablePredicates);
+                        optionalPosition, tablePredicates);
             }
         }
         /**
@@ -293,39 +304,15 @@ public class DatalogRule2QueryConverter {
          */
         else {
             InnerJoinNode joinNode = new InnerJoinNodeImpl(optionalFilterCondition);
-            queryBuilder.addChild(parentNodeOfTheJoinNode, joinNode);
+            queryBuilder.addChild(parentNodeOfTheJoinNode, joinNode, optionalPosition);
 
             /**
              * Indirect recursive call for composite atoms
              */
-            return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, joinNode, tablePredicates);
+            return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, joinNode, NO_POSITION,
+                    tablePredicates);
         }
 
-
-
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static QueryNode createQueryNode(Function dataOrCompositeAtom, Collection<Predicate> tablePredicates,
-                                             Optional<ImmutableBooleanExpression> optionalFilterCondition)
-            throws InvalidDatalogProgramException {
-        if (dataOrCompositeAtom.isDataFunction()) {
-            DataAtom dataAtom = convertFromDatalogDataAtom(dataOrCompositeAtom)._1();
-            return createDataNode(dataAtom,tablePredicates);
-        }
-
-        Predicate atomPredicate = dataOrCompositeAtom.getFunctionSymbol();
-        if  (atomPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
-            return new LeftJoinNodeImpl(optionalFilterCondition);
-        }
-        else if  (atomPredicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
-            return new InnerJoinNodeImpl(optionalFilterCondition);
-        }
-        else {
-            throw new InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
-        }
     }
 
 }

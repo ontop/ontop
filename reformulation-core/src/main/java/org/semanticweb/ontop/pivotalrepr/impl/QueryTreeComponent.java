@@ -1,7 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.jgraph.graph.DefaultEdge;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -31,4 +32,7 @@ public interface QueryTreeComponent {
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
+
+    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+                                                                               QueryNode childNode);
 }

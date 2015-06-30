@@ -138,6 +138,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
+    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+                                                                                      QueryNode childNode) {
+        return treeComponent.getOptionalPosition(parentNode, childNode);
+    }
+
+    @Override
     @Deprecated
     public QueryNode applyDetypingProposal(DetypingProposal proposal)
             throws InvalidLocalOptimizationProposalException {

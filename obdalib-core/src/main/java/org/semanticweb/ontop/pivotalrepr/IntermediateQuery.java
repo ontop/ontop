@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -56,4 +57,9 @@ public interface IntermediateQuery {
      */
     @Deprecated
     public void detypeNode(QueryNode nodeToDetype);
+
+    /**
+     * TODO: explain
+     */
+    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 }
