@@ -234,7 +234,7 @@ public class QuestResultset implements TupleResultSet {
                         if (isMsSQL) {
                             String value = set.getString(column);
 
-                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+                            DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
                             java.util.Date date;
                             try {
                                 date = df.parse(value);
@@ -319,6 +319,7 @@ public class QuestResultset implements TupleResultSet {
 
 
 						}
+
 						else {
 
 							String value = set.getString(column);
