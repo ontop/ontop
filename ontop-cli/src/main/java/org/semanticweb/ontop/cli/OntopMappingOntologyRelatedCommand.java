@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.cli;
 
-import io.airlift.airline.Option;
-import io.airlift.airline.OptionType;
+import com.github.rvesse.airline.Option;
+import com.github.rvesse.airline.OptionType;
 
 
 public abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
