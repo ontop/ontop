@@ -47,6 +47,18 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
+    public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
+        if (term instanceof VariableImpl) {
+            return applyToVariable((VariableImpl) term);
+        }
+        /**
+         * If not a variable, is a functional term.
+         */
+        return new NonGroundFunctionalTermImpl(
+                applyToFunctionalTerm((ImmutableFunctionalTerm) term));
+    }
+
+    @Override
     public VariableImpl get(VariableImpl var) {
         return map.get(var);
     }

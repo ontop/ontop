@@ -18,4 +18,6 @@ public interface QueryNodeTransformer {
     InnerJoinNode transform(InnerJoinNode innerJoinNode) throws QueryNodeTransformationException;
 
     ConstructionNode transform(ConstructionNode constructionNode) throws QueryNodeTransformationException;
+
+    GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException;
 }

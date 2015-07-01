@@ -1,12 +1,14 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.NonGroundTerm;
+
 /**
  * GROUP BY query node.
  */
 public interface GroupNode extends QueryNode {
 
-    // TODO: extend
-
+    ImmutableList<NonGroundTerm> getGroupingTerms();
 
     @Override
     GroupNode clone();

@@ -49,6 +49,18 @@ public class VariableCollector implements QueryNodeVisitor {
     }
 
     @Override
+    public void visit(GroupNode groupNode) {
+        for (NonGroundTerm term : groupNode.getGroupingTerms()) {
+            if (term instanceof VariableImpl) {
+                collectedVariableBuilder.add((VariableImpl)term);
+            }
+            else {
+                collectedVariableBuilder.addAll((List<VariableImpl>)(List<?>)term.getReferencedVariables());
+            }
+        }
+    }
+
+    @Override
     public void visit(InnerJoinNode innerJoinNode) {
         // Collects nothing
     }

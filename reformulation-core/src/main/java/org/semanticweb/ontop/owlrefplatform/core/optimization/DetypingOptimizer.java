@@ -89,6 +89,11 @@ public class DetypingOptimizer implements QueryOptimizer {
         throw new RuntimeException("TODO: implement it");
     }
 
+    @Override
+    public Optional<LocalOptimizationProposal> makeProposal(GroupNode groupNode) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
     /**
      * TODO: explain
      */

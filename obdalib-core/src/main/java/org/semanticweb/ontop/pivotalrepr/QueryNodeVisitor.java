@@ -21,4 +21,6 @@ public interface QueryNodeVisitor {
     void visit(OrdinaryDataNode ordinaryDataNode);
 
     void visit(TableNode tableNode);
+
+    void visit(GroupNode groupNode);
 }

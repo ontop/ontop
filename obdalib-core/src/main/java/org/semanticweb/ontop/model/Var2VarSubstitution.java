@@ -11,4 +11,6 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<VariableImpl>
     VariableImpl applyToVariable(VariableImpl variable);
 
     VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term);
+
+    NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
 }

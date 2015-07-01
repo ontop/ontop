@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
+import org.semanticweb.ontop.pivotalrepr.impl.GroupNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
 
 /**
@@ -29,4 +30,5 @@ public interface QueryOptimizer {
 
     Optional<LocalOptimizationProposal> makeProposal(TableNode tableNode);
 
+    Optional<LocalOptimizationProposal> makeProposal(GroupNode groupNode);
 }

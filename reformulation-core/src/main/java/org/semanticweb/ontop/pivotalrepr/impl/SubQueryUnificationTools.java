@@ -94,12 +94,14 @@ public class SubQueryUnificationTools {
                                                                 QueryNodeRenamer renamer)
             throws IntermediateQueryBuilderException, SubQueryUnificationException {
         for(QueryNode originalChild : originalSubQuery.getCurrentSubNodesOf(originalParentNode)) {
-            QueryNode newChild;
+            Optional<QueryNode> optionalNewChild;
             SubstitutionPropagator propagatorForChild;
             try {
-                newChild = originalChild
+                QueryNode newChild = originalChild
                         .acceptNodeTransformer(renamer)
                         .acceptNodeTransformer(substitutionPropagator);
+                optionalNewChild = Optional.of(newChild);
+
                 propagatorForChild = substitutionPropagator;
 
                 /**
@@ -107,24 +109,51 @@ public class SubQueryUnificationTools {
                  * TODO: further explain
                  */
             } catch (SubstitutionPropagator.NewSubstitutionException e) {
-                newChild = e.getTransformedNode();
+                optionalNewChild = Optional.of(e.getTransformedNode());
                 propagatorForChild = new SubstitutionPropagator(e.getSubstitution());
-
-                /**
-                 * Unification rejected by a sub-construction node.
-                 */
-            } catch(SubstitutionPropagator.UnificationException e) {
+            }
+            /**
+             * Unification rejected by a sub-construction node.
+             */
+            catch(SubstitutionPropagator.UnificationException e) {
                 throw new SubQueryUnificationException(e.getMessage());
-
-            } catch (QueryNodeTransformationException e) {
+            }
+            /**
+             * No new child because not needed anymore.
+             */ catch(SubstitutionPropagator.NotNeededNodeException e) {
+                optionalNewChild = Optional.absent();
+                propagatorForChild = substitutionPropagator;
+            }
+            /**
+             * Unexpected
+             */
+            catch (QueryNodeTransformationException e) {
                 throw new RuntimeException("Unexpected: " + e.getLocalizedMessage());
             }
             Optional<ArgumentPosition> optionalPosition = originalSubQuery.getOptionalPosition(originalParentNode,
                     originalChild);
-            queryBuilder.addChild(unifiedParentNode, newChild, optionalPosition);
+
+            QueryNode nextOriginalParent;
+            QueryNode nextNewParent;
+            /**
+             * Normal case: the new child becomes the new parent.
+             */
+            if (optionalNewChild.isPresent()) {
+                QueryNode newChild = optionalNewChild.get();
+                queryBuilder.addChild(unifiedParentNode, newChild, optionalPosition);
+                nextOriginalParent = originalChild;
+                nextNewParent =  newChild;
+            }
+            /**
+             * No new child: keep the same parent
+             */
+            else {
+                nextOriginalParent = originalParentNode;
+                nextNewParent = unifiedParentNode;
+            }
 
             // Recursive call
-            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalChild, newChild,
+            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, nextOriginalParent, nextNewParent,
                     propagatorForChild, renamer);
         }
         return queryBuilder;

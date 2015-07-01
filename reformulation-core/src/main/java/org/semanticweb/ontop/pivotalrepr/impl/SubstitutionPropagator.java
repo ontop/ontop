@@ -1,8 +1,11 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.NonGroundFunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 /**
@@ -40,7 +43,15 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
         public UnificationException(String message) {
             super(message);
         }
+    }
 
+    /**
+     * When the QueryNode is not needed anymore.
+     */
+    public static class NotNeededNodeException extends QueryNodeTransformationException {
+        public NotNeededNodeException(String message) {
+            super(message);
+        }
     }
 
 
@@ -124,6 +135,42 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
         } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
             throw new UnificationException(e.getMessage());
         }
+    }
+
+    @Override
+    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException {
+        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
+        for (NonGroundTerm term : groupNode.getGroupingTerms()) {
+
+            ImmutableTerm newTerm = substitution.apply(term);
+            if (newTerm instanceof Variable) {
+                termBuilder.add((Variable)newTerm);
+            }
+            /**
+             * Functional term: adds it if remains a non-ground term.
+             */
+            else if (newTerm instanceof ImmutableFunctionalTerm) {
+                if (!newTerm.getReferencedVariables().isEmpty()) {
+                    NonGroundFunctionalTerm functionalTerm = new NonGroundFunctionalTermImpl(
+                            (ImmutableFunctionalTerm)newTerm);
+
+                    termBuilder.add(functionalTerm);
+                }
+            }
+            /**
+             * Should never happen (internal error)
+             */
+            else {
+                throw new RuntimeException("Unexpected term returned: " + newTerm);
+            }
+        }
+
+        ImmutableList<NonGroundTerm> newGroupingTerms = termBuilder.build();
+        if (newGroupingTerms.isEmpty()) {
+            throw new NotNeededNodeException("The group node is not needed anymore because no grouping term remains");
+        }
+
+        return new GroupNodeImpl(newGroupingTerms);
     }
 
     private ImmutableBooleanExpression transformBooleanExpression(ImmutableBooleanExpression booleanExpression) {

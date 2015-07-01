@@ -60,6 +60,15 @@ public class QueryNodeRenamer implements QueryNodeTransformer {
                 );
     }
 
+    @Override
+    public GroupNode transform(GroupNode groupNode) {
+        ImmutableList.Builder<NonGroundTerm> renamedTermBuilder = ImmutableList.builder();
+        for (NonGroundTerm term : groupNode.getGroupingTerms()) {
+            renamedTermBuilder.add(renamingSubstitution.applyToNonGroundTerm(term));
+        }
+        return new GroupNodeImpl(renamedTermBuilder.build());
+    }
+
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
         if (optionalModifiers.isPresent()) {
             throw new RuntimeException("TODO: support modifiers renaming");
