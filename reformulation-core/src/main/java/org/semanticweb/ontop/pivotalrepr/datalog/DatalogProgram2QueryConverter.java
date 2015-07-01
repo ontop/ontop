@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -23,6 +22,8 @@ import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogRule2QueryConvert
  * Converts a datalog program into an intermediate query
  */
 public class DatalogProgram2QueryConverter {
+
+    private static final Optional<ImmutableQueryModifiers> NO_QUERY_MODIFIER = Optional.absent();
 
     /**
      * TODO: explain
@@ -64,16 +65,21 @@ public class DatalogProgram2QueryConverter {
 
         Multimap<Predicate, CQIE> ruleIndex = dependencyGraph.getRuleIndex();
 
-        IntermediateQuery intermediateQuery = createTopIntermediateQuery(
-                extractRootHeadAtom(rootPredicate, ruleIndex),
-                queryProgram.getQueryModifiers());
+        Optional<ImmutableQueryModifiers> topQueryModifiers = convertModifiers(queryProgram.getQueryModifiers());
+
+        /**
+         * TODO: explain
+         */
+        IntermediateQuery intermediateQuery = convertDatalogDefinitions(rootPredicate, ruleIndex, tablePredicates,
+                topQueryModifiers).get();
 
         /**
          * Rules (sub-queries)
          */
-        for (Predicate datalogAtomPredicate : topDownPredicates) {
+        for (int i=1; i < topDownPredicates.size() ; i++) {
+            Predicate datalogAtomPredicate  = topDownPredicates.get(i);
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex,
-                    tablePredicates);
+                    tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
                 try {
                     intermediateQuery.mergeSubQuery(optionalSubQuery.get());
@@ -81,18 +87,11 @@ public class DatalogProgram2QueryConverter {
                     throw new InvalidDatalogProgramException(e.getMessage());
                 }
             }
-
         }
 
         return intermediateQuery;
 
-    }
 
-    /**
-     * TODO: clean it !!!
-     */
-    private static Function extractRootHeadAtom(Predicate rootDatalogPredicate, Multimap<Predicate, CQIE> ruleIndex) {
-        return ruleIndex.get(rootDatalogPredicate).iterator().next().getHead();
     }
 
 
@@ -100,15 +99,16 @@ public class DatalogProgram2QueryConverter {
      * TODO: explain and comment
      */
     private static Optional<IntermediateQuery> convertDatalogDefinitions(Predicate datalogAtomPredicate,
-                                                            Multimap<Predicate, CQIE> datalogRuleIndex,
-                                                            Collection<Predicate> tablePredicates)
+                                                                         Multimap<Predicate, CQIE> datalogRuleIndex,
+                                                                         Collection<Predicate> tablePredicates,
+                                                                         Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
         List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
         for (CQIE datalogAtomDefinition : atomDefinitions) {
             convertedDefinitions.add(
-                    convertDatalogRule(datalogAtomDefinition, tablePredicates));
+                    convertDatalogRule(datalogAtomDefinition, tablePredicates, optionalModifiers));
         }
 
         try {
@@ -120,38 +120,13 @@ public class DatalogProgram2QueryConverter {
 
     /**
      * TODO: explain
-     * TODO: find a better name
      */
-    private static IntermediateQuery createTopIntermediateQuery(Function rootDatalogAtom,
-                                                                OBDAQueryModifiers queryModifiers)
-            throws InvalidDatalogProgramException {
-        try {
-            IntermediateQueryBuilder builder = new JgraphtIntermediateQueryBuilder();
-
-            DataAtom dataAtom = convertFromDatalogDataAtom(rootDatalogAtom)._1();
-            /**
-             * Empty substitution for the top construction node (stay abstract).
-             */
-            ImmutableSubstitution<ImmutableTerm> substitution = new NeutralSubstitution();
-
-            ConstructionNode rootNode;
-            if (queryModifiers.hasModifiers()) {
-                // TODO: explain
-                ImmutableQueryModifiers immutableQueryModifiers = new ImmutableQueryModifiersImpl(queryModifiers);
-                rootNode = new ConstructionNodeImpl(dataAtom, substitution, immutableQueryModifiers);
-            } else {
-                rootNode = new ConstructionNodeImpl(dataAtom, substitution);
-            }
-
-            DataNode dataNode = createDataNode(dataAtom, ImmutableList.<Predicate>of());
-
-            builder.init(rootNode);
-            builder.addChild(rootNode, dataNode);
-
-            return builder.build();
-        }
-        catch (IntermediateQueryBuilderException e) {
-            throw new InvalidDatalogProgramException(e.getMessage());
+    private static Optional<ImmutableQueryModifiers> convertModifiers(OBDAQueryModifiers queryModifiers) {
+        if (queryModifiers.hasModifiers()) {
+            ImmutableQueryModifiers immutableQueryModifiers = new ImmutableQueryModifiersImpl(queryModifiers);
+            return Optional.of(immutableQueryModifiers);
+        } else {
+            return Optional.absent();
         }
     }
 }

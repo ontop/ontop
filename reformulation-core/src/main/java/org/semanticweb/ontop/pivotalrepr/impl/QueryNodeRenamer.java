@@ -55,8 +55,18 @@ public class QueryNodeRenamer implements QueryNodeTransformer {
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
         return new ConstructionNodeImpl(renameDataAtom(constructionNode.getProjectionAtom()),
-                renameSubstitution(constructionNode.getSubstitution())
+                renameSubstitution(constructionNode.getSubstitution()),
+                renameOptionalModifiers(constructionNode.getOptionalModifiers())
                 );
+    }
+
+    private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
+        if (optionalModifiers.isPresent()) {
+            throw new RuntimeException("TODO: support modifiers renaming");
+        }
+        else {
+            return Optional.absent();
+        }
     }
 
     private ImmutableBooleanExpression renameBooleanExpression(ImmutableBooleanExpression booleanExpression) {

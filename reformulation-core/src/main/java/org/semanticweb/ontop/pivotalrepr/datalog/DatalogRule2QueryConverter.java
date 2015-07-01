@@ -33,10 +33,10 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    public static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates)
+    public static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates, Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
 
-        ConstructionNode rootNode = createConstructionNodeWithoutModifier(datalogRule);
+        ConstructionNode rootNode = createConstructionNode(datalogRule, optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         P2<List<Function>, List<Function>> atomClassification = classifyJoinSubAtoms(
@@ -53,12 +53,13 @@ public class DatalogRule2QueryConverter {
      * TODO: make sure the GROUP atom cannot be used for such rules.
      *
      */
-    private static ConstructionNode createConstructionNodeWithoutModifier(CQIE datalogRule) throws
-            InvalidDatalogProgramException {
+    private static ConstructionNode createConstructionNode(CQIE datalogRule,
+                                                           Optional<ImmutableQueryModifiers> optionalModifiers)
+            throws InvalidDatalogProgramException {
         P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                 convertFromDatalogDataAtom(datalogRule.getHead());
 
-        return new ConstructionNodeImpl(decomposition._1(), decomposition._2());
+        return new ConstructionNodeImpl(decomposition._1(), decomposition._2(), optionalModifiers);
     }
 
     private static P2<List<Function>, List<Function>> classifyJoinSubAtoms(List<Function> atoms)

@@ -162,7 +162,7 @@ public class SubQueryUnificationTools {
     /**
      * TODO: explain
      *
-     * TODO: support quer modifiers
+     * TODO: support query modifiers
      *
      */
     protected static P2<ConstructionNode, SubstitutionPropagator> unifyConstructionNode(
@@ -210,7 +210,11 @@ public class SubQueryUnificationTools {
                 constraintUnifier, filteredConstraintSubstitution);
 
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution);
+        // TODO: support them
+        Optional<ImmutableQueryModifiers> newOptionalQueryModifiers = Optional.absent();
+
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution,
+                newOptionalQueryModifiers);
         return P.p(newConstructionNode, new SubstitutionPropagator(substitutionToPropagate));
     }
 

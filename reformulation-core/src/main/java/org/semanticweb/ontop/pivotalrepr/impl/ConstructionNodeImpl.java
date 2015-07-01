@@ -16,22 +16,16 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
-    /**
-     * Without modifier
-     */
-    public ConstructionNodeImpl(DataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
-        this.dataAtom = dataAtom;
-        this.substitution = substitution;
-        this.optionalModifiers = Optional.absent();
-    }
-
     public ConstructionNodeImpl(DataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution,
-                                ImmutableQueryModifiers queryModifiers) {
+                                Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
         this.dataAtom = dataAtom;
         this.substitution = substitution;
-        this.optionalModifiers = Optional.of(queryModifiers);
+        this.optionalModifiers = optionalQueryModifiers;
     }
 
+    /**
+     * Without modifiers nor substitution.
+     */
     public ConstructionNodeImpl(DataAtom dataAtom) {
         this.dataAtom = dataAtom;
         this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<VariableImpl, ImmutableTerm>of());
@@ -58,10 +52,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public ConstructionNode clone() {
-        if (optionalModifiers.isPresent()) {
-            return new ConstructionNodeImpl(dataAtom, substitution, optionalModifiers.get());
-        }
-        return new ConstructionNodeImpl(dataAtom, substitution);
+        return new ConstructionNodeImpl(dataAtom, substitution, optionalModifiers);
     }
 
     @Override
