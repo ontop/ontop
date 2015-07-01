@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.datalog;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import fj.F;
 import fj.P2;
 import fj.data.List;
@@ -167,7 +168,7 @@ public class DatalogRule2QueryConverter {
             QueryNode bottomNode;
             if (optionalFilterOrJoinNode.isPresent()) {
                 bottomNode = optionalFilterOrJoinNode.get();
-                queryBuilder.addChild(rootNode, bottomNode);
+                queryBuilder.addChild(intermediateNode, bottomNode);
             }
             else {
                 bottomNode = rootNode;
@@ -186,10 +187,22 @@ public class DatalogRule2QueryConverter {
     }
 
     /**
-     * TODO: implement it
+     * TODO: explain it
      */
-    private static QueryNode createGroupNode(Function groupAtom) {
-        throw new RuntimeException("TODO: create a group node from a group atom!");
+    private static GroupNode createGroupNode(Function groupAtom) throws InvalidDatalogProgramException {
+        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
+        for (Term term : groupAtom.getTerms()) {
+            if (term instanceof NonGroundTerm) {
+                termBuilder.add((NonGroundTerm) term);
+            }
+            else if (!term.getReferencedVariables().isEmpty()) {
+                termBuilder.add(new NonGroundFunctionalTermImpl((Function)term));
+            }
+            else {
+                throw new InvalidDatalogProgramException("Ground term found in a GROUP atom: " + term);
+            }
+        }
+        return new GroupNodeImpl(termBuilder.build());
     }
 
     /**

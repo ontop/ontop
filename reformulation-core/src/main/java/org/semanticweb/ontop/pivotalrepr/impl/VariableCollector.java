@@ -7,6 +7,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Collects all the variables found in the nodes.
@@ -55,7 +56,7 @@ public class VariableCollector implements QueryNodeVisitor {
                 collectedVariableBuilder.add((VariableImpl)term);
             }
             else {
-                collectedVariableBuilder.addAll((List<VariableImpl>)(List<?>)term.getReferencedVariables());
+                collectedVariableBuilder.addAll((Set<VariableImpl>)(Set<?>)term.getReferencedVariables());
             }
         }
     }

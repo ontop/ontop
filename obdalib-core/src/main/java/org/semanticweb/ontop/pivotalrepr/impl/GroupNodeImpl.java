@@ -7,6 +7,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
+    private static final String GROUP_NODE_STR = "GROUP BY";
     private final ImmutableList<NonGroundTerm> groupingTerms;
 
     public GroupNodeImpl(ImmutableList<NonGroundTerm> groupingTerms) {
@@ -39,5 +40,10 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     @Override
     public GroupNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
+    }
+
+    @Override
+    public String toString() {
+        return GROUP_NODE_STR + " " + groupingTerms;
     }
 }
