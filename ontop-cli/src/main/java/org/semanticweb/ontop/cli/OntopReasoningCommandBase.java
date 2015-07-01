@@ -2,8 +2,8 @@ package org.semanticweb.ontop.cli;
 
 
 import com.google.common.base.Preconditions;
-import io.airlift.airline.Option;
-import io.airlift.airline.OptionType;
+import com.github.rvesse.airline.Option;
+import com.github.rvesse.airline.OptionType;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
