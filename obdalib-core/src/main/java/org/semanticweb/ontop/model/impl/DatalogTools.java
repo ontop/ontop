@@ -4,8 +4,6 @@ import fj.F;
 import fj.F2;
 import fj.data.List;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
 
@@ -32,7 +30,8 @@ public class DatalogTools {
     private final static  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT = new F<Function, Boolean>() {
         @Override
         public Boolean f(Function atom) {
-            return atom.isBooleanFunction();
+            return atom.isBooleanFunction()
+                    ||  atom.getFunctionSymbol().getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI);
         }
     };
 
@@ -65,18 +64,35 @@ public class DatalogTools {
         if (booleanAtoms.length() == 0)
             return TRUE_EQ;
 
-        Function firstAtom = booleanAtoms.head();
-        if (!(firstAtom instanceof BooleanExpression)) {
-            throw new IllegalArgumentException("The first atom " + firstAtom + " is not a boolean atom");
-        }
+        BooleanExpression firstBooleanAtom = convertOrCastIntoBooleanAtom( booleanAtoms.head());
 
-        BooleanExpression firstBooleanAtom = (BooleanExpression) firstAtom;
         return booleanAtoms.tail().foldLeft(new F2<BooleanExpression, Function, BooleanExpression>() {
             @Override
             public BooleanExpression f(BooleanExpression previousAtom, Function currentAtom) {
                 return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
             }
         }, firstBooleanAtom);
+    }
+
+    private static BooleanExpression convertOrCastIntoBooleanAtom(Function atom) {
+        if (atom instanceof BooleanExpression)
+            return (BooleanExpression) atom;
+
+        Predicate predicate = atom.getFunctionSymbol();
+        if (predicate instanceof BooleanOperationPredicate)
+            return DATA_FACTORY.getBooleanExpression((BooleanOperationPredicate)predicate,
+                    atom.getTerms());
+
+        String predicateName = predicate.getName();
+        if (predicateName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+
+            BooleanOperationPredicate newPredicate = new BooleanOperationPredicateImpl(predicateName,
+                    atom.getArity());
+
+            return DATA_FACTORY.getBooleanExpression(newPredicate, atom.getTerms());
+        }
+
+        throw new IllegalArgumentException(atom + " is not a boolean atom");
     }
 
     public static BooleanExpression foldBooleanConditions(java.util.List<Function> booleanAtoms) {
