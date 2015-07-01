@@ -9,33 +9,40 @@ import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
 
 import java.util.List;
 
-/**
- * Immutable implementation of QueryModifiers
- *
- * For backward compatibility, it also implements OBDAQueryModifiers
- * BUT DOES NOT SUPPORT ANY MUTABLE OPERATION.
- *
- */
-public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers, OBDAQueryModifiers {
+public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
 
     private final boolean isDistinct;
     private final boolean isCount;
     private final long limit;
     private final long offset;
-    private final ImmutableList<Variable> groupConditions;
     private final ImmutableList<OrderCondition> sortConditions;
+
+    public ImmutableQueryModifiersImpl(boolean isDistinct, boolean isCount, long limit,
+                                       long offset, ImmutableList<OrderCondition> sortConditions) {
+        this.isDistinct = isDistinct;
+        this.isCount = isCount;
+        this.limit = limit;
+        this.offset = offset;
+        this.sortConditions = sortConditions;
+    }
 
     /**
      * Tip: use a mutable implementation of QueryModifiers
      * as a builder and then create an immutable object with this constructor.
      */
     public ImmutableQueryModifiersImpl(QueryModifiers modifiers) {
+
         isDistinct = modifiers.isDistinct();
         isCount = modifiers.isCount();
         limit = modifiers.getLimit();
         offset = modifiers.getOffset();
-        groupConditions = ImmutableList.copyOf(modifiers.getGroupConditions());
         sortConditions = ImmutableList.copyOf(modifiers.getSortConditions());
+
+        if (!hasModifiers()) {
+            throw new IllegalArgumentException("Empty QueryModifiers given." +
+                    "Please use an Optional instead of creating an empty object.");
+        }
+
     }
 
     @Override
@@ -51,11 +58,6 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers, OBD
     @Override
     public boolean hasOrder() {
         return !sortConditions.isEmpty() ? true : false;
-    }
-
-    @Override
-    public boolean hasGroup() {
-        return !groupConditions.isEmpty() ? true : false;
     }
 
     @Override
@@ -79,59 +81,11 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers, OBD
     }
 
     @Override
-    public List<Variable> getGroupConditions() {
-        return groupConditions;
-    }
-
-    @Override
-    public List<OrderCondition> getSortConditions() {
+    public ImmutableList<OrderCondition> getSortConditions() {
         return sortConditions;
     }
 
-
-    @Override
-    public boolean hasModifiers() {
-        return isDistinct || hasLimit() || hasOffset() || hasOrder() || hasGroup();
-    }
-
-    @Override
-    public OBDAQueryModifiers clone() {
-        return this;
-    }
-
-    @Override
-    public void copy(OBDAQueryModifiers other) {
-        throw new UnsupportedOperationException("Does not support mutable operations");
-    }
-
-    @Override
-    public void setDistinct() {
-        throw new UnsupportedOperationException("Does not support mutable operations");
-    }
-
-    @Override
-    public void setCount() {
-        throw new UnsupportedOperationException("Does not support mutable operations");
-    }
-
-    @Override
-    public void setLimit(long limit) {
-        throw new UnsupportedOperationException("Does not support mutable operations");
-    }
-
-    @Override
-    public void setOffset(long offset) {
-        throw new UnsupportedOperationException("Does not support mutable operations");
-    }
-
-
-    @Override
-    public void addOrderCondition(Variable var, int direction) {
-        throw new UnsupportedOperationException("Does not support mutable operations");
-    }
-
-    @Override
-    public void addGroupCondition(Variable var) {
-        throw new UnsupportedOperationException("Does not support mutable operations");
+    private boolean hasModifiers() {
+        return isDistinct || hasLimit() || hasOffset() || hasOrder();
     }
 }

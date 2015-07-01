@@ -1,7 +1,23 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.OrderCondition;
+
 /**
- * Declares that the QueryModifiers are immutable
+ * ImmutableQueryModifiers contains information about:
+ *   - DISTINCT
+ *   - ORDER BY
+ *   - LIMIT
+ *   - OFFSET
+ *
+ * BUT NOT ABOUT GROUP BY
+ * (since the latter strongly changes the semantic of the query).
+ *
+ * Cannot be empty.
+ *
  */
 public interface ImmutableQueryModifiers extends QueryModifiers {
+
+    @Override
+    ImmutableList<OrderCondition> getSortConditions();
 }
