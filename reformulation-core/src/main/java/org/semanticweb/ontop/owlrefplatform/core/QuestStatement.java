@@ -58,6 +58,8 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatal
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -494,6 +496,16 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Pushing types...");
 		unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
+		if (unfolding.getRules().size() > 0) {
+			try {
+				// TODO: go further with this new data structure
+				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(unfolding,
+						unfolder.getExtensionalPredicates());
+				log.debug(intermediateQuery.toString());
+			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+				throw new OBDAException(e.getMessage());
+			}
+		}
 
 		log.debug("Pulling out equalities...");
 
