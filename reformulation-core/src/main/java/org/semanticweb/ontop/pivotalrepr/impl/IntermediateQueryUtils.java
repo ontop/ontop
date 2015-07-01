@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 
 import java.util.List;
 
@@ -133,7 +134,8 @@ public class IntermediateQueryUtils {
             // QueryNode are mutable
             QueryNode newChildNode = originalChildNode.clone();
 
-            queryBuilder.addChild(newParentNode, newChildNode);
+            Optional<ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
+            queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
 
             // Recursive call
             queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode);

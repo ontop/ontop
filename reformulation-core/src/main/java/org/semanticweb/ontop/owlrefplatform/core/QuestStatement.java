@@ -503,7 +503,7 @@ public class QuestStatement implements OBDAStatement {
 						unfolder.getExtensionalPredicates());
 				log.debug(intermediateQuery.toString());
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
-				throw new OBDAException(e.getMessage());
+				throw new OBDAException(e.getLocalizedMessage());
 			}
 		}
 
