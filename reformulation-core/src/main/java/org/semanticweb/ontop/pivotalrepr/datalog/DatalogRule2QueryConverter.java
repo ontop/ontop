@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.datalog;
 
 import com.google.common.base.Optional;
-import fj.P;
+import fj.F;
 import fj.P2;
 import fj.data.List;
 import org.semanticweb.ontop.model.*;
@@ -26,6 +26,75 @@ import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.c
  */
 public class DatalogRule2QueryConverter {
 
+    /**
+     * TODO: explain
+     */
+    private static class AtomClassification {
+        private final List<Function> dataAndCompositeAtoms;
+        private final List<Function> booleanAtoms;
+        private final Optional<Function> optionalGroupAtom;
+
+        protected AtomClassification(List<Function> atoms) throws InvalidDatalogProgramException {
+            dataAndCompositeAtoms = DatalogTools.filterDataAndCompositeAtoms(atoms);
+            List<Function> otherAtoms = DatalogTools.filterNonDataAndCompositeAtoms(atoms);
+            booleanAtoms = DatalogTools.filterBooleanAtoms(otherAtoms);
+
+            if (dataAndCompositeAtoms.isEmpty())
+                throw new InvalidDatalogProgramException("No data or composite atom in " + atoms);
+
+            optionalGroupAtom = extractOptionalGroupAtom(otherAtoms);
+
+            /**
+             * May throw a NotSupportedConversionException
+             */
+            checkNonDataOrCompositeAtomSupport(otherAtoms, booleanAtoms, optionalGroupAtom);
+        }
+
+        private static Optional<Function> extractOptionalGroupAtom(List<Function> atoms)
+                throws InvalidDatalogProgramException {
+            List<Function> groupAtoms = atoms.filter(new F<Function, Boolean>() {
+                @Override
+                public Boolean f(Function atom) {
+                    return atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP);
+                }
+            });
+
+            switch(groupAtoms.length()) {
+                case 0:
+                    return Optional.absent();
+                case 1:
+                    return Optional.of(groupAtoms.head());
+                default:
+                    throw new InvalidDatalogProgramException("Multiple GROUP atoms found in the same body! " +
+                            groupAtoms);
+            }
+        }
+
+        /**
+         * All the other atoms are currently presumed to be boolean atoms
+         */
+        private static void checkNonDataOrCompositeAtomSupport(List<Function> otherAtoms,
+                                                               List<Function> booleanAtoms,
+                                                               Optional<Function> optionalGroupAtom)
+                throws DatalogProgram2QueryConverter.NotSupportedConversionException {
+
+            int groupCount = optionalGroupAtom.isPresent()? 1 : 0;
+
+            if (booleanAtoms.length() + groupCount < otherAtoms.length()) {
+                HashSet<Function> unsupportedAtoms = new HashSet<>(otherAtoms.toCollection());
+                unsupportedAtoms.removeAll(booleanAtoms.toCollection());
+                if (groupCount == 1)
+                    unsupportedAtoms.remove(optionalGroupAtom.get());
+
+                throw new DatalogProgram2QueryConverter.NotSupportedConversionException(
+                        "Conversion of the following atoms to the intermediate query is not (yet) supported: "
+                                + unsupportedAtoms);
+            }
+        }
+
+    }
+
+
     private static final Optional<ArgumentPosition> NO_POSITION = Optional.absent();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
@@ -33,18 +102,17 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    public static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates, Optional<ImmutableQueryModifiers> optionalModifiers)
+    public static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates,
+                                                       Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
 
         ConstructionNode rootNode = createConstructionNode(datalogRule, optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
-        P2<List<Function>, List<Function>> atomClassification = classifyJoinSubAtoms(
-                bodyAtoms);
-        List<Function> dataAndCompositeAtoms = atomClassification._1();
-        List<Function> booleanAtoms = atomClassification._2();
+        AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-        return createDefinition(rootNode, tablePredicates, dataAndCompositeAtoms, booleanAtoms);
+        return createDefinition(rootNode, tablePredicates, atomClassification.dataAndCompositeAtoms,
+                atomClassification.booleanAtoms, atomClassification.optionalGroupAtom);
     }
 
     /**
@@ -62,34 +130,17 @@ public class DatalogRule2QueryConverter {
         return new ConstructionNodeImpl(decomposition._1(), decomposition._2(), optionalModifiers);
     }
 
-    private static P2<List<Function>, List<Function>> classifyJoinSubAtoms(List<Function> atoms)
-            throws InvalidDatalogProgramException {
-        List<Function> dataAndCompositeAtoms = DatalogTools.filterDataAndCompositeAtoms(atoms);
-        List<Function> otherAtoms = DatalogTools.filterNonDataAndCompositeAtoms(atoms);
-        List<Function> booleanAtoms = DatalogTools.filterBooleanAtoms(otherAtoms);
-
-        if (dataAndCompositeAtoms.isEmpty())
-            throw new InvalidDatalogProgramException("No data or composite atom in " + atoms);
-
-        /**
-         * May throw a NotSupportedConversionException
-         */
-        checkNonDataOrCompositeAtomSupport(otherAtoms, booleanAtoms);
-
-        return P.p(dataAndCompositeAtoms, booleanAtoms);
-    }
-
     /**
      * TODO: explain
      */
     private static IntermediateQuery createDefinition(ConstructionNode rootNode, Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
-                                                      List<Function> booleanAtoms)
+                                                      List<Function> booleanAtoms, Optional<Function> optionalGroupAtom)
             throws InvalidDatalogProgramException {
         /**
          * TODO: explain
          */
-        Optional<QueryNode> optionalViceTopNode = createViceTopNode(dataAndCompositeAtoms, booleanAtoms);
+        Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
         IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
@@ -98,21 +149,34 @@ public class DatalogRule2QueryConverter {
             queryBuilder.init(rootNode);
 
             /**
-             * TODO: explain
+             * Intermediate node: ConstructionNode root or GROUP node
              */
-            QueryNode quasiTopNode;
-            if (optionalViceTopNode.isPresent()) {
-                quasiTopNode = optionalViceTopNode.get();
-                queryBuilder.addChild(rootNode, quasiTopNode);
+            QueryNode intermediateNode;
+            if (optionalGroupAtom.isPresent()) {
+                intermediateNode = createGroupNode(optionalGroupAtom.get());
+                queryBuilder.addChild(rootNode, intermediateNode);
             }
             else {
-                quasiTopNode = rootNode;
+                intermediateNode = rootNode;
+            }
+
+
+            /**
+             * Bottom node: intermediate node or JOIN or FILTER
+             */
+            QueryNode bottomNode;
+            if (optionalFilterOrJoinNode.isPresent()) {
+                bottomNode = optionalFilterOrJoinNode.get();
+                queryBuilder.addChild(rootNode, bottomNode);
+            }
+            else {
+                bottomNode = rootNode;
             }
 
             /**
              * TODO: explain
              */
-            queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, quasiTopNode, NO_POSITION,
+            queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, bottomNode, NO_POSITION,
                     tablePredicates);
             return queryBuilder.build();
         }
@@ -122,23 +186,30 @@ public class DatalogRule2QueryConverter {
     }
 
     /**
+     * TODO: implement it
+     */
+    private static QueryNode createGroupNode(Function groupAtom) {
+        throw new RuntimeException("TODO: create a group node from a group atom!");
+    }
+
+    /**
      * TODO: explain
      */
-    private static Optional<QueryNode> createViceTopNode(List<Function> dataAndCompositeAtoms,
-                                                         List<Function> booleanAtoms) {
+    private static Optional<JoinOrFilterNode> createFilterOrJoinNode(List<Function> dataAndCompositeAtoms,
+                                                              List<Function> booleanAtoms) {
         Optional<ImmutableBooleanExpression> optionalFilter = createFilterExpression(booleanAtoms);
 
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
-        Optional<QueryNode> optionalRootNode;
+        Optional<JoinOrFilterNode> optionalRootNode;
 
         /**
-         * Simple filter as a root node
+         * Filter as a root node
          */
         if (optionalFilter.isPresent() && (dataAndCompositeAtomCount == 1)) {
-            optionalRootNode = Optional.of((QueryNode) new FilterNodeImpl(optionalFilter.get()));
+            optionalRootNode = Optional.of((JoinOrFilterNode) new FilterNodeImpl(optionalFilter.get()));
         }
         else if (dataAndCompositeAtomCount > 1) {
-            optionalRootNode = Optional.of((QueryNode) new InnerJoinNodeImpl(optionalFilter));
+            optionalRootNode = Optional.of((JoinOrFilterNode) new InnerJoinNodeImpl(optionalFilter));
         }
         /**
          * No need to create a special root node (will be the unique data atom)
@@ -154,22 +225,6 @@ public class DatalogRule2QueryConverter {
         if (booleanAtoms.isEmpty())
             return Optional.absent();
         return Optional.of(convertIntoImmutableBooleanExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
-    }
-
-    /**
-     * All the other atoms are currently presumed to be boolean atoms
-     * TODO: go beyond this restriction to support GROUP
-     */
-    private static void checkNonDataOrCompositeAtomSupport(List<Function> otherAtoms,
-                                                           List<Function> booleanAtoms)
-            throws DatalogProgram2QueryConverter.NotSupportedConversionException {
-        if (booleanAtoms.length() < otherAtoms.length()) {
-            HashSet<Function> unsupportedAtoms = new HashSet<>(otherAtoms.toCollection());
-            unsupportedAtoms.removeAll(booleanAtoms.toCollection());
-            throw new DatalogProgram2QueryConverter.NotSupportedConversionException(
-                    "Conversion of the following atoms to the intermediate query is not (yet) supported: "
-                            + unsupportedAtoms);
-        }
     }
 
     /**
@@ -239,11 +294,10 @@ public class DatalogRule2QueryConverter {
         /**
          * TODO: explain why we just care about the right
          */
-        P2<List<Function>, List<Function>> rightSubAtomClassification = classifyJoinSubAtoms(rightAtoms);
-        List<Function> rightSubDataOrCompositeAtoms = rightSubAtomClassification._1();
-        List<Function> rightBooleanSubAtoms = rightSubAtomClassification._2();
+        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms);
 
-        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(rightBooleanSubAtoms);
+        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(
+                rightSubAtomClassification.booleanAtoms);
 
         LeftJoinNode ljNode = new LeftJoinNodeImpl(optionalFilterCondition);
         queryBuilder.addChild(parentNodeOfTheLJ, ljNode, optionalPosition);
@@ -251,14 +305,13 @@ public class DatalogRule2QueryConverter {
         /**
          * Adds the left part
          */
-        queryBuilder = convertJoinAtom(queryBuilder, ljNode, leftAtoms, LEFT_POSITION,
-                tablePredicates);
+        queryBuilder = convertJoinAtom(queryBuilder, ljNode, leftAtoms, LEFT_POSITION, tablePredicates);
 
         /**
          * Adds the right part
          */
-        return convertDataOrCompositeAtoms(rightSubDataOrCompositeAtoms, queryBuilder, ljNode, RIGHT_POSITION,
-                tablePredicates);
+        return convertDataOrCompositeAtoms(rightSubAtomClassification.dataAndCompositeAtoms, queryBuilder, ljNode,
+                RIGHT_POSITION, tablePredicates);
     }
 
     /**
@@ -272,32 +325,34 @@ public class DatalogRule2QueryConverter {
                                                             Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
-        P2<List<Function>, List<Function>> subAtomClassification = classifyJoinSubAtoms(subAtomsOfTheJoin);
-        List<Function> subDataOrCompositeAtoms = subAtomClassification._1();
-        List<Function> booleanSubAtoms = subAtomClassification._2();
+        AtomClassification classification = new AtomClassification(subAtomsOfTheJoin);
+        if (classification.optionalGroupAtom.isPresent()) {
+            throw new InvalidDatalogProgramException("GROUP atom found inside a LJ meta-atom");
+        }
 
-        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(booleanSubAtoms);
+        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(
+                classification.booleanAtoms);
 
-        if (subDataOrCompositeAtoms.isEmpty()) {
+        if (classification.dataAndCompositeAtoms.isEmpty()) {
             throw new InvalidDatalogProgramException("Empty join found");
         }
         /**
          * May happen because this method can also be called after the LJ conversion
          */
-        else if (subDataOrCompositeAtoms.length() == 1) {
+        else if (classification.dataAndCompositeAtoms.length() == 1) {
             if (optionalFilterCondition.isPresent()) {
                 FilterNode filterNode = new FilterNodeImpl(optionalFilterCondition.get());
                 queryBuilder.addChild(parentNodeOfTheJoinNode, filterNode, optionalPosition);
 
-                return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, filterNode, NO_POSITION,
-                        tablePredicates);
+                return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder, filterNode,
+                        NO_POSITION, tablePredicates);
             }
             /**
              * Otherwise, no need for intermediate query node.
              */
             else {
-                return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, parentNodeOfTheJoinNode,
-                        optionalPosition, tablePredicates);
+                return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder,
+                        parentNodeOfTheJoinNode, optionalPosition, tablePredicates);
             }
         }
         /**
@@ -310,7 +365,7 @@ public class DatalogRule2QueryConverter {
             /**
              * Indirect recursive call for composite atoms
              */
-            return convertDataOrCompositeAtoms(subDataOrCompositeAtoms, queryBuilder, joinNode, NO_POSITION,
+            return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder, joinNode, NO_POSITION,
                     tablePredicates);
         }
 
