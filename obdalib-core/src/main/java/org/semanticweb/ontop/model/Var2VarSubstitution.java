@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.model;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 
@@ -15,5 +16,5 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<VariableImpl>
 
     NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
 
-    ImmutableQueryModifiers applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers);
+    Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers);
 }

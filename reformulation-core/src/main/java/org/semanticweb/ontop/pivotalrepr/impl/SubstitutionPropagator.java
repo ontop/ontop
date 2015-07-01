@@ -2,11 +2,10 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.NonGroundFunctionalTermImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.SubQueryUnificationTools.ConstructionNodeUnification;
 
 /**
  * TODO: describe
@@ -110,12 +109,12 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
             /**
              * TODO: explain why it makes sense (interface)
              */
-            P2<ConstructionNode, SubstitutionPropagator> unificationResults =
-                    SubQueryUnificationTools.unifyConstructionNode(constructionNode, newProjectionAtom);
+            ConstructionNodeUnification constructionNodeUnification = SubQueryUnificationTools.unifyConstructionNode(
+                    constructionNode, newProjectionAtom);
 
-            ConstructionNode newConstructionNode = unificationResults._1();
+            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
             ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
-                    unificationResults._2().getSubstitution();
+                    constructionNodeUnification.getSubstitutionPropagator().getSubstitution();
 
             /**
              * If the substitution has changed, throws the new substitution

@@ -20,5 +20,5 @@ public interface OrderCondition extends Cloneable {
     /**
      * Creates a new OrderCondition using the new variable
      */
-    OrderCondition newVariable(VariableImpl newVariable);
+    OrderCondition newVariable(Variable newVariable);
 }

@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OrderCondition;
 
@@ -21,5 +22,5 @@ public interface ImmutableQueryModifiers extends QueryModifiers {
     @Override
     ImmutableList<OrderCondition> getSortConditions();
 
-    ImmutableQueryModifiers newSortConditions(ImmutableList<OrderCondition> sortConditions);
+    Optional<ImmutableQueryModifiers> newSortConditions(ImmutableList<OrderCondition> sortConditions);
 }

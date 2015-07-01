@@ -36,6 +36,82 @@ public class SubQueryUnificationTools {
 
     /**
      * TODO: explain
+     */
+    private static class AtomSubstitutionSplit {
+
+        private final ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions;
+        private final ImmutableSubstitution<VariableOrGroundTerm> constraintSubstitution;
+
+
+        /**
+         * TODO: explain
+         */
+        protected AtomSubstitutionSplit(ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution) {
+            ImmutableMap<VariableImpl, VariableOrGroundTerm> originalMap = atomSubstitution.getImmutableMap();
+            ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> constraintMapBuilder = ImmutableMap.builder();
+            Set<VariableImpl> originalVariablesToRename = new HashSet<>();
+
+            /**
+             * Extracts var-to-ground-term constraints and collects original variables that will be renamed
+             */
+            for (Map.Entry<VariableImpl, VariableOrGroundTerm> entry : originalMap.entrySet()) {
+                VariableOrGroundTerm targetTerm = entry.getValue();
+                VariableImpl originalVariable = entry.getKey();
+
+                if (targetTerm instanceof GroundTerm) {
+                    constraintMapBuilder.put(originalVariable, targetTerm);
+                }
+                else {
+                    originalVariablesToRename.add(originalVariable);
+                }
+            }
+
+            /**
+             * Extracts the injective renaming substitutions and some additional constraints.
+             */
+            P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<VariableImpl, VariableOrGroundTerm>> extractedPair
+                    = extractRenamingSubstitutions(originalMap, originalVariablesToRename);
+            renamingSubstitutions = extractedPair._1();
+            constraintMapBuilder.putAll(extractedPair._2());
+
+            constraintSubstitution = new ImmutableSubstitutionImpl<>(constraintMapBuilder.build());
+        }
+
+        public ImmutableList<InjectiveVar2VarSubstitution> getRenamingSubstitutions() {
+            return renamingSubstitutions;
+        }
+
+        public ImmutableSubstitution<VariableOrGroundTerm> getConstraintSubstitution() {
+            return constraintSubstitution;
+        }
+    }
+
+    /**
+     * TODO: explain
+     */
+    protected static class ConstructionNodeUnification {
+        private final ConstructionNode unifiedNode;
+        private final SubstitutionPropagator substitutionPropagator;
+
+        protected ConstructionNodeUnification(ConstructionNode unifiedNode,
+                                              SubstitutionPropagator newPropagator) {
+            this.unifiedNode = unifiedNode;
+            this.substitutionPropagator = newPropagator;
+        }
+
+        public final ConstructionNode getUnifiedNode() {
+            return unifiedNode;
+        }
+
+        public final SubstitutionPropagator getSubstitutionPropagator() {
+            return substitutionPropagator;
+        }
+    }
+
+
+
+    /**
+     * TODO: explain
      *
      * Returns a new IntermediateQuery (the original one is untouched).
      */
@@ -56,20 +132,17 @@ public class SubQueryUnificationTools {
         QueryNodeRenamer renamer = new QueryNodeRenamer(
                 computeRenamingSubstitution(originalSubQuery, reservedVariables));
 
-        P2<ConstructionNode, SubstitutionPropagator> rootUnificationResults =
-                unifyConstructionNode(renamer.transform(originalRootNode), targetDataAtom);
-        ConstructionNode unifiedRootNode = rootUnificationResults._1();
-        SubstitutionPropagator substitutionPropagator = rootUnificationResults._2();
+        ConstructionNodeUnification rootUnification = unifyConstructionNode(renamer.transform(originalRootNode), targetDataAtom);
 
         try {
             IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
-            queryBuilder.init(unifiedRootNode);
+            queryBuilder.init(rootUnification.unifiedNode);
 
             /**
              * TODO: explain
              */
-            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, unifiedRootNode,
-                    substitutionPropagator, renamer);
+            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, rootUnification.unifiedNode,
+                    rootUnification.substitutionPropagator, renamer);
 
             return queryBuilder.build();
 
@@ -194,7 +267,7 @@ public class SubQueryUnificationTools {
      * TODO: support query modifiers
      *
      */
-    protected static P2<ConstructionNode, SubstitutionPropagator> unifyConstructionNode(
+    protected static ConstructionNodeUnification unifyConstructionNode(
             ConstructionNode renamedConstructionNode, DataAtom targetAtom)
             throws SubQueryUnificationException{
 
@@ -203,24 +276,13 @@ public class SubQueryUnificationTools {
                     "be disjunct!");
         }
 
-        /**
-         * TODO: support it
-         */
-        if (renamedConstructionNode.getOptionalModifiers().isPresent()) {
-            throw new RuntimeException("TODO: support query modifiers at unification time");
-        }
-
         ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution = extractAtomSubstitution(
                 renamedConstructionNode.getProjectionAtom(), targetAtom);
 
-        P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableSubstitution<VariableOrGroundTerm>> decomposition
-                = splitAtomSubstitution(atomSubstitution);
-
-        ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions = decomposition._1();
-        ImmutableSubstitution<VariableOrGroundTerm> additionalConstraintSubstitution = decomposition._2();
+        AtomSubstitutionSplit atomSubstitutionSplit = new AtomSubstitutionSplit(atomSubstitution);
 
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = ImmutableSubstitutionUtilities.computeMGUU(
-                additionalConstraintSubstitution, renamedConstructionNode.getSubstitution());
+                atomSubstitutionSplit.constraintSubstitution, renamedConstructionNode.getSubstitution());
 
         if (!optionalConstraintUnifier.isPresent()) {
             // TODO: Is it an internal error?
@@ -229,22 +291,20 @@ public class SubQueryUnificationTools {
         ImmutableSubstitution<ImmutableTerm> constraintUnifier = optionalConstraintUnifier.get();
 
         ImmutableSubstitution<ImmutableTerm> filteredConstraintSubstitution = extractConstraintsNotEncodedInAtom(
-                constraintUnifier, additionalConstraintSubstitution);
-
+                constraintUnifier, atomSubstitutionSplit.constraintSubstitution);
 
         ImmutableSubstitution<ImmutableTerm> newConstructionNodeSubstitution = ImmutableSubstitutionUtilities.renameSubstitution(
-                filteredConstraintSubstitution, renamingSubstitutions);
+                filteredConstraintSubstitution, atomSubstitutionSplit.renamingSubstitutions);
 
-        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = extractSubstitutionToPropagate(renamingSubstitutions,
-                constraintUnifier, filteredConstraintSubstitution);
+        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = extractSubstitutionToPropagate(
+                atomSubstitutionSplit.renamingSubstitutions, constraintUnifier, filteredConstraintSubstitution);
 
-
-        // TODO: support them
-        Optional<ImmutableQueryModifiers> newOptionalQueryModifiers = Optional.absent();
+        Optional<ImmutableQueryModifiers> newOptionalQueryModifiers = updateOptionalModifiers(
+                renamedConstructionNode.getOptionalModifiers(), atomSubstitution, constraintUnifier);
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution,
                 newOptionalQueryModifiers);
-        return P.p(newConstructionNode, new SubstitutionPropagator(substitutionToPropagate));
+        return new ConstructionNodeUnification(newConstructionNode, new SubstitutionPropagator(substitutionToPropagate));
     }
 
     /**
@@ -290,6 +350,34 @@ public class SubQueryUnificationTools {
     }
 
     /**
+     * TODO: explain
+     */
+    private static Optional<ImmutableQueryModifiers> updateOptionalModifiers(
+            Optional<ImmutableQueryModifiers> optionalModifiers,
+            ImmutableSubstitution<VariableOrGroundTerm> substitution1,
+            ImmutableSubstitution<ImmutableTerm> substitution2) {
+        if (!optionalModifiers.isPresent()) {
+            return Optional.absent();
+        }
+        ImmutableQueryModifiers previousModifiers = optionalModifiers.get();
+        ImmutableList.Builder<OrderCondition> conditionBuilder = ImmutableList.builder();
+
+        for (OrderCondition condition : previousModifiers.getSortConditions()) {
+            ImmutableTerm newTerm = substitution2.apply(substitution1.apply(condition.getVariable()));
+            /**
+             * If after applying the substitution the term is still a variable,
+             * "updates" the OrderCondition.
+             *
+             * Otherwise, forgets it.
+             */
+            if (newTerm instanceof Variable) {
+                conditionBuilder.add(condition.newVariable((Variable) newTerm));
+            }
+        }
+        return previousModifiers.newSortConditions(conditionBuilder.build());
+    }
+
+    /**
      * TODO: explain it
      */
     private static ImmutableSubstitution<ImmutableTerm> extractConstraintsNotEncodedInAtom(
@@ -309,45 +397,6 @@ public class SubQueryUnificationTools {
         }
 
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
-    }
-
-    /**
-     * TODO: explain
-     *
-     */
-    private static P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableSubstitution<VariableOrGroundTerm>>
-                splitAtomSubstitution(ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution) {
-
-        ImmutableMap<VariableImpl, VariableOrGroundTerm> originalMap = atomSubstitution.getImmutableMap();
-        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> constraintMapBuilder = ImmutableMap.builder();
-        Set<VariableImpl> originalVariablesToRename = new HashSet<>();
-
-        /**
-         * Extracts var-to-ground-term constraints and collects original variables that will be renamed
-         */
-        for (Map.Entry<VariableImpl, VariableOrGroundTerm> entry : originalMap.entrySet()) {
-            VariableOrGroundTerm targetTerm = entry.getValue();
-            VariableImpl originalVariable = entry.getKey();
-
-            if (targetTerm instanceof GroundTerm) {
-                constraintMapBuilder.put(originalVariable, targetTerm);
-            }
-            else {
-                originalVariablesToRename.add(originalVariable);
-            }
-        }
-
-        /**
-         * Extracts the injective renaming substitutions and some additional constraints.
-         */
-        P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<VariableImpl, VariableOrGroundTerm>> extractedPair
-                = extractRenamingSubstitutions(originalMap, originalVariablesToRename);
-        ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions = extractedPair._1();
-        constraintMapBuilder.putAll(extractedPair._2());
-
-        ImmutableSubstitution<VariableOrGroundTerm> constraintSubstitution = new ImmutableSubstitutionImpl<>(
-                constraintMapBuilder.build());
-        return P.p(renamingSubstitutions, constraintSubstitution);
     }
 
     /**

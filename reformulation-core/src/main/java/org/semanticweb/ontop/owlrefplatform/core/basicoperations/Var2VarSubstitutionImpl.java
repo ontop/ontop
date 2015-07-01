@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -62,11 +63,11 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public ImmutableQueryModifiers applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers) {
+    public Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers) {
         ImmutableList.Builder<OrderCondition> orderConditionBuilder = ImmutableList.builder();
 
         for (OrderCondition orderCondition : immutableQueryModifiers.getSortConditions()) {
-            VariableImpl newVariable = applyToVariable((VariableImpl)orderCondition.getVariable());
+            VariableImpl newVariable = applyToVariable((VariableImpl) orderCondition.getVariable());
             orderConditionBuilder.add(orderCondition.newVariable(newVariable));
         }
         return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());

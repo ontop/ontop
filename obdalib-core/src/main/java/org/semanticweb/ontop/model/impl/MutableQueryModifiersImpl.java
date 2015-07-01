@@ -185,7 +185,7 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		}
 
 		@Override
-		public OrderCondition newVariable(VariableImpl newVariable) {
+		public OrderCondition newVariable(Variable newVariable) {
 			return new OrderConditionImpl(newVariable, direction);
 		}
 	}
