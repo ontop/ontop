@@ -240,6 +240,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		return new NonGroundFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		return new NonGroundFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
 	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms) {
 		return new DataAtomImpl(predicate, terms);
 	}

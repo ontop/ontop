@@ -134,6 +134,10 @@ public interface OBDADataFactory extends Serializable {
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms);
+
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+
 	/**
 	 * Beware: a DataAtom is immutable
 	 */
