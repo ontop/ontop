@@ -175,11 +175,11 @@ public class DistinctResultSetTest { //
     @Test
     public void testDistinctSesame() throws Exception {
 
-
-        QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Book}";
-        int nResults = runTestsSesame(query, "file:/Users/Sarah/develop/ontop/quest-test/src/test/resources/example/exampleDistinct.preferences") ;
+        File f = new File("src/test/resources/example/exampleDistinct.preferences");
+        String pref = "file:" + f.getAbsolutePath();
+        int nResults = runTestsSesame(query,pref) ;
         assertEquals(24, nResults);
     }
 
