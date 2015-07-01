@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.model;
 
+import org.semanticweb.ontop.model.impl.VariableImpl;
+
 /**
  * A helper class to store the sort conditions.
  *
@@ -14,4 +16,9 @@ public interface OrderCondition extends Cloneable {
     int getDirection();
 
     OrderCondition clone();
+
+    /**
+     * Creates a new OrderCondition using the new variable
+     */
+    OrderCondition newVariable(VariableImpl newVariable);
 }

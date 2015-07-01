@@ -71,7 +71,7 @@ public class QueryNodeRenamer implements QueryNodeTransformer {
 
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
         if (optionalModifiers.isPresent()) {
-            throw new RuntimeException("TODO: support modifiers renaming");
+            return Optional.of(renamingSubstitution.applyToQueryModifiers(optionalModifiers.get()));
         }
         else {
             return Optional.absent();

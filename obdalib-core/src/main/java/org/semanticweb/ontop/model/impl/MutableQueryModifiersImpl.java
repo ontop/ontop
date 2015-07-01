@@ -183,5 +183,10 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		public OrderCondition clone() {
 			return this;
 		}
+
+		@Override
+		public OrderCondition newVariable(VariableImpl newVariable) {
+			return new OrderConditionImpl(newVariable, direction);
+		}
 	}
 }

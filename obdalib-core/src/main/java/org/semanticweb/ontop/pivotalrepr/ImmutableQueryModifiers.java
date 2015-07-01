@@ -20,4 +20,6 @@ public interface ImmutableQueryModifiers extends QueryModifiers {
 
     @Override
     ImmutableList<OrderCondition> getSortConditions();
+
+    ImmutableQueryModifiers newSortConditions(ImmutableList<OrderCondition> sortConditions);
 }

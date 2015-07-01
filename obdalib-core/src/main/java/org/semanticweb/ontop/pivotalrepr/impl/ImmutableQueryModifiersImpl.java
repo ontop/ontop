@@ -85,6 +85,11 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
         return sortConditions;
     }
 
+    @Override
+    public ImmutableQueryModifiers newSortConditions(ImmutableList<OrderCondition> newSortConditions) {
+        return new ImmutableQueryModifiersImpl(isDistinct, isCount, limit, offset, newSortConditions);
+    }
+
     private boolean hasModifiers() {
         return isDistinct || hasLimit() || hasOffset() || hasOrder();
     }
