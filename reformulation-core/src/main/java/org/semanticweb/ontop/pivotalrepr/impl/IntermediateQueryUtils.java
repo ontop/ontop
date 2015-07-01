@@ -111,12 +111,13 @@ public class IntermediateQueryUtils {
         IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
 
         // Clone of the original root node (because is mutable)
-        ConstructionNode newRootNode = originalQuery.getRootConstructionNode().clone();
+        ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
+        ConstructionNode newRootNode = originalRootNode.clone();
 
         queryBuilder.init(newRootNode);
 
 
-        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, newRootNode);
+        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode);
     }
 
     /**
@@ -124,17 +125,18 @@ public class IntermediateQueryUtils {
      */
     private static IntermediateQueryBuilder copyChildrenNodesToBuilder(final IntermediateQuery originalQuery,
                                                                        IntermediateQueryBuilder queryBuilder,
-                                                                       final QueryNode parentNode)
+                                                                       final QueryNode originalParentNode,
+                                                                       final QueryNode newParentNode)
             throws IntermediateQueryBuilderException {
-        for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(parentNode)) {
+        for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(originalParentNode)) {
 
             // QueryNode are mutable
             QueryNode newChildNode = originalChildNode.clone();
 
-            queryBuilder.addChild(parentNode, newChildNode);
+            queryBuilder.addChild(newParentNode, newChildNode);
 
             // Recursive call
-            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, newChildNode);
+            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode);
         }
 
         return queryBuilder;
