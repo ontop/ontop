@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://knova.ru/adventureWorks.owl#"
+     xml:base="http://knova.ru/adventureWorks.owl"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:reply="http://knova.ru/reply#">
+    <owl:Ontology rdf:about="http://knova.ru/adventureWorks.owl"/>
+    <!-- http://knova.ru/adventureWorks.owl#SpecialOffer_ModifiedDate -->
+    <owl:DatatypeProperty rdf:about="http://knova.ru/adventureWorks.owl#SpecialOffer_ModifiedDate">
+    </owl:DatatypeProperty>
+    <!-- http://knova.ru/adventureWorks.owl#SpecialOffer -->
+    <owl:Class rdf:about="http://knova.ru/adventureWorks.owl#SpecialOffer">
+    </owl:Class>
+</rdf:RDF>

@@ -1,0 +1,32 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123/
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	DatetimejTDS
+connectionUrl	jdbc:jtds:sqlserver://10.7.20.91;databaseName=ontopPlanning
+username	mssql
+password	obdaps83
+driverClass	net.sourceforge.jtds.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId   cl_specialoffer
+target      <http://knova.ru/adventureWorks.owl#specialoffer/{specialoffer_specialofferid}/> a <http://knova.ru/adventureWorks.owl#SpecialOffer> .
+source      SELECT "SpecialOfferID" AS "specialoffer_specialofferid" FROM "dbo"."SpecialOffer"
+
+mappingId   cl_specialoffer_modifieddate
+target      <http://knova.ru/adventureWorks.owl#specialoffer/{specialoffer_specialofferid}/> <http://knova.ru/adventureWorks.owl#SpecialOffer_ModifiedDate> {specialoffer_modifieddate} .
+source      SELECT "SpecialOfferID" AS "specialoffer_specialofferid", "ModifiedDate" AS "specialoffer_modifieddate" FROM "dbo"."SpecialOffer"
+]]
+
+

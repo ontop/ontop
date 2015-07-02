@@ -22,9 +22,9 @@ package org.semanticweb.ontop.cli;
 
 
 import com.hp.hpl.jena.rdf.model.Model;
-import io.airlift.airline.Command;
-import io.airlift.airline.Option;
-import io.airlift.airline.OptionType;
+import com.github.rvesse.airline.Command;
+import com.github.rvesse.airline.Option;
+import com.github.rvesse.airline.OptionType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
