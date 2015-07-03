@@ -29,14 +29,6 @@ public class PureDataAtomImpl extends DataAtomImpl implements PureDataAtom {
         return (VariableImpl) super.getTerm(index);
     }
 
-    @Override
-    public boolean isEquivalent(DataAtom otherAtom) {
-        if (!hasSamePredicateAndArity(otherAtom))
-            return false;
-
-        return isPureDataAtom(otherAtom);
-    }
-
     public static boolean isPureDataAtom(DataAtom atom) {
         if (atom instanceof PureDataAtom)
             return true;

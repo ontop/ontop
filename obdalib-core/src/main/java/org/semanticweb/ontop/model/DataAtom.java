@@ -19,11 +19,6 @@ public interface DataAtom extends ImmutableFunctionalTerm {
     @Override
     VariableOrGroundTerm getTerm(int index);
 
-    /**
-     * TODO: explain
-     */
-    boolean isEquivalent(DataAtom otherAtom);
-
     boolean hasSamePredicateAndArity(DataAtom otherAtom);
 
     /**

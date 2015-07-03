@@ -3,6 +3,12 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.DataAtom;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.model.impl.DataAtomImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 
@@ -12,6 +18,9 @@ import java.util.List;
  * TODO: explain
  */
 public class IntermediateQueryUtils {
+
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+
 
     /**
      * TODO: describe
@@ -26,7 +35,7 @@ public class IntermediateQueryUtils {
             return Optional.of(firstDefinition);
         }
 
-        DataAtom headAtom = firstDefinition.getRootConstructionNode().getProjectionAtom();
+        DataAtom headAtom = createTopProjectionAtom(firstDefinition.getRootConstructionNode().getProjectionAtom());
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -42,6 +51,32 @@ public class IntermediateQueryUtils {
             mergedDefinition.mergeSubQuery(definition);
         }
         return Optional.of(mergedDefinition);
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private static DataAtom createTopProjectionAtom(DataAtom firstRuleProjectionAtom) {
+        ImmutableList.Builder<VariableImpl> argBuilder = ImmutableList.builder();
+
+        VariableDispatcher variableDispatcher = new VariableDispatcher();
+        for (VariableOrGroundTerm argument : firstRuleProjectionAtom.getVariablesOrGroundTerms()) {
+            /**
+             * Variable: keeps it if not already used in the atom or rename it otherwise.
+             */
+            if (argument instanceof VariableImpl) {
+                argBuilder.add(variableDispatcher.renameDataAtomVariable((VariableImpl) argument));
+            }
+            /**
+             * Ground term: create a new variable.
+             */
+            else {
+                argBuilder.add(variableDispatcher.generateNewVariable());
+            }
+        }
+
+        return DATA_FACTORY.getDataAtom(firstRuleProjectionAtom.getPredicate(), argBuilder.build());
     }
 
     /**
@@ -156,7 +191,7 @@ public class IntermediateQueryUtils {
         DataAtom headAtom1 = root1.getProjectionAtom();
         DataAtom headAtom2 = root2.getProjectionAtom();
 
-        if (!headAtom1.isEquivalent(headAtom2)) {
+        if (!headAtom1.hasSamePredicateAndArity(headAtom2)) {
             throw new QueryMergingException("Two definitions of different things: "
                     + headAtom1 + " != " + headAtom2);
         }
