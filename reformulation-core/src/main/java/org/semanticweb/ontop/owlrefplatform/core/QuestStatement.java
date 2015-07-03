@@ -477,15 +477,15 @@ public class QuestStatement implements OBDAStatement {
 		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.getQuestUnfolder().getDatalogUnfolder();
 
 
-		if (query.getRules().size() > 0) {
-			try {
-				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(query,
-						unfolder.getExtensionalPredicates());
-				log.debug("Initial intermediate query: \n" + intermediateQuery.toString());
-			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
-				throw new OBDAException(e.getLocalizedMessage());
-			}
-		}
+//		if (query.getRules().size() > 0) {
+//			try {
+//				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(query,
+//						unfolder.getExtensionalPredicates());
+//				log.debug("Initial intermediate query: \n" + intermediateQuery.toString());
+//			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+//				throw new OBDAException(e.getLocalizedMessage());
+//			}
+//		}
 
 
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
