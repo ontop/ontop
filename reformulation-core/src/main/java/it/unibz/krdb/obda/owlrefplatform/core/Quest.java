@@ -84,7 +84,7 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sqlite.SQLiteConfig;
+//import org.sqlite.SQLiteConfig;
 
 
 public class Quest implements Serializable, RepositoryChangedListener {
@@ -472,7 +472,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		
 		 
-
+/*
 		if(driver.equals("org.sqlite.JDBC")){
 			SQLiteConfig config = new SQLiteConfig();
 		       config.enableLoadExtension( true );
@@ -481,8 +481,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		       localConnection = DriverManager.getConnection( "jdbc:sqlite:/home/constant/test-2.3.sqlite",   config.toProperties() );
 
 		} else {
+		*/	
 			localConnection = DriverManager.getConnection(url, username, password);
-		}
+		//}
 		if (localConnection != null) {
 			return true;
 		}

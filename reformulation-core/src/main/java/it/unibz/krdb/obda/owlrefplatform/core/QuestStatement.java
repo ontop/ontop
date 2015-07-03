@@ -53,7 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.sqlite.SQLiteConfig;
+//import org.sqlite.SQLiteConfig;
 
 /**
  * The obda statement provides the implementations necessary to query the
@@ -206,9 +206,10 @@ public class QuestStatement implements OBDAStatement {
 						
 						/*constant- load spatialite module before executing the query- maybe this is
 						  not the most appropriate place though*/
+						/* for sqlite- constant
 						SQLiteConfig config = new SQLiteConfig();
 				        config.enableLoadExtension( true );
-				        config.setReadOnly( true );
+				        config.setReadOnly( true );*/
 				     //   sqlstatement.setQueryTimeout( 30 ); // set timeout to 30 sec.
 					//	sqlstatement.execute( "SELECT load_extension('/usr/local/lib/mod_spatialite')" );
 					//	System.out.println("SPATIALITE EXTENSION LOADED");

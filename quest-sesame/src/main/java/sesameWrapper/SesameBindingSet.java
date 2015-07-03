@@ -22,8 +22,10 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 import it.unibz.krdb.obda.sesame.SesameHelper;
 
@@ -32,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
@@ -91,10 +94,7 @@ public class SesameBindingSet implements BindingSet {
 				Constant c = set.getConstant(bindingName);
 				if (c == null) {
 					return null;
-						} else if (col_type == COL_TYPE.GEOMETRY) {
-							URI datatype = fact.createURI(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE);
-							value = fact.createLiteral(c.getValue(), datatype);
-						} 							
+						} 						
 				else {
 					if (c instanceof ValueConstant) {
 						value = helper.getLiteral((ValueConstant)c);

@@ -1015,8 +1015,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
             if (function instanceof URITemplatePredicate) {
                 type = COL_TYPE.OBJECT;
-			} else if (functionString.equals(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE)) {
-				return (String.format(typeStr, 10, signature.get(hpos)));
+			} else if (function.equals(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE)) {
+				//return (String.format(typeStr, 10, signature.get(hpos)));
+				type = COL_TYPE.GEOMETRY;
             }
             else if (function instanceof BNodePredicate) {
                 type = COL_TYPE.BNODE;

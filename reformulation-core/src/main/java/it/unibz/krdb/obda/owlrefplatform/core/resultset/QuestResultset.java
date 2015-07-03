@@ -401,9 +401,9 @@ public class QuestResultset implements TupleResultSet {
         	throw new RuntimeException("typeCode unknown: " + typeCode);
         
         return questType;
-		} else if (sqltype == 10) {
-			return COL_TYPE.GEOMETRY;
-	}
+		} /*else if (sqltype == 10) 
+			return COL_TYPE.GEOMETRY;*/
+	
 
 	// @Override
 	// public URI getURI(String name) throws OBDAException {

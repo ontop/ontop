@@ -43,6 +43,8 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
+//import org.openrdf.query.resultio.sparqlkml.stSPARQLResultsKMLWriter;
+//import org.openrdf.query.resultio.sparqlkml.stSPARQLResultsKMLWriterFactory;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.query.resultio.text.tsv.SPARQLResultsTSVWriter;
 import org.openrdf.repository.Repository;
@@ -53,8 +55,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
 import sesameWrapper.SesameVirtualRepo;
-
-
 
 
 
@@ -79,7 +79,7 @@ public class SesameR2RMLSpatialVirtualTest extends TestCase {
 		try {
 			
 			String owlFile = "/home/constant/books.owl";
-			String ttlFile = "/home/constant/mappings-ontop/npd-plainLiterals.ttl";
+			String ttlFile = "/home/constant/mappings-ontop/npd.ttl";
 			
 			//create owlontology from file
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
@@ -114,6 +114,7 @@ public class SesameR2RMLSpatialVirtualTest extends TestCase {
 			
 			
 			repo = new SesameVirtualRepo("virtualSpatialExample", owlontology,myGraph,pref);
+			
 
 					
 			
@@ -135,21 +136,29 @@ public class SesameR2RMLSpatialVirtualTest extends TestCase {
 
 			///query repo
 			 try {
-				 String spatialQuery = prefixes + "select distinct ?x1 ?x2 \n where \n{" +
+				 
+				 //<http://www.opengis.net/ont/geosparql#sfOverlaps>
+				 String spatialQuery = prefixes + "select distinct ?x1 ?g1  \n where \n{" +
 				 						"?x1 geo:asWKT ?g1 . \n" +
 				 						" ?x2 geo:asWKT ?g2 . \n" +
-				 						"FILTER(SpatialOverlap(?g1,?g2)) \n" +
+				 						"FILTER(<http://www.opengis.net/def/function/geosparql/sfRelate>(?g1,?g2)) \n" +
 				 						"} limit 10";
-				 String spatialConstantQuery = prefixes + "select distinct ?x1 ?g1 where {" +
+				 String graphSpatialQuery = prefixes + "select distinct ?gr  \n"
+				 		+ "where { \n"
+				 		//+ "graph ?gr {" +
+	 					+	" ?x ?y ?z . \n"
+	 					//	+ "}" +
+	 					+"} limit 10";
+				 String spatialConstantQuery = prefixes + "select distinct * where {" +
 	 						"?x1 geo:asWKT ?g1 . " +
-	 						"FILTER(SpatialOverlap(\"POINT(2.497514 56.847728)\",?g1))" +
+	 						"FILTER(SpatialOverlap( \"POINT(2.497514 56.847728)\", ?g1))" +
 	 					//	"FILTER(!sameTerm(?g1,?g2))" +
 	 						"} limit 10";
 				
 				 String geosparqlProjectionQuery = prefixes +
 				 		//"prefix geo: <http://www.opengis.net/ont/geosparql#> \n" +
-				 		"select distinct  ?y  where {" +
-	 						"?x ?y ?z " +
+				 		"select distinct  ?z  where {" +
+	 						"?x geo:asWKT ?z " +
 	 						"} limit 10";
 				 String spatialProjectionQuery = prefixes + "select distinct ?g1 where {" +
 	 						"?x1 geo:asWKT ?g1 . " +

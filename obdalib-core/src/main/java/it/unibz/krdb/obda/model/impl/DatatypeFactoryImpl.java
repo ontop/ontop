@@ -33,6 +33,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final DatatypePredicate XSD_DATETIME, XSD_DATETIME_STAMP;
 	private final DatatypePredicate XSD_BOOLEAN;
 	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
+	private final DatatypePredicate  GEOSPARQL_WKT;
 	
 	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<>();
 	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<>();
@@ -61,6 +62,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+		GEOSPARQL_WKT = registerType(new ValueFactoryImpl().createURI(OBDAVocabulary.GEOSPARQL_WKT_LITERAL_DATATYPE), COL_TYPE.GEOMETRY);
 
 		
 		// special case

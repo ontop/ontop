@@ -278,9 +278,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return OBDAVocabulary.GEOSPARQL_WKT_LITERAL;
 	}
 
-	@Override
-	}
-
 
 	@Override
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {

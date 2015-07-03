@@ -35,11 +35,11 @@ import gr.uoa.di.madgik.sesame.functions.SpatialIntersectsFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialOverlapFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialTouchesFunc;
 import gr.uoa.di.madgik.sesame.functions.SpatialWithinFunc;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.TermUtils;
+import it.unibz.krdb.obda.model.impl.*;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
  * same semantics. We use the built-in predicates Join and Left join. The rules
@@ -74,7 +75,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private final DatatypeFactory dtfac = (DatatypeFactory) OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final SemanticIndexURIMap uriRef;  
@@ -906,117 +907,124 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		else if (expr instanceof Compare) {
 			switch (((Compare) expr).getOperator()) {
-				case EQ:
+			case EQ:
+				return ofac.getFunctionEQ(term1, term2);
+			case GE:
+				return ofac.getFunctionGTE(term1, term2);
+			case GT:
+				return ofac.getFunctionGT(term1, term2);
+			case LE:
+				return ofac.getFunctionLTE(term1, term2);
+			case LT:
+				return ofac.getFunctionLT(term1, term2);
+			case NE:
+				return ofac.getFunctionNEQ(term1, term2);
+			}			
 		} else if (expr instanceof SpatialOverlapFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionOverlaps(term1, term2); 
+			return ofac.getFunctionOverlaps(term1, term2); 
 		}else if (expr instanceof SpatialWithinFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialWithin(term1, term2); 
+			return ofac.getFunctionSpatialWithin(term1, term2); 
 		}else if (expr instanceof SpatialContainFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialContains(term1, term2); 
+			return ofac.getFunctionSpatialContains(term1, term2); 
 		}else if (expr instanceof SpatialCrossesFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialCrosses(term1, term2); 
+			return ofac.getFunctionSpatialCrosses(term1, term2); 
 		}else if (expr instanceof SpatialDisjointFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialDisjoint(term1, term2); 
+			return ofac.getFunctionSpatialDisjoint(term1, term2); 
 		}else if (expr instanceof SpatialEqualFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialEquals(term1, term2); 
+			return ofac.getFunctionSpatialEquals(term1, term2); 
 		}else if (expr instanceof SpatialIntersectsFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialIntersects(term1, term2); 
+			return ofac.getFunctionSpatialIntersects(term1, term2); 
 		}else if (expr instanceof SpatialTouchesFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionSpatialTouches(term1, term2); 
+			return ofac.getFunctionSpatialTouches(term1, term2); 
 		}else if (expr instanceof EHOverlapFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHOverlap(term1, term2); 
+			return ofac.getFunctionEHOverlap(term1, term2); 
 		}else if (expr instanceof EHContainsFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHContains(term1, term2); 
+			return ofac.getFunctionEHContains(term1, term2); 
 		}else if (expr instanceof EHCoversFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHCovers(term1, term2); 
+			return ofac.getFunctionEHCovers(term1, term2); 
 		}else if (expr instanceof EHCoveredByFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHCoveredBy(term1, term2); 
+			return ofac.getFunctionEHCoveredBy(term1, term2); 
 		}else if (expr instanceof EHDisjointFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHDisjoint(term1, term2); 
+			return ofac.getFunctionEHDisjoint(term1, term2); 
 		}else if (expr instanceof EHEqualsFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHEquals(term1, term2); 
+			return ofac.getFunctionEHEquals(term1, term2); 
 		}else if (expr instanceof EHInsideFunc) {
 			if (term1 instanceof Function){
 				Term arg = ((Function) term1).getTerm(0);
 				ofac.getFunctionGeomFromWKT(arg);
 				term1 = arg;
 			}
-			function = ofac.getFunctionEHInside(term1, term2); 
-		}else if (expr instanceof Compare) {
-					return ofac.getFunctionLT(term1, term2);
-				case NE:
-					return ofac.getFunctionNEQ(term1, term2);
-			}
+			return ofac.getFunctionEHInside(term1, term2); 
 		} 
 		else if (expr instanceof MathExpr) {
 			switch (((MathExpr)expr).getOperator()) {

@@ -309,6 +309,20 @@ public class DBMetadata implements Serializable {
 		}
 		return pkeys;
 	}
+	
+	
+	/**
+	 * Retrieves the table list form the metadata.
+	 */
+	public List<TableDefinition> getTableList() {
+		List<TableDefinition> tableList = new ArrayList<TableDefinition>();
+		for (DataDefinition dd : getRelations()) {
+			if (dd instanceof TableDefinition) {
+				tableList.add((TableDefinition) dd);
+			}
+		}
+		return tableList;
+	}
 
 
 }

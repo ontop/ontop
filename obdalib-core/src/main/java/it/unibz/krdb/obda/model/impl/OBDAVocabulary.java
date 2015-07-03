@@ -38,7 +38,6 @@ public class OBDAVocabulary {
 	public static final ValueConstant TRUE = new ValueConstantImpl("true", COL_TYPE.BOOLEAN);
 	public static final ValueConstant FALSE = new ValueConstantImpl("false", COL_TYPE.BOOLEAN);
 
-	public static final Constant FALSE = new ValueConstantImpl("f", COL_TYPE.BOOLEAN);
 
 	/* Numeric operations */
 
@@ -57,17 +56,6 @@ public class OBDAVocabulary {
 	public static final Predicate SUBTRACT = new NumericalOperationPredicateImpl("subtract", 2);
 	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl("multiply", 2);
 		
-	public static final Predicate MINUS = new NumericalOperationPredicateImpl(
-			MINUS_STR, 1);
-	
-	public static final Predicate ADD = new NumericalOperationPredicateImpl(
-			ADD_STR, 2);
-	
-	public static final Predicate SUBSTRACT = new NumericalOperationPredicateImpl(
-			SUBSTRACT_STR, 2);
-	
-	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl(
-			MULTIPLY_STR, 2);
 	
 	/* Boolean predicate URIs */
 
@@ -221,7 +209,7 @@ public class OBDAVocabulary {
 	
 	public static final String GEOSPARQL_WKT_LITERAL_DATATYPE = "http://www.opengis.net/ont/geosparql#wktLiteral";
 
-	public static final Predicate GEOSPARQL_WKT_LITERAL = new DataTypePredicateImpl(
+	public static final Predicate GEOSPARQL_WKT_LITERAL = new DatatypePredicateImpl(
 			GEOSPARQL_WKT_LITERAL_DATATYPE, COL_TYPE.GEOMETRY);
 	
 
@@ -266,41 +254,11 @@ public class OBDAVocabulary {
 	public static final String overlap = "<http://strdf.di.uoa.gr/ontology#overlap>";
 	
 
-	/* SPARQL Algebra predicate */
-
-	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl(
-			SPARQL_JOIN_URI, COL_TYPE.STRING);
-
-	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl(
-			SPARQL_LEFTJOIN_URI, COL_TYPE.STRING);
-
-	public static final Predicate SPARQL_IS_LITERAL = new BooleanOperationPredicateImpl(
-			SPARQL_IS_LITERAL_URI);
-
-	public static final Predicate SPARQL_IS_URI = new BooleanOperationPredicateImpl(
-			SPARQL_IS_URI_URI);
-
-	public static final Predicate SPARQL_IS_IRI = new BooleanOperationPredicateImpl(
-			SPARQL_IS_IRI_URI);
-
-	public static final Predicate SPARQL_IS_BLANK = new BooleanOperationPredicateImpl(
-			SPARQL_IS_BLANK_URI);
-
-	public static final Predicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl(
-			SPARQL_LANGMATCHES_URI, 2);
-
-	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl(
-			SPARQL_STR_URI);
-
-	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl(
-			SPARQL_DATATYPE_URI);
-
 	/* SPARQL built-in functions */
 	
 	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl("str");
 	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl("datatype");
 	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl("lang");
-
 
 
 	
