@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Mutable BUT ONLY WHEN APPLYING LocalOptimizationProposal forwarded by the IntermediateQuery.
@@ -19,7 +18,7 @@ public interface QueryNode extends Cloneable {
      * To be implemented by leaf classes.
      *
      */
-    Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
+    Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer);
 
     /**
      * "Accept" method for the "Visitor" pattern.

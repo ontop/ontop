@@ -14,7 +14,7 @@ import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
  * and executed in a given order.
  *
  */
-public interface QueryOptimizer {
+public interface QueryNodeOptimizer {
 
     Optional<LocalOptimizationProposal> makeProposal(InnerJoinNode node);
 

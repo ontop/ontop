@@ -23,7 +23,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
 

@@ -62,7 +62,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
 

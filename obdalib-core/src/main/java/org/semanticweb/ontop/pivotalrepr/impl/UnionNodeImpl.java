@@ -9,7 +9,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     private static final String UNION_NODE_STR = "UNION";
 
     @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
 

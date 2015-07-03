@@ -13,7 +13,7 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
 

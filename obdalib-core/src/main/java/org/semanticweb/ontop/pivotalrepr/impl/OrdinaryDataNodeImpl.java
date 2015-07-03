@@ -13,7 +13,7 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer) {
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
         return optimizer.makeProposal(this);
     }
 
