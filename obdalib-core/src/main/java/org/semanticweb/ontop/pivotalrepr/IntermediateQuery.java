@@ -39,24 +39,9 @@ public interface IntermediateQuery {
             throws InvalidLocalOptimizationProposalException;
 
     /**
-     * TODO: describe
-     *
-     */
-    @Deprecated
-    QueryNode applyDetypingProposal(DetypingProposal proposal)
-            throws InvalidLocalOptimizationProposalException;
-
-    /**
      * TODO: find an exception to throw
      */
     void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
-
-    /**
-     * TODO: explain
-     * Does nothing if the node is not "typed".
-     */
-    @Deprecated
-    public void detypeNode(QueryNode nodeToDetype);
 
     /**
      * TODO: explain

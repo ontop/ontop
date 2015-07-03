@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.owlrefplatform.core.optimization.DetypingOptimizer;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,43 +110,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    @Deprecated
-    public void detypeNode(QueryNode nodeToDetype) {
-
-        if (!contains(nodeToDetype)) {
-            throw new IllegalArgumentException("The node is not contained in the query");
-        }
-
-        DetypingOptimizer optimizer = new DetypingOptimizer(this);
-        Optional<LocalOptimizationProposal> optionalProposal = nodeToDetype.acceptOptimizer(optimizer);
-
-        if (!optionalProposal.isPresent()) {
-            LOGGER.debug(nodeToDetype + " was not typed (thus nothing to detype).");
-        }
-        else {
-            try {
-                optionalProposal.get().apply();
-            }
-            /**
-             * Should not happen since we created the proposal here
-             */
-            catch (InvalidLocalOptimizationProposalException e) {
-                throw new RuntimeException("Internal error while detyping a node: " + e.getLocalizedMessage());
-            }
-        }
-    }
-
-    @Override
     public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                       QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);
-    }
-
-    @Override
-    @Deprecated
-    public QueryNode applyDetypingProposal(DetypingProposal proposal)
-            throws InvalidLocalOptimizationProposalException {
-        throw new RuntimeException("TODO: implement it");
     }
 
     /**
