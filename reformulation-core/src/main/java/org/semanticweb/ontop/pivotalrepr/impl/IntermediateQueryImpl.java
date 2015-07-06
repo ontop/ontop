@@ -115,6 +115,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.getOptionalPosition(parentNode, childNode);
     }
 
+    @Override
+    public ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) {
+        try {
+            return treeComponent.getAncestors(descendantNode);
+        } catch (IllegalTreeException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
+        }
+    }
+
     /**
      * TODO: explain
      */

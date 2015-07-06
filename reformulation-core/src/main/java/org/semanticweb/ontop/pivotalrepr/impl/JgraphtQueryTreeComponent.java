@@ -282,6 +282,23 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         return edge.getOptionalPosition();
     }
 
+    @Override
+    public ImmutableList<QueryNode> getAncestors(final QueryNode descendantNode) throws IllegalTreeException {
+        ImmutableList.Builder<QueryNode> ancestorBuilder = ImmutableList.builder();
+
+        QueryNode parentNode;
+        Set<LabeledEdge> toParentEdges = queryDAG.outgoingEdgesOf(descendantNode);
+        while (!toParentEdges.isEmpty()) {
+            if (toParentEdges.size() > 1)
+                throw new IllegalTreeException("A tree node must not have more than one parent!");
+
+            parentNode = queryDAG.getEdgeTarget(toParentEdges.iterator().next());
+            ancestorBuilder.add(parentNode);
+        }
+
+        return ancestorBuilder.build();
+    }
+
     /**
      * TODO: describe
      */

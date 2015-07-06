@@ -35,4 +35,6 @@ public interface QueryTreeComponent {
 
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                QueryNode childNode);
+
+    ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException;
 }

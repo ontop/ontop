@@ -47,4 +47,6 @@ public interface IntermediateQuery {
      * TODO: explain
      */
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
+
+    ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
 }
