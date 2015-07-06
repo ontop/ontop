@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
@@ -64,6 +65,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     @Override
     public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
         return (ImmutableSubstitution<ImmutableTerm>)g;
+    }
+
+    @Override
+    public Optional<ImmutableSubstitution<ImmutableTerm>> union(ImmutableSubstitution<ImmutableTerm> otherSubstitution) {
+        return Optional.of(otherSubstitution);
     }
 
     @Override

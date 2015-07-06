@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.model;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
@@ -40,4 +41,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Returns "f o g" where f is this substitution
      */
     ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g);
+
+    /**
+     * Because of the optional cannot be overloaded.
+     */
+    Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution);
 }

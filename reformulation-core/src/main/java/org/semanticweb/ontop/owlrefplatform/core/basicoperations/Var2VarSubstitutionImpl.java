@@ -108,4 +108,5 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     public boolean isDefining(VariableImpl variable) {
         return map.containsKey(variable);
     }
+
 }

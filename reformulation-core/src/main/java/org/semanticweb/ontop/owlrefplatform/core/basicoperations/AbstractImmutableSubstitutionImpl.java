@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
@@ -133,6 +134,43 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
 
         return new ImmutableSubstitutionImpl<>(ImmutableMap.copyOf(substitutionMap));
+    }
+
+    /**
+     * In case some sub-classes wants to add a new unionXX method returning an optional in their own type.
+     *
+     * TODO: explain
+     */
+    protected Optional<ImmutableMap<VariableImpl, T>> computeUnionMap(ImmutableSubstitution<T> otherSubstitution) {
+        ImmutableMap.Builder<VariableImpl, T> mapBuilder = ImmutableMap.builder();
+        mapBuilder.putAll(getImmutableMap());
+
+        ImmutableMap<VariableImpl, T> otherMap = otherSubstitution.getImmutableMap();
+        for(VariableImpl otherVariable : otherMap.keySet()) {
+
+            T otherTerm = otherMap.get(otherVariable);
+
+            /**
+             * TODO: explain
+             */
+            if (isDefining(otherVariable) && (!get(otherVariable).equals(otherTerm))) {
+                return Optional.absent();
+            }
+
+            mapBuilder.put(otherVariable, otherTerm);
+        }
+
+        return Optional.of(mapBuilder.build());
+    }
+
+    @Override
+    public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
+        Optional<ImmutableMap<VariableImpl, T>> optionalMap = computeUnionMap(otherSubstitution);
+        if (optionalMap.isPresent()) {
+            ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get());
+            return Optional.of(unionSubstitution);
+        }
+        return Optional.absent();
     }
 
 }
