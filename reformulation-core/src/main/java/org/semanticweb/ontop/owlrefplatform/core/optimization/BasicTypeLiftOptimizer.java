@@ -3,10 +3,14 @@ package org.semanticweb.ontop.owlrefplatform.core.optimization;
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import fj.F;
+import fj.Ord;
 import fj.data.*;
 import fj.data.List;
+import fj.data.Set;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -218,37 +222,41 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      */
     private static Option<ImmutableSubstitution<ImmutableTerm>> liftBindings(TreeZipper<ConstructionNodeProposal> currentZipper) {
 
-
-        Option<TreeZipper<ConstructionNodeProposal>> optionalFirstChildZipper = currentZipper.firstChild();
-        if (optionalFirstChildZipper.isNone())
+        final Option<TreeZipper<ConstructionNodeProposal>> optionalFirstChildZipper = currentZipper.firstChild();
+        if (optionalFirstChildZipper.isNone()) {
             return Option.none();
-
-        TreeZipper<ConstructionNodeProposal> firstChildZipper = optionalFirstChildZipper.some();
-        ImmutableSubstitution<ImmutableTerm> firstSubstitution = firstChildZipper.getLabel()
+        }
+        final ImmutableSubstitution<ImmutableTerm> firstChildSubstitution = optionalFirstChildZipper.some().getLabel()
                 .getMostRecentConstructionNode().getSubstitution();
 
-        return mergeChildSubstitutions(firstSubstitution, firstChildZipper.right());
-    }
+        // Non-final
+        PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution);
+        // Non-final
+        Option<TreeZipper<ConstructionNodeProposal>> optionalChildZipper = currentZipper.firstChild();
 
-    /**
-     * TODO: explain
-     */
-    private static Option<ImmutableSubstitution<ImmutableTerm>> mergeChildSubstitutions(
-            ImmutableSubstitution<ImmutableTerm> currentConsensus,
-            Option<TreeZipper<ConstructionNodeProposal>> optionalCurrentChild) {
-        if (optionalCurrentChild.isNone())
-            return Option.some(currentConsensus);
+        /**
+         * Computes a partial union with the other children.
+         */
+        while(optionalChildZipper.isSome()) {
+            TreeZipper<ConstructionNodeProposal> currentChildZipper = optionalChildZipper.some();
+            ImmutableSubstitution<ImmutableTerm> currentChildSubstitution = currentChildZipper.getLabel()
+                    .getMostRecentConstructionNode().getSubstitution();
 
-        TreeZipper<ConstructionNodeProposal> currentChild = optionalCurrentChild.some();
+            currentUnion = currentUnion.newPartialUnion(currentChildSubstitution);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution =
-                currentConsensus.union(currentChild.getLabel().getMostRecentConstructionNode().getSubstitution());
+            optionalChildZipper = currentChildZipper.right();
+        }
 
-        if (!optionalSubstitution.isPresent())
+        /**
+         * Returns the partial union if not empty
+         */
+        ImmutableSubstitution<ImmutableTerm> proposedSubstitution = currentUnion.getPartialUnionSubstitution();
+        if (proposedSubstitution.isEmpty()) {
             return Option.none();
-
-        // Recursive call
-        return mergeChildSubstitutions(optionalSubstitution.get(), currentChild.right());
+        }
+        else {
+            return Option.some(proposedSubstitution);
+        }
     }
 
 
