@@ -1,15 +1,11 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import fj.F;
-import fj.Ord;
 import fj.data.*;
 import fj.data.List;
-import fj.data.Set;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
@@ -61,6 +57,18 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
             if (optionalNewNode.isSome())
                 return optionalNewNode.some();
             return formerNode;
+        }
+
+        public ConstructionNodeProposal removeSomeBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
+            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithLessBindings(
+                    substitutionToLift);
+            return new ConstructionNodeProposal(formerNode, newConstructionNode);
+        }
+
+        public ConstructionNodeProposal addBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
+            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithAdditionalBindings(
+                    substitutionToLift);
+            return new ConstructionNodeProposal(formerNode, newConstructionNode);
         }
     }
 
@@ -210,9 +218,9 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         }
 
         ImmutableSubstitution<ImmutableTerm> substitutionToLift = optionalSubstitutionToLift.some();
-        TreeZipper<ConstructionNodeProposal> updatedChildrenZipper = updateChildren(currentZipper, substitutionToLift);
 
         ConstructionNodeProposal newCurrentProposal = propagateSubstitutionToParent(substitutionToLift, currentZipper);
+        TreeZipper<ConstructionNodeProposal> updatedChildrenZipper = updateChildren(currentZipper, substitutionToLift);
 
         return updatedChildrenZipper.setLabel(newCurrentProposal);
     }
@@ -264,9 +272,37 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static TreeZipper<ConstructionNodeProposal> updateChildren(TreeZipper<ConstructionNodeProposal> currentZipper,
+    private static TreeZipper<ConstructionNodeProposal> updateChildren(TreeZipper<ConstructionNodeProposal> parentZipper,
                                                                        ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-        throw new RuntimeException("TODO: implement it!");
+
+        if (substitutionToLift.isEmpty())
+            return parentZipper;
+
+        // Non-final
+        Option<TreeZipper<ConstructionNodeProposal>> nextOptionalChild = parentZipper.firstChild();
+        // Non-final
+        TreeZipper<ConstructionNodeProposal> currentChildUpdatedZipper = null;
+        while (nextOptionalChild.isSome()) {
+            TreeZipper<ConstructionNodeProposal> currentChildZipper = nextOptionalChild.some();
+
+            /**
+             * TODO: explain
+             */
+            ConstructionNodeProposal newProposal = currentChildZipper.getLabel().removeSomeBindings(substitutionToLift);
+
+            currentChildUpdatedZipper = currentChildZipper.setLabel(newProposal);
+            nextOptionalChild = currentChildUpdatedZipper.right();
+        }
+
+        /**
+         * If no child
+         */
+        if (currentChildUpdatedZipper == null) {
+            return parentZipper;
+        }
+        else {
+            return currentChildUpdatedZipper.parent().some();
+        }
     }
 
     /**
@@ -275,27 +311,29 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      */
     private static ConstructionNodeProposal propagateSubstitutionToParent(ImmutableSubstitution<ImmutableTerm> substitutionToLift,
                                                                           TreeZipper<ConstructionNodeProposal> currentZipper) {
-        throw new RuntimeException("TODO: implement it!");
+        return currentZipper.getLabel().addBindings(substitutionToLift);
     }
 
 
     /**
      * Navigates into the zipper until reaching the leftmost leaf.
-     *
-     * Tail-recursive function
-     *  (even if not optimized by the JVM, should not be too profound (tree depth)).
-     *
      */
-    private static TreeZipper<ConstructionNodeProposal> navigateToLeftmostLeaf(TreeZipper<ConstructionNodeProposal> currentZipper) {
+    private static TreeZipper<ConstructionNodeProposal> navigateToLeftmostLeaf(final TreeZipper<ConstructionNodeProposal> initialZipper) {
 
-        Option<TreeZipper<ConstructionNodeProposal>> optionalFirstChild = currentZipper.firstChild();
+        // Non-final
+        Option<TreeZipper<ConstructionNodeProposal>> optionalChild = initialZipper.firstChild();
+        // Non-final
+        TreeZipper<ConstructionNodeProposal> currentZipper = initialZipper;
+
         /**
          * Goes to its left child
          */
-        if (optionalFirstChild.isSome())
-            return navigateToLeftmostLeaf(optionalFirstChild.some());
+        while(optionalChild.isSome()) {
+            currentZipper = optionalChild.some();
+            optionalChild = currentZipper.firstChild();
+        }
         /**
-         * Otherwise, is the leftmost leaf.
+         * No more children --> is the leftmost leaf.
          */
         return currentZipper;
     }

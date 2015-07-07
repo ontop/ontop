@@ -32,4 +32,14 @@ public interface ConstructionNode extends QueryNode {
     @Override
     ConstructionNode acceptNodeTransformer(QueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
+
+    /**
+     * TODO: explain
+     */
+    ConstructionNode newNodeWithAdditionalBindings(ImmutableSubstitution<ImmutableTerm> additionalBindings);
+
+    /**
+     * TODO: explain
+     */
+    ConstructionNode newNodeWithLessBindings(ImmutableSubstitution<ImmutableTerm> bindingsToRemove);
 }
