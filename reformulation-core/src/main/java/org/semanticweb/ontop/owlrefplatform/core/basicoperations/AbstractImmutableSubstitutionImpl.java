@@ -165,6 +165,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
+        if (otherSubstitution.isEmpty())
+            return Optional.of((ImmutableSubstitution<T>)this);
+        else if(isEmpty())
+            return Optional.of(otherSubstitution);
+
         Optional<ImmutableMap<VariableImpl, T>> optionalMap = computeUnionMap(otherSubstitution);
         if (optionalMap.isPresent()) {
             ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get());

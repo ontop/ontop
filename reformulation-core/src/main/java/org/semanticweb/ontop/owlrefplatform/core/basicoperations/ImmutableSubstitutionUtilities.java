@@ -13,11 +13,14 @@ import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 
 import java.util.Map;
 
+import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
+
 /**
  * Utilities for the new generation of (immutable) substitutions
  */
 public class ImmutableSubstitutionUtilities {
 
+    private static ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
     private static String PREDICATE_STR = "pred";
 
 
@@ -101,6 +104,117 @@ public class ImmutableSubstitutionUtilities {
         }
         return Optional.of(convertSubstitution(mutableSubstitution));
     }
+
+    /**
+     * Returns a substitution theta (if it exists) such as :
+     *    theta(s) = t
+     *
+     * with
+     *    s : source term
+     *    t: target term
+     *
+     */
+    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeOneWayUnifier(ImmutableTerm sourceTerm,
+                                                                                      ImmutableTerm targetTerm) {
+        /**
+         * Variable
+         */
+        if (sourceTerm instanceof VariableImpl) {
+            VariableImpl sourceVariable = (VariableImpl) sourceTerm;
+
+            ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
+                    ImmutableMap.of(sourceVariable, targetTerm));
+            return Optional.of(substitution);
+        }
+        /**
+         * Functional term
+         */
+        else if (sourceTerm instanceof ImmutableFunctionalTerm) {
+            if (targetTerm instanceof ImmutableFunctionalTerm) {
+                return computeOneWayUnifierOfFunctionalTerms((ImmutableFunctionalTerm) sourceTerm,
+                        (ImmutableFunctionalTerm) targetTerm);
+            }
+            else {
+                return Optional.absent();
+            }
+        }
+        /**
+         * Constant
+         */
+        else if(sourceTerm.equals(targetTerm)) {
+            return Optional.of(EMPTY_SUBSTITUTION);
+        }
+        else {
+            return Optional.absent();
+        }
+    }
+
+    private static Optional<ImmutableSubstitution<ImmutableTerm>> computeOneWayUnifierOfFunctionalTerms(
+            ImmutableFunctionalTerm sourceFunctionalTerm, ImmutableFunctionalTerm targetFunctionalTerm) {
+
+        /**
+         * Function symbol equality
+         */
+        if (!sourceFunctionalTerm.getFunctionSymbol().equals(
+                targetFunctionalTerm.getFunctionSymbol())) {
+            return Optional.absent();
+        }
+
+
+        /**
+         * Source is ground term
+         */
+        if (isGroundTerm(sourceFunctionalTerm)) {
+            if (sourceFunctionalTerm.equals(targetFunctionalTerm)) {
+                return Optional.of(EMPTY_SUBSTITUTION);
+            }
+            else {
+                return Optional.absent();
+            }
+        }
+
+        ImmutableList<ImmutableTerm> sourceChildren = sourceFunctionalTerm.getImmutableTerms();
+        ImmutableList<ImmutableTerm> targetChildren = targetFunctionalTerm.getImmutableTerms();
+
+        /**
+         * Arity equality
+         */
+        int sourceArity = sourceChildren.size();
+        if (sourceArity != targetChildren.size()) {
+            return Optional.absent();
+        }
+
+        /**
+         * Children
+         */
+        // Non-final
+        ImmutableSubstitution<ImmutableTerm> unifier = EMPTY_SUBSTITUTION;
+        for(int i=0; i < sourceArity ; i++) {
+
+            /**
+             * Recursive call
+             */
+            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildUnifier = computeOneWayUnifier(sourceChildren.get(i),
+                    targetChildren.get(i));
+
+            if (!optionalChildUnifier.isPresent())
+                return Optional.absent();
+
+            ImmutableSubstitution<ImmutableTerm> childUnifier = optionalChildUnifier.get();
+
+            Optional<ImmutableSubstitution<ImmutableTerm>> optionalMergedUnifier = unifier.union(childUnifier);
+            if (optionalMergedUnifier.isPresent()) {
+                unifier = optionalMergedUnifier.get();
+            }
+            else {
+                return Optional.absent();
+            }
+        }
+
+        // Present optional
+        return Optional.of(unifier);
+    }
+
 
     /**
      * TODO: explain

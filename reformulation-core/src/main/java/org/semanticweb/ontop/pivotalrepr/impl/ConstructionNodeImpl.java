@@ -3,7 +3,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
+    private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
     private final DataAtom dataAtom;
@@ -67,49 +67,28 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public ConstructionNode newNodeWithAdditionalBindings(
-            ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution) throws InconsistentBindingException {
-        ImmutableSet<Variable> projectedVariables = dataAtom.getVariables();
+    public ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution() {
+        if (substitution.isEmpty())
+            return substitution;
 
-        /**
-         * TODO: explain why the composition is too rich
-         */
-        ImmutableSubstitution<ImmutableTerm> composedSubstitution = additionalBindingsSubstitution.composeWith(substitution);
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        // Non-final
+        ImmutableSubstitution<ImmutableTerm> previousSubstitution;
+        // Non-final
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution;
 
+        int i = 0;
+        do {
+            previousSubstitution = newSubstitution;
+            newSubstitution = newSubstitution.composeWith(substitution);
+            i++;
+        } while ((i < CONVERGENCE_BOUND) && (!previousSubstitution.equals(newSubstitution)));
 
-        ImmutableMap<VariableImpl, ImmutableTerm> compositionMap = composedSubstitution.getImmutableMap();
-
-        for(VariableImpl variable : compositionMap.keySet()) {
-            ImmutableTerm term = compositionMap.get(variable);
-
-            /**
-             * If the variable is not projected, no need to be in the substitution
-             */
-            if (!projectedVariables.contains(variable)) {
-                continue;
-            }
-
-            /**
-             * Checks for contradictory bindings between
-             * the previous one (still present in the composition)
-             * and the additional ones.
-             */
-            if (additionalBindingsSubstitution.isDefining(variable)
-                    && (!additionalBindingsSubstitution.get(variable).equals(term))) {
-                throw new InconsistentBindingException("Contradictory bindings found");
-            }
-
-            substitutionMapBuilder.put(variable, term);
+        if (i == CONVERGENCE_BOUND) {
+            LOGGER.warn(substitution + " has not converged after " + CONVERGENCE_BOUND + " recursions over itself");
         }
 
-        return new ConstructionNodeImpl(dataAtom, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
-                optionalModifiers);
-    }
+        return newSubstitution;
 
-    @Override
-    public ConstructionNode newNodeWithLessBindings(ImmutableSubstitution<ImmutableTerm> bindingsToRemove) {
-        throw new RuntimeException("TODO: implement it");
     }
 
     @Override

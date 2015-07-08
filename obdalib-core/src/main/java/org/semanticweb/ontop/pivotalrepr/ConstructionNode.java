@@ -34,13 +34,16 @@ public interface ConstructionNode extends QueryNode {
             throws QueryNodeTransformationException;
 
     /**
-     * TODO: explain
+     * TODO: find a better name and a better explanation.
+     *
+     * Equivalent to the regular substitution.
+     * All projected variables that are defined from other variables
+     * defined in the ancestor nodes have a explicit binding to them
+     * in this substitution.
+     *
+     * In the regular substitution, they could just be bound to another
+     * projected variable (INDIRECT).
+     *
      */
-    ConstructionNode newNodeWithAdditionalBindings(ImmutableSubstitution<ImmutableTerm> additionalBindings)
-            throws InconsistentBindingException;
-
-    /**
-     * TODO: explain
-     */
-    ConstructionNode newNodeWithLessBindings(ImmutableSubstitution<ImmutableTerm> bindingsToRemove);
+    ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution();
 }
