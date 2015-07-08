@@ -3,12 +3,17 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
     private final DataAtom dataAtom;
@@ -62,8 +67,44 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public ConstructionNode newNodeWithAdditionalBindings(ImmutableSubstitution<ImmutableTerm> additionalBindings) {
-        throw new RuntimeException("TODO: implement it");
+    public ConstructionNode newNodeWithAdditionalBindings(
+            ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution) throws InconsistentBindingException {
+        ImmutableSet<Variable> projectedVariables = dataAtom.getVariables();
+
+        /**
+         * TODO: explain why the composition is too rich
+         */
+        ImmutableSubstitution<ImmutableTerm> composedSubstitution = additionalBindingsSubstitution.composeWith(substitution);
+        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+
+
+        ImmutableMap<VariableImpl, ImmutableTerm> compositionMap = composedSubstitution.getImmutableMap();
+
+        for(VariableImpl variable : compositionMap.keySet()) {
+            ImmutableTerm term = compositionMap.get(variable);
+
+            /**
+             * If the variable is not projected, no need to be in the substitution
+             */
+            if (!projectedVariables.contains(variable)) {
+                continue;
+            }
+
+            /**
+             * Checks for contradictory bindings between
+             * the previous one (still present in the composition)
+             * and the additional ones.
+             */
+            if (additionalBindingsSubstitution.isDefining(variable)
+                    && (!additionalBindingsSubstitution.get(variable).equals(term))) {
+                throw new InconsistentBindingException("Contradictory bindings found");
+            }
+
+            substitutionMapBuilder.put(variable, term);
+        }
+
+        return new ConstructionNodeImpl(dataAtom, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
+                optionalModifiers);
     }
 
     @Override
@@ -84,7 +125,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public String toString() {
         // TODO: display the query modifiers
-        return CONSTRUCTION_NODE_STR + " " + dataAtom + " " + "[" +substitution + "]" ;
+        return CONSTRUCTION_NODE_STR + " " + dataAtom + " " + "[" + substitution + "]" ;
     }
 
 }

@@ -36,7 +36,8 @@ public interface ConstructionNode extends QueryNode {
     /**
      * TODO: explain
      */
-    ConstructionNode newNodeWithAdditionalBindings(ImmutableSubstitution<ImmutableTerm> additionalBindings);
+    ConstructionNode newNodeWithAdditionalBindings(ImmutableSubstitution<ImmutableTerm> additionalBindings)
+            throws InconsistentBindingException;
 
     /**
      * TODO: explain
