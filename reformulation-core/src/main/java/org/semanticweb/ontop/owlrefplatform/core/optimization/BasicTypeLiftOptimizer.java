@@ -60,15 +60,17 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         }
 
         public ConstructionNodeProposal removeSomeBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithLessBindings(
-                    substitutionToLift);
-            return new ConstructionNodeProposal(formerNode, newConstructionNode);
+//            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithLessBindings(
+//                    substitutionToLift);
+//            return new ConstructionNodeProposal(formerNode, newConstructionNode);
+            throw new RuntimeException("TODO: implement it");
         }
 
         public ConstructionNodeProposal addBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithAdditionalBindings(
-                    substitutionToLift);
-            return new ConstructionNodeProposal(formerNode, newConstructionNode);
+//            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithAdditionalBindings(
+//                    substitutionToLift);
+//            return new ConstructionNodeProposal(formerNode, newConstructionNode);
+            throw new RuntimeException("TODO: implement it");
         }
     }
 
