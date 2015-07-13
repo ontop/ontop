@@ -53,6 +53,7 @@ import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -514,6 +515,11 @@ public class QuestStatement implements OBDAStatement {
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(unfolding,
 						unfolder.getExtensionalPredicates());
 				log.debug("New intermediate query: \n" + intermediateQuery.toString());
+				
+				
+				DatalogProgram pr = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+				log.debug("New Datalog query: \n" + pr.toString());
+				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
 			}
