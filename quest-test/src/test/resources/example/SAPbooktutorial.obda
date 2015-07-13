@@ -1,0 +1,57 @@
+[PrefixDeclaration]
+:		http://meraka/moss/exampleBooks.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	Books
+connectionUrl	jdbc:sap://localhost:30015/
+username	DEV_21NVADM5C2DZXCJ234KH9MPDH
+password	Zm6whgVcZoEgcwY
+driverClass	com.sap.db.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	cl_Authors
+target		:author/{WR_CODE}/ a :Author ; :name {WR_NAME} . 
+source		select WR_CODE, WR_NAME from TB_AFFILIATED_WRITERS
+
+mappingId	cl_Books
+target		:book/{BK_CODE}/ a :Book ; :title {BK_TITLE} . 
+source		select BK_CODE, BK_TITLE from TB_BOOKS
+
+mappingId	cl_Editors
+target		:editor/{ED_CODE}/ a :Editor ; :name {ED_NAME} . 
+source		select ED_CODE, ED_NAME from TB_EDITOR
+
+mappingId	cl_Editions
+target		:edition/{ED_CODE}/ a :Edition ; :dateOfPublication {PUB_DATE} ; :editionNumber {N_EDT} . 
+source		select ED_CODE,PUB_DATE,N_EDT from TB_EDITION
+
+mappingId	cl_AudioBook
+target		:book/{BK_CODE}/ a :AudioBook . 
+source		select BK_CODE, BK_TITLE from TB_BOOKS where BK_TYPE='A'
+
+mappingId	cl_EmergingWriter
+target		:author/{WR_CODE}/ a :EmergingWriter ; :name {WR_NAME} . 
+source		select WR_CODE,WR_NAME from TB_ON_PROB_WR
+
+mappingId	cl_SpecialEdition
+target		:edition/{ED_CODE}/ a :SpecialEdition . 
+source		select ED_CODE,PUB_DATE,N_EDT from TB_EDITION where ED_TYPE='S'
+
+mappingId	dp_genre
+target		:book/{ID_BK}/ :genre {GEN_NAME} . 
+source		select ID_BK,GEN_NAME from TB_BK_GEN
+
+mappingId	op_writtenBy
+target		:book/{BK_CODE}/ :writtenBy :author/{WR_ID}/ . 
+source		select BK_CODE,WR_ID from TB_AUTHORS
+
+mappingId	op_hasEdition
+target		:book/{BK_ID}/ :hasEdition :edition/{ED_CODE}/ . 
+source		select ED_CODE,BK_ID from TB_EDITION
+]]
