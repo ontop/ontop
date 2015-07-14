@@ -24,6 +24,7 @@ package org.semanticweb.ontop.model.impl;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,9 +34,6 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.AtomPredicate;
-import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
@@ -582,9 +580,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return atoms.get(0);
 		}
 	
-		
 	}
 
+	
+	
+	
+	
+	
 	@Override
 	public Function getSPARQLJoin(List<Function> atoms) {
 		
@@ -601,6 +603,39 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 		
 	}	
+	
+	
+	
+
+	
+	
+	@Override
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter){
+		
+		atoms2.add(filter);
+		
+		return  getSPARQLLeftJoin(atoms,atoms2);
+		
+	}
+
+	@Override
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2){
+
+		List<Term> termList= new LinkedList<Term>();
+		atoms.addAll(atoms2);
+		
+		for (Function f: atoms){
+			termList.add(f);
+		}
+		
+		Function function = getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, termList );
+		return  function;
+		
+	}
+
+
+
+	
 	
 	@Override
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {

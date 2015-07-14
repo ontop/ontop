@@ -227,10 +227,12 @@ public class IntermediateQueryToDatalogTranslator {
 	private static void translate(IntermediateQuery te, FilterNode node, CQIE newrule, DatalogProgram pr , Queue<ConstructionNode> rulesToDo  ) {
 		Function filter = ((FilterNode) node).getFilterCondition();
 		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		Function atom = getAtomFrom(te, listnode.get(0), rulesToDo);
-		Function newJ = ofac.getSPARQLJoin(atom,filter);
-		newrule.getBody().add(newJ);	
+		List<Function> atoms = getAtomFrom(te, listnode.get(0), rulesToDo);
+		//Function newJ = ofac.getSPARQLJoin(atom,filter);
+		newrule.getBody().addAll(atoms);	
+		newrule.getBody().add(filter);	
 	}
+	
 		
 	/**
 	 * Translates LJ atoms and add them to the rule of the program
@@ -245,18 +247,16 @@ public class IntermediateQueryToDatalogTranslator {
 
 		Optional<ImmutableBooleanExpression> filter = node.getOptionalFilterCondition();
 		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		List<Function> atoms = new LinkedList<Function>();
-		
-		for (QueryNode childnode: listnode) {
-			Function atom = getAtomFrom(te, childnode, rulesToDo);
-			atoms.add(atom);
-		}
-		
+			
+		List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
+		List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
+
+			
 		if (filter.isPresent()){
-			Function newLJAtom = ofac.getSPARQLLeftJoin(atoms.get(0), atoms.get(1), filter.get());
+			Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, filter.get());
 			newrule.getBody().add(newLJAtom);	
 		}else{
-			Function newLJAtom = ofac.getSPARQLLeftJoin(atoms.get(0), atoms.get(1));
+			Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight);
 			newrule.getBody().add(newLJAtom);	
 		}
 	
@@ -280,8 +280,8 @@ public class IntermediateQueryToDatalogTranslator {
 		List<Function> atoms = new LinkedList<Function>();
 		
 		for (QueryNode childnode: listnode) {
-			Function atom = getAtomFrom(te, childnode,rulesToDo);
-			atoms.add(atom);
+			List<Function> newAtoms = getAtomFrom(te, childnode,rulesToDo);
+			atoms.addAll(newAtoms);
 		}
 		
 		if (filter.isPresent()){
@@ -300,25 +300,31 @@ public class IntermediateQueryToDatalogTranslator {
 	 *  Takes a node and return the function that it represents.
 	 * 
 	 */
-	private static Function getAtomFrom(IntermediateQuery te, QueryNode node,  Queue<ConstructionNode> rulesToDo  ) {
+	private static List<Function> getAtomFrom(IntermediateQuery te, QueryNode node,  Queue<ConstructionNode> rulesToDo  ) {
+		
+		List<Function> body = new ArrayList<Function>();
 		
 		if (node instanceof ConstructionNode) {
 			Function newAns = ((ConstructionNode) node).getProjectionAtom();
 			rulesToDo.add((ConstructionNode)node);
-			return newAns;
+			body.add(newAns);
+			return body;
 		}
 
 		if (node instanceof FilterNode) {
 			Function filter = ((FilterNode) node).getFilterCondition();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-			Function atom = getAtomFrom(te, listnode.get(0), rulesToDo);
-			Function newJ = ofac.getSPARQLJoin(atom,filter);
-			return newJ;
+			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
+			body.add(filter);
+			return body;
 					
 		}
 		
 		if (node instanceof DataNode) {
-			return ((DataNode)node).getAtom();
+			DataAtom atom = ((DataNode)node).getAtom();
+			body.add(atom);
+			return body;
+					
 		}
 		
 		if (node instanceof InnerJoinNode) {
@@ -326,17 +332,19 @@ public class IntermediateQueryToDatalogTranslator {
 			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			for (QueryNode childnode: listnode) {
-				Function atom = getAtomFrom(te, childnode, rulesToDo);
-				atoms.add(atom);
+				List<Function> atomsList = getAtomFrom(te, childnode, rulesToDo);
+				atoms.addAll(atomsList);
 			}
 			
 			
 		if (filter.isPresent()){
 			Function newJ = ofac.getSPARQLJoin(atoms, filter.get());
-			return newJ;
+			body.add(newJ);
+			return body;
 		}else{
 			Function newJ = ofac.getSPARQLJoin(atoms);
-			return newJ;	
+			body.add(newJ);
+			return body;
 		}
 		
 		
@@ -346,18 +354,23 @@ public class IntermediateQueryToDatalogTranslator {
 			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-			for (QueryNode childnode: listnode) {
-				Function atom = getAtomFrom(te, childnode, rulesToDo);
-				atoms.add(atom);
-			}
-			
+		
+			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
+			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
+
+				
 			if (filter.isPresent()){
-				Function newLJ = ofac.getSPARQLLeftJoin(atoms.get(0), atoms.get(1), filter.get());
-				return newLJ;
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, filter.get());
+				body.add(newLJAtom);
+				return body;
 			}else{
-				Function newLJ = ofac.getSPARQLLeftJoin(atoms.get(0), atoms.get(1));
-				return newLJ;	
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight);
+				body.add(newLJAtom);
+				return body;
 			}
+
+			
+			
 			
 			
 		}
