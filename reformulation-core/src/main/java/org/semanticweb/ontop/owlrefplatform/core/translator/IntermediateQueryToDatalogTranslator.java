@@ -207,13 +207,47 @@ public class IntermediateQueryToDatalogTranslator {
 				translate(te, ((LeftJoinNode) node), newrule, pr, rulesToDo);
 			
 			}else if  (node instanceof UnionNode) {
-				//TODO
+				translate(te, ((UnionNode) node), newrule, pr, rulesToDo);
 			
 			}else if (node instanceof GroupNode) {
 				//TODO
-			}	
+			}else{
+				 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
+			}
 		} //end-for
 	}
+
+	/**
+	 * Tranlsate Union Nodes
+	 * 
+	 * @param te
+	 * @param unionNode
+	 * @param newrule
+	 * @param pr
+	 * @param rulesToDo
+	 */
+	private static void translate(IntermediateQuery te, UnionNode node,
+			CQIE newrule, DatalogProgram pr, Queue<ConstructionNode> rulesToDo) {
+		
+		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
+		
+		for (QueryNode nod: listnode){
+	
+			if (nod instanceof ConstructionNode) {
+				Function newAns = ((ConstructionNode) nod).getProjectionAtom();
+				rulesToDo.add((ConstructionNode)nod);
+				newrule.getBody().add(newAns);
+			}else{
+				 throw new UnsupportedOperationException("The Union should have only construct");
+			}
+		} //end for
+
+			
+		}
+		
+			
+		
+	
 
 	/**
 	 * Translates Filter atoms and add them to the rule of the program
@@ -245,6 +279,7 @@ public class IntermediateQueryToDatalogTranslator {
 	 */
 	private static void translate(IntermediateQuery te, LeftJoinNode node, CQIE newrule, DatalogProgram pr , Queue<ConstructionNode> rulesToDo  ) {
 
+		
 		Optional<ImmutableBooleanExpression> filter = node.getOptionalFilterCondition();
 		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			
@@ -309,25 +344,20 @@ public class IntermediateQueryToDatalogTranslator {
 			rulesToDo.add((ConstructionNode)node);
 			body.add(newAns);
 			return body;
-		}
-
-		if (node instanceof FilterNode) {
+			
+		} else if (node instanceof FilterNode) {
 			Function filter = ((FilterNode) node).getFilterCondition();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
 			body.add(filter);
 			return body;
 					
-		}
-		
-		if (node instanceof DataNode) {
+		} else if (node instanceof DataNode) {
 			DataAtom atom = ((DataNode)node).getAtom();
 			body.add(atom);
 			return body;
 					
-		}
-		
-		if (node instanceof InnerJoinNode) {
+		} else  if (node instanceof InnerJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
@@ -335,22 +365,17 @@ public class IntermediateQueryToDatalogTranslator {
 				List<Function> atomsList = getAtomFrom(te, childnode, rulesToDo);
 				atoms.addAll(atomsList);
 			}
+			if (filter.isPresent()){
+				Function newJ = ofac.getSPARQLJoin(atoms, filter.get());
+				body.add(newJ);
+				return body;
+			}else{
+				Function newJ = ofac.getSPARQLJoin(atoms);
+				body.add(newJ);
+				return body;
+			}
 			
-			
-		if (filter.isPresent()){
-			Function newJ = ofac.getSPARQLJoin(atoms, filter.get());
-			body.add(newJ);
-			return body;
-		}else{
-			Function newJ = ofac.getSPARQLJoin(atoms);
-			body.add(newJ);
-			return body;
-		}
-		
-		
-		}
-		
-		if (node instanceof LeftJoinNode) {
+		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
@@ -369,17 +394,27 @@ public class IntermediateQueryToDatalogTranslator {
 				return body;
 			}
 
+		} else if (node instanceof UnionNode) {
+		
+			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			
-			
-			
-			
+			for (QueryNode nod: listnode){
+		
+				if (nod instanceof ConstructionNode) {
+					Function newAns = ((ConstructionNode) nod).getProjectionAtom();
+					rulesToDo.add((ConstructionNode)nod);
+					body.add(newAns);
+				}else{
+					 throw new UnsupportedOperationException("The Union should have only construct");
+				}
+			} //end for
+						
+		} else {
+			 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
 		}
 		
-		if (node instanceof UnionNode) {
-		//TODO	
-		}
-	
 		return null;
+	
 	}
 
 	
