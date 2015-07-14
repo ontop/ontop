@@ -10,7 +10,5 @@ public interface LocalOptimizationProposal {
      */
     QueryNode getQueryNode();
 
-    IntermediateQuery getTargetQuery();
-
     QueryNode apply() throws InvalidLocalOptimizationProposalException;
 }

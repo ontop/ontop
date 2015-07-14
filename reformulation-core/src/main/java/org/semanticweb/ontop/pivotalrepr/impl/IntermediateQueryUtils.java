@@ -2,10 +2,11 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
-import org.semanticweb.ontop.model.impl.DataAtomImpl;
+import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
@@ -13,6 +14,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * TODO: explain
@@ -20,6 +22,7 @@ import java.util.List;
 public class IntermediateQueryUtils {
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+    private static final String SUB_QUERY_SUFFIX = "u";
 
 
     /**
@@ -36,21 +39,50 @@ public class IntermediateQueryUtils {
         }
 
         DataAtom headAtom = createTopProjectionAtom(firstDefinition.getRootConstructionNode().getProjectionAtom());
+        AtomPredicate normalPredicate = headAtom.getPredicate();
+        AtomPredicate subQueryPredicate = createSubQueryPredicate(predicateDefinitions, normalPredicate);
+        DataAtom subQueryAtom = DATA_FACTORY.getDataAtom(subQueryPredicate, headAtom.getVariablesOrGroundTerms());
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
 
-        for (IntermediateQuery definition : predicateDefinitions) {
+        for (IntermediateQuery originalDefinition : predicateDefinitions) {
             if (mergedDefinition == null) {
-                mergedDefinition = initMergedDefinition(headAtom);
+                mergedDefinition = initMergedDefinition(headAtom, subQueryAtom);
             } else {
-                mergedDefinition = prepareForMergingNewDefinition(mergedDefinition);
+                mergedDefinition = prepareForMergingNewDefinition(mergedDefinition, subQueryAtom);
             }
 
-            checkDefinitionRootProjections(mergedDefinition, definition);
-            mergedDefinition.mergeSubQuery(definition);
+            checkDefinitionRootProjections(mergedDefinition, originalDefinition);
+
+            IntermediateQuery renamedDefinition = originalDefinition.newWithDifferentConstructionPredicate(
+                    normalPredicate, subQueryPredicate);
+            mergedDefinition.mergeSubQuery(renamedDefinition);
         }
         return Optional.of(mergedDefinition);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static AtomPredicate createSubQueryPredicate(List<IntermediateQuery> predicateDefinitions,
+                                                         AtomPredicate predicate) {
+        AtomPredicate newPredicate = new AtomPredicateImpl(predicate.getName()+ SUB_QUERY_SUFFIX, predicate.getArity());
+
+        for (IntermediateQuery definition : predicateDefinitions) {
+            try {
+                PredicateRenamingChecker.checkNonExistence(definition, newPredicate);
+            }
+            /**
+             * If the proposed predicate is already used,
+             * creates one by using UUID4
+             */
+            catch (AlreadyExistingPredicateException e) {
+                newPredicate = new AtomPredicateImpl(predicate.getName()+ UUID.randomUUID(), predicate.getArity());
+                break;
+            }
+        }
+        return newPredicate;
     }
 
     /**
@@ -82,10 +114,11 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery initMergedDefinition(DataAtom headAtom) throws QueryMergingException {
+    private static IntermediateQuery initMergedDefinition(DataAtom headAtom, DataAtom subQueryAtom)
+            throws QueryMergingException {
         ConstructionNode rootNode = new ConstructionNodeImpl(headAtom);
         UnionNode unionNode = new UnionNodeImpl();
-        OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(headAtom);
+        OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
 
         IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
         try {
@@ -101,16 +134,16 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery prepareForMergingNewDefinition(IntermediateQuery mergedDefinition)
+    private static IntermediateQuery prepareForMergingNewDefinition(IntermediateQuery mergedDefinition,
+                                                                    DataAtom subQueryAtom)
             throws QueryMergingException {
         try {
             IntermediateQueryBuilder queryBuilder = convertToBuilder(mergedDefinition);
             ConstructionNode rootConstructionNode = queryBuilder.getRootConstructionNode();
-            DataAtom dataAtom = rootConstructionNode.getProjectionAtom();
 
             UnionNode unionNode = extractUnionNode(queryBuilder, rootConstructionNode);
 
-            OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(dataAtom);
+            OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
             queryBuilder.addChild(unionNode, dataNode);
 
             return queryBuilder.build();

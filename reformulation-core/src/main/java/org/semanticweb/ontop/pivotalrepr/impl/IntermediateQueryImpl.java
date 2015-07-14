@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -99,14 +100,21 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
     }
 
-    /**
-     * TODO: implement it
-     *
-     */
     @Override
     public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        throw new RuntimeException("TODO: implement it");
+        QueryNode nodeToReplace = proposal.getQueryNode();
+
+        if (!contains(nodeToReplace)) {
+            throw new InvalidLocalOptimizationProposalException("No such node to replace: " + nodeToReplace);
+        }
+
+        // TODO: check more
+
+        QueryNode replacingNode = proposal.getReplacingNode();
+        treeComponent.replaceNode(nodeToReplace,replacingNode);
+
+        return replacingNode;
     }
 
     @Override
@@ -122,6 +130,33 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }
+    }
+
+    /**
+     * TODO: explain
+     */
+    @Override
+    public IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
+            throws AlreadyExistingPredicateException {
+
+        IntermediateQuery renamedQuery = clone();
+
+
+        PredicateRenamingChecker.checkNonExistence(renamedQuery, newPredicate);
+
+        PredicateRenamer renamer = new PredicateRenamer(renamedQuery, formerPredicate, newPredicate);
+
+        for (QueryNode node : renamedQuery.getNodesInBottomUpOrder()) {
+            Optional<LocalOptimizationProposal> optionalProposal = node.acceptOptimizer(renamer);
+            if (optionalProposal.isPresent()) {
+                try {
+                    optionalProposal.get().apply();
+                } catch (InvalidLocalOptimizationProposalException e) {
+                    throw new RuntimeException("Internal error: " + e.getMessage());
+                }
+            }
+        }
+        return renamedQuery;
     }
 
     /**
@@ -183,7 +218,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * have to worry about it.
      */
     @Override
-    public IntermediateQuery clone() throws CloneNotSupportedException {
+    public IntermediateQuery clone() {
         try {
             return IntermediateQueryUtils.convertToBuilder(this).build();
         } catch (IntermediateQueryBuilderException e) {
