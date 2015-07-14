@@ -571,11 +571,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getSPARQLJoin(List<Function> atoms, Function filter) {
 		
-		int i = 0;
+
 		int size = atoms.size();
 		
 		if (size>1){
-			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin(atoms.remove(0), getBooleanConstant(true)), filter);
+			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin((List<Function>) atoms.subList(1, size)), filter);
 			return join;
 
 		}else{
@@ -588,11 +588,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getSPARQLJoin(List<Function> atoms) {
 		
-		int i = 0;
 		int size = atoms.size();
 		
 		if (size>1){
-			List<Function> remainingAtoms = (List<Function>) atoms.remove(0).clone();
+			List<Function> remainingAtoms = (List<Function>) atoms.subList(1, size);
 			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin(remainingAtoms)  );
 			return join;
 
