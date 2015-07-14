@@ -12,7 +12,7 @@ import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 
 import java.util.*;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionUtilities.computeOneWayUnifier;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionUtilities.computeUnidirectionalSubstitution;
 
 /**
  * TODO: explain
@@ -193,7 +193,7 @@ public class ConstructionNodeTools {
             ImmutableTerm formerTerm = formerSubstitution.get(variable);
             ImmutableTerm newTerm = bindingsToRemove.get(variable);
 
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalTermSubstitution = computeOneWayUnifier(
+            Optional<ImmutableSubstitution<ImmutableTerm>> optionalTermSubstitution = computeUnidirectionalSubstitution(
                     formerTerm, newTerm);
             /**
              * If cannot be unified...
