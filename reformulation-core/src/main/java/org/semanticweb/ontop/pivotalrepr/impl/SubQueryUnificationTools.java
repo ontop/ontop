@@ -9,7 +9,7 @@ import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
 
 /**
  * TODO: explain
@@ -281,7 +283,7 @@ public class SubQueryUnificationTools {
 
         AtomSubstitutionSplit atomSubstitutionSplit = new AtomSubstitutionSplit(atomSubstitution);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = ImmutableSubstitutionUtilities.computeMGUU(
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = computeMGUS(
                 atomSubstitutionSplit.constraintSubstitution, renamedConstructionNode.getSubstitution());
 
         if (!optionalConstraintUnifier.isPresent()) {
@@ -293,7 +295,7 @@ public class SubQueryUnificationTools {
         ImmutableSubstitution<ImmutableTerm> filteredConstraintSubstitution = extractConstraintsNotEncodedInAtom(
                 constraintUnifier, atomSubstitutionSplit.constraintSubstitution);
 
-        ImmutableSubstitution<ImmutableTerm> newConstructionNodeSubstitution = ImmutableSubstitutionUtilities.renameSubstitution(
+        ImmutableSubstitution<ImmutableTerm> newConstructionNodeSubstitution = ImmutableSubstitutionTools.renameSubstitution(
                 filteredConstraintSubstitution, atomSubstitutionSplit.renamingSubstitutions);
 
         ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = extractSubstitutionToPropagate(

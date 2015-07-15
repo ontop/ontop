@@ -73,6 +73,12 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
+        ImmutableMap<VariableImpl, ImmutableTerm> map = ImmutableMap.copyOf(otherSubstitution.getImmutableMap());
+        return new ImmutableSubstitutionImpl<>(map);
+    }
+
+    @Override
     public final ImmutableMap<VariableImpl, Term> getMap() {
         return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>) getImmutableMap();
     }

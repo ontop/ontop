@@ -7,21 +7,18 @@ import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutabilityTools;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 
 import java.util.Map;
 
 import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
 
 /**
- * Utilities for the new generation of (immutable) substitutions
+ * Tools for the new generation of (immutable) substitutions
  */
-public class ImmutableSubstitutionUtilities {
+public class ImmutableSubstitutionTools {
 
     private static ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
-    private static String PREDICATE_STR = "pred";
 
 
     /**
@@ -92,18 +89,6 @@ public class ImmutableSubstitutionUtilities {
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
     }
 
-    /**
-     * TODO: explain
-     *
-     */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
-        Substitution mutableSubstitution = UnifierUtilities.getMGU(term1, term2);
-
-        if (mutableSubstitution == null) {
-            return Optional.absent();
-        }
-        return Optional.of(convertSubstitution(mutableSubstitution));
-    }
 
     /**
      * Returns a substitution theta (if it exists) such as :
@@ -114,13 +99,18 @@ public class ImmutableSubstitutionUtilities {
      *    t: target term
      *
      */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeOneWayUnifier(ImmutableTerm sourceTerm,
-                                                                                      ImmutableTerm targetTerm) {
+    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitution(ImmutableTerm sourceTerm,
+                                                                                                   ImmutableTerm targetTerm) {
         /**
          * Variable
          */
         if (sourceTerm instanceof VariableImpl) {
             VariableImpl sourceVariable = (VariableImpl) sourceTerm;
+
+            // Constraint
+            if ((!sourceVariable.equals(targetTerm)) && targetTerm.getReferencedVariables().contains(sourceVariable)) {
+                return Optional.absent();
+            }
 
             ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
                     ImmutableMap.of(sourceVariable, targetTerm));
@@ -131,7 +121,7 @@ public class ImmutableSubstitutionUtilities {
          */
         else if (sourceTerm instanceof ImmutableFunctionalTerm) {
             if (targetTerm instanceof ImmutableFunctionalTerm) {
-                return computeOneWayUnifierOfFunctionalTerms((ImmutableFunctionalTerm) sourceTerm,
+                return computeUnidirectionalSubstitutionOfFunctionalTerms((ImmutableFunctionalTerm) sourceTerm,
                         (ImmutableFunctionalTerm) targetTerm);
             }
             else {
@@ -149,7 +139,7 @@ public class ImmutableSubstitutionUtilities {
         }
     }
 
-    private static Optional<ImmutableSubstitution<ImmutableTerm>> computeOneWayUnifierOfFunctionalTerms(
+    private static Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitutionOfFunctionalTerms(
             ImmutableFunctionalTerm sourceFunctionalTerm, ImmutableFunctionalTerm targetFunctionalTerm) {
 
         /**
@@ -194,8 +184,8 @@ public class ImmutableSubstitutionUtilities {
             /**
              * Recursive call
              */
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildUnifier = computeOneWayUnifier(sourceChildren.get(i),
-                    targetChildren.get(i));
+            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildUnifier = computeUnidirectionalSubstitution(
+                    sourceChildren.get(i), targetChildren.get(i));
 
             if (!optionalChildUnifier.isPresent())
                 return Optional.absent();
@@ -213,39 +203,6 @@ public class ImmutableSubstitutionUtilities {
 
         // Present optional
         return Optional.of(unifier);
-    }
-
-
-    /**
-     * TODO: explain
-     *
-     */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUU(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
-                                                                             ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
-
-        ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
-
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution1.getImmutableMap().entrySet()) {
-            firstArgListBuilder.add(entry.getKey());
-            secondArgListBuilder.add(entry.getValue());
-        }
-
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution2.getImmutableMap().entrySet()) {
-            firstArgListBuilder.add(entry.getKey());
-            secondArgListBuilder.add(entry.getValue());
-        }
-
-        ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
-        ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
-
-        OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-        Predicate predicate = new AtomPredicateImpl(PREDICATE_STR, firstArgList.size());
-
-        ImmutableFunctionalTerm functionalTerm1 = factory.getImmutableFunctionalTerm(predicate, firstArgList);
-        ImmutableFunctionalTerm functionalTerm2 = factory.getImmutableFunctionalTerm(predicate, secondArgList);
-
-        return computeMGU(functionalTerm1, functionalTerm2);
     }
 
     /**
