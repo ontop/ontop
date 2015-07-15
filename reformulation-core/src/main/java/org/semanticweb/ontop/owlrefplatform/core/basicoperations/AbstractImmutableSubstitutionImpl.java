@@ -3,6 +3,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
@@ -176,6 +177,18 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return Optional.of(unionSubstitution);
         }
         return Optional.absent();
+    }
+
+    @Override
+    public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm>
+                                                                          otherSubstitution) {
+        ImmutableMap.Builder<VariableImpl, ImmutableTerm> mapBuilder = ImmutableMap.builder();
+
+        ImmutableMap<VariableImpl, ? extends ImmutableTerm> otherSubstitutionMap = otherSubstitution.getImmutableMap();
+        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
+            mapBuilder.put(otherEntry.getKey(), apply(otherEntry.getValue()));
+        }
+        return new ImmutableSubstitutionImpl<>(mapBuilder.build());
     }
 
 }

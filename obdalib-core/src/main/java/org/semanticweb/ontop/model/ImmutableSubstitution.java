@@ -50,4 +50,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Because of the optional cannot be overloaded.
      */
     Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution);
+
+    /**
+     * Applies the current substitution to the "target" part of another substitution
+     */
+    ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution);
 }

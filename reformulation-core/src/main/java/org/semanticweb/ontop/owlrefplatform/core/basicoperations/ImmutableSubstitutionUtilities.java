@@ -105,74 +105,6 @@ public class ImmutableSubstitutionUtilities {
         return Optional.of(convertSubstitution(mutableSubstitution));
     }
 
-
-    /**
-     * Computes a MGU that reuses as much as possible the variables from the target part.
-     *
-     */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
-                                                                                    ImmutableTerm targetTerm) {
-        /**
-         * Variable
-         */
-        if (sourceTerm instanceof VariableImpl) {
-            VariableImpl sourceVariable = (VariableImpl) sourceTerm;
-
-            // Constraint
-            if ((!sourceVariable.equals(targetTerm)) && targetTerm.getReferencedVariables().contains(sourceVariable)) {
-                return Optional.absent();
-            }
-
-            ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
-                    ImmutableMap.of(sourceVariable, targetTerm));
-            return Optional.of(substitution);
-        }
-
-        /**
-         * Functional term
-         */
-        else if (sourceTerm instanceof ImmutableFunctionalTerm) {
-            if (targetTerm instanceof VariableImpl) {
-                VariableImpl targetVariable = (VariableImpl) targetTerm;
-
-                // Constraint
-                if (sourceTerm.getReferencedVariables().contains(targetVariable)) {
-                    return Optional.absent();
-                }
-                else {
-                    ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
-                            ImmutableMap.of(targetVariable, sourceTerm));
-                    return Optional.of(substitution);
-                }
-            }
-            else if (targetTerm instanceof ImmutableFunctionalTerm) {
-                return computeDirectedMGUOfTwoFunctionalTerms((ImmutableFunctionalTerm) sourceTerm,
-                        (ImmutableFunctionalTerm) targetTerm);
-            }
-            else {
-                return Optional.absent();
-            }
-        }
-        /**
-         * Constant
-         */
-        else if(sourceTerm.equals(targetTerm)) {
-            return Optional.of(EMPTY_SUBSTITUTION);
-        }
-        else {
-            return Optional.absent();
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGUOfTwoFunctionalTerms(
-            ImmutableFunctionalTerm sourceTerm, ImmutableFunctionalTerm targetTerm) {
-        throw new RuntimeException("TODO: implement it!");
-    }
-
-
     /**
      * Returns a substitution theta (if it exists) such as :
      *    theta(s) = t
@@ -267,8 +199,8 @@ public class ImmutableSubstitutionUtilities {
             /**
              * Recursive call
              */
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildUnifier = computeDirectedMGU(sourceChildren.get(i),
-                    targetChildren.get(i));
+            Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildUnifier = computeUnidirectionalSubstitution(
+                    sourceChildren.get(i), targetChildren.get(i));
 
             if (!optionalChildUnifier.isPresent())
                 return Optional.absent();
