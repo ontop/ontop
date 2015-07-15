@@ -12,7 +12,7 @@ import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 
 import java.util.*;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionUtilities.computeUnidirectionalSubstitution;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeUnidirectionalSubstitution;
 
 /**
  * TODO: explain
