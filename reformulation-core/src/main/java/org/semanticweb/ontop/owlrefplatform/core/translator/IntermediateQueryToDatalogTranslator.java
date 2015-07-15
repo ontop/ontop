@@ -177,8 +177,9 @@ public class IntermediateQueryToDatalogTranslator {
 		ConstructionNode root = rulesToDo.poll();
 		
 		DataAtom head= root.getProjectionAtom();
+	
+		//Applying substitutions in the head.
 		ImmutableFunctionalTerm substitutedHead= root.getSubstitution().applyToFunctionalTerm(head);
-		
 		List<QueryNode> listNodes=  te.getCurrentSubNodesOf(root);
 		
 		List<Function> atoms = new LinkedList<Function>();
@@ -191,150 +192,18 @@ public class IntermediateQueryToDatalogTranslator {
 		//Iterating over the nodes and constructing the rule
 		for (QueryNode node: listNodes){
 			
+			List<Function> uAtoms= getAtomFrom(te, node, rulesToDo);
+			newrule.getBody().addAll(uAtoms);	
 			
-			if (node instanceof ConstructionNode) {
-				((ConstructionNode) node).getProjectionAtom();
-			
-			} else if (node instanceof DataNode) {
-
-			} else	if (node instanceof FilterNode) {
-				translate(te, (FilterNode) node, newrule, pr, rulesToDo);
-						
-			} else if (node instanceof InnerJoinNode) {
-				translate(te, ((InnerJoinNode) node), newrule, pr, rulesToDo);
-			
-			}else if (node instanceof LeftJoinNode) {
-				translate(te, ((LeftJoinNode) node), newrule, pr, rulesToDo);
-			
-			}else if  (node instanceof UnionNode) {
-				translate(te, ((UnionNode) node), newrule, pr, rulesToDo);
-			
-			}else if (node instanceof GroupNode) {
-				//TODO
-			}else{
-				 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
-			}
 		} //end-for
 	}
 
-	/**
-	 * Tranlsate Union Nodes
-	 * 
-	 * @param te
-	 * @param unionNode
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, UnionNode node,
-			CQIE newrule, DatalogProgram pr, Queue<ConstructionNode> rulesToDo) {
-		
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		
-		for (QueryNode nod: listnode){
-			rulesToDo.add((ConstructionNode)nod);
-	
-		} //end for
-
-		QueryNode nod= listnode.get(0);
-		if (nod instanceof ConstructionNode) {
-			Function newAns = ((ConstructionNode) nod).getProjectionAtom();
-			newrule.getBody().add(newAns);
-		}else{
-			 throw new UnsupportedOperationException("The Union should have only construct");
-		}
-			
-		}
-		
-			
-		
 	
 
 	/**
-	 * Translates Filter atoms and add them to the rule of the program
-	 * 
-	 * @param te
-	 * @param node
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, FilterNode node, CQIE newrule, DatalogProgram pr , Queue<ConstructionNode> rulesToDo  ) {
-		Function filter = ((FilterNode) node).getFilterCondition();
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		List<Function> atoms = getAtomFrom(te, listnode.get(0), rulesToDo);
-		//Function newJ = ofac.getSPARQLJoin(atom,filter);
-		newrule.getBody().addAll(atoms);	
-		newrule.getBody().add(filter);	
-	}
-	
-		
-	/**
-	 * Translates LJ atoms and add them to the rule of the program
-	 * 
-	 * @param te
-	 * @param node
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, LeftJoinNode node, CQIE newrule, DatalogProgram pr , Queue<ConstructionNode> rulesToDo  ) {
-
-		
-		Optional<ImmutableBooleanExpression> filter = node.getOptionalFilterCondition();
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-			
-		List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
-		List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
-
-			
-		if (filter.isPresent()){
-			Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, filter.get());
-			newrule.getBody().add(newLJAtom);	
-		}else{
-			Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight);
-			newrule.getBody().add(newLJAtom);	
-		}
-	
-	}
-
-	/**
-	 * Translates Join atoms and add them to the rule of the program
-	 * 
-	 * @param te
-	 * @param node
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, InnerJoinNode node, CQIE newrule,DatalogProgram pr, Queue<ConstructionNode> rulesToDo  ) {
-		
-		Optional<ImmutableBooleanExpression> filter = node.getOptionalFilterCondition();
-		
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		
-		List<Function> atoms = new LinkedList<Function>();
-		
-		for (QueryNode childnode: listnode) {
-			List<Function> newAtoms = getAtomFrom(te, childnode,rulesToDo);
-			atoms.addAll(newAtoms);
-		}
-		
-		if (filter.isPresent()){
-			Function newJAtom =  ofac.getSPARQLJoin(atoms, filter.get());
-			newrule.getBody().add(newJAtom);
-		}else{
-			Function newJAtom =  ofac.getSPARQLJoin(atoms);
-			newrule.getBody().add(newJAtom);
-		}
-		
-		
-		
-	}
-
-	/**
-	 *  Takes a node and return the function that it represents.
-	 * 
+	 * This is the MAIN recursive method in this class!!
+	 * Takes a node and return the list of functions (atoms) that it represents.
+	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
 	private static List<Function> getAtomFrom(IntermediateQuery te, QueryNode node,  Queue<ConstructionNode> rulesToDo  ) {
 		
@@ -408,6 +277,7 @@ public class IntermediateQueryToDatalogTranslator {
 			if (nod instanceof ConstructionNode) {
 					Function newAns = ((ConstructionNode) nod).getProjectionAtom();
 					body.add(newAns);
+					return body;
 				}else{
 					 throw new UnsupportedOperationException("The Union should have only construct");
 				}
@@ -417,8 +287,6 @@ public class IntermediateQueryToDatalogTranslator {
 		} else {
 			 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
 		}
-		
-		return null;
 	
 	}
 
