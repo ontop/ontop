@@ -232,16 +232,17 @@ public class IntermediateQueryToDatalogTranslator {
 		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 		
 		for (QueryNode nod: listnode){
+			rulesToDo.add((ConstructionNode)nod);
 	
-			if (nod instanceof ConstructionNode) {
-				Function newAns = ((ConstructionNode) nod).getProjectionAtom();
-				rulesToDo.add((ConstructionNode)nod);
-				newrule.getBody().add(newAns);
-			}else{
-				 throw new UnsupportedOperationException("The Union should have only construct");
-			}
 		} //end for
 
+		QueryNode nod= listnode.get(0);
+		if (nod instanceof ConstructionNode) {
+			Function newAns = ((ConstructionNode) nod).getProjectionAtom();
+			newrule.getBody().add(newAns);
+		}else{
+			 throw new UnsupportedOperationException("The Union should have only construct");
+		}
 			
 		}
 		
@@ -399,15 +400,19 @@ public class IntermediateQueryToDatalogTranslator {
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			
 			for (QueryNode nod: listnode){
+				rulesToDo.add((ConstructionNode)nod);
 		
-				if (nod instanceof ConstructionNode) {
+			} //end for
+		
+			QueryNode nod= listnode.get(0);
+			if (nod instanceof ConstructionNode) {
 					Function newAns = ((ConstructionNode) nod).getProjectionAtom();
-					rulesToDo.add((ConstructionNode)nod);
 					body.add(newAns);
 				}else{
 					 throw new UnsupportedOperationException("The Union should have only construct");
 				}
-			} //end for
+			
+
 						
 		} else {
 			 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
