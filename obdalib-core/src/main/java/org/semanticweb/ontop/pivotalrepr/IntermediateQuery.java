@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.AtomPredicate;
 
 /**
  *
@@ -49,4 +50,10 @@ public interface IntermediateQuery {
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
+
+    /**
+     * Returns a new IntermediateQuery using the new predicate instead of the former one in some construction nodes.
+     */
+    IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
+            throws AlreadyExistingPredicateException;
 }

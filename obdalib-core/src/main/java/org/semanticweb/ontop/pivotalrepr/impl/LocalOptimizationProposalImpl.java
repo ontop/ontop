@@ -22,8 +22,7 @@ public abstract class LocalOptimizationProposalImpl implements LocalOptimization
         return queryNode;
     }
 
-    @Override
-    public IntermediateQuery getTargetQuery() {
+    protected IntermediateQuery getTargetQuery() {
         return targetQuery;
     }
 }
