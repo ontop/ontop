@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.InvalidLocalOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -17,8 +18,8 @@ public class ReplaceNodeProposalImpl extends LocalOptimizationProposalImpl imple
     }
 
     @Override
-    public QueryNode apply() throws InvalidLocalOptimizationProposalException {
-        return getTargetQuery().applyReplaceNodeProposal(this);
+    public Optional<QueryNode> apply() throws InvalidLocalOptimizationProposalException {
+        return Optional.of(getTargetQuery().applyReplaceNodeProposal(this));
     }
 
     @Override
