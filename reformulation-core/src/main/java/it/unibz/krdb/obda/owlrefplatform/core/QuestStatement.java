@@ -166,42 +166,40 @@ public class QuestStatement implements OBDAStatement {
 
 		@Override
 		public void run() {
-
-			log.debug("Executing SPARQL query: \n{}", strquery);
-
 			try {
+				log.debug("Executing SPARQL query: \n{}", strquery);
+				ResultSet set = null;
 
-				if (!questInstance.hasCachedSQL(strquery)) {
-					getUnfolding(strquery);
-				}
-				
-				// Obtaining the query from the cache
-				 
-				String sql = questInstance.getCachedSQL(strquery);
-				List<String> signature = questInstance.getSignatureCache().get(strquery);
-				//ParsedQuery query = sesameQueryCache.get(strquery);
+				if (questInstance.getMetaData().getDatabaseProductName().contains("4D")) {
 
-				log.debug("Executing the SQL query and get the result...");
-				if (sql.equals("") && !isBoolean) {
-					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
-				} 
-				else if (sql.equals("")) {
-					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
-				} 
-				else {
+					List<String> sqlList = null;
+					String sql = "";
+
+					sqlList = get4DUnfolding(strquery);
+					List<String> signature = questInstance.getSignatureCache().get(strquery);
+					log.debug("Executing the SQL query and get the result...");
+
 					try {
+						sql = sqlList.get(0);
+						if (sql.equals("") && !isBoolean) {
+							tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
+						} else if (sql.equals("")) {
+							tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
+						} else {
 //                        FOR debugging H2 in-memory database
 //                        try {
 //                            org.h2.tools.Server.startWebServer(conn.getConnection());
 //                        } catch (SQLException e) {
 //                            e.printStackTrace();
 //                        }
-						// Execute the SQL query string
-						executingSQL = true;
-						ResultSet set = null;
-						// try {
+								// Execute the SQL query string
+							executingSQL = true;
+							set = null;
+							// try {
 
-						set = sqlstatement.executeQuery(sql);
+							//set = sqlstatement.executeQuery(sql);
+							set = new CombinedResultSet(sqlstatement,sqlList);
+						}
 
 						// }
 						// catch(SQLException e)
@@ -210,18 +208,17 @@ public class QuestStatement implements OBDAStatement {
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
-							if(questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
+							if (questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
 
-								tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this );
-							}
+								tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this);
 
-							else {
+							} else {
 
 								tupleResult = new QuestResultset(set, signature, QuestStatement.this);
 							}
 
 						} else if (isBoolean) {
-							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
+							//tupleResult = new BooleanOWLOBDARefResultSet(mergedResultSet, QuestStatement.this);
 
 						} else if (isConstruct || isDescribe) {
 							boolean collectResults = false;
@@ -233,16 +230,91 @@ public class QuestStatement implements OBDAStatement {
 							tuples = new QuestResultset(set, signature, QuestStatement.this);
 							graphResult = new QuestGraphResultSet(tuples, templ, collectResults);
 						}
-					} catch (SQLException e) {
+
+					} catch (OBDAException e) {
+						e.printStackTrace();
+					}
+//--------------------------------------------------------------------------------------------------------------------------------------------
+				} else {
+
+					try {
+
+						if (!questInstance.hasCachedSQL(strquery)) {
+							getUnfolding(strquery);
+						}
+
+						// Obtaining the query from the cache
+
+						String sql = questInstance.getCachedSQL(strquery);
+						List<String> signature = questInstance.getSignatureCache().get(strquery);
+						//ParsedQuery query = sesameQueryCache.get(strquery);
+
+						log.debug("Executing the SQL query and get the result...");
+						if (sql.equals("") && !isBoolean) {
+							tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
+						} else if (sql.equals("")) {
+							tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
+						} else {
+							try {
+//                        FOR debugging H2 in-memory database
+//                        try {
+//                            org.h2.tools.Server.startWebServer(conn.getConnection());
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
+								// Execute the SQL query string
+								executingSQL = true;
+								set = null;
+								// try {
+
+								set = sqlstatement.executeQuery(sql);
+
+								// }
+								// catch(SQLException e)
+								// {
+								//
+								// Store the SQL result to application result set.
+								if (isSelect) { // is tuple-based results
+
+									if (questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
+
+										tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this);
+									} else {
+
+										tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+									}
+
+								} else if (isBoolean) {
+									tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
+
+								} else if (isConstruct || isDescribe) {
+									boolean collectResults = false;
+									if (isDescribe)
+										collectResults = true;
+									//Template template = query.getConstructTemplate();
+									TupleResultSet tuples = null;
+
+									tuples = new QuestResultset(set, signature, QuestStatement.this);
+									graphResult = new QuestGraphResultSet(tuples, templ, collectResults);
+								}
+							} catch (SQLException e) {
+								exception = e;
+								error = true;
+								log.error(e.getMessage(), e);
+
+								throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
+							}
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
 						exception = e;
 						error = true;
 						log.error(e.getMessage(), e);
-
-						throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
 					}
 				}
 				log.debug("Execution finished.\n");
-			} catch (Exception e) {
+			}catch (Exception e) {
 				e.printStackTrace();
 				exception = e;
 				error = true;
@@ -481,6 +553,16 @@ public class QuestStatement implements OBDAStatement {
 		return sql;
 	}
 
+    private List <String> get4DSQL(DatalogProgram query, List<String> signature) throws OBDAException {
+        log.debug("Producing the SQL string...");
+
+        // query = DatalogNormalizer.normalizeDatalogProgram(query);
+        List<String> sql = questInstance.getDatasourceQueryGenerator().generate4DSourceQuery(query,signature);
+
+        log.debug("Resulting SQL: \n{}", sql);
+        return sql;
+    }
+
 	/**
 	 * The method executes select or ask queries by starting a new quest
 	 * execution thread
@@ -673,7 +755,6 @@ public class QuestStatement implements OBDAStatement {
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
 				unfoldingTime = System.currentTimeMillis() - startTime;
 
-				
 				sql = getSQL(programAfterUnfolding, signatureContainer);
 				// cacheQueryAndProperties(strquery, sql);
 				questInstance.cacheSQL(strquery, sql);
@@ -687,6 +768,80 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 		return sql;
+	}
+
+	public List<String> get4DUnfolding(String strquery) throws Exception {
+		List<String> sqlList = new LinkedList<String>();
+
+
+		// Check the cache first if the system has processed the query string
+		// before
+//		if (questInstance.hasCachedSQL(strquery)) {
+//			// Obtain immediately the SQL string from cache
+//			sql = questInstance.getCachedSQL(strquery);
+
+			//signatureContainer = signaturecache.get(strquery);
+			//query = sesameQueryCache.get(strquery);
+
+//		}
+//		else {
+
+
+			ParsedQuery query = null;
+
+			if (!queryIsParsed){
+				QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+				query = qp.parseQuery(strquery, null); // base URI is null
+				//queryIsParsed = true;
+			} else {
+				query = parsedQ;
+				queryIsParsed = false;
+			}
+
+			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
+			List<String> signatureContainer = translator.getSignature(query);
+
+			questInstance.getSesameQueryCache().put(strquery, query);
+			questInstance.getSignatureCache().put(strquery, signatureContainer);
+
+			DatalogProgram program = translateAndPreProcess(query);
+			try {
+				// log.debug("Input query:\n{}", strquery);
+
+				for (CQIE q : program.getRules())
+					DatalogNormalizer.unfoldJoinTrees(q);
+
+				log.debug("Normalized program: \n{}", program);
+
+				/*
+				 * Empty unfolding, constructing an empty result set
+				 */
+				if (program.getRules().size() < 1)
+					throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
+
+				log.debug("Start the rewriting process...");
+
+				final long startTime0 = System.currentTimeMillis();
+				programAfterRewriting = questInstance.getOptimizedRewriting(program);
+				rewritingTime = System.currentTimeMillis() - startTime0;
+
+				final long startTime = System.currentTimeMillis();
+				programAfterUnfolding = getUnfolding(programAfterRewriting);
+				unfoldingTime = System.currentTimeMillis() - startTime;
+
+				sqlList = get4DSQL(programAfterUnfolding, signatureContainer);
+				// cacheQueryAndProperties(strquery, sql);
+				//questInstance.cacheSQL(strquery, sql);
+			}
+			catch (Exception e1) {
+				log.debug(e1.getMessage(), e1);
+
+				OBDAException obdaException = new OBDAException("Error rewriting and unfolding into SQL\n" + e1.getMessage());
+				obdaException.setStackTrace(e1.getStackTrace());
+				throw obdaException;
+			}
+//		}
+		return sqlList;
 	}
 
 

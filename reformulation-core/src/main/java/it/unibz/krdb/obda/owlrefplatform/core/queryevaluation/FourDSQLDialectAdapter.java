@@ -1,7 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,7 +78,26 @@ public class FourDSQLDialectAdapter extends SQL99DialectAdapter {
      * 4D does not handle properly expressions like " 1 AS myVarType " (assigns "null" instead of 1).
      */
    // @Override
-    public String sqlTypeCode(int code) {
+    public String sqlTypeCode(int code)
+    {
         return String.format("CAST(%d as INT)", code);
     }
+
+    @Override
+    public String sqlOrderBy(List<OBDAQueryModifiers.OrderCondition> conditions, String viewname) {
+        String sql = "ORDER BY ";
+        boolean needComma = false;
+        for (OBDAQueryModifiers.OrderCondition c : conditions) {
+            if (needComma) {
+                sql += ", ";
+            }
+            sql += 1;//"\""+c.getVariable()+"\"";
+            if (c.getDirection() == OBDAQueryModifiers.OrderCondition.ORDER_DESCENDING) {
+                sql += " DESC";
+            }
+            needComma = true;
+        }
+        return sql;
+    }
+
 }

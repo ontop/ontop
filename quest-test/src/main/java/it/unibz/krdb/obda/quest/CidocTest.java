@@ -48,7 +48,7 @@ public class CidocTest {
         p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.put(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
         p.put(QuestPreferences.PRINT_KEYS,QuestConstants.TRUE);
-        p.put(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        //p.put(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         factory.setOBDAController(obdaModel);
@@ -59,12 +59,12 @@ public class CidocTest {
         // Now we are ready for querying
         conn = reasoner.getConnection();
         st = conn.createStatement();
-        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>" +
-                "SELECT ?x WHERE {?x a :E25_Man-Made_Feature}";
+//        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>" +
+//                "SELECT ?x WHERE {?x a :E25_Man-Made_Feature}";
 //        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>"+
-//                "SELECT ?x ?y WHERE {?x a :E41_Appellation; :P3_has_note ?y}";
-//        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>"+
-//                  "SELECT ?x ?y WHERE {?x a :E7_Activity; :P3_has_note ?y}";
+//                "SELECT DISTINCT ?x ?y WHERE {?x a :E41_Appellation; :P3_has_note ?y} ORDER BY DESC(?x)";
+        String sparqlQuery = "PREFIX : <http://erlangen-crm.org/current/>"+
+                  "SELECT ?x ?y WHERE {?x a :E7_Activity; :P3_has_note ?y} ORDER BY ?x";
 
         try {
             long t1 = System.currentTimeMillis();
@@ -105,7 +105,7 @@ public class CidocTest {
 			/*
 			 * Close connection and resources
 			 */
-            if (st != null && !st.isClosed()) {
+            if (st != null) {
                 st.close();
             }
             if (conn != null && !conn.isClosed()) {

@@ -38,7 +38,7 @@ import java.util.List;
 public class QuestResultset implements TupleResultSet {
 
 	//private boolean isSemIndex = false;
-	private ResultSet set = null;
+	ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
 	private final DecimalFormat formatter = new DecimalFormat("0.0###E0");

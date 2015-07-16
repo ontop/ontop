@@ -159,6 +159,38 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
+    public List <String> generate4DSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
+		List<String> sqlList = generate4DQuery(query, signature, "");
+        isDistinct = hasSelectDistinctStatement(query);
+        isOrderBy = hasOrderByClause(query);
+		String subquery;
+		if (query.getQueryModifiers().hasModifiers()) {
+			final String viewName = "QVIEW1";
+			for(int i = 0; i<sqlList.size(); i++) {
+				subquery = sqlList.get(i);
+				if (isDistinct){
+					subquery = subquery.replace("SELECT","SELECT DISTINCT");
+				}
+				String modifier = "";
+				List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
+				if (!conditions.isEmpty()) {
+					modifier += sqladapter.sqlOrderBy(conditions, viewName) + "\n";
+				}
+				long limit = query.getQueryModifiers().getLimit();
+				long offset = query.getQueryModifiers().getOffset();
+				if (limit != -1 || offset != -1) {
+					modifier += sqladapter.sqlSlice(limit, offset) + "\n";
+				}
+				String sql = subquery + "\n";
+				sql += modifier;
+				sqlList.set(i,sql);
+
+			}
+			return sqlList;
+		}
+		return generate4DQuery(query,signature,"");
+    }
+
 	@Override
 	public boolean hasDistinctResultSet() {
 		return distinctResultSet;
@@ -268,6 +300,89 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		return result.toString();
+	}
+
+	/** 4D query
+	 * Main method. Generates the full query, taking into account
+	 * limit/offset/order by.
+	 */
+	private List <String> generate4DQuery(DatalogProgram query, List<String> signature,
+								 String indent) throws OBDAException {
+
+		int numberOfQueries = query.getRules().size();
+
+		List<String> queriesStrings = new LinkedList<String>();
+		/* Main loop, constructing the SPJ query for each CQ */
+		for (CQIE cq : query.getRules()) {
+
+			/*
+			 * Here we normalize so that the form of the CQ is as close to the
+			 * form of a normal SQL algebra as possible, particularly, no shared
+			 * variables, only joins by means of equality. Also, equalities in
+			 * nested expressions (JOINS) are kept at their respective levels to
+			 * generate correct ON and wHERE clauses.
+			 */
+//			log.debug("Before pushing equalities: \n{}", cq);
+
+			EQNormalizer.enforceEqualities(cq);
+
+//			log.debug("Before folding Joins: \n{}", cq);
+
+			DatalogNormalizer.foldJoinTrees(cq);
+
+//			log.debug("Before pulling out equalities: \n{}", cq);
+
+			DatalogNormalizer.pullOutEqualities(cq);
+
+//			log.debug("Before pulling out Left Join Conditions: \n{}", cq);
+
+			DatalogNormalizer.pullOutLeftJoinConditions(cq);
+
+//			log.debug("Before pulling up nested references: \n{}", cq);
+
+			DatalogNormalizer.pullUpNestedReferences(cq);
+
+//			log.debug("Before adding trivial equalities: \n{}, cq);", cq);
+
+			DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
+
+//			log.debug("Normalized CQ: \n{}", cq);
+
+			Predicate headPredicate = cq.getHead().getFunctionSymbol();
+			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
+				// not a target query, skip it.
+				continue;
+			}
+
+			QueryAliasIndex index = new QueryAliasIndex(cq);
+
+			boolean innerdistincts = false;
+			if (isDistinct && !distinctResultSet && numberOfQueries == 1) {
+				innerdistincts = true;
+			}
+
+			String FROM = getFROM(cq, index);
+			String WHERE = getWHERE(cq, index);
+			String SELECT = getSelectClause(signature, cq, index, innerdistincts);
+
+			String querystr = SELECT + FROM + WHERE;
+			queriesStrings.add(querystr);
+		}
+
+		Boolean UNION = false;
+		if (isDistinct && !distinctResultSet) {
+			UNION = true;
+		} else {
+			UNION = false;
+		}
+
+		if (UNION) {
+			for (int i = 0; i < queriesStrings.size(); i++) {
+				queriesStrings.get(i).replace("SELECT", "SELECT DISTINCT");
+			}
+		}
+
+		return queriesStrings;
 	}
 
 	/***
