@@ -9,17 +9,10 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
  */
 public abstract class LocalOptimizationProposalImpl implements LocalOptimizationProposal {
 
-    private final QueryNode queryNode;
     private final IntermediateQuery targetQuery;
 
-    protected LocalOptimizationProposalImpl(QueryNode queryNode, IntermediateQuery targetQuery) {
-        this.queryNode = queryNode;
+    protected LocalOptimizationProposalImpl(IntermediateQuery targetQuery) {
         this.targetQuery = targetQuery;
-    }
-
-    @Override
-    public QueryNode getQueryNode() {
-        return queryNode;
     }
 
     protected IntermediateQuery getTargetQuery() {

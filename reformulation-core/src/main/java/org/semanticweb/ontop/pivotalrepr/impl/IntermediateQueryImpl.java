@@ -103,7 +103,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        QueryNode nodeToReplace = proposal.getQueryNode();
+        QueryNode nodeToReplace = proposal.getNodeToReplace();
 
         if (!contains(nodeToReplace)) {
             throw new InvalidLocalOptimizationProposalException("No such node to replace: " + nodeToReplace);
