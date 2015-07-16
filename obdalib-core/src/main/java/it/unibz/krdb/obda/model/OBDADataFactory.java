@@ -350,4 +350,5 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
 
 	Predicate getDataTypePredicateGeosparql();
+
 }
