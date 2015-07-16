@@ -344,6 +344,13 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getSPARQLJoin(List<Function> atoms);
 
+	
+
+	
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter);
+
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2);
+
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Function function, Function function2, Function LjoinCondition);

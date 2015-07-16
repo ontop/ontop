@@ -139,8 +139,6 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     /**
      * TODO: explain
-     *
-     * TODO: make it safe for LJ!!!!
      */
     @Override
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
