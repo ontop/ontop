@@ -28,6 +28,7 @@ public interface IntermediateQuery {
      *
      * Returns the QueryNode at the same position, which might be new.
      */
+    @Deprecated
     QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
             throws InvalidLocalOptimizationProposalException;
 
@@ -37,6 +38,13 @@ public interface IntermediateQuery {
      * Returns the QueryNode at the same position, which might be new.
      */
     QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
+            throws InvalidLocalOptimizationProposalException;
+
+    /**
+     * TODO: describe
+     *
+     */
+    void applySubstitutionLiftProposal(SubstitutionLiftProposal substitutionLiftProposal)
             throws InvalidLocalOptimizationProposalException;
 
     /**

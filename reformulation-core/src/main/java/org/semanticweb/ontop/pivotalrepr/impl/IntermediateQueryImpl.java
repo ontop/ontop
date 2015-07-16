@@ -118,6 +118,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
+    public void applySubstitutionLiftProposal(SubstitutionLiftProposal substitutionLiftProposal)
+            throws InvalidLocalOptimizationProposalException {
+        throw new RuntimeException("TODO: apply substitution lift");
+    }
+
+    @Override
     public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                       QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);
