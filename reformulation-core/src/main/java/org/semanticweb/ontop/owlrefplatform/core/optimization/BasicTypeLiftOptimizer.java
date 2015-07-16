@@ -1,18 +1,24 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import fj.F;
 import fj.data.*;
 import fj.data.List;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeTools.BindingRemoval;
 
 import java.util.*;
 import java.util.HashMap;
+
+import static org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeTools.newNodeWithAdditionalBindings;
+import static org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeTools.newNodeWithLessBindings;
 
 /**
  * TODO: explain
@@ -25,7 +31,6 @@ import java.util.HashMap;
  */
 public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
 
-
     /**
      * Quasi-immutable (except the ConstructionNode)
      */
@@ -33,17 +38,29 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
 
         private final ConstructionNode formerNode;
         private final Option<ConstructionNode> optionalNewNode;
+        private final Option<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitutionToPropagate;
 
         public ConstructionNodeProposal(ConstructionNode formerConstructionNode) {
             this.formerNode = formerConstructionNode;
             this.optionalNewNode = Option.none();
+            this.optionalSubstitutionToPropagate = Option.none();
         }
 
         public ConstructionNodeProposal(ConstructionNode formerConstructionNode,
                                         ConstructionNode newConstructionNode) {
             this.formerNode = formerConstructionNode;
             this.optionalNewNode = Option.some(newConstructionNode);
+            this.optionalSubstitutionToPropagate = Option.none();
         }
+
+        public ConstructionNodeProposal(ConstructionNode formerConstructionNode,
+                                        ConstructionNode newConstructionNode,
+                                        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate) {
+            this.formerNode = formerConstructionNode;
+            this.optionalNewNode = Option.some(newConstructionNode);
+            this.optionalSubstitutionToPropagate = Option.some(substitutionToPropagate);
+        }
+
 
         public ConstructionNode getFormerNode() {
             return formerNode;
@@ -59,23 +76,44 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
             return formerNode;
         }
 
-        public ConstructionNodeProposal removeSomeBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-//            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithLessBindings(
-//                    substitutionToLift);
-//            return new ConstructionNodeProposal(formerNode, newConstructionNode);
-            throw new RuntimeException("TODO: implement it");
+        public ConstructionNodeProposal removeSomeBindings(ImmutableSubstitution<ImmutableTerm> bindingsToRemove) {
+            if (optionalSubstitutionToPropagate.isSome()) {
+                throw new RuntimeException("Removing bindings multiple times for the same node is not supported");
+            }
+
+            BindingRemoval bindingRemoval = newNodeWithLessBindings(getMostRecentConstructionNode(), bindingsToRemove);
+            ConstructionNode newConstructionNode = bindingRemoval.getNewConstructionNode();
+
+            Optional<ImmutableSubstitution<VariableOrGroundTerm>> newOptionalSubstitutionToPropagate =
+                    bindingRemoval.getOptionalSubstitutionToPropagateToAncestors();
+
+            if (newOptionalSubstitutionToPropagate.isPresent()) {
+                return new ConstructionNodeProposal(formerNode, newConstructionNode,
+                        newOptionalSubstitutionToPropagate.get());
+            }
+            else {
+                return new ConstructionNodeProposal(formerNode, newConstructionNode);
+            }
         }
 
         public ConstructionNodeProposal addBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-//            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithAdditionalBindings(
-//                    substitutionToLift);
-//            return new ConstructionNodeProposal(formerNode, newConstructionNode);
-            throw new RuntimeException("TODO: implement it");
+            if (optionalSubstitutionToPropagate.isSome()) {
+                throw new RuntimeException("Cannot add bindings after removing some.");
+            }
+
+            ConstructionNode newNode = newNodeWithAdditionalBindings(getMostRecentConstructionNode(), substitutionToLift);
+            return new ConstructionNodeProposal(formerNode, newNode);
+        }
+
+        public Option<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitutionToPropagate() {
+            return optionalSubstitutionToPropagate;
         }
     }
 
 
-
+    /**
+     * High-level method
+     */
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
 
