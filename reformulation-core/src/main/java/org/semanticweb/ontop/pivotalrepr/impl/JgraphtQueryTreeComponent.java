@@ -292,6 +292,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
             parentNode = queryDAG.getEdgeTarget(toParentEdges.iterator().next());
             ancestorBuilder.add(parentNode);
+            toParentEdges = queryDAG.outgoingEdgesOf(parentNode);
         }
 
         return ancestorBuilder.build();
