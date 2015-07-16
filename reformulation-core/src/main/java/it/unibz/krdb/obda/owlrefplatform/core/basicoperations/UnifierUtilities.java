@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
+
 
 /**
  * A Class that provides general utilities related to unification, of terms and
@@ -45,7 +45,7 @@ public class UnifierUtilities {
      * @return the substitution corresponding to this unification.
      */
     public static Substitution getMGU(Function first, Function second) {
-
+/*
         // Basic case: if predicates are different or their arity is different,
         // then no unifier
         if ((first.getArity() != second.getArity()
@@ -112,5 +112,11 @@ public class UnifierUtilities {
             }
         }
         return mgu;
+*/        
+        SubstitutionImpl mgu = new SubstitutionImpl();
+        if (mgu.composeFunctions(first, second))
+            return mgu;
+        return null;
     }
+
 }

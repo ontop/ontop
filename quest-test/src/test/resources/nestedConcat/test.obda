@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/meme/ontologies/2015/3/test#
+
+[SourceDeclaration]
+sourceUri	test
+connectionUrl	jdbc:mysql://10.7.20.39/nested_concat
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	test
+target		:period{CVE_PER} a :Period ; :yStart {AINICIO} ; :yEnd {ATERMINO} . 
+source		SELECT DISTINCT AINICIO || '-' || ATERMINO AS CVE_PER, AINICIO, ATERMINO FROM RHPROFSNI
+]]
+

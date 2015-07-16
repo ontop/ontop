@@ -1,0 +1,57 @@
+[PrefixDeclaration]
+:		http://myproject.org/odbs#
+
+[SourceDeclaration]
+sourceUri	database_conference
+connectionUrl	jdbc:mysql://10.7.20.39/conference
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	user
+target		:user{ID} a :User ; :username {User} . 
+source		select *
+			from Login
+
+mappingId	upload_submitted
+target		:uplsub{ID} a :UploadSubmitted ; :uploadTime {UploadTime} ; :uploadby1 :user{User} . :paper{Paper} :has1 :uplsub{ID} . 
+source		select *
+			from Submission
+
+mappingId	upload_accepted
+target		:accpaper{Paper} :correspondsto :paper{Paper} ; :has2 :uplacc{ID} . :uplacc{ID} a :UploadAccepted ; :uploadAcceptedTime {UploadTime} ; :uploadby2 :user{User} . 
+source		select *
+			from Acceptance
+
+mappingId	conference
+target		:conf{ID} a :Conference ; :confName {Name} ; :confTime {Time} . :user{Organizer} :organizerof :conf{ID} . 
+source		select *
+			from Conference
+
+mappingId	decision
+target		:dec{ID} a :Decision ; :decisionTime {DecisionTime} ; :outcome {Outcome} . 
+source		select *
+			from Decision
+
+mappingId	review
+target		:revreq{IDrr} a :ReviewRequest ; :has4 :rev{ID} . :rev{ID} a :Review ; :submissionTime {SubmissionTime} .
+source		select *
+			from Review
+
+mappingId	review-request
+target		:user{Reviewer} :reviewer :revreq{ID} . :revreq{ID} a :ReviewRequest ; :invitationTime {InvitationTime} ; :for :paper{Paper} . 
+source		select *
+			from ReviewRequest
+
+mappingId	paper
+target		:paper{ID} a :Paper ; :title {Title} ; :paperCT {CT} ; :has3 :dec{Status} ; :submittedto :conf{Conf} . :user{User} :creator :paper{ID} . 
+source		select *
+			from Paper
+
+mappingId	user-ct
+target		:user{User} a :User ; :userCT {CT} . 
+source		select User, CT
+			from LoginStats
+]]
+

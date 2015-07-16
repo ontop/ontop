@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+if [ -n "${JAVA_HOME}" -a -x "${JAVA_HOME}/bin/java" ]; then
+	JAVA="${JAVA_HOME}/bin/java"
+else
+	JAVA=java
+fi
+
+# <http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in>
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+
+ONTOP_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+if [ -z "${ONTOP_JAVA_ARGS}" ]; then
+  ONTOP_JAVA_ARGS="-Xmx512m"
+fi
+
+${JAVA} -cp "${ONTOP_HOME}/lib/*" -Dlogback.configurationFile=${ONTOP_HOME}/log/logback.xml \
+-Djava.ext.dirs=${ONTOP_HOME}/lib/:${ONTOP_HOME}/jdbc/ org.semanticweb.ontop.cli.Ontop $@

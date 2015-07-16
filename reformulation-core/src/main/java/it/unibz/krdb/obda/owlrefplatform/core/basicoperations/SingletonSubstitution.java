@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 
@@ -49,7 +50,12 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
         throw new UnsupportedOperationException();
     }
 

@@ -356,7 +356,7 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 	}
 
-	public int getTupleCount(String query) throws OWLException {
+	public long getTupleCount(String query) throws OWLException {
 		try {
 			return st.getTupleCount(query);
 		} catch (Exception e) {

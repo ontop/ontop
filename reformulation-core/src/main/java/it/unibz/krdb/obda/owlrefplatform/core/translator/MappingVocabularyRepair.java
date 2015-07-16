@@ -144,13 +144,13 @@ public class MappingVocabularyRepair {
 								}
 							} 
 							else  {
-								System.err.println("INTERNAL ERROR: " + p.getName());
-								throw new RuntimeException("INTERNAL ERROR: " + p.getName());
+								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
+								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName());
 							}
 						}
 						else  {
 							System.err.println("ERROR: Predicate has an incorrect arity: " + p.getName());
-							throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
+							throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + p.getName());
 						}
 					}
 					else {
