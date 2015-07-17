@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.proposal;
 
-import fj.data.Option;
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
@@ -15,7 +15,7 @@ public interface ConstructionNodeUpdate {
 
     ConstructionNode getFormerNode();
 
-    Option<ConstructionNode> getOptionalNewNode();
+    Optional<ConstructionNode> getOptionalNewNode();
 
     ConstructionNode getMostRecentConstructionNode();
 
@@ -23,5 +23,5 @@ public interface ConstructionNodeUpdate {
 
     ConstructionNodeUpdate addBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift);
 
-    Option<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitutionToPropagate();
+    Optional<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitutionToPropagate();
 }

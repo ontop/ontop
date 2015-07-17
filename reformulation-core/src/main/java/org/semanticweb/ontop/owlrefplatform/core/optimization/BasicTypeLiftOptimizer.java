@@ -8,10 +8,14 @@ import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ConstructionNodeUpdateImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionLiftProposalImpl;
 
 import java.util.*;
 import java.util.HashMap;
@@ -295,8 +299,33 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     }
 
 
+    /**
+     * TODO: explain
+     */
     private static IntermediateQuery applyProposal(IntermediateQuery query,
                                                    Tree<ConstructionNodeUpdate> proposedConstructionTree) {
+
+        ImmutableList<BindingTransfer> transfers = extractTransfers(proposedConstructionTree);
+        ImmutableList<ConstructionNodeUpdate> nodeUpdates = ImmutableList.copyOf(proposedConstructionTree
+                        .flatten()
+                        .filter(new F<ConstructionNodeUpdate, Boolean>() {
+                                    @Override
+                                    public Boolean f(ConstructionNodeUpdate update) {
+                                        return update.getOptionalNewNode().isPresent();
+                                    }
+                                })
+                        .toCollection());
+        SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(query, transfers, nodeUpdates);
+        try {
+            query.applySubstitutionLiftProposal(proposal);
+        }
+        catch (InvalidLocalOptimizationProposalException e) {
+            throw new RuntimeException("Bad substitution lift proposal: " + e.getMessage());
+        }
+        return query;
+    }
+
+    private static ImmutableList<BindingTransfer> extractTransfers(Tree<ConstructionNodeUpdate> proposedConstructionTree) {
         throw new RuntimeException("TODO: implement it!");
     }
 }
