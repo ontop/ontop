@@ -24,4 +24,8 @@ public interface ConstructionNodeUpdate {
     ConstructionNodeUpdate addBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift);
 
     Optional<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitutionToPropagate();
+
+    boolean hasNewBindings();
+
+    ImmutableSubstitution<ImmutableTerm> getNewBindings();
 }
