@@ -164,6 +164,75 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 
+		/*
+		*4D database does not support SQL UNION and UNION ALL operators
+		* We handle it by running sub-queries individually
+		* and appending the result sets inside a CombinedResultSet object
+		*/
+		private void FourDRun(ResultSet set) throws Exception {
+			List<String> sqlList = null;
+			String sql = "";
+
+			sqlList = get4DUnfolding(strquery);
+			List<String> signature = questInstance.getSignatureCache().get(strquery);
+			log.debug("Executing the SQL query and get the result...");
+
+			try {
+				sql = sqlList.get(0);
+				if (sql.equals("") && !isBoolean) {
+					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
+				} else if (sql.equals("")) {
+					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
+				} else {
+//                        FOR debugging H2 in-memory database
+//                        try {
+//                            org.h2.tools.Server.startWebServer(conn.getConnection());
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
+					// Execute the SQL query string
+					executingSQL = true;
+					set = null;
+					// try {
+
+					//set = sqlstatement.executeQuery(sql);
+					set = new CombinedResultSet(sqlstatement,sqlList);
+				}
+
+				// }
+				// catch(SQLException e)
+				// {
+				//
+				// Store the SQL result to application result set.
+				if (isSelect) { // is tuple-based results
+
+					if (questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
+
+						tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this);
+
+					} else {
+
+						tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+					}
+
+				} else if (isBoolean) {
+					//tupleResult = new BooleanOWLOBDARefResultSet(mergedResultSet, QuestStatement.this);
+
+				} else if (isConstruct || isDescribe) {
+					boolean collectResults = false;
+					if (isDescribe)
+						collectResults = true;
+					//Template template = query.getConstructTemplate();
+					TupleResultSet tuples = null;
+
+					tuples = new QuestResultset(set, signature, QuestStatement.this);
+					graphResult = new QuestGraphResultSet(tuples, templ, collectResults);
+				}
+
+			} catch (OBDAException e) {
+				e.printStackTrace();
+			}
+		}
 		@Override
 		public void run() {
 			try {
@@ -171,70 +240,7 @@ public class QuestStatement implements OBDAStatement {
 				ResultSet set = null;
 
 				if (questInstance.getMetaData().getDatabaseProductName().contains("4D")) {
-
-					List<String> sqlList = null;
-					String sql = "";
-
-					sqlList = get4DUnfolding(strquery);
-					List<String> signature = questInstance.getSignatureCache().get(strquery);
-					log.debug("Executing the SQL query and get the result...");
-
-					try {
-						sql = sqlList.get(0);
-						if (sql.equals("") && !isBoolean) {
-							tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
-						} else if (sql.equals("")) {
-							tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
-						} else {
-//                        FOR debugging H2 in-memory database
-//                        try {
-//                            org.h2.tools.Server.startWebServer(conn.getConnection());
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
-								// Execute the SQL query string
-							executingSQL = true;
-							set = null;
-							// try {
-
-							//set = sqlstatement.executeQuery(sql);
-							set = new CombinedResultSet(sqlstatement,sqlList);
-						}
-
-						// }
-						// catch(SQLException e)
-						// {
-						//
-						// Store the SQL result to application result set.
-						if (isSelect) { // is tuple-based results
-
-							if (questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
-
-								tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this);
-
-							} else {
-
-								tupleResult = new QuestResultset(set, signature, QuestStatement.this);
-							}
-
-						} else if (isBoolean) {
-							//tupleResult = new BooleanOWLOBDARefResultSet(mergedResultSet, QuestStatement.this);
-
-						} else if (isConstruct || isDescribe) {
-							boolean collectResults = false;
-							if (isDescribe)
-								collectResults = true;
-							//Template template = query.getConstructTemplate();
-							TupleResultSet tuples = null;
-
-							tuples = new QuestResultset(set, signature, QuestStatement.this);
-							graphResult = new QuestGraphResultSet(tuples, templ, collectResults);
-						}
-
-					} catch (OBDAException e) {
-						e.printStackTrace();
-					}
-//--------------------------------------------------------------------------------------------------------------------------------------------
+					FourDRun(set);
 				} else {
 
 					try {

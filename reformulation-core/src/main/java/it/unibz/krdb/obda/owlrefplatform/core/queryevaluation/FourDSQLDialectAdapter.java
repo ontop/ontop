@@ -83,21 +83,4 @@ public class FourDSQLDialectAdapter extends SQL99DialectAdapter {
         return String.format("CAST(%d as INT)", code);
     }
 
-    @Override
-    public String sqlOrderBy(List<OBDAQueryModifiers.OrderCondition> conditions, String viewname) {
-        String sql = "ORDER BY ";
-        boolean needComma = false;
-        for (OBDAQueryModifiers.OrderCondition c : conditions) {
-            if (needComma) {
-                sql += ", ";
-            }
-            sql += 1;//"\""+c.getVariable()+"\"";
-            if (c.getDirection() == OBDAQueryModifiers.OrderCondition.ORDER_DESCENDING) {
-                sql += " DESC";
-            }
-            needComma = true;
-        }
-        return sql;
-    }
-
 }

@@ -159,6 +159,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
+	/*
+	*Since 4D database does not support SQL UNION and UNION ALL
+	*we add sub-queries to a sql list and execute the sub-queries individually.
+	* Then we combine the resultsets.
+	*This function refactors 4D sub-queries in the sql list regarding the sql modifiers
+	*/
     public List <String> generate4DSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
 		List<String> sqlList = generate4DQuery(query, signature, "");
         isDistinct = hasSelectDistinctStatement(query);
