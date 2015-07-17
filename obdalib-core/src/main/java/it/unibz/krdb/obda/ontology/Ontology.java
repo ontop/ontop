@@ -24,6 +24,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 public interface Ontology extends Cloneable, Serializable {
 
 	@Deprecated
@@ -49,11 +51,11 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
-	public void addDisjointClassesAxiom(Set<ClassExpression> classes);
+	public void addDisjointClassesAxiom(ImmutableSet<ClassExpression> classes);
 
-	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> properties);
+	public void addDisjointObjectPropertiesAxiom(ImmutableSet<ObjectPropertyExpression> properties);
 	
-	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> properties);
+	public void addDisjointDataPropertiesAxiom(ImmutableSet<DataPropertyExpression> properties);
 
 	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
 

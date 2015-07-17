@@ -38,6 +38,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
@@ -163,7 +165,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addDisjointClassesAxiom(Set<ClassExpression> classes) {	
+	public void addDisjointClassesAxiom(ImmutableSet<ClassExpression> classes) {	
 		for (ClassExpression c : classes)
 			vocabulary.checkSignature(c);
 		NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<ClassExpression>(classes);
@@ -171,7 +173,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> props) {
+	public void addDisjointObjectPropertiesAxiom(ImmutableSet<ObjectPropertyExpression> props) {
 		for (ObjectPropertyExpression p : props)
 			vocabulary.checkSignature(p);
 		NaryAxiomImpl<ObjectPropertyExpression> ax = new NaryAxiomImpl<ObjectPropertyExpression>(props);
@@ -179,7 +181,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> props) {
+	public void addDisjointDataPropertiesAxiom(ImmutableSet<DataPropertyExpression> props) {
 		for (DataPropertyExpression p : props)
 			vocabulary.checkSignature(p);
 		NaryAxiomImpl<DataPropertyExpression> ax = new NaryAxiomImpl<DataPropertyExpression>(props);

@@ -20,8 +20,7 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 import it.unibz.krdb.obda.ontology.NaryAxiom;
 
@@ -29,9 +28,9 @@ public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 
 	private static final long serialVersionUID = 4576840836473365808L;
 	
-	private final Set<T> components;
+	private final ImmutableSet<T> components;
 	
-	NaryAxiomImpl(Set<T> components) {
+	NaryAxiomImpl(ImmutableSet<T> components) {
 		if (components.size() < 2)
 			throw new IllegalArgumentException("At least 2 componets are expeccted in NaryAxiom");
 
@@ -39,8 +38,8 @@ public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 	}
 	
 	@Override
-	public Set<T> getComponents() {
-		return Collections.unmodifiableSet(components);
+	public ImmutableSet<T> getComponents() {
+		return components;
 	}
 
 

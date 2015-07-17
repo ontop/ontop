@@ -42,7 +42,7 @@ public class OWLAPI3TranslatorUtility {
 
 	private static final Logger log = LoggerFactory.getLogger(OWLAPI3TranslatorUtility.class);
 
-	private static Class<?extends OWLAPI3TranslatorBase> factory = OWLAPI3TranslatorDLLiteA.class;
+	private static Class<?extends OWLAPI3TranslatorBase> factory = OWLAPI3TranslatorOWL2QL.class;
 
 	public static void setTranslator(Class<?extends OWLAPI3TranslatorBase> factory) {
 		OWLAPI3TranslatorUtility.factory = factory;

@@ -21,7 +21,8 @@ package it.unibz.krdb.obda.ontology;
 */
 
 import java.io.Serializable;
-import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Represents the following from OWL 2 QL Specification:
@@ -35,12 +36,12 @@ import java.util.Set;
  * for T = DataPropertyExpression:        
  *         		DisjointDataProperties 
  * 
- * @author roman
+ * @author Roman Kontchakov
  *
  */
 
 public interface NaryAxiom<T> extends Serializable {
 
-	public Set<T> getComponents();
+	public ImmutableSet<T> getComponents();
 
 }

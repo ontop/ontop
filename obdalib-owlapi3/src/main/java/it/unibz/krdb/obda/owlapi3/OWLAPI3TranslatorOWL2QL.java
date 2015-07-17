@@ -6,93 +6,28 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Datatype;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLAsymmetricObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataMinCardinality;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
-import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLDataRange;
-import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointDataPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointUnionAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentDataPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectComplementOf;
-import org.semanticweb.owlapi.model.OWLObjectInverseOf;
-import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
-import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.SWRLRule;
+import org.semanticweb.owlapi.model.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
 
+/**
+ * 
+ * @author Roman Kontchakov
+ */
 
-/* 	RDFS(1), OWL2QL(2), DLLITEA(3); */
-
-public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
+public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	
 	/*
@@ -147,6 +82,8 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	}
 
 	/**
+	 * (1)
+	 * 
 	 * SubClassOf := 'SubClassOf' '(' axiomAnnotations subClassExpression superClassExpression ')'
 	 * subClassExpression := Class | subObjectSomeValuesFrom | subObjectSomeValuesFrom
 	 * subObjectSomeValuesFrom := 'ObjectSomeValuesFrom' '(' ObjectPropertyExpression owl:Thing ')'
@@ -163,30 +100,44 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLSubClassOfAxiom ax) {
 		try {
 			ClassExpression subDescription = getSubclassExpression(ax.getSubClass());
-			addSubClassAxioms(subDescription, ax.getSuperClass().asConjunctSet());
+			addSubClassAxioms(subDescription, ax.getSuperClass());
 		} catch (TranslationException e) {
 			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
 		}
 	}
 
-	@Override
-	public void visit(OWLNegativeObjectPropertyAssertionAxiom ax) {
-		log.warn("Axiom not yet supported by Quest: {}", ax.toString());
-	}
-
+	
 	/**
-	 * AsymmetricObjectProperty :='AsymmetricObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * (2)
+	 * 
+	 * EquivalentClasses := 'EquivalentClasses' '(' axiomAnnotations 
+	 * 						subClassExpression subClassExpression { subClassExpression } ')'
+	 * 
+	 * replaced by SubClassOfAxiom (rule [R1])
 	 */
 	
 	@Override
-	public void visit(OWLAsymmetricObjectPropertyAxiom ax) {
-		ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
-		
-		// [R3] of the grammar simplifications
-		Set<ObjectPropertyExpression> disjointProperties = new HashSet<>();
-		disjointProperties.add(p);
-		disjointProperties.add(p.getInverse());
-		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));
+	public void visit(OWLEquivalentClassesAxiom ax) {
+		try {
+			Iterator<OWLClassExpression> it = ax.getClassExpressions().iterator();
+			ClassExpression first = getSubclassExpression(it.next());
+			ClassExpression previous = first;
+			while (it.hasNext()) {
+				ClassExpression current = getSubclassExpression(it.next());
+				dl_onto.addSubClassOfAxiom(previous, current);
+				previous = current;
+			}
+			dl_onto.addSubClassOfAxiom(previous, first);
+		} 
+		catch (TranslationException e) {
+			log.warn("Error in OWL 2 QL axiom: {} ({})", ax, e);
+		}
+	}
+	
+
+	@Override
+	public void visit(OWLNegativeObjectPropertyAssertionAxiom ax) {
+		log.warn("Axiom not yet supported by Quest: {}", ax.toString());
 	}
 
 	@Override
@@ -214,57 +165,6 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		}
 	}
 
-	/**
-	 * DataPropertyDomain := 'DataPropertyDomain' '(' axiomAnnotations DataPropertyExpression superClassExpression ')'
-	 * 
-	 */
-	
-	@Override
-	public void visit(OWLDataPropertyDomainAxiom ax) {
-		try {
-			DataPropertyExpression role = getPropertyExpression(ax.getProperty());
-			addSubClassAxioms(role.getDomain(), ax.getDomain().asConjunctSet());		
-		} catch (TranslationException e) {
-			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
-		}
-	}
-
-	/**
-	 * ObjectPropertyDomain := 'ObjectPropertyDomain' '(' axiomAnnotations ObjectPropertyExpression superClassExpression ')'
-	 * 
-	 */
-	
-	@Override
-	public void visit(OWLObjectPropertyDomainAxiom ax) {
-		try {
-			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-			
-			// [R3] of the grammar simplifications
-			addSubClassAxioms(role.getDomain(), ax.getDomain().asConjunctSet());
-		} catch (TranslationException e) {
-			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
-		}
-	}
-	
-	/**
-	 * EquivalentObjectProperties := 'EquivalentObjectProperties' '(' axiomAnnotations 
-	 * 								ObjectPropertyExpression ObjectPropertyExpression { ObjectPropertyExpression } ')'
-	 */
-
-	@Override
-	public void visit(OWLEquivalentObjectPropertiesAxiom ax) {
-
-		// TODO: avoid using intermediate list 		
-		List<ObjectPropertyExpression> result = new LinkedList<>();
-		for (OWLObjectPropertyExpression rolExpression : ax.getProperties()) 
-			result.add(getPropertyExpression(rolExpression));
-
-		// [R2] from grammar simplifications		
-		for (int i = 0; i < result.size() - 1; i++) 
-			dl_onto.addSubPropertyOfAxiom(result.get(i), result.get(i + 1));
-		
-		dl_onto.addSubPropertyOfAxiom(result.get(result.size() - 1), result.get(0));
-	}
 
 	@Override
 	public void visit(OWLNegativeDataPropertyAssertionAxiom ax) {
@@ -296,22 +196,6 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));		
 	}
 
-	/**
-	 * ObjectPropertyRange := 'ObjectPropertyRange' '(' axiomAnnotations ObjectPropertyExpression superClassExpression ')'
-	 */
-	
-	@Override
-	public void visit(OWLObjectPropertyRangeAxiom ax) {
-		
-		try {
-			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-			
-			// [R3] of the grammar simplifications			
-			addSubClassAxioms(role.getRange(), ax.getRange().asConjunctSet());
-		} catch (TranslationException e) {
-			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
-		}
-	}
 
 	@Override
 	public void visit(OWLObjectPropertyAssertionAxiom ax) {
@@ -328,6 +212,15 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		dl_onto.addFunctionalObjectPropertyAxiom(role);				
 	}
 
+	/**
+	 * (5)
+	 * 
+	 * SubObjectPropertyOf := 'SubObjectPropertyOf' '(' axiomAnnotations 
+	 * 												ObjectPropertyExpression ObjectPropertyExpression ')'
+	 * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
+	 * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
+	 */
+	
 	@Override
 	public void visit(OWLSubObjectPropertyOfAxiom ax) {
 		
@@ -337,25 +230,119 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		dl_onto.addSubPropertyOfAxiom(subrole, superrole);	
 	}
 
+	/**
+	 * (6)
+	 * 
+	 * EquivalentObjectProperties := 'EquivalentObjectProperties' '(' axiomAnnotations 
+	 * 								ObjectPropertyExpression ObjectPropertyExpression { ObjectPropertyExpression } ')'
+	 * 
+	 * replaced by SubObjectPropertyOfAxiom (rule [R1])
+	 */
+
+	@Override
+	public void visit(OWLEquivalentObjectPropertiesAxiom ax) {
+		Iterator<OWLObjectPropertyExpression> it = ax.getProperties().iterator();
+		ObjectPropertyExpression first = getPropertyExpression(it.next());
+		ObjectPropertyExpression previous = first;
+		while (it.hasNext()) {
+			ObjectPropertyExpression current = getPropertyExpression(it.next());
+			dl_onto.addSubPropertyOfAxiom(previous, current);
+			previous = current;
+		}
+		dl_onto.addSubPropertyOfAxiom(previous, first);
+	}
+	
+	/**
+	 * (8)
+	 * 
+	 * InverseObjectProperties := 'InverseObjectProperties' '(' axiomAnnotations 
+	 * 									ObjectPropertyExpression ObjectPropertyExpression ')'
+	 * 
+	 * replaced by SubObjectPropertyOfAxiom (rule [R1])
+	 */
+	
+	@Override
+	public void visit(OWLInverseObjectPropertiesAxiom ax) {		
+		ObjectPropertyExpression role1 = getPropertyExpression(ax.getFirstProperty());
+		ObjectPropertyExpression role2 = getPropertyExpression(ax.getSecondProperty());
+
+		dl_onto.addSubPropertyOfAxiom(role1, role2.getInverse());
+		dl_onto.addSubPropertyOfAxiom(role2, role1.getInverse());		
+	}
+	
+	/**
+	 * (9)
+	 * 
+	 * ObjectPropertyDomain := 'ObjectPropertyDomain' '(' axiomAnnotations ObjectPropertyExpression superClassExpression ')'
+	 * 
+	 * replaced by SubClassOfAxiom (rule [R2])
+	 */
+	
+	@Override
+	public void visit(OWLObjectPropertyDomainAxiom ax) {
+		try {
+			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
+			addSubClassAxioms(role.getDomain(), ax.getDomain());
+		} catch (TranslationException e) {
+			log.warn("Error in OWL 2 QL axiom: {} ({})", ax, e);
+		}
+	}
+	
+	/**
+	 * (10)
+	 * 
+	 * ObjectPropertyRange := 'ObjectPropertyRange' '(' axiomAnnotations ObjectPropertyExpression superClassExpression ')'
+	 * 
+	 * replaced by SubClassOfAxiom (rule [R2])
+	 */
+	
+	@Override
+	public void visit(OWLObjectPropertyRangeAxiom ax) {
+		try {
+			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
+			addSubClassAxioms(role.getRange(), ax.getRange());
+		} catch (TranslationException e) {
+			log.warn("Error in OWL 2 QL axiom: {} ({})", ax, e);
+		}
+	}
+	
+	/**
+	 * (13)
+	 * 
+	 * SymmetricObjectProperty := 'SymmetricObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * 
+	 * replaced by SubObjectPropertyOfAxiom (rule [R3])
+	 */
+
+	@Override
+	public void visit(OWLSymmetricObjectPropertyAxiom ax) {
+		ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
+		dl_onto.addSubPropertyOfAxiom(role, role.getInverse());
+	}
+
+	/**
+	 * (14)
+	 * 
+	 * AsymmetricObjectProperty :='AsymmetricObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * 
+	 * replaced by DisjointObjectPropertiesAxiom (rule [R3])
+	 */
+	
+	@Override
+	public void visit(OWLAsymmetricObjectPropertyAxiom ax) {
+		ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
+		ImmutableSet<ObjectPropertyExpression> disjointProperties = ImmutableSet.of(p, p.getInverse());
+		dl_onto.addDisjointObjectPropertiesAxiom(disjointProperties);
+	}
+
+	
+	
+	
 	@Override
 	public void visit(OWLDisjointUnionAxiom ax) {
 		log.warn("Axiom not yet supported by Quest: {}", ax.toString());
 	}
 	
-	/**
-	 * SymmetricObjectProperty := 'SymmetricObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
-	 */
-
-	@Override
-	public void visit(OWLSymmetricObjectPropertyAxiom ax) {
-		//if (profile.order() < LanguageProfile.OWL2QL.order())
-		//	throw new TranslationException();
-		
-		// [R3] of the grammar simplifications
-		ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-		dl_onto.addSubPropertyOfAxiom(role, role.getInverse());
-	}
-
 	@Override
 	public void visit(OWLDataPropertyRangeAxiom ax) {
 
@@ -394,57 +381,52 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	
 	/**
+	 * (17)
+	 * 
 	 * EquivalentDataProperties := 'EquivalentDataProperties' '(' axiomAnnotations 
 	 * 								DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'
+	 * 
+	 * replaced by SubDataPropertyOfAxiom (rule [R1])	
 	 */
 	
 	@Override
-	public void visit(OWLEquivalentDataPropertiesAxiom ax) {
-		//if (profile.order() < LanguageProfile.OWL2QL.order())
-		//	throw new TranslationException();
-
-		List<DataPropertyExpression> result = new LinkedList<>();
-		for (OWLDataPropertyExpression rolExpression : ax.getProperties()) 
-			result.add(getPropertyExpression(rolExpression));
-
-		// [R2] of the grammar simplifictaions
-		for (int i = 0; i < result.size() - 1; i++) 
-			dl_onto.addSubPropertyOfAxiom(result.get(i), result.get(i + 1));
-		
-		dl_onto.addSubPropertyOfAxiom(result.get(result.size() - 1), result.get(0));
+	public void visit(OWLEquivalentDataPropertiesAxiom ax) {		
+		Iterator<OWLDataPropertyExpression> it = ax.getProperties().iterator();
+		DataPropertyExpression first = getPropertyExpression(it.next());
+		DataPropertyExpression previous = first;
+		while (it.hasNext()) {
+			DataPropertyExpression current = getPropertyExpression(it.next());
+			dl_onto.addSubPropertyOfAxiom(previous, current);
+			previous = current;
+		}
+		dl_onto.addSubPropertyOfAxiom(previous, first);
 	}
 
+	/**
+	 * (19)
+	 * 
+	 * DataPropertyDomain := 'DataPropertyDomain' '(' axiomAnnotations DataPropertyExpression superClassExpression ')'
+	 * 
+	 * replaced by SubClassOfAxiom (rule [R2])
+	 */
+	
+	@Override
+	public void visit(OWLDataPropertyDomainAxiom ax) {
+		try {
+			DataPropertyExpression role = getPropertyExpression(ax.getProperty());
+			addSubClassAxioms(role.getDomain(), ax.getDomain());		
+		} catch (TranslationException e) {
+			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
+		}
+	}
+
+	
+	
 	@Override
 	public void visit(OWLClassAssertionAxiom ax) {
 		ClassAssertion a = translate(ax);
 		if (a != null)
 			dl_onto.addClassAssertion(a);
-	}
-
-	/**
-	 * EquivalentClasses := 'EquivalentClasses' '(' axiomAnnotations 
-	 * 						subClassExpression subClassExpression { subClassExpression } ')'
-	 */
-	
-	@Override
-	public void visit(OWLEquivalentClassesAxiom ax) {
-		//if (profile.order() < LanguageProfile.OWL2QL.order())
-		//	throw new TranslationException();
-
-		try {
-			List<ClassExpression> result = new LinkedList<>();
-			for (OWLClassExpression OWLClassExpression : ax.getClassExpressions())
-				result.add(getSubclassExpression(OWLClassExpression));
-
-			// [R2] from grammar simplifications
-			for (int i = 0; i < result.size() - 1; i++) 
-				dl_onto.addSubClassOfAxiom(result.get(i), result.get(i + 1));
-			
-			dl_onto.addSubClassOfAxiom(result.get(result.size() - 1), result.get(0));	
-		} 
-		catch (TranslationException e) {
-			log.warn("Error in " + ax);
-		}
 	}
 
 	@Override
@@ -487,27 +469,6 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLSubPropertyChainOfAxiom ax) {
 		log.warn("Axiom not yet supported by Quest: {}", ax.toString());
-	}
-
-	/**
-	 * InverseObjectProperties := 'InverseObjectProperties' '(' axiomAnnotations 
-	 * 									ObjectPropertyExpression ObjectPropertyExpression ')'
-	 */
-	
-	@Override
-	public void visit(OWLInverseObjectPropertiesAxiom ax) {
-		//if (profile.order() < LanguageProfile.OWL2QL.order())
-		//	throw new TranslationException();
-
-		ObjectPropertyExpression role1 = getPropertyExpression(ax.getFirstProperty());
-		ObjectPropertyExpression role2 = getPropertyExpression(ax.getSecondProperty());
-
-		// [R2] of the grammar simplifications
-		
-		if (!role1.equals(role2.getInverse())) {
-			dl_onto.addSubPropertyOfAxiom(role1, role2.getInverse());
-			dl_onto.addSubPropertyOfAxiom(role2, role1.getInverse());		
-		}
 	}
 
 	@Override
@@ -661,9 +622,9 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	
 	// Set<OWLClassExpression> is for [R4] in the grammar simplification
 	
-	private void addSubClassAxioms(ClassExpression subDescription, Set<OWLClassExpression> superclasses) throws TranslationException {
+	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superclasses) throws TranslationException {
 		
-		for (OWLClassExpression superClass : superclasses) {
+		for (OWLClassExpression superClass : superclasses.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {
 				dl_onto.addSubClassOfAxiom(subDescription, getClassExpression((OWLClass)superClass));
 			} 
