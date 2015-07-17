@@ -17,24 +17,21 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -313,6 +310,92 @@ public class OWL2QLTranslatorTest extends TestCase {
 			assertEquals("http://example/P", subC.getPredicate().getName());				
 			assertEquals("http://example/P", superC.getPredicate().getName());				
 			assertEquals(true, subC.isInverse() != superC.isInverse());				
+		}
+	}	
+
+	@Test
+	public void test_R4() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		
+		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
+		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
+		OWLClass class3 = factory.getOWLClass(IRI.create(URI.create("http://example/C")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
+		OWLClass class4 = factory.getOWLClass(IRI.create(URI.create("http://example/D")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class4));
+		
+		OWLClassExpression expr = factory.getOWLObjectIntersectionOf(class2, 
+				factory.getOWLObjectIntersectionOf(class3, class4));
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class1, expr));
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		List<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		assertEquals(3, axs.size());
+		Set<String> classNames = new HashSet<String>();
+		
+		for (BinaryAxiom<ClassExpression> a : axs) {
+			OClass subC = (OClass)a.getSub();
+			OClass superC = (OClass)a.getSuper();
+			assertEquals("http://example/A", subC.getPredicate().getName());
+			String name = superC.getPredicate().getName();
+			classNames.add(name);
+			assertTrue(name.equals("http://example/B") || name.equals("http://example/C") || name.equals("http://example/D"));				
+		}
+		assertEquals(3, classNames.size());
+	}	
+
+	@Test
+	public void test_R5() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		
+		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
+		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
+		OWLClass class3 = factory.getOWLClass(IRI.create(URI.create("http://example/C")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
+		OWLClass class4 = factory.getOWLClass(IRI.create(URI.create("http://example/D")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class4));
+		
+		OWLClassExpression expr = factory.getOWLObjectIntersectionOf(class2, 
+				factory.getOWLObjectIntersectionOf(factory.getOWLObjectComplementOf(class3), class4));
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class1, expr));
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		List<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		assertEquals(2, axs.size());
+		Set<String> classNames = new HashSet<String>();
+		
+		for (BinaryAxiom<ClassExpression> a : axs) {
+			OClass subC = (OClass)a.getSub();
+			OClass superC = (OClass)a.getSuper();
+			assertEquals("http://example/A", subC.getPredicate().getName());
+			String name = superC.getPredicate().getName();
+			classNames.add(name);
+			assertTrue(name.equals("http://example/B") || name.equals("http://example/D"));				
+		}
+		assertEquals(2, classNames.size());
+		
+		List<NaryAxiom<ClassExpression>> axs2 = dlliteonto.getDisjointClassesAxioms();
+		assertEquals(1, axs2.size());
+		
+		for (NaryAxiom<ClassExpression> a : axs2) {
+			assertEquals(2, a.getComponents().size());						
+			Iterator<ClassExpression> it = a.getComponents().iterator();
+			OClass subC = (OClass) it.next();
+			OClass superC = (OClass) it.next();
+			assertEquals("http://example/A", subC.getPredicate().getName());				
+			assertEquals("http://example/C", superC.getPredicate().getName());				
 		}
 	}	
 	

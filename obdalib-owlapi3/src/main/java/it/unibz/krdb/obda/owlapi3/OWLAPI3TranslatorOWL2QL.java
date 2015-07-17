@@ -611,6 +611,8 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	
 	/**
+	 * (CR)
+	 * 
 	 * superClassExpression := Class | superObjectIntersectionOf | superObjectComplementOf | 
 	 * 								superObjectSomeValuesFrom | DataSomeValuesFrom
 	 * 
@@ -618,33 +620,32 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 * superObjectComplementOf := 'ObjectComplementOf' '(' subClassExpression ')'
 	 * superObjectSomeValuesFrom := 'ObjectSomeValuesFrom' '(' ObjectPropertyExpression Class ')'
 	 * DataSomeValuesFrom := 'DataSomeValuesFrom' '(' DataPropertyExpression DataRange ')'
+	 * 
+	 * replaces ObjectIntersectionOf by a number of subClassOf axioms (rule [R4])
+	 *          superObjectComplementOf by disjointness axioms (rule [R5])
 	 */
-	
-	// Set<OWLClassExpression> is for [R4] in the grammar simplification
 	
 	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superclasses) throws TranslationException {
 		
+		//System.out.println(superclasses);
+		//System.out.println(superclasses.asConjunctSet());
+		
+		// .asConjunctSet() flattens out the intersections and the loop deals with [R4]
 		for (OWLClassExpression superClass : superclasses.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {
 				dl_onto.addSubClassOfAxiom(subDescription, getClassExpression((OWLClass)superClass));
 			} 
 			else if (superClass instanceof OWLObjectSomeValuesFrom) {
-				//if (profile.order() < LanguageProfile.OWL2QL.order()) {
-				//	throw new TranslationException();
-				//}
 				OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
 				OWLClassExpression filler = someexp.getFiller();
 
 				if (filler.isOWLThing()) 
 					dl_onto.addSubClassOfAxiom(subDescription, getClassExpression(someexp));
 				else 
-					// [R5] of the grammar simplifications
+					// grammar simplifications
 					dl_onto.addSubClassOfAxiom(subDescription, getPropertySomeClassRestriction(someexp));
 			} 
 			else if (superClass instanceof OWLDataSomeValuesFrom) {
-				//if (profile.order() < LanguageProfile.OWL2QL.order()) {
-				//	throw new TranslationException();
-				//}
 				OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
 				OWLDataRange filler = someexp.getFiller();
 
@@ -654,25 +655,18 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 					dl_onto.addSubClassOfAxiom(subDescription, getPropertySomeDatatypeRestriction(someexp));
 			} 
 			else if (superClass instanceof OWLObjectComplementOf) {
-				// TODO: handle negation via disjointness
+				// [R5]
+				OWLObjectComplementOf superC = (OWLObjectComplementOf)superClass;
+				ClassExpression subDescription2 = getSubclassExpression(superC.getOperand());
+				dl_onto.addDisjointClassesAxiom(ImmutableSet.of(subDescription, subDescription2));
 			}
-			else if (superClass instanceof OWLObjectMinCardinality) {
-				//if (profile.order() < LanguageProfile.DLLITEA.order())
-				//	throw new TranslationException();
-				dl_onto.addSubClassOfAxiom(subDescription, getClassExpression((OWLObjectMinCardinality) superClass));
-			} 
-			else if (superClass instanceof OWLDataMinCardinality) {
-				//if (profile.order() < LanguageProfile.DLLITEA.order())
-				//	throw new TranslationException();
-				dl_onto.addSubClassOfAxiom(subDescription, getClassExpression((OWLDataMinCardinality) superClass));
-			} 
 			else
-				throw new TranslationException();			
+				throw new TranslationException("unsupported operation in " + superClass);			
 		}
 	}
 	
 	
-	// [R5] of the grammar simplifcation
+	// [R5] of the grammar simplification
 	
 	private ClassExpression getPropertySomeClassRestriction(OWLObjectSomeValuesFrom someexp) throws TranslationException {
 		
