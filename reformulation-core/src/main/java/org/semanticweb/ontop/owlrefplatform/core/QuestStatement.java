@@ -517,8 +517,9 @@ public class QuestStatement implements OBDAStatement {
 				log.debug("New intermediate query: \n" + intermediateQuery.toString());
 				
 				
-				DatalogProgram pr = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
-				log.debug("New Datalog query: \n" + pr.toString());
+				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+				
+				log.debug("New Datalog query: \n" + unfolding.toString());
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());

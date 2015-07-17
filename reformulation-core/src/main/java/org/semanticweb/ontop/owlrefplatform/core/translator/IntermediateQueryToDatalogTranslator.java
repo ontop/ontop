@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,6 +89,7 @@ import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.semanticweb.ontop.model.BooleanExpression;
+import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DataAtom;
@@ -97,6 +99,7 @@ import org.semanticweb.ontop.model.DatatypeFactory;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
+import org.semanticweb.ontop.model.ListenableFunction;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
@@ -123,6 +126,8 @@ import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.UnmodifiableIterator;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -209,24 +214,37 @@ public class IntermediateQueryToDatalogTranslator {
 		
 		List<Function> body = new ArrayList<Function>();
 		
+		/**
+		 * Basic Atoms
+		 */
+		
 		if (node instanceof ConstructionNode) {
-			Function newAns = ((ConstructionNode) node).getProjectionAtom();
+			DataAtom newAns = ((ConstructionNode) node).getProjectionAtom();
+			Function mutAt = convertToMutableFunction(newAns);
 			rulesToDo.add((ConstructionNode)node);
-			body.add(newAns);
+			body.add(mutAt);
 			return body;
 			
 		} else if (node instanceof FilterNode) {
-			Function filter = ((FilterNode) node).getFilterCondition();
+			ImmutableBooleanExpression filter = ((FilterNode) node).getFilterCondition();
+			BooleanExpression mutFilter =  convertToMutableFunction(filter);
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
-			body.add(filter);
+			body.add(mutFilter);
 			return body;
+			
 					
 		} else if (node instanceof DataNode) {
 			DataAtom atom = ((DataNode)node).getAtom();
-			body.add(atom);
+			Function mutAt = convertToMutableFunction(atom);
+			body.add(mutAt);
 			return body;
-					
+				
+			
+			
+		/**
+		 * Nested Atoms	
+		 */
 		} else  if (node instanceof InnerJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
@@ -247,7 +265,6 @@ public class IntermediateQueryToDatalogTranslator {
 			
 		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
-			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 		
 			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
@@ -255,7 +272,9 @@ public class IntermediateQueryToDatalogTranslator {
 
 				
 			if (filter.isPresent()){
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, filter.get());
+				ImmutableBooleanExpression filter2 = filter.get();
+				BooleanExpression mutFilter =  convertToMutableFunction(filter2);
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, mutFilter);
 				body.add(newLJAtom);
 				return body;
 			}else{
@@ -291,5 +310,68 @@ public class IntermediateQueryToDatalogTranslator {
 	}
 
 	
+	
+	
+	
+	
+	/**
+	 * This method takes a immutable term and convert it into an old mutable function.
+	 * 
+	 * @param term
+	 * @return
+	 */
+	private static Function convertToMutableFunction( ImmutableFunctionalTerm term  ) {
+		
+		Predicate pred= term.getFunctionSymbol();
+		ImmutableList<Term> otherTerms =  term.getTerms();
+		List<Term> mutableList = new LinkedList<Term>();
+		UnmodifiableIterator<Term> iterator = otherTerms.iterator();
+		while ( iterator.hasNext()){
+
+			Term nextTerm = iterator.next();
+			if (nextTerm instanceof ImmutableFunctionalTerm ){
+				ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
+				Function newTerm = convertToMutableFunction(term2Change);
+				mutableList.add(newTerm);
+			} else{
+				mutableList.add(nextTerm);
+			}
+			
+		}
+		Function mutFunc = ofac.getFunction(pred, mutableList);
+		return mutFunc;
+		
+	}
+	
+	/**
+	 * This method takes a immutable booelan term and convert it into an old mutable boolean function.
+	 * 
+	 * @param term
+	 * @return
+	 */
+	private static BooleanExpression convertToMutableFunction( ImmutableBooleanExpression filter  ) {
+		
+		BooleanOperationPredicate pred= (BooleanOperationPredicate) filter.getFunctionSymbol();
+		ImmutableList<Term> otherTerms =  filter.getTerms();
+		List<Term> mutableList = new LinkedList<Term>();
+		
+		UnmodifiableIterator<Term> iterator = otherTerms.iterator();
+		while ( iterator.hasNext()){
+
+			Term nextTerm = iterator.next();
+			if (nextTerm instanceof ImmutableFunctionalTerm ){
+				ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
+				Function newTerm = convertToMutableFunction(term2Change);
+				mutableList.add(newTerm);
+			} else{
+				mutableList.add(nextTerm);
+			}
+			
+		}
+		BooleanExpression mutFunc = ofac.getBooleanExpression(pred,mutableList); 
+		return mutFunc;
+		
+	}
+		
 	
 }
