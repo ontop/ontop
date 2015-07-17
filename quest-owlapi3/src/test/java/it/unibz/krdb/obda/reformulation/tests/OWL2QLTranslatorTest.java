@@ -14,6 +14,8 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
 import java.net.URI;
@@ -397,6 +399,30 @@ public class OWL2QLTranslatorTest extends TestCase {
 			assertEquals("http://example/A", subC.getPredicate().getName());				
 			assertEquals("http://example/C", superC.getPredicate().getName());				
 		}
+	}	
+	
+
+	@Test
+	public void test_R6() throws Exception {
+		OntologyFactory factory = OntologyFactoryImpl.getInstance(); 
+		
+		ObjectPropertyExpression top = factory.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression topInv = top.getInverse();
+		ObjectPropertyExpression topInvInv = topInv.getInverse();
+		assertTrue(topInv == topInvInv);
+
+		ObjectPropertyExpression top2 = factory.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+		assertEquals(top2, topInv);
+		
+		ObjectPropertyExpression bot = factory.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression botInv = bot.getInverse();
+		ObjectPropertyExpression botInvInv = botInv.getInverse();
+		assertTrue(botInv == botInvInv);
+		
+		ObjectPropertyExpression bot2 = factory.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		assertEquals(bot2, botInv);		
+		
+		assertFalse(bot.equals(top));
 	}	
 	
 	

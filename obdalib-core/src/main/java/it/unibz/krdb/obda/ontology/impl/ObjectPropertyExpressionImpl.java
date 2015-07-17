@@ -51,30 +51,29 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		return new ObjectPropertyExpressionImpl(prop);  	
 	}
 	
+	/**
+	 * general constructor 
+	 * 
+	 * @param p
+	 */
+	
 	ObjectPropertyExpressionImpl(Predicate p) {
 		this.predicate = p;
 		this.isInverse = false;
-		this.isTop = predicate.getName().equals(owlTopObjectPropertyIRI);
-		this.isBottom = predicate.getName().equals(owlBottomObjectPropertyIRI);
+		this.string = predicate.getName();
+		this.isTop = string.equals(owlTopObjectPropertyIRI);
+		this.isBottom = string.equals(owlBottomObjectPropertyIRI);
 		if (isTop || isBottom) 
-			this.inverseProperty = this;   // [R1] in the grammar simplification rules
+			this.inverseProperty = this;   // rule [R6] 
 		else
 			this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
-		
-		if (isInverse) {
-			StringBuilder bf = new StringBuilder();
-			bf.append(predicate.toString());
-			bf.append("^-");
-			this.string =  bf.toString();
-		}
-		else 
-			this.string = predicate.toString();
 		
 		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
 	
 	/**
 	 * special constructor for creating the inverse of an object property
+	 *  (this constructor is never applied to the top and bottom properties)
 	 * 
 	 * @param p
 	 * @param isInverse
@@ -87,12 +86,16 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		this.isTop = false; // cannot be the top property
 		this.isBottom = false; // cannot be the bottom property
 		this.inverseProperty = inverseProperty;
-		StringBuilder bf = new StringBuilder();
-		bf.append(predicate.toString());
-		if (isInverse) 
-			bf.append("^-");
-		this.string =  bf.toString();
 
+		if (isInverse) {
+			StringBuilder bf = new StringBuilder();
+			bf.append(predicate.getName());
+			bf.append("^-");
+			this.string =  bf.toString();
+		}
+		else 
+			this.string = predicate.getName();
+		
 		this.domain = new ObjectSomeValuesFromImpl(this);		
 	}
 

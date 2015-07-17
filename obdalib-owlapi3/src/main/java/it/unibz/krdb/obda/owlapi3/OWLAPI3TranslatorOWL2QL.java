@@ -625,13 +625,13 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 *          superObjectComplementOf by disjointness axioms (rule [R5])
 	 */
 	
-	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superclasses) throws TranslationException {
+	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superClasses) throws TranslationException {
 		
 		//System.out.println(superclasses);
 		//System.out.println(superclasses.asConjunctSet());
 		
 		// .asConjunctSet() flattens out the intersections and the loop deals with [R4]
-		for (OWLClassExpression superClass : superclasses.asConjunctSet()) {
+		for (OWLClassExpression superClass : superClasses.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {
 				dl_onto.addSubClassOfAxiom(subDescription, getClassExpression((OWLClass)superClass));
 			} 
