@@ -305,16 +305,15 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     private static IntermediateQuery applyProposal(IntermediateQuery query,
                                                    Tree<ConstructionNodeUpdate> proposedConstructionTree) {
 
-        ImmutableList<BindingTransfer> transfers = extractTransfers(proposedConstructionTree);
+        ImmutableList<BindingTransfer> transfers = ImmutableList.copyOf(extractTransfers(proposedConstructionTree));
         ImmutableList<ConstructionNodeUpdate> nodeUpdates = ImmutableList.copyOf(proposedConstructionTree
                         .flatten()
                         .filter(new F<ConstructionNodeUpdate, Boolean>() {
-                                    @Override
-                                    public Boolean f(ConstructionNodeUpdate update) {
-                                        return update.getOptionalNewNode().isPresent();
-                                    }
-                                })
-                        .toCollection());
+                            @Override
+                            public Boolean f(ConstructionNodeUpdate update) {
+                                return update.getOptionalNewNode().isPresent();
+                            }
+                        }));
         SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(query, transfers, nodeUpdates);
         try {
             query.applySubstitutionLiftProposal(proposal);
@@ -325,7 +324,39 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         return query;
     }
 
-    private static ImmutableList<BindingTransfer> extractTransfers(Tree<ConstructionNodeUpdate> proposedConstructionTree) {
-        throw new RuntimeException("TODO: implement it!");
+    /**
+     * Recursive
+     */
+    private static List<BindingTransfer> extractTransfers(Tree<ConstructionNodeUpdate> tree) {
+        /**
+         * Binding transfers to this node
+         */
+
+        List<BindingTransfer> localTransfers;
+        ConstructionNodeUpdate currentRoot = tree.root();
+        if (currentRoot.hasNewBindings()) {
+            localTransfers = buildBindingTransfer(currentRoot, tree);
+        }
+        else {
+            localTransfers = List.nil();
+        }
+
+        /**
+         * Recursive call
+         */
+        List<BindingTransfer> subForestTransfers = tree.subForest()._1().toList()
+                .bind(new F<Tree<ConstructionNodeUpdate>, List<BindingTransfer>>() {
+            @Override
+            public List<BindingTransfer> f(Tree<ConstructionNodeUpdate> subTree) {
+                return extractTransfers(subTree);
+            }
+        });
+
+        return localTransfers.append(subForestTransfers);
+    }
+
+    private static List<BindingTransfer> buildBindingTransfer(ConstructionNodeUpdate currentRoot,
+                                                              Tree<ConstructionNodeUpdate> currentTree) {
+        throw new RuntimeException("TODO: implement buildBindingTransfer");
     }
 }
