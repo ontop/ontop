@@ -5,19 +5,20 @@ import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 
-public class ReplaceNodeProposalImpl extends LocalOptimizationProposalImpl implements ReplaceNodeProposal {
+public class ReplaceNodeProposalImpl implements ReplaceNodeProposal {
     private final QueryNode newNode;
     private final QueryNode formerNode;
+    private final IntermediateQuery query;
 
     public ReplaceNodeProposalImpl(IntermediateQuery intermediateQuery, QueryNode formerNode, QueryNode newNode) {
-        super(intermediateQuery);
+        this.query = intermediateQuery;
         this.formerNode = formerNode;
         this.newNode = newNode;
     }
 
     @Override
     public Optional<QueryNode> apply() throws InvalidLocalOptimizationProposalException {
-        return Optional.of(getTargetQuery().applyReplaceNodeProposal(this));
+        return Optional.of(query.applyReplaceNodeProposal(this));
     }
 
     @Override
