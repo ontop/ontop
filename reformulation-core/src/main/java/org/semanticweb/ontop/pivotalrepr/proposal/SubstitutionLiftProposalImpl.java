@@ -1,8 +1,11 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
 
 public class SubstitutionLiftProposalImpl implements SubstitutionLiftProposal {
     private final ConstructionNodeUpdate topNodeUpdate;

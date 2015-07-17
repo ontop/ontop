@@ -1,9 +1,10 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import fj.data.Option;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 
 /**
  * TODO: explain

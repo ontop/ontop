@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 

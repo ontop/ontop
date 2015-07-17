@@ -1,6 +1,7 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import com.google.common.base.Optional;
+import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
  * TODO: develop

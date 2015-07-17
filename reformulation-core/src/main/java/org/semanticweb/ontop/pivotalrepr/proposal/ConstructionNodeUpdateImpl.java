@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import com.google.common.base.Optional;
 import fj.data.Option;
@@ -6,7 +6,7 @@ import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
-import org.semanticweb.ontop.pivotalrepr.ConstructionNodeUpdate;
+import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeTools;
 
 import static org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeTools.newNodeWithAdditionalBindings;
 import static org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeTools.newNodeWithLessBindings;

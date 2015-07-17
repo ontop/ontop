@@ -7,6 +7,7 @@ import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,7 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.LocalOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 /**
  * Abstract class

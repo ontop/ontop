@@ -1,8 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.impl.GroupNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 /**
  * TODO: complete it.

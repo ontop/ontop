@@ -46,6 +46,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicTypeLiftOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -519,6 +520,9 @@ public class QuestStatement implements OBDAStatement {
 				
 				DatalogProgram pr = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 				log.debug("New Datalog query: \n" + pr.toString());
+
+				//BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				//typeLiftOptimizer.optimize(intermediateQuery);
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());

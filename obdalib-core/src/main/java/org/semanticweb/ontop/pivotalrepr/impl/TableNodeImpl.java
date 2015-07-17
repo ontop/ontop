@@ -4,6 +4,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 public class TableNodeImpl extends DataNodeImpl implements TableNode {
     private static final String TABLE_NODE_STR = "TABLE";

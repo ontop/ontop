@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 /**
  * TODO: describe.

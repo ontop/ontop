@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.NonGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 

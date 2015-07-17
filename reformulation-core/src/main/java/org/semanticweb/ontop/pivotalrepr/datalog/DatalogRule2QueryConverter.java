@@ -10,6 +10,7 @@ import org.semanticweb.ontop.model.impl.*;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter.InvalidDatalogProgramException;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
+import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 
 import java.util.Collection;
 import java.util.HashSet;

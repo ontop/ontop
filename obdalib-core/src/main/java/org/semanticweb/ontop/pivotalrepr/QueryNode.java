@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 /**
  * Mutable BUT ONLY WHEN APPLYING LocalOptimizationProposal forwarded by the IntermediateQuery.

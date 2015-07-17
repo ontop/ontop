@@ -1,6 +1,8 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 /**
  * TODO: explain
