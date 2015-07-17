@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr.proposal;
+package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;

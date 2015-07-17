@@ -11,7 +11,7 @@ import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdateImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.ConstructionNodeUpdateImpl;
 
 import java.util.*;
 import java.util.HashMap;

@@ -1,8 +1,10 @@
-package org.semanticweb.ontop.pivotalrepr.proposal;
+package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.ReplaceNodeProposal;
 
 
 public class ReplaceNodeProposalImpl implements ReplaceNodeProposal {
