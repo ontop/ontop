@@ -281,7 +281,9 @@ public class DatalogRule2QueryConverter {
                 /**
                  * Creates the node
                  */
-                DataAtom dataAtom = convertFromDatalogDataAtom(atom)._1();
+                P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = convertFromDatalogDataAtom(atom);
+                ImmutableSubstitution<ImmutableTerm> bindings = convertionResults._2();
+                DataAtom dataAtom = bindings.applyToDataAtom(convertionResults._1());
                 DataNode currentNode = createDataNode(dataAtom,tablePredicates);
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
