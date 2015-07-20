@@ -41,6 +41,8 @@ public interface QueryTreeComponent {
 
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException;
 
+    Optional<QueryNode> getParent(QueryNode node) throws IllegalTreeException;
+
     /**
      * TODO: explain
      */

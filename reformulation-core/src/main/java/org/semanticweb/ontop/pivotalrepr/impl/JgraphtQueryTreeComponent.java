@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -308,6 +309,20 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public Optional<QueryNode> getParent(QueryNode node) throws IllegalTreeException {
+        Set<LabeledEdge> toParentEdges = queryDAG.outgoingEdgesOf(node);
+
+        switch (toParentEdges.size()) {
+            case 0:
+                return Optional.absent();
+            case 1:
+                return Optional.of(queryDAG.getEdgeTarget(toParentEdges.iterator().next()));
+            default:
+                throw new IllegalTreeException("More than one parent found!");
+        }
+    }
+
+    @Override
     public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
         ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
         int nbChildren = children.size();
@@ -316,12 +331,31 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
                 removeSubTree(node);
                 return;
             case 1:
-                // TODO:
+                QueryNode child = children.get(0);
+                replaceNodeByUniqueChildren(node, child);
                 return;
             default:
                 throw new IllegalTreeUpdateException(node.toString() + " has more child. Cannot be replaced");
         }
     }
+
+    private void replaceNodeByUniqueChildren(QueryNode nodeToReplace, QueryNode replacingChild) {
+        ImmutableSet<LabeledEdge> toParentEdges = ImmutableSet.copyOf(queryDAG.outgoingEdgesOf(nodeToReplace));
+
+        /**
+         * Links to parents
+         */
+        for (LabeledEdge outgoingEdge : toParentEdges) {
+            QueryNode parent = queryDAG.getEdgeTarget(outgoingEdge);
+            try {
+                queryDAG.addDagEdge(replacingChild, parent, new LabeledEdge(outgoingEdge.getOptionalPosition()));
+            } catch (DirectedAcyclicGraph.CycleFoundException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            queryDAG.removeEdge(outgoingEdge);
+        }
+    }
+
 
     /**
      * TODO: describe

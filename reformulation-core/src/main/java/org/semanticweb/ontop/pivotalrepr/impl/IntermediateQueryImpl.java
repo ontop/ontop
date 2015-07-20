@@ -327,10 +327,60 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * Replaces the node
          */
-        QueryNode mostRecentNode = update.getMostRecentConstructionNode();
+        ConstructionNode mostRecentNode = update.getMostRecentConstructionNode();
         if (!mostRecentNode.equals(formerNode)) {
-            treeComponent.replaceNode(formerNode, mostRecentNode);
+            if (stillNeeded(formerNode, mostRecentNode)) {
+                treeComponent.replaceNode(formerNode, mostRecentNode);
+            }
+            else {
+                try {
+                    treeComponent.removeOrReplaceNodeByUniqueChildren(formerNode);
+                } catch (IllegalTreeUpdateException e) {
+                    throw new RuntimeException("Internal error: " + e.getMessage());
+                }
+            }
+
         }
+    }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: externalize
+     */
+    private boolean stillNeeded(QueryNode formerNode, ConstructionNode newNode) {
+        if (newNode.getSubstitution().isEmpty() && (!newNode.getOptionalModifiers().isPresent())) {
+
+            /**
+             * Checks the parent
+             */
+            try {
+                Optional<QueryNode> optionalParent = treeComponent.getParent(formerNode);
+                if (optionalParent.isPresent()) {
+                    QueryNode parentNode = optionalParent.get();
+                    if (parentNode instanceof UnionNode) {
+                        return true;
+                    }
+                }
+                else {
+                    return true;
+                }
+            } catch (IllegalTreeException e) {
+                throw new RuntimeException("Internal error: " + e.getMessage());
+            }
+
+            ImmutableList<QueryNode> children = treeComponent.getCurrentSubNodesOf(formerNode);
+            /**
+             * Checks if if still needed by at least one of its children.
+             */
+            for (QueryNode child : children) {
+                if (child instanceof GroupNode)
+                    return true;
+            }
+
+            return false;
+        }
+        return true;
     }
 
 
