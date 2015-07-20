@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
@@ -274,7 +276,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
                 try {
                     QueryNode newAncestor = ancestor.acceptNodeTransformer(transformer);
-                    if (newAncestor != ancestor) {
+                    if (!newAncestor.equals(ancestor)) {
                         treeComponent.replaceNode(ancestor, newAncestor);
                     }
 
@@ -285,7 +287,42 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
     }
 
+
+    /**
+     * TODO: explain
+     */
     private void applyConstructionNodeUpdate(ConstructionNodeUpdate update) throws InvalidLocalOptimizationProposalException {
-        throw new RuntimeException("TODO: implement applyConstructionNodeUpdate()");
+        QueryNode formerNode = update.getFormerNode();
+
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution =
+                update.getOptionalSubstitutionToPropagate();
+
+        /**
+         * Propagates the substitution to the sub-tree
+         */
+        if (optionalSubstitution.isPresent()) {
+
+            SubstitutionPropagator propagator = new SubstitutionPropagator(optionalSubstitution.get());
+            for (QueryNode descendantNode : treeComponent.getSubTreeNodesInTopDownOrder(formerNode)) {
+                try {
+                    QueryNode newDescendantNode = descendantNode.acceptNodeTransformer(propagator);
+                    if (!newDescendantNode.equals(descendantNode)) {
+                        treeComponent.replaceNode(descendantNode, newDescendantNode);
+                    }
+                } catch (QueryNodeTransformationException e) {
+                    throw new InvalidLocalOptimizationProposalException(e.getMessage());
+                }
+            }
+        }
+
+        /**
+         * Replaces the node
+         */
+        QueryNode mostRecentNode = update.getMostRecentConstructionNode();
+        if (!mostRecentNode.equals(formerNode)) {
+            treeComponent.replaceNode(formerNode, mostRecentNode);
+        }
     }
+
+
 }

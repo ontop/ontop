@@ -264,11 +264,20 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     /**
-     * TODO: implement it
+     * The root is EXCLUDED
      */
     @Override
-    public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
-        throw new RuntimeException("TODO: implement it");
+    public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode topNode) {
+
+        ImmutableList.Builder<QueryNode> nodeBuilder = ImmutableList.builder();
+
+        Queue<QueryNode> nodesToVisit = new LinkedList<>(getCurrentSubNodesOf(topNode));
+        while(!nodesToVisit.isEmpty()) {
+            QueryNode node = nodesToVisit.poll();
+            nodeBuilder.add(node);
+            nodesToVisit.addAll(getCurrentSubNodesOf(node));
+        }
+        return nodeBuilder.build();
     }
 
     @Override

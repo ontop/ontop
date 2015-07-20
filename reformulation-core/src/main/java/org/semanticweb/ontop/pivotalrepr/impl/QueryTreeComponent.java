@@ -31,6 +31,9 @@ public interface QueryTreeComponent {
      */
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
+    /**
+     * All the nodes EXCEPT the root of this sub-tree
+     */
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
