@@ -121,7 +121,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public void applySubstitutionLiftProposal(SubstitutionLiftProposal substitutionLiftProposal)
             throws InvalidLocalOptimizationProposalException {
-        throw new RuntimeException("TODO: apply substitution lift");
+
+        for (BindingTransfer bindingTransfer : substitutionLiftProposal.getBindingTransfers()) {
+            applyBindingTransfer(bindingTransfer);
+        }
+
+        for (ConstructionNodeUpdate update :substitutionLiftProposal.getNodeUpdates()) {
+            applyConstructionNodeUpdate(update);
+        }
     }
 
     @Override
@@ -236,5 +243,49 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public String toString() {
         return PRINTER.stringify(this);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private void applyBindingTransfer(BindingTransfer bindingTransfer) throws InvalidLocalOptimizationProposalException {
+        ConstructionNode targetNode = bindingTransfer.getTargetNode();
+
+        for (ConstructionNode sourceNode : bindingTransfer.getSourceNodes()) {
+            ImmutableList<QueryNode> ancestors;
+            try {
+                ancestors = treeComponent.getAncestors(sourceNode);
+            } catch (IllegalTreeException e) {
+                throw new InvalidLocalOptimizationProposalException("The source node " + sourceNode + " is not ");
+            }
+            if (!ancestors.contains(targetNode)) {
+                throw new InvalidLocalOptimizationProposalException("The target node " + targetNode
+                        + " is not an ancestor of " + sourceNode);
+            }
+
+            /**
+             * Updates the ancestors between the source and the target.
+             */
+            BindingTransferTransformer transformer = new BindingTransferTransformer(bindingTransfer);
+            for (QueryNode ancestor : ancestors) {
+                if (ancestor == targetNode) {
+                    break;
+                }
+
+                try {
+                    QueryNode newAncestor = ancestor.acceptNodeTransformer(transformer);
+                    if (newAncestor != ancestor) {
+                        treeComponent.replaceNode(ancestor, newAncestor);
+                    }
+
+                } catch (QueryNodeTransformationException e) {
+                    throw new InvalidLocalOptimizationProposalException(e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void applyConstructionNodeUpdate(ConstructionNodeUpdate update) throws InvalidLocalOptimizationProposalException {
+        throw new RuntimeException("TODO: implement applyConstructionNodeUpdate()");
     }
 }
