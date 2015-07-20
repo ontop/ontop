@@ -2,15 +2,13 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import fj.Effect;
-import fj.F;
-import fj.P;
-import fj.P2;
+import fj.*;
 import fj.data.HashMap;
 import fj.data.List;
 import fj.data.Option;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
@@ -87,12 +85,12 @@ public class TypeLiftTools {
          *
          *   When a false negative is detected, adds it to the index (side-effect).
          */
-        ruleEntries.foreach(new Effect<P2<Predicate, List<CQIE>>>() {
+        ruleEntries.foreach(new F<P2<Predicate, List<CQIE>>, Unit>() {
             @Override
-            public void e(P2<Predicate, List<CQIE>> ruleEntry) {
+            public Unit f(P2<Predicate, List<CQIE>> ruleEntry) {
                 Predicate predicate = ruleEntry._1();
                 if (multiTypedFunctionSymbolIndex.containsKey(predicate))
-                    return;
+                    return Unit.unit();
 
                 List<CQIE> rules = ruleEntry._2();
                 if (isMultiTypedPredicate(rules)) {
@@ -100,6 +98,7 @@ public class TypeLiftTools {
                     int count = 1;
                     newIndex.put(predicate, count);
                 }
+                return Unit.unit();
             }
         });
         return newIndex;
@@ -124,13 +123,6 @@ public class TypeLiftTools {
 
         CQIE currentRule = predicateDefinitionRules.head();
 
-        /**
-         * Checks restriction for the current rule:
-         *  --> interpreted (abusively) as multi-typed
-         */
-        if (!isRuleSupportedForTypeLift(currentRule))
-            return true;
-
         Function headFirstRule = currentRule.getHead();
 
         return isMultiTypedPredicate(constructTypeProposal(headFirstRule), predicateDefinitionRules.tail());
@@ -145,13 +137,6 @@ public class TypeLiftTools {
 
         CQIE currentRule = remainingRules.head();
 
-        /**
-         * Checks restriction for the current rule
-         * --> interpreted (abusively) as multi-typed
-         */
-        if (!isRuleSupportedForTypeLift(currentRule))
-            return true;
-
         Function ruleHead = currentRule.getHead();
         try {
             Function newType = applyTypeProposal(ruleHead, currentTypeProposal);
@@ -164,30 +149,6 @@ public class TypeLiftTools {
         } catch (SubstitutionUtilities.SubstitutionException e) {
             return true;
         }
-    }
-
-    /**
-     * Current restriction: Use of meta-atoms (left-joins, etc.)
-     */
-    private static boolean isRuleSupportedForTypeLift(CQIE rule) {
-
-        /**
-         * Checks the body atoms
-         */
-        boolean validBodyAtoms = Stream.iterableStream(rule.getBody()).forall(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                /**
-                 * Join and Left join meta-predicates are not supported here (but group is...)
-                 * (joins must have been unfolded so that its meta-predicate is not needed.).
-                 */
-                Predicate predicate = atom.getFunctionSymbol();
-                if (predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) || predicate.equals(OBDAVocabulary.SPARQL_JOIN))
-                    return false;
-                return true;
-            }
-        });
-        return validBodyAtoms;
     }
 
     /**

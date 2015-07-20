@@ -4,7 +4,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 
-SELECT ?productLabel ?offer ?price ?vendor ?vendorTitle ?review ?revTitle 
+SELECT DISTINCT ?productLabel ?offer ?price ?vendor ?vendorTitle ?review ?revTitle
        ?reviewer ?revName ?rating1 ?rating2
 WHERE { 
 	<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer7/Product330> rdfs:label ?productLabel .

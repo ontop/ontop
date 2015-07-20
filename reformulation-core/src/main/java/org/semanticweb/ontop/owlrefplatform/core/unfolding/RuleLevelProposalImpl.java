@@ -4,21 +4,25 @@ import com.google.common.collect.ImmutableSet;
 import fj.F;
 import fj.P2;
 import fj.data.*;
+import fj.data.HashMap;
+import fj.data.List;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.Set;
 
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.constructNewFunction;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isDataOrLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isLeftJoinOrJoinAtom;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.*;
 
 /**
- * Implementation making the following assumption:
- *   - Rules corresponds to conjunctive queries (no left-join)
+ * Left-join aware implementation.
  *
  */
 public class RuleLevelProposalImpl implements RuleLevelProposal {
@@ -35,55 +39,34 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     public RuleLevelProposalImpl(CQIE initialRule, HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
 
-        /**
-         * Only direct atoms (UCQ assumption: left-joins are not supported)
-         */
         List<Function> bodyAtoms = List.iterableList(initialRule.getBody());
 
-        List<Function> bodyDataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+        List<Function> dataAndCompositeAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
-                return atom.isDataFunction();
+                return isDataOrLeftJoinOrJoinAtom(atom);
             }
         });
-        List<Function> filterAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+        List<Function> otherAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
-                return atom.isBooleanFunction();
-            }
-        });
-
-        /**
-         * Excludes joins and left joins but consider group.
-         * TODO: this filtering test is weak. Improve it.
-         */
-        List<Function> nonCompositeAlgebraAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                if (!atom.isAlgebraFunction())
-                    return false;
-                Predicate predicate = atom.getFunctionSymbol();
-                if (predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) || predicate.equals(OBDAVocabulary.SPARQL_JOIN))
-                    return false;
-                return true;
+                return !isDataOrLeftJoinOrJoinAtom(atom);
             }
         });
 
         /**
-         * Extends the body data atoms so that are compatible with the typed child head for computing
-         * a type propagation substitution.
+         * Extends the body data atoms (in a possible complex structure made of Joins and LJs)
+         *     so that are compatible with the typed child head for computing a type propagation substitution.
          */
-        List<Function> extendedBodyDataAtoms = computeExtendedBodyDataAtoms(bodyDataAtoms, childProposalIndex);
+        List<Function> extendedBodyDataAndCompositeAtoms = computeExtendedBodyDataAtoms(dataAndCompositeAtoms,
+                childProposalIndex);
 
         /**
          * Computes the type propagating substitution.
          */
-        typingSubstitution = aggregateRuleAndProposals(extendedBodyDataAtoms, childProposalIndex);
+        typingSubstitution = aggregateRuleAndProposals(extendedBodyDataAndCompositeAtoms, childProposalIndex);
 
-        /**
-         * TODO: Only works for UCQs (Left-join hacky notation is not supported)
-         */
-        typedRule = constructTypedRule(initialRule, typingSubstitution, extendedBodyDataAtoms, filterAtoms, nonCompositeAlgebraAtoms);
+        typedRule = constructTypedRule(initialRule, typingSubstitution, extendedBodyDataAndCompositeAtoms, otherAtoms);
 
         /**
          * Derives the type proposal
@@ -99,7 +82,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      * Some of these conversions may introduce new non-conflicting variables.
      *
      */
-    private static List<Function> computeExtendedBodyDataAtoms(final List<Function> dataAtoms,
+    private static List<Function> computeExtendedBodyDataAtoms(final List<Function> dataAndCompositeAtoms,
                                                                final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
 
         /**
@@ -107,36 +90,84 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          *
          * Append-only Set.
          */
-        final java.util.Set<Variable> alreadyKnownRuleVariables = extractVariables(dataAtoms);
+        final java.util.Set<Variable> alreadyKnownRuleVariables = extractVariables(dataAndCompositeAtoms);
 
-        return dataAtoms.map(new F<Function, Function>() {
+        return dataAndCompositeAtoms.map(new F<Function, Function>() {
             @Override
             public Function f(Function atom) {
-                Option<PredicateLevelProposal> optionalChildPredProposal = childProposalIndex.get(atom.getFunctionSymbol());
                 /**
-                 * No child proposal --> return the original atom.
+                 * New variables may be added to alreadyKnownRuleVariables (mutable).
                  */
-                if (optionalChildPredProposal.isNone())
-                    return atom;
-
-                /**
-                 * Converts into an unifiable atom thanks to the type proposal.
-                 *
-                 * If new variables are created, they are added to the tracking set.
-                 *
-                 */
-                TypeProposal childTypeProposal = optionalChildPredProposal.some().getTypeProposal();
-                P2<Function, java.util.Set<Variable>> newAtomAndVariables = childTypeProposal.convertIntoExtendedAtom(atom,
-                        ImmutableSet.copyOf(alreadyKnownRuleVariables));
-
-                // Appends new variables
-                alreadyKnownRuleVariables.addAll(newAtomAndVariables._2());
-
-                Function unifiableAtom = newAtomAndVariables._1();
-                return unifiableAtom;
+                return computeExtendedAtom(atom, childProposalIndex, alreadyKnownRuleVariables);
             }
         });
     }
+
+    /**
+     * TODO: explain
+     *
+     * Beware, alreadyKnownRuleVariables is mutable
+     */
+    private static Function computeExtendedAtom(final Function dataOrCompositeAtom,
+                                                final HashMap<Predicate, PredicateLevelProposal> childProposalIndex,
+                                                final java.util.Set<Variable> alreadyKnownRuleVariables) {
+        if (dataOrCompositeAtom.isDataFunction())
+            return computeExtendedDataAtom(dataOrCompositeAtom, childProposalIndex, alreadyKnownRuleVariables);
+        else
+            return computeExtendedCompositeAtom(dataOrCompositeAtom, childProposalIndex, alreadyKnownRuleVariables);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Function computeExtendedDataAtom(Function dataAtom,
+                                                    HashMap<Predicate, PredicateLevelProposal> childProposalIndex,
+                                                    Set<Variable> alreadyKnownRuleVariables) {
+        Option<PredicateLevelProposal> optionalChildPredProposal = childProposalIndex.get(dataAtom.getFunctionSymbol());
+        /**
+         * No child proposal --> return the original atom.
+         */
+        if (optionalChildPredProposal.isNone())
+            return dataAtom;
+
+        /**
+         * Converts into an unifiable atom thanks to the type proposal.
+         *
+         * If new variables are created, they are added to the tracking set.
+         *
+         */
+        TypeProposal childTypeProposal = optionalChildPredProposal.some().getTypeProposal();
+        P2<Function, java.util.Set<Variable>> newAtomAndVariables = childTypeProposal.convertIntoExtendedAtom(dataAtom,
+                ImmutableSet.copyOf(alreadyKnownRuleVariables));
+
+        // Appends new variables
+        alreadyKnownRuleVariables.addAll(newAtomAndVariables._2());
+
+        Function unifiableAtom = newAtomAndVariables._1();
+        return unifiableAtom;
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Function computeExtendedCompositeAtom(Function compositeAtom,
+                                                         final HashMap<Predicate, PredicateLevelProposal> childProposalIndex,
+                                                         final Set<Variable> alreadyKnownRuleVariables) {
+        List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>)compositeAtom.getTerms());
+        List<Term> extendedSubAtoms = subAtoms.map(new F<Function, Term>() {
+            @Override
+            public Term f(Function subAtom) {
+                if (isDataOrLeftJoinOrJoinAtom(subAtom))
+                    return computeExtendedAtom(subAtom, childProposalIndex, alreadyKnownRuleVariables);
+                return subAtom;
+            }
+        });
+
+        return constructNewFunction(compositeAtom.getFunctionSymbol(), extendedSubAtoms);
+    }
+
+
+
 
     @Override
     public Substitution getTypingSubstitution() {
@@ -263,9 +294,10 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      *
      * Note that it only constructs Conjunctive Queries!
      *
+     * TODO: make sure it works for LJs!
+     *
      */
-    private static CQIE constructTypedRule(CQIE initialRule, Substitution typingSubstitution, List<Function> extendedDataAtoms, List<Function> untypedFilterAtoms,
-                                           List<Function> untypedNonCompositeAlgebraAtoms) {
+    private static CQIE constructTypedRule(CQIE initialRule, Substitution typingSubstitution, List<Function> extendedDataAndCompositeAtoms, List<Function> untypedOtherAtoms) {
 
         /**
          * Derives a typed head by applying the substitution
@@ -275,14 +307,21 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         SubstitutionUtilities.applySubstitution(typedHead, typingSubstitution);
 
         /**
-         * Types filter and non composite algebra atoms
+         * Types filter and non-composite algebra atoms
          */
-        List<Function> typedBodyAtoms = typeAtoms(typingSubstitution, untypedFilterAtoms.append(untypedNonCompositeAlgebraAtoms));
+        List<Function> typedBodyAtoms = typeAtoms(typingSubstitution, untypedOtherAtoms);
 
         /**
-         * Removes the variables that correspond to URI templates
+         * Types filter and non-composite algebra sub-atoms INSIDE composite atoms
          */
-        List<Function> newUntypedDataAtoms = removeURITemplates(extendedDataAtoms, typingSubstitution);
+        List<Function> fullyTypedExtendedDataAndCompositeAtoms = typeRelevantNestedAtoms(extendedDataAndCompositeAtoms,
+                typingSubstitution);
+
+        /**
+         * Removes the variables that correspond to URI templates from data atoms ONLY (not boolean conditions)
+         */
+        List<Function> newUntypedDataAtoms = removeURITemplatesFromDataAtoms(fullyTypedExtendedDataAndCompositeAtoms,
+                typingSubstitution);
 
         /**
          * Concats the three types of body atoms
@@ -296,34 +335,100 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     }
 
     /**
+     * TODO: explain
+     */
+    private static List<Function> typeRelevantNestedAtoms(List<Function> atoms, final Substitution typingSubstitution) {
+        return atoms.map(new F<Function, Function>() {
+            @Override
+            public Function f(Function atom) {
+                if (!isDataOrLeftJoinOrJoinAtom(atom)) {
+                    return typeAtom(typingSubstitution, atom);
+                }
+                else if (isLeftJoinOrJoinAtom(atom)) {
+                    List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>)atom.getTerms());
+
+                    List<Function> updatedSubAtoms = typeRelevantNestedAtoms(subAtoms, typingSubstitution);
+                    return constructNewFunction(updatedSubAtoms, atom.getFunctionSymbol());
+                }
+                /**
+                 * If is a data atom, nothing to do.
+                 */
+                else
+                    return atom;
+            }
+        });
+    }
+
+    /**
      * Applies the typing substitution to a list of atoms.
      */
     private static List<Function> typeAtoms(final Substitution typingSubstitution, final List<Function> atoms) {
         return atoms.map(new F<Function, Function>() {
             @Override
             public Function f(Function atom) {
-                Function newAtom = (Function) atom.clone();
-                // SIDE-EFFECT: makes the new head typed.
-                SubstitutionUtilities.applySubstitution(newAtom, typingSubstitution);
-                return newAtom;
+                return typeAtom(typingSubstitution, atom);
             }
         });
     }
 
-    private static List<Function> removeURITemplates(List<Function> extendedDataAtoms, final Substitution typingSubstitution) {
-        return extendedDataAtoms.map(new F<Function, Function>() {
+    /**
+     * TODO: look if this method does not exist somewhere else
+     */
+    private static Function typeAtom(final Substitution typingSubstitution, final Function atom) {
+        Function newAtom = (Function) atom.clone();
+        // SIDE-EFFECT: makes the new head typed.
+        SubstitutionUtilities.applySubstitution(newAtom, typingSubstitution);
+        return newAtom;
+    }
+
+    /**
+     * Composite atoms may also contain some boolean sub-atoms; URI templates in the latter should NOT be removed.
+     */
+    private static List<Function> removeURITemplatesFromDataAtoms(List<Function> atoms,
+                                                                  final Substitution typingSubstitution) {
+        return atoms.map(new F<Function, Function>() {
             @Override
             public Function f(Function atom) {
-                Function typedAtom = (Function) atom.clone();
-                SubstitutionUtilities.applySubstitution(typedAtom, typingSubstitution);
-
+                if (atom.isDataFunction()) {
+                    return removeURITemplatesFromDataAtom(atom, typingSubstitution);
+                }
                 /**
-                 * Untyping removes URI template terms.
+                 * Indirect rec
                  */
-                Function untypedAtom = TypeLiftTools.removeTypeFromAtom(typedAtom);
-                return untypedAtom;
+                else if (isLeftJoinOrJoinAtom(atom)) {
+                    return removeURITemplatesFromCompositeAtom(atom, typingSubstitution);
+                }
+                /**
+                 * Does not alter the other atoms.
+                 */
+                else
+                    return atom;
             }
         });
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Function removeURITemplatesFromDataAtom(Function dataAtom, final Substitution typingSubstitution) {
+        Function typedAtom = (Function) dataAtom.clone();
+        SubstitutionUtilities.applySubstitution(typedAtom, typingSubstitution);
+
+        /**
+         * Untyping removes URI template terms.
+         */
+        Function untypedAtom = TypeLiftTools.removeTypeFromAtom(typedAtom);
+        return untypedAtom;
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Function removeURITemplatesFromCompositeAtom(Function compositeAtom, Substitution typingSubstitution) {
+        List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>)compositeAtom.getTerms());
+
+        List<Function> cleanedSubAtoms = removeURITemplatesFromDataAtoms(subAtoms, typingSubstitution);
+        return constructNewFunction(cleanedSubAtoms, compositeAtom.getFunctionSymbol());
     }
 
     /**

@@ -51,11 +51,6 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public void put(VariableImpl var, Term term) {
-        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
-    }
-
-    @Override
     public Set<VariableImpl> keySet() {
         return ImmutableSet.of();
     }

@@ -31,22 +31,7 @@ import java.util.UUID;
 
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
@@ -229,9 +214,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.getQueryModifiers().copy(modifiers);
+		return p;
+	}
+	@Override
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
+		return p;
+	}
+	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.appendRule(rules);
+		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
 
@@ -462,6 +460,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getSPARQLJoin(Term t1, Term t2) {
 		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
+	}
+
+	@Override
+	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2, joinCondition);
 	}
 
 	@Override

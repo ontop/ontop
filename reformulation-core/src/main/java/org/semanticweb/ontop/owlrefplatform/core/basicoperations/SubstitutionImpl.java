@@ -31,7 +31,7 @@ import java.util.*;
 /**
  * Mutable reference implementation of a Substitution.
  */
-public class SubstitutionImpl implements Substitution {
+public class SubstitutionImpl implements AppendableSubstitution {
 
     private final Map<VariableImpl, Term> map;
 
@@ -59,7 +59,6 @@ public class SubstitutionImpl implements Substitution {
     }
 
     @Override
-    @Deprecated
     public void put(VariableImpl var, Term term) {
         map.put(var, term);
     }
