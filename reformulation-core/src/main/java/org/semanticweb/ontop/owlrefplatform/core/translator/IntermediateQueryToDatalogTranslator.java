@@ -254,7 +254,9 @@ public class IntermediateQueryToDatalogTranslator {
 				atoms.addAll(atomsList);
 			}
 			if (filter.isPresent()){
-				Function newJ = ofac.getSPARQLJoin(atoms, filter.get());
+				ImmutableBooleanExpression filter2 = filter.get();
+				Function mutFilter = convertToMutableFunction(filter2);
+				Function newJ = ofac.getSPARQLJoin(atoms, mutFilter);
 				body.add(newJ);
 				return body;
 			}else{
