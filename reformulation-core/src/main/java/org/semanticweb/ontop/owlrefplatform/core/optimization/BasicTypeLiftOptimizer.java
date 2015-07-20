@@ -6,6 +6,8 @@ import fj.data.*;
 import fj.data.List;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
@@ -14,6 +16,7 @@ import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.BindingTransferImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ConstructionNodeUpdateImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionLiftProposalImpl;
 
@@ -307,13 +310,13 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
 
         ImmutableList<BindingTransfer> transfers = ImmutableList.copyOf(extractTransfers(proposedConstructionTree));
         ImmutableList<ConstructionNodeUpdate> nodeUpdates = ImmutableList.copyOf(proposedConstructionTree
-                        .flatten()
-                        .filter(new F<ConstructionNodeUpdate, Boolean>() {
-                            @Override
-                            public Boolean f(ConstructionNodeUpdate update) {
-                                return update.getOptionalNewNode().isPresent();
-                            }
-                        }));
+                .flatten()
+                .filter(new F<ConstructionNodeUpdate, Boolean>() {
+                    @Override
+                    public Boolean f(ConstructionNodeUpdate update) {
+                        return update.getOptionalNewNode().isPresent();
+                    }
+                }));
         SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(query, transfers, nodeUpdates);
         try {
             query.applySubstitutionLiftProposal(proposal);
@@ -335,7 +338,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         List<BindingTransfer> localTransfers;
         ConstructionNodeUpdate currentRoot = tree.root();
         if (currentRoot.hasNewBindings()) {
-            localTransfers = buildBindingTransfer(currentRoot, tree);
+            localTransfers = buildBindingTransfers(currentRoot, tree);
         }
         else {
             localTransfers = List.nil();
@@ -355,8 +358,57 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         return localTransfers.append(subForestTransfers);
     }
 
-    private static List<BindingTransfer> buildBindingTransfer(ConstructionNodeUpdate currentRoot,
-                                                              Tree<ConstructionNodeUpdate> currentTree) {
-        throw new RuntimeException("TODO: implement buildBindingTransfer");
+    /**
+     * TODO: explain
+     */
+    private static List<BindingTransfer> buildBindingTransfers(ConstructionNodeUpdate currentRoot,
+                                                               Tree<ConstructionNodeUpdate> currentTree) {
+        ImmutableList.Builder<BindingTransfer> transferBuilder = ImmutableList.builder();
+        ImmutableMap<VariableImpl, ImmutableTerm> newBindingMap = currentRoot.getNewBindings().getImmutableMap();
+
+        for (VariableImpl boundVariable : newBindingMap.keySet()) {
+            List<ConstructionNode> sources = findSources(boundVariable, currentTree);
+
+            ImmutableSubstitution<ImmutableTerm> uniqueBinding = new ImmutableSubstitutionImpl<>(
+                    ImmutableMap.of(boundVariable, newBindingMap.get(boundVariable)));
+
+            BindingTransfer transfer = new BindingTransferImpl(uniqueBinding, ImmutableList.copyOf(sources),
+                    currentRoot.getFormerNode());
+            transferBuilder.add(transfer);
+        }
+        return mergeTransfers(transferBuilder.build());
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static List<ConstructionNode> findSources(final VariableImpl boundVariable,
+                                                      Tree<ConstructionNodeUpdate> currentTree) {
+
+        ConstructionNode formerRootNode = currentTree.root().getFormerNode();
+
+        if (formerRootNode.getSubstitution().isDefining(boundVariable)) {
+            return List.cons(formerRootNode, List.<ConstructionNode>nil());
+        }
+        /**
+         * Recursive
+         */
+        else {
+            return currentTree.subForest()._1().toList().bind(new F<Tree<ConstructionNodeUpdate>, List<ConstructionNode>>() {
+                @Override
+                public List<ConstructionNode> f(Tree<ConstructionNodeUpdate> subTree) {
+                    return findSources(boundVariable, subTree);
+                }
+            });
+        }
+    }
+
+    /**
+     * TODO: replace this stub by a merging implementation.
+     *
+     * Merges transfers that have the same sources and the same target.
+     */
+    private static List<BindingTransfer> mergeTransfers(ImmutableList<BindingTransfer> transfers) {
+        return List.iterableList(transfers);
     }
 }
