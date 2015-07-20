@@ -47,5 +47,5 @@ public interface QueryNode extends Cloneable {
      * throw a QueryNodeTransformationException
      *
      */
-    QueryNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    QueryNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
 }

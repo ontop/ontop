@@ -307,6 +307,22 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         return ancestorBuilder.build();
     }
 
+    @Override
+    public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+        ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
+        int nbChildren = children.size();
+        switch(nbChildren) {
+            case 0:
+                removeSubTree(node);
+                return;
+            case 1:
+                // TODO:
+                return;
+            default:
+                throw new IllegalTreeUpdateException(node.toString() + " has more child. Cannot be replaced");
+        }
+    }
+
     /**
      * TODO: describe
      */

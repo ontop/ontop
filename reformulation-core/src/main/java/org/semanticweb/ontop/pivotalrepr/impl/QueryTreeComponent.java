@@ -40,4 +40,9 @@ public interface QueryTreeComponent {
                                                                                QueryNode childNode);
 
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException;
+
+    /**
+     * TODO: explain
+     */
+    void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
 }

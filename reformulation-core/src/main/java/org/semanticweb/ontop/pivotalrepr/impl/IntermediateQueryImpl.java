@@ -282,6 +282,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
                 } catch (QueryNodeTransformationException e) {
                     throw new InvalidLocalOptimizationProposalException(e.getMessage());
+                } catch (NotNeededNodeException e) {
+                    try {
+                        treeComponent.removeOrReplaceNodeByUniqueChildren(ancestor);
+                    } catch (IllegalTreeUpdateException e1) {
+                        throw new RuntimeException("Internal error: invalid binding transfer application");
+                    }
                 }
             }
         }
@@ -311,6 +317,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                     }
                 } catch (QueryNodeTransformationException e) {
                     throw new InvalidLocalOptimizationProposalException(e.getMessage());
+                } catch (NotNeededNodeException e) {
+                    throw new RuntimeException("TODO: handle this case (substitution propagated after lifting" +
+                            "some bindings)");
                 }
             }
         }

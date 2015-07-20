@@ -7,6 +7,8 @@ import org.semanticweb.ontop.model.impl.NonGroundFunctionalTermImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.SubQueryUnificationTools.ConstructionNodeUnification;
 
+import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
+
 /**
  * TODO: describe
  */
@@ -40,15 +42,6 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
      */
     public static class UnificationException extends QueryNodeTransformationException {
         public UnificationException(String message) {
-            super(message);
-        }
-    }
-
-    /**
-     * When the QueryNode is not needed anymore.
-     */
-    public static class NotNeededNodeException extends QueryNodeTransformationException {
-        public NotNeededNodeException(String message) {
             super(message);
         }
     }
@@ -137,7 +130,7 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException {
+    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
         ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
         for (NonGroundTerm term : groupNode.getGroupingTerms()) {
 
@@ -148,19 +141,10 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
             /**
              * Functional term: adds it if remains a non-ground term.
              */
-            else if (newTerm instanceof ImmutableFunctionalTerm) {
-                if (!newTerm.getReferencedVariables().isEmpty()) {
-                    NonGroundFunctionalTerm functionalTerm = new NonGroundFunctionalTermImpl(
-                            (ImmutableFunctionalTerm)newTerm);
-
-                    termBuilder.add(functionalTerm);
-                }
-            }
-            /**
-             * Should never happen (internal error)
-             */
-            else {
-                throw new RuntimeException("Unexpected term returned: " + newTerm);
+            else if (!isGroundTerm(newTerm)) {
+                NonGroundFunctionalTerm functionalTerm = new NonGroundFunctionalTermImpl(
+                        (ImmutableFunctionalTerm)newTerm);
+                termBuilder.add(functionalTerm);
             }
         }
 

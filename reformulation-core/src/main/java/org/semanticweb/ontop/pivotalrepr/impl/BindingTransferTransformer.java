@@ -7,10 +7,6 @@ import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.NonGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.FilterNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.GroupNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 
 /**
@@ -65,22 +61,26 @@ public class BindingTransferTransformer implements QueryNodeTransformer {
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException {
+    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
         ImmutableList.Builder<NonGroundTerm> groupingTermBuilder = ImmutableList.builder();
         for (NonGroundTerm groupingTerm : groupNode.getGroupingTerms()) {
             ImmutableTerm newTerm = transferredBindings.apply(groupingTerm);
 
+            /**
+             * We ignore the ground terms.
+             */
             if (newTerm instanceof NonGroundTerm) {
                 groupingTermBuilder.add((NonGroundTerm) newTerm);
             }
-            /**
-             * TODO: understand what is the proper behavior to adopt.
-             */
-            else {
-                throw new QueryNodeTransformationException("GROUPing by non-ground term is not (yet?) supported");
-            }
         }
-        return new GroupNodeImpl(groupingTermBuilder.build());
+        ImmutableList<NonGroundTerm> newGroupingTerms = groupingTermBuilder.build();
+        /**
+         * Declares the node as not needed anymore if it has no more grouping term.
+         */
+        if (newGroupingTerms.isEmpty()) {
+            throw new NotNeededNodeException("This GROUP node is not needed anymore");
+        }
+        return new GroupNodeImpl(newGroupingTerms);
     }
 
     private Optional<ImmutableBooleanExpression> transformOptionalFilterCondition(
