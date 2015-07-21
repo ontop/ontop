@@ -117,7 +117,7 @@ public class DatalogProgram2QueryConverter {
                             convertDatalogRule(datalogAtomDefinition, tablePredicates, Optional.<ImmutableQueryModifiers>absent()));
                 }
                 try {
-                    return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions);
+                    return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
                 } catch (QueryMergingException e) {
                     throw new InvalidDatalogProgramException(e.getLocalizedMessage());
                 }
