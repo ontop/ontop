@@ -512,17 +512,17 @@ public class QuestStatement implements OBDAStatement {
 
 		if (unfolding.getRules().size() > 0) {
 			try {
-				// TODO: go further with this new data structure
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(unfolding,
 						unfolder.getExtensionalPredicates());
-				log.debug("New intermediate query: \n" + intermediateQuery.toString());
+				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
+
+				BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+				log.debug("New lifted query: \n" + intermediateQuery.toString());
 				
 				
 				DatalogProgram pr = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 				log.debug("New Datalog query: \n" + pr.toString());
-
-				//BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
-				//typeLiftOptimizer.optimize(intermediateQuery);
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
