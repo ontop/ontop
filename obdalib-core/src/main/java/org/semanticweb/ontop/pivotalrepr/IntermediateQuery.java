@@ -3,6 +3,10 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.NewSubNodeSelectionProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.ReplaceNodeProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
 
 /**
  *
@@ -28,6 +32,7 @@ public interface IntermediateQuery {
      *
      * Returns the QueryNode at the same position, which might be new.
      */
+    @Deprecated
     QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
             throws InvalidLocalOptimizationProposalException;
 
@@ -37,6 +42,13 @@ public interface IntermediateQuery {
      * Returns the QueryNode at the same position, which might be new.
      */
     QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
+            throws InvalidLocalOptimizationProposalException;
+
+    /**
+     * TODO: describe
+     *
+     */
+    void applySubstitutionLiftProposal(SubstitutionLiftProposal substitutionLiftProposal)
             throws InvalidLocalOptimizationProposalException;
 
     /**

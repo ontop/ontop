@@ -14,5 +14,5 @@ public interface GroupNode extends QueryNode {
     GroupNode clone();
 
     @Override
-    GroupNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    GroupNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
 }

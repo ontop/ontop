@@ -31,10 +31,20 @@ public interface QueryTreeComponent {
      */
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
+    /**
+     * All the nodes EXCEPT the root of this sub-tree
+     */
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                QueryNode childNode);
 
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException;
+
+    Optional<QueryNode> getParent(QueryNode node) throws IllegalTreeException;
+
+    /**
+     * TODO: explain
+     */
+    void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
 }

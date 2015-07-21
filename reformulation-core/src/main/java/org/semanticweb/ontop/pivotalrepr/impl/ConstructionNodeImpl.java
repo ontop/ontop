@@ -7,6 +7,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

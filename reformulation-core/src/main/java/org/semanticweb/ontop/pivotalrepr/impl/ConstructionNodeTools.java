@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
@@ -80,6 +81,8 @@ public class ConstructionNodeTools {
             return Optional.of(substitutionToPropagate);
         }
     }
+
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
 
     /**
@@ -334,20 +337,37 @@ public class ConstructionNodeTools {
         if (!optionalModifiers.isPresent())
             return Optional.absent();
 
-        throw new RuntimeException("TODO: implement it");
+        throw new RuntimeException("TODO: support the update of modifiers");
     }
 
     /**
      * TODO: explain
+     *
+     * TODO: check if the use of a set for ordering is safe
      */
     private static DataAtom computeNewDataAtom(DataAtom projectionAtom, ImmutableSet<VariableImpl> variablesToRemove,
                                                ImmutableSet<VariableImpl> newVariablesToProject) {
-        throw new RuntimeException("TODO: implement it");
+        // Mutable
+        List<VariableOrGroundTerm> newArguments = new LinkedList<>(projectionAtom.getVariablesOrGroundTerms());
+        newArguments.removeAll(variablesToRemove);
+        for (VariableImpl newVariable : newVariablesToProject) {
+            if (!newArguments.contains(newVariable)) {
+                newArguments.add(newVariable);
+            }
+        }
+        return DATA_FACTORY.getDataAtom(projectionAtom.getPredicate(), ImmutableList.copyOf(newArguments));
     }
 
-    private static ImmutableSubstitution<VariableOrGroundTerm> convertToVarOrGroundTermSubstitution(ImmutableSubstitution<ImmutableTerm> substitution)
-        throws SubstitutionConversionException {
-        return null;
+    private static ImmutableSubstitution<VariableOrGroundTerm> convertToVarOrGroundTermSubstitution(
+            ImmutableSubstitution<ImmutableTerm> substitution) throws SubstitutionConversionException {
+        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
+        for (Map.Entry<VariableImpl, ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+            ImmutableTerm rightTerm = entry.getValue();
+            if (rightTerm instanceof VariableOrGroundTerm) {
+                mapBuilder.put(entry.getKey(), (VariableOrGroundTerm) rightTerm);
+            }
+        }
+        return new ImmutableSubstitutionImpl<>(mapBuilder.build());
     }
 
 }

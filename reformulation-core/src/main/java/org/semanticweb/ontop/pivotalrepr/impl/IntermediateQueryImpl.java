@@ -5,8 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +106,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException {
-        QueryNode nodeToReplace = proposal.getQueryNode();
+        QueryNode nodeToReplace = proposal.getNodeToReplace();
 
         if (!contains(nodeToReplace)) {
             throw new InvalidLocalOptimizationProposalException("No such node to replace: " + nodeToReplace);
@@ -115,6 +118,19 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         treeComponent.replaceNode(nodeToReplace,replacingNode);
 
         return replacingNode;
+    }
+
+    @Override
+    public void applySubstitutionLiftProposal(SubstitutionLiftProposal substitutionLiftProposal)
+            throws InvalidLocalOptimizationProposalException {
+
+        for (BindingTransfer bindingTransfer : substitutionLiftProposal.getBindingTransfers()) {
+            applyBindingTransfer(bindingTransfer);
+        }
+
+        for (ConstructionNodeUpdate update :substitutionLiftProposal.getNodeUpdates()) {
+            applyConstructionNodeUpdate(update);
+        }
     }
 
     @Override
@@ -230,4 +246,142 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public String toString() {
         return PRINTER.stringify(this);
     }
+
+    /**
+     * TODO: explain
+     */
+    private void applyBindingTransfer(BindingTransfer bindingTransfer) throws InvalidLocalOptimizationProposalException {
+        ConstructionNode targetNode = bindingTransfer.getTargetNode();
+
+        for (ConstructionNode sourceNode : bindingTransfer.getSourceNodes()) {
+            ImmutableList<QueryNode> ancestors;
+            try {
+                ancestors = treeComponent.getAncestors(sourceNode);
+            } catch (IllegalTreeException e) {
+                throw new InvalidLocalOptimizationProposalException("The source node " + sourceNode + " is not ");
+            }
+            if (!ancestors.contains(targetNode)) {
+                throw new InvalidLocalOptimizationProposalException("The target node " + targetNode
+                        + " is not an ancestor of " + sourceNode);
+            }
+
+            /**
+             * Updates the ancestors between the source and the target.
+             */
+            BindingTransferTransformer transformer = new BindingTransferTransformer(bindingTransfer);
+            for (QueryNode ancestor : ancestors) {
+                if (ancestor == targetNode) {
+                    break;
+                }
+
+                try {
+                    QueryNode newAncestor = ancestor.acceptNodeTransformer(transformer);
+                    if (!newAncestor.equals(ancestor)) {
+                        treeComponent.replaceNode(ancestor, newAncestor);
+                    }
+
+                } catch (QueryNodeTransformationException e) {
+                    throw new InvalidLocalOptimizationProposalException(e.getMessage());
+                } catch (NotNeededNodeException e) {
+                    try {
+                        treeComponent.removeOrReplaceNodeByUniqueChildren(ancestor);
+                    } catch (IllegalTreeUpdateException e1) {
+                        throw new RuntimeException("Internal error: invalid binding transfer application");
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * TODO: explain
+     */
+    private void applyConstructionNodeUpdate(ConstructionNodeUpdate update) throws InvalidLocalOptimizationProposalException {
+        QueryNode formerNode = update.getFormerNode();
+
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution =
+                update.getOptionalSubstitutionToPropagate();
+
+        /**
+         * Propagates the substitution to the sub-tree
+         */
+        if (optionalSubstitution.isPresent()) {
+
+            SubstitutionPropagator propagator = new SubstitutionPropagator(optionalSubstitution.get());
+            for (QueryNode descendantNode : treeComponent.getSubTreeNodesInTopDownOrder(formerNode)) {
+                try {
+                    QueryNode newDescendantNode = descendantNode.acceptNodeTransformer(propagator);
+                    if (!newDescendantNode.equals(descendantNode)) {
+                        treeComponent.replaceNode(descendantNode, newDescendantNode);
+                    }
+                } catch (QueryNodeTransformationException e) {
+                    throw new InvalidLocalOptimizationProposalException(e.getMessage());
+                } catch (NotNeededNodeException e) {
+                    throw new RuntimeException("TODO: handle this case (substitution propagated after lifting" +
+                            "some bindings)");
+                }
+            }
+        }
+
+        /**
+         * Replaces the node
+         */
+        ConstructionNode mostRecentNode = update.getMostRecentConstructionNode();
+        if (!mostRecentNode.equals(formerNode)) {
+            if (stillNeeded(formerNode, mostRecentNode)) {
+                treeComponent.replaceNode(formerNode, mostRecentNode);
+            }
+            else {
+                try {
+                    treeComponent.removeOrReplaceNodeByUniqueChildren(formerNode);
+                } catch (IllegalTreeUpdateException e) {
+                    throw new RuntimeException("Internal error: " + e.getMessage());
+                }
+            }
+
+        }
+    }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: externalize
+     */
+    private boolean stillNeeded(QueryNode formerNode, ConstructionNode newNode) {
+        if (newNode.getSubstitution().isEmpty() && (!newNode.getOptionalModifiers().isPresent())) {
+
+            /**
+             * Checks the parent
+             */
+            try {
+                Optional<QueryNode> optionalParent = treeComponent.getParent(formerNode);
+                if (optionalParent.isPresent()) {
+                    QueryNode parentNode = optionalParent.get();
+                    if (parentNode instanceof UnionNode) {
+                        return true;
+                    }
+                }
+                else {
+                    return true;
+                }
+            } catch (IllegalTreeException e) {
+                throw new RuntimeException("Internal error: " + e.getMessage());
+            }
+
+            ImmutableList<QueryNode> children = treeComponent.getCurrentSubNodesOf(formerNode);
+            /**
+             * Checks if if still needed by at least one of its children.
+             */
+            for (QueryNode child : children) {
+                if (child instanceof GroupNode)
+                    return true;
+            }
+
+            return false;
+        }
+        return true;
+    }
+
+
 }

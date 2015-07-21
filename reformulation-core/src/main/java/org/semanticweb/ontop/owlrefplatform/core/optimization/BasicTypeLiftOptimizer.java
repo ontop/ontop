@@ -6,10 +6,19 @@ import fj.data.*;
 import fj.data.List;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
+import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.BindingTransferImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.ConstructionNodeUpdateImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionLiftProposalImpl;
 
 import java.util.*;
 import java.util.HashMap;
@@ -25,62 +34,14 @@ import java.util.HashMap;
  */
 public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
 
-
     /**
-     * Quasi-immutable (except the ConstructionNode)
+     * High-level method
      */
-    private static class ConstructionNodeProposal {
-
-        private final ConstructionNode formerNode;
-        private final Option<ConstructionNode> optionalNewNode;
-
-        public ConstructionNodeProposal(ConstructionNode formerConstructionNode) {
-            this.formerNode = formerConstructionNode;
-            this.optionalNewNode = Option.none();
-        }
-
-        public ConstructionNodeProposal(ConstructionNode formerConstructionNode,
-                                        ConstructionNode newConstructionNode) {
-            this.formerNode = formerConstructionNode;
-            this.optionalNewNode = Option.some(newConstructionNode);
-        }
-
-        public ConstructionNode getFormerNode() {
-            return formerNode;
-        }
-
-        public Option<ConstructionNode> getOptionalNewNode() {
-            return optionalNewNode;
-        }
-
-        public ConstructionNode getMostRecentConstructionNode() {
-            if (optionalNewNode.isSome())
-                return optionalNewNode.some();
-            return formerNode;
-        }
-
-        public ConstructionNodeProposal removeSomeBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-//            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithLessBindings(
-//                    substitutionToLift);
-//            return new ConstructionNodeProposal(formerNode, newConstructionNode);
-            throw new RuntimeException("TODO: implement it");
-        }
-
-        public ConstructionNodeProposal addBindings(ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
-//            ConstructionNode newConstructionNode = getMostRecentConstructionNode().newNodeWithAdditionalBindings(
-//                    substitutionToLift);
-//            return new ConstructionNodeProposal(formerNode, newConstructionNode);
-            throw new RuntimeException("TODO: implement it");
-        }
-    }
-
-
-
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
 
-        Tree<ConstructionNodeProposal> initialConstructionTree = extractConstructionTree(query);
-        Tree<ConstructionNodeProposal> proposedConstructionTree = proposeOptimizedTree(initialConstructionTree);
+        Tree<ConstructionNodeUpdate> initialConstructionTree = extractConstructionTree(query);
+        Tree<ConstructionNodeUpdate> proposedConstructionTree = proposeOptimizedTree(initialConstructionTree);
 
         return applyProposal(query, proposedConstructionTree);
     }
@@ -91,8 +52,8 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * Non-recursive implementation
      *
      */
-    private static Tree<ConstructionNodeProposal> extractConstructionTree(IntermediateQuery query) {
-        final Map<ConstructionNode, Tree<ConstructionNodeProposal>> proposalTreeMap = new HashMap<>();
+    private static Tree<ConstructionNodeUpdate> extractConstructionTree(IntermediateQuery query) {
+        final Map<ConstructionNode, Tree<ConstructionNodeUpdate>> proposalTreeMap = new HashMap<>();
 
         // Parent construction node --> children
         Multimap<ConstructionNode, ConstructionNode> constructionSuperiorMap = HashMultimap.create();
@@ -109,9 +70,9 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
                 List<ConstructionNode> childrenNodes = findChildConstructionNodes(currentConstructionNode,
                         constructionSuperiorMap);
 
-                List<Tree<ConstructionNodeProposal>> childForest = childrenNodes.map(new F<ConstructionNode, Tree<ConstructionNodeProposal>>() {
+                List<Tree<ConstructionNodeUpdate>> childForest = childrenNodes.map(new F<ConstructionNode, Tree<ConstructionNodeUpdate>>() {
                             @Override
-                            public Tree<ConstructionNodeProposal> f(ConstructionNode childNode) {
+                            public Tree<ConstructionNodeUpdate> f(ConstructionNode childNode) {
                                 if (!proposalTreeMap.containsKey(childNode)) {
                                     throw new RuntimeException("Internal error: missing tree for a child node");
                                 }
@@ -119,8 +80,8 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
                             }
                         });
 
-                ConstructionNodeProposal currentProposal = new ConstructionNodeProposal(currentConstructionNode);
-                Tree<ConstructionNodeProposal> currentTree = Tree.node(currentProposal, childForest);
+                ConstructionNodeUpdate currentProposal = new ConstructionNodeUpdateImpl(currentConstructionNode);
+                Tree<ConstructionNodeUpdate> currentTree = Tree.node(currentProposal, childForest);
                 proposalTreeMap.put(currentConstructionNode, currentTree);
             }
         }
@@ -155,14 +116,14 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static Tree<ConstructionNodeProposal> proposeOptimizedTree(Tree<ConstructionNodeProposal> initialConstructionTree) {
+    private static Tree<ConstructionNodeUpdate> proposeOptimizedTree(Tree<ConstructionNodeUpdate> initialConstructionTree) {
 
         /**
          * Non-final variable (will be re-assigned) multiple times.
          *
          * starts at the bottom-left
          */
-        TreeZipper<ConstructionNodeProposal> currentZipper = navigateToLeftmostLeaf(TreeZipper.fromTree(initialConstructionTree));
+        TreeZipper<ConstructionNodeUpdate> currentZipper = navigateToLeftmostLeaf(TreeZipper.fromTree(initialConstructionTree));
 
 
         /**
@@ -185,7 +146,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
             /**
              * Moves to the leftmost leaf of the right sibling if possible.
              */
-            final Option<TreeZipper<ConstructionNodeProposal>> optionalRightSibling = currentZipper.right();
+            final Option<TreeZipper<ConstructionNodeUpdate>> optionalRightSibling = currentZipper.right();
             if (optionalRightSibling.isSome()) {
                 /**
                  * If the right sibling is not a leaf, reaches the leftmost leaf of its sub-tree.
@@ -197,7 +158,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
              * If already at the root, terminates.
              */
             else {
-                final Option<TreeZipper<ConstructionNodeProposal>> optionalParent = currentZipper.parent();
+                final Option<TreeZipper<ConstructionNodeUpdate>> optionalParent = currentZipper.parent();
                 rootHasBeenEvaluated = optionalParent.isNone();
                 if (!rootHasBeenEvaluated) {
                     currentZipper = currentZipper.parent().some();
@@ -212,7 +173,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static TreeZipper<ConstructionNodeProposal> optimizeCurrentNode(TreeZipper<ConstructionNodeProposal> currentZipper) {
+    private static TreeZipper<ConstructionNodeUpdate> optimizeCurrentNode(TreeZipper<ConstructionNodeUpdate> currentZipper) {
 
         Option<ImmutableSubstitution<ImmutableTerm>> optionalSubstitutionToLift = liftBindings(currentZipper);
         if (optionalSubstitutionToLift.isNone()) {
@@ -221,8 +182,8 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
 
         ImmutableSubstitution<ImmutableTerm> substitutionToLift = optionalSubstitutionToLift.some();
 
-        ConstructionNodeProposal newCurrentProposal = propagateSubstitutionToParent(substitutionToLift, currentZipper);
-        TreeZipper<ConstructionNodeProposal> updatedChildrenZipper = updateChildren(currentZipper, substitutionToLift);
+        ConstructionNodeUpdate newCurrentProposal = propagateSubstitutionToParent(substitutionToLift, currentZipper);
+        TreeZipper<ConstructionNodeUpdate> updatedChildrenZipper = updateChildren(currentZipper, substitutionToLift);
 
         return updatedChildrenZipper.setLabel(newCurrentProposal);
     }
@@ -230,9 +191,9 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     /**
      * TODO: explain
      */
-    private static Option<ImmutableSubstitution<ImmutableTerm>> liftBindings(TreeZipper<ConstructionNodeProposal> currentZipper) {
+    private static Option<ImmutableSubstitution<ImmutableTerm>> liftBindings(TreeZipper<ConstructionNodeUpdate> currentZipper) {
 
-        final Option<TreeZipper<ConstructionNodeProposal>> optionalFirstChildZipper = currentZipper.firstChild();
+        final Option<TreeZipper<ConstructionNodeUpdate>> optionalFirstChildZipper = currentZipper.firstChild();
         if (optionalFirstChildZipper.isNone()) {
             return Option.none();
         }
@@ -242,13 +203,13 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         // Non-final
         PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution);
         // Non-final
-        Option<TreeZipper<ConstructionNodeProposal>> optionalChildZipper = currentZipper.firstChild();
+        Option<TreeZipper<ConstructionNodeUpdate>> optionalChildZipper = currentZipper.firstChild();
 
         /**
          * Computes a partial union with the other children.
          */
         while(optionalChildZipper.isSome()) {
-            TreeZipper<ConstructionNodeProposal> currentChildZipper = optionalChildZipper.some();
+            TreeZipper<ConstructionNodeUpdate> currentChildZipper = optionalChildZipper.some();
             ImmutableSubstitution<ImmutableTerm> currentChildSubstitution = currentChildZipper.getLabel()
                     .getMostRecentConstructionNode().getSubstitution();
 
@@ -274,23 +235,23 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static TreeZipper<ConstructionNodeProposal> updateChildren(TreeZipper<ConstructionNodeProposal> parentZipper,
+    private static TreeZipper<ConstructionNodeUpdate> updateChildren(TreeZipper<ConstructionNodeUpdate> parentZipper,
                                                                        ImmutableSubstitution<ImmutableTerm> substitutionToLift) {
 
         if (substitutionToLift.isEmpty())
             return parentZipper;
 
         // Non-final
-        Option<TreeZipper<ConstructionNodeProposal>> nextOptionalChild = parentZipper.firstChild();
+        Option<TreeZipper<ConstructionNodeUpdate>> nextOptionalChild = parentZipper.firstChild();
         // Non-final
-        TreeZipper<ConstructionNodeProposal> currentChildUpdatedZipper = null;
+        TreeZipper<ConstructionNodeUpdate> currentChildUpdatedZipper = null;
         while (nextOptionalChild.isSome()) {
-            TreeZipper<ConstructionNodeProposal> currentChildZipper = nextOptionalChild.some();
+            TreeZipper<ConstructionNodeUpdate> currentChildZipper = nextOptionalChild.some();
 
             /**
              * TODO: explain
              */
-            ConstructionNodeProposal newProposal = currentChildZipper.getLabel().removeSomeBindings(substitutionToLift);
+            ConstructionNodeUpdate newProposal = currentChildZipper.getLabel().removeSomeBindings(substitutionToLift);
 
             currentChildUpdatedZipper = currentChildZipper.setLabel(newProposal);
             nextOptionalChild = currentChildUpdatedZipper.right();
@@ -311,8 +272,8 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static ConstructionNodeProposal propagateSubstitutionToParent(ImmutableSubstitution<ImmutableTerm> substitutionToLift,
-                                                                          TreeZipper<ConstructionNodeProposal> currentZipper) {
+    private static ConstructionNodeUpdate propagateSubstitutionToParent(ImmutableSubstitution<ImmutableTerm> substitutionToLift,
+                                                                          TreeZipper<ConstructionNodeUpdate> currentZipper) {
         return currentZipper.getLabel().addBindings(substitutionToLift);
     }
 
@@ -320,12 +281,12 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     /**
      * Navigates into the zipper until reaching the leftmost leaf.
      */
-    private static TreeZipper<ConstructionNodeProposal> navigateToLeftmostLeaf(final TreeZipper<ConstructionNodeProposal> initialZipper) {
+    private static TreeZipper<ConstructionNodeUpdate> navigateToLeftmostLeaf(final TreeZipper<ConstructionNodeUpdate> initialZipper) {
 
         // Non-final
-        Option<TreeZipper<ConstructionNodeProposal>> optionalChild = initialZipper.firstChild();
+        Option<TreeZipper<ConstructionNodeUpdate>> optionalChild = initialZipper.firstChild();
         // Non-final
-        TreeZipper<ConstructionNodeProposal> currentZipper = initialZipper;
+        TreeZipper<ConstructionNodeUpdate> currentZipper = initialZipper;
 
         /**
          * Goes to its left child
@@ -341,8 +302,113 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     }
 
 
+    /**
+     * TODO: explain
+     */
     private static IntermediateQuery applyProposal(IntermediateQuery query,
-                                                   Tree<ConstructionNodeProposal> proposedConstructionTree) {
-        throw new RuntimeException("TODO: implement it!");
+                                                   Tree<ConstructionNodeUpdate> proposedConstructionTree) {
+
+        ImmutableList<BindingTransfer> transfers = ImmutableList.copyOf(extractTransfers(proposedConstructionTree));
+        ImmutableList<ConstructionNodeUpdate> nodeUpdates = ImmutableList.copyOf(proposedConstructionTree
+                .flatten()
+                .filter(new F<ConstructionNodeUpdate, Boolean>() {
+                    @Override
+                    public Boolean f(ConstructionNodeUpdate update) {
+                        return update.getOptionalNewNode().isPresent();
+                    }
+                }));
+        SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(query, transfers, nodeUpdates);
+        try {
+            query.applySubstitutionLiftProposal(proposal);
+        }
+        catch (InvalidLocalOptimizationProposalException e) {
+            throw new RuntimeException("Bad substitution lift proposal: " + e.getMessage());
+        }
+        return query;
+    }
+
+    /**
+     * Recursive
+     */
+    private static List<BindingTransfer> extractTransfers(Tree<ConstructionNodeUpdate> tree) {
+        /**
+         * Binding transfers to this node
+         */
+
+        List<BindingTransfer> localTransfers;
+        ConstructionNodeUpdate currentRoot = tree.root();
+        if (currentRoot.hasNewBindings()) {
+            localTransfers = buildBindingTransfers(currentRoot, tree);
+        }
+        else {
+            localTransfers = List.nil();
+        }
+
+        /**
+         * Recursive call
+         */
+        List<BindingTransfer> subForestTransfers = tree.subForest()._1().toList()
+                .bind(new F<Tree<ConstructionNodeUpdate>, List<BindingTransfer>>() {
+            @Override
+            public List<BindingTransfer> f(Tree<ConstructionNodeUpdate> subTree) {
+                return extractTransfers(subTree);
+            }
+        });
+
+        return localTransfers.append(subForestTransfers);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static List<BindingTransfer> buildBindingTransfers(ConstructionNodeUpdate currentRoot,
+                                                               Tree<ConstructionNodeUpdate> currentTree) {
+        ImmutableList.Builder<BindingTransfer> transferBuilder = ImmutableList.builder();
+        ImmutableMap<VariableImpl, ImmutableTerm> newBindingMap = currentRoot.getNewBindings().getImmutableMap();
+
+        for (VariableImpl boundVariable : newBindingMap.keySet()) {
+            List<ConstructionNode> sources = findSources(boundVariable, currentTree);
+
+            ImmutableSubstitution<ImmutableTerm> uniqueBinding = new ImmutableSubstitutionImpl<>(
+                    ImmutableMap.of(boundVariable, newBindingMap.get(boundVariable)));
+
+            BindingTransfer transfer = new BindingTransferImpl(uniqueBinding, ImmutableList.copyOf(sources),
+                    currentRoot.getFormerNode());
+            transferBuilder.add(transfer);
+        }
+        return mergeTransfers(transferBuilder.build());
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static List<ConstructionNode> findSources(final VariableImpl boundVariable,
+                                                      Tree<ConstructionNodeUpdate> currentTree) {
+
+        ConstructionNode formerRootNode = currentTree.root().getFormerNode();
+
+        if (formerRootNode.getSubstitution().isDefining(boundVariable)) {
+            return List.cons(formerRootNode, List.<ConstructionNode>nil());
+        }
+        /**
+         * Recursive
+         */
+        else {
+            return currentTree.subForest()._1().toList().bind(new F<Tree<ConstructionNodeUpdate>, List<ConstructionNode>>() {
+                @Override
+                public List<ConstructionNode> f(Tree<ConstructionNodeUpdate> subTree) {
+                    return findSources(boundVariable, subTree);
+                }
+            });
+        }
+    }
+
+    /**
+     * TODO: replace this stub by a merging implementation.
+     *
+     * Merges transfers that have the same sources and the same target.
+     */
+    private static List<BindingTransfer> mergeTransfers(ImmutableList<BindingTransfer> transfers) {
+        return List.iterableList(transfers);
     }
 }

@@ -195,7 +195,7 @@ public class SubQueryUnificationTools {
             }
             /**
              * No new child because not needed anymore.
-             */ catch(SubstitutionPropagator.NotNeededNodeException e) {
+             */ catch(NotNeededNodeException e) {
                 optionalNewChild = Optional.absent();
                 propagatorForChild = substitutionPropagator;
             }
