@@ -104,17 +104,23 @@ public class DatalogProgram2QueryConverter {
                                                                          Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
-
-        List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
-        for (CQIE datalogAtomDefinition : atomDefinitions) {
-            convertedDefinitions.add(
-                    convertDatalogRule(datalogAtomDefinition, tablePredicates, optionalModifiers));
-        }
-
-        try {
-            return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions);
-        } catch (QueryMergingException e) {
-            throw new InvalidDatalogProgramException(e.getLocalizedMessage());
+        switch(atomDefinitions.size()) {
+            case 0:
+                return Optional.absent();
+            case 1:
+                CQIE definition = atomDefinitions.iterator().next();
+                return Optional.of(convertDatalogRule(definition, tablePredicates, optionalModifiers));
+            default:
+                List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
+                for (CQIE datalogAtomDefinition : atomDefinitions) {
+                    convertedDefinitions.add(
+                            convertDatalogRule(datalogAtomDefinition, tablePredicates, Optional.<ImmutableQueryModifiers>absent()));
+                }
+                try {
+                    return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions);
+                } catch (QueryMergingException e) {
+                    throw new InvalidDatalogProgramException(e.getLocalizedMessage());
+                }
         }
     }
 
