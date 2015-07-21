@@ -23,6 +23,7 @@ package org.semanticweb.ontop.model.impl;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,20 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		offset = -1;
 		orderConditions = new ArrayList<OrderCondition>();
 		groupConditions = new ArrayList<Variable>();
+	}
+
+	public MutableQueryModifiersImpl(QueryModifiers modifiers) {
+		isCount = modifiers.isCount();
+		isDistinct = modifiers.isDistinct();
+		limit = modifiers.getLimit();
+		offset = modifiers.getOffset();
+		orderConditions = new ArrayList<>(modifiers.getSortConditions());
+		if (modifiers instanceof OBDAQueryModifiers) {
+			groupConditions = new ArrayList<>(((OBDAQueryModifiers) modifiers).getGroupConditions());
+		}
+		else {
+			groupConditions = new ArrayList<>();
+		}
 	}
 
 	@Override

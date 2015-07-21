@@ -107,6 +107,7 @@ import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.impl.MutableQueryModifiersImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -160,12 +161,16 @@ public class IntermediateQueryToDatalogTranslator {
 		DatalogProgram dProgram = ofac.getDatalogProgram();
 		ConstructionNode root = te.getRootConstructionNode();
 		
-		Optional<ImmutableQueryModifiers> modifiers =  root.getOptionalModifiers();
+		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
 		
-		if (modifiers.isPresent()){
-			QueryModifiers immutableQueryModifiers = (QueryModifiers) modifiers.get();
-			OBDAQueryModifiers  obdaMod= (OBDAQueryModifiers)immutableQueryModifiers;
-			dProgram.setQueryModifiers(obdaMod);
+		if (optionalModifiers.isPresent()){
+			QueryModifiers immutableQueryModifiers = optionalModifiers.get();
+
+			// Mutable modifiers (used by the Datalog)
+			OBDAQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
+			// TODO: support GROUP BY (distinct QueryNode)
+
+			dProgram.setQueryModifiers(mutableModifiers);
 			
 		}
 		
