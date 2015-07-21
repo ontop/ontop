@@ -517,7 +517,7 @@ public class QuestStatement implements OBDAStatement {
 				log.debug("New intermediate query: \n" + intermediateQuery.toString());
 				
 				
-				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+			unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 				
 				log.debug("New Datalog query: \n" + unfolding.toString());
 				

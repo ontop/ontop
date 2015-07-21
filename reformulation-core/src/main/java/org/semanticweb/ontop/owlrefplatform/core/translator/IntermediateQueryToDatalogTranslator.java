@@ -101,6 +101,7 @@ import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
 import org.semanticweb.ontop.model.ListenableFunction;
 import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.ValueConstant;
@@ -116,10 +117,12 @@ import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.DataNode;
 import org.semanticweb.ontop.pivotalrepr.FilterNode;
 import org.semanticweb.ontop.pivotalrepr.GroupNode;
+import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.JoinLikeNode;
 import org.semanticweb.ontop.pivotalrepr.LeftJoinNode;
+import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.UnionNode;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
@@ -153,9 +156,21 @@ public class IntermediateQueryToDatalogTranslator {
 	public static DatalogProgram translate(IntermediateQuery te) {
 		
 
+		
 		DatalogProgram dProgram = ofac.getDatalogProgram();
 		ConstructionNode root = te.getRootConstructionNode();
 		
+		Optional<ImmutableQueryModifiers> modifiers =  root.getOptionalModifiers();
+		
+		if (modifiers.isPresent()){
+			QueryModifiers immutableQueryModifiers = (QueryModifiers) modifiers.get();
+			OBDAQueryModifiers  obdaMod= (OBDAQueryModifiers)immutableQueryModifiers;
+			dProgram.setQueryModifiers(obdaMod);
+			
+		}
+		
+		
+	
 		Queue<ConstructionNode> rulesToDo = new LinkedList<ConstructionNode>();
 		rulesToDo.add(root);
 

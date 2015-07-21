@@ -1564,6 +1564,25 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 					return (String.format(LANG_STR, lang, varName));
 				}
+		} else if (ht instanceof Variable) { // this case is to tackle rules of the form ans1(f0,f1) :- ans1u(f0,f1)
+
+			Variable htVar = (Variable )ht;
+			Collection<String> columnRefs = index.getColumnReferences(htVar);
+			
+			//Adding the sufix Lang to the varibale name
+			if (columnRefs == null || columnRefs.size() == 0) {
+				throw new RuntimeException(
+						"Unbound variable found in WHERE clause: " + htVar);
+			}
+
+			String colName = columnRefs.iterator().next();
+			  if (colName.length() > 0) {
+				  colName = colName.substring(0, colName.length()-1);
+			    }
+			  colName=colName.concat("Lang\"");
+			
+			  //reutrning the answer
+			  return (String.format(LANG_STR,  colName, varName));
 		}
 
 
