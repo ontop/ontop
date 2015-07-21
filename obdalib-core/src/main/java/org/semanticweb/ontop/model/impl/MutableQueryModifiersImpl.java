@@ -42,8 +42,8 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		isDistinct = false;
 		limit = -1;
 		offset = -1;
-		orderConditions = new ArrayList<OrderCondition>();
-		groupConditions = new ArrayList<Variable>();
+		orderConditions = new ArrayList<>();
+		groupConditions = new ArrayList<>();
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 
 	@Override
 	public boolean hasLimit() {
-		return limit != -1 ? true : false;
+		return limit != -1;
 	}
 
 	@Override
@@ -117,7 +117,7 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 
 	@Override
 	public boolean hasOffset() {
-		return offset != -1 ? true : false;
+		return offset != -1;
 	}
 
 	@Override
@@ -143,12 +143,12 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 
 	@Override
 	public boolean hasOrder() {
-		return !orderConditions.isEmpty() ? true : false;
+		return !orderConditions.isEmpty();
 	}
 	
 	@Override
 	public boolean hasGroup() {
-		return !groupConditions.isEmpty() ? true : false;
+		return !groupConditions.isEmpty();
 	}
 
 	@Override

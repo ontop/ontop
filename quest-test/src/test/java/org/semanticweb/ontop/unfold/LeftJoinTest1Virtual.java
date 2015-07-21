@@ -130,11 +130,7 @@ public class LeftJoinTest1Virtual{
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-	
-	
-	
-		
-		
+
 		try {
 
 			executeQueryAssertResults(query, st, expectedvalue);
