@@ -21,117 +21,19 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
  */
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-import java.util.Vector;
-
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.AggregateOperator;
-import org.openrdf.query.algebra.And;
-import org.openrdf.query.algebra.Avg;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.BinaryValueOperator;
-import org.openrdf.query.algebra.Bound;
-import org.openrdf.query.algebra.Compare;
-import org.openrdf.query.algebra.Compare.CompareOp;
-import org.openrdf.query.algebra.Count;
-import org.openrdf.query.algebra.Datatype;
-import org.openrdf.query.algebra.Distinct;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.Group;
-import org.openrdf.query.algebra.IsBNode;
-import org.openrdf.query.algebra.IsLiteral;
-import org.openrdf.query.algebra.IsURI;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Lang;
-import org.openrdf.query.algebra.LangMatches;
-import org.openrdf.query.algebra.LeftJoin;
-import org.openrdf.query.algebra.MathExpr;
-import org.openrdf.query.algebra.MathExpr.MathOp;
-import org.openrdf.query.algebra.Max;
-import org.openrdf.query.algebra.Min;
-import org.openrdf.query.algebra.Not;
-import org.openrdf.query.algebra.Or;
-import org.openrdf.query.algebra.Order;
-import org.openrdf.query.algebra.OrderElem;
-import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.Reduced;
-import org.openrdf.query.algebra.Regex;
-import org.openrdf.query.algebra.SameTerm;
-import org.openrdf.query.algebra.Slice;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Str;
-import org.openrdf.query.algebra.Sum;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.UnaryValueOperator;
-import org.openrdf.query.algebra.Union;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
-import org.openrdf.query.parser.ParsedGraphQuery;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.semanticweb.ontop.model.BooleanExpression;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.ImmutableBooleanExpression;
-import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
-import org.semanticweb.ontop.model.ListenableFunction;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAQueryModifiers;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.impl.MutableQueryModifiersImpl;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import org.semanticweb.ontop.model.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
-import org.semanticweb.ontop.pivotalrepr.DataNode;
-import org.semanticweb.ontop.pivotalrepr.FilterNode;
-import org.semanticweb.ontop.pivotalrepr.GroupNode;
-import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
-import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.JoinLikeNode;
-import org.semanticweb.ontop.pivotalrepr.LeftJoinNode;
-import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.UnionNode;
-import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.MutableQueryModifiersImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.pivotalrepr.*;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -367,9 +269,7 @@ public class IntermediateQueryToDatalogTranslator {
 	
 	/**
 	 * This method takes a immutable booelan term and convert it into an old mutable boolean function.
-	 * 
-	 * @param term
-	 * @return
+	 *
 	 */
 	private static BooleanExpression convertToMutableFunction( ImmutableBooleanExpression filter  ) {
 		
