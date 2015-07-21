@@ -22,6 +22,8 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
+import com.google.common.base.Optional;
+import com.sun.corba.se.impl.orbutil.StackImpl;
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
@@ -850,7 +852,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 					boolean isLeftJoinSecondArgument[] = {false};
 
-					termidx = getStackfromPredicate(predEmpty,currentTerms, termidx, false, isLeftJoinSecondArgument);
+					Optional<Stack<Integer>> optionalStack = getStackfromPredicate(predEmpty, currentTerms, termidx, false, isLeftJoinSecondArgument);
+					if (!optionalStack.isPresent()) {
+						throw new RuntimeException("Internal error: predicate " + predEmpty + " not found!");
+					}
+					termidx = optionalStack.get();
 
 					Predicate fatherpred = fatherRule.getHead().getFunctionSymbol();
 
@@ -887,7 +893,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param termidx
 	 * @return
 	 */
-	private Stack<Integer> getStackfromPredicate(Predicate predEmpty, List<Function> currentTerms, Stack<Integer> termidx, boolean parentIsLeftJoin, boolean[] isLeftJoinSecondArgument) {
+	private Optional<Stack<Integer>> getStackfromPredicate(Predicate predEmpty, List<Function> currentTerms, Stack<Integer> termidx, boolean parentIsLeftJoin, boolean[] isLeftJoinSecondArgument) {
 		int nonBooleanAtomCounter = 0;
 
 
@@ -914,8 +920,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				for (Term t:focusedLiteral.getTerms()){
 					mylist.add((Function) t);
 				}
-				termidx.push(atomIdx);
-				termidx  = getStackfromPredicate(predEmpty, mylist, termidx, focusedAtomIsLeftJoin, isLeftJoinSecondArgument );
+				Stack<Integer> newTermStack = (Stack) termidx.clone();
+				newTermStack.push(atomIdx);
+				Optional<Stack<Integer>> optionalNewStack = getStackfromPredicate(predEmpty, mylist, newTermStack, focusedAtomIsLeftJoin, isLeftJoinSecondArgument);
+				if (optionalNewStack.isPresent()) {
+					return optionalNewStack;
+				}
 
 			} else if (focusedLiteral.isDataFunction()) {
 				nonBooleanAtomCounter += 1;
@@ -931,13 +941,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					isLeftJoinSecondArgument[0] = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
 					termidx.push(atomIdx);
 
-					return termidx;
+					return Optional.of(termidx);
 
 				}
 			}//end if
 
 		}//end for
-		return termidx;
+		return Optional.absent();
 	}
 
 	/**
