@@ -22,7 +22,6 @@ public interface OBDAQueryModifiers extends QueryModifiers {
 
     void setDistinct();
 
-    void setCount();
 
     void setLimit(long limit);
 

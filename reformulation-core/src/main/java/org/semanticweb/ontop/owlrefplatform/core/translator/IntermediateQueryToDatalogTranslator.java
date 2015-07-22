@@ -21,108 +21,19 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
  */
 
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.UnmodifiableIterator;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.MutableQueryModifiersImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.pivotalrepr.*;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
-import java.util.Vector;
-
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.AggregateOperator;
-import org.openrdf.query.algebra.And;
-import org.openrdf.query.algebra.Avg;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.BinaryValueOperator;
-import org.openrdf.query.algebra.Bound;
-import org.openrdf.query.algebra.Compare;
-import org.openrdf.query.algebra.Compare.CompareOp;
-import org.openrdf.query.algebra.Count;
-import org.openrdf.query.algebra.Datatype;
-import org.openrdf.query.algebra.Distinct;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.Group;
-import org.openrdf.query.algebra.IsBNode;
-import org.openrdf.query.algebra.IsLiteral;
-import org.openrdf.query.algebra.IsURI;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Lang;
-import org.openrdf.query.algebra.LangMatches;
-import org.openrdf.query.algebra.LeftJoin;
-import org.openrdf.query.algebra.MathExpr;
-import org.openrdf.query.algebra.MathExpr.MathOp;
-import org.openrdf.query.algebra.Max;
-import org.openrdf.query.algebra.Min;
-import org.openrdf.query.algebra.Not;
-import org.openrdf.query.algebra.Or;
-import org.openrdf.query.algebra.Order;
-import org.openrdf.query.algebra.OrderElem;
-import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.Reduced;
-import org.openrdf.query.algebra.Regex;
-import org.openrdf.query.algebra.SameTerm;
-import org.openrdf.query.algebra.Slice;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Str;
-import org.openrdf.query.algebra.Sum;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.UnaryValueOperator;
-import org.openrdf.query.algebra.Union;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
-import org.openrdf.query.parser.ParsedGraphQuery;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.semanticweb.ontop.model.BooleanExpression;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.ImmutableBooleanExpression;
-import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import org.semanticweb.ontop.model.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
-import org.semanticweb.ontop.pivotalrepr.DataNode;
-import org.semanticweb.ontop.pivotalrepr.FilterNode;
-import org.semanticweb.ontop.pivotalrepr.GroupNode;
-import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.JoinLikeNode;
-import org.semanticweb.ontop.pivotalrepr.LeftJoinNode;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.UnionNode;
-import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -148,9 +59,25 @@ public class IntermediateQueryToDatalogTranslator {
 	public static DatalogProgram translate(IntermediateQuery te) {
 		
 
+		
 		DatalogProgram dProgram = ofac.getDatalogProgram();
 		ConstructionNode root = te.getRootConstructionNode();
 		
+		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
+		
+		if (optionalModifiers.isPresent()){
+			QueryModifiers immutableQueryModifiers = optionalModifiers.get();
+
+			// Mutable modifiers (used by the Datalog)
+			OBDAQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
+			// TODO: support GROUP BY (distinct QueryNode)
+
+			dProgram.setQueryModifiers(mutableModifiers);
+			
+		}
+		
+		
+	
 		Queue<ConstructionNode> rulesToDo = new LinkedList<ConstructionNode>();
 		rulesToDo.add(root);
 
@@ -177,157 +104,70 @@ public class IntermediateQueryToDatalogTranslator {
 		ConstructionNode root = rulesToDo.poll();
 		
 		DataAtom head= root.getProjectionAtom();
+	
+		//Applying substitutions in the head.
 		ImmutableFunctionalTerm substitutedHead= root.getSubstitution().applyToFunctionalTerm(head);
-		
 		List<QueryNode> listNodes=  te.getCurrentSubNodesOf(root);
 		
 		List<Function> atoms = new LinkedList<Function>();
 		
 		//Constructing the rule
-		CQIE newrule = ofac.getCQIE(substitutedHead, atoms);
+		CQIE newrule = ofac.getCQIE(convertToMutableFunction(substitutedHead), atoms);
 		
 		pr.appendRule(newrule);
 		
 		//Iterating over the nodes and constructing the rule
 		for (QueryNode node: listNodes){
 			
+			List<Function> uAtoms= getAtomFrom(te, node, rulesToDo);
+			newrule.getBody().addAll(uAtoms);	
 			
-			if (node instanceof ConstructionNode) {
-				((ConstructionNode) node).getProjectionAtom();
-			
-			} else if (node instanceof DataNode) {
-
-			} else	if (node instanceof FilterNode) {
-				translate(te, (FilterNode) node, newrule, pr, rulesToDo);
-						
-			} else if (node instanceof InnerJoinNode) {
-				translate(te, ((InnerJoinNode) node), newrule, pr, rulesToDo);
-			
-			}else if (node instanceof LeftJoinNode) {
-				translate(te, ((LeftJoinNode) node), newrule, pr, rulesToDo);
-			
-			}else if  (node instanceof UnionNode) {
-				//TODO
-			
-			}else if (node instanceof GroupNode) {
-				//TODO
-			}	
 		} //end-for
 	}
 
-	/**
-	 * Translates Filter atoms and add them to the rule of the program
-	 * 
-	 * @param te
-	 * @param node
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, FilterNode node, CQIE newrule, DatalogProgram pr , Queue<ConstructionNode> rulesToDo  ) {
-		Function filter = ((FilterNode) node).getFilterCondition();
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		List<Function> atoms = getAtomFrom(te, listnode.get(0), rulesToDo);
-		//Function newJ = ofac.getSPARQLJoin(atom,filter);
-		newrule.getBody().addAll(atoms);	
-		newrule.getBody().add(filter);	
-	}
 	
-		
-	/**
-	 * Translates LJ atoms and add them to the rule of the program
-	 * 
-	 * @param te
-	 * @param node
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, LeftJoinNode node, CQIE newrule, DatalogProgram pr , Queue<ConstructionNode> rulesToDo  ) {
-
-		Optional<ImmutableBooleanExpression> filter = node.getOptionalFilterCondition();
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-			
-		List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
-		List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
-
-			
-		if (filter.isPresent()){
-			Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, filter.get());
-			newrule.getBody().add(newLJAtom);	
-		}else{
-			Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight);
-			newrule.getBody().add(newLJAtom);	
-		}
-	
-	}
 
 	/**
-	 * Translates Join atoms and add them to the rule of the program
-	 * 
-	 * @param te
-	 * @param node
-	 * @param newrule
-	 * @param pr
-	 * @param rulesToDo
-	 */
-	private static void translate(IntermediateQuery te, InnerJoinNode node, CQIE newrule,DatalogProgram pr, Queue<ConstructionNode> rulesToDo  ) {
-		
-		Optional<ImmutableBooleanExpression> filter = node.getOptionalFilterCondition();
-		
-		List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
-		
-		List<Function> atoms = new LinkedList<Function>();
-		
-		for (QueryNode childnode: listnode) {
-			List<Function> newAtoms = getAtomFrom(te, childnode,rulesToDo);
-			atoms.addAll(newAtoms);
-		}
-		
-		if (filter.isPresent()){
-			Function newJAtom =  ofac.getSPARQLJoin(atoms, filter.get());
-			newrule.getBody().add(newJAtom);
-		}else{
-			Function newJAtom =  ofac.getSPARQLJoin(atoms);
-			newrule.getBody().add(newJAtom);
-		}
-		
-		
-		
-	}
-
-	/**
-	 *  Takes a node and return the function that it represents.
-	 * 
+	 * This is the MAIN recursive method in this class!!
+	 * Takes a node and return the list of functions (atoms) that it represents.
+	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
 	private static List<Function> getAtomFrom(IntermediateQuery te, QueryNode node,  Queue<ConstructionNode> rulesToDo  ) {
 		
 		List<Function> body = new ArrayList<Function>();
 		
+		/**
+		 * Basic Atoms
+		 */
+		
 		if (node instanceof ConstructionNode) {
-			Function newAns = ((ConstructionNode) node).getProjectionAtom();
+			DataAtom newAns = ((ConstructionNode) node).getProjectionAtom();
+			Function mutAt = convertToMutableFunction(newAns);
 			rulesToDo.add((ConstructionNode)node);
-			body.add(newAns);
+			body.add(mutAt);
 			return body;
-		}
-
-		if (node instanceof FilterNode) {
-			Function filter = ((FilterNode) node).getFilterCondition();
+			
+		} else if (node instanceof FilterNode) {
+			ImmutableBooleanExpression filter = ((FilterNode) node).getFilterCondition();
+			BooleanExpression mutFilter =  convertToMutableFunction(filter);
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
-			body.add(filter);
+			body.add(mutFilter);
 			return body;
+			
 					
-		}
-		
-		if (node instanceof DataNode) {
+		} else if (node instanceof DataNode) {
 			DataAtom atom = ((DataNode)node).getAtom();
-			body.add(atom);
+			Function mutAt = convertToMutableFunction(atom);
+			body.add(mutAt);
 			return body;
-					
-		}
-		
-		if (node instanceof InnerJoinNode) {
+				
+			
+			
+		/**
+		 * Nested Atoms	
+		 */
+		} else  if (node instanceof InnerJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
@@ -335,24 +175,20 @@ public class IntermediateQueryToDatalogTranslator {
 				List<Function> atomsList = getAtomFrom(te, childnode, rulesToDo);
 				atoms.addAll(atomsList);
 			}
+			if (filter.isPresent()){
+				ImmutableBooleanExpression filter2 = filter.get();
+				Function mutFilter = convertToMutableFunction(filter2);
+				Function newJ = ofac.getSPARQLJoin(atoms, mutFilter);
+				body.add(newJ);
+				return body;
+			}else{
+				Function newJ = ofac.getSPARQLJoin(atoms);
+				body.add(newJ);
+				return body;
+			}
 			
-			
-		if (filter.isPresent()){
-			Function newJ = ofac.getSPARQLJoin(atoms, filter.get());
-			body.add(newJ);
-			return body;
-		}else{
-			Function newJ = ofac.getSPARQLJoin(atoms);
-			body.add(newJ);
-			return body;
-		}
-		
-		
-		}
-		
-		if (node instanceof LeftJoinNode) {
+		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
-			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 		
 			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
@@ -360,7 +196,9 @@ public class IntermediateQueryToDatalogTranslator {
 
 				
 			if (filter.isPresent()){
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, filter.get());
+				ImmutableBooleanExpression filter2 = filter.get();
+				BooleanExpression mutFilter =  convertToMutableFunction(filter2);
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, mutFilter);
 				body.add(newLJAtom);
 				return body;
 			}else{
@@ -369,19 +207,93 @@ public class IntermediateQueryToDatalogTranslator {
 				return body;
 			}
 
-			
-			
-			
-			
-		}
+		} else if (node instanceof UnionNode) {
 		
-		if (node instanceof UnionNode) {
-		//TODO	
+			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
+			
+			for (QueryNode nod: listnode){
+				rulesToDo.add((ConstructionNode)nod);
+		
+			} //end for
+		
+			QueryNode nod= listnode.get(0);
+			if (nod instanceof ConstructionNode) {
+					Function newAns = convertToMutableFunction(((ConstructionNode) nod).getProjectionAtom());
+					body.add(newAns);
+					return body;
+				}else{
+					 throw new UnsupportedOperationException("The Union should have only construct");
+				}
+			
+
+						
+		} else {
+			 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
 		}
 	
-		return null;
 	}
 
 	
+	
+	
+	
+	
+	/**
+	 * This method takes a immutable term and convert it into an old mutable function.
+	 * 
+	 * @param term
+	 * @return
+	 */
+	private static Function convertToMutableFunction( ImmutableFunctionalTerm term  ) {
+		
+		Predicate pred= term.getFunctionSymbol();
+		ImmutableList<Term> otherTerms =  term.getTerms();
+		List<Term> mutableList = new LinkedList<Term>();
+		UnmodifiableIterator<Term> iterator = otherTerms.iterator();
+		while ( iterator.hasNext()){
+
+			Term nextTerm = iterator.next();
+			if (nextTerm instanceof ImmutableFunctionalTerm ){
+				ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
+				Function newTerm = convertToMutableFunction(term2Change);
+				mutableList.add(newTerm);
+			} else{
+				mutableList.add(nextTerm);
+			}
+			
+		}
+		Function mutFunc = ofac.getFunction(pred, mutableList);
+		return mutFunc;
+		
+	}
+	
+	/**
+	 * This method takes a immutable booelan term and convert it into an old mutable boolean function.
+	 *
+	 */
+	private static BooleanExpression convertToMutableFunction( ImmutableBooleanExpression filter  ) {
+		
+		BooleanOperationPredicate pred= (BooleanOperationPredicate) filter.getFunctionSymbol();
+		ImmutableList<Term> otherTerms =  filter.getTerms();
+		List<Term> mutableList = new LinkedList<Term>();
+		
+		UnmodifiableIterator<Term> iterator = otherTerms.iterator();
+		while ( iterator.hasNext()){
+
+			Term nextTerm = iterator.next();
+			if (nextTerm instanceof ImmutableFunctionalTerm ){
+				ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
+				Function newTerm = convertToMutableFunction(term2Change);
+				mutableList.add(newTerm);
+			} else{
+				mutableList.add(nextTerm);
+			}
+			
+		}
+		BooleanExpression mutFunc = ofac.getBooleanExpression(pred,mutableList); 
+		return mutFunc;
+		
+	}
+		
 	
 }

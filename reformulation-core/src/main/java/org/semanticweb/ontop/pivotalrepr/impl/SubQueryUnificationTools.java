@@ -495,8 +495,13 @@ public class SubQueryUnificationTools {
              * The original arg is a ground term --> should be equal
              */
             else if (!originalArg.equals(newArg)) {
-                throw new SubQueryUnificationException(originalAtom + " and " + newAtom
-                        + " are not unifiable");
+                if (newArg instanceof Variable) {
+                    throw new RuntimeException("Ground-term-to-variable unification is not yet supported.");
+                }
+                else {
+                    throw new SubQueryUnificationException(originalAtom + " and " + newAtom
+                            + " are not unifiable");
+                }
             }
         }
         return new ImmutableSubstitutionImpl<>(ImmutableMap.copyOf(substitutionMap));

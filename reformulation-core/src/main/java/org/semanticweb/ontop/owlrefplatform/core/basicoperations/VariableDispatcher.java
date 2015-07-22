@@ -64,7 +64,9 @@ public class VariableDispatcher {
      * Just a wrapper of VariableGenerator.generateNewVariable().
      */
     public synchronized VariableImpl generateNewVariable() {
-        return variableGenerator.generateNewVariable();
+        VariableImpl newVariable = variableGenerator.generateNewVariable();
+        allocatedVariables.add(newVariable);
+        return newVariable;
     }
 
 }

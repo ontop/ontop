@@ -2,13 +2,11 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.AtomPredicate;
-import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
@@ -30,6 +28,17 @@ public class IntermediateQueryUtils {
      */
     public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions)
             throws QueryMergingException {
+        return mergeDefinitions(predicateDefinitions, Optional.<ImmutableQueryModifiers>absent());
+    }
+
+
+    /**
+     * TODO: describe
+     * The optional modifiers are for the top construction node above the UNION (if any).
+     */
+    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions,
+                                                               Optional<ImmutableQueryModifiers> optionalTopModifiers)
+            throws QueryMergingException {
         if (predicateDefinitions.isEmpty())
             return Optional.absent();
 
@@ -48,7 +57,7 @@ public class IntermediateQueryUtils {
 
         for (IntermediateQuery originalDefinition : predicateDefinitions) {
             if (mergedDefinition == null) {
-                mergedDefinition = initMergedDefinition(headAtom, subQueryAtom);
+                mergedDefinition = initMergedDefinition(headAtom, subQueryAtom, optionalTopModifiers);
             } else {
                 mergedDefinition = prepareForMergingNewDefinition(mergedDefinition, subQueryAtom);
             }
@@ -114,9 +123,10 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery initMergedDefinition(DataAtom headAtom, DataAtom subQueryAtom)
+    private static IntermediateQuery initMergedDefinition(DataAtom headAtom, DataAtom subQueryAtom,
+                                                          Optional<ImmutableQueryModifiers> optionalTopModifiers)
             throws QueryMergingException {
-        ConstructionNode rootNode = new ConstructionNodeImpl(headAtom);
+        ConstructionNode rootNode = new ConstructionNodeImpl(headAtom, new NeutralSubstitution(), optionalTopModifiers);
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
 

@@ -783,7 +783,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (sqls.size() == 1) {
 			unionView = sqls.iterator().next();
 		} else {
-			unionView = "(" + Joiner.on(")\n UNION \n (").join(sqls) + ")";
+			unionView = "(" + Joiner.on(")\n UNION ALL \n (").join(sqls) + ")";
 		}
 
 		//String viewname = String.format(VIEW_ANS_NAME, pred);
@@ -1317,6 +1317,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Cannot return the SQL type for: "
 					+ term.toString());
 		}
+		/**
+		 * Boolean constant
+		 */
+		else if (term.equals(OBDAVocabulary.FALSE)
+				 || term.equals(OBDAVocabulary.TRUE)) {
+			return Types.BOOLEAN;
+		}
 
 		return Types.VARCHAR;
 	}
@@ -1564,6 +1571,25 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 					return (String.format(LANG_STR, lang, varName));
 				}
+		} else if (ht instanceof Variable) { // this case is to tackle rules of the form ans1(f0,f1) :- ans1u(f0,f1)
+
+			Variable htVar = (Variable )ht;
+			Collection<String> columnRefs = index.getColumnReferences(htVar);
+			
+			//Adding the sufix Lang to the varibale name
+			if (columnRefs == null || columnRefs.size() == 0) {
+				throw new RuntimeException(
+						"Unbound variable found in WHERE clause: " + htVar);
+			}
+
+			String colName = columnRefs.iterator().next();
+			  if (colName.length() > 0) {
+				  colName = colName.substring(0, colName.length()-1);
+			    }
+			  colName=colName.concat("Lang\"");
+			
+			  //reutrning the answer
+			  return (String.format(LANG_STR,  colName, varName));
 		}
 
 
@@ -2402,6 +2428,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
+		}
+		else if (functionSymbol.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+			operator = IS_TRUE_OPERATOR;
 		}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);

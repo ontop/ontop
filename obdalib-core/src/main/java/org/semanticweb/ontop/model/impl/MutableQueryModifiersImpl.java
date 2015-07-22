@@ -23,12 +23,12 @@ package org.semanticweb.ontop.model.impl;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
-	private boolean isCount;
 	private boolean isDistinct;
 
 	private long limit;
@@ -38,7 +38,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	private List<Variable> groupConditions;
 	
 	public MutableQueryModifiersImpl() {
-		isCount = false;
 		isDistinct = false;
 		limit = -1;
 		offset = -1;
@@ -46,10 +45,22 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		groupConditions = new ArrayList<Variable>();
 	}
 
+	public MutableQueryModifiersImpl(QueryModifiers modifiers) {
+		isDistinct = modifiers.isDistinct();
+		limit = modifiers.getLimit();
+		offset = modifiers.getOffset();
+		orderConditions = new ArrayList<>(modifiers.getSortConditions());
+		if (modifiers instanceof OBDAQueryModifiers) {
+			groupConditions = new ArrayList<>(((OBDAQueryModifiers) modifiers).getGroupConditions());
+		}
+		else {
+			groupConditions = new ArrayList<>();
+		}
+	}
+
 	@Override
 	public OBDAQueryModifiers clone() {
 		MutableQueryModifiersImpl clone = new MutableQueryModifiersImpl();
-		clone.isCount = isCount;
 		clone.isDistinct = isDistinct;
 		clone.limit = limit;
 		clone.offset = offset;
@@ -63,7 +74,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	@Override
 	public void copy(OBDAQueryModifiers other) {
 		isDistinct = other.isDistinct();
-		isCount = other.isCount();
 		limit = other.getLimit();
 		offset = other.getOffset();
 		orderConditions.addAll(other.getSortConditions());
@@ -80,15 +90,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		return isDistinct;
 	}
 	
-	@Override
-	public void setCount() {
-		isCount = true;
-	}
-
-	@Override
-	public boolean isCount() {
-		return isCount;
-	}
 
 	@Override
 	public void setLimit(long limit) {

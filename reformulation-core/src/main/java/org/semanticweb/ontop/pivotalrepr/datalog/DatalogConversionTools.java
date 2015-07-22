@@ -16,6 +16,8 @@ import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
 
 import java.util.Collection;
 
+import static org.semanticweb.ontop.model.impl.GroundTermTools.castIntoGroundTerm;
+import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
 import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
 public class DatalogConversionTools {
@@ -46,7 +48,7 @@ public class DatalogConversionTools {
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
 
-        ImmutableList.Builder<VariableImpl> varListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<VariableImpl, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
 
         /**
@@ -57,27 +59,35 @@ public class DatalogConversionTools {
          */
         VariableDispatcher variableDispatcher = new VariableDispatcher();
         for (Term term : datalogDataAtom.getTerms()) {
-            VariableImpl newVariableArgument;
+            VariableOrGroundTerm newArgument;
 
             /**
              * Keep the same variable.
              */
-            if (term instanceof VariableImpl) {
-                newVariableArgument = (VariableImpl) term;
+            if (term instanceof Variable) {
+                newArgument = (Variable) term;
             }
             /**
-             * TODO: could we consider a sub-class of Function instead?
+             * Ground-term: replace by a variable and add a binding.
+             * (easier to merge than putting the ground term in the data atom).
              */
-            else if ((term instanceof Constant) || (term instanceof Function)) {
-                newVariableArgument = variableDispatcher.generateNewVariable();
-                allBindingBuilder.put(newVariableArgument, convertIntoImmutableTerm(term));
-            } else {
-                throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("Unexpected term found in a data atom: " + term);
+            else if (isGroundTerm(term)) {
+                VariableImpl newVariable = variableDispatcher.generateNewVariable();
+                newArgument = newVariable;
+                allBindingBuilder.put(newVariable, castIntoGroundTerm(term));
             }
-            varListBuilder.add(newVariableArgument);
+            /**
+             * Non-ground functional term
+             */
+            else {
+                VariableImpl newVariable = variableDispatcher.generateNewVariable();
+                newArgument = newVariable;
+                allBindingBuilder.put(newVariable, convertIntoImmutableTerm(term));
+            }
+            argListBuilder.add(newArgument);
         }
 
-        DataAtom dataAtom = DATA_FACTORY.getDataAtom(atomPredicate, varListBuilder.build());
+        DataAtom dataAtom = DATA_FACTORY.getDataAtom(atomPredicate, argListBuilder.build());
         ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
 
 
