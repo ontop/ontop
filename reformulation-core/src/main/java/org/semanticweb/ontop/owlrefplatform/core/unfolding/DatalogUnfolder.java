@@ -2057,7 +2057,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
 								Stack<Integer> termidx) {
+		
 		Function parentFunction = null;
+		Stack<Integer> ljpointer =  (Stack<Integer>) termidx.clone();
+		ljpointer.pop();
+		List<Function>  test = getNestedList(ljpointer,rule);
+		
 		if (termidx.size() > 1) {
 			/*
 			 * Its a nested term
@@ -2078,13 +2083,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//its just one Left Join, replace rule body directly
 				rule.updateBody(replacementTerms);
 				return;
+
 			}
+			
+			//Remove the LJ that is empty
 			List <Term> tempTerms = parentFunction.getTerms();
-			tempTerms.remove(0);
-			List <Term> newTerms = new LinkedList<Term>();
-			newTerms.addAll(replacementTerms);
-			newTerms.addAll(tempTerms);
-			parentFunction.updateTerms(newTerms);
+			tempTerms.remove(nestedTerm);
+			tempTerms.addAll(replacementTerms);
 		} else {
 			throw new RuntimeException("Unexpected OPTIONAL condition!");
 		}

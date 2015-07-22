@@ -466,6 +466,27 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
 		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2, joinCondition);
 	}
+	
+	@Override
+	public Function getSPARQLJoin(List<Term> atoms) {
+		
+		int size = atoms.size();
+		
+		if (size>1){
+			List<Term> remainingAtoms = (List<Term>) atoms.subList(1, size);
+			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin(remainingAtoms)  );
+			return join;
+
+		}else{
+			return (Function)atoms.get(0);
+		}
+	
+		
+	}	
+	
+	
+	
+	
 
 	@Override
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {
