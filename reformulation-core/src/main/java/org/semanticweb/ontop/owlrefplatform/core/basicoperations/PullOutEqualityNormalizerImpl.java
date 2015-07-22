@@ -2,13 +2,16 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import fj.*;
 import fj.data.*;
+import fj.data.List;
+import fj.data.Set;
+import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import static org.semanticweb.ontop.model.impl.DatalogTools.*;
 
@@ -57,8 +60,42 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          */
         PullOutEqLocalNormResult result = normalizeSameLevelAtoms(List.iterableList(newRule.getBody()), variableDispatcher);
 
-        newRule.updateBody(new ArrayList(result.getAllAtoms().toCollection()));
+        /**
+         * Minor reshaping of some top-level AND(...) boolean atoms (flattened)
+         */
+        List<Function> topAtoms = flattenTopBooleanConjunctions(result.getAllAtoms());
+
+        newRule.updateBody(new ArrayList(topAtoms.toCollection()));
         return newRule;
+    }
+
+    /**
+     * THIS IS A HACK!
+     *
+     * Flattens some top-level top AND(..) boolean atoms because the SQL generator is bit rigid with them.
+     */
+    private List<Function> flattenTopBooleanConjunctions(final List<Function> atoms) {
+        return atoms.bind(new F<Function, List<Function>>() {
+            @Override
+            public List<Function> f(Function atom) {
+                /**
+                 * Only flatten a top-level AND(...) boolean atom
+                 * IF ALL ITS SUB-TERMS are FUNCTIONAL.
+                 */
+                if (atom.getFunctionSymbol().equals(OBDAVocabulary.AND)) {
+                    java.util.List<Term> subTerms = atom.getTerms();
+                    for (Term subTerm : subTerms) {
+                        if (!(subTerm instanceof Function)) {
+                            return List.cons(atom, EMPTY_ATOM_LIST);
+                        }
+                    }
+                    return List.iterableList((java.util.List<Function>)(java.util.List<?>)subTerms);
+                }
+                else {
+                    return List.cons(atom, EMPTY_ATOM_LIST);
+                }
+            }
+        });
     }
 
     /**
