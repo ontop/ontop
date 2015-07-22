@@ -783,7 +783,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (sqls.size() == 1) {
 			unionView = sqls.iterator().next();
 		} else {
-			unionView = "(" + Joiner.on(")\n UNION \n (").join(sqls) + ")";
+			unionView = "(" + Joiner.on(")\n UNION ALL \n (").join(sqls) + ")";
 		}
 
 		//String viewname = String.format(VIEW_ANS_NAME, pred);
