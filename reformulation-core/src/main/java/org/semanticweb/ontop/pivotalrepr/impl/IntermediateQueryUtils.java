@@ -170,23 +170,54 @@ public class IntermediateQueryUtils {
 
     /**
      * TODO: explain
-     * TODO: find a better name
-     *
-     * TODO: avoid the use of a recursive method. Use a stack instead.
      *
      */
     public static IntermediateQueryBuilder convertToBuilder(IntermediateQuery originalQuery)
             throws IntermediateQueryBuilderException {
+        try {
+            return convertToBuilderAndTransform(originalQuery, Optional.<QueryNodeTransformer>absent());
+            /**
+             * No transformer so should not be expected
+             */
+        } catch (QueryNodeTransformationException | NotNeededNodeException e) {
+            throw new RuntimeException("Should not be thrown: " + e.getMessage());
+        }
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+                                                                        QueryNodeTransformer transformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
+        return convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
+    }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: avoid the use of a recursive method. Use a stack instead.
+     *
+     */
+    private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+                                                                        Optional<QueryNodeTransformer> optionalTransformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
 
-        // Clone of the original root node (because is mutable)
+        // Clone of the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
-        ConstructionNode newRootNode = originalRootNode.clone();
+        ConstructionNode newRootNode;
+        if (optionalTransformer.isPresent()) {
+            newRootNode =  originalRootNode.acceptNodeTransformer(optionalTransformer.get()).clone();
+        }
+        else {
+            newRootNode = originalRootNode.clone();
+        }
 
         queryBuilder.init(newRootNode);
 
-
-        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode);
+        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, optionalTransformer);
     }
 
     /**
@@ -195,18 +226,24 @@ public class IntermediateQueryUtils {
     private static IntermediateQueryBuilder copyChildrenNodesToBuilder(final IntermediateQuery originalQuery,
                                                                        IntermediateQueryBuilder queryBuilder,
                                                                        final QueryNode originalParentNode,
-                                                                       final QueryNode newParentNode)
-            throws IntermediateQueryBuilderException {
+                                                                       final QueryNode newParentNode,
+                                                                       Optional<QueryNodeTransformer> optionalTransformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(originalParentNode)) {
 
             // QueryNode are mutable
-            QueryNode newChildNode = originalChildNode.clone();
+            QueryNode newChildNode;
+            if (optionalTransformer.isPresent()) {
+                newChildNode = originalChildNode.acceptNodeTransformer(optionalTransformer.get()).clone();
+            } else {
+                newChildNode = originalChildNode.clone();
+            }
 
             Optional<ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
             queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
 
             // Recursive call
-            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode);
+            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode, optionalTransformer);
         }
 
         return queryBuilder;

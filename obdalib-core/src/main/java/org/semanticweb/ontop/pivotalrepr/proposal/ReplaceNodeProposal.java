@@ -4,7 +4,11 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
  * TODO: describe
+ *
+ * Proposal: DEPRECATED IT. Too low-level for a proposal
+ *
  */
+@Deprecated
 public interface ReplaceNodeProposal extends LocalOptimizationProposal {
     /**
      * Query node on which to apply the optimization proposal.

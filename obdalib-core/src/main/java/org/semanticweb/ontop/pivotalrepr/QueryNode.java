@@ -19,6 +19,7 @@ public interface QueryNode extends Cloneable {
      * To be implemented by leaf classes.
      *
      */
+    @Deprecated
     Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer);
 
     /**

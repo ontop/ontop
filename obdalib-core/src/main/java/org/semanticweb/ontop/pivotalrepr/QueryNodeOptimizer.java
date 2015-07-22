@@ -13,6 +13,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
  * and executed in a given order.
  *
  */
+@Deprecated
 public interface QueryNodeOptimizer {
 
     Optional<LocalOptimizationProposal> makeProposal(InnerJoinNode node);

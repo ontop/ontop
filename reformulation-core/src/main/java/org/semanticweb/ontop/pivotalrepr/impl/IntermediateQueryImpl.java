@@ -155,24 +155,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
             throws AlreadyExistingPredicateException {
 
-        IntermediateQuery renamedQuery = clone();
-
-
-        PredicateRenamingChecker.checkNonExistence(renamedQuery, newPredicate);
-
-        PredicateRenamer renamer = new PredicateRenamer(renamedQuery, formerPredicate, newPredicate);
-
-        for (QueryNode node : renamedQuery.getNodesInBottomUpOrder()) {
-            Optional<LocalOptimizationProposal> optionalProposal = node.acceptOptimizer(renamer);
-            if (optionalProposal.isPresent()) {
-                try {
-                    optionalProposal.get().apply();
-                } catch (InvalidLocalOptimizationProposalException e) {
-                    throw new RuntimeException("Internal error: " + e.getMessage());
-                }
-            }
+        PredicateRenamingChecker.checkNonExistence(this, newPredicate);
+        PredicateRenamer renamer = new PredicateRenamer(formerPredicate, newPredicate);
+        try {
+            return IntermediateQueryUtils.convertToBuilderAndTransform(this, renamer).build();
         }
-        return renamedQuery;
+        catch (IntermediateQueryBuilderException | QueryNodeTransformationException | NotNeededNodeException e) {
+            throw new RuntimeException("Unexpected error: " + e.getMessage());
+        }
     }
 
     /**
