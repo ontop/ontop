@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
-	private boolean isCount;
 	private boolean isDistinct;
 
 	private long limit;
@@ -39,7 +38,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	private List<Variable> groupConditions;
 	
 	public MutableQueryModifiersImpl() {
-		isCount = false;
 		isDistinct = false;
 		limit = -1;
 		offset = -1;
@@ -48,7 +46,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	}
 
 	public MutableQueryModifiersImpl(QueryModifiers modifiers) {
-		isCount = modifiers.isCount();
 		isDistinct = modifiers.isDistinct();
 		limit = modifiers.getLimit();
 		offset = modifiers.getOffset();
@@ -64,7 +61,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	@Override
 	public OBDAQueryModifiers clone() {
 		MutableQueryModifiersImpl clone = new MutableQueryModifiersImpl();
-		clone.isCount = isCount;
 		clone.isDistinct = isDistinct;
 		clone.limit = limit;
 		clone.offset = offset;
@@ -78,7 +74,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	@Override
 	public void copy(OBDAQueryModifiers other) {
 		isDistinct = other.isDistinct();
-		isCount = other.isCount();
 		limit = other.getLimit();
 		offset = other.getOffset();
 		orderConditions.addAll(other.getSortConditions());
@@ -95,15 +90,6 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		return isDistinct;
 	}
 	
-	@Override
-	public void setCount() {
-		isCount = true;
-	}
-
-	@Override
-	public boolean isCount() {
-		return isCount;
-	}
 
 	@Override
 	public void setLimit(long limit) {

@@ -6,14 +6,13 @@ import org.semanticweb.ontop.model.OrderCondition;
 import java.util.List;
 
 /**
- * Query modifiers (DISTINCT, COUNT, OFFSET, etc.)
+ * Query modifiers (DISTINCT, OFFSET, etc.)
  *
  * Allows immutable implementations.
  */
 public interface QueryModifiers {
 
     boolean isDistinct();
-    boolean isCount();
     boolean hasOrder();
     boolean hasLimit();
     boolean hasOffset();

@@ -13,15 +13,13 @@ import java.util.List;
 public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
 
     private final boolean isDistinct;
-    private final boolean isCount;
     private final long limit;
     private final long offset;
     private final ImmutableList<OrderCondition> sortConditions;
 
-    public ImmutableQueryModifiersImpl(boolean isDistinct, boolean isCount, long limit,
+    public ImmutableQueryModifiersImpl(boolean isDistinct, long limit,
                                        long offset, ImmutableList<OrderCondition> sortConditions) {
         this.isDistinct = isDistinct;
-        this.isCount = isCount;
         this.limit = limit;
         this.offset = offset;
         this.sortConditions = sortConditions;
@@ -34,7 +32,6 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
     public ImmutableQueryModifiersImpl(QueryModifiers modifiers) {
 
         isDistinct = modifiers.isDistinct();
-        isCount = modifiers.isCount();
         limit = modifiers.getLimit();
         offset = modifiers.getOffset();
         sortConditions = ImmutableList.copyOf(modifiers.getSortConditions());
@@ -51,10 +48,6 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
         return isDistinct;
     }
 
-    @Override
-    public boolean isCount() {
-        return isCount;
-    }
 
     @Override
     public boolean hasOrder() {
@@ -89,7 +82,7 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
     @Override
     public Optional<ImmutableQueryModifiers> newSortConditions(ImmutableList<OrderCondition> newSortConditions) {
         if (isDistinct || hasLimit() || hasOffset() || (!newSortConditions.isEmpty())) {
-            ImmutableQueryModifiers newModifiers = new ImmutableQueryModifiersImpl(isDistinct, isCount, limit, offset,
+            ImmutableQueryModifiers newModifiers = new ImmutableQueryModifiersImpl(isDistinct, limit, offset,
                     newSortConditions);
             return Optional.of(newModifiers);
         }
