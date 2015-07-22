@@ -1317,6 +1317,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Cannot return the SQL type for: "
 					+ term.toString());
 		}
+		/**
+		 * Boolean constant
+		 */
+		else if (term.equals(OBDAVocabulary.FALSE)
+				 || term.equals(OBDAVocabulary.TRUE)) {
+			return Types.BOOLEAN;
+		}
 
 		return Types.VARCHAR;
 	}
@@ -2421,6 +2428,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
+		}
+		else if (functionSymbol.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+			operator = IS_TRUE_OPERATOR;
 		}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
