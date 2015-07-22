@@ -112,7 +112,7 @@ public class IntermediateQueryToDatalogTranslator {
 		List<Function> atoms = new LinkedList<Function>();
 		
 		//Constructing the rule
-		CQIE newrule = ofac.getCQIE(substitutedHead, atoms);
+		CQIE newrule = ofac.getCQIE(convertToMutableFunction(substitutedHead), atoms);
 		
 		pr.appendRule(newrule);
 		
@@ -218,7 +218,7 @@ public class IntermediateQueryToDatalogTranslator {
 		
 			QueryNode nod= listnode.get(0);
 			if (nod instanceof ConstructionNode) {
-					Function newAns = ((ConstructionNode) nod).getProjectionAtom();
+					Function newAns = convertToMutableFunction(((ConstructionNode) nod).getProjectionAtom());
 					body.add(newAns);
 					return body;
 				}else{
