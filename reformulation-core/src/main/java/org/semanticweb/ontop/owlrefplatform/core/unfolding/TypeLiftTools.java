@@ -35,6 +35,15 @@ public class TypeLiftTools {
     }
 
     /**
+     * If the assumption of having only variables is violated
+     */
+    protected static class NonVariableException extends RuntimeException {
+        protected NonVariableException(String message) {
+            super(message);
+        }
+    }
+
+    /**
      * Returns true if one term of the atom corresponds to a URI template.
      */
     public static boolean containsURITemplate(Function atom) {
@@ -351,7 +360,17 @@ public class TypeLiftTools {
          * The target atom is expected to be only composed of variables.
          * Extracts them in a list.
          */
-        List<VariableImpl> targetVariables = extractVariablesFromTargetAtom(targetAtom);
+        List<VariableImpl> targetVariables;
+        try {
+            targetVariables = extractVariablesFromTargetAtom(targetAtom);
+        }
+        /**
+         * If the assumption of having only variables is violated,
+         * the substitution is cancelled.
+         */
+         catch (NonVariableException e) {
+            throw new SubstitutionUtilities.SubstitutionException();
+        }
 
         /**
          * Gets a cleaned atom that uses the same variables that the target one.
@@ -381,7 +400,7 @@ public class TypeLiftTools {
      *
      * It must be only composed of (possibly typed) variables.
      */
-    private static List<VariableImpl> extractVariablesFromTargetAtom(final Function targetAtom) {
+    private static List<VariableImpl> extractVariablesFromTargetAtom(final Function targetAtom) throws NonVariableException {
         return List.iterableList(targetAtom.getTerms()).map(new F<Term, VariableImpl>() {
             @Override
             public VariableImpl f(Term term) {
@@ -408,7 +427,7 @@ public class TypeLiftTools {
                     }
                 }
 
-                throw new IllegalArgumentException("The target atom must be only composed of (possibly typed) variables. Bad term: " + term);
+                throw new NonVariableException("The target atom must be only composed of (possibly typed) variables. Bad term: " + term);
             }
         });
     }
