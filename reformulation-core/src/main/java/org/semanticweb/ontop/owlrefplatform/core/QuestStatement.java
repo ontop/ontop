@@ -42,10 +42,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -517,9 +514,13 @@ public class QuestStatement implements OBDAStatement {
 				log.debug("New intermediate query: \n" + intermediateQuery.toString());
 				
 				
-			unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 				
 				log.debug("New Datalog query: \n" + unfolding.toString());
+
+				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
+				log.debug("New flattened Datalog query: \n" + unfolding.toString());
+
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
