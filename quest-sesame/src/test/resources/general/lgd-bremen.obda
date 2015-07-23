@@ -1,0 +1,70 @@
+[PrefixDeclaration]
+:               http://meraka/moss/exampleBooks.owl#
+owl:            http://www.w3.org/2002/07/owl#
+rdf:            http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:            http://www.w3.org/2001/XMLSchema#
+rdfs:           http://www.w3.org/2000/01/rdf-schema#
+quest:          http://obda.org/quest#
+strdf:          http://strdf.di.uoa.gr/ontology#
+cd:             http://melodiesproject.eu/CityDistricts/ontology#
+bio:             http://melodiesproject.eu/vista/biotop/ontology#
+bsph:             http://melodiesproject.eu/vista/bsph/ontology#
+ffh:             http://melodiesproject.eu/vista/ffh/ontology#
+nap:             http://melodiesproject.eu/vista/nap/ontology#
+nsg:             http://melodiesproject.eu/vista/nsg/ontology#
+bpa:             http://melodiesproject.eu/vista/bpa/ontology#
+ntp:             http://melodiesproject.eu/vista/ntp/ontology#
+twsg:             http://melodiesproject.eu/vista/twsg/ontology#
+fl:             http://melodiesproject.eu/floodArea/ontology#
+f:             http://melodiesproject.eu/field/ontology#
+geo:            http://www.opengis.net/ont/geosparql#
+ua:	 			http://geo.linkedopendata.gr/urban/ontology#
+lgd:			http://linkedgeodata.org/ontology#
+
+[SourceDeclaration]
+sourceUri       LGD-BREMEN
+connectionUrl   jdbc:postgresql://localhost:5432/lgd-bremen
+username        postgres
+password        p1r3as
+driverClass     org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+
+mappingId       lgd_buildings_info
+target          lgd:{gid}  lgd:buildingCategory lgd:{type} . lgd:{gid}  lgd:hasName {name} . 
+source          select  gid, type, name from buildings
+
+
+mappingId       lgd_buildings_geometry
+target          lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral . 
+source          select  gid, geom from buildings
+
+mappingId       lgd_landuse
+target          lgd:{gid}  lgd:landUse lgd:{type} . lgd:{gid}  lgd:hasName {name} . lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral . 
+source          select  gid, type, geom, name from landuse
+
+mappingId       lgd_places
+target          lgd:{gid}  lgd:amenityType lgd:{type} . lgd:{gid}  lgd:hasName {name} . lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral .  lgd:{gid} geo:hasPopulation {population} . 
+source          select  gid, type, population ,geom from places
+
+mappingId       lgd_points
+target          lgd:{gid}  lgd:pointType lgd:{type} . lgd:{gid}  lgd:hasName {name} . lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral .  lgd:{gid} lgd:hasTimestamp {timestamp} . 
+source          select  gid, type, timestamp ,geom from points
+
+mappingId       lgd_railways
+target          lgd:{gid}  lgd:railwayType lgd:{type} . lgd:{gid}  lgd:hasName {name} . lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral . 
+source          select  gid, type, geom from railways
+
+mappingId       lgd_roads_info
+target          lgd:{gid}  lgd:roadType lgd:{type} . lgd:{gid}  lgd:hasName {name} . lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral .  lgd:{gid} lgd:oneway {oneway} . 
+source          select  gid, type, oneway ,geom from roads
+
+mappingId       lgd_roads_properties
+target          lgd:{gid}  lgd:bridge lgd:{bridge} . lgd:{gid}  lgd:tunnel {tunnel} .  lgd:{gid} lgd:maxspeed {maxspeed} . 
+source          select  gid, bridge, tunnel, maxspeed from roads
+
+mappingId       lgd_waterways
+target          lgd:{gid}  lgd:waterwayCategory lgd:{type} . lgd:{gid}  lgd:hasName {name} . lgd:{gid} geo:asWKT {geom}^^geo:wktLiteral .  lgd:{gid} lgd:width {width} . 
+source          select  gid, type, width ,geom from waterways
+
+]]
