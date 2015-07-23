@@ -1,0 +1,3 @@
+* Support geospatial contruct functions
+* Support geospatial functions in the select clause of GeoSPARQL queries  as well 
+* Support more geospatial relational databases 

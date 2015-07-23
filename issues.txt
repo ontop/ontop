@@ -1,0 +1,5 @@
+Known issues
+==================
+
+* Use GeoSPARQL functions in the filter clause of the queries with their full URI's (do not use 
+prefixes for these functions. It is a bug and it will be fixed in the next release)
