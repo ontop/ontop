@@ -630,9 +630,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					/**
 					 * Ignores rules that must not be unfolded.
 					 */
-					if (notToUnfoldRules.contains(fatherRule))
+					if (notToUnfoldRules.contains(fatherRule)) {
 						continue;
 
+					}
+						
+						
+						
 					/**
 					 * Needed for backtracking the unfolding (if necessary).
 					 */
@@ -665,7 +669,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						// Hack: consider the original rule instead.
 						partialEvaluation = Arrays.asList(originalFatherRule);
 						// Makes sure the definitions of the data atoms are added to the datalog program.
-						workingList = appendMappingRulesToQuery(originalFatherRule, workingList);
+						workingList = appendMappingRulesToQuery(originalFatherRule, workingList,predicatesMightGotEmpty);
 					}
 
 					if (partialEvaluation != null) {
@@ -753,8 +757,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	/**
 	 * TODO: explain
+	 * @param predicatesMightGotEmpty 
 	 */
-	private List<CQIE> appendMappingRulesToQuery(CQIE notUnfoldableRule, List<CQIE> queryRules) {
+	private List<CQIE> appendMappingRulesToQuery(CQIE notUnfoldableRule, List<CQIE> queryRules, List<Predicate> predicatesMightGotEmpty) {
+		
 		Set<Predicate> dataPredicates = extractDataPredicates(notUnfoldableRule.getBody());
 		for (Predicate dataPredicate : dataPredicates) {
 			List<CQIE> predicateDefinitions = mappings.get(dataPredicate);
@@ -763,6 +769,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 * TODO: check it
 			 */
 			if (predicateDefinitions == null) {
+				
+				/**
+				 * If the predicate has no definition, I add it to the things that might go empty.
+				 */
+				if (!predicatesMightGotEmpty.contains(dataPredicate)){
+					predicatesMightGotEmpty.add(dataPredicate);
+				}
 				continue;
 			}
 			/**
