@@ -78,13 +78,29 @@ public class FunctionFlattener {
      * TODO: improve it and make it recursive
      */
     private static List<Function> flattenAND(Function andAtom) {
-        java.util.List<Term> subTerms = andAtom.getTerms();
-        for (Term subTerm : subTerms) {
-            if (!(subTerm instanceof Function)) {
-                return List.cons(andAtom, EMPTY_ATOM_LIST);
+
+        // Non-final
+        List<Function> flattenedAtoms = List.nil();
+
+        for (Term subTerm : andAtom.getTerms()) {
+            if (subTerm instanceof Function) {
+                Function subAtom = (Function) subTerm;
+                /**
+                 * Recursive call for nested AND(...)
+                 */
+                if (subAtom.getFunctionSymbol().equals(OBDAVocabulary.AND)) {
+                    flattenedAtoms = flattenedAtoms.append(flattenAND(subAtom));
+                }
+                else {
+                    flattenedAtoms = flattenedAtoms.append(List.cons(subAtom, EMPTY_ATOM_LIST));
+                }
+            }
+            else {
+                Function newAtom = DATA_FACTORY.getFunctionAND(subTerm, OBDAVocabulary.TRUE);
+               flattenedAtoms = flattenedAtoms.append(List.cons(newAtom, EMPTY_ATOM_LIST));
             }
         }
-        return convertToListofFunctions(subTerms);
+        return flattenedAtoms;
     }
 
     /**
