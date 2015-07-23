@@ -1,10 +1,22 @@
 [![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://travis-ci.org/ontop/ontop)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-Ontop
+Ontop-Spatial
 ==================
 
-Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
-virtual RDF graphs defined through mappings to RDBMS. 
+Ontop-spatial is an extension of Ontop framework with geospatial 
+support. Ontop is a framework for ontology based data access (OBDA). 
+It supports SPARQL over
+virtual RDF graphs defined through mappings to RDBMS. Ontop-spatial
+extends ontop with the following geospatial capabilities: 
+* Geospatial virtual RDF graphs can be created on top of geospatial databases
+(i.e., PostgreSQL with PostGIS extension enabled). 
+* Geometry columns in geospatial databases can be mapped to  GeoSPARQL
+WKT literals using R2RML or OBDA mappings 
+* Geospatial topology functions as defined in GeoSPARQL can be used 
+in the filter clause of (Geo)SPARQL queries.  
+
+Check also issues.txt for known issues and todo.txt for future 
+enchancements
 
 Licensing terms 
 --------------------
