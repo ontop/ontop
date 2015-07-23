@@ -504,8 +504,8 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 
 		// PUSH TYPE HERE
-		log.debug("Pushing types...");
-		unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
+		//log.debug("Pushing types...");
+		//unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
 		if (unfolding.getRules().size() > 0) {
 			try {

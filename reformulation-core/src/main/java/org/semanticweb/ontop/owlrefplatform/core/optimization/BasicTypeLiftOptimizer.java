@@ -197,13 +197,14 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
         if (optionalFirstChildZipper.isNone()) {
             return Option.none();
         }
-        final ImmutableSubstitution<ImmutableTerm> firstChildSubstitution = optionalFirstChildZipper.some().getLabel()
+        final TreeZipper<ConstructionNodeUpdate> firstChild = optionalFirstChildZipper.some();
+        final ImmutableSubstitution<ImmutableTerm> firstChildSubstitution = firstChild.getLabel()
                 .getMostRecentConstructionNode().getSubstitution();
 
         // Non-final
         PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution);
         // Non-final
-        Option<TreeZipper<ConstructionNodeUpdate>> optionalChildZipper = currentZipper.firstChild();
+        Option<TreeZipper<ConstructionNodeUpdate>> optionalChildZipper = firstChild.right();
 
         /**
          * Computes a partial union with the other children.

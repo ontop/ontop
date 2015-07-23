@@ -1,15 +1,20 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGU;
 
 /**
  * TODO: explain
@@ -67,8 +72,10 @@ public class PartialUnion<T extends ImmutableTerm> {
             /**
              * TODO: explain
              */
-            if (otherSubstitution.isDefining(variable) && (!otherSubstitution.get(variable).equals(term))) {
-                conflictingVariables.add(variable);
+            if (otherSubstitution.isDefining(variable)) {
+                if (!areEquivalent(otherSubstitution.get(variable), term)) {
+                    conflictingVariables.add(variable);
+                }
             }
             else {
                 substitutionMap.put(variable, term);
@@ -87,5 +94,32 @@ public class PartialUnion<T extends ImmutableTerm> {
 
     public PartialUnion<T> newPartialUnion(ImmutableSubstitution<T> additionalSubstitution) {
         return new PartialUnion<>(getPartialUnionSubstitution(), additionalSubstitution, getConflictingVariables());
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static boolean areEquivalent(ImmutableTerm term1, ImmutableTerm term2) {
+        /**
+         * TODO: probably too simple. Think more about it.
+         */
+        if (term1 instanceof VariableOrGroundTerm) {
+            return term1.equals(term2);
+        }
+        /**
+         *
+         */
+        else if (term1 instanceof ImmutableFunctionalTerm) {
+            if (term2 instanceof ImmutableFunctionalTerm) {
+                Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGU = computeMGU((ImmutableFunctionalTerm) term1, (ImmutableFunctionalTerm) term2);
+                return optionalMGU.isPresent();
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            throw new IllegalArgumentException("Unknown term1: " + term1);
+        }
     }
 }
