@@ -1,12 +1,12 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
-import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.NonGroundFunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.HashMap;
@@ -14,13 +14,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGU;
 
 /**
  * TODO: explain
  *
+ * TODO: explain why we always generate new variables
+ *
  */
 public class PartialUnion<T extends ImmutableTerm> {
+
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     /**
      * Possibly mutable attributes that can only be modified
@@ -32,24 +37,42 @@ public class PartialUnion<T extends ImmutableTerm> {
      */
     private final Set<VariableImpl> conflictingVariables;
     private final Map<VariableImpl, T> substitutionMap;
+    private final VariableGenerator variableGenerator;
 
     /**
      * Bootstrap. Then use newPartialUnion().
      */
-    public PartialUnion(ImmutableSubstitution<T> substitution) {
+    public PartialUnion(ImmutableSubstitution<T> substitution, VariableGenerator variableGenerator) {
         conflictingVariables = ImmutableSet.of();
-        substitutionMap = substitution.getImmutableMap();
+        this.variableGenerator = variableGenerator;
+        substitutionMap = replaceTargetVariables(substitution.getImmutableMap());
     }
 
-    public PartialUnion(ImmutableSubstitution<T> substitution1,
+    private PartialUnion(ImmutableSubstitution<T> substitution1,
                         ImmutableSubstitution<T> substitution2,
-                        ImmutableSet<VariableImpl> alreadyConflictingVariables) {
+                        ImmutableSet<VariableImpl> alreadyConflictingVariables,
+                        VariableGenerator variableGenerator) {
 
         substitutionMap = new HashMap<>();
         conflictingVariables = new HashSet<>(alreadyConflictingVariables);
+        this.variableGenerator = variableGenerator;
 
-        loadOneSubstitutionEntries(substitution1, substitution2);
-        loadOneSubstitutionEntries(substitution2, substitution1);
+        loadOneSubstitutionEntries(substitution1, substitution2, false);
+        loadOneSubstitutionEntries(substitution2, substitution1, true);
+    }
+
+    /**
+     * TODO: explain
+     *
+     * Cannot be static because of the generics.
+     */
+    private ImmutableMap<VariableImpl, T> replaceTargetVariables(ImmutableMap<VariableImpl, T> importedSubstitutionMap) {
+        ImmutableMap.Builder<VariableImpl, T> mapBuilder = ImmutableMap.builder();
+
+        for (Map.Entry<VariableImpl, T> entry : importedSubstitutionMap.entrySet()) {
+            mapBuilder.put(entry.getKey(), replaceVariablesInTerm(entry.getValue()));
+        }
+        return mapBuilder.build();
     }
 
     /**
@@ -59,7 +82,7 @@ public class PartialUnion<T extends ImmutableTerm> {
      * TODO: further explain
      */
     private void loadOneSubstitutionEntries(ImmutableSubstitution<T> substitutionToLoad,
-                                            ImmutableSubstitution<T> otherSubstitution) {
+                                            ImmutableSubstitution<T> otherSubstitution, boolean replaceVariables) {
         ImmutableMap<VariableImpl, T> substitutionMapToLoad = substitutionToLoad.getImmutableMap();
         for(VariableImpl variable : substitutionMapToLoad.keySet()) {
 
@@ -72,15 +95,73 @@ public class PartialUnion<T extends ImmutableTerm> {
             /**
              * TODO: explain
              */
+            boolean addToSubstitutionMap;
             if (otherSubstitution.isDefining(variable)) {
-                if (!areEquivalent(otherSubstitution.get(variable), term)) {
+                if (areEquivalent(otherSubstitution.get(variable), term)) {
+                    addToSubstitutionMap = !substitutionMap.containsKey(variable);
+                }
+                else {
                     conflictingVariables.add(variable);
+                    addToSubstitutionMap = false;
                 }
             }
             else {
-                substitutionMap.put(variable, term);
+                addToSubstitutionMap = true;
+            }
+
+
+            if (addToSubstitutionMap) {
+                T newTerm;
+                if (replaceVariables) {
+                    newTerm = replaceVariablesInTerm(term);
+                }
+                else {
+                    newTerm = term;
+                }
+                substitutionMap.put(variable, newTerm);
             }
         }
+    }
+
+    /**
+     * TODO: explain
+     */
+    private T replaceVariablesInTerm(T term) {
+        return (T) replaceVariablesInTerm(term, variableGenerator);
+    }
+
+    private static ImmutableTerm replaceVariablesInTerm(ImmutableTerm term, VariableGenerator variableGenerator) {
+        if (isGroundTerm(term)) {
+            return term;
+        }
+        else if (term instanceof VariableImpl) {
+            return variableGenerator.generateNewVariable();
+        }
+        /**
+         * Non-ground functional term
+         */
+        else if (term instanceof ImmutableFunctionalTerm) {
+            return replaceAllVariables((ImmutableFunctionalTerm) term, variableGenerator);
+        }
+        else {
+            throw new IllegalArgumentException("Unknown term: " + term);
+        }
+    }
+
+    /**
+     * The functional term must non-ground (maybe not explicitly typed as such)
+     */
+    private static NonGroundFunctionalTerm replaceAllVariables(ImmutableFunctionalTerm nonGroundFunctionalTerm,
+                                                               VariableGenerator variableGenerator) {
+        ImmutableList.Builder<ImmutableTerm> subTermBuilder = ImmutableList.builder();
+        for (ImmutableTerm subTerm : nonGroundFunctionalTerm.getImmutableTerms()) {
+            /**
+             * Indirectly recursive call
+             */
+            subTermBuilder.add(replaceVariablesInTerm(subTerm, variableGenerator));
+        }
+        return DATA_FACTORY.getNonGroundFunctionalTerm(nonGroundFunctionalTerm.getFunctionSymbol(),
+                subTermBuilder.build());
     }
 
 
@@ -93,7 +174,8 @@ public class PartialUnion<T extends ImmutableTerm> {
     }
 
     public PartialUnion<T> newPartialUnion(ImmutableSubstitution<T> additionalSubstitution) {
-        return new PartialUnion<>(getPartialUnionSubstitution(), additionalSubstitution, getConflictingVariables());
+        return new PartialUnion<>(getPartialUnionSubstitution(), additionalSubstitution, getConflictingVariables(),
+                variableGenerator);
     }
 
     /**
