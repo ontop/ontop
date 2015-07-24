@@ -103,4 +103,18 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
         }
         return string;
     }
+
+    /**
+     * A bit hacky: only for the functional term
+     * that derives from AbstractFunctionalTermImpl
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Function) {
+            return toString().equals(other.toString());
+        }
+        else {
+            return false;
+        }
+    }
 }
