@@ -1594,7 +1594,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			  if (colName.length() > 0) {
 				  colName = colName.substring(0, colName.length()-1);
 			    }
-			  colName=colName.concat("Lang\"");
+			  colName=colName.concat("Lang" + sqladapter.getClosingQuote());
 			
 			  //reutrning the answer
 			  return (String.format(LANG_STR,  colName, varName));

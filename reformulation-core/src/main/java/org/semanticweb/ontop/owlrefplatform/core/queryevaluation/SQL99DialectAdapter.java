@@ -104,6 +104,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 //		return name;
 	}
 
+	@Override
+	public String getClosingQuote() {
+		return "\"";
+	}
+
 	/**
 	 * There is no standard for this part.
 	 *
