@@ -68,4 +68,5 @@ public interface IntermediateQuery {
      */
     IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
             throws AlreadyExistingPredicateException;
+
 }

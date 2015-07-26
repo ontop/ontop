@@ -22,32 +22,16 @@ package org.semanticweb.ontop.unfold;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.sql.Connection;
-import java.util.Properties;
+import org.semanticweb.ontop.pivotalrepr.UnionLiftTransformer;
+import org.semanticweb.ontop.pivotalrepr.UnionLiftTransformerImpl;
 
 import static org.junit.Assert.assertEquals;
 import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition.*;
@@ -63,89 +47,20 @@ public class UnionLiftTest1Virtual {
 	private static final Optional<ImmutableBooleanExpression> NO_EXPRESSION = Optional.absent();
 	private static final Optional<ImmutableQueryModifiers> NO_MODIFIER = Optional.absent();
 
-	private OBDADataFactory fac;
-	private Connection conn;
+    private UnionNode unionNode;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person4.obda";
-
-	@Before
-	public void setUp() throws Exception {
-
-		fac = OBDADataFactoryImpl.getInstance();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		
-	}
-
-	private void runTests(Properties p, String query, int expectedvalue) throws Exception {
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
-
-		try {
-
-			executeQueryAssertResults(query, st, expectedvalue);
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-	}
-	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-		int count = 0;
-		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				String varName = rs.getSignature().get(i-1);
-				System.out.print(varName);
-				//System.out.print("=" + rs.getOWLObject(i));
-				System.out.print("=" + rs.getOWLObject(varName));
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedRows, count);
-	}
-
+    private QueryNode targetNode;
 
 
     public IntermediateQuery buildQuery1() throws Exception {
 		VariableImpl x = (VariableImpl) DATA_FACTORY.getVariable("x");
 		VariableImpl y = (VariableImpl) DATA_FACTORY.getVariable("y");
-		DataAtom rootDataAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 2), x, y);
+
+
+        /**
+         * Ans 1
+         */
+        DataAtom rootDataAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 2), x, y);
         ConstructionNode root = new ConstructionNodeImpl(rootDataAtom);
 
 		IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
@@ -161,7 +76,6 @@ public class UnionLiftTest1Virtual {
 		/**
 		 * Ans 2
 		 */
-
 		DataAtom ans2Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans2", 1), x);
 		ConstructionNode topAns2Node = new ConstructionNodeImpl(ans2Atom);
 		queryBuilder.addChild(join1, topAns2Node);
@@ -230,23 +144,25 @@ public class UnionLiftTest1Virtual {
 		TableNode t5 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t5", 2), f, g));
 		queryBuilder.addChild(t5Ans4Node, t5);
 
+        this.unionNode = unionAns2;
+        this.targetNode = join1;
 
         return queryBuilder.build();
     }
 
 	@Test
 	public void printQuery1() throws Exception {
-		System.out.println("Query 1: \n" + buildQuery1());
+        IntermediateQuery intermediateQuery = buildQuery1();
+
+        System.out.println("Query 1: \n" + intermediateQuery);
+
+        UnionLiftTransformer unionLiftProposal = new UnionLiftTransformerImpl(unionNode, targetNode);
+
+        IntermediateQuery newQuery = unionLiftProposal.apply(intermediateQuery);
+
+        System.out.println("New Query: \n" + newQuery);
 	}
 
 
-        @Test
-	public void testUnion() throws Exception {
-
-		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT * WHERE{ {?person a :Person } OPTIONAL {?person :hasFriend ?f} }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
-	}
 
 }
