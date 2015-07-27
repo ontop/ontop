@@ -41,6 +41,7 @@ public interface IntermediateQuery {
      *
      * Returns the QueryNode at the same position, which might be new.
      */
+    @Deprecated
     QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException;
 

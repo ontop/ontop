@@ -783,12 +783,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (sqls.size() == 1) {
 			unionView = sqls.iterator().next();
 		} else {
-			unionView = "(" + Joiner.on(")\n UNION \n (").join(sqls) + ")";
+			unionView = "(" + Joiner.on(")\n UNION ALL \n (").join(sqls) + ")";
 		}
 
 		//String viewname = String.format(VIEW_ANS_NAME, pred);
 		// String viewname = "Q" + pred + "View";
-		String viewname = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX, viewNames);
+		String safePredicateName = escapeName(pred.getName());
+		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX, viewNames);
 		viewNames.add(viewname);
 
 		List<String> columns = Lists
@@ -805,6 +806,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 				unionView, columns);
 		metadata.add(viewU);
 		sqlAnsViewMap.put(pred, unionView);
+	}
+
+	/**
+	 * Escapes view names.
+	 */
+	private static String escapeName(String name) {
+		return name.replace('.', '_');
 	}
 
 	/***
@@ -1317,6 +1325,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Cannot return the SQL type for: "
 					+ term.toString());
 		}
+		/**
+		 * Boolean constant
+		 */
+		else if (term.equals(OBDAVocabulary.FALSE)
+				 || term.equals(OBDAVocabulary.TRUE)) {
+			return Types.BOOLEAN;
+		}
 
 		return Types.VARCHAR;
 	}
@@ -1564,6 +1579,25 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 					return (String.format(LANG_STR, lang, varName));
 				}
+		} else if (ht instanceof Variable) { // this case is to tackle rules of the form ans1(f0,f1) :- ans1u(f0,f1)
+
+			Variable htVar = (Variable )ht;
+			Collection<String> columnRefs = index.getColumnReferences(htVar);
+			
+			//Adding the sufix Lang to the varibale name
+			if (columnRefs == null || columnRefs.size() == 0) {
+				throw new RuntimeException(
+						"Unbound variable found in WHERE clause: " + htVar);
+			}
+
+			String colName = columnRefs.iterator().next();
+			  if (colName.length() > 0) {
+				  colName = colName.substring(0, colName.length()-1);
+			    }
+			  colName=colName.concat("Lang" + sqladapter.getClosingQuote());
+			
+			  //reutrning the answer
+			  return (String.format(LANG_STR,  colName, varName));
 		}
 
 
@@ -2403,6 +2437,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
 		}
+		else if (functionSymbol.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+			operator = IS_TRUE_OPERATOR;
+		}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
@@ -2480,7 +2517,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
 			String tableName = tablePredicate.getName();
-			String safeTableName = tableName.replace('.', '_');
+			String safeTableName = escapeName(tableName);
 			DataDefinition def = metadata.getDefinition(tableName);
 
 			if (def == null) {

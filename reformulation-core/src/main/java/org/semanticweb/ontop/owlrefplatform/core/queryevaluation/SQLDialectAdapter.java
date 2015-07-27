@@ -53,6 +53,8 @@ public interface SQLDialectAdapter {
 
 	public String sqlQuote(String name);
 
+	public String getClosingQuote();
+
 	public String sqlSlice(long limit, long offset);
 
 	public String sqlOrderBy(List<OrderCondition> conditions, String viewname);

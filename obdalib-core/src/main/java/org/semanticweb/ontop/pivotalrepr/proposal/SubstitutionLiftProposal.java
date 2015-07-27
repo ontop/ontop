@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 /**
  * TODO: explain
  */
-public interface SubstitutionLiftProposal extends LocalOptimizationProposal {
+public interface SubstitutionLiftProposal extends QueryOptimizationProposal {
 
     ImmutableList<BindingTransfer> getBindingTransfers();
 

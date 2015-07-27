@@ -6,10 +6,13 @@ import fj.data.*;
 import fj.data.List;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.VariableGenerator;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
@@ -22,6 +25,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionLiftProposalI
 
 import java.util.*;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * TODO: explain
@@ -41,7 +45,12 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     public IntermediateQuery optimize(IntermediateQuery query) {
 
         Tree<ConstructionNodeUpdate> initialConstructionTree = extractConstructionTree(query);
-        Tree<ConstructionNodeUpdate> proposedConstructionTree = proposeOptimizedTree(initialConstructionTree);
+
+        VariableGenerator variableGenerator = new VariableGenerator(
+                (Set<Variable>)(Set<?>)VariableCollector.collectVariables(query));
+
+        Tree<ConstructionNodeUpdate> proposedConstructionTree = proposeOptimizedTree(initialConstructionTree,
+                variableGenerator);
 
         return applyProposal(query, proposedConstructionTree);
     }
@@ -116,7 +125,8 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static Tree<ConstructionNodeUpdate> proposeOptimizedTree(Tree<ConstructionNodeUpdate> initialConstructionTree) {
+    private static Tree<ConstructionNodeUpdate> proposeOptimizedTree(Tree<ConstructionNodeUpdate> initialConstructionTree,
+                                                                     VariableGenerator variableGenerator) {
 
         /**
          * Non-final variable (will be re-assigned) multiple times.
@@ -140,7 +150,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
              * Main operation: updates the current node and its children.
              */
             if (currentZipper.hasChildren()) {
-                currentZipper = optimizeCurrentNode(currentZipper);
+                currentZipper = optimizeCurrentNode(currentZipper, variableGenerator);
             }
 
             /**
@@ -173,9 +183,11 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static TreeZipper<ConstructionNodeUpdate> optimizeCurrentNode(TreeZipper<ConstructionNodeUpdate> currentZipper) {
+    private static TreeZipper<ConstructionNodeUpdate> optimizeCurrentNode(TreeZipper<ConstructionNodeUpdate> currentZipper,
+                                                                          VariableGenerator variableGenerator) {
 
-        Option<ImmutableSubstitution<ImmutableTerm>> optionalSubstitutionToLift = liftBindings(currentZipper);
+        Option<ImmutableSubstitution<ImmutableTerm>> optionalSubstitutionToLift = liftBindings(currentZipper,
+                variableGenerator);
         if (optionalSubstitutionToLift.isNone()) {
             return currentZipper;
         }
@@ -191,19 +203,21 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     /**
      * TODO: explain
      */
-    private static Option<ImmutableSubstitution<ImmutableTerm>> liftBindings(TreeZipper<ConstructionNodeUpdate> currentZipper) {
+    private static Option<ImmutableSubstitution<ImmutableTerm>> liftBindings(TreeZipper<ConstructionNodeUpdate> currentZipper,
+                                                                             VariableGenerator variableGenerator) {
 
         final Option<TreeZipper<ConstructionNodeUpdate>> optionalFirstChildZipper = currentZipper.firstChild();
         if (optionalFirstChildZipper.isNone()) {
             return Option.none();
         }
-        final ImmutableSubstitution<ImmutableTerm> firstChildSubstitution = optionalFirstChildZipper.some().getLabel()
+        final TreeZipper<ConstructionNodeUpdate> firstChild = optionalFirstChildZipper.some();
+        final ImmutableSubstitution<ImmutableTerm> firstChildSubstitution = firstChild.getLabel()
                 .getMostRecentConstructionNode().getSubstitution();
 
         // Non-final
-        PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution);
+        PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution, variableGenerator);
         // Non-final
-        Option<TreeZipper<ConstructionNodeUpdate>> optionalChildZipper = currentZipper.firstChild();
+        Option<TreeZipper<ConstructionNodeUpdate>> optionalChildZipper = firstChild.right();
 
         /**
          * Computes a partial union with the other children.

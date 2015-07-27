@@ -22,6 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -53,6 +54,12 @@ import static org.semanticweb.ontop.model.impl.DatalogTools.isLeftJoinOrJoinAtom
  * @author mariano, mrezk
  */
 public class DatalogUnfolder implements UnfoldingMechanism {
+
+	/**
+	 * TODO: explain
+	 */
+	private static class NotToUnfoldException extends Exception {
+	}
 
 	private static final long serialVersionUID = 6088558456135748487L;
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
@@ -286,8 +293,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			List<Term> tempList = getBodyTerms(rule);
 
-			List<CQIE> result = computePartialEvaluation(null, tempList, rule, rcount, termidx, false,
-					includeMappings, ruleIndex, multiTypedFunctionSymbolIndex);
+			List<CQIE> result = null;
+			try {
+				result = computePartialEvaluation(null, tempList, rule, rcount, termidx, false,
+                        includeMappings, ruleIndex, multiTypedFunctionSymbolIndex, false);
+			} catch (NotToUnfoldException e) {
+				throw new RuntimeException("TODO: make the Top-down unfolder support NotToUnfoldException");
+			}
 
 			if (result == null) {
 
@@ -404,8 +416,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 					List<CQIE> result = new LinkedList<CQIE>();
 					if (!hasAggregates){
-						result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,
-								includingMappings, ruleIndex, multiTypedFunctionSymbolIndex);
+						try {
+							result = computePartialEvaluation( pred, fatherTerms, fatherRule, rcount, termidx, parentIsLeftJoin,
+                                    includingMappings, ruleIndex, multiTypedFunctionSymbolIndex, false);
+						}
+						/**
+						 * Unexpected (only when they are mappings)
+						 */
+						catch (NotToUnfoldException e) {
+							throw new RuntimeException("NotToUnfoldException are not expected while unfolding the " +
+									"SPARQL query without the mappings!!");
+						}
 					}else{
 						// result is the empty list
 						//TODO: This can be optmised I think. Here we could still unfold atoms in the body that are not
@@ -557,20 +578,26 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		log.debug("Generating Dependency Graph!");
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
-		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+		//List<Predicate> predicatesToUnfold = depGraph.getExtensionalPredicates();
+		List<Predicate> predicatesToUnfold = depGraph.getPredicatesInBottomUp();
 		List<Predicate> predicatesMightGotEmpty = new LinkedList<Predicate>();
 
 		boolean includeMappings=true;
 		boolean keepLooping=true;
-		extensionalPredicates =  depGraph.getExtensionalPredicates();
 		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 		Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
-		for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
+		// List of rules that MUST NOT be unfolded (to prevent partial unfolding)
+		List<CQIE> notToUnfoldRules = new ArrayList<>();
+		// {New rule : original rule }
+		Map<CQIE, CQIE> originalRuleTrackingMap = initOriginalRules(workingList);
 
-			Predicate pred = extensionalPredicates.get(predIdx);
+		/**
+		 * For each predicate ...
+		 */
+		for (int predIdx = 0; predIdx < predicatesToUnfold.size() ; predIdx++) {
 
-
+			Predicate pred = predicatesToUnfold.get(predIdx);
 
 			List<CQIE> result = new LinkedList<CQIE>();
 			List<CQIE> fatherCollection = new LinkedList<CQIE>();
@@ -589,19 +616,57 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 				boolean parentIsLeftJoin = false;
 
+				/**
+				 * ... try to unfold its parent rules (where it appears in the body)
+				 */
 				for (CQIE fatherRule:  fatherCollection) {
+
+					/**
+					 * Ignores rules that must not be unfolded.
+					 */
+					if (notToUnfoldRules.contains(fatherRule)) {
+						continue;
+
+					}
+						
+						
+						
+					/**
+					 * Needed for backtracking the unfolding (if necessary).
+					 */
+					CQIE originalFatherRule = originalRuleTrackingMap.get(fatherRule);
+					if (originalFatherRule == null) {
+						throw new RuntimeException("Bug: the mappings between new and original rules" +
+								"must be tracked.");
+					}
 
 					Predicate preFather =  fatherRule.getHead().getFunctionSymbol();
 					List<Term> ruleTerms = getBodyTerms(fatherRule);
 					Stack<Integer> termidx = new Stack<Integer>();
 
-					//here we perform the partial evaluation
-					List<CQIE> partialEvaluation = computePartialEvaluation(pred,  ruleTerms, fatherRule, rcount, termidx,
-							parentIsLeftJoin,  includeMappings, ruleIndex, multiTypedFunctionSymbolIndex);
+					List<CQIE> partialEvaluation;
+					try {
+						//here we perform the partial evaluation
+						partialEvaluation = computePartialEvaluation(pred, ruleTerms, fatherRule, rcount, termidx,
+								parentIsLeftJoin, includeMappings, ruleIndex, multiTypedFunctionSymbolIndex, true);
+					}
+					/**
+					 * Prevents partial unfolding.
+					 *
+					 * This exception is thrown in two situations:
+					 *   1. if a ansXX atom is detected in the body of the father rule
+					 *       (the current implementation is not able to unfold it properly)
+					 *   2. if a data atom in the right argument of the LJ has more than 1 definition.
+					 */
+					catch(NotToUnfoldException e) {
+						notToUnfoldRules.add(originalFatherRule);
+						// Hack: consider the original rule instead.
+						partialEvaluation = Arrays.asList(originalFatherRule);
+						// Makes sure the definitions of the data atoms are added to the datalog program.
+						workingList = appendMappingRulesToQuery(originalFatherRule, workingList,predicatesMightGotEmpty);
+					}
 
-
-
-					if (partialEvaluation != null){
+					if (partialEvaluation != null) {
 
 //							System.out.print("Result: ");
 //							for (CQIE rule: partialEvaluation){
@@ -611,27 +676,31 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						addDistinctList(result, partialEvaluation);
 						//updating indexes with intermediate results
 
-
 						keepLooping = updateIndexes(pred, preFather, result, fatherRule,
 								workingList, depGraph, multiTypedFunctionSymbolIndex);
 
-						log.debug(pred + " : " + ruleIndex.get(preFather).toString() );
+						/**
+						 * Adds the (new rule -> original rule) mappings
+						 */
+						originalRuleTrackingMap = updateOriginalRuleTrackingMap(originalRuleTrackingMap, result, originalFatherRule);
+
+						log.debug(pred + " : " + ruleIndex.get(preFather).toString());
 
 
-					} else{
-						log.debug("Empty: "+pred);
-						if (!predicatesMightGotEmpty.contains(preFather)){
+					} else {
+						log.debug("Empty: " + pred);
+						if (!predicatesMightGotEmpty.contains(preFather)) {
 							predicatesMightGotEmpty.add(preFather);
 
 						}
-						keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList, depGraph);
+						keepLooping = updateNullIndexes(pred, preFather, fatherRule, workingList, depGraph);
 
 						//System.out.println(ruleIndex.get(preFather).size());
 //							System.out.println(ruleIndexByBody.get(pred).size());
 
 					}
 					if (result.size() >= 2) {
-						multiTypedFunctionSymbolIndex = detectMissmatchArgumentType(result,false, ruleIndex, multiTypedFunctionSymbolIndex);
+						multiTypedFunctionSymbolIndex = detectMissmatchArgumentType(result, false, ruleIndex, multiTypedFunctionSymbolIndex);
 					}
 
 				} //end for father collection
@@ -662,11 +731,89 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		if (!noRewriting){
 			// I add to the working list all the rules touched by the unfolder!
-			addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates, ruleIndex, depGraph);
+			addNewRules2WorkingListFromBodyAtoms(workingList, predicatesToUnfold, ruleIndex, depGraph);
 			addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates, ruleIndex);
 		}
 
 
+	}
+
+	/**
+	 * Adds the mappings (new rule -> original rule)
+	 */
+	private static Map<CQIE,CQIE> updateOriginalRuleTrackingMap(Map<CQIE, CQIE> originalRuleTrackingMap,
+																List<CQIE> newRules, CQIE originalRule) {
+		for (CQIE newRule : newRules) {
+			originalRuleTrackingMap.put(newRule, originalRule);
+		}
+		return originalRuleTrackingMap;
+	}
+
+	/**
+	 * TODO: explain
+	 * @param predicatesMightGotEmpty 
+	 */
+	private List<CQIE> appendMappingRulesToQuery(CQIE notUnfoldableRule, List<CQIE> queryRules, List<Predicate> predicatesMightGotEmpty) {
+		
+		Set<Predicate> dataPredicates = extractDataPredicates(notUnfoldableRule.getBody());
+		for (Predicate dataPredicate : dataPredicates) {
+			List<CQIE> predicateDefinitions = mappings.get(dataPredicate);
+			/**
+			 * If not a mapping, should already be in the ruleIndex.
+			 * TODO: check it
+			 */
+			if (predicateDefinitions == null) {
+				
+				/**
+				 * If the predicate has no definition, I add it to the things that might go empty.
+				 */
+				if (!predicatesMightGotEmpty.contains(dataPredicate)){
+					predicatesMightGotEmpty.add(dataPredicate);
+				}
+				continue;
+			}
+			/**
+			 * Appends if necessary (not already in) the definitions of this predicate (sub-rules)
+			 */
+			for (CQIE definition : predicateDefinitions) {
+				if (!queryRules.contains(definition))
+					queryRules.add(definition);
+			}
+		}
+
+		return queryRules;
+	}
+
+	/**
+	 * TODO: explain
+	 */
+	private static Set<Predicate> extractDataPredicates(List<Function> atoms) {
+		Set<Predicate> predicates = new HashSet<>();
+		for (Function atom: atoms) {
+			Predicate atomPredicate = atom.getFunctionSymbol();
+			if (atomPredicate.isDataPredicate()) {
+				predicates.add(atomPredicate);
+			}
+			else if (atomPredicate.isAlgebraPredicate()) {
+				List<Function> subAtoms = (List<Function>)(List<?>)atom.getTerms();
+				predicates.addAll(extractDataPredicates(subAtoms));
+			}
+		}
+		return predicates;
+	}
+
+	/**
+	 * Transforms a list of rules into a map of rules where the rules are both
+	 * used as keys and as values.
+	 *
+	 * Returns a mutable map (UGLY!)
+	 */
+	private static Map<CQIE,CQIE> initOriginalRules(List<CQIE> originalRuleList) {
+		Map<CQIE,CQIE> originalRuleMap = new HashMap<>();
+		for (CQIE originalRule : originalRuleList) {
+			originalRuleMap.put(originalRule, originalRule);
+		}
+		return originalRuleMap;
 	}
 
 	/**
@@ -712,7 +859,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 					boolean isLeftJoinSecondArgument[] = {false};
 
-					termidx = getStackfromPredicate(predEmpty,currentTerms, termidx, false, isLeftJoinSecondArgument);
+					Optional<Stack<Integer>> optionalStack = getStackfromPredicate(predEmpty, currentTerms, termidx, false, isLeftJoinSecondArgument);
+					if (!optionalStack.isPresent()) {
+						throw new RuntimeException("Internal error: predicate " + predEmpty + " not found!");
+					}
+					termidx = optionalStack.get();
 
 					Predicate fatherpred = fatherRule.getHead().getFunctionSymbol();
 
@@ -749,7 +900,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param termidx
 	 * @return
 	 */
-	private Stack<Integer> getStackfromPredicate(Predicate predEmpty, List<Function> currentTerms, Stack<Integer> termidx, boolean parentIsLeftJoin, boolean[] isLeftJoinSecondArgument) {
+	private Optional<Stack<Integer>> getStackfromPredicate(Predicate predEmpty, List<Function> currentTerms, Stack<Integer> termidx, boolean parentIsLeftJoin, boolean[] isLeftJoinSecondArgument) {
 		int nonBooleanAtomCounter = 0;
 
 
@@ -776,8 +927,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				for (Term t:focusedLiteral.getTerms()){
 					mylist.add((Function) t);
 				}
-				termidx.push(atomIdx);
-				termidx  = getStackfromPredicate(predEmpty, mylist, termidx, focusedAtomIsLeftJoin, isLeftJoinSecondArgument );
+				Stack<Integer> newTermStack = (Stack) termidx.clone();
+				newTermStack.push(atomIdx);
+				Optional<Stack<Integer>> optionalNewStack = getStackfromPredicate(predEmpty, mylist, newTermStack, focusedAtomIsLeftJoin, isLeftJoinSecondArgument);
+				if (optionalNewStack.isPresent()) {
+					return optionalNewStack;
+				}
 
 			} else if (focusedLiteral.isDataFunction()) {
 				nonBooleanAtomCounter += 1;
@@ -793,13 +948,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					isLeftJoinSecondArgument[0] = (nonBooleanAtomCounter == 2) && parentIsLeftJoin;
 					termidx.push(atomIdx);
 
-					return termidx;
+					return Optional.of(termidx);
 
 				}
 			}//end if
 
 		}//end for
-		return termidx;
+		return Optional.absent();
 	}
 
 	/**
@@ -1079,7 +1234,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx,
 									   int[] resolutionCount, boolean isLeftJoin, boolean isSecondAtomInLeftJoin,
 									   boolean includingMappings, boolean parentIsAggr, Multimap<Predicate, CQIE> ruleIndex,
-									   Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
+									   Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex,
+									   boolean isMappingUnfoldingMode) throws NotToUnfoldException {
 
 		if (!focusedAtom.isDataFunction())
 			throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
@@ -1088,7 +1244,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 * Leaf predicates are ignored (as boolean or algebra predicates)
 			 */
 		Predicate pred = focusedAtom.getFunctionSymbol();
-		if (extensionalPredicates.contains(pred) && !includingMappings) {
+
+		/**
+		 * TODO: cannot understand the content of extensionalPredicates
+		 */
+		boolean isExtensional = extensionalPredicates.contains(pred);
+
+		if (isExtensional && !includingMappings) {
 			// The atom is a leaf, that means that is a data atom that
 			// has no resolvent rule, and marks the end points to compute
 			// partial evaluations
@@ -1109,9 +1271,29 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				rulesDefiningTheAtom = ruleIndex.get(pred);
 			}
 		} else  if (pred.equals(resolvPred)) {
-			// I am doing top-down
-			//I am using the mappings
-			rulesDefiningTheAtom = mappings.get(pred);
+
+			/**
+			 * UGLY hack!!!!
+			 * TODO: ansXX should be the only non-extensional (intentional) predicates.
+			 */
+			if ((!isExtensional) && pred.getName().startsWith("ans")) {
+				//rulesDefiningTheAtom = ruleIndex.get(pred);
+				/**
+				 * Current limitation: we cannot unfold ans() predicate
+				 * during the second unfolding step (where they are mappings).
+				 *
+				 * To prevent partial unfolding, we reject the unfolding of this rule.
+				 *
+				 * UGLY!!!
+				 * TODO: get rid of this
+				 */
+				throw new NotToUnfoldException();
+			}
+			else {
+				// I am doing top-down
+				//I am using the mappings
+				rulesDefiningTheAtom = mappings.get(pred);
+			}
 
 		} else if (!pred.equals(resolvPred)){
 			return Collections.emptyList();
@@ -1149,7 +1331,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//result = generateResolutionResultParent(parentRule, focusAtom, rule, termidx, resolutionCount,
 				// rulesDefiningTheAtom, isLeftJoin, isSecondAtomInLeftJoin);
 				result = generateResolutionResult(focusedAtom, rule, termidx, resolutionCount, rulesDefiningTheAtom,
-						isLeftJoin, isSecondAtomInLeftJoin, multiTypedFunctionSymbolIndex);
+						isLeftJoin, isSecondAtomInLeftJoin, multiTypedFunctionSymbolIndex, isMappingUnfoldingMode
+						);
 			} else {
 				boolean noUnfoldingNeededAddMappings = isSecondAtomInLeftJoin || parentIsAggr;
 				if (!hasOneMapping && noUnfoldingNeededAddMappings) {
@@ -1359,7 +1542,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private List<CQIE> computePartialEvaluation(Predicate resolvPred, List<Term> currentTerms, CQIE rule, int[] resolutionCount, Stack<Integer> termidx,
 												boolean parentIsLeftJoin, boolean includingMappings, Multimap<Predicate, CQIE> ruleIndex,
-												Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
+												Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex,
+												boolean isMappingUnfoldingMode) throws NotToUnfoldException {
 
 		int nonBooleanAtomCounter = 0;
 
@@ -1394,7 +1578,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 				List<CQIE> result = computePartialEvaluation(resolvPred, focusedLiteral.getTerms(),
 						rule, resolutionCount, termidx, focusedAtomIsLeftJoin, includingMappings, ruleIndex,
-						multiTypedFunctionSymbolIndex);
+						multiTypedFunctionSymbolIndex, isMappingUnfoldingMode);
 
 				if (result == null)
 					if (!isLeftJoinSecondArgument){
@@ -1431,7 +1615,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					}
 					result = resolveDataAtom(resolvPred, focusedLiteral, rule, termidx, resolutionCount, parentIsLeftJoin,
 							isLeftJoinSecondArgument, includingMappings, parentIsAggr, ruleIndex,
-							multiTypedFunctionSymbolIndex);
+							multiTypedFunctionSymbolIndex, isMappingUnfoldingMode);
 					if (result == null)
 						return null;
 
@@ -1586,7 +1770,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount,
 												Collection<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin,
-												Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
+												Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex, boolean includeMappings)
+			throws NotToUnfoldException {
 
 		/**
 		 * No unfolding in there is multiple rules for the right term of the LJ.
@@ -1601,8 +1786,24 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 *
 		 */
 		if (isSecondAtomOfLeftJoin && (rulesDefiningTheAtom.size() > 1)) {
+			if (includeMappings)
+				throw new NotToUnfoldException();
 			return null;
 		}
+
+//		/**
+//		 * Current limitation: we cannot unfold ans() predicate
+//		 * during the second unfolding step (where they are mappings).
+//		 *
+//		 * To prevent partial unfolding, we reject the unfolding of this rule.
+//		 *
+//		 * UGLY!!!
+//		 * TODO: get rid of this
+//		 */
+//		if (includeMappings && focusAtom.getFunctionSymbol().getName().startsWith("ans")) {
+//			throw new NotToUnfoldException();
+//		}
+
 
 		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
 //		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
@@ -1863,7 +2064,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
 								Stack<Integer> termidx) {
+		
 		Function parentFunction = null;
+		Stack<Integer> ljpointer =  (Stack<Integer>) termidx.clone();
+		ljpointer.pop();
+		List<Function>  test = getNestedList(ljpointer,rule);
+		
 		if (termidx.size() > 1) {
 			/*
 			 * Its a nested term
@@ -1884,13 +2090,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//its just one Left Join, replace rule body directly
 				rule.updateBody(replacementTerms);
 				return;
+
 			}
+			
+			//Remove the LJ that is empty
 			List <Term> tempTerms = parentFunction.getTerms();
-			tempTerms.remove(0);
-			List <Term> newTerms = new LinkedList<Term>();
-			newTerms.addAll(replacementTerms);
-			newTerms.addAll(tempTerms);
-			parentFunction.updateTerms(newTerms);
+			tempTerms.remove(nestedTerm);
+			tempTerms.addAll(replacementTerms);
 		} else {
 			throw new RuntimeException("Unexpected OPTIONAL condition!");
 		}

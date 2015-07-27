@@ -109,5 +109,13 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
 		return "{-/-}";
 	}
 
-
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof ImmutableSubstitution) {
+            return ((ImmutableSubstitution) other).isEmpty();
+        }
+        else {
+            return false;
+        }
+    }
 }

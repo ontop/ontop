@@ -42,10 +42,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicTypeLiftOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -507,22 +504,27 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 
 		// PUSH TYPE HERE
-		log.debug("Pushing types...");
-		unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
+		//log.debug("Pushing types...");
+		//unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
 		if (unfolding.getRules().size() > 0) {
 			try {
-				// TODO: go further with this new data structure
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(unfolding,
 						unfolder.getExtensionalPredicates());
-				log.debug("New intermediate query: \n" + intermediateQuery.toString());
-				
-				
-				DatalogProgram pr = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
-				log.debug("New Datalog query: \n" + pr.toString());
+				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
 
-				//BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
-				//typeLiftOptimizer.optimize(intermediateQuery);
+				BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+				log.debug("New lifted query: \n" + intermediateQuery.toString());
+				
+				
+				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+				
+				log.debug("New Datalog query: \n" + unfolding.toString());
+
+				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
+				log.debug("New flattened Datalog query: \n" + unfolding.toString());
+
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());

@@ -7,6 +7,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.ReplaceNodeProposal;
 
 
+@Deprecated
 public class ReplaceNodeProposalImpl implements ReplaceNodeProposal {
     private final QueryNode newNode;
     private final QueryNode formerNode;

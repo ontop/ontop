@@ -1,50 +1,60 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.impl.ReplaceNodeProposalImpl;
 
 /**
  * TODO: explain
  *
  * Immutable
  */
-public class PredicateRenamer implements QueryNodeOptimizer {
+public class PredicateRenamer implements QueryNodeTransformer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final AtomPredicate formerPredicate;
     private final AtomPredicate newPredicate;
-    private final IntermediateQuery intermediateQuery;
 
 
-    public PredicateRenamer(IntermediateQuery intermediateQuery, AtomPredicate formerPredicate, AtomPredicate newPredicate) {
-        this.intermediateQuery = intermediateQuery;
+    public PredicateRenamer(AtomPredicate formerPredicate, AtomPredicate newPredicate) {
         this.formerPredicate = formerPredicate;
         this.newPredicate = newPredicate;
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(InnerJoinNode node) {
-        return Optional.absent();
+    public FilterNode transform(FilterNode filterNode) throws QueryNodeTransformationException {
+        return filterNode;
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(LeftJoinNode leftJoinNode) {
-        return Optional.absent();
+    public TableNode transform(TableNode tableNode) throws QueryNodeTransformationException {
+        return tableNode;
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(FilterNode filterNode) {
-        return Optional.absent();
+    public LeftJoinNode transform(LeftJoinNode leftJoinNode) throws QueryNodeTransformationException {
+        return leftJoinNode;
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(ConstructionNode formerNode) {
+    public UnionNode transform(UnionNode unionNode) throws QueryNodeTransformationException {
+        return unionNode;
+    }
+
+    @Override
+    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) throws QueryNodeTransformationException {
+        return ordinaryDataNode;
+    }
+
+    @Override
+    public InnerJoinNode transform(InnerJoinNode innerJoinNode) throws QueryNodeTransformationException {
+        return innerJoinNode;
+    }
+
+    @Override
+    public ConstructionNode transform(ConstructionNode formerNode) throws QueryNodeTransformationException {
         DataAtom currentAtom = formerNode.getProjectionAtom();
         AtomPredicate currentPredicate = currentAtom.getPredicate();
 
@@ -55,36 +65,16 @@ public class PredicateRenamer implements QueryNodeOptimizer {
             DataAtom newDataAtom = DATA_FACTORY.getDataAtom(newPredicate,
                     formerNode.getProjectionAtom().getVariablesOrGroundTerms());
 
-            ConstructionNode newNode = new ConstructionNodeImpl(newDataAtom, formerNode.getSubstitution(),
+            return new ConstructionNodeImpl(newDataAtom, formerNode.getSubstitution(),
                     formerNode.getOptionalModifiers());
-
-            LocalOptimizationProposal renamingProposal = new ReplaceNodeProposalImpl(intermediateQuery,
-                    formerNode, newNode);
-
-            return Optional.of(renamingProposal);
         }
         else {
-            return Optional.absent();
+            return formerNode;
         }
     }
 
     @Override
-    public Optional<LocalOptimizationProposal> makeProposal(UnionNode unionNode) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<LocalOptimizationProposal> makeProposal(OrdinaryDataNode ordinaryDataNode) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<LocalOptimizationProposal> makeProposal(TableNode tableNode) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<LocalOptimizationProposal> makeProposal(GroupNode groupNode) {
-        return Optional.absent();
+    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
+        return groupNode;
     }
 }

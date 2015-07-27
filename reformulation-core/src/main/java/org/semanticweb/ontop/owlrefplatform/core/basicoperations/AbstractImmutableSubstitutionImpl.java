@@ -191,4 +191,12 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return new ImmutableSubstitutionImpl<>(mapBuilder.build());
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof ImmutableSubstitution) {
+            return getImmutableMap().equals(((ImmutableSubstitution) other).getImmutableMap());
+        }
+        return false;
+    }
+
 }

@@ -2,12 +2,12 @@ package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
 
 /**
  * TODO: explain
  */
-public interface NewSubNodeSelectionProposal extends LocalOptimizationProposal {
+@Deprecated
+public interface NewSubNodeSelectionProposal extends QueryOptimizationProposal {
 
     /**
      * Query node on which to apply the optimization proposal.

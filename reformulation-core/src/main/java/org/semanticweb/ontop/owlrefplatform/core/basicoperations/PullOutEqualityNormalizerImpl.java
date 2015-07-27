@@ -2,13 +2,16 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import fj.*;
 import fj.data.*;
+import fj.data.List;
+import fj.data.Set;
+import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import static org.semanticweb.ontop.model.impl.DatalogTools.*;
 
