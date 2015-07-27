@@ -3,36 +3,11 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.impl.JgraphtIntermediateQueryBuilder;
 
-public class UnionLiftTransformerImpl implements UnionLiftTransformer {
-
-    private UnionNode unionNode;
-
-    private QueryNode targetNode;
-
-    boolean initialized = false;
+public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor {
 
     private final QueryNodeTransformer queryNodeCloner = new QueryNodeCloner();
 
-    public UnionLiftTransformerImpl(UnionNode unionNode, QueryNode targetNode) {
-        this.unionNode = unionNode;
-        this.targetNode = targetNode;
-        this.initialized = false;
-    }
-
-    @Override
-    public UnionNode getUnionNode() {
-        return unionNode;
-    }
-
-    @Override
-    public QueryNode getTargetQueryNode() {
-        return targetNode;
-    }
-
-    @Override
-    public IntermediateQuery apply(IntermediateQuery inputQuery) {
-
-        this.initialized = false;
+    public IntermediateQuery apply(UnionNode unionNode, QueryNode targetQueryNode, IntermediateQuery inputQuery) {
 
         IntermediateQueryBuilder builder = new JgraphtIntermediateQueryBuilder();
 
@@ -40,7 +15,7 @@ public class UnionLiftTransformerImpl implements UnionLiftTransformer {
         try {
             ConstructionNode newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
             builder.init(newRootNode);
-            recursive(builder, inputQuery, rootNode, newRootNode, Optional.<Integer>absent());
+            recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>absent());
         } catch (IntermediateQueryBuilderException | NotNeededNodeException | QueryNodeTransformationException e) {
             e.printStackTrace();
         }
@@ -53,7 +28,7 @@ public class UnionLiftTransformerImpl implements UnionLiftTransformer {
     }
 
 
-    public void recursive(IntermediateQueryBuilder builder, IntermediateQuery query, QueryNode parentNode,
+    public void recursive(UnionNode unionNode, QueryNode targetNode, IntermediateQueryBuilder builder, IntermediateQuery query, QueryNode parentNode,
                           QueryNode newParentNode, Optional<Integer> branchIndexInsideUnion)
             throws QueryNodeTransformationException, NotNeededNodeException, IntermediateQueryBuilderException {
 
@@ -64,7 +39,7 @@ public class UnionLiftTransformerImpl implements UnionLiftTransformer {
             QueryNode newSubNode = subNode.acceptNodeTransformer(queryNodeCloner);
 
             if (subNode == targetNode) {
-                UnionNode unionNodeClone = this.unionNode.acceptNodeTransformer(queryNodeCloner);
+                UnionNode unionNodeClone = unionNode.acceptNodeTransformer(queryNodeCloner);
 
                 builder.addChild(newParentNode, unionNodeClone, optionalPosition);
 
@@ -75,7 +50,7 @@ public class UnionLiftTransformerImpl implements UnionLiftTransformer {
                         newSubNode = subNode.acceptNodeTransformer(queryNodeCloner);
                     }
                     builder.addChild(unionNodeClone, newSubNode, optionalPosition);
-                    recursive(builder, query, subNode, newSubNode, Optional.of(i));
+                    recursive(unionNode, targetNode, builder, query, subNode, newSubNode, Optional.of(i));
                 }
             } else if (subNode == unionNode) {
 
@@ -85,14 +60,26 @@ public class UnionLiftTransformerImpl implements UnionLiftTransformer {
 
                 builder.addChild(newParentNode, subNodeOfUnionClone, optionalPosition);
 
-                recursive(builder, query, subNodeOfUnion, subNodeOfUnionClone, Optional.<Integer>absent());
+                recursive(unionNode, targetNode, builder, query, subNodeOfUnion, subNodeOfUnionClone, Optional.<Integer>absent());
+
             } else {
 
                 builder.addChild(newParentNode, newSubNode, optionalPosition);
 
-                recursive(builder, query, subNode, newSubNode, branchIndexInsideUnion);
+                recursive(unionNode, targetNode, builder, query, subNode, newSubNode, branchIndexInsideUnion);
             }
         }
 
+    }
+
+//    public String toString() {
+//        return "UnionLiftTransformerImpl[" + unionNode + "," + targetNode + "]";
+//    }
+
+    @Override
+    public IntermediateQuery apply(UnionLiftProposal proposal, IntermediateQuery inputQuery) {
+
+
+        return apply(proposal.getUnionNode(), proposal.getTargetQueryNode(), inputQuery);
     }
 }

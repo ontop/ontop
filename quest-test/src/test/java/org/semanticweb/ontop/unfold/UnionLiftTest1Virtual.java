@@ -30,8 +30,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
-import org.semanticweb.ontop.pivotalrepr.UnionLiftTransformer;
-import org.semanticweb.ontop.pivotalrepr.UnionLiftTransformerImpl;
+import org.semanticweb.ontop.pivotalrepr.UnionLiftProposalExecutor;
 
 import static org.junit.Assert.assertEquals;
 import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition.*;
@@ -49,7 +48,9 @@ public class UnionLiftTest1Virtual {
 
     private UnionNode unionNode;
 
-    private QueryNode targetNode;
+    private QueryNode targetNode1;
+
+    private QueryNode targetNode2;
 
 
     public IntermediateQuery buildQuery1() throws Exception {
@@ -145,24 +146,50 @@ public class UnionLiftTest1Virtual {
 		queryBuilder.addChild(t5Ans4Node, t5);
 
         this.unionNode = unionAns2;
-        this.targetNode = join1;
+        this.targetNode1 = join1;
+
+        this.targetNode2 = topLJ;
 
         return queryBuilder.build();
     }
 
 	@Test
-	public void printQuery1() throws Exception {
+	public void testUnionLift1() throws Exception {
         IntermediateQuery intermediateQuery = buildQuery1();
 
         System.out.println("Query 1: \n" + intermediateQuery);
 
-        UnionLiftTransformer unionLiftProposal = new UnionLiftTransformerImpl(unionNode, targetNode);
+        UnionLiftProposal unionLiftProposal = new UnionLiftProposalImpl(unionNode, targetNode1);
 
-        IntermediateQuery newQuery = unionLiftProposal.apply(intermediateQuery);
+        UnionLiftProposalExecutor executor = new UnionLiftProposalExecutorImpl();
+
+        IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery);
+
+        // IntermediateQuery newQuery = unionLiftTransformer.apply(intermediateQuery);
+
+        System.out.println(unionLiftProposal);
 
         System.out.println("New Query: \n" + newQuery);
 	}
 
 
+    @Test
+    public void testUnionLift2() throws Exception {
+        IntermediateQuery intermediateQuery = buildQuery1();
+
+        System.out.println("Query 1: \n" + intermediateQuery);
+
+        UnionLiftProposal unionLiftProposal = new UnionLiftProposalImpl(unionNode, targetNode2);
+
+        UnionLiftProposalExecutor executor = new UnionLiftProposalExecutorImpl();
+
+        IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery);
+
+        // IntermediateQuery newQuery = unionLiftTransformer.apply(intermediateQuery);
+
+        System.out.println(unionLiftProposal);
+
+        System.out.println("New Query: \n" + newQuery);
+    }
 
 }
