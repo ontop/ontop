@@ -3,10 +3,7 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.AtomPredicate;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
-import org.semanticweb.ontop.pivotalrepr.proposal.NewSubNodeSelectionProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.ReplaceNodeProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.*;
 
 /**
  *
@@ -28,29 +25,19 @@ public interface IntermediateQuery {
     boolean contains(QueryNode node);
 
     /**
-     * TODO: describe
+     * Central method for submitting a proposal.
+     * Throws a InvalidQueryOptimizationProposalException if the proposal is rejected.
      *
-     * Returns the QueryNode at the same position, which might be new.
-     */
-    @Deprecated
-    QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
-            throws InvalidLocalOptimizationProposalException;
-
-    /**
-     * TODO: describe
+     * Returns an IntermediateQuery that MIGHT (i) be the current intermediate query that would have been optimized
+     * or (ii) a new IntermediateQuery.
      *
-     * Returns the QueryNode at the same position, which might be new.
-     */
-    @Deprecated
-    QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
-            throws InvalidLocalOptimizationProposalException;
-
-    /**
-     * TODO: describe
+     *
+     * The proposal is expected TO optimize the query WITHOUT CHANGING ITS SEMANTICS.
+     * In principle, the proposal could be carefully checked, beware!
      *
      */
-    void applySubstitutionLiftProposal(SubstitutionLiftProposal substitutionLiftProposal)
-            throws InvalidLocalOptimizationProposalException;
+    IntermediateQuery applyProposal(QueryOptimizationProposal proposal)
+        throws InvalidQueryOptimizationProposalException;
 
     /**
      * TODO: find an exception to throw
@@ -66,6 +53,8 @@ public interface IntermediateQuery {
 
     /**
      * Returns a new IntermediateQuery using the new predicate instead of the former one in some construction nodes.
+     *
+     * TODO: create a dedicated proposal instead.
      */
     IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
             throws AlreadyExistingPredicateException;

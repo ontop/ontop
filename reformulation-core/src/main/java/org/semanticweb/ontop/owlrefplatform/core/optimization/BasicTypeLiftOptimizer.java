@@ -17,7 +17,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidLocalOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.BindingTransferImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ConstructionNodeUpdateImpl;
@@ -331,14 +331,16 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
                         return update.getOptionalNewNode().isPresent();
                     }
                 }));
-        SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(query, transfers, nodeUpdates);
+        SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(transfers, nodeUpdates);
+
+        IntermediateQuery newQuery;
         try {
-            query.applySubstitutionLiftProposal(proposal);
+            newQuery = query.applyProposal(proposal);
         }
-        catch (InvalidLocalOptimizationProposalException e) {
+        catch (InvalidQueryOptimizationProposalException e) {
             throw new RuntimeException("Bad substitution lift proposal: " + e.getMessage());
         }
-        return query;
+        return newQuery;
     }
 
     /**
