@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr;
+package org.semanticweb.ontop.executor.renaming;
 
 /**
  * When the predicate is already used in the intermediate query

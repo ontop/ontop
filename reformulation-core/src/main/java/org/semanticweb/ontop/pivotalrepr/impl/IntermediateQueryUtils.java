@@ -2,6 +2,8 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.executor.renaming.AlreadyExistingPredicateException;
+import org.semanticweb.ontop.executor.renaming.PredicateRenamingChecker;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -10,6 +12,9 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitu
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.PredicateRenamingProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.PredicateRenamingProposalImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,8 +69,15 @@ public class IntermediateQueryUtils {
 
             checkDefinitionRootProjections(mergedDefinition, originalDefinition);
 
-            IntermediateQuery renamedDefinition = originalDefinition.newWithDifferentConstructionPredicate(
-                    normalPredicate, subQueryPredicate);
+            PredicateRenamingProposal renamingProposal = new PredicateRenamingProposalImpl(normalPredicate,
+                    subQueryPredicate);
+
+            IntermediateQuery renamedDefinition = null;
+            try {
+                renamedDefinition = originalDefinition.applyProposal(renamingProposal);
+            } catch (InvalidQueryOptimizationProposalException e) {
+                throw new RuntimeException("Internal error: bad renaming proposal: " + e.getMessage());
+            }
             mergedDefinition.mergeSubQuery(renamedDefinition);
         }
         return Optional.of(mergedDefinition);

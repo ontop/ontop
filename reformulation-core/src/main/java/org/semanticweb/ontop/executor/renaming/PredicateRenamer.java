@@ -1,10 +1,11 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.executor.renaming;
 
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 
 /**
  * TODO: explain

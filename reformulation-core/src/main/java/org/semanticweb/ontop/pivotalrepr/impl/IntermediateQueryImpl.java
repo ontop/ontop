@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
@@ -54,7 +55,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
     static {
         STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                UnionLiftProposal.class, UnionLiftProposalExecutor.class);
+                UnionLiftProposal.class, UnionLiftProposalExecutor.class,
+                PredicateRenamingProposal.class, PredicateRenamingExecutor.class);
     }
 
     /**
@@ -168,23 +170,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             return treeComponent.getAncestors(descendantNode);
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    @Override
-    public IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
-            throws AlreadyExistingPredicateException {
-
-        PredicateRenamingChecker.checkNonExistence(this, newPredicate);
-        PredicateRenamer renamer = new PredicateRenamer(formerPredicate, newPredicate);
-        try {
-            return IntermediateQueryUtils.convertToBuilderAndTransform(this, renamer).build();
-        }
-        catch (IntermediateQueryBuilderException | QueryNodeTransformationException | NotNeededNodeException e) {
-            throw new RuntimeException("Unexpected error: " + e.getMessage());
         }
     }
 
