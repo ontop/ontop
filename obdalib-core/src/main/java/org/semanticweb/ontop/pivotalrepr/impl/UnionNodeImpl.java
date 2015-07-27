@@ -3,16 +3,11 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
-
-    @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
-        return optimizer.makeProposal(this);
-    }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {

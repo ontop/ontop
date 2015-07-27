@@ -4,7 +4,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
@@ -12,11 +12,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     public FilterNodeImpl(ImmutableBooleanExpression filterCondition) {
         super(Optional.of(filterCondition));
-    }
-
-    @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
-        return optimizer.makeProposal(this);
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.NonGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
@@ -21,11 +21,6 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     @Override
     public ImmutableList<NonGroundTerm> getGroupingTerms() {
         return groupingTerms;
-    }
-
-    @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
-        return optimizer.makeProposal(this);
     }
 
     @Override

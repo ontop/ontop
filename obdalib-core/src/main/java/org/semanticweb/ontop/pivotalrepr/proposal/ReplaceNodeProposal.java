@@ -9,7 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
  *
  */
 @Deprecated
-public interface ReplaceNodeProposal extends LocalOptimizationProposal {
+public interface ReplaceNodeProposal extends QueryOptimizationProposal {
     /**
      * Query node on which to apply the optimization proposal.
      */

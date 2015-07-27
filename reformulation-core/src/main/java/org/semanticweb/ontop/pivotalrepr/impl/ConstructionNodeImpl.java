@@ -7,7 +7,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.LocalOptimizationProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,11 +90,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         return newSubstitution;
 
-    }
-
-    @Override
-    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryNodeOptimizer optimizer) {
-        return optimizer.makeProposal(this);
     }
 
     @Override

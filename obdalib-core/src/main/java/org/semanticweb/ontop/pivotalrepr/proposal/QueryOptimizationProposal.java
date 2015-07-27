@@ -6,7 +6,7 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
 /**
  * TODO: develop
  */
-public interface LocalOptimizationProposal {
+public interface QueryOptimizationProposal {
 
     /**
      * Returns a QueryNode if it makes sense for the concrete proposal
