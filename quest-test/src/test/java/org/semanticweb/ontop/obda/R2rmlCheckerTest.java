@@ -21,10 +21,7 @@ package org.semanticweb.ontop.obda;
  */
 
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.OClass;
@@ -129,6 +126,18 @@ public class R2rmlCheckerTest {
 			assertTrue(false);
 		}
 
+	}
+	
+	@Test 
+	public void testMappings() throws Exception {
+		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolder().getRules()) {
+			if (!reasonerR2rml.getQuestInstance().getUnfolder().getRules().contains(q)) 
+				System.out.println("NOT IN R2RML: " + q);
+		}
+		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolder().getRules()) {
+			if (!reasonerOBDA.getQuestInstance().getUnfolder().getRules().contains(q))
+				System.out.println("NOT IN OBDA: " + q);
+		}
 	}
 
 	/**
@@ -358,7 +367,10 @@ public class R2rmlCheckerTest {
 
 		factory.setPreferenceHolder(p);
 
-		R2RMLReader reader = new R2RMLReader(r2rmlfile);
+		R2RMLReader reader = null;
+		try {
+			reader = new R2RMLReader(r2rmlfile);
+
 
 		obdaModel = reader.readModel(dataSource);
 
@@ -366,6 +378,9 @@ public class R2rmlCheckerTest {
 
 		reasonerR2rml = (QuestOWL) factory.createReasoner(ontology,
 				new SimpleConfiguration());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 

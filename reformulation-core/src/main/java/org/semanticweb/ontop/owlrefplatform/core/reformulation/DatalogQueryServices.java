@@ -26,7 +26,6 @@ import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.AnonymousVariable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 
@@ -50,10 +49,10 @@ public class DatalogQueryServices {
 	// to be taken from org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder
 	
 	private static Function getFreshAtom(Function a, String suffix) {
-		List<Term> termscopy = new ArrayList<Term>(a.getArity());
+		List<Term> termscopy = new ArrayList<>(a.getArity());
 		
 		for (Term t : a.getTerms()) {
-			if ((t instanceof Variable) && !(t instanceof AnonymousVariable)) {
+			if (t instanceof Variable) {
 				Variable v = (Variable)t;
 				termscopy.add(fac.getVariable(v.getName() + suffix));
 			}
@@ -124,7 +123,7 @@ public class DatalogQueryServices {
 						// REDUCE
 						EQNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-						newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
+						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						CQCUtilities.removeRundantAtoms(newquery);
 						
 						queue.add(newquery);

@@ -29,7 +29,7 @@ import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
+import org.semanticweb.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
@@ -63,7 +63,8 @@ public class ABoxMaterializerExample {
 		 * Start materializing data from database to triples.
 		 */
 
-		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel);
+		// TODO: try the streaming mode.
+		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false);
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);
@@ -71,7 +72,7 @@ public class ABoxMaterializerExample {
 		/*
 		 * Obtain the triples iterator
 		 */
-		QuestOWLIndividualIterator triplesIter = materializer.getIterator();
+		QuestOWLIndividualAxiomIterator triplesIter = materializer.getIterator();
 		
 		/*
 		 * Print the triples into an external file.

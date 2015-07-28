@@ -21,8 +21,6 @@ package org.semanticweb.ontop.model;
  */
 
 
-
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
@@ -40,20 +38,21 @@ public interface OBDADataFactory extends Serializable {
 	public CQIE getCQIE(Function head, Function... body );
 	
 	public CQIE getCQIE(Function head, List<Function> body);
+	
+	public CQIE getFreshCQIECopy(CQIE rule);	
+	
 
 	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
-
-	@Deprecated
-	public DatalogProgram getDatalogProgram(CQIE rule);
-
+	
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers);
+
+	public DatalogProgram getDatalogProgram(CQIE rule);
 
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
 
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules);
-
 
 
 	public Function getTripleAtom(Term subject, Term predicate, Term object);
@@ -114,7 +113,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @param functor
 	 *            the function symbol name.
-	 * @param terms
+	 * @param arguments
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
@@ -155,6 +154,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionRegex(Term term1, Term term2, Term term3);
 	
+	public Function getFunctionReplace(Term term1, Term term2, Term term3);
+	
 
 	/*
 	 * Numerical arithmethic functions
@@ -167,6 +168,8 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionSubstract(Term term1, Term term2);
 
 	public Function getFunctionMultiply(Term term1, Term term2);
+
+    public Function getFunctionConcat(Term term1, Term term2);
 	
 	/*
 	 * Casting values cast(source-value AS destination-type)
@@ -291,7 +294,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the variable object.
 	 */
-	public Variable getVariableNondistinguished();
+//	public Variable getVariableNondistinguished();
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 
@@ -301,14 +304,10 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDASQLQuery getSQLQuery(String query);
 
-	//public Predicate getTypePredicate(Predicate.COL_TYPE type);
-
-	/**
-	 * TODO: deprecate it?
-	 */
+	
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);	
+	public Function getSPARQLLeftJoin(Term t1, Term t2);
 }

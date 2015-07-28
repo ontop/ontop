@@ -216,7 +216,6 @@ public class SemanticIndexHelper {
         String resfile = owlloc + resname + ".abox";
         List<String[]> rv = new LinkedList<String[]>();
       
-
             FileInputStream fstream = new FileInputStream(resfile);
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -225,6 +224,7 @@ public class SemanticIndexHelper {
                 String[] tokens = strLine.split(" ");
                 rv.add(tokens);
             }
+        br.close();
        
         return rv;
     }

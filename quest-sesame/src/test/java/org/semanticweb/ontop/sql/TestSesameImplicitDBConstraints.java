@@ -147,17 +147,16 @@ public class TestSesameImplicitDBConstraints {
 		Attribute attribute = null;
 		//It starts from 1 !!!
 		attribute = new Attribute("COL1", java.sql.Types.INTEGER, false, null);
-		tableDefinition.setAttribute(1, attribute);
+		tableDefinition.addAttribute(attribute);
 		attribute = new Attribute("COL2", java.sql.Types.INTEGER, false, null);
-		tableDefinition.setAttribute(2, attribute);
+		tableDefinition.addAttribute(attribute);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = new DBMetadata();
+		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver");
 		dbMetadata.add(defTable("\"TABLE1\""));
 		dbMetadata.add(defTable("\"TABLE2\""));
 		dbMetadata.add(defTable("\"TABLE3\""));
-		dbMetadata.setDriverName("org.h2.Driver");
 		return dbMetadata;
 	}
 

@@ -25,14 +25,14 @@ package org.semanticweb.ontop.r2rml;
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
 import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataTypePredicate;
+import org.semanticweb.ontop.model.DatatypePredicate;
 import org.semanticweb.ontop.model.DatatypeFactory;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.DataTypePredicateImpl;
+import org.semanticweb.ontop.model.impl.DatatypePredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
@@ -46,6 +46,8 @@ import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.optique.api.mapping.ObjectMap;
 import eu.optique.api.mapping.PredicateMap;
@@ -59,7 +61,6 @@ import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
 
-
 public class R2RMLParser {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -72,6 +73,7 @@ public class R2RMLParser {
 	String subjectString = "";
 	String objectString = "";
 	R2RMLMappingManager mapManager;
+	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 
 	/**
 	 * empty constructor 
@@ -87,9 +89,8 @@ public class R2RMLParser {
 	 * @param myModel - the Model to process
 	 * @return Collection<TriplesMap> - the collection of mappings
 	 */
-	public Collection <TriplesMap> getMappingNodes(Model myModel)
-	{
-		Collection <TriplesMap> coll = null;
+	public Collection<TriplesMap> getMappingNodes(Model myModel) {
+		Collection<TriplesMap> coll = null;
 		try {
 			coll = mapManager.importMappings(myModel);
 		} catch (InvalidR2RMLMappingException e) {
@@ -136,8 +137,7 @@ public class R2RMLParser {
 		return predobjs;
 	}
 
-	public Term getSubjectAtom(TriplesMap tm)
-			throws Exception {
+	public Term getSubjectAtom(TriplesMap tm) throws Exception {
 		return getSubjectAtom(tm, "");
 	}
 	
@@ -149,8 +149,7 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Term getSubjectAtom(TriplesMap tm, String joinCond)
-			throws Exception {
+	public Term getSubjectAtom(TriplesMap tm, String joinCond) throws Exception {
 		Term subjectAtom = null;
 		String subj = "";
         classPredicates.clear();
@@ -160,20 +159,19 @@ public class R2RMLParser {
 		SubjectMapImpl sm = (SubjectMapImpl) sMap;
 		// process template declaration
 		Object termType = sm.getTermType(Object.class);
-		
-		
-		TermMapType subjectTermType = sm.getTermMapType() ;
-		
-		// WORKAROUND for: 
-		// SubjectMap.getTemplateString() throws NullPointerException when template == null
-		// 
-		if(sMap.getTemplate() == null){
+
+		TermMapType subjectTermType = sm.getTermMapType();
+
+		// WORKAROUND for:
+		// SubjectMap.getTemplateString() throws NullPointerException when
+		// template == null
+		//
+		if (sMap.getTemplate() == null) {
 			subj = null;
 		} else {
 			subj = sMap.getTemplateString();
 		}
-		
-		
+
 		if (subj != null) {
 			// craete uri("...",var)
 			subjectAtom = getURIFunction((subj), joinCond);
@@ -203,11 +201,9 @@ public class R2RMLParser {
 
 		// process class declaration
 		List<Object> classes = sMap.getClasses(Object.class);
-		for (Object o : classes)
-		{	
+		for (Object o : classes) {
 			classPredicates.add(fac.getClassPredicate(o.toString()));
 		}
-
 
 		if (subjectAtom == null)
 			throw new Exception("Error in parsing the subjectMap in node "
@@ -223,8 +219,7 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Predicate> getBodyPredicates(PredicateObjectMap pom)
-			throws Exception {
+	public List<Predicate> getBodyPredicates(PredicateObjectMap pom) {
 		List<Predicate> bodyPredicates = new ArrayList<Predicate>();
 		Predicate bodyPredicate = null;
 
@@ -250,8 +245,7 @@ public class R2RMLParser {
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 			Template t = pm.getTemplate();
-			if(t != null) 
-			{
+			if (t != null) {
 				// craete uri("...",var)
 				predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
@@ -273,6 +267,19 @@ public class R2RMLParser {
 		return getObjectAtom(pom, "");
 	}
 
+	public boolean isConcat(String st) {
+		int i, j;
+		if ((i = st.indexOf("{")) > -1) {
+			if ((j = st.lastIndexOf("{")) > i) {
+				return true;
+			} else if ((i > 0) || ((j > 0) && (j < (st.length() - 1)))) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Get the object atom, it can be a constant, a column or a template
 	 * @param pom
@@ -290,7 +297,6 @@ public class R2RMLParser {
 		
 		String lan = om.getLanguageTag();
 		Object datatype = om.getDatatype(Object.class);
-
 		
 		//we check if the object map is a constant (can be a iri or a literal)
 		String obj = om.getConstant();
@@ -307,22 +313,20 @@ public class R2RMLParser {
 			// create the function object later
 			if (lan != null || datatype != null) {
 				objectAtom = fac.getConstantLiteral(obj);
-				
-			} 
-			else {
+
+			} else {
 				Term newlit = fac.getConstantLiteral(obj);
 				
 				if (obj.startsWith("http://")) {
 					objectAtom = fac.getUriTemplate(newlit);
-				} 
-				else {
+				} else {
 					objectAtom = fac.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
 				}
 			}
 		}
 
-		//we check if the object map is a column (can be only literal)
-        //if it has a datatype or language property we check it later
+		// we check if the object map is a column (can be only literal)
+		// if it has a datatype or language property we check it later
 		String col = om.getColumn();
 		if (col != null) {
 			col=trim(col);
@@ -331,63 +335,81 @@ public class R2RMLParser {
 				col = joinCond + col;
 			}
 
-				objectAtom = fac.getVariable(col);
+			objectAtom = fac.getVariable(col);
 
 		}
 
-		
-		//we check if the object map is a template (can be a iri, a literal or a blank node)
+		// we check if the object map is a template (can be a iri, a literal or
+		// a blank node)
 		Template t = om.getTemplate();
+		Object typ = om.getTermType(Object.class);
+		boolean concat = false;
 		if (t != null) {
+			//we check if the template is a literal
+			//then we check if the template includes concat 
+			concat = isConcat(t.toString());
+			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
+				objectAtom = getTypedFunction(t.toString(), 4, joinCond);
+			}else {
 
-			// a template can be a rr:IRI, a
-			// rr:Literal or rr:BlankNode
-				
-			// if the literal has a language property or a datatype property we
-			// create the function object later
-			if (lan != null || datatype != null) {
-				String value = t.getColumnName(0);
-				if (!joinCond.isEmpty()){
-					value = joinCond + value;
-					
+				// a template can be a rr:IRI, a
+				// rr:Literal or rr:BlankNode
+
+				// if the literal has a language property or a datatype property
+				// we
+				// create the function object later
+				if (lan != null || datatype != null) {
+					String value = t.getColumnName(0);
+					if (!joinCond.isEmpty()) {
+						value = joinCond + value;
+
+					}
+					objectAtom = fac.getVariable(value);
+				} else {
+					Object type = om.getTermType(Object.class);
+
+					// we check if the template is a IRI a simple literal or a
+					// blank
+					// node and create the function object
+					objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
 				}
-				objectAtom = fac.getVariable(value);
-			} 
-			else{
-				
-				Object type = om.getTermType(Object.class);
-				
-				//we check if the template is a IRI a simple literal or a blank node and create the function object
-				objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
 			}
 		}
-		
-		//we check if it is a literal with language tag
-		
+
+		// we check if it is a literal with language tag
+
 		if (lan != null) {
 			Term langAtom = fac.getTypedTerm(objectAtom, lan);
 			objectAtom = langAtom;
-		} else {
+		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
+			objectAtom = fac.getTypedTerm(objectAtom, COL_TYPE.LITERAL);
+		}
 
-            //we check if it is a typed literal
-            if (datatype != null) {
-                Predicate dtype = new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-                Term dtAtom = fac.getFunction(dtype, objectAtom);
-                objectAtom = dtAtom;
-            }
-
-        }
+		// we check if it is a typed literal
+		if (datatype != null) {
+			Predicate.COL_TYPE type = dtfac.getDatatype(datatype.toString());
+			if (type == null) {
+				// throw new RuntimeException("Unsupported datatype: " +
+				// datatype.toString());
+				logger.warn("Unsupported datatype will not be converted: "
+						+ datatype.toString());
+			} else {
+				Term dtAtom = fac.getTypedTerm(objectAtom, type);
+				// Predicate dtype = new
+				// DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
+				// Term dtAtom = fac.getFunction(dtype, objectAtom);
+				objectAtom = dtAtom;
+			}
+		}
 
 		return objectAtom;
 	}
-
 
 	@Deprecated
 	private Term getConstantObject(String objectString) {
 		if (objectString.startsWith("http:"))
 			return getURIFunction(objectString);
-		else
-		{	//literal
+		else { // literal
 			Constant constt = fac.getConstantLiteral(objectString);
 			return fac.getTypedTerm(constt, COL_TYPE.LITERAL);
 
@@ -401,13 +423,13 @@ public class R2RMLParser {
 		String[] strings = string.split("<");
 		if (strings.length > 1) {
 			String consts = strings[0];
-			consts = consts.substring(0, consts.length()-2);
+			consts = consts.substring(0, consts.length() - 2);
 			consts = trim(consts);
 			String type = strings[1];
 			if (type.endsWith(">"))
 				type = type.substring(0, type.length() - 1);
 
-			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
+			DatatypePredicate predicate = new DatatypePredicateImpl(type, COL_TYPE.OBJECT);
 			Term constant = fac.getConstantLiteral(consts);
 			typedObject = fac.getFunction(predicate, constant);
 		}
@@ -415,8 +437,7 @@ public class R2RMLParser {
 	}
 
 	@Deprecated
-	public List<Resource> getJoinNodes(TriplesMap tm)
-	{
+	public List<Resource> getJoinNodes(TriplesMap tm) {
 		List<Resource> joinPredObjNodes = new ArrayList<Resource>();
 		// get predicate-object nodes
 		Set<Resource> predicateObjectNodes = getPredicateObjects(tm);
@@ -425,8 +446,11 @@ public class R2RMLParser {
 
 	/**
 	 * get a typed atom of a specific type
-	 * @param type - iri, blanknode or literal
-	 * @param string - the atom as string
+	 * 
+	 * @param type
+	 *            - iri, blanknode or literal
+	 * @param string
+	 *            - the atom as string
 	 * @return the contructed Function atom
 	 */
 	private Function getTermTypeAtom(String string, Object type, String joinCond) {
@@ -457,6 +481,21 @@ public class R2RMLParser {
 	public Function getTypedFunction(String parsedString, int type) {
 		return getTypedFunction(parsedString, type, "");
 	}
+	
+	
+	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{" 
+	private int getIndexOfCurlyB(String str){
+		int i;
+		int j;
+		i = str.indexOf("{");
+		j = str.indexOf("\\{");
+		
+		while((i-1 == j) && (j != -1)){		
+			i = str.indexOf("{",i+1);
+			j = str.indexOf("\\{",j+1);		
+		}	
+		return i;
+	}
 
 	/**
 	 * get a typed atom 
@@ -469,46 +508,63 @@ public class R2RMLParser {
 
 		List<Term> terms = new ArrayList<Term>();
 		String string = (parsedString);
-		if (!string.contains("{")){
-			if (type<3){
-				if(!string.startsWith("http://")) 
-				{	string = R2RMLVocabulary.baseuri + "{" + string + "}";
-				if (type == 2)
-				{
-					string = "\"" + string + "\"";
-				}
-				}
-				else
-				{
+		if (!string.contains("{")) {
+			if (type < 3) {
+				if (!string.startsWith("http://")) {
+					string = R2RMLVocabulary.baseuri + "{" + string + "}";
+					if (type == 2) {
+						string = "\"" + string + "\"";
+					}
+				} else {
 					type = 0;
 				}
 			}
 		}
-		if (type == 1 && !string.startsWith("http://"))
-		{
+		if (type == 1 && !string.startsWith("http://")) {
 			string = R2RMLVocabulary.baseuri + string;
 		}
 
+		String str = string; //str for concat of constant literal
+		
 		string = string.replace("\\{", "[");
 		string = string.replace("\\}", "]");
-
-		while (string.contains("{") ) {
+		
+		String cons;
+		int i;
+		while (string.contains("{")) {
 			int end = string.indexOf("}");
 			int begin = string.lastIndexOf("{", end);
+			
+			// (Concat) if there is constant literal in template, adds it to terms list 
+			if (type == 4){
+				if ((i = getIndexOfCurlyB(str)) > 0){
+					cons = str.substring(0, i);
+					str = str.substring(str.indexOf("}", i)+1, str.length());
+					terms.add(fac.getConstantLiteral(cons));	
+				}else{
+					str = str.substring(str.indexOf("}")+1);
+				}
+			}
 
 			String var = trim(string.substring(begin + 1, end));
 
-			//trim for making variable
-			terms.add(fac.getVariable(joinCond+(var)));
-
+			// trim for making variable
+			terms.add(fac.getVariable(joinCond + (var)));
 
 			string = string.replace("{\"" + var + "\"}", "[]");
 			string = string.replace("{" + var + "}", "[]");
+			
 		}
+		if(type == 4){
+			if (!str.equals("")){
+				cons = str;
+				terms.add(fac.getConstantLiteral(cons));
+			}
+		}
+	
 		string = string.replace("[", "{");
 		string = string.replace("]", "}");
-
-
+        
 		Term uriTemplate = null;
 		switch (type) {
 		//constant uri
@@ -531,8 +587,14 @@ public class R2RMLParser {
 			uriTemplate = terms.remove(0);
 			// pred = dtfac.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL; 
 			// the URI template is always on the first position in the term list
-			//terms.add(0, uriTemplate);
-			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL); 
+			// terms.add(0, uriTemplate);
+			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL);
+		case 4://concat
+			Function f = fac.getFunctionConcat(terms.get(0),terms.get(1));
+            for(int j=2;j<terms.size();j++){
+                f = fac.getFunctionConcat(f,terms.get(j));
+            }
+            return f;
 		}
 		return null;
 	}

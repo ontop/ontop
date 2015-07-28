@@ -22,19 +22,20 @@ package org.semanticweb.ontop.quest.dag;
 
 
 
-import org.semanticweb.ontop.ontology.ClassExpression;
-import org.semanticweb.ontop.ontology.DataPropertyExpression;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
+import java.util.Map.Entry;
+
 import junit.framework.TestCase;
 
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,56 +105,55 @@ public void testIndexes() throws Exception{
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
-
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine);
 		
 		
-		assertTrue(testIndexes(engine, engine.getNamedDAG()));
-
-
+		assertTrue(testIndexes(engine, dag));
 	}
 }
 
-private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
-	boolean result=true;
+	private boolean testIndexes(SemanticIndexBuilder engine, TBoxReasoner reasoner){
+		boolean result = true;
 		
-	//create semantic index
-	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
-		int index= engine.getIndex(vertex);
-		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof ObjectPropertyExpression) {
-			for(ObjectPropertyExpression parent: namedDAG.getSuccessors((ObjectPropertyExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
-				if(!result)
-					break;
+		//create semantic index
+		//check that the index of the node is contained in the intervals of the parent node
+		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getObjectPropertyDAG());		
+		for (Entry<ObjectPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
+			int index = vertex.getValue().getIndex();
+			log.info("vertex {} index {}", vertex, index);
+			for(ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex.getKey())){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index));
+				if (!result)
+					return result;
 			}
 		}
-		else if (vertex instanceof DataPropertyExpression) {
-			for(DataPropertyExpression parent: namedDAG.getSuccessors((DataPropertyExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
-				if(!result)
-					break;
+		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getDataPropertyDAG());
+		for (Entry<DataPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedDataProperties()) { 
+			int index = vertex.getValue().getIndex();
+			log.info("vertex {} index {}", vertex, index);
+			for(DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex.getKey())){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index));
+				if (!result)
+					return result;
 			}
 		}
-		else {
-			for(ClassExpression parent: namedDAG.getSuccessors((ClassExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
-				if(!result)
-					break;
+		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG());
+		for (Entry<ClassExpression, SemanticIndexRange> vertex: engine.getIndexedClasses()) { 
+			int index = vertex.getValue().getIndex();
+			log.info("vertex {} index {}", vertex, index);
+			for(ClassExpression parent: Graphs.successorListOf(namedCL, vertex.getKey())) {
+				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index));
+				if (!result)
+					return result;
 			}			
 		}
 		
-	}
-	
-	//log.info("ranges {}", ranges);
-	
-	
-	return result;
-	
-
+		return result;
 }
 
 

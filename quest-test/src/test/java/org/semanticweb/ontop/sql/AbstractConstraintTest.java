@@ -23,6 +23,7 @@ package org.semanticweb.ontop.sql;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +66,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
 		
-		List<TableDefinition> tables = metadata.getTableList();
+		Collection<TableDefinition> tables = metadata.getTables();
 		for (TableDefinition t : tables) {
 			List<Attribute> pk =  t.getPrimaryKeys();
 			if (checkName(t, TB_BOOK)) {
@@ -85,7 +86,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
 		
-		List<TableDefinition> tables = metadata.getTableList();
+		Collection<TableDefinition> tables = metadata.getTables();
 		for (TableDefinition t : tables) {
 			Map<String, List<Attribute>> fk =  t.getForeignKeys();
 			if (checkName(t, TB_BOOK)) {

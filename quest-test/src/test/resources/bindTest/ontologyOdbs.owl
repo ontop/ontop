@@ -1,0 +1,1408 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://myproject.org/odbs#"
+     xml:base="http://myproject.org/odbs"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://myproject.org/odbs"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://myproject.org/odbs#addressLocatedIn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#addressLocatedIn">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Address"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#City"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#basedOn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#basedOn">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Rental"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#cityLocatedIn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#cityLocatedIn">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#City"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Country"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#contain1 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#contain1">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Log"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Trace"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#contain2 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#contain2">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Event"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Trace"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#contain3 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#contain3">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Attribute"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Event"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#contain4 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#contain4">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Attribute"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Log"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#contain5 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#contain5">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Attribute"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Trace"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#contain6 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#contain6">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Attribute"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#customerRental -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#customerRental">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Customer"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Rental"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#declare1 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#declare1">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Extension"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Log"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#declare2 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#declare2">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Attribute"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#define1 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#define1">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Classifier"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Log"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#define2 -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#define2">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Classifier"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#GlobalAttribute"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#filmInventory -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#filmInventory">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Inventory"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#hasActor -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#hasActor">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Actor"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#hasAddress -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#hasAddress">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Address"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#hasDirector -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#hasDirector">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Director"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#isProduceIn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#isProduceIn">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Country"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#isShotIn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#isShotIn">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#City"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#paymentRental -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#paymentRental">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Payment"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Rental"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#storeInventory -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#storeInventory">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Store"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#storeLocatedIn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#storeLocatedIn">
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Address"/>
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Store"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#worksIn -->
+
+    <owl:ObjectProperty rdf:about="http://myproject.org/odbs#worksIn">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Staff"/>
+        <rdfs:range rdf:resource="http://myproject.org/odbs#Store"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://myproject.org/odbs#cellphone -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#cellphone">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Person"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#dateOfBirth -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#dateOfBirth">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Person"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#dateOfPayment -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#dateOfPayment">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Payment"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#dateOfRent -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#dateOfRent">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Rental"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#dateOfReturn -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#dateOfReturn">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Rental"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#feature -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#feature">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Log"/>
+        <rdfs:range rdf:resource="&xsd;token"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#firstName -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#firstName">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#firstNameCeleb -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#firstNameCeleb">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Celebrity"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#genre -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#genre">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#idFilm -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#idFilm">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#idInventory -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#idInventory">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#idPayment -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#idPayment">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Payment"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#idRental -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#idRental">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Rental"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#idStore -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#idStore">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Store"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#keyA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#keyA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Attribute"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#keyC -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#keyC">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Classifier"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#keyE -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#keyE">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Extension"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#languageCountry -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#languageCountry">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Country"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#languageFilm -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#languageFilm">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#lastName -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#lastName">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#lastNameCeleb -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#lastNameCeleb">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Celebrity"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#nameC -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#nameC">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Classifier"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#nameCity -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#nameCity">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#City"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#nameCountry -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#nameCountry">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Country"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#nameStore -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#nameStore">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Store"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#numberOfAvailability -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#numberOfAvailability">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#numberOfCopies -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#numberOfCopies">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#numberOfEmployee -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#numberOfEmployee">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Store"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#population -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#population">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Country"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#position -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#position">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Country"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#postalCode -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#postalCode">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Address"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#prefixE -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#prefixE">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Extension"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#price -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#price">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Payment"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#releaseDate -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#releaseDate">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#scope -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#scope">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#GlobalAttribute"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#sector -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#sector">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Address"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#street -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#street">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Address"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#subtitle -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#subtitle">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#title -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#title">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Film"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#type -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#type">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Payment"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#valueBA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#valueBA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#BooleanAttribute"/>
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#valueDA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#valueDA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#DateTimeAttribute"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#valueFA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#valueFA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#FloatAttribute"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#valueIA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#valueIA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#IntAttribute"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#valueIDA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#valueIDA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#IdAttribute"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#valueSA -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#valueSA">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#StringAttribute"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://myproject.org/odbs#version -->
+
+    <owl:DatatypeProperty rdf:about="http://myproject.org/odbs#version">
+        <rdfs:domain rdf:resource="http://myproject.org/odbs#Log"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://myproject.org/odbs#Actor -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Actor">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Celebrity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#hasActor"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Address -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Address">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#addressLocatedIn"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#hasAddress"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#hasAddress"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#storeLocatedIn"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#addressLocatedIn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#storeLocatedIn"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Attribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Attribute">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain3"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain4"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#declare2"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain3"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain5"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#declare2"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain5"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain4"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#BooleanAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#BooleanAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Celebrity -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Celebrity"/>
+    
+
+
+    <!-- http://myproject.org/odbs#City -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#City">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#cityLocatedIn"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#cityLocatedIn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Classifier -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Classifier">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#define1"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#define2"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#define1"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#ConceptExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#ConceptExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#ContainerAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#ContainerAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#CostExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#CostExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Country -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Country"/>
+    
+
+
+    <!-- http://myproject.org/odbs#Customer -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Customer">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#DateTimeAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#DateTimeAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Director -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Director">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Celebrity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#hasDirector"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Event -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Event">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain2"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain2"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Extension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Extension">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#declare2"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#declare1"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#declare2"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#declare1"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Film -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Film">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#hasActor"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#filmInventory"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#hasDirector"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#FloatAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#FloatAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#GlobalAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#GlobalAttribute">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#define2"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#IDExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#IDExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#IdAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#IdAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#IntAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#IntAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Inventory -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Inventory">
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#filmInventory"/>
+                        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#storeInventory"/>
+                        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#filmInventory"/>
+                        <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#storeInventory"/>
+                        <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#LifecycleExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#LifecycleExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#ListAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#ListAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Log -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Log">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#define1"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#OrganizationalExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#OrganizationalExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Payment -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Payment"/>
+    
+
+
+    <!-- http://myproject.org/odbs#Person -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Person"/>
+    
+
+
+    <!-- http://myproject.org/odbs#Rental -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Rental">
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#customerRental"/>
+                        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#paymentRental"/>
+                        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#customerRental"/>
+                        <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://myproject.org/odbs#paymentRental"/>
+                        <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#SemanticExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#SemanticExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Staff -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Staff">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#worksIn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#worksIn"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Store -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Store">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#storeLocatedIn"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#storeInventory"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://myproject.org/odbs#storeLocatedIn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#worksIn"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#StringAttribute -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#StringAttribute">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Attribute"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#TimeExtension -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#TimeExtension">
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Extension"/>
+    </owl:Class>
+    
+
+
+    <!-- http://myproject.org/odbs#Trace -->
+
+    <owl:Class rdf:about="http://myproject.org/odbs#Trace">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="http://myproject.org/odbs#contain1"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Payment"/>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://myproject.org/odbs#paymentRental"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <owl:onProperty rdf:resource="http://myproject.org/odbs#filmInventory"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Customer"/>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://myproject.org/odbs#customerRental"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Film"/>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://myproject.org/odbs#filmInventory"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Rental"/>
+        <owl:onProperty rdf:resource="http://myproject.org/odbs#paymentRental"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Rental"/>
+        <owl:onProperty rdf:resource="http://myproject.org/odbs#customerRental"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Inventory"/>
+        <owl:onProperty rdf:resource="http://myproject.org/odbs#storeInventory"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://myproject.org/odbs#Store"/>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://myproject.org/odbs#storeInventory"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

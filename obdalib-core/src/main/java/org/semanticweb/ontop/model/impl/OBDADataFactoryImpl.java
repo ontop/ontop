@@ -21,7 +21,7 @@ package org.semanticweb.ontop.model.impl;
  */
 
 
-
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -43,12 +43,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
 	private DatatypeFactoryImpl datatypes = null;
-	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper();
+	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
 	
 
 	private static int counter = 0;
 	
-	protected OBDADataFactoryImpl() {
+	private OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
 
@@ -169,12 +169,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Variable getVariable(String name) {
 		return new VariableImpl(name);
 	}
-	
-
-	@Override
-	public Variable getVariableNondistinguished() {
-		return new AnonymousVariable();
-	}
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
@@ -253,12 +247,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
-
-	
-	
-	
-	
-	
 
 	
 	@Override
@@ -403,6 +391,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
+	}
+	
+	@Override
 	public Function getFunctionMinus(Term term1) {
 		return getFunction(OBDAVocabulary.MINUS, term1);
 	}
@@ -422,6 +415,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
 	}
 
+    @Override
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+    }
+
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
@@ -432,13 +430,19 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, 
 			String password, String driverclass) {
 		URI id = URI.create(UUID.randomUUID().toString());
-		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
+        return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
 	}
 
 	@Override
 	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, 
 			String username, String password, String driverclass) {
-		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
+        Preconditions.checkNotNull(sourceuri, "sourceuri is null");
+        Preconditions.checkNotNull(jdbcurl, "jdbcurl is null");
+        Preconditions.checkNotNull(password, "password is null");
+        Preconditions.checkNotNull(username, "username is null");
+        Preconditions.checkNotNull(driverclass, "driverclass is null");
+
+        DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
@@ -454,12 +458,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionIsTrue(Term term) {
-		return getFunction(OBDAVocabulary.IS_TRUE, term);
+        return getFunction(OBDAVocabulary.IS_TRUE, term);
 	}
 
 	@Override
 	public Function getSPARQLJoin(Term t1, Term t2) {
-		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
+        return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
 	@Override
@@ -479,8 +483,85 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTripleAtom(Term subject, Term predicate, Term object) {
-		return getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, predicate, object);
+		return getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
 	}
 
+	private int suffix = 0;
 	
+	/***
+	 * Replaces each variable 'v' in the query for a new variable constructed
+	 * using the name of the original variable plus the counter. For example
+	 * 
+	 * <pre>
+	 * q(x) :- C(x)
+	 * 
+	 * results in
+	 * 
+	 * q(x_1) :- C(x_1)
+	 * 
+	 * if counter = 1.
+	 * </pre>
+	 * 
+	 * <p>
+	 * This method can be used to generate "fresh" rules from a datalog program
+	 * so that it can be used during a resolution step.
+	 * 
+	 * @param rule
+	 * @param suffix
+	 *            The integer that will be apended to every variable name
+	 * @return
+	 */
+	@Override
+	public CQIE getFreshCQIECopy(CQIE rule) {
+		
+		int suff = ++suffix;
+		
+		// This method doesn't support nested functional terms
+		CQIE freshRule = rule.clone();
+		Function head = freshRule.getHead();
+		List<Term> headTerms = head.getTerms();
+		for (int i = 0; i < headTerms.size(); i++) {
+			Term term = headTerms.get(i);
+			Term newTerm = getFreshTerm(term, suff);
+			headTerms.set(i, newTerm);
+		}
+
+		List<Function> body = freshRule.getBody();
+		for (Function atom : body) {
+			List<Term> atomTerms = atom.getTerms();
+			for (int i = 0; i < atomTerms.size(); i++) {
+				Term term = atomTerms.get(i);
+				Term newTerm = getFreshTerm(term, suff);
+				atomTerms.set(i, newTerm);
+			}
+		}
+		return freshRule;
+	}
+
+	private Term getFreshTerm(Term term, int suff) {
+		Term newTerm;
+		if (term instanceof Variable) {
+			Variable variable = (Variable) term;
+			newTerm = getVariable(variable.getName() + "_" + suff);
+		} 
+		else if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+			List<Term> innerTerms = functionalTerm.getTerms();
+			List<Term> newInnerTerms = new LinkedList<>();
+			for (int j = 0; j < innerTerms.size(); j++) {
+				Term innerTerm = innerTerms.get(j);
+				newInnerTerms.add(getFreshTerm(innerTerm, suff));
+			}
+			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
+			Function newFunctionalTerm = getFunction(newFunctionSymbol, newInnerTerms);
+			newTerm = newFunctionalTerm;
+		} 
+		else if (term instanceof Constant) {
+			newTerm = term.clone();
+		} 
+		else {
+			throw new RuntimeException("Unsupported term: " + term);
+		}
+		return newTerm;
+	}
 }

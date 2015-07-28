@@ -15,4 +15,6 @@ public interface CQContainmentCheck {
 	
 	boolean isContainedIn(CQIE cq1, CQIE cq2);
 	
+	Substitution computeHomomorphsim(CQIE q1, CQIE q2);
+	
 }

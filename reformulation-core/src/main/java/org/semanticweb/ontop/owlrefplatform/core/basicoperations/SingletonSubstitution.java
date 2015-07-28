@@ -24,20 +24,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * An atomic substitution accepts only one variable in its domain.
  */
 public class SingletonSubstitution implements Substitution {
 
-    private final VariableImpl variable;
+    private final Variable variable;
     private final Term term;
 
-    public SingletonSubstitution(VariableImpl var, Term term) {
+    public SingletonSubstitution(Variable var, Term term) {
         this.variable = var;
         this.term = term;
     }
@@ -46,7 +45,7 @@ public class SingletonSubstitution implements Substitution {
         return term;
     }
 
-    public VariableImpl getVariable() {
+    public Variable getVariable() {
         return variable;
     }
 
@@ -66,14 +65,14 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Term get(VariableImpl var) {
+    public Term get(Variable var) {
         if (var.equals(variable))
             return term;
         return null;
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public Map<Variable, Term> getMap() {
         return ImmutableMap.of(variable, term);
     }
 
@@ -83,7 +82,8 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Set<VariableImpl> keySet() {
-        return ImmutableSet.of(variable);
+    public void put(Variable var, Term term) {
+        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
     }
+
 }

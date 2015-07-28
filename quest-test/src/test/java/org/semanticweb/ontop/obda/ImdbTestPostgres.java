@@ -32,12 +32,12 @@ import static org.junit.Assert.assertFalse;
 public class ImdbTestPostgres {
     private OBDADataFactory fac;
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private OBDAModel obdaModel;
     private OWLOntology ontology;
 
-    final String owlFile = "src/test/resources/movieontology.owl";
-    final String obdaFile = "src/test/resources/movieontology.obda";
+    private final String owlFile = "src/test/resources/movieontology.owl";
+    private final String obdaFile = "src/test/resources/movieontology.obda";
 
     @Before
     public void setUp() throws Exception {

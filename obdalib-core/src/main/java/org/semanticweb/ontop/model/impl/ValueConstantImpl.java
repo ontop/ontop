@@ -63,7 +63,7 @@ public class ValueConstantImpl implements ValueConstant {
 		this.string = getStringRepresentation();
 	}
 	
-	private final String getStringRepresentation() {
+	private String getStringRepresentation() {
 		StringBuilder sb = new StringBuilder();
 		
 		switch (type) {
@@ -71,7 +71,8 @@ public class ValueConstantImpl implements ValueConstant {
             case DATE:
             case TIME:
             case YEAR:
-			case DATETIME: 
+			case DATETIME:
+			case DATETIME_STAMP:
 				sb.append("\"").append(value).append("\""); 
 				break;
 			case INTEGER:
@@ -135,7 +136,6 @@ public class ValueConstantImpl implements ValueConstant {
 		return string;
 	}
 
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		return Collections.emptySet();
 	}

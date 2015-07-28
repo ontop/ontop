@@ -137,7 +137,7 @@ public class MetaMappingVirtualABoxTest{
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();

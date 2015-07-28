@@ -21,8 +21,10 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.*;
 
 import java.util.*;
@@ -33,23 +35,23 @@ import java.util.*;
  */
 public class SubstitutionImpl implements AppendableSubstitution {
 
-    private final Map<VariableImpl, Term> map;
+    private final Map<Variable, Term> map;
 
     public SubstitutionImpl() {
         this.map = new HashMap<>();
     }
 
-    public SubstitutionImpl(Map<VariableImpl, Term> substitutionMap) {
+    public SubstitutionImpl(Map<Variable, Term> substitutionMap) {
         this.map = substitutionMap;
     }
 
     @Override
-    public Term get(VariableImpl var) {
+    public Term get(Variable var) {
         return map.get(var);
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public Map<Variable, Term> getMap() {
         return map;
     }
 
@@ -59,13 +61,13 @@ public class SubstitutionImpl implements AppendableSubstitution {
     }
 
     @Override
-    public void put(VariableImpl var, Term term) {
+    @Deprecated
+    public void put(Variable var, Term term) {
         map.put(var, term);
     }
 
-    @Override
     @Deprecated
-    public Set<VariableImpl> keySet() {
+    public Set<Variable> keySet() {
         return map.keySet();
     }
 
@@ -127,9 +129,9 @@ public class SubstitutionImpl implements AppendableSubstitution {
         SingletonSubstitution substitution = (SingletonSubstitution) s;
 
 
-        List<VariableImpl> forRemoval = new ArrayList<>();
-        for (Map.Entry<VariableImpl,Term> entry : map.entrySet()) {
-            VariableImpl v = entry.getKey();
+        List<Variable> forRemoval = new ArrayList<>();
+        for (Map.Entry<Variable,Term> entry : map.entrySet()) {
+            Variable v = entry.getKey();
             Term t = entry.getValue();
             if (substitution.getVariable().equals(t)) { // ROMAN: no need in isEqual(t, s.getVariable())
                 if (v.equals(substitution.getTerm())) {  // ROMAN: no need in isEqual(v, s.getTerm())
@@ -212,16 +214,12 @@ public class SubstitutionImpl implements AppendableSubstitution {
      */
     private static Substitution createUnifier(Term term1, Term term2) {
 
-        if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
+        if (!(term1 instanceof Variable) && !(term2 instanceof Variable)) {
 
             // neither is a variable, impossible to unify unless the two terms are
             // equal, in which case there the substitution is empty
-            if ((term1 instanceof AnonymousVariable) || (term2 instanceof AnonymousVariable)) {
-                // this is questionable -- consider R(_,_) and R(c,c)
-                return new NeutralSubstitution();
-            }
 
-            if ((term1 instanceof VariableImpl) || (term1 instanceof FunctionalTermImpl)
+            if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
                     || (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
 
                 // ROMAN: why is BNodeConstantImpl not mentioned?
@@ -237,22 +235,19 @@ public class SubstitutionImpl implements AppendableSubstitution {
         }
 
         // arranging the terms so that the first is always a variable
-        VariableImpl t1;
+        Variable t1;
         Term t2;
-        if (term1 instanceof VariableImpl) {
-            t1 = (VariableImpl)term1;
+        if (term1 instanceof Variable) {
+            t1 = (Variable)term1;
             t2 = term2;
         } else {
-            t1 = (VariableImpl)term2;
+            t1 = (Variable)term2;
             t2 = term1;
         }
 
         // Undistinguished variables do not need a substitution,
         // the unifier knows about this
-        if (t2 instanceof AnonymousVariable) { // ROMAN: no need in (t1 instanceof AnonymousVariable)
-            return new NeutralSubstitution();
-        }
-        else if (t2 instanceof VariableImpl) {
+        if  (t2 instanceof Variable) {
             if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
                 return new NeutralSubstitution();
             else

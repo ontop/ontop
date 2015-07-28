@@ -38,8 +38,8 @@ public class OBDAQueryModifiers {
 		isDistinct = false;
 		limit = -1;
 		offset = -1;
-		orderConditions = new ArrayList<OrderCondition>();
-		groupConditions = new ArrayList<Variable>();
+		orderConditions = new ArrayList<>();
+		groupConditions = new ArrayList<>();
 	}
 
 	public OBDAQueryModifiers clone() {
@@ -59,6 +59,7 @@ public class OBDAQueryModifiers {
 		return clone;
 	}
 
+	@Deprecated
 	public void copy(OBDAQueryModifiers other) {
 		isDistinct = other.isDistinct;
 		isCount = other.isCount;

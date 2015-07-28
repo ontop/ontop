@@ -31,7 +31,6 @@ import junit.framework.TestCase;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 

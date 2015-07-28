@@ -20,16 +20,14 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.NumericalOperationPredicate;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 
 public class PredicateImpl implements Predicate {
 
 	private static final long serialVersionUID = -7096056207721170465L;
 
+	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);	
+	
 	private int arity = -1;
 	private String name = null;
 	private int identifier = -1;
@@ -130,12 +128,18 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isDataTypePredicate() {
-		return this instanceof DataTypePredicate;
+		return this instanceof DatatypePredicate;
 	}
 
-	@Override
+    @Override
+    public boolean isStringOperationPredicate() {
+        return this instanceof StringOperationPredicate;
+    }
+
+
+    @Override
 	public boolean isTriplePredicate() {
-		if (arity == 3 && name.equals(OBDAVocabulary.QUEST_TRIPLE_PRED.getName())) {
+		if (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName())) {
 			return true;
 		}
 		return false;

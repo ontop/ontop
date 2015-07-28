@@ -22,7 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 
 import java.util.Map;
 import java.util.Set;
@@ -43,15 +43,12 @@ import java.util.Set;
  */
 public interface Substitution {
 
-    /**
-     * TODO: replace VariableImpl by Variable
-     */
-    Term get(VariableImpl var);
+    Term get(Variable var);
 
     /**
      * Map representation of this function.
      */
-    Map<VariableImpl, Term> getMap();
+    Map<Variable, Term> getMap();
 
     boolean isEmpty();
 
@@ -94,5 +91,5 @@ public interface Substitution {
     boolean composeFunctions(Function term1, Function term2);
 
     @Deprecated
-    Set<VariableImpl> keySet();
+    void put(Variable var, Term term);
 }

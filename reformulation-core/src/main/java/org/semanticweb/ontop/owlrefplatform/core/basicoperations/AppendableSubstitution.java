@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 
 /**
  * Mutable substitution that accepts new entries.
@@ -16,6 +16,6 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
  */
 public interface AppendableSubstitution extends Substitution {
 
-    void put(VariableImpl var, Term term);
+    void put(Variable var, Term term);
 
 }

@@ -212,7 +212,6 @@ public class DAGOperations {
 	public static void removeCycles(Map<Description, DAGNode> dagnodes, Map<Description, Description> equi_mapp, DAG dag) {
 
 		// Finding the cycles (strongly connected components)
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 		ArrayList<ArrayList<DAGNode>> sccs = scc(dagnodes);
 

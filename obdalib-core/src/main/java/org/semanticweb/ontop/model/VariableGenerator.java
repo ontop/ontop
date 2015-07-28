@@ -40,26 +40,26 @@ public class VariableGenerator {
      * Generates a new non-conflicting variable from a previous one.
      * It will reuse its name.
      */
-    public VariableImpl generateNewVariableFromVar(Variable previousVariable) {
+    public Variable generateNewVariableFromVar(Variable previousVariable) {
         Variable newVariable;
         do {
             newVariable = dataFactory.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
         } while(knownVariables.contains(newVariable));
 
         knownVariables.add(newVariable);
-        return (VariableImpl)newVariable;
+        return newVariable;
     }
 
     /**
      * Generates a new non-conflicting variable.
      */
-    public VariableImpl generateNewVariable() {
+    public Variable generateNewVariable() {
         Variable newVariable;
         do {
             newVariable = dataFactory.getVariable(SUFFIX_PREFIX + (count++));
         } while(knownVariables.contains(newVariable));
 
         knownVariables.add(newVariable);
-        return (VariableImpl)newVariable;
+        return newVariable;
     }
 }

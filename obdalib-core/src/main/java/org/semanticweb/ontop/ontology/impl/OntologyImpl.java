@@ -54,8 +54,6 @@ public class OntologyImpl implements Ontology {
 	
 	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
 	
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	
 	// axioms and assertions
 
 	private final List<BinaryAxiom<ClassExpression>> subClassAxioms = new ArrayList<BinaryAxiom<ClassExpression>>();

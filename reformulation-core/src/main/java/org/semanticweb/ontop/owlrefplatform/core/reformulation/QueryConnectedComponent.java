@@ -36,6 +36,7 @@ import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.model.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public class QueryConnectedComponent {
 		this.edges = edges;
 		this.nonDLAtoms = nonDLAtoms;
 
-		this.loop = isDegenerate() ? terms.get(0) : null; 
+		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null; 
 				
 		quantifiedVariables = new ArrayList<Loop>(terms.size());
 		variables = new ArrayList<Term>(terms.size());
@@ -176,7 +177,8 @@ public class QueryConnectedComponent {
 			while (ni.hasNext()) {
 				Function atom = ni.next();
 				boolean intersects = false;
-				Set<Variable> atomVars = atom.getReferencedVariables();
+				Set<Variable> atomVars = new HashSet<>();
+				TermUtils.addReferencedVariablesTo(atomVars, atom);
 				for (Variable t : atomVars) 
 					if (ccTerms.contains(t)) {
 						intersects = true;
@@ -257,7 +259,9 @@ public class QueryConnectedComponent {
 		while (!nonDLAtoms.isEmpty()) {
 			//log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
 			Function f = nonDLAtoms.iterator().next(); 
-			Set<Variable> vars = f.getReferencedVariables();
+			Set<Variable> vars = new HashSet<>();
+            TermUtils.addReferencedVariablesTo(vars,f);
+
 			Variable v = vars.iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v));			
 		}

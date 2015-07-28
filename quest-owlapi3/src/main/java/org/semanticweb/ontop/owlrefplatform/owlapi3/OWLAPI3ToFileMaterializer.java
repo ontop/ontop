@@ -33,7 +33,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
+import org.semanticweb.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
@@ -72,10 +72,10 @@ public class OWLAPI3ToFileMaterializer {
 	}
 
 	public static int materializeN3(Writer bf, OBDAModel model) throws Exception {
-		return materializeN3(bf, (new OWLAPI3Materializer(model)).getIterator());
+		return materializeN3(bf, (new OWLAPI3Materializer(model, false)).getIterator());
 	}
 	
-	public static int materializeN3(Writer bf, QuestOWLIndividualIterator iterator) throws Exception {
+	public static int materializeN3(Writer bf, QuestOWLIndividualAxiomIterator iterator) throws Exception {
 
 		String rdftype = OBDAVocabulary.RDF_TYPE;
 		int count = 0;

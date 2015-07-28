@@ -87,7 +87,6 @@ public class BNodeConstantImpl implements BNode {
 		return name;
 	}
 
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		return Collections.emptySet();
 	}

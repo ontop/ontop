@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.semanticweb.ontop.model.Variable;
 
-public class VariableImpl implements Variable, Comparable<VariableImpl> {
+public class VariableImpl implements Variable {
 
 	private static final long serialVersionUID = 5723075311798541659L;
 
@@ -70,15 +70,5 @@ public class VariableImpl implements Variable, Comparable<VariableImpl> {
 	@Override
 	public Variable clone() {
 		return this;
-	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		return Collections.<Variable>singleton(this);
-	}
-
-	@Override
-	public int compareTo(VariableImpl other) {
-		return other.identifier - identifier ;
 	}
 }

@@ -28,13 +28,14 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.sesame.RepositoryConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class SesameAbstractRepo implements
-		org.openrdf.repository.Repository {
-	private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
+		org.openrdf.repository.Repository, AutoCloseable {
+    private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
 
 	private RepositoryConnection repoConnection;
 	private Map<String, String> namespaces;
@@ -103,7 +104,15 @@ public abstract class SesameAbstractRepo implements
 		// Once shut down, the repository can no longer be used until it is
 		// re-initialized.
 		isinitialized=false;
+		if(repoConnection!=null && repoConnection.isOpen())
+			repoConnection.close();
+		
 	}
+
+    @Override
+    public void close() throws Exception {
+        this.shutDown();
+    }
 	
 
 	public abstract String getType();

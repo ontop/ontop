@@ -34,6 +34,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.Reference;
@@ -112,13 +113,13 @@ public class DirectMappingAxiom {
 		for (Attribute pk : pks)
 			Column += Table + ".\"" + pk.getName() + "\" AS "+this.table.getName()+"_"+pk.getName()+", ";
 		} else {
-			for (int i = 0; i < tableDef.getNumOfAttributes(); i++) {
-				String attrName = tableDef.getAttributeName(i + 1);
-				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName()+"_"+attrName +", ";
+			for (Attribute att : tableDef.getAttributes()) {
+				String attrName = att.getName();
+				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
 			}
 		}
 
-		// refferring object
+		// referring object
 		List<Attribute> attr = fks.get(key);
 		for (int i = 0; i < attr.size(); i++) {
 			Condition += table + ".\"" + attr.get(i).getName() + "\" = ";
@@ -139,7 +140,7 @@ public class DirectMappingAxiom {
 				Condition += " AND ";
 			}
 		}
-		for (TableDefinition tdef : metadata.getTableList()) {
+		for (TableDefinition tdef : metadata.getTables()) {
 			if (tdef.getName().equals(tableRef)) {
 				int pknumber = tdef.getPrimaryKeys().size();
 				if (pknumber > 0) {
@@ -149,18 +150,18 @@ public class DirectMappingAxiom {
 						if (!Column.contains(refPki))
 							Column += ", " + refPki + " AS " + tableRef + "_" + pki;
 					}
-				} else {
-					for (int i = 0; i < tdef.getNumOfAttributes(); i++) {
-						String attrName = tdef.getAttributeName(i + 1);
+				} 
+				else {
+					for (Attribute att : tdef.getAttributes()) {
+						String attrName = att.getName();
 						Column += ", \""+ tableRef + "\".\"" + attrName +
-								"\" AS " + tableRef+"_"+attrName;
+								"\" AS " + tableRef+"_" + attrName;
 					}
 				}
 			}
 		}
 		
-		return (String.format(SQLStringTempl, Column, Table, Condition));
-
+		return String.format(SQLStringTempl, Column, Table, Condition);
 	}
 
 	public CQIE getCQ(){
@@ -173,8 +174,7 @@ public class DirectMappingAxiom {
 		
 		//DataType Atoms
 		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
-		for(int i=0;i<table.getNumOfAttributes();i++){
-			Attribute att = table.getAttribute(i+1);
+		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			if (type == COL_TYPE.LITERAL) {
 				Variable objV = df.getVariable(att.getName());
@@ -191,13 +191,12 @@ public class DirectMappingAxiom {
 		}
 	
 		//To construct the head, there is no static field about this predicate
-		List<Term> headTerms = new ArrayList<Term>();
-		for(int i=0;i<table.getNumOfAttributes();i++){
-			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
-		}
+		List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
+		for (Attribute att : table.getAttributes())
+			headTerms.add(df.getVariable(att.getName()));
+		
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
 		Function head = df.getFunction(headPredicate, headTerms);
-		
 		
 		return df.getCQIE(head, atoms);
 	}
@@ -209,9 +208,8 @@ public class DirectMappingAxiom {
 
 		// Object Atoms
 		// Foreign key reference
-		for (int i = 0; i < table.getNumOfAttributes(); i++) {
-			if (table.getAttribute(i + 1).isForeignKey()) {
-				Attribute att = table.getAttribute(i + 1);
+		for (Attribute att : table.getAttributes()) {
+			if (att.isForeignKey()) {
 				Reference ref = att.getReference();
 				if (ref.getReferenceName().equals(fk)) {
 					String pkTableReference = ref.getTableReference();
@@ -219,14 +217,15 @@ public class DirectMappingAxiom {
 							.getDefinition(pkTableReference);
 					Term obj = generateSubject(tdRef, true);
 
-					atom = (df.getFunction(
-							df.getObjectPropertyPredicate(generateOPURI(
-									table.getName(), table.getAttributes())),
-							sub, obj));
+					String opURI = generateOPURI(table.getName(), att);
+					atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
 					// construct the head
-					List<Term> headTerms = new ArrayList<Term>();
-					headTerms.addAll(atom.getReferencedVariables());
+					Set<Variable> headTermsSet = new HashSet<>();
+					TermUtils.addReferencedVariablesTo(headTermsSet, atom);
+					
+					List<Term> headTerms = new ArrayList<>();
+					headTerms.addAll(headTermsSet);
 
 					Predicate headPredicate = df.getPredicate(
 							"http://obda.inf.unibz.it/quest/vocabulary#q",
@@ -256,13 +255,14 @@ public class DirectMappingAxiom {
 	}
 
 	// Generate an URI for object property from a string(name of column)
-	private String generateOPURI(String table, ArrayList<Attribute> columns) {
-		String column = "";
-		for (Attribute a : columns)
-			if (a.isForeignKey())
-				column += a.getName() + "_";
-		column = column.substring(0, column.length() - 1);
-		return new String(baseuri + percentEncode(table) + "#ref-" + column);
+	private String generateOPURI(String table, Attribute columns) {
+//		String columnsInFK = "";
+//		for (Attribute a : columns)
+//			if (a.isForeignKey() && a.getReference().getTableReference().equals(foreignTable.getName()))
+//				columnsInFK += a.getName() + ";";
+//		columnsInFK = columnsInFK.substring(0, columnsInFK.length() - 1);
+		String columnsInFK = columns.getName();
+		return baseuri + percentEncode(table) + "#ref-"  + columnsInFK;
 	}
 
 	/*
@@ -289,10 +289,9 @@ public class DirectMappingAxiom {
 			return df.getUriTemplate(terms);
 
 		} else {
-			List<Term> vars = new ArrayList<Term>();
-			for (int i = 0; i < td.getNumOfAttributes(); i++) {
-				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
-			}
+			List<Term> vars = new ArrayList<>(td.getAttributes().size());
+			for (Attribute att : td.getAttributes()) 
+				vars.add(df.getVariable(tableName + att.getName()));
 
 			return df.getBNodeTemplate(vars);
 		}

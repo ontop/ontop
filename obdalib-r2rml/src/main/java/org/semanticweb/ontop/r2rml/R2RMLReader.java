@@ -50,19 +50,16 @@ public class R2RMLReader {
 		this.m = m;
 	}
 	
-	public R2RMLReader(String file)
-	{
+	public R2RMLReader(String file) throws Exception {
 		this(new File(file));
 	}
 	
-	public R2RMLReader(File file, OBDAModel model)
-	{
+	public R2RMLReader(File file, OBDAModel model) throws Exception {
 		this(file);
 		obdaModel = model;
 	}
 	
-	public R2RMLReader(File file)
-	{
+	public R2RMLReader(File file) throws Exception {
 		manager = new R2RMLManager(file);
 		m = manager.getModel();
 	}
@@ -116,8 +113,13 @@ public class R2RMLReader {
 
 	public static void main(String args[])
 	{
-		String file = "/Users/mindaugas/r2rml/test26.ttl";	
-		R2RMLReader reader = new R2RMLReader(file);
+		String file = "/Users/mindaugas/r2rml/test26.ttl";
+		R2RMLReader reader = null;
+		try {
+			reader = new R2RMLReader(file);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		ArrayList<OBDAMappingAxiom> axioms = reader.readMappings();
 		for (OBDAMappingAxiom ax : axioms)
 			System.out.println(ax);

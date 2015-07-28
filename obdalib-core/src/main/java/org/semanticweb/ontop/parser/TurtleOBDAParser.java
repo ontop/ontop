@@ -2,30 +2,13 @@
 
 package org.semanticweb.ontop.parser;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.OBDALibConstants;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.utils.QueryUtils;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -251,7 +234,7 @@ public class TurtleOBDAParser extends Parser {
 		}
 		
 	// Column placeholder pattern
-	private static final String formatSpecifier = "\\{([\\w.]+)?\\}";
+	private static final String formatSpecifier = "\\{([^\\}]+)?\\}";
 	private static Pattern chPattern = Pattern.compile(formatSpecifier);
 
 	private List<FormatString> parse(String text) {
@@ -294,6 +277,61 @@ public class TurtleOBDAParser extends Parser {
 	   @Override public String toString() { return s; }
 	}
 
+		//this function distinguishes curly bracket with 
+		//back slash "\{" from curly bracket "{" 
+		private int getIndexOfCurlyB(String str){
+		   int i;
+		   int j;
+		   i = str.indexOf("{");
+		   j = str.indexOf("\\{");
+		      while((i-1 == j) &&(j != -1)){		
+			i = str.indexOf("{",i+1);
+			j = str.indexOf("\\{",j+1);		
+		      }	
+		  return i;
+		}
+		
+		//in case of concat this function parses the literal 
+		//and adds parsed constant literals and template literal to terms list
+		private ArrayList<Term> addToTermsList(String str){
+		   ArrayList<Term> terms = new ArrayList<Term>();
+		   int i,j;
+		   String st;
+		   str = str.substring(1, str.length()-1);
+		   while(str.contains("{")){
+		      i = getIndexOfCurlyB(str);
+		      if (i > 0){
+		    	 st = str.substring(0,i);
+		    	 st = st.replace("\\\\", "");
+		         terms.add(dfac.getConstantLiteral(st));
+		         str = str.substring(str.indexOf("{", i), str.length());
+		      }else if (i == 0){
+		         j = str.indexOf("}");
+		         terms.add(dfac.getVariable(str.substring(1,j)));
+		         str = str.substring(j+1,str.length());
+		      } else {
+		    	  break;
+		      }
+		   }
+		   if(!str.equals("")){
+		      str = str.replace("\\\\", "");
+		      terms.add(dfac.getConstantLiteral(str));
+		   }
+		   return terms;
+		}
+		
+		//this function returns nested concats 
+		//in case of more than two terms need to be concatted
+		private Function getNestedConcat(String str){
+		   ArrayList<Term> terms = new ArrayList<Term>();
+		   terms = addToTermsList(str);
+		   Function f = dfac.getFunctionConcat(terms.get(0),terms.get(1));
+	           for(int j=2;j<terms.size();j++){
+	              f = dfac.getFunctionConcat(f,terms.get(j));
+	           }
+		   return f;
+		}
+
 	/**
 	 * This methods construct an atom from a triple 
 	 * 
@@ -328,17 +366,31 @@ public class TurtleOBDAParser extends Parser {
 			        } else if( ! QueryUtils.isGrounded(pred) ){
 			             atom = dfac.getTripleAtom(subject, pred,  object);
 			        } else {
-			             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-			             Predicate predicate;
-			             if(pred instanceof Function){
-			                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-			                  predicate = dfac.getPredicate(pr.getValue(), 2);
-			             } else {
-			                  throw new IllegalArgumentException("predicate should be a URI Function");
-			             }
-			             atom = dfac.getFunction(predicate, subject, object);
-			       }
-			       return atom;
+	                			             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+	                			             Predicate predicate;
+	                			             if(pred instanceof Function) {
+	                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+	                							 if (object instanceof Variable) {
+	                								 predicate = dfac.getPredicate(pr.getValue(), 2);
+	                							 } else {
+	                								 if (object instanceof Function) {
+	                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+	                										 predicate = dfac.getObjectPropertyPredicate(pr.getValue());
+	                									 } else {
+	                										 predicate = dfac.getDataPropertyPredicate(pr.getValue());
+	                									 }
+	                								 }
+	                									 else {
+	                										 throw new IllegalArgumentException("parser cannot handle object " + object);
+	                									 }
+	                							 }
+	                						 }else {
+	                			                  throw new IllegalArgumentException("predicate should be a URI Function");
+	                			             }
+	                			             atom = dfac.getFunction(predicate, subject, object);
+	                			       }
+	                			       return atom;
 		  }
 
 
@@ -420,10 +472,18 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:322:6: t2= triplesStatement
 					{
-					pushFollow(FOLLOW_triplesStatement_in_parse74);
+					pushFollow(FOLLOW_triplesStatement_in_parse76);
 					t2=triplesStatement();
 					state._fsp--;
 
+
+					      List<Function> additionalTriples = t2;
+					      if (additionalTriples != null) {
+					        // If there are additional triple statements then just add to the existing body
+					        List<Function> existingBody = value.getBody();
+					        existingBody.addAll(additionalTriples);
+					      }
+					    
 					}
 					break;
 
@@ -432,15 +492,7 @@ public class TurtleOBDAParser extends Parser {
 				}
 			}
 
-			match(input,EOF,FOLLOW_EOF_in_parse78); 
-
-			      List<Function> additionalTriples = t2;
-			      if (additionalTriples != null) {
-			        // If there are additional triple statements then just add to the existing body
-			        List<Function> existingBody = value.getBody();
-			        existingBody.addAll(additionalTriples);
-			      }
-			    
+			match(input,EOF,FOLLOW_EOF_in_parse83); 
 			}
 
 		}
@@ -464,11 +516,11 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:333:3: ( directive PERIOD )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:333:5: directive PERIOD
 			{
-			pushFollow(FOLLOW_directive_in_directiveStatement93);
+			pushFollow(FOLLOW_directive_in_directiveStatement96);
 			directive();
 			state._fsp--;
 
-			match(input,PERIOD,FOLLOW_PERIOD_in_directiveStatement95); 
+			match(input,PERIOD,FOLLOW_PERIOD_in_directiveStatement98); 
 			}
 
 		}
@@ -496,7 +548,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:3: ( triples ( WS )* PERIOD )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:5: triples ( WS )* PERIOD
 			{
-			pushFollow(FOLLOW_triples_in_triplesStatement112);
+			pushFollow(FOLLOW_triples_in_triplesStatement115);
 			triples1=triples();
 			state._fsp--;
 
@@ -513,7 +565,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:13: WS
 					{
-					match(input,WS,FOLLOW_WS_in_triplesStatement114); 
+					match(input,WS,FOLLOW_WS_in_triplesStatement117); 
 					}
 					break;
 
@@ -522,7 +574,7 @@ public class TurtleOBDAParser extends Parser {
 				}
 			}
 
-			match(input,PERIOD,FOLLOW_PERIOD_in_triplesStatement117); 
+			match(input,PERIOD,FOLLOW_PERIOD_in_triplesStatement120); 
 			 value = triples1; 
 			}
 
@@ -580,7 +632,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:341:5: base
 					{
-					pushFollow(FOLLOW_base_in_directive132);
+					pushFollow(FOLLOW_base_in_directive135);
 					base();
 					state._fsp--;
 
@@ -589,7 +641,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:342:5: prefixID
 					{
-					pushFollow(FOLLOW_prefixID_in_directive138);
+					pushFollow(FOLLOW_prefixID_in_directive141);
 					prefixID();
 					state._fsp--;
 
@@ -617,9 +669,9 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:346:3: ( AT BASE uriref )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:346:5: AT BASE uriref
 			{
-			match(input,AT,FOLLOW_AT_in_base151); 
-			match(input,BASE,FOLLOW_BASE_in_base153); 
-			pushFollow(FOLLOW_uriref_in_base155);
+			match(input,AT,FOLLOW_AT_in_base154); 
+			match(input,BASE,FOLLOW_BASE_in_base156); 
+			pushFollow(FOLLOW_uriref_in_base158);
 			uriref();
 			state._fsp--;
 
@@ -652,8 +704,8 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:3: ( AT PREFIX ( namespace | defaultNamespace ) uriref )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:5: AT PREFIX ( namespace | defaultNamespace ) uriref
 			{
-			match(input,AT,FOLLOW_AT_in_prefixID173); 
-			match(input,PREFIX,FOLLOW_PREFIX_in_prefixID175); 
+			match(input,AT,FOLLOW_AT_in_prefixID176); 
+			match(input,PREFIX,FOLLOW_PREFIX_in_prefixID178); 
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:15: ( namespace | defaultNamespace )
 			int alt5=2;
 			int LA5_0 = input.LA(1);
@@ -674,7 +726,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:16: namespace
 					{
-					pushFollow(FOLLOW_namespace_in_prefixID178);
+					pushFollow(FOLLOW_namespace_in_prefixID181);
 					namespace2=namespace();
 					state._fsp--;
 
@@ -684,7 +736,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:58: defaultNamespace
 					{
-					pushFollow(FOLLOW_defaultNamespace_in_prefixID184);
+					pushFollow(FOLLOW_defaultNamespace_in_prefixID187);
 					defaultNamespace3=defaultNamespace();
 					state._fsp--;
 
@@ -694,7 +746,7 @@ public class TurtleOBDAParser extends Parser {
 
 			}
 
-			pushFollow(FOLLOW_uriref_in_prefixID189);
+			pushFollow(FOLLOW_uriref_in_prefixID192);
 			uriref4=uriref();
 			state._fsp--;
 
@@ -730,12 +782,12 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:360:3: ( subject predicateObjectList )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:360:5: subject predicateObjectList
 			{
-			pushFollow(FOLLOW_subject_in_triples208);
+			pushFollow(FOLLOW_subject_in_triples211);
 			subject5=subject();
 			state._fsp--;
 
 			 currentSubject = subject5; 
-			pushFollow(FOLLOW_predicateObjectList_in_triples212);
+			pushFollow(FOLLOW_predicateObjectList_in_triples215);
 			predicateObjectList6=predicateObjectList();
 			state._fsp--;
 
@@ -776,11 +828,11 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:369:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:369:5: v1= verb l1= objectList ( SEMI v2= verb l2= objectList )*
 			{
-			pushFollow(FOLLOW_verb_in_predicateObjectList238);
+			pushFollow(FOLLOW_verb_in_predicateObjectList241);
 			v1=verb();
 			state._fsp--;
 
-			pushFollow(FOLLOW_objectList_in_predicateObjectList244);
+			pushFollow(FOLLOW_objectList_in_predicateObjectList247);
 			l1=objectList();
 			state._fsp--;
 
@@ -803,12 +855,12 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:375:6: SEMI v2= verb l2= objectList
 					{
-					match(input,SEMI,FOLLOW_SEMI_in_predicateObjectList253); 
-					pushFollow(FOLLOW_verb_in_predicateObjectList257);
+					match(input,SEMI,FOLLOW_SEMI_in_predicateObjectList256); 
+					pushFollow(FOLLOW_verb_in_predicateObjectList260);
 					v2=verb();
 					state._fsp--;
 
-					pushFollow(FOLLOW_objectList_in_predicateObjectList261);
+					pushFollow(FOLLOW_objectList_in_predicateObjectList264);
 					l2=objectList();
 					state._fsp--;
 
@@ -871,7 +923,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:385:5: predicate
 					{
-					pushFollow(FOLLOW_predicate_in_verb285);
+					pushFollow(FOLLOW_predicate_in_verb288);
 					predicate7=predicate();
 					state._fsp--;
 
@@ -881,7 +933,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:386:5: 'a'
 					{
-					match(input,77,FOLLOW_77_in_verb293); 
+					match(input,77,FOLLOW_77_in_verb296); 
 
 					  Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
 					  value = dfac.getUriTemplate(constant);
@@ -920,7 +972,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:3: (o1= object ( COMMA o2= object )* )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:5: o1= object ( COMMA o2= object )*
 			{
-			pushFollow(FOLLOW_object_in_objectList319);
+			pushFollow(FOLLOW_object_in_objectList322);
 			o1=object();
 			state._fsp--;
 
@@ -938,8 +990,8 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:43: COMMA o2= object
 					{
-					match(input,COMMA,FOLLOW_COMMA_in_objectList324); 
-					pushFollow(FOLLOW_object_in_objectList328);
+					match(input,COMMA,FOLLOW_COMMA_in_objectList327); 
+					pushFollow(FOLLOW_object_in_objectList331);
 					o2=object();
 					state._fsp--;
 
@@ -998,7 +1050,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:400:5: resource
 					{
-					pushFollow(FOLLOW_resource_in_subject350);
+					pushFollow(FOLLOW_resource_in_subject353);
 					resource8=resource();
 					state._fsp--;
 
@@ -1008,7 +1060,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:401:5: variable
 					{
-					pushFollow(FOLLOW_variable_in_subject358);
+					pushFollow(FOLLOW_variable_in_subject361);
 					variable9=variable();
 					state._fsp--;
 
@@ -1043,7 +1095,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:407:3: ( resource )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:407:5: resource
 			{
-			pushFollow(FOLLOW_resource_in_predicate379);
+			pushFollow(FOLLOW_resource_in_predicate382);
 			resource10=resource();
 			state._fsp--;
 
@@ -1143,7 +1195,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:420:5: resource
 					{
-					pushFollow(FOLLOW_resource_in_object398);
+					pushFollow(FOLLOW_resource_in_object401);
 					resource11=resource();
 					state._fsp--;
 
@@ -1153,7 +1205,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:421:5: literal
 					{
-					pushFollow(FOLLOW_literal_in_object406);
+					pushFollow(FOLLOW_literal_in_object409);
 					literal12=literal();
 					state._fsp--;
 
@@ -1163,7 +1215,7 @@ public class TurtleOBDAParser extends Parser {
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:422:5: typedLiteral
 					{
-					pushFollow(FOLLOW_typedLiteral_in_object415);
+					pushFollow(FOLLOW_typedLiteral_in_object418);
 					typedLiteral13=typedLiteral();
 					state._fsp--;
 
@@ -1173,7 +1225,7 @@ public class TurtleOBDAParser extends Parser {
 				case 4 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:423:5: variable
 					{
-					pushFollow(FOLLOW_variable_in_object423);
+					pushFollow(FOLLOW_variable_in_object426);
 					variable14=variable();
 					state._fsp--;
 
@@ -1226,7 +1278,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:428:6: uriref
 					{
-					pushFollow(FOLLOW_uriref_in_resource444);
+					pushFollow(FOLLOW_uriref_in_resource447);
 					uriref15=uriref();
 					state._fsp--;
 
@@ -1236,7 +1288,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:429:6: qname
 					{
-					pushFollow(FOLLOW_qname_in_resource453);
+					pushFollow(FOLLOW_qname_in_resource456);
 					qname16=qname();
 					state._fsp--;
 
@@ -1271,7 +1323,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:435:3: ( STRING_WITH_BRACKET )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:435:5: STRING_WITH_BRACKET
 			{
-			STRING_WITH_BRACKET17=(Token)match(input,STRING_WITH_BRACKET,FOLLOW_STRING_WITH_BRACKET_in_uriref478); 
+			STRING_WITH_BRACKET17=(Token)match(input,STRING_WITH_BRACKET,FOLLOW_STRING_WITH_BRACKET_in_uriref481); 
 			 value = removeBrackets((STRING_WITH_BRACKET17!=null?STRING_WITH_BRACKET17.getText():null)); 
 			}
 
@@ -1301,7 +1353,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:439:3: ( PREFIXED_NAME )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:439:5: PREFIXED_NAME
 			{
-			PREFIXED_NAME18=(Token)match(input,PREFIXED_NAME,FOLLOW_PREFIXED_NAME_in_qname497); 
+			PREFIXED_NAME18=(Token)match(input,PREFIXED_NAME,FOLLOW_PREFIXED_NAME_in_qname500); 
 
 			      String[] tokens = (PREFIXED_NAME18!=null?PREFIXED_NAME18.getText():null).split(":", 2);
 			      String uri = directives.get(tokens[0]);  // the first token is the prefix
@@ -1347,7 +1399,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:447:5: nodeID
 					{
-					pushFollow(FOLLOW_nodeID_in_blank512);
+					pushFollow(FOLLOW_nodeID_in_blank515);
 					nodeID();
 					state._fsp--;
 
@@ -1356,7 +1408,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:448:5: BLANK
 					{
-					match(input,BLANK,FOLLOW_BLANK_in_blank518); 
+					match(input,BLANK,FOLLOW_BLANK_in_blank521); 
 					}
 					break;
 
@@ -1386,7 +1438,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:452:3: ( STRING_WITH_CURLY_BRACKET )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:452:5: STRING_WITH_CURLY_BRACKET
 			{
-			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable535); 
+			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable538); 
 
 			      value = dfac.getVariable(removeBrackets((STRING_WITH_CURLY_BRACKET19!=null?STRING_WITH_CURLY_BRACKET19.getText():null)));
 			      variableSet.add(value);
@@ -1420,16 +1472,16 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:459:3: ( resource LPAREN terms RPAREN )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:459:5: resource LPAREN terms RPAREN
 			{
-			pushFollow(FOLLOW_resource_in_function556);
+			pushFollow(FOLLOW_resource_in_function559);
 			resource20=resource();
 			state._fsp--;
 
-			match(input,LPAREN,FOLLOW_LPAREN_in_function558); 
-			pushFollow(FOLLOW_terms_in_function560);
+			match(input,LPAREN,FOLLOW_LPAREN_in_function561); 
+			pushFollow(FOLLOW_terms_in_function563);
 			terms21=terms();
 			state._fsp--;
 
-			match(input,RPAREN,FOLLOW_RPAREN_in_function562); 
+			match(input,RPAREN,FOLLOW_RPAREN_in_function565); 
 
 			      String functionName = resource20.toString();
 			      int arity = terms21.size();
@@ -1500,12 +1552,12 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:468:5: variable AT language
 					{
-					pushFollow(FOLLOW_variable_in_typedLiteral581);
+					pushFollow(FOLLOW_variable_in_typedLiteral584);
 					variable22=variable();
 					state._fsp--;
 
-					match(input,AT,FOLLOW_AT_in_typedLiteral583); 
-					pushFollow(FOLLOW_language_in_typedLiteral585);
+					match(input,AT,FOLLOW_AT_in_typedLiteral586); 
+					pushFollow(FOLLOW_language_in_typedLiteral588);
 					language23=language();
 					state._fsp--;
 
@@ -1520,12 +1572,12 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:474:5: variable REFERENCE resource
 					{
-					pushFollow(FOLLOW_variable_in_typedLiteral593);
+					pushFollow(FOLLOW_variable_in_typedLiteral596);
 					variable24=variable();
 					state._fsp--;
 
-					match(input,REFERENCE,FOLLOW_REFERENCE_in_typedLiteral595); 
-					pushFollow(FOLLOW_resource_in_typedLiteral597);
+					match(input,REFERENCE,FOLLOW_REFERENCE_in_typedLiteral598); 
+					pushFollow(FOLLOW_resource_in_typedLiteral600);
 					resource25=resource();
 					state._fsp--;
 
@@ -1539,7 +1591,7 @@ public class TurtleOBDAParser extends Parser {
 					    } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					    }
-					    Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 					    if (type == null)  
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
@@ -1595,7 +1647,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:495:5: languageTag
 					{
-					pushFollow(FOLLOW_languageTag_in_language616);
+					pushFollow(FOLLOW_languageTag_in_language619);
 					languageTag26=languageTag();
 					state._fsp--;
 
@@ -1607,7 +1659,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:498:5: variable
 					{
-					pushFollow(FOLLOW_variable_in_language624);
+					pushFollow(FOLLOW_variable_in_language627);
 					variable27=variable();
 					state._fsp--;
 
@@ -1648,7 +1700,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:3: (t1= term ( COMMA t2= term )* )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:5: t1= term ( COMMA t2= term )*
 			{
-			pushFollow(FOLLOW_term_in_terms650);
+			pushFollow(FOLLOW_term_in_terms653);
 			t1=term();
 			state._fsp--;
 
@@ -1666,8 +1718,8 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:41: COMMA t2= term
 					{
-					match(input,COMMA,FOLLOW_COMMA_in_terms655); 
-					pushFollow(FOLLOW_term_in_terms659);
+					match(input,COMMA,FOLLOW_COMMA_in_terms658); 
+					pushFollow(FOLLOW_term_in_terms662);
 					t2=term();
 					state._fsp--;
 
@@ -1746,7 +1798,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:511:5: function
 					{
-					pushFollow(FOLLOW_function_in_term680);
+					pushFollow(FOLLOW_function_in_term683);
 					function28=function();
 					state._fsp--;
 
@@ -1756,7 +1808,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:512:5: variable
 					{
-					pushFollow(FOLLOW_variable_in_term688);
+					pushFollow(FOLLOW_variable_in_term691);
 					variable29=variable();
 					state._fsp--;
 
@@ -1766,7 +1818,7 @@ public class TurtleOBDAParser extends Parser {
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:513:5: literal
 					{
-					pushFollow(FOLLOW_literal_in_term696);
+					pushFollow(FOLLOW_literal_in_term699);
 					literal30=literal();
 					state._fsp--;
 
@@ -1795,8 +1847,8 @@ public class TurtleOBDAParser extends Parser {
 		Term value = null;
 
 
-		ValueConstant stringLiteral31 =null;
-		Term language32 =null;
+		Term language31 =null;
+		Term stringLiteral32 =null;
 		Term dataTypeString33 =null;
 		ValueConstant numericLiteral34 =null;
 		ValueConstant booleanLiteral35 =null;
@@ -1857,8 +1909,8 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:5: stringLiteral ( AT language )?
 					{
-					pushFollow(FOLLOW_stringLiteral_in_literal715);
-					stringLiteral31=stringLiteral();
+					pushFollow(FOLLOW_stringLiteral_in_literal719);
+					stringLiteral32=stringLiteral();
 					state._fsp--;
 
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:19: ( AT language )?
@@ -1871,9 +1923,9 @@ public class TurtleOBDAParser extends Parser {
 						case 1 :
 							// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:20: AT language
 							{
-							match(input,AT,FOLLOW_AT_in_literal718); 
-							pushFollow(FOLLOW_language_in_literal720);
-							language32=language();
+							match(input,AT,FOLLOW_AT_in_literal722); 
+							pushFollow(FOLLOW_language_in_literal724);
+							language31=language();
 							state._fsp--;
 
 							}
@@ -1882,20 +1934,29 @@ public class TurtleOBDAParser extends Parser {
 					}
 
 
-					       ValueConstant constant = stringLiteral31;
-					       Term lang = language32;
-					       if (lang != null) {
-						value = dfac.getTypedTerm(constant, lang);
-					      } else {
-					      	 value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
-					      }
+					       Term lang = language31;
+					       if ((stringLiteral32) instanceof Function){
+					          Function f = (Function)stringLiteral32;
+					          if (lang != null){
+					             value = dfac.getTypedTerm(f,lang);
+					          }else{
+					             value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
+					          }       
+					       }else{
+					          ValueConstant constant = (ValueConstant)stringLiteral32;
+					          if (lang != null) {
+						     value = dfac.getTypedTerm(constant, lang);
+					          } else {
+					      	     value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
+					          }
+					       }
 					    
 					}
 					break;
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:526:5: dataTypeString
 					{
-					pushFollow(FOLLOW_dataTypeString_in_literal730);
+					pushFollow(FOLLOW_dataTypeString_in_literal734);
 					dataTypeString33=dataTypeString();
 					state._fsp--;
 
@@ -1905,7 +1966,7 @@ public class TurtleOBDAParser extends Parser {
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:527:5: numericLiteral
 					{
-					pushFollow(FOLLOW_numericLiteral_in_literal738);
+					pushFollow(FOLLOW_numericLiteral_in_literal742);
 					numericLiteral34=numericLiteral();
 					state._fsp--;
 
@@ -1915,7 +1976,7 @@ public class TurtleOBDAParser extends Parser {
 				case 4 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:528:5: booleanLiteral
 					{
-					pushFollow(FOLLOW_booleanLiteral_in_literal746);
+					pushFollow(FOLLOW_booleanLiteral_in_literal750);
 					booleanLiteral35=booleanLiteral();
 					state._fsp--;
 
@@ -1939,9 +2000,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "stringLiteral"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:531:1: stringLiteral returns [ValueConstant value] : STRING_WITH_QUOTE_DOUBLE ;
-	public final ValueConstant stringLiteral() throws RecognitionException {
-		ValueConstant value = null;
+	// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:616:1: stringLiteral returns [Term value] : STRING_WITH_QUOTE_DOUBLE ;
+	public final Term stringLiteral() throws RecognitionException {
+		Term value = null;
 
 
 		Token STRING_WITH_QUOTE_DOUBLE36=null;
@@ -1950,10 +2011,14 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:532:3: ( STRING_WITH_QUOTE_DOUBLE )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:532:5: STRING_WITH_QUOTE_DOUBLE
 			{
-			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral765); 
+			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral769); 
 
 			      String str = (STRING_WITH_QUOTE_DOUBLE36!=null?STRING_WITH_QUOTE_DOUBLE36.getText():null);
-			      value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+			      if (str.contains("{")){
+			      	value = getNestedConcat(str);
+			      }else{
+			      	value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+			      }
 			    
 			}
 
@@ -1977,36 +2042,40 @@ public class TurtleOBDAParser extends Parser {
 		Term value = null;
 
 
-		ValueConstant stringLiteral37 =null;
+		Term stringLiteral37 =null;
 		Term resource38 =null;
 
 		try {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:539:3: ( stringLiteral REFERENCE resource )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:539:6: stringLiteral REFERENCE resource
 			{
-			pushFollow(FOLLOW_stringLiteral_in_dataTypeString785);
+			pushFollow(FOLLOW_stringLiteral_in_dataTypeString789);
 			stringLiteral37=stringLiteral();
 			state._fsp--;
 
-			match(input,REFERENCE,FOLLOW_REFERENCE_in_dataTypeString787); 
-			pushFollow(FOLLOW_resource_in_dataTypeString789);
+			match(input,REFERENCE,FOLLOW_REFERENCE_in_dataTypeString791); 
+			pushFollow(FOLLOW_resource_in_dataTypeString793);
 			resource38=resource();
 			state._fsp--;
 
 
-			      ValueConstant constant = stringLiteral37;
-			      String functionName = resource38.toString();
-			      Predicate functionSymbol = null;
-			      if (resource38 instanceof Function){
-				 functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
-			      }
-			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
-			      if (type == null) {
+			      if ((stringLiteral37) instanceof Function){
+			          Function f = (Function)stringLiteral37;
+			          value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
+			      }else{
+			          ValueConstant constant = (ValueConstant)stringLiteral37;
+			          String functionName = resource38.toString();
+			          Predicate functionSymbol = null;
+			          if (resource38 instanceof Function){
+				    functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
+			          }
+			          Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
+			          if (type == null) {
 			            throw new RuntimeException("Unsupported datatype: " + functionName);
+			          }
+			          value = dfac.getTypedTerm(constant, type);
 			      }
-			      value = dfac.getTypedTerm(constant, type);
-
-			    
+			  
 			}
 
 		}
@@ -2067,7 +2136,7 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:556:5: numericUnsigned
 					{
-					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral808);
+					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral809);
 					numericUnsigned39=numericUnsigned();
 					state._fsp--;
 
@@ -2077,7 +2146,7 @@ public class TurtleOBDAParser extends Parser {
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:557:5: numericPositive
 					{
-					pushFollow(FOLLOW_numericPositive_in_numericLiteral816);
+					pushFollow(FOLLOW_numericPositive_in_numericLiteral817);
 					numericPositive40=numericPositive();
 					state._fsp--;
 
@@ -2087,7 +2156,7 @@ public class TurtleOBDAParser extends Parser {
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:558:5: numericNegative
 					{
-					pushFollow(FOLLOW_numericNegative_in_numericLiteral824);
+					pushFollow(FOLLOW_numericNegative_in_numericLiteral825);
 					numericNegative41=numericNegative();
 					state._fsp--;
 
@@ -2117,8 +2186,8 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:562:3: ( BLANK_PREFIX name )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:562:5: BLANK_PREFIX name
 			{
-			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID839); 
-			pushFollow(FOLLOW_name_in_nodeID841);
+			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID840); 
+			pushFollow(FOLLOW_name_in_nodeID842);
 			name();
 			state._fsp--;
 
@@ -2144,7 +2213,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:566:3: ( STRING_URI )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:566:5: STRING_URI
 			{
-			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI855); 
+			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI856); 
 			}
 
 		}
@@ -2173,7 +2242,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:570:3: ( NAMESPACE )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:570:5: NAMESPACE
 			{
-			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace868); 
+			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace869); 
 			}
 
 			retval.stop = input.LT(-1);
@@ -2205,7 +2274,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:574:3: ( COLON )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:574:5: COLON
 			{
-			match(input,COLON,FOLLOW_COLON_in_defaultNamespace883); 
+			match(input,COLON,FOLLOW_COLON_in_defaultNamespace884); 
 			}
 
 			retval.stop = input.LT(-1);
@@ -2231,7 +2300,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:578:3: ( VARNAME )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:578:5: VARNAME
 			{
-			match(input,VARNAME,FOLLOW_VARNAME_in_name896); 
+			match(input,VARNAME,FOLLOW_VARNAME_in_name897); 
 			}
 
 		}
@@ -2260,7 +2329,7 @@ public class TurtleOBDAParser extends Parser {
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:582:3: ( VARNAME )
 			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:582:5: VARNAME
 			{
-			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag909); 
+			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag910); 
 			}
 
 			retval.stop = input.LT(-1);
@@ -2309,14 +2378,14 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:586:5: TRUE
 					{
-					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral926); 
+					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral927); 
 					 value = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:587:5: FALSE
 					{
-					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral935); 
+					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral936); 
 					 value = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
@@ -2374,21 +2443,21 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:591:5: INTEGER
 					{
-					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned954); 
+					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned955); 
 					 value = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:592:5: DOUBLE
 					{
-					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned962); 
+					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned963); 
 					 value = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:593:5: DECIMAL
 					{
-					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned971); 
+					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned972); 
 					 value = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
@@ -2446,21 +2515,21 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:597:5: INTEGER_POSITIVE
 					{
-					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive990); 
+					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive991); 
 					 value = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:598:5: DOUBLE_POSITIVE
 					{
-					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive998); 
+					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive999); 
 					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:599:5: DECIMAL_POSITIVE
 					{
-					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1007); 
+					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1008); 
 					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
@@ -2518,21 +2587,21 @@ public class TurtleOBDAParser extends Parser {
 				case 1 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:603:5: INTEGER_NEGATIVE
 					{
-					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1026); 
+					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1027); 
 					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:604:5: DOUBLE_NEGATIVE
 					{
-					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1034); 
+					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1035); 
 					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
 					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:605:5: DECIMAL_NEGATIVE
 					{
-					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1043); 
+					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1044); 
 					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 
 					}
 					break;
@@ -2556,96 +2625,96 @@ public class TurtleOBDAParser extends Parser {
 
 	public static final BitSet FOLLOW_directiveStatement_in_parse54 = new BitSet(new long[]{0x0040000000000200L,0x0000000000000018L});
 	public static final BitSet FOLLOW_triplesStatement_in_parse63 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000018L});
-	public static final BitSet FOLLOW_triplesStatement_in_parse74 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000018L});
-	public static final BitSet FOLLOW_EOF_in_parse78 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_directive_in_directiveStatement93 = new BitSet(new long[]{0x0008000000000000L});
-	public static final BitSet FOLLOW_PERIOD_in_directiveStatement95 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_triples_in_triplesStatement112 = new BitSet(new long[]{0x0008000000000000L,0x0000000000001000L});
-	public static final BitSet FOLLOW_WS_in_triplesStatement114 = new BitSet(new long[]{0x0008000000000000L,0x0000000000001000L});
-	public static final BitSet FOLLOW_PERIOD_in_triplesStatement117 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_base_in_directive132 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_prefixID_in_directive138 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_AT_in_base151 = new BitSet(new long[]{0x0000000000000800L});
-	public static final BitSet FOLLOW_BASE_in_base153 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_uriref_in_base155 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_AT_in_prefixID173 = new BitSet(new long[]{0x0020000000000000L});
-	public static final BitSet FOLLOW_PREFIX_in_prefixID175 = new BitSet(new long[]{0x0000200000010000L});
-	public static final BitSet FOLLOW_namespace_in_prefixID178 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_defaultNamespace_in_prefixID184 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_uriref_in_prefixID189 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_subject_in_triples208 = new BitSet(new long[]{0x0040000000000000L,0x0000000000002008L});
-	public static final BitSet FOLLOW_predicateObjectList_in_triples212 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_verb_in_predicateObjectList238 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_objectList_in_predicateObjectList244 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000001L});
-	public static final BitSet FOLLOW_SEMI_in_predicateObjectList253 = new BitSet(new long[]{0x0040000000000000L,0x0000000000002008L});
-	public static final BitSet FOLLOW_verb_in_predicateObjectList257 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_objectList_in_predicateObjectList261 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000001L});
-	public static final BitSet FOLLOW_predicate_in_verb285 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_77_in_verb293 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_object_in_objectList319 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_COMMA_in_objectList324 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_object_in_objectList328 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_resource_in_subject350 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_subject358 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_resource_in_predicate379 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_resource_in_object398 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_literal_in_object406 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_typedLiteral_in_object415 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_object423 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_uriref_in_resource444 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_qname_in_resource453 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_BRACKET_in_uriref478 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_PREFIXED_NAME_in_qname497 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_nodeID_in_blank512 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_BLANK_in_blank518 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable535 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_resource_in_function556 = new BitSet(new long[]{0x0000020000000000L});
-	public static final BitSet FOLLOW_LPAREN_in_function558 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_terms_in_function560 = new BitSet(new long[]{0x1000000000000000L});
-	public static final BitSet FOLLOW_RPAREN_in_function562 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_typedLiteral581 = new BitSet(new long[]{0x0000000000000200L});
-	public static final BitSet FOLLOW_AT_in_typedLiteral583 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000810L});
-	public static final BitSet FOLLOW_language_in_typedLiteral585 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_typedLiteral593 = new BitSet(new long[]{0x0800000000000000L});
-	public static final BitSet FOLLOW_REFERENCE_in_typedLiteral595 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_resource_in_typedLiteral597 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_languageTag_in_language616 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_language624 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_term_in_terms650 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_COMMA_in_terms655 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_term_in_terms659 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_function_in_term680 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_term688 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_literal_in_term696 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_stringLiteral_in_literal715 = new BitSet(new long[]{0x0000000000000202L});
-	public static final BitSet FOLLOW_AT_in_literal718 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000810L});
-	public static final BitSet FOLLOW_language_in_literal720 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_dataTypeString_in_literal730 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericLiteral_in_literal738 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_booleanLiteral_in_literal746 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral765 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_stringLiteral_in_dataTypeString785 = new BitSet(new long[]{0x0800000000000000L});
-	public static final BitSet FOLLOW_REFERENCE_in_dataTypeString787 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_resource_in_dataTypeString789 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericUnsigned_in_numericLiteral808 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericPositive_in_numericLiteral816 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericNegative_in_numericLiteral824 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_BLANK_PREFIX_in_nodeID839 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-	public static final BitSet FOLLOW_name_in_nodeID841 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_URI_in_relativeURI855 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_NAMESPACE_in_namespace868 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_COLON_in_defaultNamespace883 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_VARNAME_in_name896 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_VARNAME_in_languageTag909 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_TRUE_in_booleanLiteral926 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_FALSE_in_booleanLiteral935 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_in_numericUnsigned954 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DOUBLE_in_numericUnsigned962 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_in_numericUnsigned971 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_POSITIVE_in_numericPositive990 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DOUBLE_POSITIVE_in_numericPositive998 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_POSITIVE_in_numericPositive1007 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_NEGATIVE_in_numericNegative1026 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1034 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1043 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_triplesStatement_in_parse76 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000018L});
+	public static final BitSet FOLLOW_EOF_in_parse83 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_directive_in_directiveStatement96 = new BitSet(new long[]{0x0008000000000000L});
+	public static final BitSet FOLLOW_PERIOD_in_directiveStatement98 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_triples_in_triplesStatement115 = new BitSet(new long[]{0x0008000000000000L,0x0000000000001000L});
+	public static final BitSet FOLLOW_WS_in_triplesStatement117 = new BitSet(new long[]{0x0008000000000000L,0x0000000000001000L});
+	public static final BitSet FOLLOW_PERIOD_in_triplesStatement120 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_base_in_directive135 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_prefixID_in_directive141 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_AT_in_base154 = new BitSet(new long[]{0x0000000000000800L});
+	public static final BitSet FOLLOW_BASE_in_base156 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
+	public static final BitSet FOLLOW_uriref_in_base158 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_AT_in_prefixID176 = new BitSet(new long[]{0x0020000000000000L});
+	public static final BitSet FOLLOW_PREFIX_in_prefixID178 = new BitSet(new long[]{0x0000200000010000L});
+	public static final BitSet FOLLOW_namespace_in_prefixID181 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
+	public static final BitSet FOLLOW_defaultNamespace_in_prefixID187 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
+	public static final BitSet FOLLOW_uriref_in_prefixID192 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_subject_in_triples211 = new BitSet(new long[]{0x0040000000000000L,0x0000000000002008L});
+	public static final BitSet FOLLOW_predicateObjectList_in_triples215 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_verb_in_predicateObjectList241 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
+	public static final BitSet FOLLOW_objectList_in_predicateObjectList247 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000001L});
+	public static final BitSet FOLLOW_SEMI_in_predicateObjectList256 = new BitSet(new long[]{0x0040000000000000L,0x0000000000002008L});
+	public static final BitSet FOLLOW_verb_in_predicateObjectList260 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
+	public static final BitSet FOLLOW_objectList_in_predicateObjectList264 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000001L});
+	public static final BitSet FOLLOW_predicate_in_verb288 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_77_in_verb296 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_object_in_objectList322 = new BitSet(new long[]{0x0000000000020002L});
+	public static final BitSet FOLLOW_COMMA_in_objectList327 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
+	public static final BitSet FOLLOW_object_in_objectList331 = new BitSet(new long[]{0x0000000000020002L});
+	public static final BitSet FOLLOW_resource_in_subject353 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_variable_in_subject361 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_resource_in_predicate382 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_resource_in_object401 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_literal_in_object409 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_typedLiteral_in_object418 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_variable_in_object426 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_uriref_in_resource447 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_qname_in_resource456 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_STRING_WITH_BRACKET_in_uriref481 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_PREFIXED_NAME_in_qname500 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_nodeID_in_blank515 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_BLANK_in_blank521 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable538 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_resource_in_function559 = new BitSet(new long[]{0x0000020000000000L});
+	public static final BitSet FOLLOW_LPAREN_in_function561 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
+	public static final BitSet FOLLOW_terms_in_function563 = new BitSet(new long[]{0x1000000000000000L});
+	public static final BitSet FOLLOW_RPAREN_in_function565 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_variable_in_typedLiteral584 = new BitSet(new long[]{0x0000000000000200L});
+	public static final BitSet FOLLOW_AT_in_typedLiteral586 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000810L});
+	public static final BitSet FOLLOW_language_in_typedLiteral588 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_variable_in_typedLiteral596 = new BitSet(new long[]{0x0800000000000000L});
+	public static final BitSet FOLLOW_REFERENCE_in_typedLiteral598 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000008L});
+	public static final BitSet FOLLOW_resource_in_typedLiteral600 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_languageTag_in_language619 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_variable_in_language627 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_term_in_terms653 = new BitSet(new long[]{0x0000000000020002L});
+	public static final BitSet FOLLOW_COMMA_in_terms658 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
+	public static final BitSet FOLLOW_term_in_terms662 = new BitSet(new long[]{0x0000000000020002L});
+	public static final BitSet FOLLOW_function_in_term683 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_variable_in_term691 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_literal_in_term699 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_stringLiteral_in_literal719 = new BitSet(new long[]{0x0000000000000202L});
+	public static final BitSet FOLLOW_AT_in_literal722 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000810L});
+	public static final BitSet FOLLOW_language_in_literal724 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_dataTypeString_in_literal734 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numericLiteral_in_literal742 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_booleanLiteral_in_literal750 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral769 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_stringLiteral_in_dataTypeString789 = new BitSet(new long[]{0x0800000000000000L});
+	public static final BitSet FOLLOW_REFERENCE_in_dataTypeString791 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000008L});
+	public static final BitSet FOLLOW_resource_in_dataTypeString793 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numericUnsigned_in_numericLiteral809 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numericPositive_in_numericLiteral817 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_numericNegative_in_numericLiteral825 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_BLANK_PREFIX_in_nodeID840 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
+	public static final BitSet FOLLOW_name_in_nodeID842 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_STRING_URI_in_relativeURI856 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_NAMESPACE_in_namespace869 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_COLON_in_defaultNamespace884 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_VARNAME_in_name897 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_VARNAME_in_languageTag910 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_TRUE_in_booleanLiteral927 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_FALSE_in_booleanLiteral936 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INTEGER_in_numericUnsigned955 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DOUBLE_in_numericUnsigned963 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DECIMAL_in_numericUnsigned972 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INTEGER_POSITIVE_in_numericPositive991 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DOUBLE_POSITIVE_in_numericPositive999 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DECIMAL_POSITIVE_in_numericPositive1008 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_INTEGER_NEGATIVE_in_numericNegative1027 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1035 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1044 = new BitSet(new long[]{0x0000000000000002L});
 }

@@ -86,9 +86,14 @@ public class R2RMLImportAction extends ProtegeAction {
 					e.printStackTrace();
 				}
 				if (file != null) {
-					R2RMLReader reader = new R2RMLReader(file);
+                    R2RMLReader reader = null;
+                    try {
+                        reader = new R2RMLReader(file);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
-					URI sourceID = obdaModel.getSources().get(0).getSourceID();
+                    URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
 					try {
 						for (OBDAMappingAxiom mapping : reader.readMappings()) {

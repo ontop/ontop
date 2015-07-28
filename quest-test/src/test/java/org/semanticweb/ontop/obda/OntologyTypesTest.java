@@ -301,7 +301,7 @@ public class OntologyTypesTest{
 
 			factory.setPreferenceHolder(p);
 
-			QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+			QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		} catch (Exception e) {
             assertEquals(e.getCause().getClass(), OBDAException.class);

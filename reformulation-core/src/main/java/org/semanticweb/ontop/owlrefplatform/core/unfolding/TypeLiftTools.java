@@ -11,12 +11,13 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -351,7 +352,7 @@ public class TypeLiftTools {
          * The target atom is expected to be only composed of variables.
          * Extracts them in a list.
          */
-        List<VariableImpl> targetVariables = extractVariablesFromTargetAtom(targetAtom);
+        List<Variable> targetVariables = extractVariablesFromTargetAtom(targetAtom);
 
         /**
          * Gets a cleaned atom that uses the same variables that the target one.
@@ -365,10 +366,10 @@ public class TypeLiftTools {
          *
          *  { Target variable --> typed version }
          */
-        List<P2<VariableImpl, Term>> targetSourceFunctionPairs = targetVariables.zip(List.iterableList(renamedSourceAtom.getTerms()));
-        HashMap<VariableImpl, Term> variableToTypeMappings = HashMap.from(targetSourceFunctionPairs.filter(new F<P2<VariableImpl, Term>, Boolean>() {
+        List<P2<Variable, Term>> targetSourceFunctionPairs = targetVariables.zip(List.iterableList(renamedSourceAtom.getTerms()));
+        HashMap<Variable, Term> variableToTypeMappings = HashMap.from(targetSourceFunctionPairs.filter(new F<P2<Variable, Term>, Boolean>() {
             @Override
-            public Boolean f(P2<VariableImpl, Term> pair) {
+            public Boolean f(P2<Variable, Term> pair) {
                 return pair._2() instanceof Function;
             }
         }));
@@ -381,12 +382,12 @@ public class TypeLiftTools {
      *
      * It must be only composed of (possibly typed) variables.
      */
-    private static List<VariableImpl> extractVariablesFromTargetAtom(final Function targetAtom) {
-        return List.iterableList(targetAtom.getTerms()).map(new F<Term, VariableImpl>() {
+    private static List<Variable> extractVariablesFromTargetAtom(final Function targetAtom) {
+        return List.iterableList(targetAtom.getTerms()).map(new F<Term, Variable>() {
             @Override
-            public VariableImpl f(Term term) {
-                if (term instanceof VariableImpl)
-                    return (VariableImpl) term;
+            public Variable f(Term term) {
+                if (term instanceof Variable)
+                    return (Variable) term;
 
                 else if (term instanceof Function) {
                     Function functionalTerm = (Function) term;
@@ -403,8 +404,8 @@ public class TypeLiftTools {
                      */
                     if (functionSymbol.isDataTypePredicate() || functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI)) {
                         Term firstTerm = functionalTerm.getTerm(0);
-                        if (firstTerm instanceof VariableImpl)
-                            return (VariableImpl) firstTerm;
+                        if (firstTerm instanceof Variable)
+                            return (Variable) firstTerm;
                     }
                 }
 
@@ -417,7 +418,7 @@ public class TypeLiftTools {
      * Cleans out the aggregation functional terms from the source atom and replaces its variables
      * by the ones used by the target atom.
      */
-    private static Function renameAndCleanSourceAtomForTypeProg(Function sourceAtom, List<VariableImpl> targetVariables) {
+    private static Function renameAndCleanSourceAtomForTypeProg(Function sourceAtom, List<Variable> targetVariables) {
         /**
          * Cleans out the aggregation functional terms from the source atom.
          */
@@ -431,22 +432,24 @@ public class TypeLiftTools {
          * This is only possible for source terms that contains exactly 1 variable. Others are ignored.
          *
          */
-        List<P2<Term, VariableImpl>> sourceTargetPairs = List.iterableList(sourceAtom.getTerms()).zip(targetVariables);
-        HashMap<VariableImpl, Term> variableMappings = HashMap.from(Option.somes(sourceTargetPairs.map(
-                new F<P2<Term, VariableImpl>, Option<P2<VariableImpl, Term>>>() {
+        List<P2<Term, Variable>> sourceTargetPairs = List.iterableList(sourceAtom.getTerms()).zip(targetVariables);
+        HashMap<Variable, Term> variableMappings = HashMap.from(Option.somes(sourceTargetPairs.map(
+                new F<P2<Term, Variable>, Option<P2<Variable, Term>>>() {
                     @Override
-                    public Option<P2<VariableImpl, Term>> f(P2<Term, VariableImpl> pair) {
+                    public Option<P2<Variable, Term>> f(P2<Term, Variable> pair) {
                         Term sourceTerm = pair._1();
-                        VariableImpl targetVariable = pair._2();
+                        Variable targetVariable = pair._2();
 
                         /**
                          * Extracts the variable if it is unique.
                          * Otherwise, ignores this pair.
                          */
-                        Set<Variable> sourceVars = sourceTerm.getReferencedVariables();
+                        Set<Variable> sourceVars = new HashSet<>();
+                        TermUtils.addReferencedVariablesTo(sourceVars,sourceTerm);
+
                         if (sourceVars.size() != 1)
                             return Option.none();
-                        VariableImpl sourceVariable = (VariableImpl) sourceVars.iterator().next();
+                        Variable sourceVariable = sourceVars.iterator().next();
 
                         return Option.some(P.p(sourceVariable , (Term) targetVariable));
                     }

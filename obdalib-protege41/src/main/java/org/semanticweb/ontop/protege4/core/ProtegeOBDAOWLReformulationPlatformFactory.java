@@ -24,7 +24,6 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
-
 import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;

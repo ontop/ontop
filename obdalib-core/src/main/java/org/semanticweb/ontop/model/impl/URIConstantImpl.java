@@ -20,9 +20,6 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
 
 import java.util.Collections;
 import java.util.Set;
@@ -75,7 +72,7 @@ public class URIConstantImpl implements URIConstant {
 		return "<" + iristr + ">";
 	}
 
-	@Override
+
 	public Set<Variable> getReferencedVariables() {
 		return Collections.emptySet();
 	}
@@ -85,7 +82,7 @@ public class URIConstantImpl implements URIConstant {
 		return COL_TYPE.OBJECT;
 	}
 
-	@Override
+
 	public String getName() {
 		return iristr;
 	}

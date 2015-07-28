@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.Map;
@@ -9,6 +10,6 @@ import java.util.Map;
  */
 public interface Var2VarSubstitution extends Substitution {
 
-    Map<VariableImpl, VariableImpl> getVar2VarMap();
+    Map<Variable, Variable> getVar2VarMap();
 
 }

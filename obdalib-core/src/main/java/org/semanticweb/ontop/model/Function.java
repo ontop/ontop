@@ -69,8 +69,6 @@ public interface Function extends Term {
 
 	public void setTerm(int index, Term term);
 
-	public Set<Variable> getVariables();
-
 	public void updateTerms(List<Term> literals);
 
 	public void setPredicate(Predicate p);
@@ -84,4 +82,6 @@ public interface Function extends Term {
 	boolean isArithmeticFunction();
 	
 	boolean isDataTypeFunction();
+
+    public Set<Variable> getVariables();
 }

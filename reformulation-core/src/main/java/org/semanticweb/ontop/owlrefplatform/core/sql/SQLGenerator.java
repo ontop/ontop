@@ -315,7 +315,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
-	private boolean hasSelectDistinctStatement(DatalogProgram query) {
+    @Override
+    public boolean hasDistinctResultSet() {
+        return false;
+    }
+
+    private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;
 		if (query.getQueryModifiers().hasModifiers()) {
 			toReturn = query.getQueryModifiers().isDistinct();
@@ -459,7 +464,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						ansTypes.set(j, unifiedType);
 
 					//} else if (typePred.equals(dtfac.getTypePredicate(COL_TYPE.BNODE))){
-					} else if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)){
+					} else if (typePred.getName().equals(COL_TYPE.BNODE)){
 						ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 
 					}else if (  (typePred.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
@@ -684,7 +689,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		// log.debug("Before folding Joins: \n{}", cq);
 
-		DatalogNormalizer.foldJoinTrees(cq, false);
+		DatalogNormalizer.foldJoinTrees(cq.getBody(), false);
 
 		// log.debug("Before pulling out equalities: \n{}", cq);
 
@@ -698,7 +703,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		// log.debug("Before pulling up nested references: \n{}", cq);
 
-		DatalogNormalizer.pullUpNestedReferences(cq, false);
+		DatalogNormalizer.pullUpNestedReferences(cq);
 
 		// log.debug("Before adding trivial equalities: \n{}, cq);", cq);
 
@@ -1106,7 +1111,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Predicate predicate = atom.getFunctionSymbol();
 		if (predicate instanceof BooleanOperationPredicate
 				|| predicate instanceof NumericalOperationPredicate
-				|| predicate instanceof DataTypePredicate) {
+				|| predicate instanceof DatatypePredicate) {
 			// These don't participate in the FROM clause
 			return "";
 		} else if (predicate instanceof AlgebraOperatorPredicate) {
@@ -1309,7 +1314,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				Predicate.COL_TYPE type = dtfac.getDataType(p.toString());
+				Predicate.COL_TYPE type = dtfac.getDatatype(p.toString());
 				return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1437,7 +1442,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the column(s) with the actual value(s)
 			 */
-			if (function instanceof DataTypePredicate) {
+			if (function instanceof DatatypePredicate) {
 				/*
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
@@ -1702,7 +1707,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				if (subTerm instanceof Function) {
 					Function compositeSubTerm = (Function) subTerm;
 
-					type = dtfac.getDataType(compositeSubTerm.getFunctionSymbol().toString());
+					type = dtfac.getDatatype(compositeSubTerm.getFunctionSymbol().toString());
 				}
 
 				/**
@@ -1727,7 +1732,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					type = COL_TYPE.BNODE;
 				}
 				else {
-					type = dtfac.getDataType(mainFunctionSymbol.toString());
+					type = dtfac.getDatatype(mainFunctionSymbol.toString());
 				}
 		}
 
@@ -1973,7 +1978,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return java.sql.Types.DECIMAL;
 		}
 
-		COL_TYPE colType = dtfac.getDataType(functionName);
+		COL_TYPE colType = dtfac.getDatatype(functionName);
 		int sqlType = obdaDataFactory.getJdbcTypeMapper().getSQLType(colType);
 
 		return sqlType;
@@ -2018,7 +2023,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			List<TableDefinition> tables = metadata.getTableList();
+			Collection<TableDefinition> tables = metadata.getTables();
 			for (TableDefinition tabledef : tables) {
 				if (tabledef.getName().equals(table)) {
 					List<Attribute> attr = tabledef.getAttributes();
@@ -2122,7 +2127,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof DataTypePredicate) {
+		if (functionSymbol instanceof DatatypePredicate) {
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: "
 						+ function);

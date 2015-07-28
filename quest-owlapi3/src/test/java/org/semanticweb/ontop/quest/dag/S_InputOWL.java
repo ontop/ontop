@@ -37,8 +37,7 @@ public class S_InputOWL {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(file)));
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology o = translator.translate(ontology);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ontology);
 		return o;
 	}
 

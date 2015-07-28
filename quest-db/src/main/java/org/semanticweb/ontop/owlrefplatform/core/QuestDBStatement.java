@@ -22,9 +22,8 @@ package org.semanticweb.ontop.owlrefplatform.core;
 
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.openrdf.query.QueryLanguage;
@@ -57,35 +56,24 @@ public class QuestDBStatement implements OBDAStatement {
 
 	private final QuestStatement st;
 
-	private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
+	private final Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
-	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	private transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
 	protected QuestDBStatement(QuestStatement st) {
 		this.st = st;
 	}
 
-	public int add(Assertion data) throws SQLException {
-		return st.insertData(Collections.singleton(data).iterator(), false, -1, -1);
-	}
-
 	public int add(Iterator<Assertion> data) throws SQLException {
-		return st.insertData(data, false, -1, -1);
+		return st.insertData(data, -1, -1);
 	}
 
-	/***
-	 * As before, but using recreateIndexes = false.
-	 */
 	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
-		return st.insertData(data, false, commit, batch);
+		return st.insertData(data, commit, batch);
 	}
 
 	public int add(URI rdffile) throws OBDAException {
 		return load(rdffile, false, -1, -1);
-	}
-
-	public int add(URI rdffile, int commit, int batch) throws OBDAException {
-		return load(rdffile, false, commit, batch);
 	}
 
 	public int addWithTempFile(URI rdffile) throws OBDAException {
@@ -94,14 +82,6 @@ public class QuestDBStatement implements OBDAStatement {
 
 	public int addFromOBDA(URI obdaFile) throws OBDAException {
 		return loadOBDAModel(obdaFile, false, -1, -1);
-	}
-
-	public int addFromOBDA(URI obdaFile, int commitrate, int batchinserts) throws OBDAException {
-		return loadOBDAModel(obdaFile, false, commitrate, batchinserts);
-	}
-
-	public int addFromOBDAWithTempFile(URI obdaFile) throws OBDAException {
-		return loadOBDAModel(obdaFile, true, -1, -1);
 	}
 
 	/* Move to query time ? */
@@ -122,14 +102,14 @@ public class QuestDBStatement implements OBDAStatement {
 						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
 								questInstance.getReasoner());
 				
-				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
+				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
 						new EquivalentTriplePredicateIterator(it, questInstance.getReasoner());
 				
-				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
+				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -148,9 +128,9 @@ public class QuestDBStatement implements OBDAStatement {
 			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager io = new ModelIOManager(obdaModel);
 			io.load(uri.toString());
-			materializer = new QuestMaterializer(obdaModel);
+			materializer = new QuestMaterializer(obdaModel, false);
 			assertionIter =  materializer.getAssertionIterator();
-			int result = st.insertData(assertionIter, useFile, commit, batch);
+			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
 			return result;
 
 		} catch (Exception e) {
@@ -187,10 +167,6 @@ public class QuestDBStatement implements OBDAStatement {
 		return st.executeUpdate(query);
 	}
 
-	@Override
-	public OBDAConnection getConnection() throws OBDAException {
-		return st.getConnection();
-	}
 
 	@Override
 	public int getFetchSize() throws OBDAException {
@@ -240,35 +216,7 @@ public class QuestDBStatement implements OBDAStatement {
 	/*
 	 * QuestSpecific
 	 */
-
-	public void createIndexes() throws Exception {
-		st.createIndexes();
-	}
-
-	public void dropIndexes() throws Exception {
-		st.dropIndexes();
-	}
-
-	public boolean isIndexed() {
-		return st.isIndexed();
-	}
-
-	public void dropRepository() throws SQLException {
-		st.dropRepository();
-	}
-
-	/***
-	 * In an ABox store (classic) this methods triggers the generation of the
-	 * schema and the insertion of the metadata.
-	 */
-	public void createDB() throws SQLException {
-		st.createDB();
-	}
-
-	public void analyze() throws Exception {
-		st.analyze();
-	}
-
+	
 	public String getSQL(String query) throws Exception {
 		return st.getUnfolding(query);
 	}
@@ -283,10 +231,9 @@ public class QuestDBStatement implements OBDAStatement {
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
+		//SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
+		//List<String> signatureContainer = tr.getSignature(pq);
 		
-		LinkedList<String> signatureContainer = new LinkedList<String>();
-		tr.getSignature(pq, signatureContainer);
-		return st.getRewriting(pq, signatureContainer);
+		return st.getRewriting(pq/*, signatureContainer*/);
 	}
 }

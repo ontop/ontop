@@ -46,6 +46,8 @@ public class SubstitutionUtilities {
      * Exception occurring when computing a substitution.
      */
     public static class SubstitutionException extends Exception {
+
+		private static final long serialVersionUID = 2820771912046570562L;
     }
 
     /**
@@ -54,10 +56,10 @@ public class SubstitutionUtilities {
      *
      */
     public static class SubstitutionUnionException extends SubstitutionException {
+
+		private static final long serialVersionUID = 1587922941160561062L;
     }
 
-
-    private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
     /**
      * This method will return a new query, resulting from the application of
@@ -110,43 +112,17 @@ public class SubstitutionUtilities {
 
             // unifiers only apply to variables, simple or inside functional terms
 
-            if (t instanceof VariableImpl) {
-                Term replacement = unifier.get((VariableImpl) t);
+            if (t instanceof Variable) {
+                Term replacement = unifier.get((Variable) t);
                 if (replacement != null)
                     terms.set(i, replacement);
-            } else if (t instanceof Function) {
-                Function t2 = (Function) t;
-                applySubstitution(t2, unifier);
+            } 
+            else if (t instanceof Function) {
+                applySubstitution((Function) t, unifier);
             }
         }
     }
 
-    /**
-     * @param atom
-     * @param unifier
-     */
-    public static void applySubstitutionToGetFact(Function atom, Substitution unifier) {
-
-        List<Term> terms = atom.getTerms();
-        for (int i = 0; i < terms.size(); i++) {
-            Term t = terms.get(i);
-            /*
-             * unifiers only apply to variables, simple or inside functional
-             * terms
-             */
-            if (t instanceof VariableImpl) {
-                Term replacement = unifier.get((VariableImpl) t);
-                if (replacement != null) {
-                    terms.set(i, replacement);
-                } else {
-                    terms.set(i, ofac.getConstantFreshLiteral());
-                }
-            } else if (t instanceof Function) {
-                Function t2 = (Function) t;
-                applySubstitution(t2, unifier);
-            }
-        }
-    }
 
     /**
      * returns a substitution that assigns NULLs to all variables in the list
@@ -156,10 +132,10 @@ public class SubstitutionUtilities {
      */
 
     public static Substitution getNullifier(Collection<Variable> vars) {
-        Map<VariableImpl, Term> entries = new HashMap<>();
+        Map<Variable, Term> entries = new HashMap<>();
 
         for (Variable var : vars) {
-            entries.put((VariableImpl) var, OBDAVocabulary.NULL);
+            entries.put(var, OBDAVocabulary.NULL);
         }
         Substitution substitution = new SubstitutionImpl(entries);
         return substitution;
@@ -176,10 +152,10 @@ public class SubstitutionUtilities {
      */
     public static Substitution union(Substitution substitution1, Substitution substitution2)
             throws SubstitutionUnionException {
-        Map<VariableImpl, Term> substitutionMap = new HashMap<>();
+        Map<Variable, Term> substitutionMap = new HashMap<>();
         substitutionMap.putAll(substitution1.getMap());
 
-        for (Map.Entry<VariableImpl, Term> newEntry : substitution2.getMap().entrySet()) {
+        for (Map.Entry<Variable, Term> newEntry : substitution2.getMap().entrySet()) {
 
             /**
              * Checks if the variable is part of the domain

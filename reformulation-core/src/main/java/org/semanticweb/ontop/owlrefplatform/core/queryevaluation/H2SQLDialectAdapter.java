@@ -22,6 +22,8 @@ import java.sql.Types;
  * #L%
  */
 
+import java.util.regex.Pattern;
+
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
@@ -46,9 +48,12 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+        if(quotes.matcher(pattern).matches() ) {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 		// enclosing
 		// quotes
+        }
 		// embedded options:
 
 		String pflags = "(?";
@@ -61,6 +66,14 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+
+        newstr = newstr.substring(1, newstr.length() - 1);
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
+
+	@Override
 	public String getDummyTable() {
 		return "SELECT 1";
 	}
@@ -69,6 +82,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";
 	}
+
 	/***
 	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
 	 * The method will strip any fractional seconds found in the date time
@@ -77,9 +91,10 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 *
-	 * @param rdfliteral
+	 * @param
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');

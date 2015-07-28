@@ -22,6 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
+import com.google.common.collect.ImmutableMultimap;
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
@@ -35,6 +36,7 @@ import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
@@ -67,7 +69,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
 	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-	private final Map<Predicate, List<Integer>> primaryKeys;
+	private final ImmutableMultimap<Predicate, List<Integer>> primaryKeys;
 	private final Map<Predicate, List<CQIE>> mappings;
 
 	/***
@@ -82,13 +84,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private final List<Predicate> extensionalPredicates;
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
+		this(unfoldingProgram, ArrayListMultimap.<Predicate, List<Integer>>create());
 	}
 
-	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
+	public DatalogUnfolder(DatalogProgram unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
 		this(unfoldingProgram.getRules(), primaryKeys);
 	}
-	public DatalogUnfolder(List<CQIE> unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
+	public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
 		/**
 		 * Creating a local index for the rules according to their predicate
 		 */
@@ -124,7 +126,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		/**
 		 * These collections are saved as final and unmodifiable attributes.
 		 */
-		this.primaryKeys = Collections.unmodifiableMap(primaryKeys);
+		this.primaryKeys = ImmutableMultimap.copyOf(primaryKeys);
 		this.mappings = Collections.unmodifiableMap(ruleIndex);
 		this.extensionalPredicates = Collections.unmodifiableList(new ArrayList<>(leafPredicates));
 	}
@@ -220,7 +222,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		List<CQIE> workingSet = new LinkedList<CQIE>();
 		for (CQIE query : inputquery.getRules())
-			workingSet.add(QueryAnonymizer.deAnonymize(query));
+			workingSet.add(query);
 
 		if (includeMappings){
 			computePartialEvaluationWRTMappings(workingSet, multiTypedFunctionSymbolIndex);
@@ -1823,14 +1825,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				// we found the first argument of the LJ, we need
 				// the variables
 				if (ArgumentAtoms == 1) {
-					variablesArg1 = (HashSet<Variable>) atom.getReferencedVariables();
+                    TermUtils.addReferencedVariablesTo(variablesArg1, atom);
 					newbody.add(atom);
 				} else if (ArgumentAtoms != 2) {
 					newbody.add(atom);
 				} else if (ArgumentAtoms == 2){
 					// Here we keep the variables of the second LJ
 					// data argument
-					variablesArg2 = (HashSet<Variable>) atom.getReferencedVariables();
+                    TermUtils.addReferencedVariablesTo(variablesArg2, atom);
 
 					// and we remove the variables that are in both
 					// arguments
@@ -1844,7 +1846,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				//TODO: is that correct?? what if there is a complex expression?????
 			} else if (atom.isBooleanFunction()&& ArgumentAtoms >=2){
 				for (Variable var: variablesArg2){
-					containsVar = atom.getReferencedVariables().contains(var);
+                    Set<Variable> referencedVariables = new HashSet<>();
+                    TermUtils.addReferencedVariablesTo(referencedVariables, atom);
+					containsVar = referencedVariables.contains(var);
 					if (containsVar){
 						innerAtoms.remove(atom);
 						break;
@@ -1901,127 +1905,135 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 	}
 
-	/***
-	 *
-	 * We now take into account Primary Key constraints on the database to avoid
-	 * adding redundant atoms to the query. This could also be done as an
-	 * afterstep, using unification and CQC checks, however, its is much more
-	 * expensive that way. Given a primary Key on A, on columns 1,2, and an atom
-	 * A(x,y,z) added by the resolution engine (always added at the end of the
-	 * CQ body), we will look for another atom A(x,y,z') if the atom exists, we
-	 * can unify both atoms, apply the MGU to the query and remove one of the
-	 * atoms.
-	 *
-	 *
-	 * @param termidx
-	 *
-	 * @param newatomcount
-	 *            The number of new atoms introduced by this resolution step
-	 *            (the body size of the fresh rule used for this resolution
-	 *            step)
-	 *
-	 * @param partialEvalution
-	 *            The CQIE currently being optimized, i.e., the result of the
-	 *            resolution step.
-	 */
-	private void joinEliminationPKBased(Stack<Integer> termidx, int newatomcount, CQIE partialEvalution) {
+    /***
+     *
+     * We now take into account Primary Key constraints on the database to avoid
+     * adding redundant atoms to the query. This could also be done as an
+     * afterstep, using unification and CQC checks, however, its is much more
+     * expensive that way. Given a primary Key on A, on columns 1,2, and an atom
+     * A(x,y,z) added by the resolution engine (always added at the end of the
+     * CQ body), we will look for another atom A(x,y,z') if the atom exists, we
+     * can unify both atoms, apply the MGU to the query and remove one of the
+     * atoms.
+     *
+     *
+     * @param termidx
+     *
+     * @param newatomcount
+     *            The number of new atoms introduced by this resolution step
+     *            (the body size of the fresh rule used for this resolution
+     *            step)
+     *
+     * @param partialEvalution
+     *            The CQIE currently being optimized, i.e., the result of the
+     *            resolution step.
+     *
+     */
+    private void joinEliminationPKBased(Stack<Integer> termidx, int newatomcount, CQIE partialEvalution) {
 
-		List innerAtoms = getNestedList(termidx, partialEvalution);
+        List<Function> innerAtoms = getNestedList(termidx, partialEvalution);
 
-		Function currentAtom = getTerm(termidx, partialEvalution);
+        Function currentAtom = getTerm(termidx, partialEvalution);
 
 
-		if (currentAtom == null) {
+        if (currentAtom == null) {
 			/*
 			 * Case where the resolution atemt didn't add any atoms, the body was null.
 			 */
 
-			return;
-		}
+            return;
+        }
 
-		int newatomsfirstIndex = termidx.peek();
-		if (newatomsfirstIndex <= 0) {
-			return;
-		}
-		for (int newatomidx = newatomsfirstIndex; newatomidx < newatomsfirstIndex + newatomcount; newatomidx++) {
+        int newatomsfirstIndex = termidx.peek();
+        if (newatomsfirstIndex <= 0) {
+            return;
+        }
+        for (int newatomidx = newatomsfirstIndex; newatomidx < newatomsfirstIndex + newatomcount; newatomidx++) {
 
-			Function newatom = (Function) innerAtoms.get(newatomidx);
-			if (!newatom.isDataFunction())
-				continue;
+            Function newatom = innerAtoms.get(newatomidx);
+            if (!newatom.isDataFunction())
+                continue;
 
-			List<Integer> pkey = primaryKeys.get(newatom.getFunctionSymbol());
-			if (!(pkey != null && !pkey.isEmpty())) {
-				// no pkeys for this predicate
-				continue;
-			}
-			/*
-			 * the predicate has a primary key, looking for candidates for
-			 * unification, when we find one we can stop, since the application
-			 * of this optimization at each step of the derivation tree
-			 * guarantees there wont be any other redundant atom.
-			 */
-			Function replacement = null;
+            Collection<List<Integer>> pKeys = primaryKeys.get(newatom.getFunctionSymbol());
 
-			Substitution mgu1 = null;
-			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
-				Function tempatom = (Function) innerAtoms.get(idx2);
+            for(List<Integer> pKey : pKeys){
 
-				if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) {
-					/*
-					 * predicates are different, atoms cant be unified
-					 */
-					continue;
-				}
+                if (!(pKey != null && !pKey.isEmpty())) {
+                    // no pkeys for this predicate
+                    continue;
+                }
+                /*
+                 * the predicate has a primary key, looking for candidates for
+                 * unification, when we find one we can stop, since the application
+                 * of this optimization at each step of the derivation tree
+                 * guarantees there wont be any other redundant atom.
+                 */
+                Function replacement = null;
 
-				boolean redundant = true;
-				for (Integer termidx2 : pkey) {
-					if (!newatom.getTerm(termidx2 - 1).equals(tempatom.getTerm(termidx2 - 1))) {
-						redundant = false;
-						break;
-					}
-				}
+                Substitution mgu1 = null;
+                for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
+                    Function tempatom = innerAtoms.get(idx2);
 
-				if (redundant) {
-					/* found a candidate replacement atom */
-					mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
-					if (mgu1 != null) {
-						replacement = tempatom;
-						break;
-					}
-				}
+                    if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) {
+                        /*
+                         * predicates are different, atoms cant be unified
+                         */
+                        continue;
+                    }
 
-			}
+                    boolean redundant = true;
+                    for (Integer termidx2 : pKey) {
+                        if (!newatom.getTerm(termidx2 - 1).equals(tempatom.getTerm(termidx2 - 1))) {
+                            redundant = false;
+                            break;
+                        }
+                    }
 
-			if (replacement == null)
-				continue;
+                    if (redundant) {
+                        /* found a candidate replacement atom */
+                        mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
+                        if (mgu1 != null) {
+                            replacement = tempatom;
+                            break;
+                        }
+                    }
 
-			if (mgu1 == null)
-				throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
+                }
 
-			if (currentAtom.isAlgebraFunction() && currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) {
-				continue;
-			}
+                if (replacement == null)
+                    continue;
 
-			SubstitutionUtilities.applySubstitution(partialEvalution, mgu1, false);
-			innerAtoms.remove(newatomidx);
-			newatomidx -= 1;
-			newatomcount -= 1;
+                if (mgu1 == null)
+                    throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
 
-		}
+                if (currentAtom.isAlgebraFunction() && (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)) {
+                    continue;
+                }
 
-		/***
-		 * As the result of optimizing PKs, it can be that JOINs become invalid,
-		 * i.e., they contian one single data item (no longer a join). In this
-		 * case we need to eliminate the join atom attach the inner atoms to the
-		 * parent of the join (body or another join/leftjoin). This is done with
-		 * the normalizer.
-		 */
+                SubstitutionUtilities.applySubstitution(partialEvalution, mgu1, false);
+                innerAtoms.remove(newatomidx);
+                newatomidx -= 1;
+                newatomcount -= 1;
+                break;
+            }
+        }
 
-		int dataAtoms = DatalogNormalizer.countDataItems(innerAtoms);
-		if (dataAtoms == 1)
-			cleanJoins(partialEvalution);
+        /***
+         * As the result of optimizing PKs, it can be that JOINs become invalid,
+         * i.e., they contian one single data item (no longer a join). In this
+         * case we need to eliminate the join atom attach the inner atoms to the
+         * parent of the join (body or another join/leftjoin). This is done with
+         * the normalizer.
+         */
 
-	}
+        int dataAtoms = DatalogNormalizer.countDataItems(innerAtoms);
+        if (dataAtoms == 1) {
+            // Eliminates Join atoms when they only have one data atom, i.e., they are
+            // not really JOINs
+            DatalogNormalizer.unfoldJoinTrees(partialEvalution);
+        }
+    }
+
 
 
 
@@ -2030,7 +2042,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * not really JOINs
 	 */
 	private void cleanJoins(CQIE query) {
-		DatalogNormalizer.unfoldJoinTrees(query, false);
+		DatalogNormalizer.unfoldJoinTrees(query.getBody(), false);
 	}
 
 	/***

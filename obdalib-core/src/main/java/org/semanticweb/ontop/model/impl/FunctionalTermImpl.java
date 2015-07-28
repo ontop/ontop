@@ -121,16 +121,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	@Override
-	public Set<Variable> getVariables() {
-		HashSet<Variable> variables = new LinkedHashSet<Variable>();
-		for (Term t : terms) {
-			for (Variable v : t.getReferencedVariables())
-				variables.add(v);
-		}
-		return variables;
-	}
-
-	@Override
 	public Predicate getFunctionSymbol() {
 		return functor;
 	}
@@ -203,16 +193,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	@Override
-	public Set<Variable> getReferencedVariables() {
-		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Term t : terms) {
-			for (Variable v : t.getReferencedVariables())
-				vars.add(v);
-		}
-		return vars;
-	}
-
-	@Override
 	public Term getTerm(int index) {
 		return terms.get(index);
 	}
@@ -268,4 +248,17 @@ public class FunctionalTermImpl implements Function, ListListener {
 	public boolean isDataTypeFunction() {
 		return this.functor.isDataTypePredicate();
 	}
+
+    @Override
+    public Set<Variable> getVariables() {
+        HashSet<Variable> variables = new LinkedHashSet<Variable>();
+        for (Term t : terms) {
+            Set<Variable> referencedVariables = new HashSet<>();
+            TermUtils.addReferencedVariablesTo(referencedVariables,t);
+            for (Variable v : referencedVariables)
+                variables.add(v);
+        }
+        return variables;
+    }
+
 }

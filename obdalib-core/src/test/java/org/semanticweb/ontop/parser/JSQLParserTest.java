@@ -672,8 +672,16 @@ public class JSQLParserTest extends TestCase {
 	}
 	
 	//add support for CAST also in unquoted visited query
-    // We do not parse SELECT DISTINCT on purpose
-    public void testUnquoted1(){
+	public void testUnquoted1(){
+		final boolean result = parseUnquotedJSQL("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+				+ "FROM people \"QpeopleVIEW0\" "
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+		printJSQL("test_Unquoted1", result);
+		assertTrue(result);
+	}
+
+	// Does not parse SELECT DISTINCT (on purpose)
+	public void testUnquoted2(){
 		final boolean result = parseUnquotedJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
@@ -681,26 +689,17 @@ public class JSQLParserTest extends TestCase {
 		assertFalse(result);
 	}
 
-    public void testUnquoted2(){
-        final boolean result = parseUnquotedJSQL("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
-                + "FROM people \"QpeopleVIEW0\" "
-                + "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
-        printJSQL("test_Unquoted1", result);
-        assertTrue(result);
-    }
-
-    // We do not parse SELECT DISTINCT on purpose
-    public void testCast(){
-        final boolean result = parseUnquotedJSQL("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
-        printJSQL("testCast", result);
-        assertFalse(result);
-    }
-
-
-    public void testCast1(){
+	public void testCast1(){
 		final boolean result = parseUnquotedJSQL("SELECT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
 		printJSQL("testCast", result);
 		assertTrue(result);
+	}
+
+	// Does not parse SELECT DISTINCT (on purpose)
+	public void testCast2(){
+		final boolean result = parseUnquotedJSQL("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
+		printJSQL("testCast", result);
+		assertFalse(result);
 	}
 
 	/* Regex in MySQL, Oracle and Postgres*/
@@ -742,7 +741,26 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("testRegexNotMySQL", result);
 		assertFalse(result);
 	}
-	
+
+    public void test_md5() {
+        final boolean result = parseJSQL("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
+                "COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
+                "RAND()) )) AS locationID FROM northwind.Suppliers");
+        printJSQL("test_13", result);
+        assertTrue(result);
+    }
+
+    public void test_concatOracle() {
+        final boolean result = parseJSQL("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
+        printJSQL("test_concatOracle()", result);
+        assertTrue(result);
+    }
+
+    public void test_RegexpReplace() {
+        final boolean result = parseJSQL("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
+        printJSQL("test_RegexpReplace()", result);
+        assertTrue(result);
+    }
 
 	private String queryText;
 

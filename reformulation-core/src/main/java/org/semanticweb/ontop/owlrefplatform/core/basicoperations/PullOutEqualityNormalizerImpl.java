@@ -6,7 +6,6 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.ArrayList;
 
@@ -33,9 +32,9 @@ import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogT
 public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private final static Ord<VariableImpl> VARIABLE_ORD = Ord.hashEqualsOrd();
-    private final static List<P2<VariableImpl, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
-    private final static List<P2<VariableImpl, VariableImpl>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
+    private final static Ord<Variable> VARIABLE_ORD = Ord.hashEqualsOrd();
+    private final static List<P2<Variable, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
+    private final static List<P2<Variable, Variable>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
     private final static List<Function> EMPTY_ATOM_LIST = List.nil();
     private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
@@ -185,23 +184,23 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
                 return atom.isDataFunction();
             }
         });
-        List<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>> atomResults = dataAtoms.map(
-                new F<Function, P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>>() {
+        List<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>> atomResults = dataAtoms.map(
+                new F<Function, P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>>() {
                     @Override
-                    public P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> f(Function atom) {
+                    public P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> f(Function atom) {
                         // Uses the fact atoms are encoded as functional terms
                         return normalizeFunctionalTermInDataAtom(atom, variableDispatcher);
                     }
                 });
-        List<Function> normalizedDataAtoms = atomResults.map(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, Function>() {
+        List<Function> normalizedDataAtoms = atomResults.map(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, Function>() {
             @Override
-            public Function f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> triple) {
+            public Function f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> triple) {
                 return (Function) triple._1();
             }
         });
         // Variable-Variable equalities
-        List<P2<VariableImpl, VariableImpl>> variableRenamings = atomResults.bind(
-                P3.<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>__2());
+        List<P2<Variable, Variable>> variableRenamings = atomResults.bind(
+                P3.<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>__2());
 
         /**
          * Merges the variable renamings into a substitution and a list of variable-to-variable equalities.
@@ -213,8 +212,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Constructs variable-constant equalities.
          */
-        List<P2<VariableImpl,Constant>> varConstantPairs  = atomResults.bind(
-                P3.<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>__3());
+        List<P2<Variable,Constant>> varConstantPairs  = atomResults.bind(
+                P3.<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>__3());
         List<Function> varConstantEqualities = generateVariableConstantEqualities(varConstantPairs);
 
         /**
@@ -360,10 +359,10 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *
      * TODO: This would be much nicer with as a Visitor.
      */
-    private static  P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeTermInDataAtom(
+    private static  P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeTermInDataAtom(
             Term term, VariableDispatcher variableDispatcher) {
-        if (term instanceof VariableImpl) {
-            return normalizeVariableInDataAtom((VariableImpl) term, variableDispatcher);
+        if (term instanceof Variable) {
+            return normalizeVariableInDataAtom((Variable) term, variableDispatcher);
         }
         else if (term instanceof Constant) {
             return normalizeConstantInDataAtom((Constant) term, variableDispatcher);
@@ -388,11 +387,11 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *   - an empty list of variable-to-constant pairs.
      *
      */
-    private static P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeVariableInDataAtom(
-            VariableImpl previousVariable, VariableDispatcher variableDispatcher) {
+    private static P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeVariableInDataAtom(
+            Variable previousVariable, VariableDispatcher variableDispatcher) {
 
-        VariableImpl newVariable = variableDispatcher.renameDataAtomVariable(previousVariable);
-        List<P2<VariableImpl, VariableImpl>> variableRenamings = List.cons(P.p(previousVariable, newVariable), EMPTY_VARIABLE_RENAMING_LIST);
+        Variable newVariable = variableDispatcher.renameDataAtomVariable(previousVariable);
+        List<P2<Variable, Variable>> variableRenamings = List.cons(P.p(previousVariable, newVariable), EMPTY_VARIABLE_RENAMING_LIST);
 
         return P.p((Term) newVariable, variableRenamings, EMPTY_VARIABLE_CONSTANT_LIST);
     }
@@ -405,11 +404,11 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *   - an empty list of variable-to-variable renamings,
      *   - a list composed of the created variable-to-constant pair.
      */
-    private static P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeConstantInDataAtom(
+    private static P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeConstantInDataAtom(
             Constant constant, VariableDispatcher variableDispatcher) {
-        VariableImpl newVariable = variableDispatcher.generateNewVariable();
+        Variable newVariable = variableDispatcher.generateNewVariable();
 
-        List<P2<VariableImpl, Constant>> variableConstantPairs = List.cons(P.p(newVariable, constant), EMPTY_VARIABLE_CONSTANT_LIST);
+        List<P2<Variable, Constant>> variableConstantPairs = List.cons(P.p(newVariable, constant), EMPTY_VARIABLE_CONSTANT_LIST);
 
         return  P.p((Term) newVariable, EMPTY_VARIABLE_RENAMING_LIST, variableConstantPairs);
     }
@@ -429,16 +428,16 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *   - a list of variable-to-variable renamings,
      *   - a list of variable-to-constant pairs.
      */
-    private static P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeFunctionalTermInDataAtom(
+    private static P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeFunctionalTermInDataAtom(
                         Function functionalTerm, final VariableDispatcher variableDispatcher) {
 
         /**
          * Normalizes sub-terms.
          */
-        List<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>> subTermResults =
-                List.iterableList(functionalTerm.getTerms()).map(new F<Term, P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>>() {
+        List<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>> subTermResults =
+                List.iterableList(functionalTerm.getTerms()).map(new F<Term, P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>>() {
                     @Override
-                    public P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> f(Term term) {
+                    public P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> f(Term term) {
                         return normalizeTermInDataAtom(term, variableDispatcher);
                     }
                 });
@@ -446,9 +445,9 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Retrieves normalized sub-terms.
          */
-        List<Term> newSubTerms = subTermResults.map(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, Term>() {
+        List<Term> newSubTerms = subTermResults.map(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, Term>() {
             @Override
-            public Term f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> p3) {
+            public Term f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> p3) {
                 return p3._1();
             }
         });
@@ -457,14 +456,14 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Concatenates variable-to-variable renamings and variable-to-constant pairs.
          */
-        List<P2<VariableImpl, VariableImpl>> variableRenamings = subTermResults.bind(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, List<P2<VariableImpl, VariableImpl>>>() {
+        List<P2<Variable, Variable>> variableRenamings = subTermResults.bind(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, List<P2<Variable, Variable>>>() {
             @Override
-            public List<P2<VariableImpl, VariableImpl>> f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> p3) { return p3._2();
+            public List<P2<Variable, Variable>> f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> p3) { return p3._2();
             }
         });
-        List<P2<VariableImpl, Constant>> variableConstantPairs = subTermResults.bind(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, List<P2<VariableImpl, Constant>>>() {
+        List<P2<Variable, Constant>> variableConstantPairs = subTermResults.bind(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, List<P2<Variable, Constant>>>() {
             @Override
-            public List<P2<VariableImpl, Constant>> f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> p3) { return p3._3();
+            public List<P2<Variable, Constant>> f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> p3) { return p3._3();
             }
         });
 
@@ -483,10 +482,10 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Transforms the substitutions into list of variable-to-variable pairs and concatenates them.
          */
-        List<P2<VariableImpl, VariableImpl>> renamingPairs = substitutionsToMerge.bind(
-                new F<Var2VarSubstitution, List<P2<VariableImpl, VariableImpl>>>() {
+        List<P2<Variable, Variable>> renamingPairs = substitutionsToMerge.bind(
+                new F<Var2VarSubstitution, List<P2<Variable, Variable>>>() {
             @Override
-            public List<P2<VariableImpl, VariableImpl>> f(Var2VarSubstitution substitution) {
+            public List<P2<Variable, Variable>> f(Var2VarSubstitution substitution) {
                 // Transforms the map of the substitution in a list of pairs
                 return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getVar2VarMap()).toStream().toList();
             }
@@ -509,18 +508,18 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * The first variable (lowest) is selecting according a hash ordering.
      */
     private static P2<Var2VarSubstitution, List<Function>> mergeVariableRenamings(
-            List<P2<VariableImpl, VariableImpl>> renamingPairs) {
+            List<P2<Variable, Variable>> renamingPairs) {
         /**
          * Groups pairs according to the initial variable
          */
-        TreeMap<VariableImpl, Set<VariableImpl>> commonMap = renamingPairs.groupBy(P2.<VariableImpl, VariableImpl>__1(),
-                P2.<VariableImpl, VariableImpl>__2()).
+        TreeMap<Variable, Set<Variable>> commonMap = renamingPairs.groupBy(P2.<Variable, Variable>__1(),
+                P2.<Variable, Variable>__2()).
                 /**
                  * and converts the list of target variables into a set.
                  */
-                map(new F<List<VariableImpl>, Set<VariableImpl>>() {
+                map(new F<List<Variable>, Set<Variable>>() {
             @Override
-            public Set<VariableImpl> f(List<VariableImpl> equivalentVariables) {
+            public Set<Variable> f(List<Variable> equivalentVariables) {
                 return Set.iterableSet(VARIABLE_ORD, equivalentVariables);
             }
         });
@@ -528,9 +527,9 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Generates equalities between the target variables
          */
-        List<Function> newEqualities = commonMap.values().bind(new F<Set<VariableImpl>, List<Function>>() {
+        List<Function> newEqualities = commonMap.values().bind(new F<Set<Variable>, List<Function>>() {
             @Override
-            public List<Function> f(Set<VariableImpl> equivalentVariables) {
+            public List<Function> f(Set<Variable> equivalentVariables) {
                 return generateVariableEqualities(equivalentVariables);
             }
         });
@@ -540,9 +539,9 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          *
          * Selection consists in taking the first element of set.
          */
-        TreeMap<VariableImpl, VariableImpl> mergedMap = commonMap.map(new F<Set<VariableImpl>, VariableImpl>() {
+        TreeMap<Variable, Variable> mergedMap = commonMap.map(new F<Set<Variable>, Variable>() {
             @Override
-            public VariableImpl f(Set<VariableImpl> variables) {
+            public Variable f(Set<Variable> variables) {
                 return variables.toList().head();
             }
         });
@@ -554,10 +553,10 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     /**
      * Converts the variable-to-constant pairs into a list of equalities.
      */
-    private static List<Function> generateVariableConstantEqualities(List<P2<VariableImpl, Constant>> varConstantPairs) {
-        return varConstantPairs.map(new F<P2<VariableImpl, Constant>, Function>() {
+    private static List<Function> generateVariableConstantEqualities(List<P2<Variable, Constant>> varConstantPairs) {
+        return varConstantPairs.map(new F<P2<Variable, Constant>, Function>() {
             @Override
-            public Function f(P2<VariableImpl, Constant> pair) {
+            public Function f(P2<Variable, Constant> pair) {
                 return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
             }
         });
@@ -566,12 +565,12 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     /**
      * Converts the variable-to-variable pairs into a list of equalities.
      */
-    private static List<Function> generateVariableEqualities(Set<VariableImpl> equivalentVariables) {
-        List<VariableImpl> variableList = equivalentVariables.toList();
-        List<P2<VariableImpl, VariableImpl>> variablePairs = variableList.zip(variableList.tail());
-        return variablePairs.map(new F<P2<VariableImpl, VariableImpl>, Function>() {
+    private static List<Function> generateVariableEqualities(Set<Variable> equivalentVariables) {
+        List<Variable> variableList = equivalentVariables.toList();
+        List<P2<Variable, Variable>> variablePairs = variableList.zip(variableList.tail());
+        return variablePairs.map(new F<P2<Variable, Variable>, Function>() {
             @Override
-            public Function f(P2<VariableImpl, VariableImpl> pair) {
+            public Function f(P2<Variable, Variable> pair) {
                 return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
             }
         });
