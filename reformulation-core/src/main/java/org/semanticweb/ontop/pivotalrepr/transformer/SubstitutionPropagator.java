@@ -1,18 +1,21 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.transformer;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.NonGroundFunctionalTermImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.SubQueryUnificationTools.ConstructionNodeUnification;
+import org.semanticweb.ontop.pivotalrepr.impl.*;
 
 import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
 
 /**
  * TODO: describe
+ *
+ * Abstract: does not define transform(ConstructionNode ...).
+ *
  */
-public class SubstitutionPropagator implements QueryNodeTransformer {
+public abstract class SubstitutionPropagator implements QueryNodeTransformer {
 
     /**
      * TODO: explain
@@ -21,9 +24,9 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
         private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
         private final QueryNode transformedNode;
 
-        public NewSubstitutionException(ImmutableSubstitution<VariableOrGroundTerm> substitution,
+        protected NewSubstitutionException(ImmutableSubstitution<VariableOrGroundTerm> substitution,
                                         QueryNode transformedNode) {
-            super();
+            super("New substitution to propagate (" + substitution + ") and new node (" + transformedNode + ")");
             this.substitution = substitution;
             this.transformedNode = transformedNode;
        }
@@ -90,46 +93,6 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
         );
     }
 
-    /**
-     * TODO: implement
-     */
-    @Override
-    public ConstructionNode transform(ConstructionNode constructionNode)
-            throws NewSubstitutionException, UnificationException {
-        DataAtom newProjectionAtom = transformDataAtom(constructionNode.getProjectionAtom());
-
-        try {
-            /**
-             * TODO: explain why it makes sense (interface)
-             */
-            boolean acceptCommonVariables = true;
-            ConstructionNodeUnification constructionNodeUnification = SubQueryUnificationTools.unifyConstructionNode(
-                    constructionNode, newProjectionAtom, acceptCommonVariables);
-
-            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
-            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
-                    constructionNodeUnification.getSubstitutionPropagator().getSubstitution();
-
-            /**
-             * If the substitution has changed, throws the new substitution
-             * and the new construction node so that the "client" can continue
-             * with the new substitution (for the children nodes).
-             */
-            if (!substitution.equals(newSubstitutionToPropagate)) {
-                throw new NewSubstitutionException(newSubstitutionToPropagate,
-                        newConstructionNode);
-            }
-
-            /**
-             * Otherwise, continues with the current substitution
-             */
-            return newConstructionNode;
-
-        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
-            throw new UnificationException(e.getMessage());
-        }
-    }
-
     @Override
     public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
         ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
@@ -161,7 +124,7 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
         return substitution.applyToBooleanExpression(booleanExpression);
     }
 
-    private DataAtom transformDataAtom(DataAtom atom) {
+    protected DataAtom transformDataAtom(DataAtom atom) {
         return substitution.applyToDataAtom(atom);
     }
 

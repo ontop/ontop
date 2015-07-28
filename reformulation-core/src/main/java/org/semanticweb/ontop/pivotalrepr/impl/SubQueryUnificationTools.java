@@ -14,6 +14,8 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2Va
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.transformer.FullSubstitutionPropagator;
+import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -91,7 +93,7 @@ public class SubQueryUnificationTools {
     /**
      * TODO: explain
      */
-    protected static class ConstructionNodeUnification {
+    public static class ConstructionNodeUnification {
         private final ConstructionNode unifiedNode;
         private final SubstitutionPropagator substitutionPropagator;
 
@@ -134,9 +136,8 @@ public class SubQueryUnificationTools {
         QueryNodeRenamer renamer = new QueryNodeRenamer(
                 computeRenamingSubstitution(originalSubQuery, reservedVariables));
 
-        boolean acceptCommonVariables = false;
         ConstructionNodeUnification rootUnification = unifyConstructionNode(renamer.transform(originalRootNode),
-                targetDataAtom, acceptCommonVariables);
+                targetDataAtom);
 
         try {
             IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
@@ -187,7 +188,7 @@ public class SubQueryUnificationTools {
                  */
             } catch (SubstitutionPropagator.NewSubstitutionException e) {
                 optionalNewChild = Optional.of(e.getTransformedNode());
-                propagatorForChild = new SubstitutionPropagator(e.getSubstitution());
+                propagatorForChild = new FullSubstitutionPropagator(e.getSubstitution());
             }
             /**
              * Unification rejected by a sub-construction node.
@@ -271,11 +272,11 @@ public class SubQueryUnificationTools {
      * TODO: support query modifiers
      *
      */
-    protected static ConstructionNodeUnification unifyConstructionNode(ConstructionNode renamedConstructionNode,
-                                                                       DataAtom targetAtom, boolean acceptCommonVariables)
+    public static ConstructionNodeUnification unifyConstructionNode(ConstructionNode renamedConstructionNode,
+                                                                    DataAtom targetAtom)
             throws SubQueryUnificationException{
 
-        if ((!acceptCommonVariables) && (!haveDisjunctVariableSets(renamedConstructionNode, targetAtom))) {
+        if (!haveDisjunctVariableSets(renamedConstructionNode, targetAtom)) {
             throw new IllegalArgumentException("The variable sets of the construction node and the target atom must " +
                     "be disjunct!");
         }
@@ -308,7 +309,8 @@ public class SubQueryUnificationTools {
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution,
                 newOptionalQueryModifiers);
-        return new ConstructionNodeUnification(newConstructionNode, new SubstitutionPropagator(substitutionToPropagate));
+        return new ConstructionNodeUnification(newConstructionNode,
+                new FullSubstitutionPropagator(substitutionToPropagate));
     }
 
     /**
