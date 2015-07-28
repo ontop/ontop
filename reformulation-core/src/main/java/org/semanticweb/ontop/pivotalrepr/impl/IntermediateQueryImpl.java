@@ -45,7 +45,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
     /**
-     * Highly mutable (low control) so MUST NOT BE SHARED!
+     * Highly mutable (low control) so MUST NOT BE SHARED (except with InternalProposalExecutor)!
      */
     private final QueryTreeComponent treeComponent;
 

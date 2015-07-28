@@ -102,8 +102,9 @@ public class SubstitutionPropagator implements QueryNodeTransformer {
             /**
              * TODO: explain why it makes sense (interface)
              */
+            boolean acceptCommonVariables = true;
             ConstructionNodeUnification constructionNodeUnification = SubQueryUnificationTools.unifyConstructionNode(
-                    constructionNode, newProjectionAtom);
+                    constructionNode, newProjectionAtom, acceptCommonVariables);
 
             ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
             ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =

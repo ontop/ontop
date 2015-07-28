@@ -134,7 +134,9 @@ public class SubQueryUnificationTools {
         QueryNodeRenamer renamer = new QueryNodeRenamer(
                 computeRenamingSubstitution(originalSubQuery, reservedVariables));
 
-        ConstructionNodeUnification rootUnification = unifyConstructionNode(renamer.transform(originalRootNode), targetDataAtom);
+        boolean acceptCommonVariables = false;
+        ConstructionNodeUnification rootUnification = unifyConstructionNode(renamer.transform(originalRootNode),
+                targetDataAtom, acceptCommonVariables);
 
         try {
             IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
@@ -269,11 +271,11 @@ public class SubQueryUnificationTools {
      * TODO: support query modifiers
      *
      */
-    protected static ConstructionNodeUnification unifyConstructionNode(
-            ConstructionNode renamedConstructionNode, DataAtom targetAtom)
+    protected static ConstructionNodeUnification unifyConstructionNode(ConstructionNode renamedConstructionNode,
+                                                                       DataAtom targetAtom, boolean acceptCommonVariables)
             throws SubQueryUnificationException{
 
-        if (!haveDisjunctVariableSets(renamedConstructionNode, targetAtom)) {
+        if ((!acceptCommonVariables) && (!haveDisjunctVariableSets(renamedConstructionNode, targetAtom))) {
             throw new IllegalArgumentException("The variable sets of the construction node and the target atom must " +
                     "be disjunct!");
         }
