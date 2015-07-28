@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.transformer;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -7,6 +7,10 @@ import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.NonGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.FilterNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.GroupNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 
 /**

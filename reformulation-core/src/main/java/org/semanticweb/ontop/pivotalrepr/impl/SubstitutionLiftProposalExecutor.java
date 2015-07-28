@@ -9,6 +9,11 @@ import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
+import org.semanticweb.ontop.pivotalrepr.transformer.BindingTransferTransformer;
+import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionLiftPropagator;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * TODO: explain
@@ -89,21 +94,8 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
          * Propagates the substitution to the sub-tree
          */
         if (optionalSubstitution.isPresent()) {
-
-            SubstitutionPropagator propagator = new SubstitutionPropagator(optionalSubstitution.get());
-            for (QueryNode descendantNode : treeComponent.getSubTreeNodesInTopDownOrder(formerNode)) {
-                try {
-                    QueryNode newDescendantNode = descendantNode.acceptNodeTransformer(propagator);
-                    if (!newDescendantNode.equals(descendantNode)) {
-                        treeComponent.replaceNode(descendantNode, newDescendantNode);
-                    }
-                } catch (QueryNodeTransformationException e) {
-                    throw new InvalidQueryOptimizationProposalException(e.getMessage());
-                } catch (NotNeededNodeException e) {
-                    throw new RuntimeException("TODO: handle this case (substitution propagated after lifting" +
-                            "some bindings)");
-                }
-            }
+            // SIDE-EFFECT on the tree component (node replacements)
+            propagateSubstitutionToSubTree(optionalSubstitution.get(), formerNode, treeComponent);
         }
 
         /**
@@ -124,6 +116,58 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
 
         }
     }
+
+    /**
+     * TODO: explain
+     *
+     * SIDE-EFFECT on the treeComponent
+     *
+     */
+    private static void propagateSubstitutionToSubTree(ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
+                                                       QueryNode rootNode, QueryTreeComponent treeComponent)
+            throws InvalidQueryOptimizationProposalException {
+        SubstitutionLiftPropagator propagator = new SubstitutionLiftPropagator(substitutionToPropagate);
+
+
+        Queue<QueryNode> descendantNodeToTransform = new LinkedList<>();
+        // Starts with the children of the root
+        descendantNodeToTransform.addAll(treeComponent.getCurrentSubNodesOf(rootNode));
+
+        while (!descendantNodeToTransform.isEmpty()) {
+            QueryNode descendantNode = descendantNodeToTransform.poll();
+
+            /**
+             * This propagation is stopped by construction nodes
+             * (i.e. not applied to them and their descendant)
+             */
+            if (descendantNode instanceof ConstructionNode) {
+                continue;
+            }
+
+            try {
+                // May throw an exception
+                QueryNode newDescendantNode = descendantNode.acceptNodeTransformer(propagator);
+
+                /**
+                 * If no exception has been thrown...
+                 *   - adds its children to the queue
+                 *   - replaces the node if a transformed one has been returned
+                 */
+                descendantNodeToTransform.addAll(treeComponent.getCurrentSubNodesOf(descendantNode));
+
+                if (!newDescendantNode.equals(descendantNode)) {
+                    treeComponent.replaceNode(descendantNode, newDescendantNode);
+                }
+            }
+            catch (QueryNodeTransformationException e) {
+                throw new InvalidQueryOptimizationProposalException(e.getMessage());
+            } catch (NotNeededNodeException e) {
+                throw new RuntimeException("TODO: handle this case (substitution propagated after lifting" +
+                        "some bindings)");
+            }
+        }
+    }
+
 
     /**
      * TODO: explain

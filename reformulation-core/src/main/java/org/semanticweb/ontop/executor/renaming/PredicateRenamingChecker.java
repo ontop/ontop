@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.executor.renaming;
 
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
