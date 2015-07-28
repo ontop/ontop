@@ -6,5 +6,4 @@ public interface UnionLiftProposal extends QueryOptimizationProposal {
 
     UnionNode getUnionNode();
 
-    QueryNode getTargetQueryNode();
 }

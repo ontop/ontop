@@ -171,6 +171,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
     }
 
+    @Override
+    public Optional<QueryNode> getParent(QueryNode node) {
+        try {
+            return treeComponent.getParent(node);
+        } catch (IllegalTreeException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
+        }
+    }
+
     /**
      * TODO: explain
      */

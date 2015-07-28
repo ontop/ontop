@@ -2,12 +2,10 @@ package org.semanticweb.ontop.pivotalrepr;
 
 public class UnionLiftProposalImpl implements UnionLiftProposal {
 
-    private final QueryNode targetNode;
     private final UnionNode unionNode;
 
-    public UnionLiftProposalImpl(UnionNode unionNode, QueryNode targetNode) {
+    public UnionLiftProposalImpl(UnionNode unionNode) {
         this.unionNode = unionNode;
-        this.targetNode = targetNode;
     }
 
     @Override
@@ -15,8 +13,4 @@ public class UnionLiftProposalImpl implements UnionLiftProposal {
         return unionNode;
     }
 
-    @Override
-    public QueryNode getTargetQueryNode() {
-        return targetNode;
-    }
 }

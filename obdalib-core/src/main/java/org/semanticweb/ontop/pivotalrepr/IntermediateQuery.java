@@ -51,6 +51,8 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
 
+    Optional<QueryNode> getParent(QueryNode node);
+
     /**
      * Returns a new IntermediateQuery using the new predicate instead of the former one in some construction nodes.
      *
@@ -58,5 +60,4 @@ public interface IntermediateQuery {
      */
     IntermediateQuery newWithDifferentConstructionPredicate(AtomPredicate formerPredicate, AtomPredicate newPredicate)
             throws AlreadyExistingPredicateException;
-
 }

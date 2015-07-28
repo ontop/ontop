@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.impl.JgraphtIntermediateQueryBuilder;
 
 public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor {
@@ -13,7 +14,8 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {
-            ConstructionNode newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
+            ConstructionNode newRootNode;
+            newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
             builder.init(newRootNode);
             recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>absent());
         } catch (IntermediateQueryBuilderException | NotNeededNodeException | QueryNodeTransformationException e) {
@@ -28,13 +30,15 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
     }
 
 
-    public void recursive(UnionNode unionNode, QueryNode targetNode, IntermediateQueryBuilder builder, IntermediateQuery query, QueryNode parentNode,
-                          QueryNode newParentNode, Optional<Integer> branchIndexInsideUnion)
+    public void recursive(UnionNode unionNode, QueryNode targetNode, IntermediateQueryBuilder builder,
+                          IntermediateQuery query, QueryNode parentNode,
+                          QueryNode newParentNode, Optional<Integer> optionalBranchIndexInsideUnion)
             throws QueryNodeTransformationException, NotNeededNodeException, IntermediateQueryBuilderException {
 
         for (QueryNode subNode : query.getCurrentSubNodesOf(parentNode)) {
 
-            Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = query.getOptionalPosition(parentNode, subNode);
+            Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition
+                    = query.getOptionalPosition(parentNode, subNode);
 
             QueryNode newSubNode = subNode.acceptNodeTransformer(queryNodeCloner);
 
@@ -54,7 +58,12 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
                 }
             } else if (subNode == unionNode) {
 
-                QueryNode subNodeOfUnion = query.getCurrentSubNodesOf(subNode).get(branchIndexInsideUnion.get());
+                if(!optionalBranchIndexInsideUnion.isPresent()){
+                    throw new IllegalStateException();
+                }
+
+                Integer index = optionalBranchIndexInsideUnion.get();
+                QueryNode subNodeOfUnion = query.getCurrentSubNodesOf(subNode).get(index);
 
                 QueryNode subNodeOfUnionClone = subNodeOfUnion.acceptNodeTransformer(queryNodeCloner);
 
@@ -66,20 +75,62 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
                 builder.addChild(newParentNode, newSubNode, optionalPosition);
 
-                recursive(unionNode, targetNode, builder, query, subNode, newSubNode, branchIndexInsideUnion);
+                recursive(unionNode, targetNode, builder, query, subNode, newSubNode, optionalBranchIndexInsideUnion);
             }
         }
 
     }
 
-//    public String toString() {
-//        return "UnionLiftTransformerImpl[" + unionNode + "," + targetNode + "]";
-//    }
-
     @Override
     public IntermediateQuery apply(UnionLiftProposal proposal, IntermediateQuery inputQuery) {
+        Optional<QueryNode> targetQueryNode = findTargetQueryNode(inputQuery, proposal.getUnionNode());
+
+        if(!targetQueryNode.isPresent()){
+            return inputQuery;
+        }
+
+        return apply(proposal.getUnionNode(), targetQueryNode.get(), inputQuery);
+    }
+
+    private Optional<QueryNode> findTargetQueryNode(IntermediateQuery inputQuery, UnionNode unionNode) {
+
+        QueryNode current = unionNode;
+        QueryNode target = current;
+
+        boolean movingUp = true;
+        do {
+            Optional<QueryNode> optionalParent = inputQuery.getParent(current);
+
+            if(!optionalParent.isPresent()){
+                movingUp = false;
+            } else {
+                QueryNode parent = optionalParent.get();
+                if(parent == inputQuery.getRootConstructionNode()){
+                    movingUp = false;
+                } else {
+                    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition
+                            = inputQuery.getOptionalPosition(parent, current);
+                    if(parent instanceof LeftJoinNode && optionalPosition.isPresent()
+                            && optionalPosition.get().equals(BinaryAsymmetricOperatorNode.ArgumentPosition.RIGHT)){
+                        movingUp = false;
+                    } else {
+                        current = parent;
+
+                        if(!(current instanceof ConstructionNode)){
+                            target = current;
+                        }
 
 
-        return apply(proposal.getUnionNode(), proposal.getTargetQueryNode(), inputQuery);
+                    }
+                }
+            }
+        } while (movingUp);
+
+        if(target == unionNode){
+            return  Optional.absent();
+        } else {
+            return Optional.of(target);
+        }
+
     }
 }
