@@ -111,8 +111,8 @@ public class SparqlAlgebraToDatalogTranslator {
             vars = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
 
         DatalogProgram result = ofac.getDatalogProgram();
-        Function bodyAtom = translate(vars, te, result, OBDAVocabulary.QUEST_QUERY + "0");
-        createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom);
+        Function bodyAtom = translate(vars, te, result, OBDAVocabulary.QUEST_QUERY);
+        //createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom);
 
         return result;
     }
@@ -560,7 +560,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param triple
 	 * @return
 	 */
-	public Function translate(List<Variable> vars, StatementPattern triple, DatalogProgram pr, String newHeadName) {
+	public Function translate(List<Term> vars, StatementPattern triple, DatalogProgram pr, String newHeadName) {
 
         Function f;
         Var pred = triple.getPredicateVar();
@@ -611,7 +611,7 @@ public class SparqlAlgebraToDatalogTranslator {
         if (triple.getParentNode() instanceof Group){
             // Collections.sort(vars, comparator);
             List<Term> newvars = new LinkedList<Term>();
-            for (Variable var : vars) {
+            for (Term var : vars) {
                 newvars.add(var);
             }
 

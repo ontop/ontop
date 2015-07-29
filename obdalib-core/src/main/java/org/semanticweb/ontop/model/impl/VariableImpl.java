@@ -71,4 +71,9 @@ public class VariableImpl implements Variable {
 	public Variable clone() {
 		return this;
 	}
+
+    @Override
+    public int compareTo(Variable o) {
+        return identifier - o.hashCode();
+    }
 }
