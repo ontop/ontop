@@ -355,7 +355,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 	
 	public SparqlAlgebraToDatalogTranslator getSparqlAlgebraToDatalogTranslator() {
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher());
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), getUriMap());
 		return translator;
 	}
 	
