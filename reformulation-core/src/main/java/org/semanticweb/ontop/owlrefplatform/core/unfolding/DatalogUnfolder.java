@@ -354,6 +354,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		int[] rcount = { 0, 0 }; //int queryIdx = 0;
 
+        // This code is fantastically weak. TODO: understand why this matters
+        workingList = Lists.reverse(workingList);
+
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
@@ -1814,14 +1817,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		int ArgumentAtoms = 0;
 		List<Function> newbody = new LinkedList<Function>();
-		HashSet<Variable> variablesArg1 = new LinkedHashSet<Variable>();
-		HashSet<Variable> variablesArg2 = new LinkedHashSet<Variable>();
+		Set<Variable> variablesArg2 = new LinkedHashSet<Variable>();
 		boolean containsVar=false;
 		// Here we build the new LJ body where we remove the 2nd
 		// data atom
 		for (Function atom : innerAtoms) {
 			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
 				ArgumentAtoms++;
+
+                Set<Variable> variablesArg1 = new LinkedHashSet<Variable>();
 				// we found the first argument of the LJ, we need
 				// the variables
 				if (ArgumentAtoms == 1) {
@@ -1832,6 +1836,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				} else if (ArgumentAtoms == 2){
 					// Here we keep the variables of the second LJ
 					// data argument
+                    variablesArg2 = new LinkedHashSet<Variable>();
                     TermUtils.addReferencedVariablesTo(variablesArg2, atom);
 
 					// and we remove the variables that are in both
@@ -2028,9 +2033,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
         int dataAtoms = DatalogNormalizer.countDataItems(innerAtoms);
         if (dataAtoms == 1) {
-            // Eliminates Join atoms when they only have one data atom, i.e., they are
-            // not really JOINs
-            DatalogNormalizer.unfoldJoinTrees(partialEvalution);
+            cleanJoins(partialEvalution);
         }
     }
 

@@ -111,8 +111,8 @@ public class SparqlAlgebraToDatalogTranslator {
             vars = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
 
         DatalogProgram result = ofac.getDatalogProgram();
-        Function bodyAtom = translate(vars, te, result, OBDAVocabulary.QUEST_QUERY);
-        //createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom);
+        Function bodyAtom = translate(vars, te, result, OBDAVocabulary.QUEST_QUERY+"0");
+        createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom);
 
         return result;
     }
