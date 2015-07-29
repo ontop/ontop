@@ -663,7 +663,7 @@ public class CQCUtilitiesTest {
         List<Term> headTerms = new LinkedList<Term>();
         headTerms.add(x);
 
-        Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+        Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT}), headTerms);
 
         List<Function> body = new LinkedList<Function>();
 
