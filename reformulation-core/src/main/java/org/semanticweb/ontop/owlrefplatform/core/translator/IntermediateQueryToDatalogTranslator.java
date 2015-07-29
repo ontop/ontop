@@ -22,9 +22,8 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
 
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.UnmodifiableIterator;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.ImmutabilityTools;
 import org.semanticweb.ontop.model.impl.MutableQueryModifiersImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -34,6 +33,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -149,7 +150,7 @@ public class IntermediateQueryToDatalogTranslator {
 			
 		} else if (node instanceof FilterNode) {
 			ImmutableBooleanExpression filter = ((FilterNode) node).getFilterCondition();
-			BooleanExpression mutFilter =  convertToMutableFunction(filter);
+			BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
 			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
 			body.add(mutFilter);
@@ -177,7 +178,7 @@ public class IntermediateQueryToDatalogTranslator {
 			}
 			if (filter.isPresent()){
 				ImmutableBooleanExpression filter2 = filter.get();
-				Function mutFilter = convertToMutableFunction(filter2);
+				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
 				Function newJ = ofac.getSPARQLJoin(atoms, mutFilter);
 				body.add(newJ);
 				return body;
@@ -197,7 +198,7 @@ public class IntermediateQueryToDatalogTranslator {
 				
 			if (filter.isPresent()){
 				ImmutableBooleanExpression filter2 = filter.get();
-				BooleanExpression mutFilter =  convertToMutableFunction(filter2);
+				BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
 				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, mutFilter);
 				body.add(newLJAtom);
 				return body;
@@ -232,68 +233,5 @@ public class IntermediateQueryToDatalogTranslator {
 		}
 	
 	}
-
-	
-	
-	
-	
-	
-	/**
-	 * This method takes a immutable term and convert it into an old mutable function.
-	 * 
-	 * @param term
-	 * @return
-	 */
-	private static Function convertToMutableFunction( ImmutableFunctionalTerm term  ) {
-		
-		Predicate pred= term.getFunctionSymbol();
-		ImmutableList<Term> otherTerms =  term.getTerms();
-		List<Term> mutableList = new LinkedList<Term>();
-		UnmodifiableIterator<Term> iterator = otherTerms.iterator();
-		while ( iterator.hasNext()){
-
-			Term nextTerm = iterator.next();
-			if (nextTerm instanceof ImmutableFunctionalTerm ){
-				ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
-				Function newTerm = convertToMutableFunction(term2Change);
-				mutableList.add(newTerm);
-			} else{
-				mutableList.add(nextTerm);
-			}
-			
-		}
-		Function mutFunc = ofac.getFunction(pred, mutableList);
-		return mutFunc;
-		
-	}
-	
-	/**
-	 * This method takes a immutable booelan term and convert it into an old mutable boolean function.
-	 *
-	 */
-	private static BooleanExpression convertToMutableFunction( ImmutableBooleanExpression filter  ) {
-		
-		BooleanOperationPredicate pred= (BooleanOperationPredicate) filter.getFunctionSymbol();
-		ImmutableList<Term> otherTerms =  filter.getTerms();
-		List<Term> mutableList = new LinkedList<Term>();
-		
-		UnmodifiableIterator<Term> iterator = otherTerms.iterator();
-		while ( iterator.hasNext()){
-
-			Term nextTerm = iterator.next();
-			if (nextTerm instanceof ImmutableFunctionalTerm ){
-				ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
-				Function newTerm = convertToMutableFunction(term2Change);
-				mutableList.add(newTerm);
-			} else{
-				mutableList.add(nextTerm);
-			}
-			
-		}
-		BooleanExpression mutFunc = ofac.getBooleanExpression(pred,mutableList); 
-		return mutFunc;
-		
-	}
-		
 	
 }

@@ -2,10 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
 
@@ -29,6 +26,7 @@ public interface QueryTreeComponent {
     /**
      * Makes sure all the children nodes in the tree are the listed ones.
      */
+    @Deprecated
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
     /**
@@ -47,4 +45,15 @@ public interface QueryTreeComponent {
      * TODO: explain
      */
     void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
+
+    /**
+     * TODO: explain
+     */
+    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, boolean isNewNode)
+            throws IllegalTreeUpdateException;
+
+    /**
+     * TODO: explain
+     */
+    void removeNodeAndItsSubTree(QueryNode node);
 }

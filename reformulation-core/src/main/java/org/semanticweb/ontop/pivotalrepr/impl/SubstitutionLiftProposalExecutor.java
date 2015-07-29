@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -21,7 +22,7 @@ import java.util.Queue;
 public class SubstitutionLiftProposalExecutor implements InternalProposalExecutor<SubstitutionLiftProposal> {
 
     @Override
-    public void apply(SubstitutionLiftProposal proposal, QueryTreeComponent treeComponent)
+    public void apply(SubstitutionLiftProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
         for (BindingTransfer bindingTransfer : proposal.getBindingTransfers()) {
             applyBindingTransfer(bindingTransfer, treeComponent);

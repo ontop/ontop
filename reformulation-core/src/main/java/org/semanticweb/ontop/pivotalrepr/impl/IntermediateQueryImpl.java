@@ -4,11 +4,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
-import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
@@ -151,7 +149,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 /**
                  * Has a SIDE-EFFECT on the tree component.
                  */
-                executor.apply(proposal, treeComponent);
+                executor.apply(proposal, this, treeComponent);
                 return this;
             }
         }

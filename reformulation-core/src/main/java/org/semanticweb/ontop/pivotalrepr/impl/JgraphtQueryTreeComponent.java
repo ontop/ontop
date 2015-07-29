@@ -339,6 +339,16 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         }
     }
 
+    @Override
+    public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, boolean isNewNode) throws IllegalTreeUpdateException {
+        throw new RuntimeException("TODO: implement replaceNodesByOneNode()");
+    }
+
+    @Override
+    public void removeNodeAndItsSubTree(QueryNode node) {
+        throw new RuntimeException("TODO: implement removeNodeAndItsSubTree()");
+    }
+
     private void replaceNodeByUniqueChildren(QueryNode nodeToReplace, QueryNode replacingChild) {
         ImmutableSet<LabeledEdge> toParentEdges = ImmutableSet.copyOf(queryDAG.outgoingEdgesOf(nodeToReplace));
 
