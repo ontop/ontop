@@ -29,6 +29,8 @@ public interface QueryTreeComponent {
     @Deprecated
     void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
+    void removeSubTree(QueryNode subTreeRoot);
+
     /**
      * All the nodes EXCEPT the root of this sub-tree
      */
@@ -49,11 +51,12 @@ public interface QueryTreeComponent {
     /**
      * TODO: explain
      */
-    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, boolean isNewNode)
+    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode)
             throws IllegalTreeUpdateException;
 
     /**
-     * TODO: explain
+     * Please consider using an IntermediateQueryBuilder instead of this tree component.
      */
-    void removeNodeAndItsSubTree(QueryNode node);
+    void addChild(QueryNode parentNode, QueryNode childNode,
+                  Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 }

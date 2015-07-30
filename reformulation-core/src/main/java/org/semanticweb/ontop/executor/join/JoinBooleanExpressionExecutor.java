@@ -4,10 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
-import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.JoinOrFilterNode;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -49,7 +47,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
          * Returns no join node.
          */
         catch (InsatisfiedExpressionException e) {
-            treeComponent.removeNodeAndItsSubTree(topJoinNode);
+            treeComponent.removeSubTree(topJoinNode);
             return Optional.absent();
         }
 
@@ -59,8 +57,12 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
          * TODO: only if the filter condition are not violated!
          */
         try {
-            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, true);
-        } catch (IllegalTreeUpdateException e) {
+            QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
+            Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
+            treeComponent.addChild(parentNode, newJoinNode, optionalPosition);
+
+            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode);
+        } catch (IllegalTreeUpdateException | IllegalTreeException e) {
             throw new RuntimeException("Internal error: " + e.getMessage());
         }
 

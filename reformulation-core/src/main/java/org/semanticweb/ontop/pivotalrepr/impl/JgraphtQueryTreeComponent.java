@@ -6,11 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 import java.util.*;
 
@@ -247,7 +244,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      *
      * Recursive
      */
-    private void removeSubTree(QueryNode subTreeRoot) {
+    @Override
+    public void removeSubTree(QueryNode subTreeRoot) {
         for (LabeledEdge subNodeEdge : queryDAG.incomingEdgesOf(subTreeRoot)) {
             QueryNode childNode = queryDAG.getEdgeSource(subNodeEdge);
             /**
@@ -335,18 +333,82 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
                 replaceNodeByUniqueChildren(node, child);
                 return;
             default:
-                throw new IllegalTreeUpdateException(node.toString() + " has more child. Cannot be replaced");
+                throw new IllegalTreeUpdateException(node.toString() + " has more children. Cannot be replaced");
         }
     }
 
     @Override
-    public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, boolean isNewNode) throws IllegalTreeUpdateException {
-        throw new RuntimeException("TODO: implement replaceNodesByOneNode()");
+    public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode)
+            throws IllegalTreeUpdateException {
+        if (!queryDAG.containsVertex(replacingNode)) {
+            throw new IllegalTreeUpdateException("The replacing must be already present in the tree");
+        }
+        if (replacingNode instanceof BinaryAsymmetricOperatorNode) {
+            throw new RuntimeException("Using a BinaryAsymmetricOperatorNode as a replacingNode is not yet supported");
+        }
+
+        for(QueryNode nodeToRemove : nodesToRemove) {
+            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof BinaryAsymmetricOperatorNode);
+
+            for (QueryNode child : getCurrentSubNodesOf(nodeToRemove)) {
+                if (!nodesToRemove.contains(child)) {
+                    if (isParentBinaryAsymmetricOperator) {
+                        throw new RuntimeException("Re-integrating children of a BinaryAsymmetricOperatorNode " +
+                                "is not yet supported");
+                    }
+                    else {
+                        addChild(replacingNode, child, false);
+                    }
+                }
+            }
+            removeNode(nodeToRemove);
+        }
     }
 
     @Override
-    public void removeNodeAndItsSubTree(QueryNode node) {
-        throw new RuntimeException("TODO: implement removeNodeAndItsSubTree()");
+    public void addChild(QueryNode parentNode, QueryNode child,
+                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+            throws IllegalTreeUpdateException {
+        if (optionalPosition.isPresent()) {
+            addChild(parentNode, child, optionalPosition.get());
+        }
+        else {
+            addChild(parentNode, child, true);
+        }
+    }
+
+    private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
+
+        if (parentNode instanceof BinaryAsymmetricOperatorNode) {
+            throw new IllegalTreeUpdateException("A position is required for adding a child " +
+                    "to a BinaryAsymetricOperatorNode");
+        }
+
+        if (isNew && (!queryDAG.addVertex(childNode))) {
+            throw new IllegalTreeUpdateException("Node " + childNode + " already in the graph");
+        }
+        try {
+            // child --> parent!!
+            queryDAG.addDagEdge(childNode, parentNode);
+        } catch (DirectedAcyclicGraph.CycleFoundException e) {
+            throw new IllegalTreeUpdateException(e.getMessage());
+        }
+    }
+
+    private void addChild(QueryNode parentNode, QueryNode childNode,
+                         BinaryAsymmetricOperatorNode.ArgumentPosition position)
+            throws IllegalTreeUpdateException {
+
+        if (!queryDAG.addVertex(childNode)) {
+            throw new IllegalTreeUpdateException("Node " + childNode + " already in the graph");
+        }
+        try {
+            // child --> parent!!
+            LabeledEdge edge = new LabeledEdge(position);
+            queryDAG.addDagEdge(childNode, parentNode, edge);
+        } catch (DirectedAcyclicGraph.CycleFoundException e) {
+            throw new IllegalTreeUpdateException(e.getMessage());
+        }
     }
 
     private void replaceNodeByUniqueChildren(QueryNode nodeToReplace, QueryNode replacingChild) {
@@ -442,6 +504,18 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
          * By default, does nothing
          */
         return edges;
+    }
+
+    private void removeNode(QueryNode node) {
+        for (LabeledEdge subNodeEdge : queryDAG.incomingEdgesOf(node)) {
+            queryDAG.removeEdge(subNodeEdge);
+        }
+
+        for (LabeledEdge parentEdge : queryDAG.outgoingEdgesOf(node)) {
+            queryDAG.removeEdge(parentEdge);
+        }
+
+        queryDAG.removeVertex(node);
     }
 
 }
