@@ -507,11 +507,13 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     private void removeNode(QueryNode node) {
-        for (LabeledEdge subNodeEdge : queryDAG.incomingEdgesOf(node)) {
+        ImmutableList<LabeledEdge> incomingEdges = ImmutableList.copyOf(queryDAG.incomingEdgesOf(node));
+        for (LabeledEdge subNodeEdge : incomingEdges) {
             queryDAG.removeEdge(subNodeEdge);
         }
 
-        for (LabeledEdge parentEdge : queryDAG.outgoingEdgesOf(node)) {
+        ImmutableList<LabeledEdge> outgoingEdges = ImmutableList.copyOf(queryDAG.outgoingEdgesOf(node));
+        for (LabeledEdge parentEdge : outgoingEdges) {
             queryDAG.removeEdge(parentEdge);
         }
 

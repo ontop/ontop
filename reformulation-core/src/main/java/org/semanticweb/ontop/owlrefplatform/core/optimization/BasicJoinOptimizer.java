@@ -50,8 +50,8 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                     throw new RuntimeException(e.getMessage());
                 }
             }
-            // Recursive call
-            currentQuery = optimizeChildren(currentQuery, child);
+            // Recursive call on the NEW child
+            currentQuery = optimizeChildren(currentQuery, children.get(i));
         }
 
         return currentQuery;
