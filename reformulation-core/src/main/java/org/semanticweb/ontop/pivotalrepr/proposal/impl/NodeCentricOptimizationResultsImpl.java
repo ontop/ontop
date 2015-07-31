@@ -10,19 +10,23 @@ public class NodeCentricOptimizationResultsImpl extends ProposalResultsImpl
 
     private final Optional<QueryNode> optionalNextSibling;
     private final Optional<QueryNode> optionalNewNode;
+    private final Optional<QueryNode> optionalNewParent;
 
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               QueryNode newNode) {
         super(query);
         this.optionalNextSibling = query.nextSibling(newNode);
         this.optionalNewNode = Optional.of(newNode);
+        this.optionalNewParent = query.getParent(newNode);
     }
 
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
-                                              Optional<QueryNode> optionalNextSibling) {
+                                              Optional<QueryNode> optionalNextSibling,
+                                              Optional<QueryNode> optionalParent) {
         super(query);
         this.optionalNextSibling = optionalNextSibling;
         this.optionalNewNode = Optional.absent();
+        this.optionalNewParent = optionalParent;
     }
 
     @Override
@@ -33,5 +37,10 @@ public class NodeCentricOptimizationResultsImpl extends ProposalResultsImpl
     @Override
     public Optional<QueryNode> getOptionalNextSibling() {
         return optionalNextSibling;
+    }
+
+    @Override
+    public Optional<QueryNode> getOptionalParentNode() {
+        return optionalNewParent;
     }
 }

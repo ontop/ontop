@@ -13,26 +13,51 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProp
  * TODO: remove this class
  */
 public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
+
+    /**
+     * TODO: explain
+     */
+    private static class OneLevelOptimizationResult {
+        private final IntermediateQuery query;
+        private final QueryNode newParentNode;
+
+        private OneLevelOptimizationResult(IntermediateQuery query, QueryNode newParentNode) {
+            this.query = query;
+            this.newParentNode = newParentNode;
+        }
+
+        public IntermediateQuery getQuery() {
+            return query;
+        }
+
+        public QueryNode getNewParentNode() {
+            return newParentNode;
+        }
+    }
+
+
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
-        return optimizeChildren(query, query.getRootConstructionNode());
+        return optimizeChildren(query, query.getRootConstructionNode()).getQuery();
     }
 
     /**
      * TODO: explain
      *
-     * TODO: make it more robust!!!!
+     * TODO: simplify so that the update of currentQuery, currentParent and optionalChild is getting clearer.
      *
      * Recursive
      */
-    private IntermediateQuery optimizeChildren(final IntermediateQuery originalQuery, QueryNode queryNode) {
+    private OneLevelOptimizationResult optimizeChildren(final IntermediateQuery originalQuery, final QueryNode originalParent) {
 
         //Non-final
         IntermediateQuery currentQuery = originalQuery;
-
+        // Non-final
+        Optional<QueryNode> optionalChild = originalQuery.getFirstChild(originalParent);
 
         // Non-final
-        Optional<QueryNode> optionalChild = originalQuery.getFirstChild(queryNode);
+        QueryNode currentParent = originalParent;
+
         while (optionalChild.isPresent()) {
             QueryNode child = optionalChild.get();
 
@@ -40,22 +65,34 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
              * Only optimizes the JOIN nodes
              */
             if (child instanceof InnerJoinNode) {
-                // TODO: construct it!
                 InnerJoinOptimizationProposal proposal = new InnerJoinOptimizationProposalImpl((InnerJoinNode) child);
                 try {
-                    NodeCentricOptimizationResults results = proposal.castResults(currentQuery.applyProposal(proposal));
+                    NodeCentricOptimizationResults childResults = proposal.castResults(currentQuery.applyProposal(proposal));
 
-                    Optional<QueryNode> optionalNewChild = results.getOptionalNewNode();
-
-                    if (optionalNewChild.isPresent()) {
-                        // Recursive call on the NEW child
-                        currentQuery = optimizeChildren(results.getResultingQuery(), optionalNewChild.get());
-                    }
+                    Optional<QueryNode> optionalNewChild = childResults.getOptionalNewNode();
 
                     /**
-                     * Continues with the next sibling
+                     * If the JOIN is still present (not eliminated)
                      */
-                    optionalChild = results.getOptionalNextSibling();
+                    if (optionalNewChild.isPresent()) {
+                        // Recursive call on the NEW child
+                        OneLevelOptimizationResult grandChildResults = optimizeChildren(childResults.getResultingQuery(), optionalNewChild.get());
+                        currentQuery = grandChildResults.getQuery();
+
+                        QueryNode newNewChild = grandChildResults.getNewParentNode();
+                        currentParent = currentQuery.getParent(newNewChild).get();
+
+                        // Continues with the next sibling
+                        optionalChild = currentQuery.nextSibling(newNewChild);
+                    }
+                    /**
+                     * TODO: analyze and apply the consequences of the removal of the JOIN node.
+                     */
+                    else {
+                        currentParent = childResults.getOptionalParentNode().get();
+                         // Continues with the next sibling
+                        optionalChild = childResults.getOptionalNextSibling();
+                    }
 
                 } catch (InvalidQueryOptimizationProposalException e) {
                     // TODO: find a better exception
@@ -63,13 +100,19 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                 }
             }
             /**
-             * No optimization
+             * Not an inner join
              */
             else {
-                optionalChild = currentQuery.nextSibling(child);
+                OneLevelOptimizationResult grandChildResults = optimizeChildren(currentQuery, child);
+                currentQuery = grandChildResults.getQuery();
+
+                QueryNode newChild = grandChildResults.getNewParentNode();
+                currentParent = currentQuery.getParent(newChild).get();
+
+                optionalChild = currentQuery.nextSibling(newChild);
             }
         }
 
-        return currentQuery;
+        return new OneLevelOptimizationResult(currentQuery, currentParent);
     }
 }
