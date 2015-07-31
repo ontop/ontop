@@ -316,7 +316,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
             case 1:
                 return Optional.of(queryDAG.getEdgeTarget(toParentEdges.iterator().next()));
             default:
-                throw new IllegalTreeException("More than one parent found!");
+                List<QueryNode> parents = new ArrayList<>();
+                for (LabeledEdge toParentEdge : toParentEdges) {
+                    parents.add(queryDAG.getEdgeTarget(toParentEdge));
+                }
+                throw new IllegalTreeException("More than one parent found! " + parents);
         }
     }
 
@@ -473,6 +477,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
                 throw new RuntimeException(e.getMessage());
             }
             queryDAG.removeEdge(outgoingEdge);
+            removeNode(nodeToReplace);
         }
     }
 
