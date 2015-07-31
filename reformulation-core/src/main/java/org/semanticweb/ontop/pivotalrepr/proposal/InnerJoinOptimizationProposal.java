@@ -11,4 +11,6 @@ public interface InnerJoinOptimizationProposal extends QueryOptimizationProposal
      * TODO: describe precisely which join node we are considering
      */
     InnerJoinNode getTopJoinNode();
+
+    NodeCentricOptimizationResults castResults(ProposalResults results);
 }

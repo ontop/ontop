@@ -10,7 +10,9 @@ import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 
 import static org.semanticweb.ontop.executor.join.JoinExtractionUtils.*;
 
@@ -23,16 +25,31 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
      * Standard method (InternalProposalExecutor)
      */
     @Override
-    public void apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,  QueryTreeComponent treeComponent)
+    public NodeCentricOptimizationResults apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
+                                              QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
-        transformJoin(proposal.getTopJoinNode(), query, treeComponent);
+
+        InnerJoinNode originalTopJoinNode = proposal.getTopJoinNode();
+
+        /**
+         * Will remain the same, whatever happens
+         */
+        Optional<QueryNode> optionalParent = query.getParent(originalTopJoinNode);
+
+        Optional<InnerJoinNode> optionalNewJoinNode = transformJoin(originalTopJoinNode, query, treeComponent);
+
+        if (optionalNewJoinNode.isPresent()) {
+            return new NodeCentricOptimizationResultsImpl(query, optionalNewJoinNode.get());
+        }
+        else {
+            return new NodeCentricOptimizationResultsImpl(query, optionalParent);
+        }
     }
 
     /**
-     * Direct method (without proposal)
-     * RESERVED TO COMPOSITE InternalProposalExecutor<InnerJoinOptimizationProposal>!
+     * TODO: explain
      */
-    protected Optional<InnerJoinNode> transformJoin(InnerJoinNode topJoinNode, IntermediateQuery query,
+    private Optional<InnerJoinNode> transformJoin(InnerJoinNode topJoinNode, IntermediateQuery query,
                                           QueryTreeComponent treeComponent) {
 
 

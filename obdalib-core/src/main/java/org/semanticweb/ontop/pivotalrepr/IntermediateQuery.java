@@ -2,7 +2,6 @@ package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
 
 /**
@@ -36,7 +35,7 @@ public interface IntermediateQuery {
      * In principle, the proposal could be carefully checked, beware!
      *
      */
-    IntermediateQuery applyProposal(QueryOptimizationProposal proposal)
+    ProposalResults applyProposal(QueryOptimizationProposal proposal)
         throws InvalidQueryOptimizationProposalException;
 
     /**

@@ -44,7 +44,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                 // TODO: construct it!
                 InnerJoinOptimizationProposal proposal = new InnerJoinOptimizationProposalImpl((InnerJoinNode) child);
                 try {
-                    currentQuery = currentQuery.applyProposal(proposal);
+                    currentQuery = currentQuery.applyProposal(proposal).getResultingQuery();
                 } catch (InvalidQueryOptimizationProposalException e) {
                     // TODO: find a better exception
                     throw new RuntimeException(e.getMessage());

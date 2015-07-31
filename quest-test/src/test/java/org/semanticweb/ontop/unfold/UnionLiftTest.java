@@ -154,7 +154,7 @@ public class UnionLiftTest {
 
         UnionLiftProposalExecutor executor = new UnionLiftProposalExecutorImpl();
 
-        IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery);
+        IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery).getResultingQuery();
 
         System.out.println("New Query: \n" + newQuery);
 
@@ -172,7 +172,7 @@ public class UnionLiftTest {
 
         UnionLiftProposalExecutor executor = new UnionLiftProposalExecutorImpl();
 
-        IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery);
+        IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery).getResultingQuery();
 
         System.out.println("New Query: \n" + newQuery);
 

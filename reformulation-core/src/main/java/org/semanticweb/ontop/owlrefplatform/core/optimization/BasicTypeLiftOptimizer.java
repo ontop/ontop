@@ -335,7 +335,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
 
         IntermediateQuery newQuery;
         try {
-            newQuery = query.applyProposal(proposal);
+            newQuery = query.applyProposal(proposal).getResultingQuery();
         }
         catch (InvalidQueryOptimizationProposalException e) {
             throw new RuntimeException("Bad substitution lift proposal: " + e.getMessage());

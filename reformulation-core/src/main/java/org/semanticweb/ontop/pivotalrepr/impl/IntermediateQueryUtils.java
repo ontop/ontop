@@ -74,7 +74,7 @@ public class IntermediateQueryUtils {
 
             IntermediateQuery renamedDefinition = null;
             try {
-                renamedDefinition = originalDefinition.applyProposal(renamingProposal);
+                renamedDefinition = originalDefinition.applyProposal(renamingProposal).getResultingQuery();
             } catch (InvalidQueryOptimizationProposalException e) {
                 throw new RuntimeException("Internal error: bad renaming proposal: " + e.getMessage());
             }

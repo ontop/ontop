@@ -6,10 +6,8 @@ import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
-import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.*;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import org.semanticweb.ontop.pivotalrepr.transformer.BindingTransferTransformer;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionLiftPropagator;
 
@@ -22,7 +20,7 @@ import java.util.Queue;
 public class SubstitutionLiftProposalExecutor implements InternalProposalExecutor<SubstitutionLiftProposal> {
 
     @Override
-    public void apply(SubstitutionLiftProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
+    public ProposalResults apply(SubstitutionLiftProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
         for (BindingTransfer bindingTransfer : proposal.getBindingTransfers()) {
             applyBindingTransfer(bindingTransfer, treeComponent);
@@ -31,6 +29,8 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
         for (ConstructionNodeUpdate update : proposal.getNodeUpdates()) {
             applyConstructionNodeUpdate(update, treeComponent);
         }
+
+        return new ProposalResultsImpl(query);
     }
 
     /**

@@ -113,7 +113,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * TODO: make this extensible by using Guice as a dependency-injection solution for loading arbitrary ProposalExecutor
      */
     @Override
-    public IntermediateQuery applyProposal(QueryOptimizationProposal proposal)
+    public ProposalResults applyProposal(QueryOptimizationProposal proposal)
             throws InvalidQueryOptimizationProposalException {
 
         /**
@@ -151,8 +151,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 /**
                  * Has a SIDE-EFFECT on the tree component.
                  */
-                executor.apply(proposal, this, treeComponent);
-                return this;
+                return executor.apply(proposal, this, treeComponent);
             }
         }
         throw new RuntimeException("No executor found for a proposal of the type " + proposal.getClass());

@@ -3,6 +3,8 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.impl.JgraphtIntermediateQueryBuilder;
+import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 
 public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor {
 
@@ -82,14 +84,15 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
     }
 
     @Override
-    public IntermediateQuery apply(UnionLiftProposal proposal, IntermediateQuery inputQuery) {
+    public ProposalResults apply(UnionLiftProposal proposal, IntermediateQuery inputQuery) {
         Optional<QueryNode> targetQueryNode = findTargetQueryNode(inputQuery, proposal.getUnionNode());
 
         if(!targetQueryNode.isPresent()){
-            return inputQuery;
+            return new ProposalResultsImpl(inputQuery);
         }
 
-        return apply(proposal.getUnionNode(), targetQueryNode.get(), inputQuery);
+        IntermediateQuery newQuery = apply(proposal.getUnionNode(), targetQueryNode.get(), inputQuery);
+        return new ProposalResultsImpl(newQuery);
     }
 
     private Optional<QueryNode> findTargetQueryNode(IntermediateQuery inputQuery, UnionNode unionNode) {
