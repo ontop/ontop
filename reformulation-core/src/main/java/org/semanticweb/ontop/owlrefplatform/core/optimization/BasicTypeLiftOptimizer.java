@@ -43,7 +43,11 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      */
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
+        // TODO: see if we can prevent applying it twice.
+        return optimizeQuery(optimizeQuery(query));
+    }
 
+    private IntermediateQuery optimizeQuery(IntermediateQuery query) {
         Tree<ConstructionNodeUpdate> initialConstructionTree = extractConstructionTree(query);
 
         VariableGenerator variableGenerator = new VariableGenerator(
