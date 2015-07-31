@@ -43,6 +43,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
+import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicTypeLiftOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -513,9 +514,15 @@ public class QuestStatement implements OBDAStatement {
 						unfolder.getExtensionalPredicates());
 				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
 
-				BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
-				intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+				//BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				//intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
+
+
+				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 				
 				
 				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
