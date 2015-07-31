@@ -51,5 +51,9 @@ public interface IntermediateQuery {
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
 
     Optional<QueryNode> getParent(QueryNode node);
+
+    Optional<QueryNode> nextSibling(QueryNode node);
+
+    Optional<QueryNode> getFirstChild(QueryNode node);
     
 }

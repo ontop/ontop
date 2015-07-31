@@ -181,6 +181,20 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
     }
 
+    @Override
+    public Optional<QueryNode> nextSibling(QueryNode node) {
+        try {
+            return treeComponent.nextSibling(node);
+        } catch (IllegalTreeException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Optional<QueryNode> getFirstChild(QueryNode node) {
+        return treeComponent.getFirstChild(node);
+    }
+
     /**
      * TODO: explain
      */

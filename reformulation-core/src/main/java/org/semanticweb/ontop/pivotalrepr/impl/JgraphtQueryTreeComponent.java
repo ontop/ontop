@@ -377,6 +377,54 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         }
     }
 
+    /**
+     * Weak guarantee about the ordering with Jgrapht...
+     * TODO: avoid using it
+     */
+    @Override
+    public Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException {
+        Optional<QueryNode> optionalParent = getParent(node);
+        if (optionalParent.isPresent()) {
+            ImmutableList<QueryNode> siblings = getCurrentSubNodesOf(optionalParent.get());
+            int index = siblings.indexOf(node);
+            int nextIndex = index + 1;
+            if (nextIndex < siblings.size()) {
+                QueryNode nextSibling = siblings.get(nextIndex);
+
+                /**
+                 * Checks if the next sibling object
+                 * have not appear before in the list
+                 */
+                if (siblings.indexOf(nextSibling) < nextIndex) {
+                    throw new IllegalTreeException("The node " + nextSibling + " appears more than once in " +
+                            "the children list");
+                }
+
+                return Optional.of(nextSibling);
+            }
+            else {
+                return Optional.absent();
+            }
+        }
+        /**
+         * No parent, no sibling.
+         */
+        else {
+            return Optional.absent();
+        }
+    }
+
+    @Override
+    public Optional<QueryNode> getFirstChild(QueryNode node) {
+        ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
+        if (children.isEmpty()) {
+            return Optional.absent();
+        }
+        else {
+            return Optional.of(children.get(0));
+        }
+    }
+
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
 
         if (parentNode instanceof BinaryAsymmetricOperatorNode) {

@@ -34,7 +34,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
         /**
          * Will remain the same, whatever happens
          */
-        Optional<QueryNode> optionalParent = query.getParent(originalTopJoinNode);
+        Optional<QueryNode> optionalNextSibling = query.nextSibling(originalTopJoinNode);
 
         Optional<InnerJoinNode> optionalNewJoinNode = transformJoin(originalTopJoinNode, query, treeComponent);
 
@@ -42,7 +42,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
             return new NodeCentricOptimizationResultsImpl(query, optionalNewJoinNode.get());
         }
         else {
-            return new NodeCentricOptimizationResultsImpl(query, optionalParent);
+            return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling);
         }
     }
 

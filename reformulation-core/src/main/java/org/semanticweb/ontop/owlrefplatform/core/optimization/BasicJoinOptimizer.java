@@ -1,11 +1,12 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 
 /**
@@ -24,18 +25,16 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
      *
      * Recursive
      */
-    private IntermediateQuery optimizeChildren(final IntermediateQuery query, QueryNode queryNode) {
+    private IntermediateQuery optimizeChildren(final IntermediateQuery originalQuery, QueryNode queryNode) {
 
         //Non-final
-        IntermediateQuery currentQuery = query;
+        IntermediateQuery currentQuery = originalQuery;
 
 
-        ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(queryNode);
-        /**
-         * TODO: this is weak!!! It assumes that the optimization will be applied by an InternalOptimizationExecutor!!
-         */
-        for (int i=0; i < children.size() ; i++) {
-            QueryNode child = children.get(i);
+        // Non-final
+        Optional<QueryNode> optionalChild = originalQuery.getFirstChild(queryNode);
+        while (optionalChild.isPresent()) {
+            QueryNode child = optionalChild.get();
 
             /**
              * Only optimizes the JOIN nodes
@@ -44,14 +43,31 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                 // TODO: construct it!
                 InnerJoinOptimizationProposal proposal = new InnerJoinOptimizationProposalImpl((InnerJoinNode) child);
                 try {
-                    currentQuery = currentQuery.applyProposal(proposal).getResultingQuery();
+                    NodeCentricOptimizationResults results = proposal.castResults(currentQuery.applyProposal(proposal));
+
+                    Optional<QueryNode> optionalNewChild = results.getOptionalNewNode();
+
+                    if (optionalNewChild.isPresent()) {
+                        // Recursive call on the NEW child
+                        currentQuery = optimizeChildren(results.getResultingQuery(), optionalNewChild.get());
+                    }
+
+                    /**
+                     * Continues with the next sibling
+                     */
+                    optionalChild = results.getOptionalNextSibling();
+
                 } catch (InvalidQueryOptimizationProposalException e) {
                     // TODO: find a better exception
                     throw new RuntimeException(e.getMessage());
                 }
             }
-            // Recursive call on the NEW child
-            currentQuery = optimizeChildren(currentQuery, children.get(i));
+            /**
+             * No optimization
+             */
+            else {
+                optionalChild = currentQuery.nextSibling(child);
+            }
         }
 
         return currentQuery;

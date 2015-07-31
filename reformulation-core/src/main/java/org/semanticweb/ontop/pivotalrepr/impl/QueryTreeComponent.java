@@ -59,4 +59,9 @@ public interface QueryTreeComponent {
      */
     void addChild(QueryNode parentNode, QueryNode childNode,
                   Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+
+    Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException;
+
+    Optional<QueryNode> getFirstChild(QueryNode node);
+
 }

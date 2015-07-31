@@ -11,10 +11,10 @@ public interface NodeCentricOptimizationResults extends ProposalResults {
     /**
      * TODO: explain
      */
-    Optional<QueryNode> getOptionalNewParentNode();
+    Optional<QueryNode> getOptionalNewNode();
 
     /**
      * TODO: explain
      */
-    Optional<QueryNode> getOptionalNewNode();
+    Optional<QueryNode> getOptionalNextSibling();
 }
