@@ -49,8 +49,9 @@ public class NpdEntailmentTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/npdEntailment/ontology/npd-v2-ql.owl";
-	final String obdafile = "src/test/resources/npdEntailment/mappings/mysql/npd-v2-ql-mysql.obda";
+	String owlfile = "src/test/resources/npdEntailment/ontology/npd-v2-ql.owl";
+	String obdafile = "src/test/resources/npdEntailment/mappings/mysql/npd-v2-ql-mysql.obda";
+	String outputfile = "src/test/resources/npdEntailment/querytime.txt";
 	private QuestOWL reasoner;
 	private QuestOWLConnection conn;
 
@@ -104,7 +105,7 @@ public class NpdEntailmentTest {
 		/*
 		 * Generate File !
 		 */
-		PrintWriter writer = new PrintWriter("src/test/resources/npdEntailment/querytime.txt", "UTF-8");
+		PrintWriter writer = new PrintWriter(outputfile, "UTF-8");
 		for( String result: results) {
 			writer.println(result);
 		}
@@ -166,10 +167,11 @@ public class NpdEntailmentTest {
 
 			while (rs.nextRow()) {
 				resultCount++;
-
-				OWLIndividual y = rs.getOWLIndividual("y");
-				retval = y.toString();
-				System.out.println(retval);
+				for(String variable : rs.getSignature()) {
+					OWLIndividual y = rs.getOWLIndividual(variable);
+					retval = y.toString();
+					System.out.println(variable + ": " +retval);
+				}
 			}
 			assertTrue(resultCount > 0);
 
@@ -243,6 +245,14 @@ public class NpdEntailmentTest {
 
 	}
 
+	@Test
+	public void testResultsNpd() throws Exception {
+		String query = "PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#> select * where { ?x rdfs:subClassOf :Agent . ?licenceURI a ?x . [] :licenseeForLicence ?licenceURI .}";
+		int domain = runTests(query);
+		assertEquals(73, domain);
+
+	}
+
 	private void runSingleQuery(String groupId, String queryId) throws Exception  {
 	/*
 		 * Loading the queries
@@ -267,10 +277,10 @@ public class NpdEntailmentTest {
 		while (res.nextRow()) {
 			count += 1;
 
-//                    for (int i = 1; i <= res.getColumnCount(); i++) {
-//                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
-//
-//                    }
+                    for (int i = 1; i <= res.getColumnCount(); i++) {
+                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
+
+                    }
 				}
 		log.debug("Total result: {}", count);
 
@@ -280,8 +290,23 @@ public class NpdEntailmentTest {
 
 	@Test
 	public void getOneResult() throws Exception{
-		runSingleQuery("TestQueries", "q6StaticRange");
+		runSingleQuery("TestQueries", "q1Materialize");
 	}
 
+
+	public static void main(String[] args) throws Exception {
+		if (args.length != 3) {
+			System.err.println("Usage: main ontology.owl mapping.obda outputFile.txt");
+			System.exit(0);
+		}
+
+		NpdEntailmentTest benchmark = new NpdEntailmentTest();
+		benchmark.owlfile = args[0];
+		benchmark.obdafile = args[1];
+		benchmark.outputfile = args[2];
+		benchmark.setUp();
+		benchmark.testNpdQueries();
+		benchmark.tearDown();
+	}
 
 }
