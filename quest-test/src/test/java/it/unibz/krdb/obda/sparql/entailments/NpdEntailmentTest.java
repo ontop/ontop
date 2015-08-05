@@ -52,6 +52,7 @@ public class NpdEntailmentTest {
 	String owlfile = "src/test/resources/npdEntailment/ontology/npd-v2-ql.owl";
 	String obdafile = "src/test/resources/npdEntailment/mappings/mysql/npd-v2-ql-mysql.obda";
 	String outputfile = "src/test/resources/npdEntailment/querytime.txt";
+	String queryfile = "src/test/resources/npdEntailment/queries/npdEntailment.q";
 	private QuestOWL reasoner;
 	private QuestOWLConnection conn;
 
@@ -120,6 +121,7 @@ public class NpdEntailmentTest {
 		/*
 		 * Loading the queries
 		 */
+
 		QuestOWLStatement st = conn.createStatement();
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
@@ -305,8 +307,8 @@ public class NpdEntailmentTest {
 
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 3) {
-			System.err.println("Usage: main ontology.owl mapping.obda outputFile.txt");
+		if (args.length != 4) {
+			System.err.println("Usage: main ontology.owl mapping.obda outputFile.txt queryFile.q");
 			System.exit(0);
 		}
 
@@ -314,9 +316,91 @@ public class NpdEntailmentTest {
 		benchmark.owlfile = args[0];
 		benchmark.obdafile = args[1];
 		benchmark.outputfile = args[2];
-		benchmark.setUp();
-		benchmark.testNpdQueries();
-		benchmark.tearDown();
+		benchmark.queryfile = args [3];
+		benchmark.testMainNpdQueries();
 	}
+
+	public void testMainNpdQueries() throws Exception{
+
+			long start1 = System.currentTimeMillis();
+			// Loading the OWL file
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+
+			// Loading the OBDA data
+			fac = OBDADataFactoryImpl.getInstance();
+			obdaModel = fac.getOBDAModel();
+
+			ModelIOManager ioManager = new ModelIOManager(obdaModel);
+			ioManager.load(obdafile);
+
+			QuestPreferences p = new QuestPreferences();
+			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+			p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, QuestConstants.TRUE);
+			// Creating a new instance of the reasoner
+			QuestOWLFactory factory = new QuestOWLFactory();
+			factory.setOBDAController(obdaModel);
+
+			factory.setPreferenceHolder(p);
+
+			QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+			long end1 = System.currentTimeMillis() - start1;
+			log.info("---time Reasoner " + end1);
+			// Now we are ready for querying
+			QuestOWLConnection conn = reasoner.getConnection();
+
+		List<String> resultsList = new ArrayList<String>();
+		/*
+		 * Loading the queries
+		 */
+
+		QuestOWLStatement st = conn.createStatement();
+		QueryController qc = new QueryController();
+		QueryIOManager qman = new QueryIOManager(qc);
+		qman.load(queryfile);
+
+
+		for (QueryControllerGroup group : qc.getGroups()) {
+			for (QueryControllerQuery query : group.getQueries()) {
+
+				log.debug("Executing query: {}", query.getID());
+				log.debug("Query: \n{}", query.getQuery());
+				int count = 0, run = 0;
+				double totalTime = 0;
+				while (run < 3) {
+					long start = System.currentTimeMillis();
+					QuestOWLResultSet res = st.executeTuple(query.getQuery());
+					long end = System.currentTimeMillis();
+
+					double time = (end - start);
+					totalTime += time ;
+
+
+					count = 0;
+					while (res.nextRow()) {
+						count += 1;
+
+//                    for (int i = 1; i <= res.getColumnCount(); i++) {
+//                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
+//
+//                    }
+					}
+
+
+
+					log.debug("Elapsed time: {} ms", time);
+					run++;
+				}
+				log.debug("Total result: {}", count);
+				resultsList.add(group.getID() + " " + query.getID() + " results:" + count + " " + Math.round(totalTime / 3.0D) + " ms");
+
+			}
+		}
+
+		generateFile(resultsList);
+	}
+
 
 }
