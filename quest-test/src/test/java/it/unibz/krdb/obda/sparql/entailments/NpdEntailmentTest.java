@@ -59,7 +59,7 @@ public class NpdEntailmentTest {
 	@Before
 	public void setUp() throws Exception {
 		try {
-
+			long start1 = System.currentTimeMillis();
 			// Loading the OWL file
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
@@ -83,6 +83,8 @@ public class NpdEntailmentTest {
 
 			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
+			long end1 = System.currentTimeMillis() - start1;
+			log.info("---time Reasoner " + end1);
 			// Now we are ready for querying
 			conn = reasoner.getConnection();
 		} catch (Exception exc) {
@@ -129,26 +131,34 @@ public class NpdEntailmentTest {
 
 				log.debug("Executing query: {}", query.getID());
 				log.debug("Query: \n{}", query.getQuery());
+				int count = 0, run = 0;
+				double totalTime = 0;
+				while (run < 3) {
+					long start = System.currentTimeMillis();
+					QuestOWLResultSet res = st.executeTuple(query.getQuery());
+					long end = System.currentTimeMillis();
 
-				long start = System.nanoTime();
-				QuestOWLResultSet res = st.executeTuple(query.getQuery());
-				long end = System.nanoTime();
+					double time = (end - start);
+					totalTime += time ;
 
-				double time = (end - start) / 1000;
 
-				int count = 0;
-				while (res.nextRow()) {
-					count += 1;
+					 count = 0;
+					while (res.nextRow()) {
+						count += 1;
 
 //                    for (int i = 1; i <= res.getColumnCount(); i++) {
 //                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
 //
 //                    }
+					}
+
+
+					assertEquals(results[nquery], count);
+					log.debug("Elapsed time: {} ms", time);
+					run++;
 				}
 				log.debug("Total result: {}", count);
-				assertEquals(results[nquery], count);
-				log.debug("Elapsed time: {} ms", time);
-				resultsList.add(group.getID() + " " + query.getID() + " results:" + count + " " +  time + " ms" );
+				resultsList.add(group.getID() + " " + query.getID() + " results:" + count + " " + Math.round(totalTime / 3.0D) + " ms");
 				nquery ++;
 			}
 		}
@@ -267,11 +277,11 @@ public class NpdEntailmentTest {
 		log.debug("Executing query: {}", query.getID());
 		log.debug("Query: \n{}", query.getQuery());
 
-		long start = System.nanoTime();
+		long start = System.currentTimeMillis();
 		QuestOWLResultSet res = st.executeTuple(query.getQuery());
-		long end = System.nanoTime();
+		long end = System.currentTimeMillis();
 
-		double time = (end - start) / 1000;
+		double time = (end - start) ;
 
 		int count = 0;
 		while (res.nextRow()) {
