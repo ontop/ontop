@@ -12,10 +12,10 @@
 ########################################################################################################################
 
 # location for the build ROOT folder
-export BUILD_ROOT=/build/ontop-1.8
+export BUILD_ROOT=/home/constant/manual-release/build/ontop-1.15/ontop
 
 # location for the build dependencies home 
-export ONTOP_DEP_HOME=/build/dependencies
+export ONTOP_DEP_HOME=/home/constant/manual-release/build/dependencies
 
 #------------------------------------------# 
 # DO NOT touch the following command lines #
@@ -49,7 +49,7 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.8
+export VERSION=1.15
 export REVISION=0
 
 
@@ -72,7 +72,7 @@ mvn bundle:bundle -DskipTests
 
 rm -fr $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
 mkdir $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
-cp target/it.unibz.inf.obda.p4plugin-$VERSION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
+cp target/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
 cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
 
 cd $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
@@ -87,7 +87,21 @@ zip $PROTEGE_COPY_FILENAME.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*
 mv $PROTEGE_COPY_FILENAME.zip $PROTEGE_MAIN_PLUGIN-with-protege-$VERSION.$REVISION.zip
 
 rm -fr $PROTEGE_MAIN_FOLDER_NAME
+
+cd $BUILD_ROOT/obdalib-sesame
+
+# Packing obdalib-sesame
+#
+echo ""
+echo "========================================="
+echo " Making obdalib-sesame package"
+echo "-----------------------------------------"
+rm -fr $QUEST_SESAME_DIST
+mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
+mvn clean package -DskipTests
+
 cd $BUILD_ROOT/quest-distribution
+
 
 # Packing the sesame distribution
 #
@@ -98,14 +112,20 @@ echo "-----------------------------------------"
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
 mvn assembly:assembly -DskipTests
-cp target/quest-distribution-$VERSION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
-unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-$VERSION-dependencies.zip
+cp target/ontop-distribution-$VERSION.$REVISION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
+cp $BUILD_ROOT/obdalib-sesame/target/ontop-obdalib-sesame-$VERSION.$REVISION.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-obdalib-sesame-$VERSION.$REVISION.jar
+
+echo "PROOF:"
+ls $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
+unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/ontop-distribution-$VERSION.$REVISION-dependencies.zip
 cp $OPENRDF_SESAME_PATH/$OPENRDF_SESAME_FILENAME.war $QUEST_SESAME_DIST/
 cp $OPENRDF_WORKBENCH_PATH/$OPENRDF_WORKBENCH_FILENAME.war $QUEST_SESAME_DIST/
 
 cd $QUEST_SESAME_DIST
 echo ""
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-sesame.war"
+echo "[INFO] Printing content of WEB-INF/lib:"
+
 jar -uf $OPENRDF_SESAME_FILENAME.war WEB-INF/lib/*
 
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
@@ -144,7 +164,7 @@ echo "-----------------------------------------"
 rm -fr $OWL_API_DIST
 mkdir $OWL_API_DIST
 echo "[INFO] Copying files..."
-cp target/quest-distribution-$VERSION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
+cp target/ontop-distribution-$VERSION.$REVISION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
 
 echo ""
 echo "Done."
