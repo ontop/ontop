@@ -1396,7 +1396,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
-			String langColumn = getLangColumnForSELECT(ht, varName, index, sqlVariableNames);
+			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index, sqlVariableNames);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -1533,59 +1533,89 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return format;
 	}
 
-	/**
-	 * Adding the ColType column to the projection (used in the result
-	 * set to know the type of constant)
-	 */
-	private String getLangColumnForSELECT(Term ht, String signatureVarName,
-										  QueryAliasIndex index,
-										  Set<String> sqlVariableNames) {
-		final String varName = sqladapter.nameTopVariable(signatureVarName, LANG_SUFFIX, sqlVariableNames);
-		sqlVariableNames.add(varName);
+    private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index,
+                                          Set<String> sqlVariableNames) {
 
-		// String varName = signature.get(hpos);
-		if (ht instanceof Function) {
-			Function ov = (Function) ht;
-			Predicate function = ov.getFunctionSymbol();
+        /**
+         * Creates a variable name that fits to the restrictions of the SQL dialect.
+         */
+        String langVariableName = sqladapter.nameTopVariable(signature.get(hpos), LANG_SUFFIX, sqlVariableNames);
+        sqlVariableNames.add(langVariableName);
 
-			if (dtfac.isLiteral(function))
-				if (ov.getTerms().size() > 1) {
-					/*
-					 * Case for rdf:literal s with a language, we need to select
-					 * 2 terms from ".., rdf:literal(?x,"en"),
-					 * 
-					 * and signature "name" * we will generate a select with the
-					 * projection of 2 columns
-					 * 
-					 * , 'en' as nameqlang, view.colforx as name,
-					 */
-					String lang = null;
-					int last = ov.getTerms().size() - 1;
-					Term langTerm = ov.getTerms().get(last);
-					if (langTerm == OBDAVocabulary.NULL) {
+        if (ht instanceof Function) {
+            Function ov = (Function) ht;
+            Predicate function = ov.getFunctionSymbol();
 
-						if (sqladapter instanceof HSQLSQLDialectAdapter) {
-							lang = "CAST(NULL AS VARCHAR(3))";
-						} else {
-							lang = "NULL";
-						}
+            String lang = getLangType(ov, index);
+//
 
-					} else if (langTerm instanceof ValueConstant) {
-						lang = getSQLLexicalForm((ValueConstant) langTerm);
-					} else {
-						lang = getSQLString(langTerm, index, false);
-					}
-					return (String.format(LANG_STR, lang, varName));
-				}
-		}
+            return (String.format(LANG_STR, lang, langVariableName));
+        }
+
+        return  (String.format(LANG_STR, "NULL", langVariableName));
+
+    }
+
+    private String getLangType(Function func1, QueryAliasIndex index) {
+
+        Predicate pred1 = func1.getFunctionSymbol();
+
+        if (dtfac.isLiteral(pred1) && isBinary(func1)) {
 
 
-		if (sqladapter instanceof HSQLSQLDialectAdapter) {
-			return (String.format(LANG_STR, "CAST(NULL AS VARCHAR(3))", varName));
-		}
-		return (String.format(LANG_STR,  "NULL", varName));
+            Term langTerm = func1.getTerm(1);
+            if (langTerm == OBDAVocabulary.NULL) {
+                return  "NULL";
+            } else if (langTerm instanceof ValueConstant) {
+                return getSQLLexicalForm((ValueConstant) langTerm);
+            } else {
+                return getSQLString(langTerm, index, false);
+            }
 
-	}
+        }
+        else if (pred1.isStringOperationPredicate()) {
+
+            if(pred1.equals(OBDAVocabulary.CONCAT)) {
+                Term concat1 = func1.getTerm(0);
+                Term concat2 = func1.getTerm(1);
+
+                if (concat1 instanceof Function && concat2 instanceof Function) {
+                    Function concatFunc1 = (Function) concat1;
+                    Function concatFunc2 = (Function) concat2;
+
+                    String lang1 = getLangType(concatFunc1, index);
+
+                    String lang2 = getLangType(concatFunc2, index);
+
+                    if (lang1.equals(lang2)) {
+
+                        return lang1;
+
+                    } else return "NULL";
+
+                }
+            }
+            else if(pred1.equals(OBDAVocabulary.REPLACE)){
+                Term rep1 = func1.getTerm(0);
+
+
+                if (rep1 instanceof Function) {
+                    Function replFunc1 = (Function) rep1;
+
+
+                    String lang1 = getLangType(replFunc1, index);
+
+                    return lang1;
+
+
+
+                }
+
+            }
+            return "NULL";
+        }
+        else return "NULL";
+    }
 
 //	/**
 //	 * Infers the type of a projected term.
