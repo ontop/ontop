@@ -2265,7 +2265,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			} else if (functionName.equals(OBDAVocabulary.SPARQL_COUNT.getName())) {
+			}else if (functionName.equals(OBDAVocabulary.REPLACE.getName())) {
+                String orig = getSQLString(function.getTerm(0), index, false);
+                String out_str = getSQLString(function.getTerm(1), index, false);
+                String in_str = getSQLString(function.getTerm(2), index, false);
+                String result = sqladapter.strreplace(orig, out_str, in_str);
+                return result;
+            }
+            else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
+                String left = getSQLString(function.getTerm(0), index, false);
+                String right = getSQLString(function.getTerm(1), index, false);
+                String result = sqladapter.strconcat(new String[]{left, right});
+                return result;
+            }
+            else if (functionName.equals(OBDAVocabulary.SPARQL_COUNT.getName())) {
 				if (term1.toString().equals("*")) {
 					return "COUNT(*)";
 				}
