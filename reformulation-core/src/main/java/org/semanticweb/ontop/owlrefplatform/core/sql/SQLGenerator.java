@@ -1469,7 +1469,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 				// New template based URI building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 			}
-			else if (function instanceof BNodePredicate) {
+            else if (function instanceof StringOperationPredicate) {
+                // Functions returning string values
+                mainColumn = getSQLString(ov, index, false);
+            }
+            else if (function instanceof BNodePredicate) {
 				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
