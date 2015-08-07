@@ -459,7 +459,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					Function f = (Function)term;
 					Predicate typePred = f.getFunctionSymbol();
 
-					if (typePred.isDataTypePredicate() || typePred.getName().equals(OBDAVocabulary.QUEST_URI)){
+					if(typePred.isStringOperationPredicate()){
+                        Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(COL_TYPE.LITERAL));
+                        ansTypes.set(j, unifiedType);
+                    } else if (typePred.isDataTypePredicate() || typePred.getName().equals(OBDAVocabulary.QUEST_URI)){
 						Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
 						ansTypes.set(j, unifiedType);
 
@@ -1727,8 +1730,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			default:
 				if (mainFunctionSymbol instanceof URITemplatePredicate) {
 					type = COL_TYPE.OBJECT;
-				}
-				else if (mainFunctionSymbol instanceof BNodePredicate) {
+				}else if(mainFunctionSymbol instanceof StringOperationPredicate){
+                    type = COL_TYPE.LITERAL;
+                } else if (mainFunctionSymbol instanceof BNodePredicate) {
 					type = COL_TYPE.BNODE;
 				}
 				else {
