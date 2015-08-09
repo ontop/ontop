@@ -33,9 +33,12 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 public class OWL2QLTranslatorTest extends TestCase {
 
@@ -44,13 +47,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass class1 = factory.getOWLClass(IRI.create("http://example/A"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/B"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
-		OWLClass class3 = factory.getOWLClass(IRI.create(URI.create("http://example/C")));
+		OWLClass class3 = factory.getOWLClass(IRI.create("http://example/C"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
 		
 		manager.addAxiom(onto, factory.getOWLEquivalentClassesAxiom(class1, class2, class3));
@@ -79,13 +82,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/P")));
+		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLObjectProperty class2 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/Q")));
+		OWLObjectProperty class2 = factory.getOWLObjectProperty(IRI.create("http://example/Q"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
-		OWLObjectProperty class3 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/R")));
+		OWLObjectProperty class3 = factory.getOWLObjectProperty(IRI.create("http://example/R"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
 		
 		manager.addAxiom(onto, factory.getOWLEquivalentObjectPropertiesAxiom(class1, class2, class3));
@@ -114,11 +117,11 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/P")));
+		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLObjectProperty class2 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/Q")));
+		OWLObjectProperty class2 = factory.getOWLObjectProperty(IRI.create("http://example/Q"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLInverseObjectPropertiesAxiom(class1, class2));
@@ -148,13 +151,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLDataProperty class1 = factory.getOWLDataProperty(IRI.create(URI.create("http://example/P")));
+		OWLDataProperty class1 = factory.getOWLDataProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLDataProperty class2 = factory.getOWLDataProperty(IRI.create(URI.create("http://example/Q")));
+		OWLDataProperty class2 = factory.getOWLDataProperty(IRI.create("http://example/Q"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
-		OWLDataProperty class3 = factory.getOWLDataProperty(IRI.create(URI.create("http://example/R")));
+		OWLDataProperty class3 = factory.getOWLDataProperty(IRI.create("http://example/R"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
 		
 		manager.addAxiom(onto, factory.getOWLEquivalentDataPropertiesAxiom(class1, class2, class3));
@@ -183,11 +186,11 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/P")));
+		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/A"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLObjectPropertyDomainAxiom(class1, class2));
@@ -211,11 +214,11 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/P")));
+		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/A"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLObjectPropertyRangeAxiom(class1, class2));
@@ -239,11 +242,11 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLDataProperty class1 = factory.getOWLDataProperty(IRI.create(URI.create("http://example/P")));
+		OWLDataProperty class1 = factory.getOWLDataProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/A"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLDataPropertyDomainAxiom(class1, class2));
@@ -266,9 +269,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/P")));
+		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
 		
 		manager.addAxiom(onto, factory.getOWLSymmetricObjectPropertyAxiom(class1));
@@ -292,9 +295,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create(URI.create("http://example/P")));
+		OWLObjectProperty class1 = factory.getOWLObjectProperty(IRI.create("http://example/P"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
 		
 		manager.addAxiom(onto, factory.getOWLAsymmetricObjectPropertyAxiom(class1));
@@ -320,15 +323,15 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass class1 = factory.getOWLClass(IRI.create("http://example/A"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/B"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
-		OWLClass class3 = factory.getOWLClass(IRI.create(URI.create("http://example/C")));
+		OWLClass class3 = factory.getOWLClass(IRI.create("http://example/C"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
-		OWLClass class4 = factory.getOWLClass(IRI.create(URI.create("http://example/D")));
+		OWLClass class4 = factory.getOWLClass(IRI.create("http://example/D"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class4));
 		
 		OWLClassExpression expr = factory.getOWLObjectIntersectionOf(class2, 
@@ -357,15 +360,15 @@ public class OWL2QLTranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass class1 = factory.getOWLClass(IRI.create("http://example/A"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
-		OWLClass class2 = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/B"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
-		OWLClass class3 = factory.getOWLClass(IRI.create(URI.create("http://example/C")));
+		OWLClass class3 = factory.getOWLClass(IRI.create("http://example/C"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
-		OWLClass class4 = factory.getOWLClass(IRI.create(URI.create("http://example/D")));
+		OWLClass class4 = factory.getOWLClass(IRI.create("http://example/D"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class4));
 		
 		OWLClassExpression expr = factory.getOWLObjectIntersectionOf(class2, 
@@ -425,5 +428,31 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertFalse(bot.equals(top));
 	}	
 	
+	@Test
+	public void test_DT() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLDatatype dt2 = factory.getOWLDatatype(IRI.create("http://example/datatype2"));
+		OWLDataRange dr2 = factory.getOWLDataIntersectionOf(factory.getIntegerOWLDatatype(), OWL2Datatype.XSD_NON_NEGATIVE_INTEGER.getDatatype(factory));
+		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt2, dr2));
+
+		OWLDatatype dt = factory.getOWLDatatype(IRI.create("http://example/datatype"));
+		OWLDataRange dr = factory.getOWLDataIntersectionOf(factory.getIntegerOWLDatatype(), dt2);
+		OWLDataRange drp = factory.getOWLDataIntersectionOf(dr, OWL2Datatype.XSD_STRING.getDatatype(factory));
+		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt, drp));
+
+		OWLDatatype dt3 = factory.getOWLDatatype(IRI.create("http://example/datatype3"));
+		OWLDataRange dr3 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_DECIMAL.XSD_INTEGER.getDatatype(factory), OWL2Datatype.OWL_REAL.getDatatype(factory));
+		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt3, dr3));
+
+		OWLDatatype dt4 = factory.getOWLDatatype(IRI.create("http://example/datatype3"));
+		OWLDataRange dr4 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_DECIMAL.XSD_INTEGER.getDatatype(factory), OWL2Datatype.XSD_BOOLEAN.getDatatype(factory));
+		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt4, dr4));
+	
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);		
+	}
 	
 }

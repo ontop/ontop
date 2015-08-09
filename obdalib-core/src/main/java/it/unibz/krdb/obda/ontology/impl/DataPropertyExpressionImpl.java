@@ -21,7 +21,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
 	
     static final DataPropertyExpression owlTopDataProperty = initialize(owlTopDataPropertyIRI); 
-    static final DataPropertyExpression owlBottomDataProperty = initialize(owlBottomDataPropertyIRI); 
+    public static final DataPropertyExpression owlBottomDataProperty = initialize(owlBottomDataPropertyIRI); 
     
     private static DataPropertyExpression initialize(String uri) {
     	final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();

@@ -74,6 +74,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
@@ -839,15 +840,26 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	}
 	
 	
-	
+	@Override
+	public void prepare(OWLOntology owl) {
+		// add all definitions for classes and roles
+		
+		for (OWLClass entity : owl.getClassesInSignature()) 
+			declare(entity);
+
+		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) 
+			declare(prop);
+		
+		for (OWLDataProperty prop : owl.getDataPropertiesInSignature()) 
+			declare(prop);
+	}
 
 	
 	private final Set<String> objectproperties = new HashSet<>();
 	private final Set<String> dataproperties = new HashSet<>();
 	private final Set<String> punnedPredicates = new HashSet<>();
 	
-	@Override
-	public void declare(OWLClass entity) {
+	private void declare(OWLClass entity) {
 		/* We ignore TOP and BOTTOM (Thing and Nothing) */
 		//if (entity.isOWLThing() || entity.isOWLNothing()) 
 		//	continue;				
@@ -855,8 +867,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		dl_onto.getVocabulary().createClass(uri);
 	}
 
-	@Override
-	public void declare(OWLObjectProperty prop) {
+	private void declare(OWLObjectProperty prop) {
 		//if (prop.isOWLTopObjectProperty() || prop.isOWLBottomObjectProperty()) 
 		//	continue;
 		String uri = prop.getIRI().toString();
@@ -870,8 +881,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		}
 	}
 
-	@Override
-	public void declare(OWLDataProperty prop) {
+	private void declare(OWLDataProperty prop) {
 		//if (prop.isOWLTopDataProperty() || prop.isOWLBottomDataProperty()) 
 		//	continue;
 		String uri = prop.getIRI().toString();

@@ -25,9 +25,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,16 +95,7 @@ public class OWLAPI3TranslatorUtility {
 	
 	private static void translateInto(OWLAPI3TranslatorBase translator, OWLOntology owl) {
 
-		// add all definitions for classes and roles
-					
-		for (OWLClass entity : owl.getClassesInSignature()) 
-			translator.declare(entity);
-
-		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) 
-			translator.declare(prop);
-		
-		for (OWLDataProperty prop : owl.getDataPropertiesInSignature()) 
-			translator.declare(prop);
+		translator.prepare(owl);
 
 		// process all axioms
 		

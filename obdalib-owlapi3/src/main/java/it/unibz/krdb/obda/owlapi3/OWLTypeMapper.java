@@ -52,14 +52,23 @@ public class OWLTypeMapper {
 	}
 	
 	// OWLAPI3TranslatorDLLiteA only
-	public static Predicate.COL_TYPE getType(OWLDatatype datatype) throws TranslationException {
-		if (datatype == null) 
+	public static Predicate.COL_TYPE getType(OWL2Datatype owlDatatype) throws TranslationException {
+		if (owlDatatype == null) 
 			return COL_TYPE.LITERAL;
 		
-		COL_TYPE type = OWLtoCOLTYPE.get(datatype.getBuiltInDatatype());
+		COL_TYPE type = OWLtoCOLTYPE.get(owlDatatype);
 		if (type == null)
-			throw new TranslationException("Unsupported data range: " + datatype);
+			throw new TranslationException("Unsupported data range: " + owlDatatype);
 		return type;
+	}
+
+	// OWLAPI3TranslatorDLLiteA only
+	@Deprecated
+	public static Predicate.COL_TYPE getType(OWLDatatype owlDatatype) throws TranslationException {
+		if (owlDatatype == null) 
+			return COL_TYPE.LITERAL;
+		
+		return getType(owlDatatype.getBuiltInDatatype());
 	}
 	
 	// OWLAPI3IndividualTranslator only
