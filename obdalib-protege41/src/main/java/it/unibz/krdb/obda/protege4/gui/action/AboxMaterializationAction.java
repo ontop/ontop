@@ -183,7 +183,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private void materializeToFile(int format) throws Exception
 	{
 		String fileName = "";
-		int count = 0;
+		long count = 0;
 		long time = 0;
 		int vocab = 0;
 		final JFileChooser fc = new JFileChooser();
@@ -228,24 +228,24 @@ public class AboxMaterializationAction extends ProtegeAction {
 					while (iterator.hasNext())
 						writer.handleStatement(iterator.next());
 					writer.endRDF();
-					count = (int) materializer.getTriplesCount();
+					count = materializer.getTriplesCount();
 					vocab = materializer.getVocabularySize();
 					materializer.disconnect();
 				}
 
 				else {
 					// owlxml, OWL materializer
-					OWLAPI3Materializer materializer = new OWLAPI3Materializer(
-							obdaModel, onto, DO_STREAM_RESULTS);
-					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
-					while (iterator.hasNext())
-						manager.addAxiom(ontology, iterator.next());
-					manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
-							new WriterDocumentTarget(fileWriter));
+					try (OWLAPI3Materializer materializer = new OWLAPI3Materializer(
+							obdaModel, onto, DO_STREAM_RESULTS)) {
+						Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
+						while (iterator.hasNext())
+							manager.addAxiom(ontology, iterator.next());
+						manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
+								new WriterDocumentTarget(fileWriter));
 
-					count = (int) materializer.getTriplesCount();
-					vocab = materializer.getVocabularySize();
-					materializer.disconnect();
+						count = materializer.getTriplesCount();
+						vocab = materializer.getVocabularySize();
+					}
 				}
 
 				fileWriter.close();

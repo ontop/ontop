@@ -2,10 +2,12 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.Datatype;
 
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
@@ -20,20 +22,27 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
 	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
 	
-    static final DataPropertyExpression owlTopDataProperty = initialize(owlTopDataPropertyIRI); 
-    public static final DataPropertyExpression owlBottomDataProperty = initialize(owlBottomDataPropertyIRI); 
-    
-    private static DataPropertyExpression initialize(String uri) {
-    	final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-		Predicate prop = ofac.getDataPropertyPredicate(uri);
-		return new DataPropertyExpressionImpl(prop);  	
-    }
+	private static final  Datatype rdfsLiteral; 
+    static final DataPropertyExpression owlTopDataProperty; 
+    public static final DataPropertyExpression owlBottomDataProperty; 
+	
+	static {
+		OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	    rdfsLiteral = new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL));   	
+
+		Predicate prop = ofac.getDataPropertyPredicate(owlTopDataPropertyIRI);
+		owlTopDataProperty = new DataPropertyExpressionImpl(prop);  	
+	    
+		Predicate propbot = ofac.getDataPropertyPredicate(owlBottomDataPropertyIRI);
+		owlBottomDataProperty = new DataPropertyExpressionImpl(propbot);  	
+	}
+	
 
 	DataPropertyExpressionImpl(Predicate p) {
 		this.predicate = p;
-		this.string = predicate.toString();
-		
-		this.domain = new DataSomeValuesFromImpl(this);
+		this.string = predicate.toString();		
+
+		this.domain = new DataSomeValuesFromImpl(this, rdfsLiteral);
 		this.range = new DataPropertyRangeExpressionImpl(this);
 	}
 
@@ -70,7 +79,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 			return predicate.equals(other.predicate);
 		}
 		
-		// the two types of properties share the same name space
+		// object and data properties share the same name space
 		
 		if (obj instanceof ObjectPropertyExpressionImpl) {
 			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
