@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -183,8 +184,8 @@ public class SigmaTBoxOptimizer {
 
 	private boolean check_directly_redundant_role(DataPropertyExpression parent, DataPropertyExpression child) {
 
-		DataSomeValuesFrom existParentDesc = parent.getDomain();
-		DataSomeValuesFrom existChildDesc = child.getDomain();
+		DataSomeValuesFrom existParentDesc = parent.getDomainRestriction(DatatypeImpl.rdfsLiteral);
+		DataSomeValuesFrom existChildDesc = child.getDomainRestriction(DatatypeImpl.rdfsLiteral);
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);

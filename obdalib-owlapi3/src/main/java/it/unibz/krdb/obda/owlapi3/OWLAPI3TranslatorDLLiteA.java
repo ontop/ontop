@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.HashMap;
@@ -224,7 +225,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLDataPropertyDomainAxiom ax) {
 		try {
 			DataPropertyExpression role = getPropertyExpression(ax.getProperty());
-			addSubClassAxioms(role.getDomain(), ax.getDomain().asConjunctSet());		
+			addSubClassAxioms(role.getDomainRestriction(DatatypeImpl.rdfsLiteral), ax.getDomain().asConjunctSet());		
 		} catch (TranslationException e) {
 			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
 		}
@@ -554,7 +555,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		if (!filler.isTopDatatype()) 
 			throw new TranslationException();
 		
-		return getPropertyExpression(rest.getProperty()).getDomain();
+		return getPropertyExpression(rest.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 	}
 
 	private static ClassExpression getClassExpression(OWLObjectMinCardinality rest) throws TranslationException {
@@ -572,7 +573,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		if (cardinatlity != 1 || !range.isTopDatatype()) 
 			throw new TranslationException();
 		
-		return getPropertyExpression(rest.getProperty()).getDomain();
+		return getPropertyExpression(rest.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 	}
 	
 	
@@ -762,7 +763,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			
 			DataPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryDataProperty();
 
-			auxclass = auxRole.getDomain(); 
+			auxclass = auxRole.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
 			dl_onto.addSubPropertyOfAxiom(auxRole, role);

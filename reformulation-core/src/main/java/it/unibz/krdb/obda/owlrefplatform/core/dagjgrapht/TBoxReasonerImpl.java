@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -362,7 +363,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 						DataSomeValuesFrom firstp = (DataSomeValuesFrom)first;
 						DataPropertyExpression prop = firstp.getProperty();
 						DataPropertyExpression propRep = dataPropertyDAG.getVertex(prop).getRepresentative();
-						representative = propRep.getDomain();
+						representative = propRep.getDomainRestriction(DatatypeImpl.rdfsLiteral);
 					}
 				}
 				else

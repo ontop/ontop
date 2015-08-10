@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.DataPropertyExpressionImpl;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.HashMap;
@@ -438,7 +439,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	public void visit(OWLDataPropertyDomainAxiom ax) {
 		try {
 			DataPropertyExpression role = getPropertyExpression(ax.getProperty());
-			addSubClassAxioms(role.getDomain(), ax.getDomain());		
+			addSubClassAxioms(role.getDomainRestriction(DatatypeImpl.rdfsLiteral), ax.getDomain());		
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
@@ -724,7 +725,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			if (!filler.isTopDatatype()) 
 				throw new TranslationException();
 			
-			return getPropertyExpression(someexp.getProperty()).getDomain();
+			return getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 		}
 		else if (owlExpression instanceof OWLDataMinCardinality) {
 			OWLDataMinCardinality someexp = (OWLDataMinCardinality) owlExpression;
@@ -733,7 +734,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			if (someexp.getCardinality() != 1 || !range.isTopDatatype()) 
 				throw new TranslationException();
 			
-			return getPropertyExpression(someexp.getProperty()).getDomain();
+			return getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 		} 
 		else
 			throw new TranslationException("unsupported construct " + owlExpression);
@@ -818,7 +819,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 				ClassExpression superClassExp; 
 				if (filler.isTopDatatype()) 
-					superClassExp = getPropertyExpression(someexp.getProperty()).getDomain();
+					superClassExp = getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 				else
 					superClassExp = getPropertySomeDatatypeRestriction(someexp);
 				
@@ -886,7 +887,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			
 			DataPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryDataProperty();
 
-			auxclass = auxRole.getDomain(); 
+			auxclass = auxRole.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
 			dl_onto.addSubPropertyOfAxiom(auxRole, role);

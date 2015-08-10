@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
@@ -22,13 +21,11 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
 	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
 	
-	private static final  Datatype rdfsLiteral; 
     static final DataPropertyExpression owlTopDataProperty; 
     public static final DataPropertyExpression owlBottomDataProperty; 
 	
 	static {
 		OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	    rdfsLiteral = new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL));   	
 
 		Predicate prop = ofac.getDataPropertyPredicate(owlTopDataPropertyIRI);
 		owlTopDataProperty = new DataPropertyExpressionImpl(prop);  	
@@ -42,7 +39,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 		this.predicate = p;
 		this.string = predicate.toString();		
 
-		this.domain = new DataSomeValuesFromImpl(this, rdfsLiteral);
+		this.domain = new DataSomeValuesFromImpl(this, DatatypeImpl.rdfsLiteral);
 		this.range = new DataPropertyRangeExpressionImpl(this);
 	}
 
@@ -53,8 +50,10 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	}
 	
 	@Override
-	public DataSomeValuesFrom getDomain() {
-		return domain;
+	public DataSomeValuesFrom getDomainRestriction(Datatype datatype) {
+		if (datatype.equals(DatatypeImpl.rdfsLiteral))
+			return domain;
+		return new DataSomeValuesFromImpl(this, datatype);
 	}
 
 	@Override

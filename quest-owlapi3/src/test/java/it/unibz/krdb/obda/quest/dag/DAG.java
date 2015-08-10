@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
 import java.io.Serializable;
@@ -134,13 +135,8 @@ public class DAG implements Serializable {
 
 			roles.put(role, rolenode);
 
-			//DataPropertyExpression roleInv = role.getInverse();
-			//DAGNode rolenodeinv = new DAGNode(roleInv);
-			//roles.put(roleInv, rolenodeinv);
-
-			DataSomeValuesFrom existsRole = role.getDomain(); // descFactory.createPropertySomeRestriction(role);
-			DataPropertyRangeExpression existsRoleInv = role.getRange(); //descFactory.createDataPropertyRange(role);
-					//.createPropertySomeRestriction(roleInv);
+			DataSomeValuesFrom existsRole = role.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
+			DataPropertyRangeExpression existsRoleInv = role.getRange(); 
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -149,10 +145,6 @@ public class DAG implements Serializable {
 			allnodes.put(role, rolenode);
 			allnodes.put(existsRole, existsNode);
 			allnodes.put(existsRoleInv, existsNodeInv);
-			//allnodes.put(roleInv, rolenodeinv);
-
-			// addParent(existsNode, thing);
-			// addParent(existsNodeInv, thing);
 		}
 
 		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
@@ -305,8 +297,8 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		DataSomeValuesFrom existsParent = parent.getDomain(); // descFactory.createPropertySomeRestriction(parent);
-		DataSomeValuesFrom existChild = child.getDomain(); // escFactory.createPropertySomeRestriction(child);
+		DataSomeValuesFrom existsParent = parent.getDomainRestriction(DatatypeImpl.rdfsLiteral); // descFactory.createPropertySomeRestriction(parent);
+		DataSomeValuesFrom existChild = child.getDomainRestriction(DatatypeImpl.rdfsLiteral); // escFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);

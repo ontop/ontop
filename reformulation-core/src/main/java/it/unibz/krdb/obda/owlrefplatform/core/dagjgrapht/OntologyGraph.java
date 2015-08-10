@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -136,13 +137,13 @@ public class OntologyGraph {
 		
 		// domains and ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) 
-			classGraph.addVertex(role.getDomain());			
+			classGraph.addVertex(role.getDomainRestriction(DatatypeImpl.rdfsLiteral));			
 		
 		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
 			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
 			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
-			classGraph.addEdge(child.getDomain(), parent.getDomain());		
+			classGraph.addEdge(child.getDomainRestriction(DatatypeImpl.rdfsLiteral), parent.getDomainRestriction(DatatypeImpl.rdfsLiteral));		
 		}
 
 		

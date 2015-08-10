@@ -45,7 +45,7 @@ public interface DataPropertyExpression extends Description {
 	 * @return
 	 */
 	
-	public DataSomeValuesFrom getDomain();
+	public DataSomeValuesFrom getDomainRestriction(Datatype datatype);
 
 	/**
 	 * returns the DataPropertyRangeExpression for the range of the data property
