@@ -24,18 +24,20 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 import java.util.Set;
 
+import org.junit.Test;
+
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.quest.dag.TestTBoxReasonerImpl_OnGraph;
-
 import junit.framework.TestCase;
 
 
@@ -48,13 +50,15 @@ public class DAGChainTest extends TestCase {
 		}
 		return size;
 	}
-	
-	public void test_simple_isa() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		OClass ac = ontology.getVocabulary().createClass("a");
-		OClass bc = ontology.getVocabulary().createClass("b");
-		OClass cc = ontology.getVocabulary().createClass("c");
+	@Test
+	public void test_simple_isa() {        
+		OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OClass ac = vb.declareClass("a");
+		OClass bc = vb.declareClass("b");
+		OClass cc = vb.declareClass("c");
+
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(vb);
 
 		ontology.addSubClassOfAxiom(bc, ac);
 		ontology.addSubClassOfAxiom(cc, bc);
@@ -77,14 +81,17 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void test_exists_simple() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
+		
+        OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		ObjectPropertyExpression rprop = vb.declareObjectProperty("r");
+		OClass ac = vb.declareClass("a");
+		OClass cc = vb.declareClass("c");
+		
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(vb);
 
-		ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
 		ObjectPropertyExpression riprop = rprop.getInverse();
-		OClass ac = ontology.getVocabulary().createClass("a");
 		ObjectSomeValuesFrom er = rprop.getDomain();
 		ObjectSomeValuesFrom ier = riprop.getDomain();
-		OClass cc = ontology.getVocabulary().createClass("c");
 
 		ontology.addSubClassOfAxiom(er, ac);
 		ontology.addSubClassOfAxiom(cc, ier);
@@ -125,17 +132,18 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_complex() {
 
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
+        OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OClass ac = vb.declareClass("a");
+		OClass cc = vb.declareClass("c");
+		OClass bc = vb.declareClass("b");
+		OClass dc = vb.declareClass("d");
+		ObjectPropertyExpression rprop = vb.declareObjectProperty("r");
+        
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(vb);
 
-		ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
 		ObjectPropertyExpression riprop = rprop.getInverse();
-
-		OClass ac = ontology.getVocabulary().createClass("a");
 		ObjectSomeValuesFrom er = rprop.getDomain();
 		ObjectSomeValuesFrom ier = riprop.getDomain();
-		OClass cc = ontology.getVocabulary().createClass("c");
-		OClass bc = ontology.getVocabulary().createClass("b");
-		OClass dc = ontology.getVocabulary().createClass("d");
 
 		ontology.addSubClassOfAxiom(er, ac);
 		ontology.addSubClassOfAxiom(cc, ier);

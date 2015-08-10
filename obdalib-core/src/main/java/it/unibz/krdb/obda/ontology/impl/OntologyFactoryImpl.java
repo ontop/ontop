@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
@@ -60,6 +61,13 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public Ontology createOntology() {
 		return new OntologyImpl();
+	}
+	
+	@Override
+	public Ontology createOntology(OntologyVocabularyBuilder vb) {
+		OntologyImpl ont = new OntologyImpl();
+		ont.vocabulary = new OntologyVocabularyImpl((OntologyVocabularyBuilderImpl)vb);
+		return ont;
 	}
 	
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
@@ -128,6 +136,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public DataPropertyExpression getBottomDataProperty() {
 		return DataPropertyExpressionImpl.owlBottomDataProperty;
+	}
+
+	@Override
+	public OntologyVocabularyBuilder createVocabularyBuilder() {
+		return new OntologyVocabularyBuilderImpl();
 	}
 	
 }

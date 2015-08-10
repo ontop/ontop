@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -39,11 +40,14 @@ public class SigmaTest extends TestCase {
     private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
-        Ontology ontology = descFactory.createOntology();
-
-        OClass ac = ontology.getVocabulary().createClass("a");
-        OClass cc = ontology.getVocabulary().createClass("c");
-        ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
+    	
+		OntologyVocabularyBuilder vb = descFactory.createVocabularyBuilder();
+        OClass ac = vb.declareClass("a");
+        OClass cc = vb.declareClass("c");
+        ObjectPropertyExpression rprop = vb.declareObjectProperty("r");
+       
+        Ontology ontology = descFactory.createOntology(vb);
+ 
         ObjectSomeValuesFrom er = rprop.getDomain();
  
         ontology.addSubClassOfAxiom(er, ac);

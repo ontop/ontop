@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -132,18 +133,20 @@ public class QuestMaterializer {
 
         //start a quest instance
 		if (ontology == null) {
-			ontology = ofac.createOntology();
+			OntologyVocabularyBuilder vb = ofac.createVocabularyBuilder();
 			
 			// TODO: use Vocabulary for OBDAModel as well
 			
 			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
+				vb.declareClass(pred.getPredicate().getName());				
 			
 			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
+				vb.declareObjectProperty(prop.getPredicate().getName());
 
 			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
+				vb.declareDataProperty(prop.getPredicate().getName());
+			
+			ontology = ofac.createOntology(vb);			
 		}
 		
 		

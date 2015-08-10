@@ -64,15 +64,15 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
 	}
 	
-	
-	@Override
-	public OClass createClass(String uri) {
-		OClass cd = ofac.createClass(uri);
-		if (!cd.isNothing() && !cd.isThing())
-			concepts.add(cd);
-		return cd;
+	OntologyVocabularyImpl() {		
 	}
 
+	OntologyVocabularyImpl(OntologyVocabularyBuilderImpl builder) {		
+		concepts.addAll(builder.concepts);
+		objectProperties.addAll(builder.objectProperties);
+		dataProperties.addAll(builder.dataProperties);
+	}
+	
 	@Override
 	public OClass getClass(String uri) {
 		OClass cd = ofac.createClass(uri);
@@ -81,17 +81,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return cd;
 	}
 	
-	@Override
-	public ObjectPropertyExpression createObjectProperty(String uri) {
-		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		if (!rd.isBottom() && !rd.isTop()) {
-			if (isAuxiliaryProperty(rd))
-				auxObjectProperties.add(rd);
-			else
-				objectProperties.add(rd);
-		}
-		return rd;
-	}
 
 	@Override
 	public ObjectPropertyExpression getObjectProperty(String uri) {
@@ -101,18 +90,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return rd;
 	}
 	
-	@Override
-	public DataPropertyExpression createDataProperty(String uri) {
-		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		if (!rd.isBottom() && !rd.isTop()) {
-			if (isAuxiliaryProperty(rd))
-				auxDataProperties.add(rd);
-			else
-				dataProperties.add(rd);
-		}
-		return rd;
-	}
-
 	@Override
 	public DataPropertyExpression getDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
@@ -150,7 +127,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	@Override
 	public DataPropertyExpression createAuxiliaryDataProperty() {
-		DataPropertyExpression rd = createDataProperty(AUXROLEURI + auxCounter);
+		DataPropertyExpression rd = ofac.createDataProperty(AUXROLEURI + auxCounter);
 		auxCounter++ ;
 		auxDataProperties.add(rd);
 		return rd;
@@ -303,15 +280,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	
-	@Override
-	public void merge(OntologyVocabulary v) {
-		concepts.addAll(v.getClasses());
-		objectProperties.addAll(v.getObjectProperties());
-		dataProperties.addAll(v.getDataProperties());
-		auxObjectProperties.addAll(v.getAuxiliaryObjectProperties());
-		auxDataProperties.addAll(v.getAuxiliaryDataProperties());
-	}
-
 	@Override
 	public boolean isEmpty() {
 		return concepts.isEmpty() && objectProperties.isEmpty() && dataProperties.isEmpty();

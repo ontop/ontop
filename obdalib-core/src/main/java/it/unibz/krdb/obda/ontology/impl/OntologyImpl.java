@@ -44,7 +44,7 @@ public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
 	
-	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
+	OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
 	
 	// axioms and assertions
 
@@ -74,19 +74,10 @@ public class OntologyImpl implements Ontology {
 	
 
 	OntologyImpl() {
+		// NO-OP: restricts visibility of the default (and only) constructor
 	}
-
-	@Override
-	public OntologyImpl clone() {
-		OntologyImpl clone = new OntologyImpl();
-		clone.subClassAxioms.addAll(subClassAxioms);
-		clone.subObjectPropertyAxioms.addAll(subObjectPropertyAxioms);
-		clone.subDataPropertyAxioms.addAll(subDataPropertyAxioms);
-		clone.vocabulary.merge(vocabulary);
-		return clone;
-	}
-
 	
+
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	

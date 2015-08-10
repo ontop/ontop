@@ -4,14 +4,6 @@ import java.util.Set;
 
 public interface OntologyVocabulary {
 
-	/**
-	 * create and declare class
-	 * 
-	 * @param uri
-	 * @return
-	 */
-	
-	public OClass createClass(String uri);
 
 	/**
 	 * check whether the class has been declared and return the class object
@@ -23,14 +15,6 @@ public interface OntologyVocabulary {
 	
 	public OClass getClass(String uri);
 	
-	/**
-	 * create and declare object property
-	 * 
-	 * @param uri property name
-	 * @return
-	 */
-	
-	public ObjectPropertyExpression createObjectProperty(String uri);
 
 	/**
 	 * check whether the object property has been declared and return the class object
@@ -42,14 +26,6 @@ public interface OntologyVocabulary {
 	
 	public ObjectPropertyExpression getObjectProperty(String uri);
 	
-	/**
-	 * create and declare data property
-	 * 
-	 * @param uri property name
-	 * @return
-	 */
-	
-	public DataPropertyExpression createDataProperty(String uri);
 
 	/**
 	 * check whether the data property has been declared and return the class object
@@ -94,9 +70,5 @@ public interface OntologyVocabulary {
 	public Set<DataPropertyExpression> getAuxiliaryDataProperties();
 	
 
-	
-
-	public void merge(OntologyVocabulary v);
-	
 	public boolean isEmpty();
 }

@@ -14,17 +14,9 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -60,7 +52,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	private static final String NOT_SUPPORTED_EXT = "Axiom does not belong to OWL 2 QL: {} ({})";
 	
 	
-	private final Ontology dl_onto = ofac.createOntology();
+	private Ontology dl_onto;
 	
 	public OntologyVocabulary getVocabulary() {
 		return dl_onto.getVocabulary();
@@ -966,61 +958,55 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	
 	private OWLOntology owlOntology;
 	
+	private final Set<String> objectproperties = new HashSet<>();
+	private final Set<String> dataproperties = new HashSet<>();
+	private final Set<String> punnedPredicates = new HashSet<>();
+		
+	
 	@Override
 	public void prepare(OWLOntology owl) {
 		owlOntology = owl;
 		
-		// add all definitions for classes and roles
+		OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
 		
-		for (OWLClass entity : owl.getClassesInSignature()) 
-			declare(entity);
-
-		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) 
-			declare(prop);
+		// add all definitions for classes and roles		
 		
-		for (OWLDataProperty prop : owl.getDataPropertiesInSignature()) 
-			declare(prop);
-	}
-	
-	
-	private final Set<String> objectproperties = new HashSet<>();
-	private final Set<String> dataproperties = new HashSet<>();
-	private final Set<String> punnedPredicates = new HashSet<>();
-	
-	private void declare(OWLClass entity) {
-		/* We ignore TOP and BOTTOM (Thing and Nothing) */
-		//if (entity.isOWLThing() || entity.isOWLNothing()) 
-		//	continue;				
-		String uri = entity.getIRI().toString();
-		dl_onto.getVocabulary().createClass(uri);
-	}
+		for (OWLClass entity : owl.getClassesInSignature())  {
+			/* We ignore TOP and BOTTOM (Thing and Nothing) */
+			//if (entity.isOWLThing() || entity.isOWLNothing()) 
+			//	continue;				
+			String uri = entity.getIRI().toString();
+			vb.declareClass(uri);			
+		}
 
-	private void declare(OWLObjectProperty prop) {
-		//if (prop.isOWLTopObjectProperty() || prop.isOWLBottomObjectProperty()) 
-		//	continue;
-		String uri = prop.getIRI().toString();
-		if (dataproperties.contains(uri))  {
-			punnedPredicates.add(uri); 
-			log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
+			//if (prop.isOWLTopObjectProperty() || prop.isOWLBottomObjectProperty()) 
+			//	continue;
+			String uri = prop.getIRI().toString();
+			if (dataproperties.contains(uri))  {
+				punnedPredicates.add(uri); 
+				log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+			}
+			else {
+				objectproperties.add(uri);
+				vb.declareObjectProperty(uri);
+			}
 		}
-		else {
-			objectproperties.add(uri);
-			dl_onto.getVocabulary().createObjectProperty(uri);
+		
+		for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
+			//if (prop.isOWLTopDataProperty() || prop.isOWLBottomDataProperty()) 
+			//	continue;
+			String uri = prop.getIRI().toString();
+			if (objectproperties.contains(uri)) {
+				punnedPredicates.add(uri);
+				log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+			}
+			else {
+				dataproperties.add(uri);
+				vb.declareDataProperty(uri);
+			}
 		}
-	}
-
-	private void declare(OWLDataProperty prop) {
-		//if (prop.isOWLTopDataProperty() || prop.isOWLBottomDataProperty()) 
-		//	continue;
-		String uri = prop.getIRI().toString();
-		if (objectproperties.contains(uri)) {
-			punnedPredicates.add(uri);
-			log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
-		}
-		else {
-			dataproperties.add(uri);
-			dl_onto.getVocabulary().createDataProperty(uri);
-		}
+		dl_onto = ofac.createOntology(vb);
 	}
 	
 	

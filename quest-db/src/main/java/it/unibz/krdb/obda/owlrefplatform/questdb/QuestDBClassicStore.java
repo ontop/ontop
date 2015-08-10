@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
@@ -90,10 +91,6 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private Quest questInstance;	
 	
-	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
-		this(name, tboxFile, null);
-	}
-
 	public QuestDBClassicStore(String name, java.net.URI tboxFile, QuestPreferences config) throws Exception {
 		super(name);
 		Ontology tbox = readOntology(tboxFile.toASCIIString());
@@ -207,15 +204,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private Ontology getTBox(Dataset dataset) throws Exception {
 		// Merge default and named graphs to filter duplicates
-		Set<URI> graphURIs = new HashSet<URI>();
+		Set<URI> graphURIs = new HashSet<>();
 		graphURIs.addAll(dataset.getDefaultGraphs());
 		graphURIs.addAll(dataset.getNamedGraphs());
 
-		Ontology result = ofac.createOntology();
-
+		OntologyVocabularyBuilder vb = ofac.createVocabularyBuilder();
+		
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(graphURI, graphURI);
-			result.getVocabulary().merge(o.getVocabulary());
+			vb.merge(o.getVocabulary());
 			
 			// TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
 			
@@ -224,6 +221,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			//for (SubClassOfAxiom ax : result.getSubClassAxioms()) 
 			//	result.add(ax);	
 		}
+		Ontology result = ofac.createOntology(vb);
+
 		return result;
 	}
 
@@ -254,16 +253,11 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	public class RDFTBoxReader extends RDFHandlerBase {
-		private Ontology ontology = null;
 		private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		private OntologyVocabularyBuilder vb = ofac.createVocabularyBuilder();
 
 		public Ontology getOntology() {
-			return ontology;
-		}
-
-		@Override
-		public void startRDF() throws RDFHandlerException {
-			ontology = ofac.createOntology();
+			return ofac.createOntology(vb);
 		}
 
 		@Override
@@ -272,29 +266,21 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
 				String dataProperty = pred.stringValue();
-				ontology.getVocabulary().createDataProperty(dataProperty);
+				vb.declareDataProperty(dataProperty);
 			} 
 			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
 				String className = obj.stringValue();
-				ontology.getVocabulary().createClass(className);
+				vb.declareClass(className);
 			} 
 			else {
 				String objectProperty = pred.stringValue();
-				ontology.getVocabulary().createObjectProperty(objectProperty);
+				vb.declareObjectProperty(objectProperty);
 			}
 
-		/*
-		 * ROMAN: this code does nothing because	getTBoxAxiom is null
+		/* Roman 10/08/15: recover?
 			Axiom axiom = getTBoxAxiom(st);
-			if (axiom == null) {
-				return;
-			}
 			ontology.addAssertionWithCheck(axiom);
 		*/
-		}
-
-		public Object getTBoxAxiom(Statement st) {
-			return null;
 		}
 
 	}

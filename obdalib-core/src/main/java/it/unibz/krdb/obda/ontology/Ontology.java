@@ -26,7 +26,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-public interface Ontology extends Cloneable, Serializable {
+public interface Ontology extends Serializable {
 
 	@Deprecated
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2);
@@ -67,10 +67,8 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
 
-	
-	
-	public Ontology clone();
 
+	
 	
 	public OntologyVocabulary getVocabulary();
 	

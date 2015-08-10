@@ -79,32 +79,33 @@ public class YAGOTest {
             	// TODO (ROMAN): not necessarily object properties?
             	
                 if ("rdfs:range".equals(predicate)) {
-                    ObjectPropertyExpression psprop = onto.getVocabulary().createObjectProperty(subject).getInverse();
-                    ObjectSomeValuesFrom rs = psprop.getDomain();
-                    OClass co = onto.getVocabulary().createClass(object);
-                    onto.addSubClassOfAxiom(rs, co);
+//                    ObjectPropertyExpression psprop = onto.getVocabulary().createObjectProperty(subject).getInverse();
+//                    ObjectSomeValuesFrom rs = psprop.getDomain();
+//                    OClass co = onto.getVocabulary().createClass(object);
+//                    onto.addSubClassOfAxiom(rs, co);
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
-                    ObjectPropertyExpression psprop = onto.getVocabulary().createObjectProperty(subject);
-                    ObjectSomeValuesFrom rs = psprop.getDomain();
-                    OClass co = onto.getVocabulary().createClass(object);
-                    onto.addSubClassOfAxiom(rs, co);
+//                    ObjectPropertyExpression psprop = onto.getVocabulary().createObjectProperty(subject);
+//                    ObjectSomeValuesFrom rs = psprop.getDomain();
+//                    OClass co = onto.getVocabulary().createClass(object);
+//                    onto.addSubClassOfAxiom(rs, co);
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
-                    String co = object;
-                    onto.getVocabulary().createClass(co);
+//                   String co = object;
+//                   onto.getVocabulary().createClass(co);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
-                    OClass cs = onto.getVocabulary().createClass(subject);
-                    OClass co = onto.getVocabulary().createClass(object);
-                    onto.addSubClassOfAxiom(cs, co);
+//                   OClass cs = onto.getVocabulary().createClass(subject);
+//                   OClass co = onto.getVocabulary().createClass(object);
+//                    onto.addSubClassOfAxiom(cs, co);
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
-                    ObjectPropertyExpression rs = onto.getVocabulary().createObjectProperty(subject);
-                    ObjectPropertyExpression ro = onto.getVocabulary().createObjectProperty(object);
-                    onto.addSubPropertyOfAxiom(rs, ro);
-                } else {
+//                    ObjectPropertyExpression rs = onto.getVocabulary().createObjectProperty(subject);
+//                    ObjectPropertyExpression ro = onto.getVocabulary().createObjectProperty(object);
+//                    onto.addSubPropertyOfAxiom(rs, ro);
+                } 
+                else {
 //                    log.debug(predicate);
                 }
             } else {
