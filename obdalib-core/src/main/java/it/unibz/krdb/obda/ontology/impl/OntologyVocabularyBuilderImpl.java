@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -14,17 +16,17 @@ public class OntologyVocabularyBuilderImpl implements OntologyVocabularyBuilder 
 
 	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
-	final Set<OClass> concepts = new HashSet<OClass>();
+	final Map<String, OClass> concepts = new HashMap<>();
 
-	final Set<ObjectPropertyExpression> objectProperties = new HashSet<ObjectPropertyExpression>();
+	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
 
-	final Set<DataPropertyExpression> dataProperties = new HashSet<DataPropertyExpression>();
+	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
 		
 	@Override
 	public OClass declareClass(String uri) {
 		OClass cd = ofac.createClass(uri);
 		if (!cd.isNothing() && !cd.isThing())
-			concepts.add(cd);
+			concepts.put(uri, cd);
 		return cd;
 	}
 
@@ -32,7 +34,7 @@ public class OntologyVocabularyBuilderImpl implements OntologyVocabularyBuilder 
 	public DataPropertyExpression declareDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
 		if (!rd.isBottom() && !rd.isTop()) 
-			dataProperties.add(rd);
+			dataProperties.put(uri, rd);
 		return rd;
 	}
 
@@ -40,15 +42,15 @@ public class OntologyVocabularyBuilderImpl implements OntologyVocabularyBuilder 
 	public ObjectPropertyExpression declareObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
 		if (!rd.isBottom() && !rd.isTop()) 
-			objectProperties.add(rd);
+			objectProperties.put(uri, rd);
 		return rd;
 	}
 
 	@Override
 	public void merge(OntologyVocabulary v) {
-		concepts.addAll(v.getClasses());
-		objectProperties.addAll(v.getObjectProperties());
-		dataProperties.addAll(v.getDataProperties());
+		concepts.putAll(((OntologyVocabularyImpl)v).concepts);
+		objectProperties.putAll(((OntologyVocabularyImpl)v).objectProperties);
+		dataProperties.putAll(((OntologyVocabularyImpl)v).dataProperties);
 //		auxObjectProperties.addAll(v.getAuxiliaryObjectProperties());
 //		auxDataProperties.addAll(v.getAuxiliaryDataProperties());
 	}

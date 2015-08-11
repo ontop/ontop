@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.ontology;
 
-import java.util.Set;
+import java.util.Collection;
 
 public interface OntologyVocabulary {
 
@@ -51,23 +51,26 @@ public interface OntologyVocabulary {
 	
 	public DataPropertyExpression createAuxiliaryDataProperty();
 	
+	
+	
 
-	public Set<OClass> getClasses();
+	public Collection<OClass> getClasses();
 	
-	public Set<ObjectPropertyExpression> getObjectProperties();
+	public Collection<ObjectPropertyExpression> getObjectProperties();
 	
-	public Set<DataPropertyExpression> getDataProperties();
+	public Collection<DataPropertyExpression> getDataProperties();
 	
 	/**
 	 * auxiliary properties result from NORMALIZATION
 	 */
 	
-	public Set<ObjectPropertyExpression> getAuxiliaryObjectProperties();
+	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
+
 	/**
 	 * auxiliary properties result from NORMALIZATION
 	 */
 	
-	public Set<DataPropertyExpression> getAuxiliaryDataProperties();
+	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
 	
 
 	public boolean isEmpty();

@@ -108,35 +108,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
 
-	@Override
-	public OClass getThing() {
-		return ClassImpl.owlThing;
-	}
-
-	@Override
-	public OClass getNothing() {
-		return ClassImpl.owlNothing;
-	}
-
-	@Override
-	public ObjectPropertyExpression getTopObjectProperty() {
-		return ObjectPropertyExpressionImpl.owlTopObjectProperty;
-	}
-
-	@Override
-	public ObjectPropertyExpression getBottomObjectProperty() {
-		return ObjectPropertyExpressionImpl.owlBottomObjectProperty;
-	}
-
-	@Override
-	public DataPropertyExpression getTopDataProperty() {
-		return DataPropertyExpressionImpl.owlTopDataProperty;
-	}
-
-	@Override
-	public DataPropertyExpression getBottomDataProperty() {
-		return DataPropertyExpressionImpl.owlBottomDataProperty;
-	}
 
 	@Override
 	public OntologyVocabularyBuilder createVocabularyBuilder() {

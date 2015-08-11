@@ -33,31 +33,18 @@ public interface OntologyFactory {
 	
 	public OntologyVocabularyBuilder createVocabularyBuilder();
 	
+	
+	
 	public OClass createClass(String uri);
 
-	public OClass getThing();
-
-	public OClass getNothing();
+	public ObjectPropertyExpression createObjectProperty(String uri);
 	
+	public DataPropertyExpression createDataProperty(String uri);
+
 	
 	
 	public Datatype createDataType(Predicate.COL_TYPE type);
 	
-	
-	
-	public ObjectPropertyExpression createObjectProperty(String uri);
-	
-	public ObjectPropertyExpression getTopObjectProperty();
-	
-	public ObjectPropertyExpression getBottomObjectProperty();
-
-	
-	
-	public DataPropertyExpression createDataProperty(String uri);
-
-	public DataPropertyExpression getTopDataProperty();
-	
-	public DataPropertyExpression getBottomDataProperty();
 	
 	
 	/**

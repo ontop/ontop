@@ -1,7 +1,10 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.DatatypeFactory;
@@ -26,15 +29,16 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	// signature
 	
-	private final Set<OClass> concepts = new HashSet<OClass>();
+	final Map<String, OClass> concepts = new HashMap<>();
 
-	private final Set<ObjectPropertyExpression> objectProperties = new HashSet<ObjectPropertyExpression>();
+	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
 
-	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<ObjectPropertyExpression>();
+	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
 
-	private final Set<DataPropertyExpression> dataProperties = new HashSet<DataPropertyExpression>();
+	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
 
-	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<DataPropertyExpression>();
+	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
+	
 	
 	// auxiliary symbols and built-in datatypes 
 	
@@ -45,7 +49,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		
 		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 		
-		builtinDatatypes = new HashSet<Predicate>();
+		builtinDatatypes = new HashSet<>();
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
@@ -68,49 +72,61 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	OntologyVocabularyImpl(OntologyVocabularyBuilderImpl builder) {		
-		concepts.addAll(builder.concepts);
-		objectProperties.addAll(builder.objectProperties);
-		dataProperties.addAll(builder.dataProperties);
+		concepts.putAll(builder.concepts);
+		objectProperties.putAll(builder.objectProperties);
+		dataProperties.putAll(builder.dataProperties);
 	}
 	
 	@Override
 	public OClass getClass(String uri) {
-		OClass cd = ofac.createClass(uri);
-		if (!cd.isNothing() && !cd.isThing() && !concepts.contains(cd))
-			throw new RuntimeException("Class not found: " + uri);
-		return cd;
+		OClass cd0 = concepts.get(uri);
+		if (cd0 == null) {
+			OClass cd = ofac.createClass(uri);
+			if (!cd.isNothing() && !cd.isThing())
+				throw new RuntimeException("Class not found: " + uri);
+			return cd;
+		}
+		return cd0;
 	}
 	
 
 	@Override
 	public ObjectPropertyExpression getObjectProperty(String uri) {
-		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		if (!rd.isBottom() && !rd.isTop() && !objectProperties.contains(rd))
-			throw new RuntimeException("Object property not found: " + uri);
-		return rd;
+		ObjectPropertyExpression rd0 = objectProperties.get(uri);
+		if (rd0 == null) {
+			ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
+			if (!rd.isBottom() && !rd.isTop())
+				throw new RuntimeException("Object property not found: " + uri);
+			return rd;
+		}
+		return rd0;
 	}
 	
 	@Override
 	public DataPropertyExpression getDataProperty(String uri) {
-		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		if (!rd.isBottom() && !rd.isTop() && !dataProperties.contains(rd))
-			throw new RuntimeException("Data property not found: " + uri);			
-		return rd;
+		DataPropertyExpression rd0 = dataProperties.get(uri);
+		if (rd0 == null) {
+			DataPropertyExpression rd = ofac.createDataProperty(uri);
+			if (!rd.isBottom() && !rd.isTop())
+				throw new RuntimeException("Data property not found: " + uri);		
+			return rd;
+		}
+		return rd0;
 	}
 
 	@Override
-	public Set<OClass> getClasses() {
-		return Collections.unmodifiableSet(concepts);
+	public Collection<OClass> getClasses() {
+		return concepts.values();
 	}
 
 	@Override
-	public Set<ObjectPropertyExpression> getObjectProperties() {
-		return Collections.unmodifiableSet(objectProperties);
+	public Collection<ObjectPropertyExpression> getObjectProperties() {
+		return objectProperties.values();
 	}
 
 	@Override
-	public Set<DataPropertyExpression> getDataProperties() {
-		return Collections.unmodifiableSet(dataProperties);
+	public Collection<DataPropertyExpression> getDataProperties() {
+		return dataProperties.values();
 	}
 
 	
@@ -159,7 +175,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		if (desc instanceof OClass) {
 			OClass cl = (OClass)desc;
 			if (!isBuiltIn(cl)) {
-				concepts.add(cl);
+				concepts.put(cl.getPredicate().getName(), cl);
 				return true;
 			}
 		}
@@ -195,7 +211,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 				if (isAuxiliaryProperty(p))
 					auxObjectProperties.add(p);
 				else
-					objectProperties.add(p);
+					objectProperties.put(p.getPredicate().getName(), p);
 				return true;
 			}
 		}
@@ -204,7 +220,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 				if (isAuxiliaryProperty(prop))
 					auxObjectProperties.add(prop);
 				else
-					objectProperties.add(prop);
+					objectProperties.put(prop.getPredicate().getName(), prop);
 				return true;
 			}			
 		}
@@ -216,7 +232,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			if (isAuxiliaryProperty(prop))
 				auxDataProperties.add(prop);
 			else
-				dataProperties.add(prop);
+				dataProperties.put(prop.getPredicate().getName(), prop);
 			return true;
 		}
 		return false;
@@ -237,7 +253,8 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	void checkSignature(ClassExpression desc) {
 		
 		if (desc instanceof OClass) {
-			if (!concepts.contains(desc) && !isBuiltIn((OClass)desc))
+			OClass cl = (OClass) desc;
+			if (!concepts.containsKey(cl.getPredicate().getName()) && !isBuiltIn(cl))
 				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
 		}	
 		else if (desc instanceof ObjectSomeValuesFrom) {
@@ -265,17 +282,17 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	void checkSignature(ObjectPropertyExpression prop) {
 
 		if (prop.isInverse()) {
-			if (!objectProperties.contains(prop.getInverse()) && !isBuiltIn(prop.getInverse())) 
+			if (!objectProperties.containsKey(prop.getInverse().getPredicate().getName()) && !isBuiltIn(prop.getInverse())) 
 				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.getInverse());
 		}
 		else {
-			if (!objectProperties.contains(prop) && !isBuiltIn(prop)) 
+			if (!objectProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop)) 
 				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 		}
 	}
 
 	void checkSignature(DataPropertyExpression prop) {
-		if (!dataProperties.contains(prop) && !isBuiltIn(prop))
+		if (!dataProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop))
 			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 	}
 	
