@@ -452,7 +452,7 @@ public class QuestUnfolder {
 		for (OBDAMappingAxiom axiom : mappings) {
 			String sourceString = axiom.getSourceQuery().toString();
 
-			CQIE targetQuery= axiom.getTargetQuery();
+			CQIE targetQuery = axiom.getTargetQuery();
 
 			Select select = null;
 			try {

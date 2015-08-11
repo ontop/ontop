@@ -455,7 +455,7 @@ public class OBDAModelImpl implements OBDAModel {
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
 			for (OBDAMappingAxiom mapping : mp) {
-				CQIE cq = (CQIE) mapping.getTargetQuery();
+				CQIE cq = mapping.getTargetQuery();
 				List<Function> body = cq.getBody();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
@@ -478,7 +478,7 @@ public class OBDAModelImpl implements OBDAModel {
 		for (OBDADataSource source : datasources.values()) {
 			List<OBDAMappingAxiom> mp = new ArrayList<OBDAMappingAxiom>(mappings.get(source.getSourceID()));
 			for (OBDAMappingAxiom mapping : mp) {
-				CQIE cq = (CQIE) mapping.getTargetQuery();
+				CQIE cq = mapping.getTargetQuery();
 				List<Function> body = cq.getBody();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);

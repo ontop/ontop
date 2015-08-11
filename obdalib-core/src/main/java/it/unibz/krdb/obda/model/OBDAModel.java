@@ -196,6 +196,8 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void reset();
 
+	
+	
 	public Set<OClass> getDeclaredClasses();
 
 	public Set<ObjectPropertyExpression> getDeclaredObjectProperties();
@@ -211,6 +213,8 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public boolean declareDataProperty(DataPropertyExpression property);
 
+	
+	
 	public void declareAll(OntologyVocabulary vocabulary);
 	
 	

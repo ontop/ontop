@@ -193,7 +193,7 @@ public class VocabularyValidator {
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			CQIE targetQuery = mapping.getTargetQuery();
 			
 			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
 			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));

@@ -94,7 +94,7 @@ public class MappingVocabularyRepair {
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			CQIE targetQuery = mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
 
 			for (Function atom : targetQuery.getBody()) {

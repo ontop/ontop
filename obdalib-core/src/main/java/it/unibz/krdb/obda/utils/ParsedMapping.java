@@ -42,7 +42,7 @@ public class ParsedMapping {
 	
 	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryParser translator){
 		this.axiom = axiom;
-		OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
+		OBDASQLQuery sourceQuery = axiom.getSourceQuery();
 
 		// Construct the SQL parsed query from the source query
 		ParsedSQLQuery queryParsed = translator.parseShallowly(sourceQuery.toString());

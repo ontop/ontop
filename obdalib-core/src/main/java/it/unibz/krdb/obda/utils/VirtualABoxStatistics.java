@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.obda.exception.NoDatasourceSelectedException;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -148,10 +149,10 @@ public class VirtualABoxStatistics {
 				String mappingId = mapping.getId();
 				int triplesCount = 0;
 				try {
-					OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
+					OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 					int tuples = getTuplesCount(database, sourceQuery);
 
-					CQIEImpl targetQuery = (CQIEImpl) mapping.getTargetQuery();
+					CQIE targetQuery = mapping.getTargetQuery();
 					int atoms = getAtomCount(targetQuery);
 
 					triplesCount = tuples * atoms;
@@ -198,7 +199,7 @@ public class VirtualABoxStatistics {
 		return count;
 	}
 
-	private int getAtomCount(CQIEImpl query) {
+	private int getAtomCount(CQIE query) {
 		return query.getBody().size();
 	}
 

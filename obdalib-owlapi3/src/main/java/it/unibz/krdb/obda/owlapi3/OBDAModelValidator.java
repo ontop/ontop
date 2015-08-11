@@ -56,7 +56,7 @@ public class OBDAModelValidator {
 		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
 		for (URI datasourceUri : mappingTable.keySet()) {
 			for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
-				CQIE tq = (CQIE) mapping.getTargetQuery();
+				CQIE tq = mapping.getTargetQuery();
 				boolean bSuccess = validator.validate(tq);
 				if (!bSuccess) {
 					throw new Exception("Found an invalid target query: " + tq.toString());
