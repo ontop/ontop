@@ -17,23 +17,29 @@ public interface OBDAOntologyVocabulary {
 
 	
 	
-	public boolean declareClass(OClass classname);
+	public OClass declareClass(String classname);
 
-	public boolean declareObjectProperty(ObjectPropertyExpression property);
+	public ObjectPropertyExpression declareObjectProperty(String property);
 
-	public boolean declareDataProperty(DataPropertyExpression property);
+	public DataPropertyExpression declareDataProperty(String property);
 
+	
+	
 	public void declareAll(OntologyVocabulary vocabulary);
 
+	
+	
 	public boolean unDeclareClass(OClass classname);
 
 	public boolean unDeclareObjectProperty(ObjectPropertyExpression property);
 
 	public boolean unDeclareDataProperty(DataPropertyExpression property);
+	
+	
 
-	public boolean isDeclaredClass(OClass classname);
+	public OClass getClass(String classname);
 
-	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property);
+	public ObjectPropertyExpression getObjectProperty(String property);
 
-	public  boolean isDeclaredDataProperty(DataPropertyExpression property);
+	public DataPropertyExpression getDataProperty(String property);
 }

@@ -4,90 +4,101 @@ import it.unibz.krdb.obda.model.OBDAOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OBDAOntologyVocabularyImpl implements OBDAOntologyVocabulary {
 
-	private final Set<OClass> declaredClasses = new LinkedHashSet<OClass>();
+	private final Map<String, OClass> declaredClasses = new HashMap<>();
+	private final Map<String, ObjectPropertyExpression> declaredObjectProperties = new HashMap<>();
+	private final Map<String, DataPropertyExpression> declaredDataProperties = new HashMap<>();
 
-	private final Set<ObjectPropertyExpression> declaredObjectProperties = new LinkedHashSet<ObjectPropertyExpression>();
-
-	private final Set<DataPropertyExpression> declaredDataProperties = new LinkedHashSet<DataPropertyExpression>();
-
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	
 	@Override
-	public Set<OClass> getClasses() {
-		return Collections.unmodifiableSet(declaredClasses);
+	public Collection<OClass> getClasses() {
+		return declaredClasses.values();
 	}
 
 	@Override
-	public Set<ObjectPropertyExpression> getObjectProperties() {
-		return Collections.unmodifiableSet(declaredObjectProperties);
+	public Collection<ObjectPropertyExpression> getObjectProperties() {
+		return declaredObjectProperties.values();
 	}
 
 	@Override
-	public Set<DataPropertyExpression> getDataProperties() {
-		return Collections.unmodifiableSet(declaredDataProperties);
+	public Collection<DataPropertyExpression> getDataProperties() {
+		return declaredDataProperties.values();
 	}
 	
 	@Override
-	public boolean declareClass(OClass classname) {
-		return declaredClasses.add(classname);
+	public OClass declareClass(String classname) {
+		OClass cl = ofac.createClass(classname);
+		declaredClasses.put(classname, cl);
+		return cl;
 	}
 
 	@Override
-	public boolean declareObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.add(property);
+	public ObjectPropertyExpression declareObjectProperty(String property) {
+		ObjectPropertyExpression p = ofac.createObjectProperty(property);
+		declaredObjectProperties.put(property, p);
+		return p;
 	}
 
 	@Override
-	public boolean declareDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.add(property);
+	public DataPropertyExpression declareDataProperty(String property) {
+		DataPropertyExpression p = ofac.createDataProperty(property);
+		declaredDataProperties.put(property, p);
+		return p;
 	}
 	
 	@Override
 	public void declareAll(OntologyVocabulary vocabulary) {
-		for (OClass p : vocabulary.getClasses()) 
-			declareClass(p);
+		for (OClass cl : vocabulary.getClasses()) 
+			declaredClasses.put(cl.getPredicate().getName(), cl);
 		
 		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
-			declareObjectProperty(p);
+			declaredObjectProperties.put(p.getPredicate().getName(), p);
 		
 		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
-			declareDataProperty(p);
+			declaredDataProperties.put(p.getPredicate().getName(), p);
 	}
+	
+	
+	
 	
 	@Override
 	public boolean unDeclareClass(OClass classname) {
-		return declaredClasses.remove(classname);
+		return declaredClasses.remove(classname.getPredicate().getName()) != null;
 	}
 
 	@Override
 	public boolean unDeclareObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.remove(property);
+		return declaredObjectProperties.remove(property.getPredicate().getName()) != null;
 	}
 
 	@Override
 	public boolean unDeclareDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.remove(property);
+		return declaredDataProperties.remove(property.getPredicate().getName()) != null;
 	}
 	
 	@Override
-	public boolean isDeclaredClass(OClass classname) {
-		return declaredClasses.contains(classname);
+	public OClass getClass(String classname) {
+		return declaredClasses.get(classname);
 	}
 
 	@Override
-	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.contains(property);
+	public ObjectPropertyExpression getObjectProperty(String property) {
+		return declaredObjectProperties.get(property);
 	}
 
 	@Override
-	public boolean isDeclaredDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.contains(property);
+	public DataPropertyExpression getDataProperty(String property) {
+		return declaredDataProperties.get(property);
 	}
 	
 	

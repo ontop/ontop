@@ -204,16 +204,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							OClass c = ofac.createClass(oc.getIRI().toString());
-							activeOBDAModel.getOntologyVocabulary().declareClass(c);
-						} else if (entity instanceof OWLObjectProperty) {
+							activeOBDAModel.getOntologyVocabulary().declareClass(oc.getIRI().toString());
+						} 
+						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
-							activeOBDAModel.getOntologyVocabulary().declareObjectProperty(r);
-						} else if (entity instanceof OWLDataProperty) {
+							activeOBDAModel.getOntologyVocabulary().declareObjectProperty(or.getIRI().toString());
+						} 
+						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
-							activeOBDAModel.getOntologyVocabulary().declareDataProperty(p);
+							activeOBDAModel.getOntologyVocabulary().declareDataProperty(op.getIRI().toString());
 						}
 					}
 
@@ -362,18 +361,14 @@ public class OBDAModelManager implements Disposable {
 		Set<OWLOntology> ontologies = mmgr.getOntologies();
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
-			for (OWLClass c : ontology.getClassesInSignature()) {
-				OClass pred = ofac.createClass(c.getIRI().toString());
-				activeOBDAModel.getOntologyVocabulary().declareClass(pred);
-			}
-			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
-				activeOBDAModel.getOntologyVocabulary().declareObjectProperty(pred);
-			}
-			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
-				activeOBDAModel.getOntologyVocabulary().declareDataProperty(pred);
-			}
+			for (OWLClass c : ontology.getClassesInSignature()) 
+				activeOBDAModel.getOntologyVocabulary().declareClass(c.getIRI().toString());
+			
+			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) 
+				activeOBDAModel.getOntologyVocabulary().declareObjectProperty(r.getIRI().toString());
+			
+			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) 
+				activeOBDAModel.getOntologyVocabulary().declareDataProperty(p.getIRI().toString());
 		}
 
 		// Setup the prefixes
