@@ -142,7 +142,7 @@ public class VirtualABoxStatistics {
 
 		for (OBDADataSource database : sourceList) {
 			URI sourceUri = database.getSourceID();
-			ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
+			List<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 
 			HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
 			for (OBDAMappingAxiom mapping : mappingList) {

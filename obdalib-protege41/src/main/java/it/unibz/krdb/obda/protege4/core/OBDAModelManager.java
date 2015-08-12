@@ -205,15 +205,15 @@ public class OBDAModelManager implements Disposable {
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
 							OClass c = ofac.createClass(oc.getIRI().toString());
-							activeOBDAModel.declareClass(c);
+							activeOBDAModel.getOntologyVocabulary().declareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
 							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
-							activeOBDAModel.declareObjectProperty(r);
+							activeOBDAModel.getOntologyVocabulary().declareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
 							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
-							activeOBDAModel.declareDataProperty(p);
+							activeOBDAModel.getOntologyVocabulary().declareDataProperty(p);
 						}
 					}
 
@@ -225,15 +225,15 @@ public class OBDAModelManager implements Disposable {
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
 							OClass c = ofac.createClass(oc.getIRI().toString());
-							activeOBDAModel.unDeclareClass(c);
+							activeOBDAModel.getOntologyVocabulary().unDeclareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
 							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
-							activeOBDAModel.unDeclareObjectProperty(r);
+							activeOBDAModel.getOntologyVocabulary().unDeclareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
 							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
-							activeOBDAModel.unDeclareDataProperty(p);
+							activeOBDAModel.getOntologyVocabulary().unDeclareDataProperty(p);
 						}
 					}
 				}
@@ -364,15 +364,15 @@ public class OBDAModelManager implements Disposable {
 			// Setup the entity declarations
 			for (OWLClass c : ontology.getClassesInSignature()) {
 				OClass pred = ofac.createClass(c.getIRI().toString());
-				activeOBDAModel.declareClass(pred);
+				activeOBDAModel.getOntologyVocabulary().declareClass(pred);
 			}
 			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
 				ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
-				activeOBDAModel.declareObjectProperty(pred);
+				activeOBDAModel.getOntologyVocabulary().declareObjectProperty(pred);
 			}
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
 				DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
-				activeOBDAModel.declareDataProperty(pred);
+				activeOBDAModel.getOntologyVocabulary().declareDataProperty(pred);
 			}
 		}
 

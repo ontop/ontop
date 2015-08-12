@@ -310,7 +310,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (OClass c : obdaModel.getDeclaredClasses()) {
+        for (OClass c : obdaModel.getOntologyVocabulary().getClasses()) {
         	Predicate pred = c.getPredicate(); 
             v.addElement(new PredicateItem(pred, prefixManager));
         }

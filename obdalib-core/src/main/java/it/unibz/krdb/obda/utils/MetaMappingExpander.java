@@ -96,7 +96,7 @@ public class MetaMappingExpander {
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
 		
 		for (OBDAMappingAxiom mapping : mappings) {
 

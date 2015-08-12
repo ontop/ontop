@@ -120,7 +120,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
 
-            obdaModel.declareAll(inputOntology.getVocabulary());
+            obdaModel.getOntologyVocabulary().declareAll(inputOntology.getVocabulary());
 
 
             int numPredicates = predicates.size();
@@ -236,7 +236,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 }
 
                 Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
-                obdaModel.declareAll(onto.getVocabulary());
+                obdaModel.getOntologyVocabulary().declareAll(onto.getVocabulary());
                 materializer = new OWLAPI3Materializer(obdaModel, onto, DO_STREAM_RESULTS);
             } else {
                 ontology = manager.createOntology();

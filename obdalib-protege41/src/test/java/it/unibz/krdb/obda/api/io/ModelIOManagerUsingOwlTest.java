@@ -108,15 +108,15 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         // Setup the entity declarations
         for (OWLClass c : schoolOntology.getClassesInSignature()) {
             OClass pred = ofac.createClass(c.getIRI().toString());
-            model.declareClass(pred);
+            model.getOntologyVocabulary().declareClass(pred);
         }
         for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) {
         	ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
-            model.declareObjectProperty(pred);
+            model.getOntologyVocabulary().declareObjectProperty(pred);
         }
         for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) {
         	DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
-            model.declareDataProperty(pred);
+            model.getOntologyVocabulary().declareDataProperty(pred);
         }
     }
 

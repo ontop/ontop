@@ -137,13 +137,13 @@ public class QuestMaterializer {
 			
 			// TODO: use Vocabulary for OBDAModel as well
 			
-			for (OClass pred : model.getDeclaredClasses()) 
+			for (OClass pred : model.getOntologyVocabulary().getClasses()) 
 				vb.declareClass(pred.getPredicate().getName());				
 			
-			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
+			for (ObjectPropertyExpression prop : model.getOntologyVocabulary().getObjectProperties()) 
 				vb.declareObjectProperty(prop.getPredicate().getName());
 
-			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
+			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
 				vb.declareDataProperty(prop.getPredicate().getName());
 			
 			ontology = ofac.createOntology(vb);			
@@ -166,17 +166,17 @@ public class QuestMaterializer {
 
         //add all class/data/object predicates to vocabulary
         //add declared predicates in model
-        for (OClass cl : model.getDeclaredClasses()) {
+        for (OClass cl : model.getOntologyVocabulary().getClasses()) {
             Predicate p = cl.getPredicate();
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
-        for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
+        for (ObjectPropertyExpression prop : model.getOntologyVocabulary().getObjectProperties()) {
             Predicate p = prop.getPredicate();
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
-        for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
+        for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) {
             Predicate p = prop.getPredicate();
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);

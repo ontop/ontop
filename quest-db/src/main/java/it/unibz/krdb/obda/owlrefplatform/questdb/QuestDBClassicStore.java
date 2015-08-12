@@ -166,7 +166,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			obdaModelForMaterialization.declareAll(tbox.getVocabulary());
+			obdaModelForMaterialization.getOntologyVocabulary().declareAll(tbox.getVocabulary());
 			
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();

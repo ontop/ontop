@@ -36,11 +36,11 @@ import java.util.Vector;
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	/** The OBDA model for validating the target query */
-	private OBDAModel obdaModel;
+	private final OBDAModel obdaModel;
 
 	/** Data factory **/
-	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
-	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/** List of invalid predicates */
 	private Vector<String> invalidPredicates = new Vector<String>();
@@ -101,17 +101,17 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	@Override
 	public boolean isClass(Predicate predicate) {
-		return obdaModel.isDeclaredClass(ofac.createClass(predicate.getName()));
+		return obdaModel.getOntologyVocabulary().isDeclaredClass(ofac.createClass(predicate.getName()));
 	}
 	
 	@Override
 	public boolean isObjectProperty(Predicate predicate) {
-		return obdaModel.isDeclaredObjectProperty(ofac.createObjectProperty(predicate.getName()));
+		return obdaModel.getOntologyVocabulary().isDeclaredObjectProperty(ofac.createObjectProperty(predicate.getName()));
 	}
 
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
-		return obdaModel.isDeclaredDataProperty(ofac.createDataProperty(predicate.getName()));
+		return obdaModel.getOntologyVocabulary().isDeclaredDataProperty(ofac.createDataProperty(predicate.getName()));
 	}
 	
 	@Override
