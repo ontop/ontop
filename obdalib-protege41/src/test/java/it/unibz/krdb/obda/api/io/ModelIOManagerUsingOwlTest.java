@@ -107,13 +107,13 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         
         // Setup the entity declarations
         for (OWLClass c : schoolOntology.getClassesInSignature()) 
-            model.getOntologyVocabulary().declareClass(c.getIRI().toString());
+            model.getOntologyVocabulary().createClass(c.getIRI().toString());
         
         for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) 
-            model.getOntologyVocabulary().declareObjectProperty(r.getIRI().toString());
+            model.getOntologyVocabulary().createObjectProperty(r.getIRI().toString());
         
         for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) 
-            model.getOntologyVocabulary().declareDataProperty(p.getIRI().toString());
+            model.getOntologyVocabulary().createDataProperty(p.getIRI().toString());
     }
 
     public void testRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {

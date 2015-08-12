@@ -36,21 +36,21 @@ public class OBDAOntologyVocabularyImpl implements OBDAOntologyVocabulary {
 	}
 	
 	@Override
-	public OClass declareClass(String classname) {
+	public OClass createClass(String classname) {
 		OClass cl = ofac.createClass(classname);
 		declaredClasses.put(classname, cl);
 		return cl;
 	}
 
 	@Override
-	public ObjectPropertyExpression declareObjectProperty(String property) {
+	public ObjectPropertyExpression createObjectProperty(String property) {
 		ObjectPropertyExpression p = ofac.createObjectProperty(property);
 		declaredObjectProperties.put(property, p);
 		return p;
 	}
 
 	@Override
-	public DataPropertyExpression declareDataProperty(String property) {
+	public DataPropertyExpression createDataProperty(String property) {
 		DataPropertyExpression p = ofac.createDataProperty(property);
 		declaredDataProperties.put(property, p);
 		return p;
@@ -72,19 +72,21 @@ public class OBDAOntologyVocabularyImpl implements OBDAOntologyVocabulary {
 	
 	
 	@Override
-	public boolean unDeclareClass(OClass classname) {
-		return declaredClasses.remove(classname.getPredicate().getName()) != null;
+	public boolean removeClass(String classname) {
+		return declaredClasses.remove(classname) != null;
 	}
 
 	@Override
-	public boolean unDeclareObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.remove(property.getPredicate().getName()) != null;
+	public boolean removeObjectProperty(String property) {
+		return declaredObjectProperties.remove(property) != null;
 	}
 
 	@Override
-	public boolean unDeclareDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.remove(property.getPredicate().getName()) != null;
+	public boolean removeDataProperty(String property) {
+		return declaredDataProperties.remove(property) != null;
 	}
+	
+	
 	
 	@Override
 	public OClass getClass(String classname) {

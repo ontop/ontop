@@ -37,6 +37,19 @@ public interface OntologyVocabulary {
 	
 	public DataPropertyExpression getDataProperty(String uri);
 	
+
+	public Collection<OClass> getClasses();
+	
+	public Collection<ObjectPropertyExpression> getObjectProperties();
+	
+	public Collection<DataPropertyExpression> getDataProperties();
+	
+	
+
+	public boolean isEmpty();
+	
+	
+	
 	/**
 	 * auxiliary properties result from NORMALIZATION
 	 * @param uri
@@ -52,14 +65,6 @@ public interface OntologyVocabulary {
 	public DataPropertyExpression createAuxiliaryDataProperty();
 	
 	
-	
-
-	public Collection<OClass> getClasses();
-	
-	public Collection<ObjectPropertyExpression> getObjectProperties();
-	
-	public Collection<DataPropertyExpression> getDataProperties();
-	
 	/**
 	 * auxiliary properties result from NORMALIZATION
 	 */
@@ -71,7 +76,4 @@ public interface OntologyVocabulary {
 	 */
 	
 	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
-	
-
-	public boolean isEmpty();
 }

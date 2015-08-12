@@ -17,11 +17,11 @@ public interface OBDAOntologyVocabulary {
 
 	
 	
-	public OClass declareClass(String classname);
+	public OClass createClass(String classname);
 
-	public ObjectPropertyExpression declareObjectProperty(String property);
+	public ObjectPropertyExpression createObjectProperty(String property);
 
-	public DataPropertyExpression declareDataProperty(String property);
+	public DataPropertyExpression createDataProperty(String property);
 
 	
 	
@@ -29,11 +29,11 @@ public interface OBDAOntologyVocabulary {
 
 	
 	
-	public boolean unDeclareClass(OClass classname);
+	public boolean removeClass(String classname);
 
-	public boolean unDeclareObjectProperty(ObjectPropertyExpression property);
+	public boolean removeObjectProperty(String property);
 
-	public boolean unDeclareDataProperty(DataPropertyExpression property);
+	public boolean removeDataProperty(String property);
 	
 	
 

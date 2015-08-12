@@ -228,11 +228,11 @@ public class DirectMappingEngine {
 				CQIE rule = mapping.getTargetQuery();
 				for (Function f : rule.getBody()) {
 					if (f.getArity() == 1)
-						model.getOntologyVocabulary().declareClass(f.getFunctionSymbol().getName());
+						model.getOntologyVocabulary().createClass(f.getFunctionSymbol().getName());
 					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
-						model.getOntologyVocabulary().declareObjectProperty(f.getFunctionSymbol().getName());
+						model.getOntologyVocabulary().createObjectProperty(f.getFunctionSymbol().getName());
 					else
-						model.getOntologyVocabulary().declareDataProperty(f.getFunctionSymbol().getName());
+						model.getOntologyVocabulary().createDataProperty(f.getFunctionSymbol().getName());
 				}
 			}
 		}
