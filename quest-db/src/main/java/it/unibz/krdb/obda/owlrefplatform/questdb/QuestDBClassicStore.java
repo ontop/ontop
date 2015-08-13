@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
@@ -166,7 +166,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			obdaModelForMaterialization.getOntologyVocabulary().declareAll(tbox.getVocabulary());
+			obdaModelForMaterialization.getOntologyVocabulary().merge(tbox.getVocabulary());
 			
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
@@ -208,7 +208,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		graphURIs.addAll(dataset.getDefaultGraphs());
 		graphURIs.addAll(dataset.getNamedGraphs());
 
-		OntologyVocabularyBuilder vb = ofac.createVocabularyBuilder();
+		OntologyVocabulary vb = ofac.createVocabularyBuilder();
 		
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(graphURI, graphURI);
@@ -254,7 +254,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	public class RDFTBoxReader extends RDFHandlerBase {
 		private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		private OntologyVocabularyBuilder vb = ofac.createVocabularyBuilder();
+		private OntologyVocabulary vb = ofac.createVocabularyBuilder();
 
 		public Ontology getOntology() {
 			return ofac.createOntology(vb);
@@ -266,15 +266,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
 				String dataProperty = pred.stringValue();
-				vb.declareDataProperty(dataProperty);
+				vb.createDataProperty(dataProperty);
 			} 
 			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
 				String className = obj.stringValue();
-				vb.declareClass(className);
+				vb.createClass(className);
 			} 
 			else {
 				String objectProperty = pred.stringValue();
-				vb.declareObjectProperty(objectProperty);
+				vb.createObjectProperty(objectProperty);
 			}
 
 		/* Roman 10/08/15: recover?

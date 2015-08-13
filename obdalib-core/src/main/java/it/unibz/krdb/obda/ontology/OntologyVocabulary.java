@@ -37,28 +37,88 @@ public interface OntologyVocabulary {
 	
 	public DataPropertyExpression getDataProperty(String uri);
 	
+	/**
+	 * return all declared classes
+	 * 
+	 * @return
+	 */
 
 	public Collection<OClass> getClasses();
 	
+	/**
+	 * return all declared object properties
+	 * 
+	 * @return
+	 */
+	
 	public Collection<ObjectPropertyExpression> getObjectProperties();
+	
+	/**
+	 * return all declared data properties
+	 * 
+	 * @return
+	 */
 	
 	public Collection<DataPropertyExpression> getDataProperties();
 	
 	
+	/**
+	 * check whether the vocabulary is empty (no declared classes, object or data properties)
+	 * 
+	 * @return
+	 */
 
 	public boolean isEmpty();
 	
 	
 	
+	
+	
 	/**
-	 * auxiliary properties result from NORMALIZATION
+	 * declare class
+	 * 
+	 * @param uri
+	 * @return
+	 */
+	
+	public OClass createClass(String uri);
+
+	/**
+	 * declare object property
+	 * 
+	 * @param uri property name
+	 * @return
+	 */
+	
+	public ObjectPropertyExpression createObjectProperty(String uri);
+
+	/**
+	 * declare data property
+	 * 
+	 * @param uri property name
+	 * @return
+	 */
+	
+	public DataPropertyExpression createDataProperty(String uri);
+
+	
+		
+
+	
+	
+	/**
+	 * create an auxiliary object property 
+	 * (auxiliary properties result from ontology normalisation)
+	 * 
 	 * @param uri
 	 */
 
 	public ObjectPropertyExpression createAuxiliaryObjectProperty();
 	
 	/**
-	 * auxiliary properties result from NORMALIZATION
+	 * create an auxiliary data property 
+	 * (auxiliary properties result from ontology normalisation)
+	 * 
 	 * @param uri
 	 */
 	
@@ -66,14 +126,33 @@ public interface OntologyVocabulary {
 	
 	
 	/**
-	 * auxiliary properties result from NORMALIZATION
+	 * return all auxiliary object properties
+	 * (auxiliary properties result from ontology normalisation)
+	 * 
+	 * @return
 	 */
 	
 	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
 
 	/**
-	 * auxiliary properties result from NORMALIZATION
+	 * return all auxiliary data properties
+	 * (auxiliary properties result from ontology normalisation)
+	 * 
+	 * @return
 	 */
 	
 	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
+	
+	
+	
+	public void merge(OntologyVocabulary v);
+
+	
+	public boolean removeClass(String classname);
+
+	public boolean removeObjectProperty(String property);
+
+	public boolean removeDataProperty(String property);
+	
+	
 }

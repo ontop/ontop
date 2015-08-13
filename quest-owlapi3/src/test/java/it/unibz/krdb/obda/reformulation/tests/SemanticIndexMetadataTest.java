@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -112,13 +112,13 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-			OntologyVocabularyBuilder vb = ofac.createVocabularyBuilder();
+			OntologyVocabulary vb = ofac.createVocabularyBuilder();
 						
-			vb.declareClass("A");
-			vb.declareObjectProperty("P");
-			vb.declareDataProperty("P");
-			vb.declareObjectProperty("Q");
-			vb.declareDataProperty("D");
+			vb.createClass("A");
+			vb.createObjectProperty("P");
+			vb.createDataProperty("P");
+			vb.createObjectProperty("Q");
+			vb.createDataProperty("D");
 
 			Ontology ont = ofac.createOntology(vb);
 			

@@ -116,7 +116,7 @@ class QuestSesameMaterializerCMD {
 			// Loading the OWL ontology from the file as with normal OWLReasoners
 				ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 				 onto =  OWLAPI3TranslatorUtility.translate(ontology);
-				 model.getOntologyVocabulary().declareAll(onto.getVocabulary());
+				 model.getOntologyVocabulary().merge(onto.getVocabulary());
 			}
 			else {
 				ontology = manager.createOntology();

@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -41,10 +41,10 @@ public class SigmaTest extends TestCase {
 
     public void test_exists_simple() {
     	
-		OntologyVocabularyBuilder vb = descFactory.createVocabularyBuilder();
-        OClass ac = vb.declareClass("a");
-        OClass cc = vb.declareClass("c");
-        ObjectPropertyExpression rprop = vb.declareObjectProperty("r");
+		OntologyVocabulary vb = descFactory.createVocabularyBuilder();
+        OClass ac = vb.createClass("a");
+        OClass cc = vb.createClass("c");
+        ObjectPropertyExpression rprop = vb.createObjectProperty("r");
        
         Ontology ontology = descFactory.createOntology(vb);
  

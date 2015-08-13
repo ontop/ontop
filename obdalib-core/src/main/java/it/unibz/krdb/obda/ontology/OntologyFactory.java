@@ -29,9 +29,9 @@ public interface OntologyFactory {
 	@Deprecated
 	public Ontology createOntology();
 
-	public Ontology createOntology(OntologyVocabularyBuilder vb);
+	public Ontology createOntology(OntologyVocabulary vb);
 	
-	public OntologyVocabularyBuilder createVocabularyBuilder();
+	public OntologyVocabulary createVocabularyBuilder();
 	
 	
 	

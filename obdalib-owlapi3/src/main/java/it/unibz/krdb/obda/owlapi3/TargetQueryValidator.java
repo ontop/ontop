@@ -98,17 +98,35 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	@Override
 	public boolean isClass(Predicate predicate) {
-		return obdaModel.getOntologyVocabulary().getClass(predicate.getName()) != null;
+		try {
+			obdaModel.getOntologyVocabulary().getClass(predicate.getName());
+			return true;
+		}
+		catch (RuntimeException e) {
+			return false;
+		}
 	}
 	
 	@Override
 	public boolean isObjectProperty(Predicate predicate) {
-		return obdaModel.getOntologyVocabulary().getObjectProperty(predicate.getName()) != null;
+		try {
+			obdaModel.getOntologyVocabulary().getObjectProperty(predicate.getName());
+			return true;
+		}
+		catch (RuntimeException e) {
+			return false;
+		}
 	}
 
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
-		return obdaModel.getOntologyVocabulary().getDataProperty(predicate.getName()) != null;
+		try {
+			obdaModel.getOntologyVocabulary().getDataProperty(predicate.getName());
+			return true;
+		}
+		catch (RuntimeException e) {
+			return false;
+		}
 	}
 	
 	@Override

@@ -201,7 +201,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 				Ontology onto = OWLAPI3TranslatorUtility.translate(ontology);
-				obdaModel.getOntologyVocabulary().declareAll(onto.getVocabulary());
+				obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
 				
 				final long startTime = System.currentTimeMillis();
 				if (format != 3) {

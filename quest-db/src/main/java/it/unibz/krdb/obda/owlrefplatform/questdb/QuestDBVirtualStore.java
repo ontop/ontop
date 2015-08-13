@@ -171,7 +171,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			if (obdaModel.getSources().size() == 0)
 				obdaModel.addSource(getMemOBDADataSource("MemH2"));
 		}
-		obdaModel.getOntologyVocabulary().declareAll(tbox.getVocabulary());
+		obdaModel.getOntologyVocabulary().merge(tbox.getVocabulary());
 		// OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
 
 		//set up Quest
@@ -202,7 +202,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		//add data source to model
 		obdaModel.addSource(source);
 		//OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
-		obdaModel.getOntologyVocabulary().declareAll(ontology.getVocabulary());
+		obdaModel.getOntologyVocabulary().merge(ontology.getVocabulary());
 		//setup Quest
 		setupQuest(ontology, obdaModel, metadata, config);
 	}

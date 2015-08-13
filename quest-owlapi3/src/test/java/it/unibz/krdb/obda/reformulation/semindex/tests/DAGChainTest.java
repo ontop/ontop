@@ -31,7 +31,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -53,10 +53,10 @@ public class DAGChainTest extends TestCase {
 
 	@Test
 	public void test_simple_isa() {        
-		OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
-		OClass ac = vb.declareClass("a");
-		OClass bc = vb.declareClass("b");
-		OClass cc = vb.declareClass("c");
+		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OClass ac = vb.createClass("a");
+		OClass bc = vb.createClass("b");
+		OClass cc = vb.createClass("c");
 
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(vb);
 
@@ -82,10 +82,10 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_simple() {
 		
-        OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
-		ObjectPropertyExpression rprop = vb.declareObjectProperty("r");
-		OClass ac = vb.declareClass("a");
-		OClass cc = vb.declareClass("c");
+        OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		ObjectPropertyExpression rprop = vb.createObjectProperty("r");
+		OClass ac = vb.createClass("a");
+		OClass cc = vb.createClass("c");
 		
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(vb);
 
@@ -132,12 +132,12 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_complex() {
 
-        OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
-		OClass ac = vb.declareClass("a");
-		OClass cc = vb.declareClass("c");
-		OClass bc = vb.declareClass("b");
-		OClass dc = vb.declareClass("d");
-		ObjectPropertyExpression rprop = vb.declareObjectProperty("r");
+        OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OClass ac = vb.createClass("a");
+		OClass cc = vb.createClass("c");
+		OClass bc = vb.createClass("b");
+		OClass dc = vb.createClass("d");
+		ObjectPropertyExpression rprop = vb.createObjectProperty("r");
         
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(vb);
 

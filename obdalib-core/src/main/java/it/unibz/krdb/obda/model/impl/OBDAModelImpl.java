@@ -31,9 +31,10 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
-import it.unibz.krdb.obda.model.OBDAOntologyVocabulary;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelImpl.class);
 
-	private final OBDAOntologyVocabulary vocabulary = new OBDAOntologyVocabularyImpl();
+	private final OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
 
 	/**
 	 * The default constructor
@@ -494,7 +495,7 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public OBDAOntologyVocabulary getOntologyVocabulary() {
+	public OntologyVocabulary getOntologyVocabulary() {
 		return vocabulary;
 	}
 }

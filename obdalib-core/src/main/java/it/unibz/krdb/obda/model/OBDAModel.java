@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.Serializable;
@@ -195,6 +196,6 @@ public interface OBDAModel extends Cloneable, Serializable {
 	 * @return
 	 */
 	
-	public OBDAOntologyVocabulary getOntologyVocabulary();
+	public OntologyVocabulary getOntologyVocabulary();
 		
 }

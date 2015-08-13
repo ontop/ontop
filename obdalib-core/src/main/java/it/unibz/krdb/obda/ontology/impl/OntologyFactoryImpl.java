@@ -34,7 +34,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
@@ -64,9 +64,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 	
 	@Override
-	public Ontology createOntology(OntologyVocabularyBuilder vb) {
+	public Ontology createOntology(OntologyVocabulary vb) {
 		OntologyImpl ont = new OntologyImpl();
-		ont.vocabulary = new OntologyVocabularyImpl((OntologyVocabularyBuilderImpl)vb);
+		ont.vocabulary = (OntologyVocabularyImpl)vb;
 		return ont;
 	}
 	
@@ -110,8 +110,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 
 	@Override
-	public OntologyVocabularyBuilder createVocabularyBuilder() {
-		return new OntologyVocabularyBuilderImpl();
+	public OntologyVocabulary createVocabularyBuilder() {
+		return new OntologyVocabularyImpl();
 	}
 	
 }

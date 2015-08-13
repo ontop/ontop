@@ -68,15 +68,9 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
 	}
 	
-	OntologyVocabularyImpl() {		
+	public OntologyVocabularyImpl() {		
 	}
 
-	OntologyVocabularyImpl(OntologyVocabularyBuilderImpl builder) {		
-		concepts.putAll(builder.concepts);
-		objectProperties.putAll(builder.objectProperties);
-		dataProperties.putAll(builder.dataProperties);
-	}
-	
 	@Override
 	public OClass getClass(String uri) {
 		OClass cd0 = concepts.get(uri);
@@ -150,12 +144,12 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	@Override
-	public Set<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
+	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
 		return Collections.unmodifiableSet(auxObjectProperties);
 	}
 
 	@Override
-	public Set<DataPropertyExpression> getAuxiliaryDataProperties() {
+	public Collection<DataPropertyExpression> getAuxiliaryDataProperties() {
 		return Collections.unmodifiableSet(auxDataProperties);
 	}
 	
@@ -302,5 +296,57 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return concepts.isEmpty() && objectProperties.isEmpty() && dataProperties.isEmpty();
 	}
 		
+	
+	
+	
+	@Override
+	public OClass createClass(String uri) {
+		OClass cd = ofac.createClass(uri);
+		if (!cd.isNothing() && !cd.isThing())
+			concepts.put(uri, cd);
+		return cd;
+	}
+
+	@Override
+	public DataPropertyExpression createDataProperty(String uri) {
+		DataPropertyExpression rd = ofac.createDataProperty(uri);
+		if (!rd.isBottom() && !rd.isTop()) 
+			dataProperties.put(uri, rd);
+		return rd;
+	}
+
+	@Override
+	public ObjectPropertyExpression createObjectProperty(String uri) {
+		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
+		if (!rd.isBottom() && !rd.isTop()) 
+			objectProperties.put(uri, rd);
+		return rd;
+	}
+
+	@Override
+	public void merge(OntologyVocabulary v) {
+		OntologyVocabularyImpl vi = (OntologyVocabularyImpl)v;
+		
+		concepts.putAll(vi.concepts);
+		objectProperties.putAll(vi.objectProperties);
+		dataProperties.putAll(vi.dataProperties);
+		auxObjectProperties.addAll(vi.auxObjectProperties);
+		auxDataProperties.addAll(vi.auxDataProperties);
+	}
+	
+	@Override
+	public boolean removeClass(String classname) {
+		return concepts.remove(classname) != null;
+	}
+
+	@Override
+	public boolean removeObjectProperty(String property) {
+		return objectProperties.remove(property) != null;
+	}
+
+	@Override
+	public boolean removeDataProperty(String property) {
+		return dataProperties.remove(property) != null;
+	}
 	
 }

@@ -967,7 +967,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	public void prepare(OWLOntology owl) {
 		owlOntology = owl;
 		
-		OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
 		
 		// add all definitions for classes and roles		
 		
@@ -976,7 +976,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			//if (entity.isOWLThing() || entity.isOWLNothing()) 
 			//	continue;				
 			String uri = entity.getIRI().toString();
-			vb.declareClass(uri);			
+			vb.createClass(uri);			
 		}
 
 		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
@@ -989,7 +989,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			}
 			else {
 				objectproperties.add(uri);
-				vb.declareObjectProperty(uri);
+				vb.createObjectProperty(uri);
 			}
 		}
 		
@@ -1003,7 +1003,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			}
 			else {
 				dataproperties.add(uri);
-				vb.declareDataProperty(uri);
+				vb.createDataProperty(uri);
 			}
 		}
 		dl_onto = ofac.createOntology(vb);

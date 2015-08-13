@@ -20,7 +20,6 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.OntologyVocabularyBuilder;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
@@ -850,7 +849,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	@Override
 	public void prepare(OWLOntology owl) {
 		
-		OntologyVocabularyBuilder vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
 		
 		// add all definitions for classes and roles		
 		
@@ -859,7 +858,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			//if (entity.isOWLThing() || entity.isOWLNothing()) 
 			//	continue;				
 			String uri = entity.getIRI().toString();
-			vb.declareClass(uri);			
+			vb.createClass(uri);			
 		}
 
 		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
@@ -872,7 +871,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			}
 			else {
 				objectproperties.add(uri);
-				vb.declareObjectProperty(uri);
+				vb.createObjectProperty(uri);
 			}
 		}
 		
@@ -886,7 +885,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			}
 			else {
 				dataproperties.add(uri);
-				vb.declareDataProperty(uri);
+				vb.createDataProperty(uri);
 			}
 		}
 		dl_onto = ofac.createOntology(vb);
