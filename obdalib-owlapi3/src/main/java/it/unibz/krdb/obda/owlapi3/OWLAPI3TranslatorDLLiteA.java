@@ -729,7 +729,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			
 			ClassExpression filler = getSubclassExpression(owlFiller);
 
-			ObjectPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryObjectProperty();
+			ObjectPropertyExpression auxRole = dl_onto.createAuxiliaryObjectProperty();
 
 			// if \exists R.C then auxRole = P, auxclass = \exists P, P <= R, \exists P^- <= C
 			// if \exists R^-.C then auxRole = P^-, auxclass = \exists P^-, P^- <= R^-, \exists P <= C
@@ -761,7 +761,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
 			Datatype filler = ofac.createDataType(datatype);
 			
-			DataPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryDataProperty();
+			DataPropertyExpression auxRole = dl_onto.createAuxiliaryDataProperty();
 
 			auxclass = auxRole.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
 			auxiliaryDatatypeProperties.put(someexp, auxclass);

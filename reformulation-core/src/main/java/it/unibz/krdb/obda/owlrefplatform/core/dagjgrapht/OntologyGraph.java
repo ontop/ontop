@@ -56,7 +56,7 @@ public class OntologyGraph {
 			graph.addVertex(role.getInverse());
 		}
 		
-		for (ObjectPropertyExpression role : ontology.getVocabulary().getAuxiliaryObjectProperties()) {
+		for (ObjectPropertyExpression role : ontology.getAuxiliaryObjectProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}
@@ -89,7 +89,7 @@ public class OntologyGraph {
 		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) 
 			graph.addVertex(role);
 		
-		for (DataPropertyExpression role : ontology.getVocabulary().getAuxiliaryDataProperties()) 
+		for (DataPropertyExpression role : ontology.getAuxiliaryDataProperties()) 
 			graph.addVertex(role);
 
 		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) 

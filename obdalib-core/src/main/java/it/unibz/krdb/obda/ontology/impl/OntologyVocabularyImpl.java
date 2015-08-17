@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.ontology.impl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,7 +24,7 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
-	private static OntologyFactory ofac;
+	private static final OntologyFactory ofac;
 	
 	// signature
 	
@@ -35,14 +34,10 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
 
-	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
-
-	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
-	
 	
 	// auxiliary symbols and built-in datatypes 
 	
-	private final static Set<Predicate> builtinDatatypes;
+	final static Set<Predicate> builtinDatatypes;
 
 	static { // static block
 		ofac = OntologyFactoryImpl.getInstance();
@@ -124,171 +119,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	
-	private static final String AUXROLEURI = "ER.A-AUXROLE"; 
-	private static int auxCounter = 0; // THIS IS SHARED AMONG ALL INSTANCES!
-	
-	@Override
-	public ObjectPropertyExpression createAuxiliaryObjectProperty() {
-		ObjectPropertyExpression rd = ofac.createObjectProperty(AUXROLEURI + auxCounter);
-		auxCounter++ ;
-		auxObjectProperties.add(rd);
-		return rd;
-	}
-	
-	@Override
-	public DataPropertyExpression createAuxiliaryDataProperty() {
-		DataPropertyExpression rd = ofac.createDataProperty(AUXROLEURI + auxCounter);
-		auxCounter++ ;
-		auxDataProperties.add(rd);
-		return rd;
-	}
-	
-	@Override
-	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
-		return Collections.unmodifiableSet(auxObjectProperties);
-	}
-
-	@Override
-	public Collection<DataPropertyExpression> getAuxiliaryDataProperties() {
-		return Collections.unmodifiableSet(auxDataProperties);
-	}
-	
-	// TODO: remove static
-	
-	@Deprecated
-	public static boolean isAuxiliaryProperty(ObjectPropertyExpression role) {
-		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
-	}
-	@Deprecated
-	public static boolean isAuxiliaryProperty(DataPropertyExpression role) {
-		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
-	}
-
-	
-	boolean addReferencedEntries(ClassExpression desc) {
-		if (desc instanceof OClass) {
-			OClass cl = (OClass)desc;
-			if (!isBuiltIn(cl)) {
-				concepts.put(cl.getPredicate().getName(), cl);
-				return true;
-			}
-		}
-		else if (desc instanceof ObjectSomeValuesFrom)  {
-			ObjectPropertyExpression prop = ((ObjectSomeValuesFrom) desc).getProperty();
-			return addReferencedEntries(prop);
-		}
-		else  {
-			assert (desc instanceof DataSomeValuesFrom);
-			DataPropertyExpression prop = ((DataSomeValuesFrom) desc).getProperty();
-			return addReferencedEntries(prop);
-		}
-		return false;
-	}
-	
-	boolean addReferencedEntries(DataRangeExpression desc) {
-		if (desc instanceof Datatype)  {
-			// NO-OP
-			// datatypes.add((Datatype) desc);
-			return true;
-		}
-		else  {
-			assert (desc instanceof DataPropertyRangeExpression);
-			DataPropertyExpression prop = ((DataPropertyRangeExpression) desc).getProperty();
-			return addReferencedEntries(prop);			
-		}
-	}
-	
-	boolean addReferencedEntries(ObjectPropertyExpression prop) {
-		if (prop.isInverse()) {
-			if (!isBuiltIn(prop.getInverse())) {
-				ObjectPropertyExpression p = prop.getInverse();
-				if (isAuxiliaryProperty(p))
-					auxObjectProperties.add(p);
-				else
-					objectProperties.put(p.getPredicate().getName(), p);
-				return true;
-			}
-		}
-		else {
-			if (!isBuiltIn(prop)) {
-				if (isAuxiliaryProperty(prop))
-					auxObjectProperties.add(prop);
-				else
-					objectProperties.put(prop.getPredicate().getName(), prop);
-				return true;
-			}			
-		}
-		return false;
-	}
-	
-	boolean addReferencedEntries(DataPropertyExpression prop) {
-		if (!isBuiltIn(prop)) {
-			if (isAuxiliaryProperty(prop))
-				auxDataProperties.add(prop);
-			else
-				dataProperties.put(prop.getPredicate().getName(), prop);
-			return true;
-		}
-		return false;
-	}
-	
-	private boolean isBuiltIn(OClass cl) {
-		return cl.isNothing() || cl.isThing();
-	}
-	
-	private boolean isBuiltIn(ObjectPropertyExpression prop) {
-		return prop.isBottom() || prop.isTop() || auxObjectProperties.contains(prop);
-	}
-
-	private boolean isBuiltIn(DataPropertyExpression prop) {
-		return prop.isBottom() || prop.isTop() || auxDataProperties.contains(prop);
-	}
-	
-	void checkSignature(ClassExpression desc) {
-		
-		if (desc instanceof OClass) {
-			OClass cl = (OClass) desc;
-			if (!concepts.containsKey(cl.getPredicate().getName()) && !isBuiltIn(cl))
-				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
-		}	
-		else if (desc instanceof ObjectSomeValuesFrom) {
-			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
-		}
-		else  {
-			assert (desc instanceof DataSomeValuesFrom);
-			checkSignature(((DataSomeValuesFrom) desc).getProperty());
-		}
-	}	
-	
-	void checkSignature(DataRangeExpression desc) {
-		
-		if (desc instanceof Datatype) {
-			Predicate pred = ((Datatype) desc).getPredicate();
-			if (!builtinDatatypes.contains(pred)) 
-				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
-		}
-		else {
-			assert (desc instanceof DataPropertyRangeExpression);
-			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
-		}
-	}
-
-	void checkSignature(ObjectPropertyExpression prop) {
-
-		if (prop.isInverse()) {
-			if (!objectProperties.containsKey(prop.getInverse().getPredicate().getName()) && !isBuiltIn(prop.getInverse())) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.getInverse());
-		}
-		else {
-			if (!objectProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-		}
-	}
-
-	void checkSignature(DataPropertyExpression prop) {
-		if (!dataProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop))
-			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-	}
 	
 	
 	@Override
@@ -330,8 +160,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		concepts.putAll(vi.concepts);
 		objectProperties.putAll(vi.objectProperties);
 		dataProperties.putAll(vi.dataProperties);
-		auxObjectProperties.addAll(vi.auxObjectProperties);
-		auxDataProperties.addAll(vi.auxDataProperties);
 	}
 	
 	@Override

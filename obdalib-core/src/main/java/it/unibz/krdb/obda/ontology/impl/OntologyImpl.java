@@ -20,20 +20,29 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.NaryAxiom;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +52,8 @@ import com.google.common.collect.ImmutableSet;
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
+	
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
 	
@@ -81,8 +92,8 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
-		vocabulary.addReferencedEntries(concept1);
-		vocabulary.addReferencedEntries(concept2);
+		addReferencedEntries(concept1);
+		addReferencedEntries(concept2);
 		if (!concept1.isNothing() && !concept2.isThing()) {
 			BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 			subClassAxioms.add(assertion);
@@ -91,16 +102,16 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
-		vocabulary.addReferencedEntries(concept1);
-		vocabulary.addReferencedEntries(concept2);
+		addReferencedEntries(concept1);
+		addReferencedEntries(concept2);
 		BinaryAxiom<DataRangeExpression> assertion = new BinaryAxiomImpl<DataRangeExpression>(concept1, concept2);
 		subDataRangeAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		vocabulary.addReferencedEntries(included);
-		vocabulary.addReferencedEntries(including);
+		addReferencedEntries(included);
+		addReferencedEntries(including);
 		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 			subObjectPropertyAxioms.add(assertion);
@@ -109,8 +120,8 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
-		vocabulary.addReferencedEntries(included);
-		vocabulary.addReferencedEntries(including);
+		addReferencedEntries(included);
+		addReferencedEntries(including);
 		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
 			subDataPropertyAxioms.add(assertion);
@@ -119,8 +130,8 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
-		vocabulary.checkSignature(concept1);
-		vocabulary.checkSignature(concept2);
+		checkSignature(concept1);
+		checkSignature(concept2);
 		if (!concept1.isNothing() && !concept2.isThing()) {
 			BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 			subClassAxioms.add(ax);
@@ -129,16 +140,16 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
-		vocabulary.checkSignature(concept1);
-		vocabulary.checkSignature(concept2);
+		checkSignature(concept1);
+		checkSignature(concept2);
 		BinaryAxiom<DataRangeExpression> ax = new BinaryAxiomImpl<DataRangeExpression>(concept1, concept2);
 		subDataRangeAxioms.add(ax);
 	}
 
 	@Override
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		vocabulary.checkSignature(included);
-		vocabulary.checkSignature(including);
+		checkSignature(included);
+		checkSignature(including);
 		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 			subObjectPropertyAxioms.add(ax);
@@ -147,8 +158,8 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
-		vocabulary.checkSignature(included);
-		vocabulary.checkSignature(including);
+		checkSignature(included);
+		checkSignature(including);
 		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
 			subDataPropertyAxioms.add(ax);
@@ -158,7 +169,7 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public void addDisjointClassesAxiom(ImmutableSet<ClassExpression> classes) {	
 		for (ClassExpression c : classes)
-			vocabulary.checkSignature(c);
+			checkSignature(c);
 		NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<ClassExpression>(classes);
 		disjointClassesAxioms.add(ax);
 	}
@@ -166,7 +177,7 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public void addDisjointObjectPropertiesAxiom(ImmutableSet<ObjectPropertyExpression> props) {
 		for (ObjectPropertyExpression p : props)
-			vocabulary.checkSignature(p);
+			checkSignature(p);
 		NaryAxiomImpl<ObjectPropertyExpression> ax = new NaryAxiomImpl<ObjectPropertyExpression>(props);
 		disjointObjectPropertiesAxioms.add(ax);
 	}
@@ -174,38 +185,38 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public void addDisjointDataPropertiesAxiom(ImmutableSet<DataPropertyExpression> props) {
 		for (DataPropertyExpression p : props)
-			vocabulary.checkSignature(p);
+			checkSignature(p);
 		NaryAxiomImpl<DataPropertyExpression> ax = new NaryAxiomImpl<DataPropertyExpression>(props);
 		disjointDataPropertiesAxioms.add(ax);
 	}
 	
 	@Override
 	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop) {
-		vocabulary.checkSignature(prop);
+		checkSignature(prop);
 		functionalObjectPropertyAxioms.add(prop);
 	}
 
 	@Override
 	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop) {
-		vocabulary.checkSignature(prop);
+		checkSignature(prop);
 		functionalDataPropertyAxioms.add(prop);
 	}
 	
 	@Override
 	public void addClassAssertion(ClassAssertion assertion) {
-		vocabulary.checkSignature(assertion.getConcept());
+		checkSignature(assertion.getConcept());
 		classAssertions.add(assertion);
 	}
 
 	@Override
 	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion) {
-		vocabulary.checkSignature(assertion.getProperty());
+		checkSignature(assertion.getProperty());
 		objectPropertyAssertions.add(assertion);
 	}
 	
 	@Override
 	public void addDataPropertyAssertion(DataPropertyAssertion assertion) {
-		vocabulary.checkSignature(assertion.getProperty());
+		checkSignature(assertion.getProperty());
 		dataPropertyAssertions.add(assertion);
 	}
 	
@@ -287,4 +298,178 @@ public class OntologyImpl implements Ontology {
 	public OntologyVocabulary getVocabulary() {
 		return vocabulary;
 	}
+	
+	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
+
+	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
+	
+	
+	private static int auxCounter = 0; // THIS IS SHARED AMONG ALL INSTANCES!
+	
+	@Override
+	public ObjectPropertyExpression createAuxiliaryObjectProperty() {
+		ObjectPropertyExpression rd = ofac.createObjectProperty(AUXROLEURI + auxCounter);
+		auxCounter++ ;
+		auxObjectProperties.add(rd);
+		return rd;
+	}
+	
+	@Override
+	public DataPropertyExpression createAuxiliaryDataProperty() {
+		DataPropertyExpression rd = ofac.createDataProperty(AUXROLEURI + auxCounter);
+		auxCounter++ ;
+		auxDataProperties.add(rd);
+		return rd;
+	}
+	
+	@Override
+	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
+		return Collections.unmodifiableSet(auxObjectProperties);
+	}
+
+	@Override
+	public Collection<DataPropertyExpression> getAuxiliaryDataProperties() {
+		return Collections.unmodifiableSet(auxDataProperties);
+	}
+
+	
+	public static final String AUXROLEURI = "ER.A-AUXROLE"; 
+	
+	// TODO: remove static
+	
+	@Deprecated
+	public static boolean isAuxiliaryProperty(ObjectPropertyExpression role) {
+		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
+	}
+	@Deprecated
+	public static boolean isAuxiliaryProperty(DataPropertyExpression role) {
+		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
+	}
+
+	
+	boolean addReferencedEntries(ClassExpression desc) {
+		if (desc instanceof OClass) {
+			OClass cl = (OClass)desc;
+			if (!isBuiltIn(cl)) {
+				vocabulary.concepts.put(cl.getPredicate().getName(), cl);
+				return true;
+			}
+		}
+		else if (desc instanceof ObjectSomeValuesFrom)  {
+			ObjectPropertyExpression prop = ((ObjectSomeValuesFrom) desc).getProperty();
+			return addReferencedEntries(prop);
+		}
+		else  {
+			assert (desc instanceof DataSomeValuesFrom);
+			DataPropertyExpression prop = ((DataSomeValuesFrom) desc).getProperty();
+			return addReferencedEntries(prop);
+		}
+		return false;
+	}
+	
+	boolean addReferencedEntries(DataRangeExpression desc) {
+		if (desc instanceof Datatype)  {
+			// NO-OP
+			// datatypes.add((Datatype) desc);
+			return true;
+		}
+		else  {
+			assert (desc instanceof DataPropertyRangeExpression);
+			DataPropertyExpression prop = ((DataPropertyRangeExpression) desc).getProperty();
+			return addReferencedEntries(prop);			
+		}
+	}
+	
+	boolean addReferencedEntries(ObjectPropertyExpression prop) {
+		if (prop.isInverse()) {
+			if (!isBuiltIn(prop.getInverse())) {
+				ObjectPropertyExpression p = prop.getInverse();
+				if (isAuxiliaryProperty(p))
+					auxObjectProperties.add(p);
+				else
+					vocabulary.objectProperties.put(p.getPredicate().getName(), p);
+				return true;
+			}
+		}
+		else {
+			if (!isBuiltIn(prop)) {
+				if (isAuxiliaryProperty(prop))
+					auxObjectProperties.add(prop);
+				else
+					vocabulary.objectProperties.put(prop.getPredicate().getName(), prop);
+				return true;
+			}			
+		}
+		return false;
+	}
+	
+	boolean addReferencedEntries(DataPropertyExpression prop) {
+		if (!isBuiltIn(prop)) {
+			if (isAuxiliaryProperty(prop))
+				auxDataProperties.add(prop);
+			else
+				vocabulary.dataProperties.put(prop.getPredicate().getName(), prop);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isBuiltIn(OClass cl) {
+		return cl.isNothing() || cl.isThing();
+	}
+	
+	private boolean isBuiltIn(ObjectPropertyExpression prop) {
+		return prop.isBottom() || prop.isTop() || auxObjectProperties.contains(prop);
+	}
+
+	private boolean isBuiltIn(DataPropertyExpression prop) {
+		return prop.isBottom() || prop.isTop() || auxDataProperties.contains(prop);
+	}
+	
+	void checkSignature(ClassExpression desc) {
+		
+		if (desc instanceof OClass) {
+			OClass cl = (OClass) desc;
+			if (!vocabulary.concepts.containsKey(cl.getPredicate().getName()) && !isBuiltIn(cl))
+				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
+		}	
+		else if (desc instanceof ObjectSomeValuesFrom) {
+			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
+		}
+		else  {
+			assert (desc instanceof DataSomeValuesFrom);
+			checkSignature(((DataSomeValuesFrom) desc).getProperty());
+		}
+	}	
+	
+	void checkSignature(DataRangeExpression desc) {
+		
+		if (desc instanceof Datatype) {
+			Predicate pred = ((Datatype) desc).getPredicate();
+			if (!vocabulary.builtinDatatypes.contains(pred)) 
+				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
+		}
+		else {
+			assert (desc instanceof DataPropertyRangeExpression);
+			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
+		}
+	}
+
+	void checkSignature(ObjectPropertyExpression prop) {
+
+		if (prop.isInverse()) {
+			if (!vocabulary.objectProperties.containsKey(prop.getInverse().getPredicate().getName()) && !isBuiltIn(prop.getInverse())) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.getInverse());
+		}
+		else {
+			if (!vocabulary.objectProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+		}
+	}
+
+	void checkSignature(DataPropertyExpression prop) {
+		if (!vocabulary.dataProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop))
+			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+	}
+	
 }

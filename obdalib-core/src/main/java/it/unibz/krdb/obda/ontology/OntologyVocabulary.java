@@ -103,45 +103,6 @@ public interface OntologyVocabulary {
 
 	
 		
-
-	
-	
-	/**
-	 * create an auxiliary object property 
-	 * (auxiliary properties result from ontology normalisation)
-	 * 
-	 * @param uri
-	 */
-
-	public ObjectPropertyExpression createAuxiliaryObjectProperty();
-	
-	/**
-	 * create an auxiliary data property 
-	 * (auxiliary properties result from ontology normalisation)
-	 * 
-	 * @param uri
-	 */
-	
-	public DataPropertyExpression createAuxiliaryDataProperty();
-	
-	
-	/**
-	 * return all auxiliary object properties
-	 * (auxiliary properties result from ontology normalisation)
-	 * 
-	 * @return
-	 */
-	
-	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
-
-	/**
-	 * return all auxiliary data properties
-	 * (auxiliary properties result from ontology normalisation)
-	 * 
-	 * @return
-	 */
-	
-	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
 	
 	
 	

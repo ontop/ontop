@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
 import java.util.HashMap;
@@ -88,7 +89,7 @@ public class DAGConstructor {
 			if (node.getDescription() instanceof ObjectPropertyExpression) {
 				ObjectPropertyExpression nodeDesc = (ObjectPropertyExpression) node.getDescription();
 
-				if (OntologyVocabularyImpl.isAuxiliaryProperty(nodeDesc)) {
+				if (OntologyImpl.isAuxiliaryProperty(nodeDesc)) {
 					continue;
 				}
 
@@ -113,7 +114,7 @@ public class DAGConstructor {
 				}
 				for (DAGNode child : node.getChildren()) {
 						ObjectPropertyExpression childDesc = (ObjectPropertyExpression) child.getDescription();
-						if (OntologyVocabularyImpl.isAuxiliaryProperty(childDesc)) {
+						if (OntologyImpl.isAuxiliaryProperty(childDesc)) {
 							continue;
 						}
 						if (childDesc.isInverse()) {
@@ -144,7 +145,7 @@ public class DAGConstructor {
 			else {
 				DataPropertyExpression nodeDesc = (DataPropertyExpression) node.getDescription();
 
-				if (OntologyVocabularyImpl.isAuxiliaryProperty(nodeDesc)) {
+				if (OntologyImpl.isAuxiliaryProperty(nodeDesc)) {
 					continue;
 				}
 
@@ -158,7 +159,7 @@ public class DAGConstructor {
 				}
 				for (DAGNode child : node.getChildren()) {
 						DataPropertyExpression childDesc = (DataPropertyExpression) child.getDescription();
-						if (OntologyVocabularyImpl.isAuxiliaryProperty(childDesc)) {
+						if (OntologyImpl.isAuxiliaryProperty(childDesc)) {
 							continue;
 						}
 

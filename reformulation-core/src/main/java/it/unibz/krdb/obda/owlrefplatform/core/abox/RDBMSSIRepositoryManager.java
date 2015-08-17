@@ -43,7 +43,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
@@ -895,7 +895,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(ope)) 
+			if (OntologyImpl.isAuxiliaryProperty(ope)) 
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -934,7 +934,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(dpe)) 
+			if (OntologyImpl.isAuxiliaryProperty(dpe)) 
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);
