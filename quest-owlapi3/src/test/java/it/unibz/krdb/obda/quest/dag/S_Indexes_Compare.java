@@ -84,7 +84,7 @@ public class S_Indexes_Compare extends TestCase {
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);
         DAGOperations.buildAncestors(dag2);
-		DAG pureIsa = DAGConstructor.filterPureISA(dag2);
+		DAG pureIsa = DAGConstructor.filterPureISA(dag2, onto.getVocabulary());
 		 pureIsa.clean();
 			pureIsa.index();
 			 DAGOperations.buildDescendants(pureIsa);

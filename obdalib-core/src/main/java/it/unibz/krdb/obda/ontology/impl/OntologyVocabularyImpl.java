@@ -176,5 +176,20 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	public boolean removeDataProperty(String property) {
 		return dataProperties.remove(property) != null;
 	}
+
+	@Override
+	public boolean containsClass(String uri) {
+		return concepts.containsKey(uri);
+	}
+
+	@Override
+	public boolean containsObjectProperty(String uri) {
+		return objectProperties.containsKey(uri);
+	}
+
+	@Override
+	public boolean containsDataProperty(String uri) {
+		return dataProperties.containsKey(uri);
+	}
 	
 }

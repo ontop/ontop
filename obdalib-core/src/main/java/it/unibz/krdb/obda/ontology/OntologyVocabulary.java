@@ -43,6 +43,13 @@ public interface OntologyVocabulary {
 	 * @return
 	 */
 
+	public boolean containsClass(String uri);
+	
+	public boolean containsObjectProperty(String uri);
+	
+	public boolean containsDataProperty(String uri);
+	
+	
 	public Collection<OClass> getClasses();
 	
 	/**

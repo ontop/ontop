@@ -25,8 +25,8 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -43,7 +43,7 @@ public class DAGConstructor {
 		return new DAG(ontology);
 	}
 
-	public static DAG filterPureISA(DAG dag) {
+	public static DAG filterPureISA(DAG dag, OntologyVocabulary voc) {
 
 		Map<Description, DAGNode> classes = new LinkedHashMap<Description, DAGNode>();
 		Map<Description, DAGNode> roles = new LinkedHashMap<Description, DAGNode>();
@@ -89,9 +89,9 @@ public class DAGConstructor {
 			if (node.getDescription() instanceof ObjectPropertyExpression) {
 				ObjectPropertyExpression nodeDesc = (ObjectPropertyExpression) node.getDescription();
 
-				if (OntologyImpl.isAuxiliaryProperty(nodeDesc)) {
+				// auxiliary symbol
+				if (!voc.containsObjectProperty(nodeDesc.getPredicate().getName())) 
 					continue;
-				}
 
 				if (nodeDesc.isInverse()) {
 					ObjectPropertyExpression posNode = nodeDesc.getInverse();
@@ -114,9 +114,11 @@ public class DAGConstructor {
 				}
 				for (DAGNode child : node.getChildren()) {
 						ObjectPropertyExpression childDesc = (ObjectPropertyExpression) child.getDescription();
-						if (OntologyImpl.isAuxiliaryProperty(childDesc)) {
+
+						// auxiliary symbol
+						if (!voc.containsObjectProperty(nodeDesc.getPredicate().getName())) 
 							continue;
-						}
+
 						if (childDesc.isInverse()) {
 							ObjectPropertyExpression posChild = childDesc.getInverse();
 							DAGNode newChild = roles.get(posChild);
