@@ -42,6 +42,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -266,6 +267,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
 	private final TBoxReasoner reasonerDag;
+	private final OntologyVocabulary voc;
 	
 	private SemanticIndexCache cacheSI;
 	
@@ -275,8 +277,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
+	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, OntologyVocabulary voc) {
 		this.reasonerDag = reasonerDag;
+		this.voc = voc;
 	}
 
 	public void generateMetadata() {
@@ -893,9 +896,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			if (ope.isInverse()) 
 				continue;
 			
-			// We need to make sure we make no mappings for Auxiliary roles
-			// introduced by the Ontology translation process.
-			if (OntologyImpl.isAuxiliaryProperty(ope)) 
+			// no mappings for auxiliary roles, which are introduced by the ontology translation process
+			if (!voc.containsObjectProperty(ope.getPredicate().getName())) 
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -932,9 +934,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			DataPropertyExpression dpe = set.getRepresentative();
 			
-			// We need to make sure we make no mappings for Auxiliary roles
-			// introduced by the Ontology translation process.
-			if (OntologyImpl.isAuxiliaryProperty(dpe)) 
+			// no mappings for auxiliary roles, which are introduced by the ontology translation process
+			if (!voc.containsDataProperty(dpe.getPredicate().getName())) 
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);

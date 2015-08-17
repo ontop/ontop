@@ -335,17 +335,6 @@ public class OntologyImpl implements Ontology {
 	
 	public static final String AUXROLEURI = "ER.A-AUXROLE"; 
 	
-	// TODO: remove static
-	
-	@Deprecated
-	public static boolean isAuxiliaryProperty(ObjectPropertyExpression role) {
-		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
-	}
-	@Deprecated
-	public static boolean isAuxiliaryProperty(DataPropertyExpression role) {
-		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
-	}
-
 	
 	boolean addReferencedEntries(ClassExpression desc) {
 		if (desc instanceof OClass) {
@@ -384,7 +373,7 @@ public class OntologyImpl implements Ontology {
 		if (prop.isInverse()) {
 			if (!isBuiltIn(prop.getInverse())) {
 				ObjectPropertyExpression p = prop.getInverse();
-				if (isAuxiliaryProperty(p))
+				if (p.getPredicate().getName().toString().startsWith(AUXROLEURI))
 					auxObjectProperties.add(p);
 				else
 					vocabulary.objectProperties.put(p.getPredicate().getName(), p);
@@ -393,7 +382,7 @@ public class OntologyImpl implements Ontology {
 		}
 		else {
 			if (!isBuiltIn(prop)) {
-				if (isAuxiliaryProperty(prop))
+				if (prop.getPredicate().getName().toString().startsWith(AUXROLEURI))
 					auxObjectProperties.add(prop);
 				else
 					vocabulary.objectProperties.put(prop.getPredicate().getName(), prop);
@@ -405,7 +394,7 @@ public class OntologyImpl implements Ontology {
 	
 	boolean addReferencedEntries(DataPropertyExpression prop) {
 		if (!isBuiltIn(prop)) {
-			if (isAuxiliaryProperty(prop))
+			if (prop.getPredicate().getName().toString().startsWith(AUXROLEURI))
 				auxDataProperties.add(prop);
 			else
 				vocabulary.dataProperties.put(prop.getPredicate().getName(), prop);

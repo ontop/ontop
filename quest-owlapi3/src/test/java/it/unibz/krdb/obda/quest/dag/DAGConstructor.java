@@ -147,9 +147,9 @@ public class DAGConstructor {
 			else {
 				DataPropertyExpression nodeDesc = (DataPropertyExpression) node.getDescription();
 
-				if (OntologyImpl.isAuxiliaryProperty(nodeDesc)) {
+				// auxiliary symbol
+				if (!voc.containsDataProperty(nodeDesc.getPredicate().getName())) 
 					continue;
-				}
 
 				DAGNode newNode = roles.get(nodeDesc);
 
@@ -161,9 +161,9 @@ public class DAGConstructor {
 				}
 				for (DAGNode child : node.getChildren()) {
 						DataPropertyExpression childDesc = (DataPropertyExpression) child.getDescription();
-						if (OntologyImpl.isAuxiliaryProperty(childDesc)) {
+						// auxiliary symbol
+						if (!voc.containsDataProperty(childDesc.getPredicate().getName())) 
 							continue;
-						}
 
 						DAGNode newChild = roles.get(childDesc);
 						if (newChild == null) {

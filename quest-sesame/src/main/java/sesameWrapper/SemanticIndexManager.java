@@ -68,7 +68,7 @@ public class SemanticIndexManager {
 		// generate a new TBox with a simpler vocabulary
 		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
 			
-		dataRepository = new RDBMSSIRepositoryManager(reasoner);
+		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
 		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");

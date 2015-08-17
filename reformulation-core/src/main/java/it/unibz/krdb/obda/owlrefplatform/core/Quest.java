@@ -596,7 +596,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
+				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
 				dataRepository.addRepositoryChangedListener(this);
 
 				if (inmemory) {
