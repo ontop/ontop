@@ -609,6 +609,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * 
 	 * 
 	 */
+
+	public static TBoxReasoner getChainReasoner(Ontology onto) {				
+		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
+		return getChainReasoner(tbox);
+	}
 	
 	public static TBoxReasoner getChainReasoner(TBoxReasonerImpl tbox) {		
 		

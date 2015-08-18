@@ -59,9 +59,7 @@ public class SigmaTBoxOptimizer {
 		
 		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
 	
-		TBoxReasonerImpl sigma = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(isa, true));						
-		
-		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(TBoxReasonerToOntology.getOntology(isa, true));
 	}
 
 	// USED IN ONE TEST (SemanticReductionTest, with the empty Sigma)
@@ -74,9 +72,7 @@ public class SigmaTBoxOptimizer {
 		OntologyVocabulary voc = OntologyFactoryImpl.getInstance().createVocabulary();
 		Ontology ont = OntologyFactoryImpl.getInstance().createOntology(voc);
 		
-		TBoxReasonerImpl sigma = new TBoxReasonerImpl(ont);						
-		
-		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(ont);
 	}
 	
 	public Ontology getReducedOntology() {
