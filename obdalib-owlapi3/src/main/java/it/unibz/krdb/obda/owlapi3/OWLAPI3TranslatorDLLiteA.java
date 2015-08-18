@@ -535,12 +535,12 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	 * 
 	 */
 	
-	private static ClassExpression getClassExpression(OWLClass rest) {
+	private ClassExpression getClassExpression(OWLClass rest) {
 		String uri = rest.getIRI().toString();
-		return ofac.createClass(uri);		
+		return dl_onto.getVocabulary().getClass(uri);		
 	}
 	
-	private static ClassExpression getClassExpression(OWLObjectSomeValuesFrom rest) throws TranslationException {
+	private ClassExpression getClassExpression(OWLObjectSomeValuesFrom rest) throws TranslationException {
 		OWLClassExpression filler = rest.getFiller();
 
 		if (!filler.isOWLThing()) 
@@ -549,7 +549,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		return getPropertyExpression(rest.getProperty()).getDomain();		
 	}
 
-	private static ClassExpression getClassExpression(OWLDataSomeValuesFrom rest) throws TranslationException {
+	private ClassExpression getClassExpression(OWLDataSomeValuesFrom rest) throws TranslationException {
 		OWLDataRange filler = rest.getFiller();
 
 		if (!filler.isTopDatatype()) 
@@ -558,7 +558,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		return getPropertyExpression(rest.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 	}
 
-	private static ClassExpression getClassExpression(OWLObjectMinCardinality rest) throws TranslationException {
+	private  ClassExpression getClassExpression(OWLObjectMinCardinality rest) throws TranslationException {
 		int cardinatlity = rest.getCardinality();
 		OWLClassExpression filler = rest.getFiller();
 		if (cardinatlity != 1 || !filler.isOWLThing()) 
@@ -567,7 +567,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		return getPropertyExpression(rest.getProperty()).getDomain();
 	}
 
-	private static ClassExpression getClassExpression(OWLDataMinCardinality rest) throws TranslationException {
+	private ClassExpression getClassExpression(OWLDataMinCardinality rest) throws TranslationException {
 		int cardinatlity = rest.getCardinality();
 		OWLDataRange range = rest.getFiller();
 		if (cardinatlity != 1 || !range.isTopDatatype()) 
@@ -585,7 +585,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	 * @throws TranslationException
 	 */
 	
-	private static ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
+	private ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
 
 		if (owlExpression instanceof OWLClass) {
 			return getClassExpression((OWLClass)owlExpression);
@@ -849,7 +849,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	@Override
 	public void prepare(OWLOntology owl) {
 		
-		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
 		
 		// add all definitions for classes and roles		
 		

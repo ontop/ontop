@@ -41,7 +41,7 @@ public class SigmaTest extends TestCase {
 
     public void test_exists_simple() {
     	
-		OntologyVocabulary vb = descFactory.createVocabularyBuilder();
+		OntologyVocabulary vb = descFactory.createVocabulary();
         OClass ac = vb.createClass("a");
         OClass cc = vb.createClass("c");
         ObjectPropertyExpression rprop = vb.createObjectProperty("r");

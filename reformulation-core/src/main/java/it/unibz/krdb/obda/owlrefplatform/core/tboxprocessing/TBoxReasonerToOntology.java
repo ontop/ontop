@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -16,7 +17,8 @@ public class TBoxReasonerToOntology {
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 	public static Ontology getOntology(TBoxReasoner reasoner, final boolean excludeExistentials) {
-		final Ontology sigma = fac.createOntology();
+		OntologyVocabulary voc = fac.createVocabulary();
+		final Ontology sigma = fac.createOntology(voc);
 
 		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 			

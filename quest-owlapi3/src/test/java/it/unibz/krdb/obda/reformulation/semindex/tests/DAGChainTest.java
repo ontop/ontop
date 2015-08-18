@@ -53,7 +53,7 @@ public class DAGChainTest extends TestCase {
 
 	@Test
 	public void test_simple_isa() {        
-		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
 		OClass ac = vb.createClass("a");
 		OClass bc = vb.createClass("b");
 		OClass cc = vb.createClass("c");
@@ -82,7 +82,7 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_simple() {
 		
-        OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+        OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
 		ObjectPropertyExpression rprop = vb.createObjectProperty("r");
 		OClass ac = vb.createClass("a");
 		OClass cc = vb.createClass("c");
@@ -132,7 +132,7 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_complex() {
 
-        OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+        OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
 		OClass ac = vb.createClass("a");
 		OClass cc = vb.createClass("c");
 		OClass bc = vb.createClass("b");

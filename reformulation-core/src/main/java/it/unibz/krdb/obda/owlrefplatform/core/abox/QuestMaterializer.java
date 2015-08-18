@@ -133,7 +133,7 @@ public class QuestMaterializer {
 
         //start a quest instance
 		if (ontology == null) {
-			OntologyVocabulary vb = ofac.createVocabularyBuilder();
+			OntologyVocabulary vb = ofac.createVocabulary();
 			
 			// TODO: use Vocabulary for OBDAModel as well
 			

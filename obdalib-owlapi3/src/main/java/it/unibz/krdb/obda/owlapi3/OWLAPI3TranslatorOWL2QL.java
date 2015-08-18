@@ -690,11 +690,11 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 * @throws TranslationException
 	 */
 	
-	private static ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
+	private ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
 		
 		if (owlExpression instanceof OWLClass) {
 			String uri = ((OWLClass)owlExpression).getIRI().toString();
-			return ofac.createClass(uri);
+			return dl_onto.getVocabulary().getClass(uri);
 		} 
 		else if (owlExpression instanceof OWLObjectSomeValuesFrom) {
 			OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom)owlExpression;
@@ -739,9 +739,9 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 * @return
 	 */
 	
-	private static DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression rolExpression)  {
+	private DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression rolExpression)  {
 		assert (rolExpression instanceof OWLDataProperty); 
-		return ofac.createDataProperty((rolExpression.asOWLDataProperty().getIRI().toString()));
+		return dl_onto.getVocabulary().getDataProperty((rolExpression.asOWLDataProperty().getIRI().toString()));
 	}
 	
 	/**
@@ -752,16 +752,16 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 * @return
 	 */
 	
-	private static ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression rolExpression) {
+	private ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression rolExpression) {
 
 		if (rolExpression instanceof OWLObjectProperty) 
-			return ofac.createObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString());
+			return dl_onto.getVocabulary().getObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString());
 	
 		else {
 			assert(rolExpression instanceof OWLObjectInverseOf);
 			
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) rolExpression;
-			return ofac.createObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+			return dl_onto.getVocabulary().createObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} 			
 	}
 
@@ -790,7 +790,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		for (OWLClassExpression superClass : superClasses.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {				
 				String uri = ((OWLClass)superClass).getIRI().toString();
-				dl_onto.addSubClassOfAxiom(subDescription, ofac.createClass(uri));
+				dl_onto.addSubClassOfAxiom(subDescription, dl_onto.getVocabulary().getClass(uri));
 			} 
 			else if (superClass instanceof OWLObjectSomeValuesFrom) {
 				OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
@@ -894,7 +894,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	
 	
-	public static ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) {
+	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) {
 		
 		URIConstant c1 = getIndividual(ax.getSubject());
 		URIConstant c2 = getIndividual(ax.getObject());
@@ -907,7 +907,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	}
 	
 	
-	public static DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
+	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
 		
 		try {
 			OWLLiteral object = aux.getObject();
@@ -967,7 +967,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	public void prepare(OWLOntology owl) {
 		owlOntology = owl;
 		
-		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabularyBuilder();
+		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
 		
 		// add all definitions for classes and roles		
 		

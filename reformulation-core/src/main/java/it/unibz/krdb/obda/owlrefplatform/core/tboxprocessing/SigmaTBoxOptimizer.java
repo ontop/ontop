@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -70,14 +71,19 @@ public class SigmaTBoxOptimizer {
 		
 		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
 
-		TBoxReasonerImpl sigma = new TBoxReasonerImpl(OntologyFactoryImpl.getInstance().createOntology());						
+		OntologyVocabulary voc = OntologyFactoryImpl.getInstance().createVocabulary();
+		Ontology ont = OntologyFactoryImpl.getInstance().createOntology(voc);
+		
+		TBoxReasonerImpl sigma = new TBoxReasonerImpl(ont);						
 		
 		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
 	}
 	
 	public Ontology getReducedOntology() {
 		if (optimizedTBox == null) {
-			optimizedTBox = fac.createOntology();
+			OntologyVocabulary voc = fac.createVocabulary();
+			
+			optimizedTBox = fac.createOntology(voc);
 			//optimizedTBox.addEntities(vocabulary);
 
 			log.debug("Starting semantic-reduction");

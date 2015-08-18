@@ -101,7 +101,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		super(name);
 		Ontology tbox = null;
 		if (tboxFile == null) {
-			tbox = ofac.createOntology();
+			OntologyVocabulary voc = ofac.createVocabulary();
+			tbox = ofac.createOntology(voc);
 		} else {
 			tbox = readOntology(tboxFile);
 		}
@@ -208,7 +209,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		graphURIs.addAll(dataset.getDefaultGraphs());
 		graphURIs.addAll(dataset.getNamedGraphs());
 
-		OntologyVocabulary vb = ofac.createVocabularyBuilder();
+		OntologyVocabulary vb = ofac.createVocabulary();
 		
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(graphURI, graphURI);
@@ -254,7 +255,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	public class RDFTBoxReader extends RDFHandlerBase {
 		private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		private OntologyVocabulary vb = ofac.createVocabularyBuilder();
+		private OntologyVocabulary vb = ofac.createVocabulary();
 
 		public Ontology getOntology() {
 			return ofac.createOntology(vb);

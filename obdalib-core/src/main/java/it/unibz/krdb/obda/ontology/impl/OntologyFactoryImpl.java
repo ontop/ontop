@@ -58,16 +58,10 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new ClassAssertionImpl(concept, object);
 	}
 
-	@Override
-	public Ontology createOntology() {
-		return new OntologyImpl();
-	}
 	
 	@Override
 	public Ontology createOntology(OntologyVocabulary vb) {
-		OntologyImpl ont = new OntologyImpl();
-		ont.vocabulary = (OntologyVocabularyImpl)vb;
-		return ont;
+		return new OntologyImpl((OntologyVocabularyImpl)vb);
 	}
 	
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
@@ -110,7 +104,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 
 	@Override
-	public OntologyVocabulary createVocabularyBuilder() {
+	public OntologyVocabulary createVocabulary() {
 		return new OntologyVocabularyImpl();
 	}
 	

@@ -112,7 +112,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-			OntologyVocabulary vb = ofac.createVocabularyBuilder();
+			OntologyVocabulary vb = ofac.createVocabulary();
 						
 			vb.createClass("A");
 			vb.createObjectProperty("P");

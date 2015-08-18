@@ -55,7 +55,7 @@ public class OntologyImpl implements Ontology {
 	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
-	OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
+	private final OntologyVocabularyImpl vocabulary;
 	
 	// axioms and assertions
 
@@ -84,8 +84,8 @@ public class OntologyImpl implements Ontology {
 	private final List<DataPropertyAssertion> dataPropertyAssertions = new ArrayList<DataPropertyAssertion>();
 	
 
-	OntologyImpl() {
-		// NO-OP: restricts visibility of the default (and only) constructor
+	OntologyImpl(OntologyVocabularyImpl voc) {
+		this.vocabulary = voc;
 	}
 	
 

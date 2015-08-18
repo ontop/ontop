@@ -26,12 +26,9 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
-	@Deprecated
-	public Ontology createOntology();
-
 	public Ontology createOntology(OntologyVocabulary vb);
 	
-	public OntologyVocabulary createVocabularyBuilder();
+	public OntologyVocabulary createVocabulary();
 	
 	
 	

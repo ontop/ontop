@@ -718,7 +718,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
-			OClass c = ofac.createClass(iri);
+			OClass c = voc.getClass(iri);
 			if (reasonerDag.getClassDAG().getVertex(c) == null) 
 				throw new RuntimeException("UNKNOWN CLASS: " + iri);
 			
@@ -728,8 +728,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			cacheSI.setIndex(c, idx);
 		}
 		else {
-			ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
-			if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
+			if (voc.containsObjectProperty(iri)) { // reasonerDag.getObjectPropertyDAG().getVertex(ope) != null
 				//
 				// a bit elaborate logic is a consequence of using the same type for
 				// both object and data properties (which can have the same name)
@@ -739,8 +738,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				// and the second occurrence is a datatype property
 				// (here we use the fact that the query result is sorted by idx)
 				//
+				ObjectPropertyExpression ope = voc.getObjectProperty(iri);
 				if (cacheSI.getEntry(ope) != null)  {
-					DataPropertyExpression dpe = ofac.createDataProperty(iri);
+					DataPropertyExpression dpe = voc.getDataProperty(iri);
 					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
 						if (cacheSI.getEntry(dpe) != null)
 							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -754,7 +754,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					cacheSI.setIndex(ope, idx);
 			}
 			else {
-				DataPropertyExpression dpe = ofac.createDataProperty(iri);
+				DataPropertyExpression dpe = voc.getDataProperty(iri);
 				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
 					if (cacheSI.getEntry(dpe) != null)
 						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -771,18 +771,18 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		SemanticIndexRange range;
 		if (type == CLASS_TYPE) {
-			OClass c = ofac.createClass(iri);
+			OClass c = voc.getClass(iri);
 			range = cacheSI.getEntry(c);
 		}
 		else {
 			Interval interval = intervals.get(0);
 			// if the first interval is within object property indexes
 			if (interval.getEnd() <= maxObjectPropertyIndex) {
-				ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
+				ObjectPropertyExpression ope = voc.getObjectProperty(iri);
 				range = cacheSI.getEntry(ope);
 			}
 			else {
-				DataPropertyExpression dpe = ofac.createDataProperty(iri);
+				DataPropertyExpression dpe = voc.getDataProperty(iri);
 				range = cacheSI.getEntry(dpe);
 			}
 		}

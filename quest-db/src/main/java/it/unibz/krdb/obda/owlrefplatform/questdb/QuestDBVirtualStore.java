@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
@@ -40,6 +41,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
+
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -167,7 +169,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		} else { 
 			// create empty ontology
 			//owlontology = man.createOntology();
-			tbox = OntologyFactoryImpl.getInstance().createOntology();
+			OntologyVocabulary voc = OntologyFactoryImpl.getInstance().createVocabulary();
+			tbox = OntologyFactoryImpl.getInstance().createOntology(voc);
 			if (obdaModel.getSources().size() == 0)
 				obdaModel.addSource(getMemOBDADataSource("MemH2"));
 		}

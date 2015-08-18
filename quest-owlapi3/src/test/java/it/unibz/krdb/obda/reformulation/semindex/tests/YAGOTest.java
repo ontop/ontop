@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.io.BufferedReader;
@@ -60,7 +61,8 @@ public class YAGOTest {
 
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
  
-        Ontology onto = descFactory.createOntology();
+		OntologyVocabulary voc = descFactory.createVocabulary();
+		Ontology onto = descFactory.createOntology(voc);
 
         while ((line = triples.readLine()) != null) {
             if (line.startsWith("@")) {
