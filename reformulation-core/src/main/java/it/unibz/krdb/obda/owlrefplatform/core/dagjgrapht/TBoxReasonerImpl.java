@@ -419,6 +419,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
 
+		// OBJECT PROPERTIES
+		// 		
 		Map<Predicate, ObjectPropertyExpression> objectPropertyEquivalenceMap = new HashMap<>();
 		SimpleDirectedGraph <Equivalences<ObjectPropertyExpression>,DefaultEdge> objectProperties 
 					= new SimpleDirectedGraph<>(DefaultEdge.class);
@@ -428,26 +430,24 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// create vertices for properties 
 		
 		for(Equivalences<ObjectPropertyExpression> node : reasoner.getObjectPropertyDAG()) {
-			ObjectPropertyExpression prop = node.getRepresentative();
-			ObjectPropertyExpression inverseProp = prop.getInverse();
+			ObjectPropertyExpression rep = node.getRepresentative();
+			ObjectPropertyExpression repInv = rep.getInverse();
 			
 			Set<ObjectPropertyExpression> reduced = new HashSet<>();
-			Equivalences<ObjectPropertyExpression> reducedNode = new Equivalences<>(reduced, prop);
+			Equivalences<ObjectPropertyExpression> reducedNode = new Equivalences<>(reduced, rep);
 			
 			for (ObjectPropertyExpression equi : node) {
-				// no map entry if the property coincides with its inverse
-				if (equi.equals(prop) || equi.equals(inverseProp)) {
+				// if the property coincides with the representative or its inverse
+				if (equi.equals(rep) || equi.equals(repInv)) {
 					objectPropertyEquivalences.put(equi, reducedNode);
 					reduced.add(equi);
-					continue;
 				}
-
-				// if the property is different from its inverse, an entry is created 
-				// (taking the inverses into account)
-				if (equi.isInverse()) 
-					objectPropertyEquivalenceMap.put(equi.getPredicate(), inverseProp);
-				else 
-					objectPropertyEquivalenceMap.put(equi.getPredicate(), prop);
+				else {
+					// an entry in the equivalence map is created 
+					// (but only for a non-inverse -- the inverse will be treated in the respective node    
+					if (!equi.isInverse()) 
+						objectPropertyEquivalenceMap.put(equi.getPredicate(), rep);
+				}
 			}
 			if (node.isIndexed())
 				reducedNode.setIndexed();
@@ -458,7 +458,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		copyEdges(reasoner.getObjectPropertyDAG(), objectPropertyEquivalences, objectProperties);
 		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = new EquivalencesDAGImpl<>(null, objectProperties, objectPropertyEquivalences);
 
-		
+		// DATA PROPERTIES
+		// 		
 		Map<Predicate, DataPropertyExpression> dataPropertyEquivalenceMap = new HashMap<>();
 		SimpleDirectedGraph <Equivalences<DataPropertyExpression>,DefaultEdge> dataProperties 
 					= new SimpleDirectedGraph<>(DefaultEdge.class);
@@ -468,22 +469,20 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// create vertices for properties 
 		
 		for(Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
-			DataPropertyExpression prop = node.getRepresentative();
+			DataPropertyExpression rep = node.getRepresentative();
 			
 			Set<DataPropertyExpression> reduced = new HashSet<>();
-			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<>(reduced, prop);
+			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<>(reduced, rep);
 			
 			for (DataPropertyExpression equi : node) {
-				// no map entry if the property coincides with its inverse
-				if (equi.equals(prop)) {
+				// if the property coincides with the representative 
+				if (equi.equals(rep)) {
 					dataPropertyEquivalences.put(equi, reducedNode);
 					reduced.add(equi);
-					continue;
 				}
-
-				// if the property is different from its inverse, an entry is created 
-				// (taking the inverses into account)
-				dataPropertyEquivalenceMap.put(equi.getPredicate(), prop);
+				else
+					// an entry in the equivalence map is created 
+					dataPropertyEquivalenceMap.put(equi.getPredicate(), rep);
 			}
 			if (node.isIndexed())
 				reducedNode.setIndexed();
@@ -495,11 +494,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = new EquivalencesDAGImpl<>(null, dataProperties, dataPropertyEquivalences);
 		
 		
-		//
 		// CLASSES
 		// 
-		
-		
 		Map<Predicate, OClass> classEquivalenceMap = new HashMap<>();
 		SimpleDirectedGraph <Equivalences<ClassExpression>,DefaultEdge> classes = new SimpleDirectedGraph<>(DefaultEdge.class);
 		Map<ClassExpression, Equivalences<ClassExpression>> classEquivalences = new HashMap<>();

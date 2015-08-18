@@ -80,7 +80,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	@Override
 	public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
-		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		Set<Equivalences<T>> result = new LinkedHashSet<>();
 
 		for (DefaultEdge edge : dag.incomingEdgesOf(v)) {	
 			Equivalences<T> source = dag.getEdgeSource(edge);
@@ -148,7 +148,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	@Override
 	public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
-		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		Set<Equivalences<T>> result = new LinkedHashSet<>();
 
 		for (DefaultEdge edge : dag.outgoingEdgesOf(v)) {	
 			Equivalences<T> source = dag.getEdgeTarget(edge);
@@ -163,7 +163,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
 
-		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		Set<Equivalences<T>> result = new LinkedHashSet<>();
 
 		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
 				new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(dag, v);
@@ -236,7 +236,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
-		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<TT, DefaultEdge>(graph);
+		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<>(graph);
 		List<Equivalences<TT>> equivalenceSets = inspector.stronglyConnectedSets();
 
 		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
