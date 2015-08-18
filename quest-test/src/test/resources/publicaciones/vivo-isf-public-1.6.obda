@@ -1,0 +1,303 @@
+[PrefixDeclaration]
+:		http://vivoweb.org/ontology/core#
+c4o:		http://purl.org/spar/c4o/
+geo:		http://aims.fao.org/aos/geopolitical.owl#
+j.0:		http://purl.org/net/OCRe/statistics.owl#
+j.1:		http://www.w3.org/2008/05/skos#
+j.2:		http://www.w3.org/2003/06/sw-vocab-status/ns#
+j.3:		http://purl.org/net/OCRe/study_protocol.owl#
+j.4:		http://purl.org/dc/terms/
+new:		http://addedMapping.org/
+obo:		http://purl.obolibrary.org/obo/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+bibo:		http://purl.org/ontology/bibo/
+cito:		http://purl.org/spar/cito/
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+skos:		http://www.w3.org/2004/02/skos/core#
+vivo:		http://vivoweb.org/ontology/core#
+event:		http://purl.org/NET/c4dm/event.owl#
+fabio:		http://purl.org/spar/fabio/
+ocrer:		http://purl.org/net/OCRe/research.owl#
+vcard:		http://www.w3.org/2006/vcard/ns#
+vitro:		http://vitro.mannlib.cornell.edu/ns/vitro/0.7#
+ocresd:		http://purl.org/net/OCRe/study_design.owl#
+scires:		http://vivoweb.org/ontology/scientific-research#
+vitro-public:	http://vitro.mannlib.cornell.edu/ns/vitro/public#
+
+[SourceDeclaration]
+sourceUri	authorship
+connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
+username	system
+password	obdaps83
+driverClass	oracle.jdbc.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	cl_Document
+target		bibo:document{CVE} a bibo:Document ; vcard:title {TITULO} ; new:issueDate {FECHA} ; new:endDate {FECHA_FIN} ; vivo:geographicFocus vivo:region{CVE_PAIS} ; vivo:hasSubjectArea vivo:subject{CVE_TIPO} ; vcard:hasNote vcard:level{CVE_NIVEL} ; vcard:url {URL} ; new:numCitations {NUMCITAS} . 
+source		SELECT CVE, TITULO, ISBN_ISSN , FECHA,  FECHA_FIN, CVE_TIPO, CVE_PAIS, CVE_NIVEL, CVE_ESTATUS, URL, NUMCITAS  FROM INVESTIGACION.PUPUBLICACIONES
+
+mappingId	cl_Person
+target		foaf:person{ID} a foaf:Person ; vivo:hasDocument bibo:document{CVE} . 
+source		SELECT ID, CVE FROM INVESTIGACION.PUAUTORES
+
+mappingId	cl_FacultyMember
+target		foaf:person{ADCLAVES.NOMINA} a vivo:FacultyMember ; obo:ARG_2000028 vcard:individual{ADCLAVES.PID} ; vivo:identifier {MATRICULA} . 
+source		SELECT ADCLAVES.NOMINA, ADCLAVES.MATRICULA, ADUSUARIO.NOMALTERNATIVO, ADUSUARIO.APALTERNATIVO FROM INVESTIGACION.ADCLAVES, INVESTIGACION.ADUSUARIO WHERE ADCLAVES.PIDM = ADUSUARIO.PIDM AND ADCLAVES.NOMINA IS NOT NULL
+
+mappingId	cl_NonFacultyAcademic
+target		foaf:person{ADCLAVES.EXTERNO} a vivo:NonFacultyAcademic ; obo:ARG_2000028 vcard:individual{ADCLAVES.PID} ; new:institute {INSTITUCION} . 
+source		SELECT ADCLAVES.EXTERNO, ADCLAVES.PID, RHEXTERN.INSTITUCION FROM INVESTIGACION.ADCLAVES, INVESTIGACION.RHEXTERN WHERE ADCLAVES.PID = RHEXTERN.PID AND ADCLAVES.EXTERNO IS NOT NULL
+
+mappingId	cl_AcademicArticle
+target		bibo:document{CVE} a bibo:AcademicArticle ; bibo:volume {VOLUMEN} ; bibo:issue {NUMERO} ; bibo:pageStart {PAGINI} ; bibo:pageEnd {PAGFIN} . 
+source		SELECT CVE, VOLUMEN, NUMERO, PAGINI, PAGFIN FROM INVESTIGACION.PUART
+
+mappingId	op_hasPublicationVenue_Article
+target		bibo:document{CVE} vivo:hasPublicationVenue bibo:journal{CVE_REVISTA} . 
+source		SELECT CVE, CVE_REVISTA FROM INVESTIGACION.PUART
+
+mappingId	cl_Journal
+target		bibo:journal{CVE} a bibo:Journal ; vivo:abbreviation {TITULOAB} ; vcard:title {NOMBRE} ; bibo:issn {ISSN} ; vcard:url {URL} ; vcard:hasCategory vcard:jcr{CVE_JCR} ; vivo:geographicFocus vivo:region{CVE_PAIS} ; new:hasSCIIFRank new:citationFI{CVE} ; new:hasSCImagoRank new:citationSCI{CVE} ; new:hasJCRRank vcard:jcr{CVE_JCR} ; new:journalPublisher vivo:editorial{CVE_EDITORIAL} ; vivo:contributingRole vivo:editor{EDITOR} ; vcard:hasNote vcard:level{CVE_NIVEL} ; new:numCitations {NUMCITAS} . 
+source		SELECT CVE, TITULOAB, NOMBRE, EDITOR, CVE_EDITORIAL, ISSN, URL, CVE_JCR, CVE_PAIS, CVE_NIVEL, NUMCITAS FROM INVESTIGACION.PUREVISTAS
+
+mappingId	cl_Note
+target		bibo:document{CVE} a bibo:Note ; new:institute {INSTITUCION} ; vivo:publisher vivo:editorial{CVE_EDITORIAL} . 
+source		SELECT CVE, CVE_TIPO, CVE_EDITORIAL, INSTITUCION FROM INVESTIGACION.PUACT
+
+mappingId	cl_CaseStudy
+target		bibo:document{CVE} a vivo:CaseStudy ; vivo:placeOfPublication {CIUDAD} . 
+source		SELECT CVE, CIUDAD FROM INVESTIGACION.PUCASO
+
+mappingId	cl_Speech
+target		bibo:document{CVE} a vivo:Speech ; new:institute {INSTITUCION} ; vivo:placeOfPublication {CIUDAD} ; new:conference {CONFERENCIA} ; vivo:dateTimeValue vivo:numberDays{DURACION} . 
+source		SELECT CVE, INSTITUCION, CIUDAD, CONFERENCIA, DURACION FROM INVESTIGACION.PUCONFINV
+
+mappingId	cl_ResearchProposal
+target		bibo:document{CVE} a vivo:ResearchProposal ; new:institute {INSTITUCION} ; obo:RO_0002353 obo:sector{CVERAMAECPRINC} ; obo:OBI_0000312 obo:sector{CVERAMAECESP} ; bibo:recipient bibo:user{USUARIO} . 
+source		SELECT CVE, INSTITUCION, USUARIO, CVERAMAECESP, CVERAMAECPRINC FROM INVESTIGACION.PUDESTEC
+
+mappingId	cl_EditedBook
+target		bibo:document{CVE} a bibo:EditedBook ; vivo:publisher vivo:publisher{CVE_EDITORIAL} ; bibo:edition {ANIOED} ; bibo:volume {VOLUMEN} ; bibo:number {NUMREV} . 
+source		SELECT CVE, ANIOED, NUMREV,  VOLUMEN, CVE_EDITORIAL FROM INVESTIGACION.PUEDREV
+
+mappingId	cl_WorkingPaper
+target		bibo:document{CVE} a vivo:WorkingPaper ; bibo:pageStart {PAGINI} ; bibo:pageEnd {PAGFIN} ; vivo:placeOfPublication {PUBLICADOR} . 
+source		SELECT CVE, PAGINI,  PAGFIN, PUBLICADOR FROM INVESTIGACION.PUENSAYO
+
+mappingId	cl_Book
+target		bibo:document{CVE} a bibo:Book ; bibo:numPages {NUMPAGS} ; bibo:edition {EDICION} ; vivo:hasResearchArea vivo:target{CVE_OBJETIVO} ; bibo:pageStart {PAGINI} ; bibo:pageEnd {PAGFIN} ; vivo:publisher vivo:editorial{CVE_EDITORIAL} ; new:chapterTitle {TITULO_CAPITULO} . 
+source		SELECT CVE, NUMPAGS, EDICION, CVE_OBJETIVO, PAGINI, PAGFIN, CVE_EDITORIAL, TITULO_CAPITULO FROM INVESTIGACION.PULIB
+
+mappingId	cl_Translation
+target		bibo:document{CVE} a vivo:Translation ; bibo:volume {VOLUMEN} ; vivo:publisher vivo:editorial{CVE_EDITORIAL} ; bibo:numPages {NUMPAGS} ; vivo:contributingRole vivo:author{AUTORESORG} . 
+source		SELECT CVE, VOLUMEN, NUMPAGS, AUTORESORG, CVE_EDITORIAL FROM INVESTIGACION.PULIBTRA
+
+mappingId	cl_Manual
+target		bibo:document{CVE} a bibo:Manual ; bibo:presentedAt bibo:course{CURSO} ; vivo:placeOfPublication {CIUDAD} ; vivo:contributingRole vivo:professor{CVE_ROL} . 
+source		SELECT CVE, CURSO, CIUDAD, CVE_ROL FROM INVESTIGACION.PUMATDID
+
+mappingId	cl_Proceedings
+target		bibo:document{CVE} a bibo:Proceedings ; vivo:placeOfPublication {CIUDAD} ; bibo:pageStart {PAGINI} ; bibo:pageEnd {PAGFIN} ; bibo:volume {VOLUMEN} ; bibo:number {NUMERO} ; vivo:proceedingsOf bibo:congress{CVE_CONGRESO} ; new:institute {INSTITUCION} . 
+source		SELECT CVE, CIUDAD, CVE_CONGRESO, PAGINI, PAGFIN, VOLUMEN, INSTITUCION, NUMERO FROM INVESTIGACION.PUMEMORIAS
+
+mappingId	cl_EditorialArticle
+target		bibo:document{CVE} a vivo:EditorialArticle ; bibo:issue {PERIODICO} ; bibo:section {SECCION} ; vivo:placeOfPublication {CIUDAD} ; vivo:publisher vivo:editorial{CVE_EDITORIAL} . 
+source		SELECT CVE, PERIODICO, SECCION, CIUDAD, CVE_EDITORIAL FROM INVESTIGACION.PUNOTAPER
+
+mappingId	cl_Patent
+target		bibo:document{CVE} a bibo:Patent ; vivo:iclCode {CLASIFICAINT} ; vivo:dateIssued {FECHA_OTORGA} ; vivo:dateFiled {FECHA_SOL} ; new:dateSearch {FECHADIVULG} ; new:datePublication {FECHAPUB} ; vivo:patentNumber {SOLICITUD} ; vivo:foreignPatentNumber {PRIORIDAD} ; new:hasTypeApplication {CVE_SOL} . 
+source		SELECT CVE, CLASIFICAINT, CVE_SOL, FECHA_SOL, SOLICITUD, FECHAPUB, FECHA_OTORGA, FECHADIVULG FROM INVESTIGACION.PUPATENTE
+
+mappingId	cl_ConferencePaper
+target		bibo:document{CVE} a vivo:ConferencePaper ; vivo:features foaf:person{PONENTE_ID} ; bibo:presentedAt bibo:congress{CVE_REUNION} ; vivo:dateTimeValue vivo:numberDays{DURACION} ; new:institute {INSTITUCION} ; vivo:placeOfPublication {CIUDAD} ; new:reunion {REUNION} . 
+source		SELECT CVE, PONENTE_ID, REUNION, CVE_REUNION, DURACION, INSTITUCION, CIUDAD FROM INVESTIGACION.PUPONENCIA
+
+mappingId	cl_Report
+target		bibo:document{CVE} a bibo:Report ; bibo:numPages {NPAG} ; vivo:reportId {CVEREPTEC} ; vivo:description {DESCRIPCION} ; obo:ARG_2000391 obo:activity{CVE_TIPOPY} ; bibo:distributor bibo:center{CVE_CENTRO} ; new:institute {INSTITUCION} . 
+source		SELECT CVE, NPAG, CVEREPTEC, DESCRIPCION, INSTITUCION, CVE_TIPOPY FROM INVESTIGACION.PUREPTEC
+
+mappingId	cl_Review
+target		bibo:document{CVE} a vivo:Review ; bibo:pageStart {PAGINI} ; bibo:pageEnd {PAGFIN} ; vivo:placeOfPublication {LUGARPUB} ; new:titleReview {OBRA} . 
+source		SELECT CVE, OBRA, PAGINI,  PAGFIN, LUGARPUB FROM INVESTIGACION.PURESENA
+
+mappingId	dp_shortDescription_Journal
+target		bibo:journal{PUREVISTAS_CVE} bibo:shortDescription vivo:subject{DESCRIPCION} . 
+source		SELECT "PUREVISTAS"."CVE" AS PUREVISTAS_CVE, "PUCATREVISTA"."DESCRIPCION"  FROM INVESTIGACION."PUREVISTAS", INVESTIGACION."PUCATREVISTA" WHERE "PUREVISTAS"."CVE_TIPO" = "PUCATREVISTA"."CVE"
+
+mappingId	cl_JournalArticle
+target		bibo:document{CVE} a obo:IAO_0000013 . 
+source		SELECT CVE, CVE_REVISTA FROM INVESTIGACION.PUART WHERE CVE_REVISTA IS NOT NULL
+
+mappingId	dp_shortDescription_EditedJournal
+target		bibo:document{PUEDREV_CVE} bibo:shortDescription {DESCRIPCION} . 
+source		SELECT "PUEDREV"."CVE" AS PUEDREV_CVE, "PUCATEDREV"."DESCRIPCION"  FROM INVESTIGACION."PUEDREV", INVESTIGACION."PUCATEDREV" WHERE "PUEDREV"."CVE_TIPO" = "PUCATEDREV"."CVE"
+
+mappingId	dp_shortDescription_Note
+target		bibo:document{PUACT_CVE} bibo:shortDescription {DESCRIPCION} . 
+source		SELECT "PUACT"."CVE" AS PUACT_CVE, "PUCATACT"."DESCRIPCION"  FROM INVESTIGACION."PUACT", INVESTIGACION."PUCATACT" WHERE "PUACT"."CVE_TIPO" = "PUCATACT"."CVE"
+
+mappingId	dp_shortDescription_Document
+target		vivo:subject{CVE} bibo:shortDescription {NOMBRE} ; vivo:description {DESCRIPCION} ; obo:IAO_0000136 obo:classification{CVE_CLASIFICACION} . 
+source		SELECT CVE, DESCRIPCION, NOMBRE, CVE_CLASIFICACION FROM INVESTIGACION.PUCATPUB
+
+mappingId	dp_shortDescription_Patent
+target		bibo:document{PUPATENTE_CVE} bibo:shortDescription {DESCRIPCION} . 
+source		SELECT "PUPATENTE"."CVE" AS PUPATENTE_CVE, "PUCATPAT"."DESCRIPCION"  FROM INVESTIGACION."PUPATENTE", INVESTIGACION."PUCATPAT" WHERE "PUPATENTE"."CVE_TIPO" = "PUCATPAT"."CVE"
+
+mappingId	dp_shortDescription_Report
+target		bibo:documentl{PUREPTEC_CVE} bibo:shortDescription {DESCRIPCION} . 
+source		SELECT "PUREPTEC"."CVE" AS PUREPTEC_CVE, "PUCATREPTEC"."DESCRIPCION"  FROM INVESTIGACION."PUREPTEC", INVESTIGACION."PUCATREPTEC" WHERE "PUREPTEC"."CVE_TIPO" = "PUCATREPTEC"."CVE"
+
+mappingId	dp_shortDescription_Review
+target		bibo:document{PURESENA_CVE} bibo:shortDescription {DESCRIPCION} . 
+source		SELECT "PURESENA"."CVE" AS PURESENA_CVE, "PUCATRESENA"."DESCRIPCION" FROM INVESTIGACION."PURESENA", INVESTIGACION."PUCATRESENA" WHERE "PURESENA"."CVE_TIPO" = "PUCATRESENA"."CVE"
+
+mappingId	cl_Publisher
+target		vivo:editorial{CVE} a vivo:Publisher ; vcard:organizationName {NOMBRE} ; obo:RO_0001025 vivo:region{CVE_PAIS} . 
+source		SELECT CVE, NOMBRE, CVE_PAIS FROM INVESTIGACION.PUCATEDITORIAL
+
+mappingId	dp_language_Translation
+target		bibo:document{CVETRA} vcard:language {DESCR} . 
+source		SELECT PULIBTRA.CVE AS CVETRA, PUCATIDIOMA.DESCRIPCION AS DESCR  FROM INVESTIGACION.PUCATIDIOMA, INVESTIGACION.PULIBTRA WHERE PULIBTRA.CVE_IDIOMA = PUCATIDIOMA.CVE
+
+mappingId	dp_shortDescription_Manual
+target		bibo:document{PUMATDID_CVE} bibo:shortDescription {DESCRIPCION} . 
+source		SELECT "PUMATDID"."CVE" AS PUMATDID_CVE, "PUCATMATDID"."DESCRIPCION"  FROM INVESTIGACION."PUMATDID", INVESTIGACION."PUCATMATDID" WHERE "PUMATDID"."CVE_TIPO" = "PUCATMATDID"."CVE"
+
+mappingId	cl_RoleProfessor
+target		vivo:professor{CVE} a vivo:TeacherRole ; vivo:description {DESCRIPCION} . 
+source		SELECT CVE, "DESCRIPCION"  FROM INVESTIGACION."PUCATROLMATDID"
+
+mappingId	cl_Conference
+target		bibo:congress{CVE} a bibo:Conference ; vivo:abbreviation {TITULOAB} ; vcard:title {NOMBRE} ; vcard:url {URL} ; vcard:hasNote vcard:level{CVE_NIVEL} . 
+source		SELECT CVE, TITULOAB, NOMBRE, URL, CVE_NIVEL FROM INVESTIGACION.PUREUNCIENTIF
+
+mappingId	cl_Authorship
+target		vivo:autorship{CVE_NIVEL} a vivo:Authorship ; vivo:relates bibo:document{CVE} , foaf:Person{ID} . 
+source		SELECT ID, CVE_NIVEL, CVE FROM INVESTIGACION.PUAUTORES
+
+mappingId	dp_role_authorship
+target		vivo:authorship{CVE} vcard:role {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION FROM INVESTIGACION.PUAUTORNIVEL
+
+mappingId	dp_classification_Publications
+target		obo:classification{CVE} vivo:description {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION  FROM INVESTIGACION.PUCATCLASIFICACION
+
+mappingId	dp_information_NonFacultyAcademic
+target		vcard:individual{PID} vcard:givenName {NOMBRE} ; vcard:familyName {APATERNO} ; vcard:additionalName {AMATERNO} ; vcard:email {CORREO} . 
+source		SELECT PID, NOMBRE, APATERNO, AMATERNO, CORREO FROM INVESTIGACION.RHEXTERN
+
+mappingId	dp_information_FacultyMember
+target		vcard:individual{PIDM} vcard:givenName {ADUSUARIO.NOMALTERNATIVO} ; vcard:familyName {ADUSUARIO.APALTERNATIVO} ; vcard:additionalName {AMALTERNATIVO} . 
+source		SELECT PIDM, NOMALTERNATIVO, APALTERNATIVO, AMALTERNATIVO FROM  INVESTIGACION.ADUSUARIO
+
+mappingId	cl_CollectionConspectus
+target		bibo:document{CVE_PUB} a bibo:Collection ; bibo:abstract {DESCRIPCION} . 
+source		SELECT CVE_PUB, DESCRIPCION FROM INVESTIGACION.PUCONSPECTUSPUB, INVESTIGACION.PUCATCONSPECTUS WHERE PUCONSPECTUSPUB.CVE_CONSP = PUCATCONSPECTUS.CVE
+
+mappingId	cl_DocumentStatus
+target		bibo:document{CVE_DOC} bibo:status vivo:status{STATUS} ; vivo:description {DESCR} . 
+source		SELECT PUPUBLICACIONES.CVE AS CVE_DOC, PUCATESTATUS.CVE AS STATUS, PUCATESTATUS.DESCRIPCION AS DESCR FROM INVESTIGACION.PUCATESTATUS, INVESTIGACION.PUPUBLICACIONES WHERE PUCATESTATUS.CVE = PUPUBLICACIONES.CVE_ESTATUS AND PUPUBLICACIONES.CVE_TIPO = PUCATESTATUS.CVE_TIPOPUB
+
+mappingId	op_Citation_Journal
+target		new:citationFI{CVE_REV} c4o:hasGlobalCountDate c4o:{ANIO} ; c4o:hasGlobalCountValue {FI} . 
+source		SELECT CVE_REV, FI, ANIO FROM INVESTIGACION.PUCATFIREV
+
+mappingId	cl_CategoryJCR_Journal
+target		vcard:jcr{CVE} vcard:category {DESCRIPCION} . 
+source		SELECT CVE, CATEGORIA, DESCRIPCION FROM INVESTIGACION.PUCATJCR
+
+mappingId	dp_shortDescription_Book
+target		bibo:document{PULIB_CVE} bibo:shortDescription {DESCR} . 
+source		SELECT "PULIB"."CVE" AS PULIB_CVE, "PUCATLIB"."DESCRIPCION" AS DESCR  FROM INVESTIGACION."PULIB", INVESTIGACION."PUCATLIB" WHERE "PULIB"."CVE_TIPO" = "PUCATLIB"."CVE"
+
+mappingId	dp_shortDescription_Proceedings
+target		bibo:document{PUMEMORIA_CVE} new:typeProceedings {DESCR} . 
+source		SELECT "PUMEMORIAS"."CVE" AS PUMEMORIA_CVE, "PUCATMEMORIA"."DESCRIPCION" AS DESCR  FROM INVESTIGACION."PUMEMORIAS", INVESTIGACION."PUCATMEMORIA" WHERE "PUMEMORIAS"."CVE_FORMATO" = "PUCATMEMORIA"."CVE"
+
+mappingId	dp_level_Publication_Congress_Journal
+target		vcard:level{CVE} vcard:note {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION FROM INVESTIGACION.PUCATNIVEL
+
+mappingId	dp_target_Book
+target		vivo:target{CVE} vivo:description {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION FROM INVESTIGACION.PUCATOBJLIB
+
+mappingId	op_periodical_EditedBook
+target		bibo:document{CVE} vivo:dateTimePrecision vivo:periodic{DESCRIPCION} . 
+source		SELECT "PUEDREV"."CVE" AS PUEDREV_CVE, "PUCATPERIODICIDAD"."DESCRIPCION"  FROM INVESTIGACION."PUEDREV", "INVESTIGACION"."PUCATPERIODICIDAD" WHERE "PUEDREV"."CVE_PERIODICIDAD" = "PUCATPERIODICIDAD"."CVE"
+
+mappingId	op_CategoryRomeo_Publisher
+target		vivo:editorial{CVE_EDITORIAL} vcard:hasCategory vcard:romeo{CVE_ROMEO} . 
+source		SELECT CVE_EDITORIAL, CVE_ROMEO FROM INVESTIGACION.PUEDITORIALROMEO
+
+mappingId	cl_ConferenceSeries
+target		bibo:congress{CVE_RC}/edition{EDICION} a vivo:ConferenceSeries ; bibo:number {EDICION} ; vivo:description {MEMORIA} ; bibo:isbn13 {ISBN} ; vivo:dateTimeValue vivo:year{ANIO} ; vcard:url {URL} ; new:congressPublisher vivo:editorial{CVE_EDITORIAL} ; bibo:issn {ISSN_VALIDA} ; vivo:geographicFocus vivo:region{CVE_PAIS} ; vivo:contributingRole vivo:editor{EDITOR} . 
+source		SELECT CVE_RC, EDICION, CIUDAD, ISBN, ANIO, MEMORIA, CVE_PAIS, URL, CVE_EDITORIAL, EDITOR, ISSN_VALIDA FROM INVESTIGACION.PUEDREUNCIENTIF
+
+mappingId	dp_Sector_ResearchProposal
+target		obo:sector{CVE} vivo:description {DESCRIPCION} ; obo:BFO_0000050 obo:sector{CVE_PADRE} . 
+source		SELECT CVE, CVE_PADRE, DESCRIPCION FROM INVESTIGACION.PUCATRAMAS
+
+mappingId	cl_ActivityType_Report
+target		obo:activity{CVE} vivo:description {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION FROM INVESTIGACION.PUCATPYREPTEC
+
+mappingId	dp_application_Patent
+target		vcard:application{CVE} vcard:note {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION FROM INVESTIGACION.PUCATSOLPAT
+
+mappingId	cl_Region
+target		vivo:region{CLAVE_PAIS} a vivo:GeographicRegion ; vivo:description {NOMBRE} . 
+source		SELECT CLAVE_PAIS, NOMBRE, NOMBRE_BUSQUEDA, GENTILICIO, FECHA_ULTIMA_MODIFICACION, ESTATUS FROM NUCLEO.DM_PAIS
+
+mappingId	cl_DraftDocument
+target		bibo:document{CVE} a new:DraftDocument . 
+source		SELECT CVE FROM INVESTIGACION.PUPUBLICACIONES WHERE BORRADO = 'S'
+
+mappingId	cl_CompletedDocument
+target		bibo:document{CVE} a new:CompletedDocument . 
+source		SELECT CVE FROM INVESTIGACION.PUPUBLICACIONES WHERE BORRADO <> 'S'
+
+mappingId	cl_ActivityType_Report_Other
+target		obo:activity{CVE} vivo:description {DESCRIPCION} . 
+source		SELECT CVE , OTROPY  FROM INVESTIGACION.PUREPTEC WHERE CVE_TIPOPY ='O'  AND OTROPY IS NOT NULL
+
+mappingId	cl_SCImagoRank
+target		bibo:journal{CVE_REV} c4o:hasGlobalCountDate c4o:{ANIO} ; c4o:hasGlobalCountValue {SJR} ; new:numCitations {NCITAS} . 
+source		SELECT CVE_REV, SJR, NCITAS, ANIO FROM INVESTIGACION.PUREVSCIMAGO
+
+mappingId	op_CategoryConspectus_Document
+target		bibo:document{CVE_PUB} vcard:hasCategory vcard:conspectus{CVE_CONSP} . 
+source		SELECT CVE_PUB, CVE_CONSP FROM INVESTIGACION.PUCONSPECTUSPUB
+
+mappingId	cl_CategoryConspectus
+target		vcard:conspectus{CVE} vcard:category {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION, ACTIVO FROM INVESTIGACION.PUCATCONSPECTUS
+
+mappingId	cl_CategoryRomeo_Publisher
+target		vcard:romeo{CVE} vcard:category {DESCRIPCION} . 
+source		SELECT CVE, DESCRIPCION FROM INVESTIGACION.PUCATROMEO
+
+mappingId	op_FI_JCR_Journal
+target		vcard:jcr{CVE} c4o:hasGlobalCountDate c4o:{ANIO} ; c4o:hasGlobalCountValue {FI} . 
+source		SELECT CVE, FI, ANIO FROM INVESTIGACION.PUCATFICATEG
+
+mappingId	dp_Document_isbn
+target		bibo:document{CVE} bibo:isbn13 {ISBN_ISSN} . 
+source		SELECT CVE, ISBN_ISSN FROM INVESTIGACION.PUPUBLICACIONES WHERE CVE_TIPO NOT IN (2,11, 12)
+
+mappingId	dp_Document_issn
+target		bibo:document{CVE} bibo:issn {ISBN_ISSN} . 
+source		SELECT CVE, ISBN_ISSN FROM INVESTIGACION.PUPUBLICACIONES WHERE  PUPUBLICACIONES.CVE_TIPO= 2
+			      OR PUPUBLICACIONES.CVE_TIPO   = 11
+			      OR PUPUBLICACIONES.CVE_TIPO   = 12
+
+mappingId	dp_Document_year
+target		bibo:document{CVE} new:year {YEAR} . 
+source		SELECT CVE, EXTRACT(YEAR FROM PUPUBLICACIONES.FECHA) AS YEAR FROM INVESTIGACION.PUPUBLICACIONES
+]]
+

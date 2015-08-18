@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -289,6 +290,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return conditions;
 	}
 
+
 	/***
 	 * Returns the SQL for an atom representing an SQL condition (booleans).
 	 */
@@ -299,6 +301,41 @@ public class SQLGenerator implements SQLQueryGenerator {
 			// added also for IS TRUE
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			Term term = atom.getTerm(0);
+
+
+			if(functionSymbol.equals(OBDAVocabulary.IS_NOT_NULL) && term instanceof Function) {
+				Function uri = (Function) term;
+				if (!uri.isDataTypeFunction()) {
+					List<String> conditions = new ArrayList<>();
+					//add IS NOT NULL for each of the columns present in the uri
+					for (Term v : (((Function) term).getTerms())) {
+						if (v instanceof Variable) {
+							String column = getSQLString(v, index, false);
+							conditions.add(String.format(expressionFormat, column));
+						}
+
+					}
+					return Joiner.on(" AND ").join(conditions);
+				}
+			}
+			if(functionSymbol.equals(OBDAVocabulary.IS_NULL) && term instanceof Function) {
+				Function uri = (Function) term;
+				if (!uri.isDataTypeFunction()) {
+					List<String> conditions = new ArrayList<>();
+
+					//add IS NULL for each of the columns present in the uri
+					for (Term v : (((Function) term).getTerms())) {
+						if (v instanceof Variable) {
+							String column = getSQLString(v, index, false);
+							conditions.add(String.format(expressionFormat, column));
+						}
+
+					}
+					return Joiner.on(" OR ").join(conditions);
+				}
+			}
+
+
 			String column = getSQLString(term, index, false);
 			if (expressionFormat.contains("NOT %s") ) {
 				// find data type of term and evaluate accordingly
