@@ -24,27 +24,22 @@ public class TBoxReasonerToOntology {
 			
 			@Override
 			public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
-				if (sub != sup) 
-					sigma.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
+				sigma.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
 			}
 			@Override
 			public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
-				if (sub != sup) 
-					sigma.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
+				sigma.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
 			}
 
 			@Override
 			public void onInclusion(ClassExpression sub, ClassExpression sup) {
-				if (sub != sup) {
-					if (!excludeExistentials || (!(sup instanceof ObjectSomeValuesFrom) && !(sup instanceof DataSomeValuesFrom))) {
-						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
-					}
+				if (!excludeExistentials || (!(sup instanceof ObjectSomeValuesFrom) && !(sup instanceof DataSomeValuesFrom))) {
+					sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 				}
 			}
 			@Override
 			public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
-				if (sub != sup) 
-					sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
+				sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 			}
 		});
 		

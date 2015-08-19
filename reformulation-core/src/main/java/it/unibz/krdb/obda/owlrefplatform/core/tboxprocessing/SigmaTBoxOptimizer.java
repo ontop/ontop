@@ -88,34 +88,26 @@ public class SigmaTBoxOptimizer {
 
 				@Override
 				public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
-					if (sub != sup) {
-						if (!check_redundant_role(sup, sub)) {
-							optimizedTBox.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
-						}
+					if (!check_redundant_role(sup, sub)) {
+						optimizedTBox.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
 				@Override
 				public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
-					if (sub != sup) {
-						if (!check_redundant_role(sup, sub)) {
-							optimizedTBox.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
-						}
+					if (!check_redundant_role(sup, sub)) {
+						optimizedTBox.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
 
 				@Override
 				public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
-					if (sub != sup) {
-						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
-							optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
-						}
+					if (!sup.equals(sub) && !check_redundant(sup, sub))  {
+						optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
 				public void onInclusion(ClassExpression sub, ClassExpression sup) {
-					if (sub != sup) {
-						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
-							optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
-						}
+					if (!sup.equals(sub) && !check_redundant(sup, sub))  {
+						optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
 			});

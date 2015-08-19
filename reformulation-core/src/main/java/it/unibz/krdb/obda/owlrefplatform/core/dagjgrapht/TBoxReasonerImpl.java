@@ -379,42 +379,63 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public static void chooseDataRangeRepresentatives(EquivalencesDAGImpl<DataRangeExpression> dag, 
 			EquivalencesDAG<DataPropertyExpression> dataPropertyDAG) {
 
-	for (Equivalences<DataRangeExpression> equivalenceSet : dag) {
+		for (Equivalences<DataRangeExpression> equivalenceSet : dag) {
 
-		DataRangeExpression representative = null;			
-		if (equivalenceSet.size() <= 1) {
-			representative = equivalenceSet.iterator().next();
-		}
-		else {
-			// find a named class as a representative 
-			Datatype namedRepresentative = null;
-			for (DataRangeExpression e : equivalenceSet) 
-				if (e instanceof Datatype) {
-					if (namedRepresentative == null || datatypeComparator.compare((Datatype)e, namedRepresentative) < 0)
-						namedRepresentative = (Datatype)e;
-				}
-	
-			if (namedRepresentative == null) {
-				DataRangeExpression first = equivalenceSet.iterator().next();
-				assert (first instanceof DataPropertyRangeExpression);
-				DataPropertyRangeExpression firstp = (DataPropertyRangeExpression)first;
-				DataPropertyExpression prop = firstp.getProperty();
-                Equivalences<DataPropertyExpression> vertex = dataPropertyDAG.getVertex(prop);
-                if (vertex == null){
-                    throw new IllegalStateException("Unknown data property: " + prop);
-                }
-                DataPropertyExpression propRep = vertex.getRepresentative();
-				representative = propRep.getRange();
+			DataRangeExpression representative = null;			
+			if (equivalenceSet.size() <= 1) {
+				representative = equivalenceSet.iterator().next();
 			}
-			else
-				representative = namedRepresentative;
-		}
+			else {
+				// find a named class as a representative 
+				Datatype namedRepresentative = null;
+				for (DataRangeExpression e : equivalenceSet) 
+					if (e instanceof Datatype) {
+						if (namedRepresentative == null || datatypeComparator.compare((Datatype)e, namedRepresentative) < 0)
+							namedRepresentative = (Datatype)e;
+					}
+		
+				if (namedRepresentative == null) {
+					DataRangeExpression first = equivalenceSet.iterator().next();
+					assert (first instanceof DataPropertyRangeExpression);
+					DataPropertyRangeExpression firstp = (DataPropertyRangeExpression)first;
+					DataPropertyExpression prop = firstp.getProperty();
+	                Equivalences<DataPropertyExpression> vertex = dataPropertyDAG.getVertex(prop);
+	                if (vertex == null){
+	                    throw new IllegalStateException("Unknown data property: " + prop);
+	                }
+	                DataPropertyExpression propRep = vertex.getRepresentative();
+					representative = propRep.getRange();
+				}
+				else
+					representative = namedRepresentative;
+			}
 
-		equivalenceSet.setRepresentative(representative);
-		if (representative instanceof OClass)
-			equivalenceSet.setIndexed();
+			equivalenceSet.setRepresentative(representative);
+			if (representative instanceof OClass)
+				equivalenceSet.setIndexed();
+		}		
 	}
-}
+	
+	/**
+	 * constructs a TBoxReasoner that has a reduced number of classes and properties in each equivalent class
+	 *  
+	 *   - each object property equivalence class contains one property (representative)
+	 *     except when the representative property is equivalent to its inverse, in which 
+	 *     case the equivalence class contains both the property and its inverse
+	 *     
+	 *   - each data property equivalence class contains a single property (representative)
+	 *   
+	 *   - each class equivalence class contains the representative and all domains / ranges 
+	 *     of the representatives of property equivalence classes
+	 *     
+	 *  in other words, the constructed TBoxReasoner is the restriction to the vocabulary of the representatives
+	 *     all other symbols are mapped to the nodes via *Equivalences hash-maps
+	 *     
+	 *  note that *EquivalenceMap's are required for compatibility with older code
+	 * 
+	 * @param reasoner
+	 * @return reduced reasoner
+	 */
 	
 	
 	public static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
@@ -426,9 +447,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					= new SimpleDirectedGraph<>(DefaultEdge.class);
 		Map<ObjectPropertyExpression, Equivalences<ObjectPropertyExpression>> objectPropertyEquivalences = new HashMap<>();
 
-
 		// create vertices for properties 
-		
 		for(Equivalences<ObjectPropertyExpression> node : reasoner.getObjectPropertyDAG()) {
 			ObjectPropertyExpression rep = node.getRepresentative();
 			ObjectPropertyExpression repInv = rep.getInverse();
@@ -465,9 +484,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					= new SimpleDirectedGraph<>(DefaultEdge.class);
 		Map<DataPropertyExpression, Equivalences<DataPropertyExpression>> dataPropertyEquivalences = new HashMap<>();
 		
-		
 		// create vertices for properties 
-		
 		for(Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
 			DataPropertyExpression rep = node.getRepresentative();
 			
@@ -492,8 +509,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// create edges for the properties graph
 		copyEdges(reasoner.getDataPropertyDAG(), dataPropertyEquivalences, dataProperties);
 		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = new EquivalencesDAGImpl<>(null, dataProperties, dataPropertyEquivalences);
-		
-		
+				
 		// CLASSES
 		// 
 		Map<Predicate, OClass> classEquivalenceMap = new HashMap<>();
@@ -501,7 +517,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		Map<ClassExpression, Equivalences<ClassExpression>> classEquivalences = new HashMap<>();
 	
 		// create vertices for classes
-		
 		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
 			ClassExpression rep = node.getRepresentative();
 			Set<ClassExpression> reduced = new HashSet<>();
@@ -546,6 +561,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		copyEdges(reasoner.getClassDAG(), classEquivalences, classes);
 		EquivalencesDAGImpl<ClassExpression> classDAG = new EquivalencesDAGImpl<>(null, classes, classEquivalences);
 		
+		// DATA RANGES
+		// 
+		// TODO: a proper implementation is in order here
 		
 		return new TBoxReasonerImpl(classDAG,  (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(), objectPropertyDAG, dataPropertyDAG, classEquivalenceMap, objectPropertyEquivalenceMap, dataPropertyEquivalenceMap);
 	}
@@ -587,7 +605,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 
 	
-	
+	public static TBoxReasoner getSigmaReasoner(TBoxReasonerImpl tbox) {		
+		// TODO:
+		return null;
+	}
 	
 	
 	
