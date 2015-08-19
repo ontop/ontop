@@ -128,6 +128,37 @@ public class BoundTest {
         assertEquals(520, results);
     }
 
+    @Test
+    public void testBoundShortQuery() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+//
+        String queryBind = "PREFIX new: <http://addedMapping.org/>\n" +
+                "PREFIX : <http://vivoweb.org/ontology/core#>\n" +
+                "PREFIX vivo: <http://vivoweb.org/ontology/core#>\n" +
+                "PREFIX bibo: <http://purl.org/ontology/bibo/>\n" +
+                "\n" +
+                "SELECT DISTINCT  ?cve  ?cve_status \n" +
+                "WHERE { \n" +
+                "?cve a new:CompletedDocument .\n" +
+
+                "\n" +
+                "OPTIONAL {\n" +
+                "?cve bibo:status ?cve_status .\n" +
+                "}\n" +
+                "\n" +
+                "\n" +
+                "FILTER(!BOUND(?cve_status) )\n" +
+
+                "}";
+
+
+
+        int results = runTestQuery(p, queryBind);
+        assertEquals(520, results);
+    }
+
 
     private int runTestQuery(Properties p, String query) throws Exception {
 

@@ -1169,11 +1169,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 				for (int termIndex = 1; termIndex < size; termIndex++) {
 					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl = "";
-					if (isStringColType(currentTerm, index)) {
+//					if (isStringColType(currentTerm, index)) {
 						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
-					} else {
-						repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
-					}
+//					} else {
+//						repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
+//					}
 					vex.add(repl);
 					if (termIndex < split.length ) {
 						vex.add(sqladapter.getSQLLexicalFormString(split[termIndex]));
