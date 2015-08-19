@@ -26,16 +26,8 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +38,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /***
  * Tests that the system can handle the SPARQL "LIKE" keyword in the oracle setting
@@ -140,7 +134,7 @@ public class OracleRegexpTestSpace extends TestCase {
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :CountryWithSpace . }";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
-			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
+			assertEquals( "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>", countryName);
 		
 		
 			
@@ -168,7 +162,7 @@ public class OracleRegexpTestSpace extends TestCase {
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {?country a :CountriesWithSpaceNoWhere . ?country :position ?pos . FILTER (?pos >0)}";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
-			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
+			assertEquals( "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>", countryName);
 		
 		
 			
@@ -195,7 +189,7 @@ public class OracleRegexpTestSpace extends TestCase {
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {?country a :CountriesWithSpaceNoWhereNoSubquery . ?country :position ?pos . FILTER (?pos >0)}";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
-			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
+			assertEquals( "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>" , countryName);
 		
 		
 			

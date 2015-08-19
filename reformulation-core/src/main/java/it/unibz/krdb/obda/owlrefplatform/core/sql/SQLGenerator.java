@@ -1252,6 +1252,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 					term = function.getTerm(0);
 					return isStringColType(term, index);
 				}
+				//if replace or concat is present we are working with strings
+					if (functionSymbol.equals(OBDAVocabulary.REPLACE) || functionSymbol.equals(OBDAVocabulary.CONCAT)) {
+
+						return true;
+					}
+
+
 			}
 		} else if (term instanceof Variable) {
 			Set<String> viewdef = index.getColumnReferences((Variable) term);
@@ -1268,6 +1275,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
+//
 			Collection<TableDefinition> tables = metadata.getTables();
 			for (TableDefinition tabledef: tables) {
 				if (tabledef.getName().equals(table)) {
@@ -1289,6 +1297,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
+			return true; //TODO: this is a bugfix in the case a view is present (it is not a table) we treat it as a string character since we cannot now it's value
 		}
 		return false;
 	}
