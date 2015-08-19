@@ -33,13 +33,19 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -565,7 +571,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// 
 		// TODO: a proper implementation is in order here
 		
-		return new TBoxReasonerImpl(classDAG,  (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(), objectPropertyDAG, dataPropertyDAG, classEquivalenceMap, objectPropertyEquivalenceMap, dataPropertyEquivalenceMap);
+		return new TBoxReasonerImpl(classDAG,  
+				(EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(), objectPropertyDAG, dataPropertyDAG, 
+				classEquivalenceMap, objectPropertyEquivalenceMap, dataPropertyEquivalenceMap);
 	}
 	
 	
@@ -603,13 +611,96 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 */	
 	
+	
+	public static TBoxReasonerImpl getSigmaReasoner(TBoxReasoner reasoner0) {	
 
-	
-	public static TBoxReasoner getSigmaReasoner(TBoxReasonerImpl tbox) {		
-		// TODO:
-		return null;
+		TBoxReasonerImpl reasoner = (TBoxReasonerImpl)reasoner0;
+		
+		SimpleDirectedGraph <Equivalences<ClassExpression>,DefaultEdge> sigmaClasses = new SimpleDirectedGraph<>(DefaultEdge.class);
+		Map<ClassExpression, Equivalences<ClassExpression>> sigmaClassEquivalences = new HashMap<>();
+		Map<Equivalences<ClassExpression>, Equivalences<ClassExpression>> sourceNode = new HashMap<>();
+
+		// create vertices for classes
+		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
+			List<Equivalences<ClassExpression>> sigmaNodes = new ArrayList<>(node.size());
+			for (ClassExpression equi : node) {	
+				ClassExpression sigmaRep;		
+				if (equi instanceof OClass) {
+					sigmaRep = node.getRepresentative();
+				}
+				else if (equi instanceof ObjectSomeValuesFrom) {
+					ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)equi).getProperty();
+					ObjectPropertyExpression opeRep = reasoner.getObjectPropertyDAG().getVertex(ope).getRepresentative();
+					sigmaRep = opeRep.getDomain();
+				}
+				else  {
+					assert (equi instanceof DataSomeValuesFrom);
+					DataPropertyExpression dpe = ((DataSomeValuesFrom)equi).getProperty();
+					DataPropertyExpression dpeRep = reasoner.getDataPropertyDAG().getVertex(dpe).getRepresentative();
+					sigmaRep = dpeRep.getDomainRestriction(DatatypeImpl.rdfsLiteral);
+				}
+				Equivalences<ClassExpression> sigmaNode = sigmaClassEquivalences.get(sigmaRep);
+				if (sigmaNode == null) {
+					sigmaNode = new Equivalences<>(new HashSet<ClassExpression>(), sigmaRep);
+					sigmaNodes.add(sigmaNode);
+				}
+				sigmaNode.getMembers().add(equi);				
+				sigmaClassEquivalences.put(equi, sigmaNode);
+			}
+			for (Equivalences<ClassExpression> sigmaNode : sigmaNodes) {
+				sigmaClassEquivalences.put(sigmaNode.getRepresentative(), sigmaNode);
+				sigmaClasses.addVertex(sigmaNode);			
+				sourceNode.put(sigmaNode, node);
+			}
+		}	
+
+		for (Entry<Equivalences<ClassExpression>, Equivalences<ClassExpression>> e : sourceNode.entrySet()) {
+			Equivalences<ClassExpression> sigmaSource = e.getKey(); 
+			
+			Stack<Equivalences<ClassExpression>> targets = new Stack<>();
+			if (e.getKey().getRepresentative() instanceof OClass) {
+				// for classes
+				for (Equivalences<ClassExpression> s : reasoner.getClassDAG().getDirectSuper(e.getValue()))
+					targets.add(s);
+			}
+			else {
+				// for property domains
+				targets.add(e.getValue());
+			}
+			while (!targets.isEmpty()) {
+				Equivalences<ClassExpression> t = targets.pop();
+				if (t.getRepresentative() instanceof OClass) 
+					sigmaClasses.addEdge(sigmaSource, sigmaClassEquivalences.get(t.getRepresentative()));					
+				else 
+					for (Equivalences<ClassExpression> c : reasoner.getClassDAG().getDirectSuper(t))
+						targets.push(c);
+			}
+			
+			ClassExpression sigmaSourceRep = sigmaSource.getRepresentative();
+			
+			if (sigmaSourceRep instanceof ObjectSomeValuesFrom) {
+				ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)sigmaSourceRep).getProperty();
+				Equivalences<ObjectPropertyExpression> opeEq = reasoner.getObjectPropertyDAG().getVertex(ope);
+				for (Equivalences<ObjectPropertyExpression> superOpe : reasoner.getObjectPropertyDAG().getDirectSuper(opeEq)) {
+					sigmaClasses.addEdge(sigmaSource, sigmaClassEquivalences.get(superOpe.getRepresentative().getDomain()));										
+				}
+			}
+			else if (sigmaSource.getRepresentative() instanceof DataSomeValuesFrom) {
+				DataPropertyExpression dpe = ((DataSomeValuesFrom)sigmaSourceRep).getProperty();
+				Equivalences<DataPropertyExpression> dpeEq = reasoner.getDataPropertyDAG().getVertex(dpe);
+				for (Equivalences<DataPropertyExpression> superDpe : reasoner.getDataPropertyDAG().getDirectSuper(dpeEq)) {
+					sigmaClasses.addEdge(sigmaSource, sigmaClassEquivalences.get(superDpe.getRepresentative().getDomainRestriction(DatatypeImpl.rdfsLiteral)));										
+				}
+			}
+
+		}
+			
+		EquivalencesDAGImpl<ClassExpression> classDAG = new EquivalencesDAGImpl<>(null, sigmaClasses, sigmaClassEquivalences);
+		
+		return new TBoxReasonerImpl(classDAG,  
+				reasoner.dataRangeDAG, reasoner.objectPropertyDAG, reasoner.dataPropertyDAG, 
+				reasoner.classEquivalenceMap, reasoner.objectPropertyEquivalenceMap, reasoner.dataPropertyEquivalenceMap);
 	}
-	
 	
 	
 	
@@ -626,11 +717,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * 
 	 * 
 	 */
-
-	public static TBoxReasoner getChainReasoner(Ontology onto) {				
-		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
-		return getChainReasoner(tbox);
-	}
 	
 	public static TBoxReasoner getChainReasoner(TBoxReasonerImpl tbox) {		
 		

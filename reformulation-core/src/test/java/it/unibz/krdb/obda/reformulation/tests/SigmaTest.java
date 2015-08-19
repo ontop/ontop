@@ -55,7 +55,7 @@ public class SigmaTest extends TestCase {
 
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
+		TBoxReasoner sigmaReasoner = TBoxReasonerImpl.getSigmaReasoner(reasoner);						
 
 		EquivalencesDAG<ClassExpression> classes = sigmaReasoner.getClassDAG();
 
