@@ -63,6 +63,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	/**
 	 * the EquivalenceMap maps predicates to the representatives of their equivalence class (in TBox)
+	 * (these maps are only used for the equivalence-reduced TBoxes)
 	 * 
 	 * it contains 
 	 * 		- an entry for each property name other than the representative of an equivalence class 
@@ -712,8 +713,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
 	 * relation of the original DAG gets extended to the reachability relation
 	 * of T and Sigma chains.
-	 * 
-	 * 
 	 */
 	
 	public static TBoxReasoner getChainReasoner(TBoxReasoner tbox) {		
@@ -734,7 +733,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
 
-		HashSet<ClassExpression> processedNodes = new HashSet<>();
+		Set<ClassExpression> processedNodes = new HashSet<>();
 		
 		for (Equivalences<ClassExpression> existsNode : classes) {
 			ClassExpression existsNodeRep = existsNode.getRepresentative();
@@ -742,7 +741,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			if (!(existsNodeRep instanceof ObjectSomeValuesFrom) || processedNodes.contains(existsNodeRep)) 
 				continue;
 			
-			// Adding a cycle between exists R and exists R- for each R.
+			// Adding a cycle between exists R and exists R- for each R
 			ObjectPropertyExpression exists = ((ObjectSomeValuesFrom) existsNodeRep).getProperty();
 			ClassExpression invNode = exists.getInverse().getDomain();						
 			Equivalences<ClassExpression> existsInvNode = classes.getVertex(invNode);
@@ -775,24 +774,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			processedNodes.add(existsInvNodeRep);
 		}
 
-		/*&& !(node instanceof DataSomeValuesFrom)*/
-		//if (node instanceof ObjectSomeValuesFrom) {
-	//}
-	/*	
-	else {
-		DataPropertyExpression exists = ((DataSomeValuesFrom) node).getProperty();
-		invNode = fac.createPropertySomeRestriction(exists.getInverse());
 	// TODO: fix DataRange
-//		invNode = fac.createDataPropertyRange((DataPropertyExpression)exists);		
-	}
-	*/	
-		
 		
 		TBoxReasonerImpl t = (TBoxReasonerImpl)tbox;
+		EquivalencesDAGImpl<ClassExpression> classDAG = EquivalencesDAGImpl.getEquivalencesDAG(modifiedGraph);
+		chooseClassRepresentatives(classDAG, t.objectPropertyDAG, t.dataPropertyDAG);
 		
-		/* Collapsing the cycles */
-		return new TBoxReasonerImpl(t.objectPropertyDAG.getGraph(), t.dataPropertyDAG.getGraph(), 
-									modifiedGraph, t.dataRangeDAG.getGraph());
+		// Collapsing the cycles 
+		return new TBoxReasonerImpl(classDAG, t.dataRangeDAG, t.objectPropertyDAG, t.dataPropertyDAG, 
+							 t.classEquivalenceMap, t.objectPropertyEquivalenceMap, t.dataPropertyEquivalenceMap);
 	}
 
 

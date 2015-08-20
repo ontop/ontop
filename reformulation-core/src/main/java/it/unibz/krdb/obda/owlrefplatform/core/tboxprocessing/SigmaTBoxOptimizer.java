@@ -57,7 +57,7 @@ public class SigmaTBoxOptimizer {
 	public SigmaTBoxOptimizer(TBoxReasoner isa) {		
 		this.isa = isa;
 		
-		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
+		isaChain = TBoxReasonerImpl.getChainReasoner(isa);
 	
 		sigmaChain = TBoxReasonerImpl.getChainReasoner(TBoxReasonerImpl.getSigmaReasoner(isa));
 	}
@@ -102,12 +102,12 @@ public class SigmaTBoxOptimizer {
 
 				@Override
 				public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
-					if (!sup.equals(sub) && !check_redundant(sup, sub))  {
+					if (!check_redundant(sup, sub))  {
 						optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
 				public void onInclusion(ClassExpression sub, ClassExpression sup) {
-					if (!sup.equals(sub) && !check_redundant(sup, sub))  {
+					if (!check_redundant(sup, sub))  {
 						optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
