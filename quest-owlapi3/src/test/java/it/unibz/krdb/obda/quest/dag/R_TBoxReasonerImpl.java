@@ -52,7 +52,7 @@ public class R_TBoxReasonerImpl extends TestCase {
 		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 /*		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getIntervals(ofac

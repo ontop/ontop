@@ -64,7 +64,7 @@ public class SemanticIndexManager {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 
-		TBoxReasoner ontoReasoner = new TBoxReasonerImpl(ontologyClosure);
+		TBoxReasoner ontoReasoner = TBoxReasonerImpl.create(ontologyClosure);
 		// generate a new TBox with a simpler vocabulary
 		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
 			

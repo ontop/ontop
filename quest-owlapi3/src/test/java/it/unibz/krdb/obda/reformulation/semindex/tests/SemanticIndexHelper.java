@@ -102,9 +102,7 @@ public class SemanticIndexHelper {
     }
 
     public TBoxReasoner load_dag(String ontoname) throws Exception {
-
-    	return new TBoxReasonerImpl(load_onto(ontoname));
-        //return DAGBuilder.getDAG(load_onto(ontoname));
+    	return TBoxReasonerImpl.create(load_onto(ontoname));
     }
 
     public List<List<Description>> get_results(String resname) {

@@ -61,7 +61,7 @@ public class DAGLoopTest {
 	public void testLoop() throws Exception {
 		
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 
 		
 	}

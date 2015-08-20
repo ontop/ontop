@@ -56,7 +56,7 @@ public class S_NewGraphTest  extends TestCase{
 		Ontology o = OWLAPI3TranslatorUtility.translate(ontology);
 
 		log.info("Generating graph");
-		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
+		TBoxReasonerImpl r = (TBoxReasonerImpl)TBoxReasonerImpl.create(o);
 		
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());

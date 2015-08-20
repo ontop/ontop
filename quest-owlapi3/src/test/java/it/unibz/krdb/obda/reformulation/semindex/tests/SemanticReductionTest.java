@@ -38,7 +38,7 @@ public class SemanticReductionTest extends TestCase {
 	
 	public void test_2_0_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_0");
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
@@ -47,7 +47,7 @@ public class SemanticReductionTest extends TestCase {
 
 	public void test_2_0_1() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_1");
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
@@ -56,7 +56,7 @@ public class SemanticReductionTest extends TestCase {
 
 	public void test_2_1_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_1_0");
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
@@ -65,7 +65,7 @@ public class SemanticReductionTest extends TestCase {
 
 	public void test_1_2_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_1_2_0");
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
@@ -82,7 +82,7 @@ public class SemanticReductionTest extends TestCase {
 		 */
 
 		Ontology ontology = helper.load_onto("equivalence-test");
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, null);
 		Ontology reduced = reduction.getReducedOntology();

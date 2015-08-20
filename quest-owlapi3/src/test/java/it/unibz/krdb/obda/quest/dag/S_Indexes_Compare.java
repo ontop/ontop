@@ -69,7 +69,7 @@ public class S_Indexes_Compare extends TestCase {
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag = TBoxReasonerImpl.create(S_InputOWL.createOWL(fileInput));
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		

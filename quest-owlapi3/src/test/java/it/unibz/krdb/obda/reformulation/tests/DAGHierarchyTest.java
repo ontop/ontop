@@ -80,7 +80,7 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto = loadOntology(inputFile1);
 
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
@@ -168,7 +168,7 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto = loadOntology(inputFile1);
 
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
@@ -258,7 +258,7 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto = loadOntology(inputFile2);
 		
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
@@ -344,7 +344,7 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto = loadOntology(inputFile2);
 
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 		

@@ -55,7 +55,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
 		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
@@ -112,7 +112,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
 		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 		
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
@@ -165,7 +165,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
 		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
@@ -212,7 +212,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
 		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 

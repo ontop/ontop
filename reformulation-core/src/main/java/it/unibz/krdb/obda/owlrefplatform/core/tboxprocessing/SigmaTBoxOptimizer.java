@@ -71,7 +71,7 @@ public class SigmaTBoxOptimizer {
 
 		OntologyVocabulary voc = OntologyFactoryImpl.getInstance().createVocabulary();
 		Ontology ont = OntologyFactoryImpl.getInstance().createOntology(voc);
-		TBoxReasonerImpl emptyReasoner = new TBoxReasonerImpl(ont);
+		TBoxReasoner emptyReasoner = TBoxReasonerImpl.create(ont);
 		
 		sigmaChain = TBoxReasonerImpl.getChainReasoner(emptyReasoner);
 	}

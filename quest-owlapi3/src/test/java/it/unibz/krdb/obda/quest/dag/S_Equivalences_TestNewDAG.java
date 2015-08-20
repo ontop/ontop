@@ -101,7 +101,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(S_InputOWL.createOWL(fileInput));
 			TestTBoxReasonerImpl_OnGraph graphReasoner = new TestTBoxReasonerImpl_OnGraph(reasoner);
 
 			

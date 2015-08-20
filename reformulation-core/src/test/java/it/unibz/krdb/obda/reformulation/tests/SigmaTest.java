@@ -53,8 +53,7 @@ public class SigmaTest extends TestCase {
         ontology.addSubClassOfAxiom(er, ac);
         ontology.addSubClassOfAxiom(cc, er);
 
-       
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner sigmaReasoner = TBoxReasonerImpl.getSigmaReasoner(reasoner);						
 
 		EquivalencesDAG<ClassExpression> classes = sigmaReasoner.getClassDAG();

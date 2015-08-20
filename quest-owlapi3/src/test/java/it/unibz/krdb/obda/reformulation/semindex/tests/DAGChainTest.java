@@ -63,7 +63,7 @@ public class DAGChainTest extends TestCase {
 		ontology.addSubClassOfAxiom(bc, ac);
 		ontology.addSubClassOfAxiom(cc, bc);
 
-		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner0 = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
 		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 		
@@ -97,7 +97,7 @@ public class DAGChainTest extends TestCase {
 		ontology.addSubClassOfAxiom(cc, ier);
 		
 		//generate Graph
-		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
+		TBoxReasonerImpl res0 = (TBoxReasonerImpl)TBoxReasonerImpl.create(ontology);
 		//DefaultDirectedGraph<Description,DefaultEdge> res1 = res0.getGraph();
 
 		
@@ -153,7 +153,7 @@ public class DAGChainTest extends TestCase {
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
 		//DAGImpl dagChain221 = reasoner221.getChainDAG();
-		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner0 = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
 
 		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();

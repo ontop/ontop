@@ -318,7 +318,7 @@ public class EmptyEntitiesTest {
 	 */
 	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-		TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
+		TBoxReasoner tboxreasoner = TBoxReasonerImpl.create(onto);
 		System.out.println();
 		System.out.println(tboxreasoner.getObjectPropertyDAG());
 

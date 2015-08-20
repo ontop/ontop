@@ -537,7 +537,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Simplifying the vocabulary of the TBox
 		 */
 
-		reformulationReasoner = new TBoxReasonerImpl(inputOntology);
+		reformulationReasoner = TBoxReasonerImpl.create(inputOntology);
 		
 		if (bOptimizeEquivalences) {
 			// generate a new TBox with a simpler vocabulary
@@ -801,7 +801,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			TBoxReasoner reasoner = reformulationReasoner;
 			if (bOptimizeTBoxSigma) {
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
-				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
+				reasoner = TBoxReasonerImpl.create(reducer.getReducedOntology());
 			} 
 
 			/*

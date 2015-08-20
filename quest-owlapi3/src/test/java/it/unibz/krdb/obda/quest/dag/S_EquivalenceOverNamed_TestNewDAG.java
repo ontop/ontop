@@ -103,7 +103,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(S_InputOWL.createOWL(fileInput));
 			//transform in a named graph
 			TestTBoxReasonerImpl_OnNamedDAG namedDag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
 			log.debug("Input number {}", i+1 );

@@ -69,7 +69,7 @@ public class DAGEquivalenceTest extends TestCase {
 		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.getClassDAG()
@@ -128,7 +128,7 @@ public class DAGEquivalenceTest extends TestCase {
 				testEquivalenceRoles));
 		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
@@ -188,7 +188,7 @@ public class DAGEquivalenceTest extends TestCase {
 				testEquivalenceRolesInverse));
 		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 		// generate DAG
-		TBoxReasoner dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		

@@ -103,15 +103,13 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-
+		TBoxReasoner dag = TBoxReasonerImpl.create(S_InputOWL.createOWL(fileInput));
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine);
-		
 		
 		assertTrue(testIndexes(engine, dag));
 	}
