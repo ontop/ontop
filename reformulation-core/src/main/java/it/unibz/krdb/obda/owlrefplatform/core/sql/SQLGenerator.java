@@ -1278,13 +1278,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 //
 			Collection<TableDefinition> tables = metadata.getTables();
 			for (TableDefinition tabledef: tables) {
-				if (tabledef.getName().equals(table)) {
+				String tableName =trim(tabledef.getName());
+
+				if (tableName.equals(table)) {
 					Collection<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
 						if (a.getName().equals(col)) {
 							switch (a.getType()) {
 								case Types.VARCHAR:
-								case Types.CHAR:
+//								case Types.CHAR:
 								case Types.LONGNVARCHAR:
 								case Types.LONGVARCHAR:
 								case Types.NVARCHAR:
@@ -1297,7 +1299,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			return true; //TODO: this is a bugfix in the case a view is present (it is not a table) we treat it as a string character since we cannot now it's value
+//			return true; //TODO: this is a bugfix in the case a view is present (it is not a table) we treat it as a string character since we cannot know it's value
 		}
 		return false;
 	}
