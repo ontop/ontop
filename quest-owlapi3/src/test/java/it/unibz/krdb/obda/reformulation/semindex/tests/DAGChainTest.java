@@ -179,11 +179,11 @@ public class DAGChainTest extends TestCase {
 
 		assertTrue(classes.getSub(er0).contains(bc0));
 		assertTrue(classes.getSub(er0).contains(cc0));
-		assertEquals(sizeOf(classes.getSub(er0)), 3);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(er0)), 4);  // getDescendants is reflexive
 
 		assertTrue(classes.getSub(ier0).contains(bc0));
 		assertTrue(classes.getSub(ier0).contains(cc0));
-		assertEquals(sizeOf(classes.getSub(ier0)), 3);  // getDescendants is reflexive
+		assertEquals(sizeOf(classes.getSub(ier0)), 4);  // getDescendants is reflexive
 
 		assertEquals(sizeOf(classes.getSub(bc0)), 1);  // getDescendants is reflexive
 		assertEquals(sizeOf(classes.getSub(cc0)), 1);  // getDescendants is reflexive

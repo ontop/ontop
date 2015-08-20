@@ -588,27 +588,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 		}		
 	}
-/*	
-	private static <T> DefaultDirectedGraph<T,DefaultEdge> getGraphFromDAG(EquivalencesDAG<T> source) {
-		
-		DefaultDirectedGraph<T,DefaultEdge> graph = new DefaultDirectedGraph<T,DefaultEdge>(DefaultEdge.class);
-
-		for (Equivalences<T> node : source) {
-			for (T v : node) 
-				graph.addVertex(v);
-			for (T v : node)  {
-				graph.addEdge(v, node.getRepresentative());
-				graph.addEdge(node.getRepresentative(), v);
-			}
-		}
-		
-		for (Equivalences<T> node : source) 
-			for (Equivalences<T> subNode : source.getDirectSub(node)) 
-				graph.addEdge(subNode.getRepresentative(), node.getRepresentative());
-	
-		return graph;
-	}
-*/	
 	
 	
 	public static TBoxReasonerImpl getSigmaReasoner(TBoxReasoner reasoner0) {	
@@ -702,18 +681,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	
-
-//	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
-//		
-//		return new TBoxReasonerImpl((OntologyGraph.getGraph(onto, true)));		
-//	}
-	
 	/***
 	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
 	 * relation of the original DAG gets extended to the reachability relation
 	 * of T and Sigma chains.
 	 */
+	
 	
 	public static TBoxReasoner getChainReasoner(TBoxReasoner tbox) {		
 		
@@ -724,58 +697,30 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				new  DefaultDirectedGraph<>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
-		for (Equivalences<ClassExpression> v : classes) 
-			modifiedGraph.addVertex(v.getRepresentative());
+		for (Equivalences<ClassExpression> v : classes) {
+			for (ClassExpression e : v)
+				modifiedGraph.addVertex(e);
+		}
 		
 		for (Equivalences<ClassExpression> v : classes) {
 			ClassExpression s = v.getRepresentative();
+			for (ClassExpression e : v)
+				if (e != s) {
+					modifiedGraph.addEdge(s, e);
+					modifiedGraph.addEdge(e, s);
+				}
 			for (Equivalences<ClassExpression> vp : classes.getDirectSuper(v))
 				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
 
-		Set<ClassExpression> processedNodes = new HashSet<>();
-		
-		for (Equivalences<ClassExpression> existsNode : classes) {
-			ClassExpression existsNodeRep = existsNode.getRepresentative();
-			
-			if (!(existsNodeRep instanceof ObjectSomeValuesFrom) || processedNodes.contains(existsNodeRep)) 
-				continue;
-			
-			// Adding a cycle between exists R and exists R- for each R
-			ObjectPropertyExpression exists = ((ObjectSomeValuesFrom) existsNodeRep).getProperty();
-			ClassExpression invNode = exists.getInverse().getDomain();						
-			Equivalences<ClassExpression> existsInvNode = classes.getVertex(invNode);
-			ClassExpression existsInvNodeRep = existsInvNode.getRepresentative();
-			
-			for (Equivalences<ClassExpression> children : classes.getDirectSub(existsNode)) {
-				ClassExpression child = children.getRepresentative(); 
-				if (!child.equals(existsInvNode))
-					modifiedGraph.addEdge(child, existsInvNodeRep);
-			}
-			for (Equivalences<ClassExpression> children : classes.getDirectSub(existsInvNode)) {
-				ClassExpression child = children.getRepresentative(); 
-				if (!child.equals(existsNode))
-					modifiedGraph.addEdge(child, existsNodeRep);
-			}
-
-			for (Equivalences<ClassExpression> parents : classes.getDirectSuper(existsNode)) {
-				ClassExpression parent = parents.getRepresentative(); 
-				if (!parent.equals(existsInvNode))
-					modifiedGraph.addEdge(existsInvNodeRep, parent);
-			}
-
-			for (Equivalences<ClassExpression> parents : classes.getDirectSuper(existsInvNode)) {
-				ClassExpression parent = parents.getRepresentative(); 
-				if (!parent.equals(existsInvNode))
-					modifiedGraph.addEdge(existsNodeRep, parent);
-			}
-
-			processedNodes.add(existsNodeRep);
-			processedNodes.add(existsInvNodeRep);
+		for (Equivalences<ObjectPropertyExpression> ope : tbox.getObjectPropertyDAG()) {
+			ObjectPropertyExpression opeRep = ope.getRepresentative();
+			ClassExpression opeRepDomain = opeRep.getDomain();
+			ClassExpression opeRepRange = opeRep.getRange();
+			modifiedGraph.addEdge(opeRepDomain, opeRepRange);			
+			modifiedGraph.addEdge(opeRepRange, opeRepDomain);			
 		}
 
-	// TODO: fix DataRange
-		
 		TBoxReasonerImpl t = (TBoxReasonerImpl)tbox;
 		EquivalencesDAGImpl<ClassExpression> classDAG = EquivalencesDAGImpl.getEquivalencesDAG(modifiedGraph);
 		chooseClassRepresentatives(classDAG, t.objectPropertyDAG, t.dataPropertyDAG);
@@ -784,6 +729,4 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return new TBoxReasonerImpl(classDAG, t.dataRangeDAG, t.objectPropertyDAG, t.dataPropertyDAG, 
 							 t.classEquivalenceMap, t.objectPropertyEquivalenceMap, t.dataPropertyEquivalenceMap);
 	}
-
-
 }
