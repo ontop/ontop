@@ -221,8 +221,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 			for (DefaultEdge edge : dag.edgeSet()) 
 				graph.addEdge(dag.getEdgeSource(edge).getRepresentative(), dag.getEdgeTarget(edge).getRepresentative());
 		}
-		return graph;
-		
+		return graph;		
 	}
 	
 	

@@ -738,7 +738,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, localConnection, sourceId);
 
-			/***
+			/*
 			 * T-Mappings and Fact mappings
 			 */
 
@@ -782,19 +782,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/* The active ABox dependencies */
 			sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
 			
-			/*
-			 * Setting up the TBox we will use for the reformulation
-			 */
-			TBoxReasoner reasoner = reformulationReasoner;
+			
+			// Setting up the TBox we will use for the reformulation
+			//TBoxReasoner reasoner = reformulationReasoner;
 			//if (bOptimizeTBoxSigma) {
 			//	SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
 			//	reasoner = TBoxReasonerImpl.create(reducer.getReducedOntology());
 			//} 
 
-			/*
-			 * Setting up the reformulation engine
-			 */
-
+			// Setting up the reformulation engine
 			if (reformulate == false) {
 				rewriter = new DummyReformulator();
 			} 
@@ -805,7 +801,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
 			}
 
-			rewriter.setTBox(reasoner, sigma);
+			rewriter.setTBox(reformulationReasoner, sigma);
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
