@@ -44,7 +44,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
@@ -73,14 +72,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
-import net.sf.jsqlparser.JSQLParserException;
-
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.openrdf.query.parser.ParsedQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class Quest implements Serializable, RepositoryChangedListener {
@@ -175,8 +166,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private String reformulationTechnique = QuestConstants.UCQBASED;
 
 	private boolean bOptimizeEquivalences = true;
-
-	private boolean bOptimizeTBoxSigma = true;
 
 	private boolean bObtainFromOntology = true;
 
@@ -430,7 +419,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		reformulate = Boolean.valueOf((String) preferences.get(QuestPreferences.REWRITE));
 		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
-		bOptimizeTBoxSigma = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_TBOX_SIGMA));
 		bObtainFromOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FROM_ONTOLOGY));
 		bObtainFromMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FROM_MAPPINGS));
 		aboxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
@@ -457,7 +445,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			log.debug("Extensional query rewriting technique: {}", reformulationTechnique);
 		}
 		log.debug("Optimize TBox using class/property equivalences: {}", bOptimizeEquivalences);
-		log.debug("Optimize TBox using dependencies in ABox: {}", bOptimizeTBoxSigma);
 		log.debug("ABox mode: {}", aboxMode);
 		if (!aboxMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
@@ -799,10 +786,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Setting up the TBox we will use for the reformulation
 			 */
 			TBoxReasoner reasoner = reformulationReasoner;
-			if (bOptimizeTBoxSigma) {
-				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
-				reasoner = TBoxReasonerImpl.create(reducer.getReducedOntology());
-			} 
+			//if (bOptimizeTBoxSigma) {
+			//	SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
+			//	reasoner = TBoxReasonerImpl.create(reducer.getReducedOntology());
+			//} 
 
 			/*
 			 * Setting up the reformulation engine

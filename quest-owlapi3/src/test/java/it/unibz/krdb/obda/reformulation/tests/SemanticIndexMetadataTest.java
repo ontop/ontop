@@ -106,7 +106,6 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
