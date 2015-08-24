@@ -61,7 +61,7 @@ public class MappingDataTypeRepair {
      * Private method that gets the datatypes already present in the ontology and stores them in a map
      * It will be used later in insertDataTyping
      */
-    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner){
+    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
 
     	final Map<Predicate, Datatype> dataTypesMap = new HashMap<Predicate, Datatype>();
     	

@@ -195,7 +195,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	
 	@Deprecated
-	int edgeSetSize() {
+	public int edgeSetSize() {
 		return dag.edgeSet().size();
 	}
 
