@@ -92,6 +92,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private boolean generatingREPLACE = true;
 	private boolean distinctResultSet = false;
+	private boolean isView = false;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
@@ -1175,7 +1176,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 					} else {
 
-						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						if(isView){
+							repl = replace1 + (sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR)) + replace2;
+						}
+						else {
+							repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						}
 					}
 					vex.add(repl);
 					if (termIndex < split.length ) {
@@ -1306,6 +1312,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return false;
 	}
 
+
 	private boolean isIntColType(Term term, QueryAliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
@@ -1377,7 +1384,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-//			return true; //TODO: this is a bugfix in the case a view is present (it is not a table) we treat it as a string character since we cannot know it's value
+			// TODO: improve this.
+			// It is a bugfix in the case a view is present (it is not a table) we need to cast becuase we are not sure of the content of the column
+			isView = true;
+			return false;
 		}
 		return false;
 	}
