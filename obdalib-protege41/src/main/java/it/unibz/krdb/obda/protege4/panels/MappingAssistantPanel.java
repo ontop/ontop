@@ -22,18 +22,7 @@ package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -52,15 +41,13 @@ import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.*;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import javax.swing.plaf.metal.MetalComboBoxButton;
+import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -73,19 +60,6 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.plaf.metal.MetalComboBoxButton;
-import javax.swing.table.TableModel;
 
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -967,7 +941,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					try {
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType);
+                        //second parameter is database version, not relevant in this step
+						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
 						String sqlString = txtQueryEditor.getText();
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter

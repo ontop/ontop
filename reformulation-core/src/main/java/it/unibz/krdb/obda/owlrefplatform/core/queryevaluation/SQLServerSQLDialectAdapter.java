@@ -24,19 +24,53 @@ import java.sql.Types;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 
+	private String databaseVersion ;
+
+	public SQLServerSQLDialectAdapter(String databaseVersion) {
+		this.databaseVersion = databaseVersion;
+
+	}
+
+
 	@Override
 	public String strconcat(String[] strings) {
+
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
-		
 		if (strings.length == 1)
 			return strings[0];
-		
-		StringBuilder sql = new StringBuilder();
 
-		sql.append(String.format("(%s", strings[0]));
+		StringBuilder sql = new StringBuilder();
+		String version =databaseVersion.split("\\.")[0];
+		try {
+			int versionInt = Integer.parseInt(version);
+			//support previous version of SQL server
+			if (versionInt<11){
+				sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
 			sql.append(String.format(" + CAST(%s as varchar(8000))", strings[i]));
+
+		}
+				sql.append(")");
+		return sql.toString();
+			}
+			else {
+
+				sql.append(String.format("CONCAT(%s", strings[0]));
+				for (int i = 1; i < strings.length; i++) {
+					sql.append(String.format(", %s", strings[i]));
+				}
+				sql.append(")");
+				return sql.toString();
+			}
+		}catch (NumberFormatException nfe){
+			//not a number  use new concat
+
+
+		}
+		sql.append(String.format("CONCAT(%s", strings[0]));
+		for (int i = 1; i < strings.length; i++) {
+			sql.append(String.format(", %s", strings[i]));
 		}
 		sql.append(")");
 		return sql.toString();
@@ -97,7 +131,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param v
 	 * @return
 	 */
 	@Override

@@ -44,6 +44,7 @@ public class DBMetadata implements Serializable {
 	private final String driverName;
 	private String driverVersion;
 	private String databaseProductName;
+	private String databaseVersion;
 
 	private boolean storesLowerCaseIdentifiers = false;
 	private boolean storesLowerCaseQuotedIdentifiers = false;
@@ -75,6 +76,7 @@ public class DBMetadata implements Serializable {
 			driverName = md.getDriverName();
 			driverVersion = md.getDriverVersion();
 			databaseProductName = md.getDatabaseProductName();
+			databaseVersion = md.getDatabaseProductVersion();
 			
 			storesLowerCaseIdentifiers = md.storesLowerCaseIdentifiers();
 			storesLowerCaseQuotedIdentifiers = md.storesLowerCaseQuotedIdentifiers();
@@ -107,6 +109,7 @@ public class DBMetadata implements Serializable {
 			schema.put(name.substring(1, name.length() - 1), value);
 
 		else {
+
 			String[] names = name.split("\\."); // consider the case of
 												// schema.table
 			if (names.length == 2) {
@@ -327,4 +330,7 @@ public class DBMetadata implements Serializable {
 	}
 
 
+	public String getDatabaseVersion() {
+		return databaseVersion;
+	}
 }

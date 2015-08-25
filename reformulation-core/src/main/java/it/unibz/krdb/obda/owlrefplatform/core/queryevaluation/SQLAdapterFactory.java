@@ -27,7 +27,7 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName) {
 
 		switch (className) {
 			case "org.postgresql.Driver":
@@ -47,7 +47,7 @@ public class SQLAdapterFactory {
 				return new TeiidSQLDialectAdapter();
 			case "net.sourceforge.jtds.jdbc.Driver":
 			case "com.microsoft.sqlserver.jdbc.SQLServerDriver":
-				return new SQLServerSQLDialectAdapter();
+				return new SQLServerSQLDialectAdapter(databaseName);
 			case "madgik.adp.federatedjdbc.AdpDriver":
 				return new AdpSQLDialectAdapter();
 			default:

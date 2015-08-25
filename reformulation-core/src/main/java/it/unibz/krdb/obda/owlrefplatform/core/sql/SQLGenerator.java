@@ -1169,11 +1169,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 				for (int termIndex = 1; termIndex < size; termIndex++) {
 					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl = "";
-					if (isStringColType(currentTerm, index)) {
-						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
-					} else {
+					if (isIntColType(currentTerm,index)){
+
 						repl = (getSQLString(currentTerm, index, false));
-//						repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
+
+					} else {
+
+						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
 					}
 					vex.add(repl);
 					if (termIndex < split.length ) {
@@ -1291,6 +1293,82 @@ public class SQLGenerator implements SQLQueryGenerator {
 								case Types.LONGVARCHAR:
 								case Types.NVARCHAR:
 								case Types.NCHAR:
+									return true;
+								default:
+									return false;
+							}
+						}
+					}
+				}
+			}
+
+		}
+		return false;
+	}
+
+	private boolean isIntColType(Term term, QueryAliasIndex index) {
+		if (term instanceof Function) {
+			Function function = (Function) term;
+			Predicate functionSymbol = function.getFunctionSymbol();
+
+			if (functionSymbol instanceof URITemplatePredicate) {
+				/*
+				 * A URI function always returns a string, thus it is a string column type.
+				 */
+				return isSI;
+			} else {
+				if (isUnary(function)) {
+
+					/*
+					 * Update the term with the parent term's first parameter.
+					 * Note: this method is confusing :(
+					 */
+					term = function.getTerm(0);
+					return isIntColType(term, index);
+				}
+				//if replace or concat is present we are working with strings
+				if (functionSymbol.equals(OBDAVocabulary.REPLACE) || functionSymbol.equals(OBDAVocabulary.CONCAT)) {
+
+					return false;
+				}
+
+
+			}
+		} else if (term instanceof Variable) {
+			Set<String> viewdef = index.getColumnReferences((Variable) term);
+			String def = viewdef.iterator().next();
+			String col = trim(def.split("\\.")[1]);
+			String table = def.split("\\.")[0];
+			if (def.startsWith("QVIEW")) {
+				Map<Function, String> views = index.viewNames;
+				for (Function func : views.keySet()) {
+					String value = views.get(func);
+					if (value.equals(def.split("\\.")[0])) {
+						table = func.getFunctionSymbol().toString();
+						break;
+					}
+				}
+			}
+//
+			Collection<TableDefinition> tables = metadata.getTables();
+			for (TableDefinition tabledef: tables) {
+				String tableName =trim(tabledef.getName());
+
+				if (tableName.equals(table)) {
+					Collection<Attribute> attr = tabledef.getAttributes();
+					for (Attribute a : attr) {
+						if (a.getName().equals(col)) {
+							switch (a.getType()) {
+								case Types.BIGINT:
+								case Types.DECIMAL:
+								case Types.CHAR:
+								case Types.DOUBLE:
+								case Types.FLOAT:
+								case Types.INTEGER:
+								case Types.SMALLINT:
+								case Types.REAL:
+								case Types.NUMERIC:
+								case Types.TINYINT:
 									return true;
 								default:
 									return false;
