@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -60,7 +61,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	
 	@Override
-	public Ontology createOntology(OntologyVocabulary vb) {
+	public Ontology createOntology(ImmutableOntologyVocabulary vb) {
 		return new OntologyImpl((OntologyVocabularyImpl)vb);
 	}
 	

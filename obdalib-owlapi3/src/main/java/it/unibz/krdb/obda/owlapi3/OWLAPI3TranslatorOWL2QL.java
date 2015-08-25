@@ -54,7 +54,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	
 	private Ontology dl_onto;
 	
-	public OntologyVocabulary getVocabulary() {
+	public ImmutableOntologyVocabulary getVocabulary() {
 		return dl_onto.getVocabulary();
 	}
 	
@@ -761,7 +761,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			assert(rolExpression instanceof OWLObjectInverseOf);
 			
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) rolExpression;
-			return dl_onto.getVocabulary().createObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+			return dl_onto.getVocabulary().getObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} 			
 	}
 

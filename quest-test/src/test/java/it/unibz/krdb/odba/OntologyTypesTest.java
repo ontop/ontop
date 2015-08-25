@@ -38,7 +38,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.Connection;
 import java.util.Properties;
 
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
@@ -59,10 +58,9 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class OntologyTypesTest{
+public class OntologyTypesTest {
 
 	private OBDADataFactory fac;
-	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
@@ -81,9 +79,6 @@ public class OntologyTypesTest{
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-
-		
 	}
 
 	private void runTests(Properties p, String query, int numberResults) throws Exception {

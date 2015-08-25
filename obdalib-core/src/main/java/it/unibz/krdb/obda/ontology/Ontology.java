@@ -56,7 +56,7 @@ public interface Ontology extends Serializable {
 
 	
 	
-	public OntologyVocabulary getVocabulary();
+	public ImmutableOntologyVocabulary getVocabulary();
 	
 	
 	public List<BinaryAxiom<ClassExpression>> getSubClassAxioms();

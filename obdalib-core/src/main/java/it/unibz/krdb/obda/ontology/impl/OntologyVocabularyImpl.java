@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -148,7 +149,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
-	public void merge(OntologyVocabulary v) {
+	public void merge(ImmutableOntologyVocabulary v) {
 		OntologyVocabularyImpl vi = (OntologyVocabularyImpl)v;
 		
 		concepts.putAll(vi.concepts);
@@ -157,18 +158,18 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	@Override
-	public boolean removeClass(String classname) {
-		return concepts.remove(classname) != null;
+	public void removeClass(String classname) {
+		concepts.remove(classname);
 	}
 
 	@Override
-	public boolean removeObjectProperty(String property) {
-		return objectProperties.remove(property) != null;
+	public void removeObjectProperty(String property) {
+		objectProperties.remove(property);
 	}
 
 	@Override
-	public boolean removeDataProperty(String property) {
-		return dataProperties.remove(property) != null;
+	public void removeDataProperty(String property) {
+		dataProperties.remove(property);
 	}
 
 	@Override

@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
-	public Ontology createOntology(OntologyVocabulary vb);
+	public Ontology createOntology(ImmutableOntologyVocabulary vb);
 	
 	public OntologyVocabulary createVocabulary();
 	

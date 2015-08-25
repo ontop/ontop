@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
@@ -58,7 +59,7 @@ public class MappingVocabularyRepair {
 
 	private static final Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public static void fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
+	public static void fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(source.getSourceID()));
@@ -79,7 +80,7 @@ public class MappingVocabularyRepair {
 	 * @param vocabulary
 	 * @return
 	 */
-	private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
+	private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, ImmutableOntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
 		Map<String, Predicate> urimap = new HashMap<>();

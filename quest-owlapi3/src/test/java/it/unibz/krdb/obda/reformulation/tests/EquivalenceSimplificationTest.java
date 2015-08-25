@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
@@ -65,7 +66,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(2, classDAG.edgeSetSize());  // A1 <- B1 <- C1
 		assertEquals(0, propDAG.edgeSetSize());  // no properties
 
-		OntologyVocabulary voc = ontology.getVocabulary();
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
 
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
@@ -110,7 +111,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); 
 		assertEquals(4, classDAG.edgeSetSize()); // A1 <- B1 <- C1, A1^- <- B1^- <- C1^-
 
-		OntologyVocabulary voc = ontology.getVocabulary();
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
 		
 		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
 		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
@@ -154,7 +155,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(0, propDAG.edgeSetSize()); // 
 		assertEquals(2, classDAG.edgeSetSize()); // A1 <- B1 <- C1
 
-		OntologyVocabulary voc = ontology.getVocabulary();
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
 
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
@@ -190,7 +191,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 >= B1 >= C1, A1^- >= B1^- >= C1^-
 		assertEquals(4, propDAG.edgeSetSize()); //
 
-		OntologyVocabulary voc = ontology.getVocabulary();
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
 
 		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
 		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B1")) != null);

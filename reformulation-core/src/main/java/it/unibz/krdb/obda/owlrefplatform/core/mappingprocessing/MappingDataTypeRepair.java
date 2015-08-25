@@ -63,7 +63,7 @@ public class MappingDataTypeRepair {
      */
     private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
 
-    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<Predicate, Datatype>();
+    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<>();
         
         // Traverse the graph searching for dataProperty
 		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
@@ -85,7 +85,7 @@ public class MappingDataTypeRepair {
 		return dataTypesMap;
     }
 
-    private static void onDataRangeInclusion( Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub, DataRangeExpression sup) {
+    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub, DataRangeExpression sup) {
         //if sup is a datatype property  we store it in the map
         //it means that sub is of datatype sup
     	if (sup instanceof Datatype) {

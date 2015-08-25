@@ -1,91 +1,13 @@
 package it.unibz.krdb.obda.ontology;
 
-import java.util.Collection;
 
-public interface OntologyVocabulary {
+public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 
-
-	/**
-	 * check whether the class has been declared and return the class object
-	 * 
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the class has not been declared
-	 */
-	
-	public OClass getClass(String uri);
-	
-
-	/**
-	 * check whether the object property has been declared and return the class object
-	 * 
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the object property has not been declared
-	 */
-	
-	public ObjectPropertyExpression getObjectProperty(String uri);
-	
-
-	/**
-	 * check whether the data property has been declared and return the class object
-	 * 
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the data property has not been declared
-	 */
-	
-	public DataPropertyExpression getDataProperty(String uri);
-	
-	/**
-	 * return all declared classes
-	 * 
-	 * @return
-	 */
-
-	public boolean containsClass(String uri);
-	
-	public boolean containsObjectProperty(String uri);
-	
-	public boolean containsDataProperty(String uri);
-	
-	
-	public Collection<OClass> getClasses();
-	
-	/**
-	 * return all declared object properties
-	 * 
-	 * @return
-	 */
-	
-	public Collection<ObjectPropertyExpression> getObjectProperties();
-	
-	/**
-	 * return all declared data properties
-	 * 
-	 * @return
-	 */
-	
-	public Collection<DataPropertyExpression> getDataProperties();
-	
-	
-	/**
-	 * check whether the vocabulary is empty (no declared classes, object or data properties)
-	 * 
-	 * @return
-	 */
-
-	public boolean isEmpty();
-	
-	
-	
-	
-	
 	/**
 	 * declare class
 	 * 
 	 * @param uri
-	 * @return
+	 * @return class object
 	 */
 	
 	public OClass createClass(String uri);
@@ -94,7 +16,7 @@ public interface OntologyVocabulary {
 	 * declare object property
 	 * 
 	 * @param uri property name
-	 * @return
+	 * @return property object
 	 */
 	
 	public ObjectPropertyExpression createObjectProperty(String uri);
@@ -103,24 +25,42 @@ public interface OntologyVocabulary {
 	 * declare data property
 	 * 
 	 * @param uri property name
-	 * @return
+	 * @return property object
 	 */
 	
 	public DataPropertyExpression createDataProperty(String uri);
 
-	
-		
-	
-	
-	
-	public void merge(OntologyVocabulary v);
 
+	/**
+	 * remove class from the vocabulary
+	 * 
+	 * @param uri property name
+	 */
 	
-	public boolean removeClass(String classname);
+	public void removeClass(String classname);
 
-	public boolean removeObjectProperty(String property);
+	/**
+	 * remove object property from the vocabulary
+	 * 
+	 * @param uri property name
+	 */
+	
+	public void removeObjectProperty(String property);
 
-	public boolean removeDataProperty(String property);
+	/**
+	 * remove data property from the vocabulary
+	 * 
+	 * @param uri property name
+	 */
+	
+	public void removeDataProperty(String property);
 	
 	
+	/**
+	 * copy all classes and properties from a given vocabulary 
+	 * 
+	 * @param v vocabulary to be copied from
+	 */
+	
+	public void merge(ImmutableOntologyVocabulary v);
 }
