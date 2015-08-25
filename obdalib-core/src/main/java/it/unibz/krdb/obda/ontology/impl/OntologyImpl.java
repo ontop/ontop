@@ -20,8 +20,10 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
@@ -37,20 +39,18 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 public class OntologyImpl implements Ontology {
@@ -90,24 +90,23 @@ public class OntologyImpl implements Ontology {
 	
 	private final class ImmutableOntologyVocabularyImpl implements ImmutableOntologyVocabulary {
 
-		final Map<String, OClass> concepts = new HashMap<>();
-		final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
-		final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
+		final ImmutableMap<String, OClass> concepts;
+		final ImmutableMap<String, ObjectPropertyExpression> objectProperties;
+		final ImmutableMap<String, DataPropertyExpression> dataProperties;
 		
 		ImmutableOntologyVocabularyImpl(OntologyVocabularyImpl voc) {
-			concepts.putAll(voc.concepts);
-			concepts.put(ClassImpl.owlThingIRI, ClassImpl.owlThing);
-			concepts.put(ClassImpl.owlNothingIRI, ClassImpl.owlNothing);
-			objectProperties.putAll(voc.objectProperties);
-			objectProperties.put(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, 
-					ObjectPropertyExpressionImpl.owlTopObjectProperty);
-			objectProperties.put(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, 
-					ObjectPropertyExpressionImpl.owlBottomObjectProperty);
-			dataProperties.putAll(voc.dataProperties);
-			dataProperties.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, 
-					DataPropertyExpressionImpl.owlTopDataProperty);
-			dataProperties.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, 
-					DataPropertyExpressionImpl.owlBottomDataProperty);
+			concepts = ImmutableMap.<String, OClass>builder()
+				.putAll(voc.concepts)
+				.put(ClassImpl.owlThingIRI, ClassImpl.owlThing)
+				.put(ClassImpl.owlNothingIRI, ClassImpl.owlNothing).build();
+			objectProperties = ImmutableMap.<String, ObjectPropertyExpression>builder()
+				.putAll(voc.objectProperties)
+				.put(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty)
+				.put(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty).build();
+			dataProperties  = ImmutableMap.<String, DataPropertyExpression>builder() 
+				.putAll(voc.dataProperties)
+				.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty)
+				.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty).build();
 		}
 		
 		@Override
@@ -130,7 +129,7 @@ public class OntologyImpl implements Ontology {
 		public DataPropertyExpression getDataProperty(String uri) {
 			DataPropertyExpression dpe = dataProperties.get(uri);
 			if (dpe == null)
-				throw new RuntimeException("ObjectProperty not found: " + uri);
+				throw new RuntimeException("DataProperty not found: " + uri);
 			return dpe;
 		}
 
@@ -349,10 +348,9 @@ public class OntologyImpl implements Ontology {
 	}
 
 	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
-
 	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
 	
-	
+	public static final String AUXROLEURI = "ER.A-AUXROLE"; 
 	private static int auxCounter = 0; // THIS IS SHARED AMONG ALL INSTANCES!
 	
 	
@@ -385,7 +383,32 @@ public class OntologyImpl implements Ontology {
 	}
 
 	
-	public static final String AUXROLEURI = "ER.A-AUXROLE"; 
+	
+	// built-in datatypes 
+	
+	final static Set<Predicate> builtinDatatypes;
+
+	static { // static block
+		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+		
+		builtinDatatypes = new HashSet<>();
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NEGATIVE_INTEGER)); // XSD_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INT)); // OBDAVocabulary.XSD_INT);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER)); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.UNSIGNED_INT)); // OBDAVocabulary.XSD_UNSIGNED_INT);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.POSITIVE_INTEGER)); //.XSD_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_POSITIVE_INTEGER)); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LONG)); // OBDAVocabulary.XSD_LONG);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DECIMAL)); // OBDAVocabulary.XSD_DECIMAL);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DOUBLE)); // OBDAVocabulary.XSD_DOUBLE);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.FLOAT)); // OBDAVocabulary.XSD_FLOAT);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME)); // OBDAVocabulary.XSD_DATETIME);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.BOOLEAN)); // OBDAVocabulary.XSD_BOOLEAN
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
+	}
 	
 	
 	
@@ -409,7 +432,7 @@ public class OntologyImpl implements Ontology {
 		
 		if (desc instanceof Datatype) {
 			Predicate pred = ((Datatype) desc).getPredicate();
-			if (!OntologyVocabularyImpl.builtinDatatypes.contains(pred)) 
+			if (!builtinDatatypes.contains(pred)) 
 				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
 		}
 		else {
