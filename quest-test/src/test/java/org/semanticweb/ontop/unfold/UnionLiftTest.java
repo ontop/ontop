@@ -31,6 +31,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubsti
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
 import org.semanticweb.ontop.pivotalrepr.UnionLiftProposalExecutor;
+import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition.*;

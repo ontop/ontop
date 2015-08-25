@@ -12,6 +12,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitu
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.PredicateRenamingProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PredicateRenamingProposalImpl;

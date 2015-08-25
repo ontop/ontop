@@ -14,6 +14,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2Va
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.transformer.FullSubstitutionPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
 

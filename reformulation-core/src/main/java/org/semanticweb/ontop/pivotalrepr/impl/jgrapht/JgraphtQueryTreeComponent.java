@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.impl.jgrapht;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -8,6 +8,9 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
+import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 
 import java.util.*;
 
@@ -180,7 +183,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         }
     }
 
-    @Override
+    @Deprecated
     public void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException {
         boolean isAsymmetric = (parentNode instanceof BinaryAsymmetricOperatorNode);
 

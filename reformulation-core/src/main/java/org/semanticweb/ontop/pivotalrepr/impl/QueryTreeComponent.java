@@ -17,17 +17,13 @@ public interface QueryTreeComponent {
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalTreeException;
 
+    ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException;
+
     boolean contains(QueryNode node);
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
 
     void addSubTree(IntermediateQuery subQuery, QueryNode parentNode);
-
-    /**
-     * Makes sure all the children nodes in the tree are the listed ones.
-     */
-    @Deprecated
-    void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException;
 
     void removeSubTree(QueryNode subTreeRoot);
 
@@ -63,5 +59,4 @@ public interface QueryTreeComponent {
     Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException;
 
     Optional<QueryNode> getFirstChild(QueryNode node);
-
 }

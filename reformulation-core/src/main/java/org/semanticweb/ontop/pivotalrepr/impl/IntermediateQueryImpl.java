@@ -72,7 +72,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    protected IntermediateQueryImpl(QueryTreeComponent treeComponent) {
+    public IntermediateQueryImpl(QueryTreeComponent treeComponent) {
         this.treeComponent = treeComponent;
     }
 
@@ -89,6 +89,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public ImmutableList<QueryNode> getNodesInBottomUpOrder() throws InconsistentIntermediateQueryException {
         try {
             return treeComponent.getNodesInBottomUpOrder();
+        } catch (IllegalTreeException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ImmutableList<QueryNode> getNodesInTopDownOrder() {
+        try {
+            return treeComponent.getNodesInTopDownOrder();
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }

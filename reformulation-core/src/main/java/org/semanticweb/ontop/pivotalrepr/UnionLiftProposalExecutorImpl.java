@@ -1,8 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.impl.JgraphtIntermediateQueryBuilder;
+import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 

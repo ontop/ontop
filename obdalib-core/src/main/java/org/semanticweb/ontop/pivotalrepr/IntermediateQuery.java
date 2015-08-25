@@ -13,6 +13,8 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();
 
+    ImmutableList<QueryNode> getNodesInTopDownOrder();
+
     ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
 
     /**
