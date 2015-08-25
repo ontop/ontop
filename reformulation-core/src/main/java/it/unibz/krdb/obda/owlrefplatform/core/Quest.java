@@ -530,7 +530,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			// generate a new TBox with a simpler vocabulary
 			reformulationReasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reformulationReasoner);
 		} 
-		vocabularyValidator = new VocabularyValidator(reformulationReasoner);
+		vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
 
 		try {
 
@@ -766,7 +766,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
                 unfolder.addDataPropertyAssertionsAsFacts(inputOntology.getDataPropertyAssertions());
 
 				// Adding data typing on the mapping axioms.
-				unfolder.extendTypesWithMetadata(reformulationReasoner, metadata);
+				unfolder.extendTypesWithMetadata(reformulationReasoner, vocabularyValidator, metadata);
 
 				
 				 // Adding NOT NULL conditions to the variables used in the head

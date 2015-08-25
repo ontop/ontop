@@ -120,7 +120,7 @@ public class MappingDataTypeRepair {
                  * @throws OBDAException
                  */
 
-    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner) throws OBDAException {
+    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
 
 
         //get all the datatypes in the ontology
@@ -132,8 +132,6 @@ public class MappingDataTypeRepair {
             throw new OBDAException(pe);
         }
 
-
-		VocabularyValidator qvv = new VocabularyValidator(reasoner);
 
 		for (CQIE rule : mappingRules) {
             Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);

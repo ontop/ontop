@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
-
 import com.google.common.collect.Multimap;
+
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -187,10 +187,10 @@ public class QuestUnfolder {
 	 * Adding data typing on the mapping axioms.
 	 */
 	
-	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, DBMetadata metadata) throws OBDAException {
+	public void extendTypesWithMetadata(TBoxReasoner tboxReasoner, VocabularyValidator qvv, DBMetadata metadata) throws OBDAException {
 
 		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
-		typeRepair.insertDataTyping(unfoldingProgram, tBoxReasoner);
+		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv);
 	}
 
 	/***
