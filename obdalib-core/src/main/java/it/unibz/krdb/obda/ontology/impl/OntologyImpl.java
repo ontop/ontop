@@ -64,29 +64,24 @@ public class OntologyImpl implements Ontology {
 	// axioms and assertions
 
 	private final List<BinaryAxiom<ClassExpression>> subClassAxioms = new ArrayList<BinaryAxiom<ClassExpression>>();
-	
 	private final List<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new ArrayList<BinaryAxiom<DataRangeExpression>>();
-	
 	private final List<BinaryAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new ArrayList<BinaryAxiom<ObjectPropertyExpression>>();
-	
 	private final List<BinaryAxiom<DataPropertyExpression>> subDataPropertyAxioms = new ArrayList<BinaryAxiom<DataPropertyExpression>>();
 
 	private final List<NaryAxiom<ClassExpression>> disjointClassesAxioms = new ArrayList<NaryAxiom<ClassExpression>>();
-
 	private final List<NaryAxiom<ObjectPropertyExpression>> disjointObjectPropertiesAxioms = new ArrayList<NaryAxiom<ObjectPropertyExpression>>();
-
 	private final List<NaryAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new ArrayList<NaryAxiom<DataPropertyExpression>>();
 	
 	private final Set<ObjectPropertyExpression> functionalObjectPropertyAxioms = new LinkedHashSet<ObjectPropertyExpression>();
-
 	private final Set<DataPropertyExpression> functionalDataPropertyAxioms = new LinkedHashSet<DataPropertyExpression>();
 	
 	private final List<ClassAssertion> classAssertions = new ArrayList<ClassAssertion>();
-
 	private final List<ObjectPropertyAssertion> objectPropertyAssertions = new ArrayList<ObjectPropertyAssertion>();
-	
 	private final List<DataPropertyAssertion> dataPropertyAssertions = new ArrayList<DataPropertyAssertion>();
 
+	private static final String CLASS_NOT_FOUND = "Class not found: ";	
+	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
+	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
 	
 	private final class ImmutableOntologyVocabularyImpl implements ImmutableOntologyVocabulary {
 
@@ -113,7 +108,7 @@ public class OntologyImpl implements Ontology {
 		public OClass getClass(String uri) {
 			OClass oc = concepts.get(uri);
 			if (oc == null)
-				throw new RuntimeException("Class not found: " + uri);
+				throw new RuntimeException(CLASS_NOT_FOUND + uri);
 			return oc;
 		}
 
@@ -121,7 +116,7 @@ public class OntologyImpl implements Ontology {
 		public ObjectPropertyExpression getObjectProperty(String uri) {
 			ObjectPropertyExpression ope = objectProperties.get(uri);
 			if (ope == null)
-				throw new RuntimeException("ObjectProperty not found: " + uri);
+				throw new RuntimeException(OBJECT_PROPERTY_NOT_FOUND + uri);
 			return ope;
 		}
 
@@ -129,7 +124,7 @@ public class OntologyImpl implements Ontology {
 		public DataPropertyExpression getDataProperty(String uri) {
 			DataPropertyExpression dpe = dataProperties.get(uri);
 			if (dpe == null)
-				throw new RuntimeException("DataProperty not found: " + uri);
+				throw new RuntimeException(DATA_PROPERTY_NOT_FOUND + uri);
 			return dpe;
 		}
 
@@ -339,19 +334,19 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append("[Ontology info.");
-		str.append(String.format(" Axioms: %d", subClassAxioms.size() + subObjectPropertyAxioms.size() + subDataPropertyAxioms.size()));
-		str.append(String.format(" Classes: %d", getVocabulary().getClasses().size()));
-		str.append(String.format(" Object Properties: %d", getVocabulary().getObjectProperties().size()));
-		str.append(String.format(" Data Properties: %d]", getVocabulary().getDataProperties().size()));
+		str.append("[Ontology info.")
+		 	.append(String.format(" Axioms: %d", subClassAxioms.size() + subObjectPropertyAxioms.size() + subDataPropertyAxioms.size()))
+			.append(String.format(" Classes: %d", vocabulary.getClasses().size()))
+			.append(String.format(" Object Properties: %d", vocabulary.getObjectProperties().size()))
+			.append(String.format(" Data Properties: %d]", vocabulary.getDataProperties().size()));
 		return str.toString();
 	}
 
 	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
 	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
 	
-	public static final String AUXROLEURI = "ER.A-AUXROLE"; 
-	private static int auxCounter = 0; // THIS IS SHARED AMONG ALL INSTANCES!
+	private static final String AUXROLEURI = "ER.A-AUXROLE"; 
+	private int auxCounter = 0; // THIS IS SHARED AMONG ALL INSTANCES!
 	
 	
 	@Override
@@ -412,12 +407,11 @@ public class OntologyImpl implements Ontology {
 	
 	
 	
-	private void checkSignature(ClassExpression desc) {
-		
+	private void checkSignature(ClassExpression desc) {		
 		if (desc instanceof OClass) {
 			OClass cl = (OClass) desc;
 			if (!vocabulary.concepts.containsKey(cl.getPredicate().getName()))
-				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
+				throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
 		}	
 		else if (desc instanceof ObjectSomeValuesFrom) {
 			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
@@ -428,8 +422,7 @@ public class OntologyImpl implements Ontology {
 		}
 	}	
 	
-	private void checkSignature(DataRangeExpression desc) {
-		
+	private void checkSignature(DataRangeExpression desc) {		
 		if (desc instanceof Datatype) {
 			Predicate pred = ((Datatype) desc).getPredicate();
 			if (!builtinDatatypes.contains(pred)) 
@@ -445,13 +438,13 @@ public class OntologyImpl implements Ontology {
 		if (prop.isInverse()) 
 			prop = prop.getInverse();
 		
-		if (!vocabulary.objectProperties.containsKey(prop.getPredicate().getName()) && !auxObjectProperties.contains(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+		if (!vocabulary.containsObjectProperty(prop.getPredicate().getName()) && !auxObjectProperties.contains(prop)) 
+				throw new IllegalArgumentException(OBJECT_PROPERTY_NOT_FOUND + prop);
 	}
 
 	private void checkSignature(DataPropertyExpression prop) {
-		if (!vocabulary.dataProperties.containsKey(prop.getPredicate().getName()) && !auxDataProperties.contains(prop))
-			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+		if (!vocabulary.containsDataProperty(prop.getPredicate().getName()) && !auxDataProperties.contains(prop))
+			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
 	}
 	
 }
