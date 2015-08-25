@@ -29,21 +29,6 @@ import com.google.common.collect.ImmutableSet;
 
 public interface Ontology extends Serializable {
 
-	@Deprecated
-	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2);
-	
-	@Deprecated
-	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2);
-
-	@Deprecated
-	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including);
-
-	@Deprecated
-	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including);
-
-	
-	
-	
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
 
 	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2);

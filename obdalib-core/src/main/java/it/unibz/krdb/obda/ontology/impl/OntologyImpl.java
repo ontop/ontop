@@ -91,44 +91,6 @@ public class OntologyImpl implements Ontology {
 
 	
 	@Override
-	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
-		addReferencedEntries(concept1);
-		addReferencedEntries(concept2);
-		if (!concept1.isNothing() && !concept2.isThing()) {
-			BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
-			subClassAxioms.add(assertion);
-		}
-	}
-
-	@Override
-	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
-		addReferencedEntries(concept1);
-		addReferencedEntries(concept2);
-		BinaryAxiom<DataRangeExpression> assertion = new BinaryAxiomImpl<DataRangeExpression>(concept1, concept2);
-		subDataRangeAxioms.add(assertion);
-	}
-	
-	@Override
-	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		addReferencedEntries(included);
-		addReferencedEntries(including);
-		if (!included.isBottom() && !including.isTop()) {
-			BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
-			subObjectPropertyAxioms.add(assertion);
-		}
-	}
-	
-	@Override
-	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
-		addReferencedEntries(included);
-		addReferencedEntries(including);
-		if (!included.isBottom() && !including.isTop()) {
-			BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
-			subDataPropertyAxioms.add(assertion);
-		}
-	}
-
-	@Override
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
 		checkSignature(concept1);
 		checkSignature(concept2);
@@ -336,72 +298,6 @@ public class OntologyImpl implements Ontology {
 	public static final String AUXROLEURI = "ER.A-AUXROLE"; 
 	
 	
-	boolean addReferencedEntries(ClassExpression desc) {
-		if (desc instanceof OClass) {
-			OClass cl = (OClass)desc;
-			if (!isBuiltIn(cl)) {
-				vocabulary.concepts.put(cl.getPredicate().getName(), cl);
-				return true;
-			}
-		}
-		else if (desc instanceof ObjectSomeValuesFrom)  {
-			ObjectPropertyExpression prop = ((ObjectSomeValuesFrom) desc).getProperty();
-			return addReferencedEntries(prop);
-		}
-		else  {
-			assert (desc instanceof DataSomeValuesFrom);
-			DataPropertyExpression prop = ((DataSomeValuesFrom) desc).getProperty();
-			return addReferencedEntries(prop);
-		}
-		return false;
-	}
-	
-	boolean addReferencedEntries(DataRangeExpression desc) {
-		if (desc instanceof Datatype)  {
-			// NO-OP
-			// datatypes.add((Datatype) desc);
-			return true;
-		}
-		else  {
-			assert (desc instanceof DataPropertyRangeExpression);
-			DataPropertyExpression prop = ((DataPropertyRangeExpression) desc).getProperty();
-			return addReferencedEntries(prop);			
-		}
-	}
-	
-	boolean addReferencedEntries(ObjectPropertyExpression prop) {
-		if (prop.isInverse()) {
-			if (!isBuiltIn(prop.getInverse())) {
-				ObjectPropertyExpression p = prop.getInverse();
-				if (p.getPredicate().getName().toString().startsWith(AUXROLEURI))
-					auxObjectProperties.add(p);
-				else
-					vocabulary.objectProperties.put(p.getPredicate().getName(), p);
-				return true;
-			}
-		}
-		else {
-			if (!isBuiltIn(prop)) {
-				if (prop.getPredicate().getName().toString().startsWith(AUXROLEURI))
-					auxObjectProperties.add(prop);
-				else
-					vocabulary.objectProperties.put(prop.getPredicate().getName(), prop);
-				return true;
-			}			
-		}
-		return false;
-	}
-	
-	boolean addReferencedEntries(DataPropertyExpression prop) {
-		if (!isBuiltIn(prop)) {
-			if (prop.getPredicate().getName().toString().startsWith(AUXROLEURI))
-				auxDataProperties.add(prop);
-			else
-				vocabulary.dataProperties.put(prop.getPredicate().getName(), prop);
-			return true;
-		}
-		return false;
-	}
 	
 	private boolean isBuiltIn(OClass cl) {
 		return cl.isNothing() || cl.isThing();
@@ -415,7 +311,7 @@ public class OntologyImpl implements Ontology {
 		return prop.isBottom() || prop.isTop() || auxDataProperties.contains(prop);
 	}
 	
-	void checkSignature(ClassExpression desc) {
+	private void checkSignature(ClassExpression desc) {
 		
 		if (desc instanceof OClass) {
 			OClass cl = (OClass) desc;
@@ -431,7 +327,7 @@ public class OntologyImpl implements Ontology {
 		}
 	}	
 	
-	void checkSignature(DataRangeExpression desc) {
+	private void checkSignature(DataRangeExpression desc) {
 		
 		if (desc instanceof Datatype) {
 			Predicate pred = ((Datatype) desc).getPredicate();
@@ -444,7 +340,7 @@ public class OntologyImpl implements Ontology {
 		}
 	}
 
-	void checkSignature(ObjectPropertyExpression prop) {
+	private void checkSignature(ObjectPropertyExpression prop) {
 
 		if (prop.isInverse()) {
 			if (!vocabulary.objectProperties.containsKey(prop.getInverse().getPredicate().getName()) && !isBuiltIn(prop.getInverse())) 
@@ -456,7 +352,7 @@ public class OntologyImpl implements Ontology {
 		}
 	}
 
-	void checkSignature(DataPropertyExpression prop) {
+	private void checkSignature(DataPropertyExpression prop) {
 		if (!vocabulary.dataProperties.containsKey(prop.getPredicate().getName()) && !isBuiltIn(prop))
 			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 	}
