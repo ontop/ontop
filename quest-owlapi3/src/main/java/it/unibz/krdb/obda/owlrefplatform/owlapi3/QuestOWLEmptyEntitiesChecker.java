@@ -119,28 +119,31 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	private void runQueries() throws Exception {
 
-		for (OClass cl : onto.getVocabulary().getClasses()) {
-			Predicate concept = cl.getPredicate();
-			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
-				emptyConcepts.add(concept);
+		for (OClass cl : onto.getVocabulary().getClasses()) 
+			if (!cl.isThing() && !cl.isNothing()) {
+				Predicate concept = cl.getPredicate();
+				if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
+					emptyConcepts.add(concept);
+				}
 			}
-		}
 		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role);
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) 
+			if (!prop.isBottom() && !prop.isTop()) {
+				Predicate role = prop.getPredicate();
+				if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+					emptyRoles.add(role);
+				}
 			}
-		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 
-		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role);
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) 		
+			if (!prop.isBottom() && !prop.isTop()) {
+				Predicate role = prop.getPredicate();
+				if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+					emptyRoles.add(role);
+				}
 			}
-		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 		
 	}

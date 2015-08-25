@@ -52,8 +52,10 @@ public class OntologyGraph {
 							= new  DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
 		for (ObjectPropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
-			graph.addVertex(role);
-			graph.addVertex(role.getInverse());
+			if (!role.isBottom() && !role.isTop()) {
+				graph.addVertex(role);
+				graph.addVertex(role.getInverse());
+			}
 		}
 		
 		for (ObjectPropertyExpression role : ontology.getAuxiliaryObjectProperties()) {
@@ -87,7 +89,8 @@ public class OntologyGraph {
 							= new  DefaultDirectedGraph<DataPropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
 		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) 
-			graph.addVertex(role);
+			if (!role.isBottom() && !role.isTop()) 
+				graph.addVertex(role);
 		
 		for (DataPropertyExpression role : ontology.getAuxiliaryDataProperties()) 
 			graph.addVertex(role);
@@ -122,7 +125,8 @@ public class OntologyGraph {
 									= new  DefaultDirectedGraph<ClassExpression,DefaultEdge>(DefaultEdge.class);
 		
 		for (OClass concept : ontology.getVocabulary().getClasses()) 
-			classGraph.addVertex(concept);
+			if (!concept.isNothing() && !concept.isThing()) 
+				classGraph.addVertex(concept);
 	
 		// domains and ranges of roles
 		for (ObjectPropertyExpression role : objectPropertyGraph.vertexSet()) 

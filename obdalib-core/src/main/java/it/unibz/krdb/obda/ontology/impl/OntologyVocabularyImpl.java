@@ -24,13 +24,11 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	// signature
 	
 	final Map<String, OClass> concepts = new HashMap<>();
-
 	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
-
 	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
 
 	
-	// auxiliary symbols and built-in datatypes 
+	// built-in datatypes 
 	
 	final static Set<Predicate> builtinDatatypes;
 
@@ -150,11 +148,24 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	@Override
 	public void merge(ImmutableOntologyVocabulary v) {
-		OntologyVocabularyImpl vi = (OntologyVocabularyImpl)v;
-		
-		concepts.putAll(vi.concepts);
-		objectProperties.putAll(vi.objectProperties);
-		dataProperties.putAll(vi.dataProperties);
+		if (v instanceof OntologyVocabularyImpl) {
+			OntologyVocabularyImpl vi = (OntologyVocabularyImpl)v;
+			
+			concepts.putAll(vi.concepts);
+			objectProperties.putAll(vi.objectProperties);
+			dataProperties.putAll(vi.dataProperties);
+		}
+		else {
+			for (OClass oc : v.getClasses())
+				if (!oc.isThing() && !oc.isNothing())
+					concepts.put(oc.getPredicate().getName(), oc);
+			for (ObjectPropertyExpression ope : v.getObjectProperties())
+				if (!ope.isTop() && !ope.isBottom())
+					objectProperties.put(ope.getPredicate().getName(), ope);
+			for (DataPropertyExpression dpe : v.getDataProperties())
+				if (!dpe.isTop() && !dpe.isBottom())
+					dataProperties.put(dpe.getPredicate().getName(), dpe);
+		}
 	}
 	
 	@Override
