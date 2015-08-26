@@ -73,6 +73,7 @@ public class SemanticIndexHelper {
     public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
        
     public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+    private Ontology onto;
     
     public transient Connection conn;
 
@@ -102,7 +103,8 @@ public class SemanticIndexHelper {
     }
 
     public TBoxReasoner load_dag(String ontoname) throws Exception {
-    	return TBoxReasonerImpl.create(load_onto(ontoname));
+    	onto = load_onto(ontoname);
+    	return TBoxReasonerImpl.create(onto);
     }
 
     public List<List<Description>> get_results(String resname) {
@@ -175,16 +177,16 @@ public class SemanticIndexHelper {
                 if (type.equals("classes")) {
                     if (exists) {
                     	// TODO: check whether object properties are enough
-                    	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
+                    	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
                     	if (inverse)
                     		prop = prop.getInverse();
                         description = prop.getDomain();
                     }
                     else
-                        description = descFactory.createClass(uri);
+                        description = onto.getVocabulary().getClass(uri);
                 } else {
                 	// TODO: check whether object properties are enough
-                	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
+                	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
                     if (inverse)
                     	description = prop.getInverse();
                     else

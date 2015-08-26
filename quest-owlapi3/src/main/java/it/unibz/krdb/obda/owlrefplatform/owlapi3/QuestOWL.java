@@ -383,7 +383,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure, questInstance.getVocabulary());
 					EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					

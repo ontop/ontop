@@ -931,7 +931,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	}
 
 	
-	public static ClassAssertion translate(OWLClassAssertionAxiom aux) {
+	public ClassAssertion translate(OWLClassAssertionAxiom aux) {
 
 		OWLClassExpression classExpression = aux.getClassExpression();
 		if (!(classExpression instanceof OWLClass))
@@ -945,7 +945,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 		OWLClass namedclass = (OWLClass) classExpression;
 
-		OClass concept = ofac.createClass(namedclass.getIRI().toString());
+		OClass concept = dl_onto.getVocabulary().getClass(namedclass.getIRI().toString());
 		URIConstant c = getIndividual(aux.getIndividual());
 
 		return ofac.createClassAssertion(concept, c);

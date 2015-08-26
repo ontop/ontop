@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -14,6 +17,7 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	final Map<String, OClass> concepts = new HashMap<>();
 	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
@@ -98,7 +102,8 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	@Override
 	public DataPropertyExpression createDataProperty(String uri) {
-		DataPropertyExpression rd = ofac.createDataProperty(uri);
+		Predicate prop = fac.getDataPropertyPredicate(uri);
+		DataPropertyExpression rd = new DataPropertyExpressionImpl(prop);
 		if (!rd.isBottom() && !rd.isTop()) 
 			dataProperties.put(uri, rd);
 		return rd;

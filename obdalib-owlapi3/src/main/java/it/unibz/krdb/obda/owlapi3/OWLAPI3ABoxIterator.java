@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlapi3;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 import java.util.Collection;
@@ -36,7 +37,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /***
- * A read only iterator that will translate OWLAPI2 data assertions into ABox
+ * A read only iterator that will translate OWLAPI data assertions into ABox
  * assertions in ontop's API. This is used in our Statement classes (e.g.,
  * {@link QuestOWLStatement} and SemanticIndexManager to iterate over the input
  * and then insert it into the semantic index database.
@@ -49,8 +50,10 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private Iterator<OWLAxiom> owlaxiomiterator = null;
 	private Iterator<OWLOntology> ontologies = null;
 	private Assertion next = null;
+	private final ImmutableOntologyVocabulary voc;
 
-	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies) {
+	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc) {
+		this.voc = voc;
 		if (ontologies.size() > 0) {
 			this.ontologies = ontologies.iterator();
 			this.owlaxiomiterator = this.ontologies.next().getAxioms().iterator();
@@ -143,15 +146,15 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private Assertion translate(OWLAxiom axiom) {
 		
 		if (axiom instanceof OWLClassAssertionAxiom) {
-			ClassAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLClassAssertionAxiom)axiom);
+			ClassAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate(voc, (OWLClassAssertionAxiom)axiom);
 			return translatedAxiom;
 		} 
 		else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
-			ObjectPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLObjectPropertyAssertionAxiom)axiom);
+			ObjectPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate(voc, (OWLObjectPropertyAssertionAxiom)axiom);
 			return translatedAxiom;		
 		} 
 		else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
-			DataPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLDataPropertyAssertionAxiom)axiom);
+			DataPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate(voc, (OWLDataPropertyAssertionAxiom)axiom);
 			return translatedAxiom;
 		}		
 		return null;
@@ -160,15 +163,6 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private boolean hasNextInCurrentIterator() {
 		if (owlaxiomiterator == null)
 			return false;
-/*
-		OWLAxiom currentABoxAssertion = null;
-
-		try {
-			currentABoxAssertion = owlaxiomiterator.next();
-		} catch (NoSuchElementException e) {
-			return false;
-		}
-*/
 		
 		while (true) {
 			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();

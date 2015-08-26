@@ -86,12 +86,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	
-	@Override
-	public DataPropertyExpression createDataProperty(String p) {
-		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return new DataPropertyExpressionImpl(prop);
-	}
-
 
 	@Override
 	public Datatype createDataType(Predicate.COL_TYPE type) {

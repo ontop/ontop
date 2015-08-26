@@ -22,11 +22,13 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 
 import com.google.common.collect.Lists;
+
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
@@ -55,6 +57,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import net.sf.jsqlparser.JSQLParserException;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
@@ -831,7 +834,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-	
+	public ImmutableOntologyVocabulary getVocabulary() {
+		return inputOntology.getVocabulary();
+	}
 
 
 	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {

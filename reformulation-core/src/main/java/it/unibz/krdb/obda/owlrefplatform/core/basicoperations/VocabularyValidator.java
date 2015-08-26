@@ -88,27 +88,29 @@ public class VocabularyValidator {
 	public Function getNormal(Function atom) {
 		Predicate p = atom.getFunctionSymbol();
 		
-		if (p.getArity() == 1) {
-			OClass c = ofac.createClass(p.getName());
+		// the contains tests are inefficient, but tests fails without them 
+		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+		if (/*p.isClass()*/ (p.getArity() == 1) && voc.containsClass(p.getName())) {
+			OClass c = voc.getClass(p.getName());
 			OClass equivalent = reasoner.getClassRepresentative(c);
 			if (equivalent != null)
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
-		else {
-			ObjectPropertyExpression op = ofac.createObjectProperty(p.getName());
+		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
+			ObjectPropertyExpression op = voc.getObjectProperty(p.getName());
 			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyRepresentative(op);
-			if (equivalent != null) {
+			if (equivalent != null) { 
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 			}
-			else {
-				DataPropertyExpression dp = ofac.createDataProperty(p.getName());
-				DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(dp);
-				if (equiv2 != null) 
-					return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
-			}
+		}
+		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
+			DataPropertyExpression dp = voc.getDataProperty(p.getName());
+			DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(dp);
+			if (equiv2 != null) 
+				return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
 		}
 		return atom;
 	}

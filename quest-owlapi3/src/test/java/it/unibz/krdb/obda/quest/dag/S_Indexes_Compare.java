@@ -111,8 +111,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 		System.out.println(d1.getRoleNode(((ObjectPropertyExpression)dd.getDescription())));
 		;
 		}
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		System.out.println(d1.getRoleNode(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
+		//System.out.println(d1.getRoleNode(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
 		;
 	}
 		

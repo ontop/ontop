@@ -156,7 +156,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure);
+			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getVocabulary());
 			EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 			
