@@ -28,10 +28,12 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Iterator;
@@ -51,7 +53,7 @@ import org.openrdf.rio.helpers.RDFHandlerBase;
 public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
 	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private BlockingQueue<Statement> buffer;
@@ -168,19 +170,16 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		// Create the assertion
 		Assertion assertion = null;
 		if (currentPredicate.getArity() == 1) {
-			OClass concept = ofac.createClass(currentPredicate.getName());
-			assertion = ofac.createClassAssertion(concept, c);
+			assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
 		} 
 		else if (currentPredicate.getArity() == 2) {
 			if (currObject instanceof URI) {
 				ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
-				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
-				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+				assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 			} 
 			else if (currObject instanceof BNode) {
 				ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
-				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
-				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+				assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 			} 
 			else if (currObject instanceof Literal) {
 				Literal l = (Literal) currObject;				
@@ -204,8 +203,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 				else {
 					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
 				}
-				DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
-				assertion = ofac.createDataPropertyAssertion(prop, c, c2);			
+				assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
 			} 
 			else {
 				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");

@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
-		List<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
@@ -89,7 +90,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
-		List<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
@@ -112,7 +113,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
-		List<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
+		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
 		Iterator<BinaryAxiom<ObjectPropertyExpression>> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
@@ -149,7 +150,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
-		List<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		

@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -39,6 +40,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -74,7 +76,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	private boolean storeResults = false;
 
 	private OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
 			boolean storeResult) throws OBDAException {
@@ -148,30 +150,18 @@ public class QuestGraphResultSet implements GraphResultSet {
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				OClass concept = ofac.createClass(objectConstant.getValue());
-				ClassAssertion ca = ofac.createClassAssertion(concept, subjectConstant);
+				ClassAssertion ca = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
 				tripleAssertions.add(ca);
 			} 
 			else {
-				if (objectConstant instanceof URIConstant) {
-					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop, subjectConstant,
-									(ObjectConstant) objectConstant);
-					tripleAssertions.add(op);
-				} 
-				else if (objectConstant instanceof BNode) {
-					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop, subjectConstant,
-									(ObjectConstant) objectConstant);
+				if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
+					ObjectPropertyAssertion op = ofac.createObjectPropertyAssertion(predicateName, 
+							subjectConstant, (ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} 
 				else {
-					DataPropertyExpression prop = ofac.createDataProperty(predicateName);
-					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(prop, subjectConstant,
-									(ValueConstant) objectConstant);
+					DataPropertyAssertion dp = ofac.createDataPropertyAssertion(predicateName, 
+								subjectConstant, (ValueConstant) objectConstant);
 					tripleAssertions.add(dp);
 				}
 			}

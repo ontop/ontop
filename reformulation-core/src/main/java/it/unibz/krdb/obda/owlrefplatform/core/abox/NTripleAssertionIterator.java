@@ -27,11 +27,8 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.AssertionFactory;
+import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,7 +42,7 @@ import java.util.NoSuchElementException;
 public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	private final int rdftype_hash = OBDAVocabulary.RDF_TYPE.hashCode();
 
@@ -71,20 +68,17 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 		if (currentPredicate.getArity() == 1) {
 			URIConstant c = obdafac.getConstantURI(currSubject);
-			OClass concept = ofac.createClass(currentPredicate.getName());
-			assertion = ofac.createClassAssertion(concept, c);
+			assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
 		} 
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			URIConstant c2 = obdafac.getConstantURI(currObject);
-			ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
-			assertion = ofac.createObjectPropertyAssertion(prop, c1, c2);
+			assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c1, c2);
 		} 
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			ValueConstant c2 = obdafac.getConstantLiteral(currObject);
-			DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
-			assertion = ofac.createDataPropertyAssertion(prop, c1, c2);
+			assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c1, c2);
 		} 
 		else {
 			throw new RuntimeException("ERROR, Wrongly type predicate: " + currentPredicate.toString());
@@ -220,9 +214,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 	}
 
 	private static boolean isWS(char c) {
-		if (c == '\t' || c == ' ')
-			return true;
-		return false;
+		return c == '\t' || c == ' ';
 	}
 
 	@Override

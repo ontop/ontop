@@ -63,7 +63,6 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		originalIterator.remove();
 	}
 	
-	// used in EquivalentTriplePredicateIterator
 	
 	private Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {

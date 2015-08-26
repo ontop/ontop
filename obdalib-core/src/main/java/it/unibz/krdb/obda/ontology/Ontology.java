@@ -29,6 +29,15 @@ import com.google.common.collect.ImmutableSet;
 
 public interface Ontology extends Serializable {
 
+	/**
+	 * vocabulary is used to check whether all the symbols referenced in axioms are valid
+	 * @return ontology vocabulary 
+	 */
+	
+	public ImmutableOntologyVocabulary getVocabulary();
+	
+	// SUBCLASS/PROPERTY
+
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
 
 	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
@@ -37,15 +46,45 @@ public interface Ontology extends Serializable {
 
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
+
+	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms();
+
+	public Collection<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
+	
+	public Collection<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+
+	public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
+
+
+	// DISJOINTNESS
+	
 	public void addDisjointClassesAxiom(ImmutableSet<ClassExpression> classes);
 
 	public void addDisjointObjectPropertiesAxiom(ImmutableSet<ObjectPropertyExpression> properties);
 	
 	public void addDisjointDataPropertiesAxiom(ImmutableSet<DataPropertyExpression> properties);
+	
+	
+	public Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
+	
+	public Collection<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
 
+	public Collection<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+	
+	
+	// FUNCTIONALITY 
+	
+	
 	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
 
 	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
+	
+	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
+
+	public Set<DataPropertyExpression> getFunctionalDataProperties();
+	
+	
+	// ASSERTIONS
 	
 	public void addClassAssertion(ClassAssertion assertion);
 
@@ -53,29 +92,6 @@ public interface Ontology extends Serializable {
 
 	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
 
-
-	
-	
-	public ImmutableOntologyVocabulary getVocabulary();
-	
-	
-	public List<BinaryAxiom<ClassExpression>> getSubClassAxioms();
-
-	public List<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
-	
-	public List<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
-
-	public List<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
-	
-	public List<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
-	
-	public List<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
-
-	public List<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
-
-	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
-
-	public Set<DataPropertyExpression> getFunctionalDataProperties();
 	
 	public List<ClassAssertion> getClassAssertions();
 
@@ -89,7 +105,7 @@ public interface Ontology extends Serializable {
 	
 	/**
 	 * create an auxiliary object property 
-	 * (auxiliary properties result from ontology normalisation)
+	 * (auxiliary properties result from ontology normalization)
 	 * 
 	 * @param uri
 	 */
@@ -98,7 +114,7 @@ public interface Ontology extends Serializable {
 	
 	/**
 	 * create an auxiliary data property 
-	 * (auxiliary properties result from ontology normalisation)
+	 * (auxiliary properties result from ontology normalization)
 	 * 
 	 * @param uri
 	 */
@@ -108,7 +124,7 @@ public interface Ontology extends Serializable {
 	
 	/**
 	 * return all auxiliary object properties
-	 * (auxiliary properties result from ontology normalisation)
+	 * (auxiliary properties result from ontology normalization)
 	 * 
 	 * @return
 	 */
@@ -117,12 +133,10 @@ public interface Ontology extends Serializable {
 
 	/**
 	 * return all auxiliary data properties
-	 * (auxiliary properties result from ontology normalisation)
+	 * (auxiliary properties result from ontology normalization)
 	 * 
 	 * @return
 	 */
 	
 	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
-	
-
 }
