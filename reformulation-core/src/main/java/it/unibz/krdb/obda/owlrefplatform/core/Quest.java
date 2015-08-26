@@ -804,7 +804,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
 			}
 
-			rewriter.setTBox(reformulationReasoner, sigma);
+			rewriter.setTBox(reformulationReasoner, inputOntology.getVocabulary(), sigma);
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured

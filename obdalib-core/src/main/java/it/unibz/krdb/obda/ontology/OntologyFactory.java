@@ -32,8 +32,6 @@ public interface OntologyFactory {
 	
 	
 	
-	public OClass createClass(String uri);
-
 	public ObjectPropertyExpression createObjectProperty(String uri);
 	
 	

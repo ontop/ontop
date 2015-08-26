@@ -74,12 +74,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 
 	@Override
-	public OClass createClass(String c) {
-		Predicate classp = ofac.getClassPredicate(c);
-		return new ClassImpl(classp);
-	}
-
-	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return new ObjectPropertyExpressionImpl(prop);

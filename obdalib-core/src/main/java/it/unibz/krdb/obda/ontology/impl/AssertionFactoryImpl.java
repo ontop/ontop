@@ -31,7 +31,8 @@ public class AssertionFactoryImpl implements AssertionFactory {
 	
 	@Override
 	public ClassAssertion createClassAssertion(String className, ObjectConstant o) {
-		OClass oc = ofac.createClass(className);
+		Predicate classp = fac.getClassPredicate(className);
+		OClass oc = new ClassImpl(classp);
 		return ofac.createClassAssertion(oc, o);
 	}
 

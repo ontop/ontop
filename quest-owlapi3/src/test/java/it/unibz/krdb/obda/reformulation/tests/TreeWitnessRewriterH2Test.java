@@ -240,7 +240,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 		factory.setPreferenceHolder(p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLStatement st = reasoner.getStatement();

@@ -94,7 +94,8 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	@Override
 	public OClass createClass(String uri) {
-		OClass cd = ofac.createClass(uri);
+		Predicate classp = fac.getClassPredicate(uri);
+		OClass cd = new ClassImpl(classp);
 		if (!cd.isNothing() && !cd.isThing())
 			concepts.put(uri, cd);
 		return cd;

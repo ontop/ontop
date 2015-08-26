@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -63,9 +64,9 @@ public class TreeWitnessSet {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner);
+		this.cache = new QueryConnectedComponentCache(reasoner, voc);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -77,8 +78,8 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> generators) {		
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> generators) {		
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, voc, generators);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -365,13 +366,15 @@ public class TreeWitnessSet {
 	
 	
 	static class QueryConnectedComponentCache {
-		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<TermOrderedPair, Intersection<ObjectPropertyExpression>>();
-		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<Term, Intersection<ClassExpression>>();
+		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
+		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final TBoxReasoner reasoner;
+		private final ImmutableOntologyVocabulary voc;
 		
-		private QueryConnectedComponentCache(TBoxReasoner reasoner) {
+		private QueryConnectedComponentCache(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
 			this.reasoner = reasoner;
+			this.voc = voc;
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
@@ -391,7 +394,10 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 subc.intersectWith(ontFactory.createClass(pred.getName()));
+				 if (voc.containsClass(pred.getName())) 
+					 subc.intersectWith(voc.getClass(pred.getName()));
+				 else
+					 subc.setToBottom();
 				 if (subc.isBottom())
 					 break;
 			}
