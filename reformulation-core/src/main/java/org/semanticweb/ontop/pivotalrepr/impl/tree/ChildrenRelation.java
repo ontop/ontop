@@ -19,7 +19,11 @@ public interface ChildrenRelation {
 
     void addChild(TreeNode childNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
+    void replaceChild(TreeNode formerChild, TreeNode newChild);
+
     void removeChild(TreeNode childNode);
 
     ImmutableList<QueryNode> getChildQueryNodes();
+
+    Optional<ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
 }

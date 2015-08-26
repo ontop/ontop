@@ -23,7 +23,8 @@ public interface QueryTreeComponent {
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
 
-    void addSubTree(IntermediateQuery subQuery, QueryNode parentNode);
+    void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
+            throws IllegalTreeUpdateException;
 
     void removeSubTree(QueryNode subTreeRoot);
 
@@ -35,6 +36,9 @@ public interface QueryTreeComponent {
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                QueryNode childNode);
 
+    /**
+     * From the parent to the oldest ancestor.
+     */
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException;
 
     Optional<QueryNode> getParent(QueryNode node) throws IllegalTreeException;
@@ -47,7 +51,8 @@ public interface QueryTreeComponent {
     /**
      * TODO: explain
      */
-    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode)
+    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
+                               Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException;
 
     /**

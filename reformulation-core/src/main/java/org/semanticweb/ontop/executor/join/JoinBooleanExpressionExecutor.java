@@ -77,9 +77,8 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
         try {
             QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
             Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
-            treeComponent.addChild(parentNode, newJoinNode, optionalPosition);
+            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode, optionalPosition);
 
-            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode);
         } catch (IllegalTreeUpdateException | IllegalTreeException e) {
             throw new RuntimeException("Internal error: " + e.getMessage());
         }

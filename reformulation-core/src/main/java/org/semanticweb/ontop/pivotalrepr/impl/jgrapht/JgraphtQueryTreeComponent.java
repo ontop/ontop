@@ -133,6 +133,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException {
+        return getNodesInBottomUpOrder().reverse();
+    }
+
+    @Override
     public boolean contains(QueryNode node) {
         return queryDAG.containsVertex(node);
     }
@@ -169,17 +174,18 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      * Low-level. Tail recursive.
      */
     @Override
-    public void addSubTree(IntermediateQuery subQuery, QueryNode parentNode) {
-        for (QueryNode childNode : subQuery.getCurrentSubNodesOf(parentNode)) {
-            queryDAG.addVertex(childNode);
+    public void addSubTree(IntermediateQuery subQuery, QueryNode externalParent, QueryNode localParent) throws IllegalTreeUpdateException {
+        for (QueryNode externalChild : subQuery.getCurrentSubNodesOf(externalParent)) {
+            QueryNode localChild = externalChild.clone();
+            queryDAG.addVertex(localChild);
             try {
-                Optional<ArgumentPosition> optionalPosition = subQuery.getOptionalPosition(parentNode, childNode);
-                queryDAG.addDagEdge(childNode, parentNode, new LabeledEdge(optionalPosition));
+                Optional<ArgumentPosition> optionalPosition = subQuery.getOptionalPosition(externalParent, externalChild);
+                queryDAG.addDagEdge(localChild, localParent, new LabeledEdge(optionalPosition));
             } catch (DirectedAcyclicGraph.CycleFoundException e) {
                 throw new RuntimeException("BUG (internal error)" + e.getLocalizedMessage());
             }
             // Recursive call
-            addSubTree(subQuery, childNode);
+            addSubTree(subQuery, externalChild, localChild);
         }
     }
 
@@ -345,11 +351,10 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode)
+    public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode, QueryNode parentNode,
+                                      Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
-        if (!queryDAG.containsVertex(replacingNode)) {
-            throw new IllegalTreeUpdateException("The replacing must be already present in the tree");
-        }
+        addChild(parentNode, replacingNode, optionalPosition);
         if (replacingNode instanceof BinaryAsymmetricOperatorNode) {
             throw new RuntimeException("Using a BinaryAsymmetricOperatorNode as a replacingNode is not yet supported");
         }

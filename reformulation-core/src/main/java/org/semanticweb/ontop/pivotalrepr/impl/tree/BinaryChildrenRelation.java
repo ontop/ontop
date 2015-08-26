@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 
@@ -51,7 +52,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+    public void addChild(TreeNode childNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The StandardChildrenRelation requires argument positions");
         }
@@ -81,6 +82,19 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public void replaceChild(TreeNode formerChild, TreeNode newChild) {
+        if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == formerChild)) {
+            optionalLeftChild = Optional.of(newChild);
+        }
+        else if (optionalRightChild.isPresent() && (optionalRightChild.get() == formerChild)) {
+            optionalRightChild = Optional.of(newChild);
+        }
+        else {
+            throw new IllegalArgumentException("Unknown former child " + formerChild);
+        }
+    }
+
+    @Override
     public void removeChild(TreeNode childNode) {
         if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
             optionalLeftChild = Optional.absent();
@@ -98,5 +112,18 @@ public class BinaryChildrenRelation implements ChildrenRelation {
             builder.add(treeNode.getQueryNode());
         }
         return builder.build();
+    }
+
+    @Override
+    public Optional<ArgumentPosition> getOptionalPosition(TreeNode childNode) {
+        if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
+            return Optional.of(ArgumentPosition.LEFT);
+        }
+        else if (optionalRightChild.isPresent() && (optionalRightChild.get() == childNode)) {
+            return Optional.of(ArgumentPosition.RIGHT);
+        }
+        else {
+            throw new IllegalArgumentException(childNode.getQueryNode() + " does not appear as a child.");
+        }
     }
 }

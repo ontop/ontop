@@ -10,6 +10,11 @@ import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+
 
 /**
  * TODO: describe
@@ -52,12 +57,28 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
-        tree.replaceNode(previousNode, replacingNode, true);
+        tree.replaceNode(previousNode, replacingNode);
     }
 
     @Override
-    public void addSubTree(IntermediateQuery subQuery, QueryNode parentNode) {
-        throw new RuntimeException("TODO: implement it!");
+    public void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
+            throws IllegalTreeUpdateException {
+        Queue<QueryNode> localParents = new LinkedList<>();
+        localParents.add(localTopNode);
+        Map<QueryNode, QueryNode> localToExternalNodeMap = new HashMap<>();
+        localToExternalNodeMap.put(localTopNode, subQueryTopNode);
+
+        while(!localParents.isEmpty()) {
+            QueryNode localParent = localParents.poll();
+            QueryNode externalParent = localToExternalNodeMap.get(localParent);
+
+            for (QueryNode externalChild : subQuery.getCurrentSubNodesOf(externalParent)) {
+                QueryNode localChild = externalChild.clone();
+                localToExternalNodeMap.put(localChild, externalChild);
+                addChild(localParent, localChild, subQuery.getOptionalPosition(externalParent, externalChild));
+            }
+        }
+
     }
 
     @Override
@@ -73,12 +94,23 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                        QueryNode childNode) {
-        throw new RuntimeException("TODO: implement it!");
+        return tree.getOptionalPosition(parentNode, childNode);
     }
 
     @Override
     public ImmutableList<QueryNode> getAncestors(QueryNode descendantNode) throws IllegalTreeException {
-        throw new RuntimeException("TODO: implement it!");
+        ImmutableList.Builder<QueryNode> ancestorBuilder = ImmutableList.builder();
+
+        // Non-final
+        Optional<QueryNode> optionalAncestor = getParent(descendantNode);
+
+        while(optionalAncestor.isPresent()) {
+            QueryNode ancestor = optionalAncestor.get();
+            ancestorBuilder.add(ancestor);
+
+            optionalAncestor = getParent(ancestor);
+        }
+        return ancestorBuilder.build();
     }
 
     @Override
@@ -88,14 +120,16 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
-        throw new RuntimeException("TODO: implement it!");
+        tree.removeOrReplaceNodeByUniqueChild(node);
     }
 
     @Override
-    public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode)
+    public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
+                                      Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
-        throw new RuntimeException("TODO: implement it!");
+        tree.replaceNodesByOneNode(queryNodes, replacingNode, parentNode, optionalPosition);
     }
+
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,

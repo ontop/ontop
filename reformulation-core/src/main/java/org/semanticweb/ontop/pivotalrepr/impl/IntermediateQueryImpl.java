@@ -226,10 +226,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                             localDataNode.getAtom(), localVariables);
 
                 ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
-                treeComponent.replaceNode(localDataNode, subQueryRootNode);
+                ConstructionNode localSubTreeRootNode = subQueryRootNode.clone();
+                treeComponent.replaceNode(localDataNode, localSubTreeRootNode);
 
-                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode);
-            } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode, localSubTreeRootNode);
+            } catch (SubQueryUnificationTools.SubQueryUnificationException | IllegalTreeUpdateException e) {
                 throw new QueryMergingException(e.getMessage());
             }
         }

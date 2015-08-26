@@ -51,6 +51,17 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public void replaceChild(TreeNode formerChild, TreeNode newChild) {
+        int index = children.indexOf(formerChild);
+        switch(index) {
+            case -1:
+                throw new IllegalArgumentException("The former child is not in the child relation");
+            default:
+                children.set(index, newChild);
+        }
+    }
+
+    @Override
     public void removeChild(TreeNode childNode) {
         if (contains(childNode)) {
             children.remove(childNode);
@@ -64,5 +75,10 @@ public class StandardChildrenRelation implements ChildrenRelation {
             builder.add(treeNode.getQueryNode());
         }
         return builder.build();
+    }
+
+    @Override
+    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
+        return Optional.absent();
     }
 }

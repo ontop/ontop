@@ -50,6 +50,9 @@ public interface IntermediateQuery {
      */
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
+    /**
+     * From the parent to the oldest ancestor.
+     */
     ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
 
     Optional<QueryNode> getParent(QueryNode node);
