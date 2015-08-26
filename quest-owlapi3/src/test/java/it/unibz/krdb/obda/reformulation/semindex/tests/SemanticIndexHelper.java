@@ -22,10 +22,12 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -176,21 +178,31 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists) {
-                    	// TODO: check whether object properties are enough
-                    	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
-                    	if (inverse)
-                    		prop = prop.getInverse();
-                        description = prop.getDomain();
+                    	if (onto.getVocabulary().containsObjectProperty(uri)) {
+                        	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
+                        	if (inverse)
+                        		prop = prop.getInverse();
+                            description = prop.getDomain();
+                    	}
+                    	else {
+                    		DataPropertyExpression prop = onto.getVocabulary().getDataProperty(uri);
+                    		description = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral);
+                    	}
                     }
                     else
                         description = onto.getVocabulary().getClass(uri);
-                } else {
-                	// TODO: check whether object properties are enough
-                	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
-                    if (inverse)
-                    	description = prop.getInverse();
-                    else
-                    	description = prop;
+                } 
+                else {
+                	if (onto.getVocabulary().containsObjectProperty(uri)) {	
+                    	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
+                        if (inverse)
+                        	description = prop.getInverse();
+                        else
+                        	description = prop;
+                	}
+                	else {
+                		description = onto.getVocabulary().getDataProperty(uri);
+                	}
                 }
 
 
