@@ -73,12 +73,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 
-	@Override
-	public ObjectPropertyExpression createObjectProperty(String uri) {
-		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new ObjectPropertyExpressionImpl(prop);
-	}
-
 	
 
 	@Override

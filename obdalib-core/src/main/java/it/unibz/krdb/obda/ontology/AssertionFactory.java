@@ -3,6 +3,16 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
+/**
+ * factory for ABox assertions 
+ * 
+ * IMPORTANT: this factory does NOT check whether the class / property has been declared
+ *            it also does not check whether it is top/bottom class / property
+ * 
+ * @author roman
+ *
+ */
+
 public interface AssertionFactory {
 
 	/**
@@ -17,7 +27,6 @@ public interface AssertionFactory {
 
 	/**
 	 * creates an object property assertion 
-	 * (ensures that the property is not inverse by swapping arguments if necessary)
 	 * 
 	 * @param prop
 	 * @param o1

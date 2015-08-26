@@ -32,9 +32,6 @@ public interface OntologyFactory {
 	
 	
 	
-	public ObjectPropertyExpression createObjectProperty(String uri);
-	
-	
 	
 	public Datatype createDataType(Predicate.COL_TYPE type);
 	

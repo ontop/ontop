@@ -38,7 +38,8 @@ public class AssertionFactoryImpl implements AssertionFactory {
 
 	@Override
 	public ObjectPropertyAssertion createObjectPropertyAssertion(String propertyName, ObjectConstant o1, ObjectConstant o2) {
-		ObjectPropertyExpression ope = ofac.createObjectProperty(propertyName);
+		Predicate prop = fac.getObjectPropertyPredicate(propertyName);
+		ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(prop);
 		return ofac.createObjectPropertyAssertion(ope, o1, o2);
 	}
 

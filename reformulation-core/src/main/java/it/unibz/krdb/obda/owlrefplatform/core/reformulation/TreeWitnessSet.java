@@ -429,10 +429,15 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						ObjectPropertyExpression prop = ontFactory.createObjectProperty(a.getFunctionSymbol().getName());
-						if (!root.equals(a.getTerm(0)))
-								prop = prop.getInverse();
-						properties.intersectWith(prop);
+						if (voc.containsObjectProperty(a.getFunctionSymbol().getName())) {
+							ObjectPropertyExpression prop = voc.getObjectProperty(a.getFunctionSymbol().getName());
+							if (!root.equals(a.getTerm(0)))
+									prop = prop.getInverse();
+							properties.intersectWith(prop);
+						}
+						else
+							properties.setToBottom();
+						
 						if (properties.isBottom())
 							break;						
 					}
