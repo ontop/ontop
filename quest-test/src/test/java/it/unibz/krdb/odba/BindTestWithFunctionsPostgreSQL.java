@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
@@ -24,23 +24,16 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,14 +41,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -73,35 +64,15 @@ public class BindTestWithFunctionsPostgreSQL {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
-	final String obdafile = "src/test/resources/test/bind/sparqlBindPostgreSQL.obda";
+	final String owlfile = "src/test/resources/bindTest/sparqlBind.owl";
+	final String obdafile = "src/test/resources/bindTest/sparqlBindPostgreSQL.obda";
 
     @Before
 	public void setUp() throws Exception {
 	
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:postgresql:user";
-		String username = "user";
-		String password = "";
 
 		fac = OBDADataFactoryImpl.getInstance();
 
-		conn = DriverManager.getConnection(url, username, password);		
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-create-postgresql.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		
-		st.executeUpdate(bf.toString()); 
-		//conn.commit();
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -113,13 +84,7 @@ public class BindTestWithFunctionsPostgreSQL {
 		ioManager.load(obdafile);
 	}
 
-	@After
-	public void tearDown() throws Exception {
 
-		  dropTables();
-			conn.close();
-		
-	}
 
 	private void dropTables() throws SQLException, IOException {
 
