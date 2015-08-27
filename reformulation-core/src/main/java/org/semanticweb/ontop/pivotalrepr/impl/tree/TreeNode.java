@@ -21,4 +21,8 @@ public class TreeNode {
         this.queryNode = newNode;
     }
 
+    public String toString() {
+        return "TN(" + queryNode + ")";
+    }
+
 }
