@@ -37,6 +37,9 @@ public interface ImmutableOntologyVocabulary {
 	public DataPropertyExpression getDataProperty(String uri);
 	
 	
+	public Datatype getDatatype(String uri);
+	
+	
 	/**
 	 * check whether the class has been declared 
 	 * 

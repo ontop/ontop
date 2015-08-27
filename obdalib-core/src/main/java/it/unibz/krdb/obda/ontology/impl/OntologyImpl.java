@@ -42,6 +42,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,6 +95,44 @@ public class OntologyImpl implements Ontology {
 	private static final String CLASS_NOT_FOUND = "Class not found: ";	
 	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
 	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
+	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
+	
+	public static final ImmutableMap<String, Datatype> OWL2QLDatatypes;
+	
+	private static final String xml  = "http://www.w3.org/1999/02/22-rdf-syntax-ns";
+	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema";	
+	private static final String owl = "http://www.w3.org/2002/07/owl";
+	private static final String xsd = "http://www.w3.org/2001/XMLSchema";
+	
+	static {
+		DatatypeFactory ofac = obdafac.getDatatypeFactory();
+		
+		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
+				.put(xml + "#PlainLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
+				.put(xml + "#XMLLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
+				.put(rdfs + "#Literal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
+				.put(owl + "#real", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
+				.put(owl + "#rational", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational		
+				.put(xsd + "#decimal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal
+				.put(xsd + "#integer", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INTEGER))) // 	xsd:integer
+				.put(xsd + "#nonNegativeInteger", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER))) // 	xsd:nonNegativeInteger
+				.put(xsd + "#string", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:string
+				.put(xsd + "#normalizedString", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:normalizedString
+				.put(xsd + "#token", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:token
+				.put(xsd + "#Name", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:Name
+				.put(xsd + "#NCName", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	xsd:NCName
+				.put(xsd + "#NMTOKEN", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:NMTOKEN
+				.put(xsd + "#hexBinary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:hexBinary
+				.put(xsd + "#base64Binary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:base64Binary
+				.put(xsd + "#anyURI", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:anyURI
+				.put(xsd + "#dateTime", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME))) // 	xsd:dateTime
+				.put(xsd + "#dateTimeStamp", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME_STAMP))) // 	xsd:dateTimeStamp
+				.put(xsd + "#int", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INT))) // 	TEMPORARY FOR Q9 / FISHMARK
+				.put(xsd + "#long", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LONG))) // 	TEMPORARY FOR OntologyTypesTest
+				.build();
+	}
+	
+	
 	
 	private final class ImmutableOntologyVocabularyImpl implements ImmutableOntologyVocabulary {
 
@@ -140,6 +179,8 @@ public class OntologyImpl implements Ontology {
 			return dpe;
 		}
 
+		
+		
 		@Override
 		public boolean containsClass(String uri) {
 			return concepts.containsKey(uri);
@@ -174,6 +215,14 @@ public class OntologyImpl implements Ontology {
 		public boolean isEmpty() {
 			// the minimum size is 2 because of \top / \bopttom
 			return concepts.size() == 2 && objectProperties.size() == 2 && dataProperties.size() == 2;
+		}
+
+		@Override
+		public Datatype getDatatype(String uri) {
+			Datatype dt = OWL2QLDatatypes.get(uri);
+			if (dt == null)
+				throw new RuntimeException(DATATYPE_NOT_FOUND + uri);
+			return dt;
 		}
 	}
 

@@ -371,17 +371,15 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			OWLDatatype rangeDatatype = range.asOWLDatatype();
 
 			if (rangeDatatype.isBuiltIn()) {
-				try {
-					Predicate.COL_TYPE columnType = OWLTypeMapper.getType(rangeDatatype);
-					Datatype datatype = ofac.createDataType(columnType);
-					dl_onto.addSubClassOfAxiom(subclass, datatype);
-				} catch (TranslationException e) {
-					log.warn("Error in " + ax + "(" + e + ")");
-				}
-			} else {
+				//Predicate.COL_TYPE columnType = OWLTypeMapper.getType(rangeDatatype);
+				Datatype datatype = dl_onto.getVocabulary().getDatatype(rangeDatatype.getIRI().toString());
+				dl_onto.addSubClassOfAxiom(subclass, datatype);
+			} 
+			else {
 				log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + ax);
 			}
-		} else {
+		} 
+		else {
 			log.warn("Ignoring range axiom since it is not a datatype: " + ax);
 		}
 	}
@@ -759,8 +757,8 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			// TODO: handle more complex fillers
 			// if (filler instanceof OWLDatatype);
 			OWLDatatype owlDatatype = (OWLDatatype) someexp.getFiller();
-			COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
-			Datatype filler = ofac.createDataType(datatype);
+			//COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
+			Datatype filler = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
 			
 			DataPropertyExpression auxRole = dl_onto.createAuxiliaryDataProperty();
 

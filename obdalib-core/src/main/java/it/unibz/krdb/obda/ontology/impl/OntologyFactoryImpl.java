@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -72,13 +71,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 			return new ObjectPropertyAssertionImpl(role, o1, o2);			
 	}
 
-
-	
-
-	@Override
-	public Datatype createDataType(Predicate.COL_TYPE type) {
-		return new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(type));
-	}
 
 	@Override
 	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2) {

@@ -8,20 +8,25 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	final Map<String, OClass> concepts = new HashMap<>();
 	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
 	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
+
+	
+	private static final String CLASS_NOT_FOUND = "Class not found: ";	
+	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
+	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
+	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
 	
 	public OntologyVocabularyImpl() {		
 	}
@@ -36,7 +41,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		else if (uri.equals(ClassImpl.owlNothingIRI))
 			return ClassImpl.owlNothing;
 		else
-			throw new RuntimeException("Class not found: " + uri);
+			throw new RuntimeException(CLASS_NOT_FOUND + uri);
 	}
 	
 
@@ -50,7 +55,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		else if (uri.equals(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI))
 			return ObjectPropertyExpressionImpl.owlTopObjectProperty;
 		else
-			throw new RuntimeException("ObjectProperty not found: " + uri);
+			throw new RuntimeException(OBJECT_PROPERTY_NOT_FOUND + uri);
 	}
 	
 	@Override
@@ -63,9 +68,18 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		else if (uri.equals(DataPropertyExpressionImpl.owlTopDataPropertyIRI))
 			return DataPropertyExpressionImpl.owlTopDataProperty;
 		else
-			throw new RuntimeException("DataProperty not found: " + uri);
+			throw new RuntimeException(DATA_PROPERTY_NOT_FOUND + uri);
 	}
 
+	@Override
+	public Datatype getDatatype(String uri) {
+		Datatype dt = OntologyImpl.OWL2QLDatatypes.get(uri);
+		if (dt == null)
+			throw new RuntimeException(DATATYPE_NOT_FOUND + uri);
+		return dt;
+	}
+	
+	
 	@Override
 	public Collection<OClass> getClasses() {
 		return concepts.values();
@@ -170,5 +184,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	public boolean containsDataProperty(String uri) {
 		return dataProperties.containsKey(uri);
 	}
+
 	
 }

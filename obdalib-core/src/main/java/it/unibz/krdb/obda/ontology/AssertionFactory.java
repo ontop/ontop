@@ -18,7 +18,7 @@ public interface AssertionFactory {
 	/**
 	 * creates a class assertion 
 	 * 
-	 * @param concept
+	 * @param className
 	 * @param o
 	 * @return
 	 */
@@ -28,7 +28,7 @@ public interface AssertionFactory {
 	/**
 	 * creates an object property assertion 
 	 * 
-	 * @param prop
+	 * @param propertyName
 	 * @param o1
 	 * @param o2
 	 * @return
@@ -39,12 +39,12 @@ public interface AssertionFactory {
 	/**
 	 * creates a data property assertion 
 	 * 
-	 * @param prop
-	 * @param o1
-	 * @param o2
+	 * @param propertyName
+	 * @param o
+	 * @param v
 	 * @return
 	 */
 	
-	public DataPropertyAssertion createDataPropertyAssertion(String propertyName, ObjectConstant o1, ValueConstant o2);
+	public DataPropertyAssertion createDataPropertyAssertion(String propertyName, ObjectConstant o, ValueConstant v);
 		
 }

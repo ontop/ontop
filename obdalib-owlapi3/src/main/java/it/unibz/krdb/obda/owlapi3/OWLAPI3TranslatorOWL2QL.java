@@ -377,8 +377,9 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			else {
 				DataPropertyRangeExpression subclass = role.getRange(); 			
 				
-				Predicate.COL_TYPE columnType = OWLTypeMapper.getType(owlDatatype);
-				Datatype datatype = ofac.createDataType(columnType);
+				//Predicate.COL_TYPE columnType = OWLTypeMapper.getType(owlDatatype);
+				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+				//Datatype datatype = ofac.createDataType(columnType);
 				dl_onto.addSubClassOfAxiom(subclass, datatype);		
 			}		
 		} 
@@ -876,8 +877,8 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			// TODO: handle more complex fillers
 			// if (filler instanceof OWLDatatype);
 			OWLDatatype owlDatatype = (OWLDatatype) someexp.getFiller();
-			COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
-			Datatype filler = ofac.createDataType(datatype);
+			//COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
+			Datatype filler = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
 			
 			DataPropertyExpression auxRole = dl_onto.createAuxiliaryDataProperty();
 

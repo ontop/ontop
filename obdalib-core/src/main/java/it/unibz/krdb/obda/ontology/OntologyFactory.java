@@ -21,53 +21,59 @@ package it.unibz.krdb.obda.ontology;
  */
 
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
-	public Ontology createOntology(ImmutableOntologyVocabulary vb);
+	/**
+	 * creates a modifiable ontology vocabulary 
+	 * 
+	 * @return created vocabulary
+	 */
 	
 	public OntologyVocabulary createVocabulary();
 	
+	/**
+	 * creates an ontology using a given vocabulary
+	 * (the vocabulary is copied and fixes it)
+	 * 
+	 * @param voc
+	 * @return
+	 */
 	
+	public Ontology createOntology(ImmutableOntologyVocabulary voc);
 	
+	/**
+	 * creates a class assertion 
+	 * 
+	 * @param concept 
+	 * @param o
+	 * @return
+	 */
 	
-	public Datatype createDataType(Predicate.COL_TYPE type);
-	
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
 	
 	
 	/**
 	 * creates an object property assertion 
 	 * (ensures that the property is not inverse by swapping arguments if necessary)
 	 * 
-	 * @param prop
+	 * @param ope
 	 * @param o1
 	 * @param o2
 	 * @return
 	 */
 	
-	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression prop, ObjectConstant o1, ObjectConstant o2);
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2);
 
 	/**
 	 * creates a data property assertion 
 	 * 
-	 * @param prop
-	 * @param o1
-	 * @param o2
-	 * @return
-	 */
-	
-	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2);
-
-	/**
-	 * creates a class assertion 
-	 * 
-	 * @param concept
+	 * @param dpe
 	 * @param o
+	 * @param v
 	 * @return
 	 */
 	
-	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
-
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v);
 }
