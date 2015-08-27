@@ -1,13 +1,13 @@
 package it.unibz.krdb.sql;
 
-import static org.junit.Assert.*;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class TestImplicitDBConstraints {
 
