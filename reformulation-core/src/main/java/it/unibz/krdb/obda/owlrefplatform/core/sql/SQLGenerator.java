@@ -859,7 +859,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             		mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
               	}
                 
-            	if (isUnary(ov)) {
+            	else if (isUnary(ov)) {
             		Term left = ov.getTerm(0);
                     String leftOp = getSQLString(left, index, true);
                     mainColumn = String.format("(" + expressionFormat + ")", leftOp);

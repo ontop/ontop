@@ -61,116 +61,118 @@ import static org.junit.Assert.assertTrue;
 
 public class BindTest {
 
-	private OBDADataFactory fac;
-	private Connection conn;
 
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
-	final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
+    private OBDADataFactory fac;
+    private Connection conn;
+
+    private OBDAModel obdaModel;
+    private OWLOntology ontology;
+
+    final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
+    final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
 
     @Before
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
+        // String driver = "org.h2.Driver";
+        String url = "jdbc:h2:mem:questjunitdb";
+        String username = "sa";
+        String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
+        fac = OBDADataFactoryImpl.getInstance();
 
-		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
+        conn = DriverManager.getConnection(url, username, password);
+        Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		
-		st.executeUpdate(bf.toString());
-		conn.commit();
+        FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-create-h2.sql");
+        BufferedReader in = new BufferedReader(reader);
+        StringBuilder bf = new StringBuilder();
+        String line = in.readLine();
+        while (line != null) {
+            bf.append(line);
+            line = in.readLine();
+        }
+        in.close();
 
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+        st.executeUpdate(bf.toString());
+        conn.commit();
 
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	}
+        // Loading the OWL file
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-	@After
-	public void tearDown() throws Exception {
+        // Loading the OBDA data
+        obdaModel = fac.getOBDAModel();
+        ModelIOManager ioManager = new ModelIOManager(obdaModel);
+        ioManager.load(obdafile);
+    }
 
-			dropTables();
-			conn.close();
-		
-	}
+    @After
+    public void tearDown() throws Exception {
 
-	private void dropTables() throws SQLException, IOException {
+        dropTables();
+        conn.close();
 
-		Statement st = conn.createStatement();
+    }
 
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
-	}
+    private void dropTables() throws SQLException, IOException {
 
-	private OWLObject runTests(Properties p, String query) throws Exception {
+        Statement st = conn.createStatement();
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+        FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-drop-h2.sql");
+        BufferedReader in = new BufferedReader(reader);
+        StringBuilder bf = new StringBuilder();
+        String line = in.readLine();
+        while (line != null) {
+            bf.append(line);
+            line = in.readLine();
+        }
+        in.close();
 
-		factory.setPreferenceHolder(p);
+        st.executeUpdate(bf.toString());
+        st.close();
+        conn.commit();
+    }
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+    private OWLObject runTests(Properties p, String query) throws Exception {
 
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+        // Creating a new instance of the reasoner
+        QuestOWLFactory factory = new QuestOWLFactory();
+        factory.setOBDAController(obdaModel);
+
+        factory.setPreferenceHolder(p);
+
+        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+        // Now we are ready for querying
+        QuestOWLConnection conn = reasoner.getConnection();
+        QuestOWLStatement st = conn.createStatement();
 
 
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+        try {
+            QuestOWLResultSet rs = st.executeTuple(query);
             rs.nextRow();
-			OWLObject ind1 = rs.getOWLObject("title");
+            OWLObject ind1 = rs.getOWLObject("title");
             OWLObject ind2 = rs.getOWLObject("price");
 
-         return ind2;
+            return ind2;
 
-		}
-		finally {
-			st.close();
-			reasoner.dispose();
-		}
-	}
+        }
+        finally {
+            st.close();
+            reasoner.dispose();
+        }
+    }
 
     /**
      * querySelect1 return a literal instead of a numeric datatype
      * @throws Exception
      */
-   /* @Test
-	public void testSelect() throws Exception {
+    @Test
+    public void testSelect() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -205,10 +207,41 @@ public class BindTest {
 
 
 
-    } */
+    }
 
     @Test
     public void testBind() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount\n"
+                + "   BIND (?p*(1-?discount) AS ?w)\n"
+                + "   FILTER(?w < 20)\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"17.25\"");
+
+
+        checkReturnedValues(p, queryBind, expectedValues);
+//        OWLObject price = runTests(p, queryBind);
+//
+//        assertEquals("\"17.25\"", price.toString());
+
+
+    }
+
+    @Test
+    public void testBindWithStrlen() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -237,7 +270,6 @@ public class BindTest {
 
 
     }
-/*
     @Test
     public void testDoubleBind() throws Exception{
 
@@ -345,7 +377,7 @@ public class BindTest {
      * SingletonSet operator is not supported
      * @throws Exception
      */
-   /* @Test
+    @Test
     public void testFailingBind() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -365,12 +397,12 @@ public class BindTest {
                 + "   ?x dc:title ?title .\n"
                 + "}";
         try {
-        OWLObject price = runTests(p, queryBind);
+            OWLObject price = runTests(p, queryBind);
 
         } catch (OntopOWLException e) {
             assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
             // ROMAN: commented out -- now the message is different
-           // assertEquals("Operator not supported: SingletonSet", e.getCause().getLocalizedMessage().trim());
+            // assertEquals("Operator not supported: SingletonSet", e.getCause().getLocalizedMessage().trim());
         }
 
         //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
@@ -391,13 +423,13 @@ public class BindTest {
 
             assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
 
-        } 
+        }
 
 
 
 
     }
-*/
+
     @Test
     public void testBindWithConcat() throws Exception {
 
@@ -413,9 +445,37 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
+                + "   BIND (CONCAT(?title, \" title\") AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL Tutorial title\"");
+        expectedValues.add("\"The Semantic Web title\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+
+
+
+    }
+
+    @Test
+    public void testBindWithConcatStrLen() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
                 + "   BIND (STRLEN(CONCAT(?title, \" \")) AS ?v)\n"
                 + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
-             + "}";
+                + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
@@ -424,37 +484,8 @@ public class BindTest {
         checkReturnedValues(p, queryBind, expectedValues);
 
 
-    } 
-   /* Test for ABS
-    
-    @Test
-    public void testBindWithAbs() throws Exception{
+    }
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        // double bind
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title  ?w WHERE \n" +
-                "{  ?x ns:discount ?discount .\n" +
-                "   ?x dc:title ?title .\n" +
-                "   BIND (?p AS ?fullPrice) \n" +
-                "   BIND (ABS (?fullPrice  - ?discount) AS ?w) \n" +
-                "   ?x ns:price ?fullPrice .\n" +
-                "}";
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"41.8\"");
-        expectedValues.add("\"22.75\"");
-
-
-        checkReturnedValues(p, queryBind, expectedValues);
-    } */
-    
-/*
     @Test
     public void testBindWithConcatLanguage() throws Exception {
 
@@ -514,8 +545,8 @@ public class BindTest {
 
 
     }
-*/
-/*
+
+
     //CAST function not supported
     //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
     @Test
@@ -546,12 +577,10 @@ public class BindTest {
 
         }
 
-    } 
-    
-    */
+    }
 
 
-        private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
+    private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -567,26 +596,26 @@ public class BindTest {
 
 
 
-            int i = 0;
-            List<String> returnedValues = new ArrayList<>();
-            try {
-                QuestOWLResultSet rs = st.executeTuple(query);
-                while (rs.nextRow()) {
-                    OWLObject ind1 = rs.getOWLObject("w");
-                    // log.debug(ind1.toString());
-                    returnedValues.add(ind1.toString());
-                    java.lang.System.out.println(ind1);
-                    i++;
-                }
-            } catch (Exception e) {
-                throw e;
-            } finally {
-                conn.close();
-                reasoner.dispose();
+        int i = 0;
+        List<String> returnedValues = new ArrayList<>();
+        try {
+            QuestOWLResultSet rs = st.executeTuple(query);
+            while (rs.nextRow()) {
+                OWLObject ind1 = rs.getOWLObject("w");
+                // log.debug(ind1.toString());
+                returnedValues.add(ind1.toString());
+                java.lang.System.out.println(ind1);
+                i++;
             }
-            assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                    returnedValues.equals(expectedValues));
-            assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            conn.close();
+            reasoner.dispose();
+        }
+        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
+                returnedValues.equals(expectedValues));
+        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
 
     }
 
