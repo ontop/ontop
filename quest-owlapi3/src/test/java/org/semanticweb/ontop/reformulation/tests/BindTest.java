@@ -219,7 +219,7 @@ public class BindTest {
                 "}";
         OWLObject price1 = runTests(p, querySelect1);
 
-        assertEquals("\"33.6\"", price1.toString());
+        assertEquals("\"33.6\"^^xsd:decimal", price1.toString());
 
 
 
@@ -278,8 +278,8 @@ public class BindTest {
                 "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"41.8\"");
-        expectedValues.add("\"22.75\"");
+        expectedValues.add("\"41.8\"^^xsd:decimal");
+        expectedValues.add("\"22.75\"^^xsd:decimal");
 
 
         checkReturnedValues(p, queryBind, expectedValues);
@@ -306,8 +306,8 @@ public class BindTest {
                 "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.4\"");
-        expectedValues.add("\"5.75\"");
+        expectedValues.add("\"8.4\"^^xsd:decimal");
+        expectedValues.add("\"5.75\"^^xsd:decimal");
 
 
         checkReturnedValues(p, queryBind, expectedValues);

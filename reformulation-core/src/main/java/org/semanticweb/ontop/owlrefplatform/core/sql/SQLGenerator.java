@@ -473,20 +473,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}else if (  (typePred.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
 							(typePred.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
 							(typePred.getName().equals(OBDAVocabulary.SPARQL_MAX_URI)) ||
-							(typePred.getName().equals(OBDAVocabulary.SPARQL_MIN_URI))){
+							(typePred.getName().equals(OBDAVocabulary.SPARQL_MIN_URI))) {
 
-						Term agTerm= f.getTerm(0);
-						if (agTerm instanceof Function){
-							Function agFunc = (Function)agTerm;
-							typePred = agFunc.getFunctionSymbol();
-							Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
-							ansTypes.set(j, unifiedType);
+                        Term agTerm = f.getTerm(0);
+                        if (agTerm instanceof Function) {
+                            Function agFunc = (Function) agTerm;
+                            typePred = agFunc.getFunctionSymbol();
+                            Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
+                            ansTypes.set(j, unifiedType);
 
-						}else{
-							Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(COL_TYPE.DECIMAL));
-							ansTypes.set(j, unifiedType);
-						}
-					} else {
+                        } else {
+                            Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(COL_TYPE.DECIMAL));
+                            ansTypes.set(j, unifiedType);
+                        }
+                    }else if(typePred.isArithmeticPredicate()){
+                        Predicate unifiedPredicate = getHeadDataTypesOfArithmeticOperations(f);
+                        ansTypes.set(j, unifiedPredicate);
+                    } else {
 						throw new IllegalArgumentException();
 					}
 
@@ -508,6 +511,36 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		return ansTypes;
 	}
+
+    private Predicate getHeadDataTypesOfArithmeticOperations(Term t){
+
+        Predicate type1 = null;
+        Predicate type2 = null;
+        Predicate type = null;
+
+        Function f = null;
+
+
+        if (t instanceof  Variable){
+            return type = dtfac.getTypePredicate(COL_TYPE.INTEGER);
+        }else if(t instanceof ValueConstant) {
+            COL_TYPE ty = ((ValueConstant) t).getType();
+            return type = dtfac.getTypePredicate(ty);
+        }else if(t instanceof Function){
+            f = (Function) t;
+
+            if(f.isDataTypeFunction()){
+                return type = f.getFunctionSymbol();
+            }else {
+                type1 = getHeadDataTypesOfArithmeticOperations((Term) (f.getTerm(0)));
+                type2 = getHeadDataTypesOfArithmeticOperations((Term) (f.getTerm(1)));
+                type = unifyTypes(type1, type2);
+            }
+        }
+
+        return type;
+
+    }
 
 	/**
 	 * Unifies the input types
@@ -1473,6 +1506,15 @@ public class SQLGenerator implements SQLQueryGenerator {
                 // Functions returning string values
                 mainColumn = getSQLString(ov, index, false);
             }
+            else if (function.isArithmeticPredicate()){
+                // For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
+                String expressionFormat = getNumericalOperatorString(function);
+                Term left = ov.getTerm(0);
+                Term right = ov.getTerm(1);
+                String leftOp = getSQLString(left, index, true);
+                String rightOp = getSQLString(right, index, true);
+                mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
+            }
             else if (function instanceof BNodePredicate) {
 				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
@@ -1768,7 +1810,9 @@ public class SQLGenerator implements SQLQueryGenerator {
                     type = COL_TYPE.LITERAL;
                 } else if (mainFunctionSymbol instanceof BNodePredicate) {
 					type = COL_TYPE.BNODE;
-				}
+				}else if (mainFunctionSymbol.isArithmeticPredicate()){
+                    type = COL_TYPE.DECIMAL;
+                }
 				else {
 					type = dtfac.getDatatype(mainFunctionSymbol.toString());
 				}
@@ -2578,7 +2622,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		private void indexVariables(Function atom) {
 			DataDefinition def = dataDefinitions.get(atom);
 			Predicate atomName = atom.getFunctionSymbol();
-			final String quotedViewName = sqladapter.sqlQuote(viewNames.get(atom));
+			final String quotedViewName = viewNames.get(atom); //sqladapter.sqlQuote(viewNames.get(atom));
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
 
@@ -2628,7 +2672,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			DataDefinition def = dataDefinitions.get(atom);
 			if (def != null) {
-				final String viewName = sqladapter.sqlQuote(viewNames.get(atom));
+				final String viewName = viewNames.get(atom); //sqladapter.sqlQuote(viewNames.get(atom));
 				if (def instanceof TableDefinition) {
 					return sqladapter.sqlTableName(tableNames.get(atom), viewName);
 				} else if (def instanceof ViewDefinition) {
