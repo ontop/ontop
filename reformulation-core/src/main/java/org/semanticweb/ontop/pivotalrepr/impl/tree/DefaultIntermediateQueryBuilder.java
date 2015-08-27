@@ -24,9 +24,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     @Override
     public void init(ConstructionNode rootConstructionNode){
-        boolean hasBeenInitialized = (tree == null);
-
-        if (hasBeenInitialized)
+        if (tree != null)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
 
         // TODO: use Guice to construct this tree
@@ -72,7 +70,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query= new IntermediateQueryImpl(new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = new IntermediateQueryImpl(new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
     }

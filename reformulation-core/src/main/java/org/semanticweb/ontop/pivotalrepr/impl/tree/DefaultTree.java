@@ -31,12 +31,15 @@ public class DefaultTree implements QueryTree {
 
 
     protected DefaultTree(ConstructionNode rootQueryNode) {
-        rootNode = new TreeNode(rootQueryNode);
         nodeIndex = new HashMap<>();
-        nodeIndex.put(rootQueryNode, rootNode);
-
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
+
+        // Adds the root node
+        rootNode = new TreeNode(rootQueryNode);
+        nodeIndex.put(rootQueryNode, rootNode);
+        childrenIndex.put(rootNode, createChildrenRelation(rootNode, rootQueryNode));
+        // No parent
     }
 
     @Override
@@ -47,10 +50,7 @@ public class DefaultTree implements QueryTree {
     @Override
     public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<ArgumentPosition> optionalPosition,
                          boolean mustBeNew) throws IllegalTreeUpdateException {
-        TreeNode parentNode = nodeIndex.get(parentQueryNode);
-        if (parentNode == null) {
-            throw new IllegalTreeUpdateException("Node " + parentQueryNode + " not in the graph");
-        }
+        TreeNode parentNode = getTreeNode(parentQueryNode);
 
         TreeNode childNode;
         if (nodeIndex.containsKey(childQueryNode)) {
@@ -58,14 +58,14 @@ public class DefaultTree implements QueryTree {
                 throw new IllegalTreeUpdateException("Node " + childQueryNode + " already in the graph");
             }
             else {
-                childNode = nodeIndex.get(childQueryNode);
+                childNode = getTreeNode(childQueryNode);
 
-                TreeNode previousParent = parentIndex.get(childNode);
+                TreeNode previousParent = getParentTreeNode(childNode);
                 if (previousParent != null) {
                     removeChild(previousParent, childNode);
                 }
                 parentIndex.put(childNode, parentNode);
-                childrenIndex.get(parentNode).addChild(childNode, optionalPosition);
+                getChildrenRelation(parentNode).addChild(childNode, optionalPosition);
             }
         }
         /**
@@ -84,22 +84,25 @@ public class DefaultTree implements QueryTree {
         TreeNode childNode = new TreeNode(childQueryNode);
         nodeIndex.put(childQueryNode, childNode);
 
-        ChildrenRelation newChildrenRelation;
-        if (childQueryNode instanceof BinaryChildrenRelation) {
-            newChildrenRelation = new BinaryChildrenRelation(childNode);
-        }
-        else {
-            newChildrenRelation = new StandardChildrenRelation(childNode);
-        }
-        childrenIndex.put(childNode, newChildrenRelation);
+        childrenIndex.put(childNode, createChildrenRelation(childNode, childQueryNode));
 
         parentIndex.put(childNode, parentNode);
-        childrenIndex.get(parentNode).addChild(childNode, optionalPosition);
+        getChildrenRelation(parentNode).addChild(childNode, optionalPosition);
     }
+
+    private static ChildrenRelation createChildrenRelation(TreeNode parentTreeNode, QueryNode parentQueryNode) {
+        if (parentQueryNode instanceof BinaryChildrenRelation) {
+            return new BinaryChildrenRelation(parentTreeNode);
+        }
+        else {
+            return new StandardChildrenRelation(parentTreeNode);
+        }
+    }
+
 
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
-        ChildrenRelation childrenRelation = childrenIndex.get(node);
+        ChildrenRelation childrenRelation = getChildrenRelation(getTreeNode(node));
         if (childrenRelation == null) {
             return ImmutableList.of();
         }
@@ -127,7 +130,7 @@ public class DefaultTree implements QueryTree {
 
         while (!nodesToExplore.isEmpty()) {
             TreeNode node = nodesToExplore.poll();
-            for (TreeNode childNode : childrenIndex.get(node).getChildren()) {
+            for (TreeNode childNode : getChildrenRelation(node).getChildren()) {
                 nodesToExplore.add(childNode);
                 builder.add(childNode.getQueryNode());
             }
@@ -137,7 +140,7 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
-        TreeNode treeNode = nodeIndex.get(previousNode);
+        TreeNode treeNode = getTreeNode(previousNode);
         if (treeNode == null) {
             throw new IllegalArgumentException("The previous query node must be in the tree");
         }
@@ -152,16 +155,14 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void removeSubTree(QueryNode subQueryTreeRoot) {
-        TreeNode subTreeRoot = nodeIndex.get(subQueryTreeRoot);
-        if (subTreeRoot == null)
-            throw new IllegalArgumentException("The given query node must be in the tree");
+        TreeNode subTreeRoot = getTreeNode(subQueryTreeRoot);
 
         Queue<TreeNode> nodesToRemove = new LinkedList<>();
         nodesToRemove.add(subTreeRoot);
 
         while(!nodesToRemove.isEmpty()) {
             TreeNode treeNode = nodesToRemove.poll();
-            nodesToRemove.addAll(childrenIndex.get(treeNode).getChildren());
+            nodesToRemove.addAll(getChildrenRelation(treeNode).getChildren());
 
             removeNode(treeNode);
         }
@@ -169,10 +170,7 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentQueryNode) {
-        TreeNode currentTreeNode = nodeIndex.get(currentQueryNode);
-
-        if (currentQueryNode == null)
-            throw new IllegalArgumentException("The given query node must be in the tree");
+        TreeNode currentTreeNode = getTreeNode(currentQueryNode);
 
         Queue<TreeNode> nodesToExplore = new LinkedList<>();
         ImmutableList.Builder<QueryNode> builder = ImmutableList.builder();
@@ -181,7 +179,7 @@ public class DefaultTree implements QueryTree {
 
         while (!nodesToExplore.isEmpty()) {
             TreeNode node = nodesToExplore.poll();
-            for (TreeNode childNode : childrenIndex.get(node).getChildren()) {
+            for (TreeNode childNode : getChildrenRelation(node).getChildren()) {
                 nodesToExplore.add(childNode);
                 builder.add(childNode.getQueryNode());
             }
@@ -191,10 +189,9 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public Optional<QueryNode> getParent(QueryNode childQueryNode) {
-        TreeNode childTreeNode = nodeIndex.get(childQueryNode);
-        if (childTreeNode == null)
-            throw new IllegalArgumentException("The given query node must be in the tree");
-        TreeNode parentTreeNode = parentIndex.get(childTreeNode);
+        TreeNode childTreeNode = getTreeNode(childQueryNode);
+
+        TreeNode parentTreeNode = getParentTreeNode(childTreeNode);
         if (parentTreeNode == null) {
             return Optional.absent();
         }
@@ -207,17 +204,17 @@ public class DefaultTree implements QueryTree {
     public void removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
         TreeNode parentTreeNode = getTreeNode(parentQueryNode);
 
-        ImmutableList<TreeNode> children = childrenIndex.get(parentTreeNode).getChildren();
+        ImmutableList<TreeNode> children = getChildrenRelation(parentTreeNode).getChildren();
 
         if (children.size() == 1) {
             TreeNode childTreeNode = children.get(0);
             childrenIndex.remove(parentTreeNode);
             // May be null
-            TreeNode grandParentTreeNode = parentIndex.get(parentTreeNode);
+            TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
             parentIndex.remove(parentTreeNode);
             parentIndex.put(childTreeNode, grandParentTreeNode);
 
-            ChildrenRelation grandParentRelation = childrenIndex.get(grandParentTreeNode);
+            ChildrenRelation grandParentRelation = getChildrenRelation(grandParentTreeNode);
             grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
         }
         else {
@@ -239,7 +236,7 @@ public class DefaultTree implements QueryTree {
 
             TreeNode treeNodeToRemove = getTreeNode(nodeToRemove);
 
-            for (QueryNode child : childrenIndex.get(treeNodeToRemove).getChildQueryNodes()) {
+            for (QueryNode child : getChildrenRelation(treeNodeToRemove).getChildQueryNodes()) {
                 if (!nodesToRemove.contains(child)) {
                     if (isParentBinaryAsymmetricOperator) {
                         throw new RuntimeException("Re-integrating children of a BinaryAsymmetricOperatorNode " +
@@ -252,9 +249,9 @@ public class DefaultTree implements QueryTree {
             }
             nodeIndex.remove(nodeToRemove);
 
-            TreeNode localParentTreeNode = parentIndex.get(treeNodeToRemove);
+            TreeNode localParentTreeNode = getParentTreeNode(treeNodeToRemove);
             if (localParentTreeNode != null) {
-                ChildrenRelation childrenRelation = childrenIndex.get(localParentTreeNode);
+                ChildrenRelation childrenRelation = getChildrenRelation(localParentTreeNode);
                 if (childrenRelation.contains(treeNodeToRemove)) {
                     childrenRelation.removeChild(treeNodeToRemove);
                 }
@@ -269,7 +266,7 @@ public class DefaultTree implements QueryTree {
         TreeNode parentTreeNode = getTreeNode(parentNode);
         TreeNode childTreeNode = getTreeNode(childNode);
 
-        ChildrenRelation childrenRelation = childrenIndex.get(parentTreeNode);
+        ChildrenRelation childrenRelation = getChildrenRelation(parentTreeNode);
         return childrenRelation.getOptionalPosition(childTreeNode);
     }
 
@@ -278,9 +275,9 @@ public class DefaultTree implements QueryTree {
      */
     private void removeNode(TreeNode treeNode) {
         nodeIndex.remove(treeNode.getQueryNode());
-        TreeNode parentNode = parentIndex.get(treeNode);
+        TreeNode parentNode = getParentTreeNode(treeNode);
         if (parentNode != null) {
-            childrenIndex.get(parentNode).removeChild(treeNode);
+            getChildrenRelation(parentNode).removeChild(treeNode);
         }
         parentIndex.remove(treeNode);
         childrenIndex.remove(treeNode);
@@ -288,12 +285,12 @@ public class DefaultTree implements QueryTree {
     }
 
     private void removeChild(TreeNode parentNode, TreeNode childNodeToRemove) {
-        if (parentIndex.get(childNodeToRemove) == parentNode) {
+        if (getParentTreeNode(childNodeToRemove) == parentNode) {
             parentIndex.remove(childNodeToRemove);
         }
 
         if (childrenIndex.containsKey(parentNode)) {
-            childrenIndex.get(parentNode).removeChild(childNodeToRemove);
+            getChildrenRelation(parentNode).removeChild(childNodeToRemove);
         }
     }
 
@@ -303,5 +300,22 @@ public class DefaultTree implements QueryTree {
             throw new IllegalArgumentException("The given query node is not in the tree");
         }
         return treeNode;
+    }
+
+    private ChildrenRelation getChildrenRelation(TreeNode node) {
+        ChildrenRelation relation = childrenIndex.get(node);
+        if (relation == null) {
+            throw new RuntimeException("Internal error: the tree node does not have a children relation.");
+        }
+        return relation;
+    }
+
+    /**
+     * The returned value might be null.
+     *
+     * The point of this structure is to enforce the use of a TreeNode as argument.
+     */
+    private TreeNode getParentTreeNode(TreeNode child) {
+        return parentIndex.get(child);
     }
 }
