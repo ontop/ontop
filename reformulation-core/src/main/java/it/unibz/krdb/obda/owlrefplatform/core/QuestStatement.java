@@ -20,16 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.HashMultimap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -212,7 +210,15 @@ public class QuestStatement implements OBDAStatement {
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
-							tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+							if(questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
+
+								tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this );
+							}
+
+							else {
+
+								tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+							}
 
 						} else if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
@@ -253,9 +259,7 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	@Override
 	public it.unibz.krdb.obda.model.ResultSet execute(String strquery) throws OBDAException {
-
-
-        if (strquery.isEmpty()) {
+		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
 		ParsedQuery pq = null;
@@ -394,7 +398,7 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules());
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules(), HashMultimap.<Predicate, List<Integer>>create());
 			removeNonAnswerQueries(program);
 
 			program = unfolder.unfold(program, OBDAVocabulary.QUEST_QUERY);
@@ -689,14 +693,14 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * Returns the number of tuples returned by the query
 	 */
-	public int getTupleCount(String query) throws Exception {
+	public long getTupleCount(String query) throws Exception {
 
 		String unf = getUnfolding(query);
 		String newsql = "SELECT count(*) FROM (" + unf + ") t1";
 		if (!canceled) {
 			ResultSet set = sqlstatement.executeQuery(newsql);
 			if (set.next()) {
-				return set.getInt(1);
+				return set.getLong(1);
 			} else {
 				throw new Exception("Tuple count failed due to empty result set.");
 			}

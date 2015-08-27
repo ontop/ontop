@@ -20,14 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+
+import com.google.common.collect.Lists;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -37,7 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -53,14 +49,18 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
-import it.unibz.krdb.obda.utils.MappingSplitter;
-import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
+import net.sf.jsqlparser.JSQLParserException;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.openrdf.query.parser.ParsedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -68,14 +68,11 @@ import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 
@@ -153,6 +150,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private boolean applyUserConstraints;
 
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	//private boolean applyExcludeFromTMappings;
+	
 	/***
 	 * General flags and fields
 	 */
@@ -178,6 +185,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean obtainFullMetadata = false;
 
     private boolean sqlGenerateReplace = true;
+
+	private boolean distinctResultSet = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -280,6 +289,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		loadOBDAModel(mappings);
 	}
 	
+	
+
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	public void setExcludeFromTMappings(TMappingExclusionConfig excludeFromTMappings){
+		assert(excludeFromTMappings != null);
+		this.excludeFromTMappings = excludeFromTMappings;
+	}
+
 	/**
 	 * Supply user constraints: that is primary and foreign keys not in the database
 	 * Can be useful for eliminating self-joins
@@ -422,7 +439,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
-
+		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
                 
 		if (!inmemory) {
@@ -722,10 +739,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					}
 				}		
 			}
-				
 
 
-			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, getUriMap());
+
+			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
+
 
 
 
@@ -748,7 +766,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				// Apply TMappings
-				unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				// Davide> Option to disable T-Mappings (TODO: Test)
+				//if( tMappings ){
+				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
+				//}
+
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());

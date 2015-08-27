@@ -25,7 +25,6 @@ import net.sf.jsqlparser.schema.Table;
 
 import java.io.Serializable;
 
-
 public class TableJSQL implements Serializable{
 	
 	private static final long serialVersionUID = 7031993308873750327L;

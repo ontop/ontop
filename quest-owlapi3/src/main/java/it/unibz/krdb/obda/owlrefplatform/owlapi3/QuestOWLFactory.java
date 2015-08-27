@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import com.google.common.collect.Lists;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -61,6 +61,18 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	private ImplicitDBConstraints userConstraints = null;
 	private boolean applyUserConstraints = false;
 	
+	/**
+	 * @author Davide>
+	 * 
+	 * The user can specify predicates for which the T-Mappings 
+	 * algorithm should not do its job. This is useful in those
+	 * cases where we know that a concept is already "complete", 
+	 * and where adding individuals from mapping assertions 
+	 * identified by the TMapping algorithm would NOT add any
+	 * new individual.
+	 */
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
+	
 	private String name = "Quest";
 
 	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
@@ -93,6 +105,23 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	public void setPreferenceHolder(Properties preference) {
 		this.preferences = preference;
 	}
+
+	/**
+	 * @author Davide>
+	 * 
+	 * The user can specify predicates for which the T-Mappings 
+	 * algorithm should not do its job. This is useful in those
+	 * cases where we know that a concept is already "complete", 
+	 * that means where adding individuals from mapping assertions 
+	 * identified by the TMapping algorithm would NOT add any
+	 * new individual in the concept.
+	 */
+	public void setExcludeFromTMappingsPredicates(TMappingExclusionConfig excludeFromTMappings){
+		
+		if( excludeFromTMappings == null ) throw new NullPointerException(); 
+		
+		this.excludeFromTMappings = excludeFromTMappings;
+	}
 	
 	@Override
 	public String getReasonerName() {
@@ -113,11 +142,12 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
+				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
 		}
 		else{
-			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
+				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
 		}
+		
 		
 	}
 
@@ -136,10 +166,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
+			//if( this.applyExcludeFromTMappings )
+				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
+			//else
+		    //		return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
 		}
 		else{
-			return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
+			//if( this.applyExcludeFromTMappings )
+				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
 		}
 	}
 	
@@ -157,11 +193,18 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
+			//if( this.applyExcludeFromTMappings )
+				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
 		}
 		else{
-			return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
+			//if( this.applyExcludeFromTMappings )
+				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, excludeFromTMappings);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 		}
+		
 	}
 
 	@Override
@@ -178,10 +221,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
+			//if( this.applyExcludeFromTMappings )
+				return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
+			//else
+			//	return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
 		}
 		else{
-			return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
+			//if( this.applyExcludeFromTMappings )
+				return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
 		}
 	}
 

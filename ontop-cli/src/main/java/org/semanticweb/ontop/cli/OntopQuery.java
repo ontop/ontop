@@ -20,10 +20,10 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
+import com.github.rvesse.airline.Command;
+import com.github.rvesse.airline.Option;
+import com.github.rvesse.airline.OptionType;
 import com.google.common.base.Joiner;
-import io.airlift.airline.Command;
-import io.airlift.airline.Option;
-import io.airlift.airline.OptionType;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.ontology.Ontology;

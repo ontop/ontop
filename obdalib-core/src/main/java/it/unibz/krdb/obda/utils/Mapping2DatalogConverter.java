@@ -181,7 +181,7 @@ public class Mapping2DatalogConverter {
     	List<SelectExpressionItem> selects = proj.getColumnList();
     	for(SelectExpressionItem select : selects){
     		Expression select_expr = select.getExpression();
-    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat || select_expr instanceof StringValue ){
+    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat || select_expr instanceof StringValue || select_expr instanceof Parenthesis ){
     			Alias alias = select.getAlias();
     			if(alias == null){
     				throw new JSQLParserException("The expression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");

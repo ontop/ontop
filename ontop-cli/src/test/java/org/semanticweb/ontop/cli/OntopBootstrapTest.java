@@ -13,8 +13,8 @@ public class OntopBootstrapTest {
     public void testOntopBootstrap (){
         String[] argv = {"bootstrap",
                 "-b", "http://www.example.org/",
-                "-m", "/tmp/bootstrapped-univ-benchQL.obda",
-                "-t", "/tmp/bootstrapped-univ-benchQL.owl",
+                "-m", "src/test/resources/bootstrapped-univ-benchQL.obda",
+                "-t", "src/test/resources/bootstrapped-univ-benchQL.owl",
                 "-l", "jdbc:mysql://10.7.20.39/lubm1",
                 "-u", "fish",
                 "-p", "fish",
