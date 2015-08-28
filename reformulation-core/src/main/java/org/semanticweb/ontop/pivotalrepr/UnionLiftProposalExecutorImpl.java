@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
+import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 
@@ -11,7 +11,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
     public IntermediateQuery apply(UnionNode unionNode, QueryNode targetQueryNode, IntermediateQuery inputQuery) {
 
-        IntermediateQueryBuilder builder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder builder = new DefaultIntermediateQueryBuilder();
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {

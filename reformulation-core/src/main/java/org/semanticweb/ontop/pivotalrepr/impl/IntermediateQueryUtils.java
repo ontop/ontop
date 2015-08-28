@@ -12,7 +12,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitu
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
-import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
+import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.PredicateRenamingProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PredicateRenamingProposalImpl;
@@ -143,7 +143,7 @@ public class IntermediateQueryUtils {
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
 
-        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
         try {
             queryBuilder.init(rootNode);
             queryBuilder.addChild(rootNode, unionNode);
@@ -226,7 +226,7 @@ public class IntermediateQueryUtils {
     private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                         Optional<QueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
 
         // Clone of the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
@@ -285,8 +285,7 @@ public class IntermediateQueryUtils {
         DataAtom headAtom2 = root2.getProjectionAtom();
 
         if (!headAtom1.hasSamePredicateAndArity(headAtom2)) {
-            throw new QueryMergingException("Two definitions of different things: "
-                    + headAtom1 + " != " + headAtom2);
+            throw new QueryMergingException("Two definitions of different things: " + headAtom1 + " != " + headAtom2);
         }
 
         /**
