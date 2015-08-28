@@ -38,7 +38,7 @@ public class DefaultTree implements QueryTree {
         // Adds the root node
         rootNode = new TreeNode(rootQueryNode);
         nodeIndex.put(rootQueryNode, rootNode);
-        childrenIndex.put(rootNode, createChildrenRelation(rootNode, rootQueryNode));
+        childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
     }
 
@@ -84,14 +84,14 @@ public class DefaultTree implements QueryTree {
         TreeNode childNode = new TreeNode(childQueryNode);
         nodeIndex.put(childQueryNode, childNode);
 
-        childrenIndex.put(childNode, createChildrenRelation(childNode, childQueryNode));
+        childrenIndex.put(childNode, createChildrenRelation(childNode));
 
         parentIndex.put(childNode, parentNode);
         accessChildrenRelation(parentNode).addChild(childNode, optionalPosition);
     }
 
-    private static ChildrenRelation createChildrenRelation(TreeNode parentTreeNode, QueryNode parentQueryNode) {
-        if (parentQueryNode instanceof BinaryChildrenRelation) {
+    private static ChildrenRelation createChildrenRelation(TreeNode parentTreeNode) {
+        if (parentTreeNode.getQueryNode() instanceof BinaryAsymmetricOperatorNode) {
             return new BinaryChildrenRelation(parentTreeNode);
         }
         else {
