@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -149,21 +150,25 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
-			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				ClassAssertion ca = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
-				tripleAssertions.add(ca);
-			} 
-			else {
-				if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
-					ObjectPropertyAssertion op = ofac.createObjectPropertyAssertion(predicateName, 
-							subjectConstant, (ObjectConstant) objectConstant);
-					tripleAssertions.add(op);
+			Assertion assertion;
+			try {
+				if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
+					assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
 				} 
 				else {
-					DataPropertyAssertion dp = ofac.createDataPropertyAssertion(predicateName, 
-								subjectConstant, (ValueConstant) objectConstant);
-					tripleAssertions.add(dp);
-				}
+					if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) 
+						assertion = ofac.createObjectPropertyAssertion(predicateName, 
+								subjectConstant, (ObjectConstant) objectConstant);
+					else 
+						assertion = ofac.createDataPropertyAssertion(predicateName, 
+									subjectConstant, (ValueConstant) objectConstant);
+				} 
+				if (assertion != null)
+					tripleAssertions.add(assertion);
+			}
+			catch (InconsistentOntologyException e) {
+				throw new RuntimeException("InconsistentOntologyException: " + 
+							predicateName + " " + subjectConstant + " " + objectConstant);
 			}
 		}
 		}

@@ -898,15 +898,17 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	
 	
 	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) {
-		
-		URIConstant c1 = getIndividual(ax.getSubject());
-		URIConstant c2 = getIndividual(ax.getObject());
+		try {
+			URIConstant c1 = getIndividual(ax.getSubject());
+			URIConstant c2 = getIndividual(ax.getObject());
 
-		ObjectPropertyExpression prop = getPropertyExpression(ax.getProperty());
+			ObjectPropertyExpression prop = getPropertyExpression(ax.getProperty());
 
-		// TODO: check for bottom			
-		
-		return ofac.createObjectPropertyAssertion(prop, c1, c2);						
+			return ofac.createObjectPropertyAssertion(prop, c1, c2);
+		} 
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + ax);
+		}						
 	}
 	
 	
@@ -917,16 +919,16 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			
 			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
 			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
-
-			DataPropertyExpression prop = getPropertyExpression(aux.getProperty());
-
-			// TODO: CHECK FOR BOT AND TOP
-			
 			URIConstant c1 = getIndividual(aux.getSubject());
 
-			return ofac.createDataPropertyAssertion(prop, c1, c2);
-		
-		} catch (TranslationException e) {
+			DataPropertyExpression prop = getPropertyExpression(aux.getProperty());
+			
+			return ofac.createDataPropertyAssertion(prop, c1, c2);	
+		} 
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + aux);
+		}
+		catch (TranslationException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -934,22 +936,21 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	
 	public ClassAssertion translate(OWLClassAssertionAxiom aux) {
 
-		OWLClassExpression classExpression = aux.getClassExpression();
-		if (!(classExpression instanceof OWLClass))
-			throw new RuntimeException("Found complex class in assertion, this feature is not supported");
-		
-		if (classExpression.isOWLThing())
-			return null;
-		
-		if (classExpression.isOWLNothing())
-			throw new RuntimeException("Unsatisfiable class assertion: " + aux);
+		try {
+			OWLClassExpression classExpression = aux.getClassExpression();
+			if (!(classExpression instanceof OWLClass))
+				throw new RuntimeException("Found complex class in assertion, this feature is not supported");
+			
+			OWLClass namedclass = (OWLClass) classExpression;
+			OClass concept = dl_onto.getVocabulary().getClass(namedclass.getIRI().toString());
+			
+			URIConstant c = getIndividual(aux.getIndividual());
 
-		OWLClass namedclass = (OWLClass) classExpression;
-
-		OClass concept = dl_onto.getVocabulary().getClass(namedclass.getIRI().toString());
-		URIConstant c = getIndividual(aux.getIndividual());
-
-		return ofac.createClassAssertion(concept, c);
+			return ofac.createClassAssertion(concept, c);
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + aux);
+		}		
 	}
 	
 	private static URIConstant getIndividual(OWLIndividual ind) {

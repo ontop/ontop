@@ -23,6 +23,12 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
+/**
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public interface OntologyFactory {
 
 	/**
@@ -45,35 +51,42 @@ public interface OntologyFactory {
 	
 	/**
 	 * creates a class assertion 
+	 *    (implements rule [C4])
 	 * 
-	 * @param concept 
+	 * @param ce 
 	 * @param o
 	 * @return
+	 * @return null if ce is the top class ([C4])
+	 * @throws InconsistentOntologyException if ce is the bottom class ([C4])
 	 */
 	
-	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
+	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
 	
 	
 	/**
 	 * creates an object property assertion 
 	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 *    (implements rule [O4])
 	 * 
 	 * @param ope
 	 * @param o1
 	 * @param o2
-	 * @return
+	 * @return null if ope is the top property ([O4])
+	 * @throws InconsistentOntologyException if ope is the bottom property ([O4])
 	 */
 	
-	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2);
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
 
 	/**
 	 * creates a data property assertion 
+	 *    (implements rule [D4])
 	 * 
 	 * @param dpe
 	 * @param o
 	 * @param v
-	 * @return
+	 * @return null if dpe is the top property ([D4])
+	 * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
 	 */
 	
-	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v);
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
 }

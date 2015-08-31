@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -168,49 +169,54 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		}
 		
 		// Create the assertion
-		Assertion assertion = null;
-		if (currentPredicate.getArity() == 1) {
-			assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
-		} 
-		else if (currentPredicate.getArity() == 2) {
-			if (currObject instanceof URI) {
-				ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
-				assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+		Assertion assertion;
+		try {
+			if (currentPredicate.getArity() == 1) {
+				assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
 			} 
-			else if (currObject instanceof BNode) {
-				ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
-				assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
-			} 
-			else if (currObject instanceof Literal) {
-				Literal l = (Literal) currObject;				
-				String lang = l.getLanguage();
-				ValueConstant c2;
-				if (lang == null) {
-					URI datatype = l.getDatatype();
-					Predicate.COL_TYPE type; 
-					
-					if (datatype == null) {
-						type = Predicate.COL_TYPE.LITERAL;
+			else if (currentPredicate.getArity() == 2) {
+				if (currObject instanceof URI) {
+					ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
+					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+				} 
+				else if (currObject instanceof BNode) {
+					ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
+					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+				} 
+				else if (currObject instanceof Literal) {
+					Literal l = (Literal) currObject;				
+					String lang = l.getLanguage();
+					ValueConstant c2;
+					if (lang == null) {
+						URI datatype = l.getDatatype();
+						Predicate.COL_TYPE type; 
+						
+						if (datatype == null) {
+							type = Predicate.COL_TYPE.LITERAL;
+						} 
+						else {
+							type = dtfac.getDatatype(datatype);
+							if (type == null)
+								type = Predicate.COL_TYPE.UNSUPPORTED;
+						}			
+						
+						c2 = obdafac.getConstantLiteral(l.getLabel(), type);
 					} 
 					else {
-						type = dtfac.getDatatype(datatype);
-						if (type == null)
-							type = Predicate.COL_TYPE.UNSUPPORTED;
-					}			
-					
-					c2 = obdafac.getConstantLiteral(l.getLabel(), type);
+						c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
+					}
+					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
 				} 
 				else {
-					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
+					throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 				}
-				assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
 			} 
 			else {
-				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
+				throw new RuntimeException("Unsupported statement: " + st.toString());
 			}
-		} 
-		else {
-			throw new RuntimeException("Unsupported statement: " + st.toString());
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + currentPredicate + " " + currSubject + " " + currObject);
 		}
 		return assertion;
 	}

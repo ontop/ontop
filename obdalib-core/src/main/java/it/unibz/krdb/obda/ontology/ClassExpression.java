@@ -30,7 +30,7 @@ package it.unibz.krdb.obda.ontology;
  * 		subObjectSomeValuesFrom := 'ObjectSomeValuesFrom' '(' ObjectPropertyExpression owl:Thing ')'
  * 		DataSomeValuesFrom := 'DataSomeValuesFrom' '(' DataPropertyExpression { DataPropertyExpression } DataRange ')'
  * 
- * @author roman
+ * @author Roman Kontchakov
  *
  */
 

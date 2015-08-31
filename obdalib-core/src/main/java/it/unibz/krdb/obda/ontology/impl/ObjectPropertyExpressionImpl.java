@@ -26,6 +26,20 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 
+/**
+ * Represents ObjectPropertyExpression from the OWL 2 QL Specification
+ * 
+ * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
+ * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
+ * 
+ * Support for owl:topObjectProperty and owl:bottomObjectProperty
+ *     - the inverses of the two coincide with themselves 
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
+
 public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 	private static final long serialVersionUID = -2514037755762973974L;

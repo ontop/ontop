@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.AssertionFactory;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
 
 import java.io.BufferedReader;
@@ -66,22 +67,28 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 	private Assertion constructAssertion() {
 		Assertion assertion = null;
 
-		if (currentPredicate.getArity() == 1) {
-			URIConstant c = obdafac.getConstantURI(currSubject);
-			assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
+		try {
+			if (currentPredicate.getArity() == 1) {
+				URIConstant c = obdafac.getConstantURI(currSubject);
+				assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
+			} 
+			else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
+				URIConstant c1 = obdafac.getConstantURI(currSubject);
+				URIConstant c2 = obdafac.getConstantURI(currObject);
+				assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c1, c2);
+			} 
+			else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
+				URIConstant c1 = obdafac.getConstantURI(currSubject);
+				ValueConstant c2 = obdafac.getConstantLiteral(currObject);
+					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c1, c2);
+			} 
+			else {
+				throw new RuntimeException("ERROR, Wrongly type predicate: " + currentPredicate.toString());
+			}
 		} 
-		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
-			URIConstant c1 = obdafac.getConstantURI(currSubject);
-			URIConstant c2 = obdafac.getConstantURI(currObject);
-			assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c1, c2);
-		} 
-		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
-			URIConstant c1 = obdafac.getConstantURI(currSubject);
-			ValueConstant c2 = obdafac.getConstantLiteral(currObject);
-			assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c1, c2);
-		} 
-		else {
-			throw new RuntimeException("ERROR, Wrongly type predicate: " + currentPredicate.toString());
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + 
+							currentPredicate + " " + currSubject + " " + currObject);
 		}
 		return assertion;
 	}

@@ -32,8 +32,19 @@ package it.unibz.krdb.obda.ontology;
  *
  */
 
-
 import it.unibz.krdb.obda.model.Predicate;
+
+/**
+ * Represents DataPropertyExpression from the OWL 2 QL Specification
+ * 
+ * DataPropertyExpression := DataProperty
+ * 
+ * Support for owl:topDataProperty and owl:bottomDataProperty
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 
 public interface DataPropertyExpression extends Description {
 

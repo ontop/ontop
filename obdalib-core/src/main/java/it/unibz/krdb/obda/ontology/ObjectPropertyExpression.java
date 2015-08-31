@@ -23,15 +23,15 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.Predicate;
 
 /**
- * Represents ObjectPropertyExpression from OWL 2 QL Specification
+ * Represents ObjectPropertyExpression from the OWL 2 QL Specification
  * 
  * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
  * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
  * 
- *  Support for owl:topObjectProperty and owl:bottomObjectProperty
+ * Support for owl:topObjectProperty and owl:bottomObjectProperty
  *     - the inverses of the two coincide with themselves 
  * 
- * @author roman
+ * @author Roman Kontchakov
  *
  */
 
