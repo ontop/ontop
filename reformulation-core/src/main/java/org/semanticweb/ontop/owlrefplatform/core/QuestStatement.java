@@ -527,13 +527,6 @@ public class QuestStatement implements OBDAStatement {
 				
 				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 
-				/**
-				 * Unfolds it once again (normally) just for removing the top ans1u(...) predicates.
-				 * TODO: improve the previous translation and remove this
-				 */
-				unfolding = unfolder.unfold(unfolding, "ans1",QuestConstants.BUP, false, multiTypedFunctionSymbolIndex);
-
-				
 				log.debug("New Datalog query: \n" + unfolding.toString());
 
 				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
