@@ -59,7 +59,8 @@ public interface QueryTreeComponent {
      * Please consider using an IntermediateQueryBuilder instead of this tree component.
      */
     void addChild(QueryNode parentNode, QueryNode childNode,
-                  Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+                  Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition,
+                  boolean canReplacePreviousChildren) throws IllegalTreeUpdateException;
 
     Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException;
 

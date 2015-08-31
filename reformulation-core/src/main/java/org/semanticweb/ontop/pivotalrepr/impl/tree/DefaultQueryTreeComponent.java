@@ -76,7 +76,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
                 QueryNode localChild = externalChild.clone();
                 localToExternalNodeMap.put(localChild, externalChild);
                 localParents.add(localChild);
-                addChild(localParent, localChild, subQuery.getOptionalPosition(externalParent, externalChild));
+                addChild(localParent, localChild, subQuery.getOptionalPosition(externalParent, externalChild), false);
             }
         }
 
@@ -134,9 +134,9 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,
-                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
-        tree.addChild(parentNode, childNode, optionalPosition, true);
+        tree.addChild(parentNode, childNode, optionalPosition, true, canReplace);
     }
 
     @Override

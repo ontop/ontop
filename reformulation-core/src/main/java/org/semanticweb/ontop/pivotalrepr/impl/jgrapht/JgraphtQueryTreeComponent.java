@@ -354,7 +354,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode, QueryNode parentNode,
                                       Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
-        addChild(parentNode, replacingNode, optionalPosition);
+        addChild(parentNode, replacingNode, optionalPosition, true);
         if (replacingNode instanceof BinaryAsymmetricOperatorNode) {
             throw new RuntimeException("Using a BinaryAsymmetricOperatorNode as a replacingNode is not yet supported");
         }
@@ -379,7 +379,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode child,
-                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         if (optionalPosition.isPresent()) {
             addChild(parentNode, child, optionalPosition.get());

@@ -17,7 +17,8 @@ public interface ChildrenRelation {
 
     boolean contains(TreeNode node);
 
-    void addChild(TreeNode childNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+    void addChild(TreeNode childNode, Optional<ArgumentPosition> optionalPosition, boolean canReplace)
+            throws IllegalTreeUpdateException;
 
     void replaceChild(TreeNode formerChild, TreeNode newChild);
 

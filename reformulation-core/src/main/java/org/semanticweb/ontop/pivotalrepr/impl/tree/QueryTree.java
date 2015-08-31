@@ -13,7 +13,8 @@ import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 public interface QueryTree {
     ConstructionNode getRootNode();
 
-    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<ArgumentPosition> optionalPosition, boolean mustBeNew) throws IllegalTreeUpdateException;
+    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<ArgumentPosition> optionalPosition,
+                  boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 

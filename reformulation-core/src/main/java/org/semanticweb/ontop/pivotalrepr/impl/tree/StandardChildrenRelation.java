@@ -41,7 +41,8 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition) {
+    public void addChild(TreeNode childNode, Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition,
+                         boolean canReplace) {
         if (optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept argument positions");
         }

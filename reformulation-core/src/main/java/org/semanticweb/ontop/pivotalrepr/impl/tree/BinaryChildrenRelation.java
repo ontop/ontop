@@ -52,7 +52,8 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+    public void addChild(TreeNode childNode, Optional<ArgumentPosition> optionalPosition, boolean canReplace)
+            throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The StandardChildrenRelation requires argument positions");
         }
@@ -60,7 +61,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         switch (optionalPosition.get()) {
             case LEFT:
                 if (optionalLeftChild.isPresent()) {
-                    if (optionalLeftChild.get() != childNode) {
+                    if ((!canReplace) && (optionalLeftChild.get() != childNode)) {
                         throw new IllegalTreeUpdateException("Left child node is already present");
                     }
                 }
@@ -70,7 +71,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
                 break;
             case RIGHT:
                 if (optionalRightChild.isPresent()) {
-                    if (optionalRightChild.get() != childNode) {
+                    if ((!canReplace) && (optionalRightChild.get() != childNode)) {
                         throw new IllegalTreeUpdateException("Right child node is already present");
                     }
                 }
