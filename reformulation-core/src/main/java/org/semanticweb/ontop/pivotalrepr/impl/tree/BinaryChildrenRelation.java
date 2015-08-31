@@ -60,20 +60,16 @@ public class BinaryChildrenRelation implements ChildrenRelation {
 
         switch (optionalPosition.get()) {
             case LEFT:
-                if (optionalLeftChild.isPresent()) {
-                    if ((!canReplace) && (optionalLeftChild.get() != childNode)) {
-                        throw new IllegalTreeUpdateException("Left child node is already present");
-                    }
+                if (optionalLeftChild.isPresent() && (!canReplace) && (optionalLeftChild.get() != childNode)) {
+                    throw new IllegalTreeUpdateException("Left child node is already present");
                 }
                 else {
                     optionalLeftChild = Optional.of(childNode);
                 }
                 break;
             case RIGHT:
-                if (optionalRightChild.isPresent()) {
-                    if ((!canReplace) && (optionalRightChild.get() != childNode)) {
+                if (optionalRightChild.isPresent() && (!canReplace) && (optionalRightChild.get() != childNode)) {
                         throw new IllegalTreeUpdateException("Right child node is already present");
-                    }
                 }
                 else {
                     optionalRightChild = Optional.of(childNode);
