@@ -5,10 +5,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
+import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import org.semanticweb.ontop.executor.join.JoinBooleanExpressionExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.slf4j.Logger;
@@ -65,7 +67,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     static {
         INTERNAL_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>of(
                 SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class,
-                InnerJoinOptimizationProposal.class, JoinBooleanExpressionExecutor.class);
+                InnerJoinOptimizationProposal.class, JoinBooleanExpressionExecutor.class,
+                ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class);
     }
 
 
@@ -123,7 +126,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public ProposalResults applyProposal(QueryOptimizationProposal proposal)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         /**
          * It assumes that the concrete proposal classes DIRECTLY

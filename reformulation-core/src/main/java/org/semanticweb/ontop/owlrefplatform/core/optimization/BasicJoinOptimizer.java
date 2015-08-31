@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.base.Optional;
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -37,7 +38,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
 
 
     @Override
-    public IntermediateQuery optimize(IntermediateQuery query) {
+    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         return optimizeChildren(query, query.getRootConstructionNode()).getQuery();
     }
 
@@ -48,7 +49,8 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
      *
      * Recursive
      */
-    private OneLevelOptimizationResult optimizeChildren(final IntermediateQuery originalQuery, final QueryNode originalParent) {
+    private OneLevelOptimizationResult optimizeChildren(final IntermediateQuery originalQuery,
+                                                        final QueryNode originalParent) throws EmptyQueryException {
 
         //Non-final
         IntermediateQuery currentQuery = originalQuery;

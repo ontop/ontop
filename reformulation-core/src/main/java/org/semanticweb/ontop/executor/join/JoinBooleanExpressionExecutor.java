@@ -12,7 +12,9 @@ import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
 
 import static org.semanticweb.ontop.executor.join.JoinExtractionUtils.*;
 
@@ -27,7 +29,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
     @Override
     public NodeCentricOptimizationResults apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
                                               QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         InnerJoinNode originalTopJoinNode = proposal.getTopJoinNode();
 
@@ -43,7 +45,11 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
             return new NodeCentricOptimizationResultsImpl(query, optionalNewJoinNode.get());
         }
         else {
-            return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling, optionalParent);
+            // TODO: clean that!
+            ProposalResults results = query.applyProposal(new ReactToChildDeletionProposalImpl(originalTopJoinNode,
+                    optionalParent.get()));
+            throw new RuntimeException("TODO: handle the deletion of the node properly");
+            //return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling, optionalParent);
         }
     }
 
@@ -71,9 +77,6 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
 
         InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
 
-        /**
-         * TODO: only if the filter condition are not violated!
-         */
         try {
             QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
             Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);

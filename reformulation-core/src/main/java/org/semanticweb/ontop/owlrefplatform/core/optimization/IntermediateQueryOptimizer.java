@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 
 /**

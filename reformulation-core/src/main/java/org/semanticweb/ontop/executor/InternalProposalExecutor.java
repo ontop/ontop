@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.executor;
 
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -18,6 +19,6 @@ public interface InternalProposalExecutor<T extends QueryOptimizationProposal> e
      * TODO: explain
      */
     public ProposalResults apply(T proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException;
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
 }

@@ -38,7 +38,7 @@ public interface IntermediateQuery {
      *
      */
     ProposalResults applyProposal(QueryOptimizationProposal proposal)
-        throws InvalidQueryOptimizationProposalException;
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      * TODO: find an exception to throw

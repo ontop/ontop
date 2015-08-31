@@ -73,10 +73,10 @@ public class IntermediateQueryUtils {
             PredicateRenamingProposal renamingProposal = new PredicateRenamingProposalImpl(normalPredicate,
                     subQueryPredicate);
 
-            IntermediateQuery renamedDefinition = null;
+            IntermediateQuery renamedDefinition;
             try {
                 renamedDefinition = originalDefinition.applyProposal(renamingProposal).getResultingQuery();
-            } catch (InvalidQueryOptimizationProposalException e) {
+            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
                 throw new RuntimeException("Internal error: bad renaming proposal: " + e.getMessage());
             }
             mergedDefinition.mergeSubQuery(renamedDefinition);
