@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.DataPropertyExpressionImpl;
@@ -399,6 +398,25 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	
 	/**
+	 * (16) 
+	 * 
+	 * SubDataPropertyOf := 'SubDataPropertyOf' '(' axiomAnnotations 
+	 * 							subDataPropertyExpression superDataPropertyExpression ')'
+	 * subDataPropertyExpression := DataPropertyExpression
+	 * superDataPropertyExpression := DataPropertyExpression
+	 * 
+	 */
+	
+	@Override
+	public void visit(OWLSubDataPropertyOfAxiom ax) {
+		DataPropertyExpression dpe1 = getPropertyExpression(ax.getSubProperty());
+		DataPropertyExpression dpe2 = getPropertyExpression(ax.getSuperProperty());
+
+		dl_onto.addSubPropertyOfAxiom(dpe1, dpe2);	
+	}
+	
+	
+	/**
 	 * (17)
 	 * 
 	 * EquivalentDataProperties := 'EquivalentDataProperties' '(' axiomAnnotations 
@@ -462,14 +480,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLIrreflexiveObjectPropertyAxiom ax) {
 		log.warn(NOT_SUPPORTED, ax);
-	}
-
-	@Override
-	public void visit(OWLSubDataPropertyOfAxiom ax) {
-		DataPropertyExpression subrole = getPropertyExpression(ax.getSubProperty());
-		DataPropertyExpression superrole = getPropertyExpression(ax.getSuperProperty());
-
-		dl_onto.addSubPropertyOfAxiom(subrole, superrole);	
 	}
 
 	@Override
@@ -742,28 +752,28 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 * @return
 	 */
 	
-	private DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression rolExpression)  {
-		assert (rolExpression instanceof OWLDataProperty); 
-		return dl_onto.getVocabulary().getDataProperty((rolExpression.asOWLDataProperty().getIRI().toString()));
+	private DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression)  {
+		assert (dpeExpression instanceof OWLDataProperty); 
+		return dl_onto.getVocabulary().getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
 	}
 	
 	/**
 	 * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
 	 * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
 	 * 
-	 * @param rolExpression
+	 * @param opeExpression
 	 * @return
 	 */
 	
-	private ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression rolExpression) {
+	private ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression) {
 
-		if (rolExpression instanceof OWLObjectProperty) 
-			return dl_onto.getVocabulary().getObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString());
+		if (opeExpression instanceof OWLObjectProperty) 
+			return dl_onto.getVocabulary().getObjectProperty(opeExpression.asOWLObjectProperty().getIRI().toString());
 	
 		else {
-			assert(rolExpression instanceof OWLObjectInverseOf);
+			assert(opeExpression instanceof OWLObjectInverseOf);
 			
-			OWLObjectInverseOf aux = (OWLObjectInverseOf) rolExpression;
+			OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
 			return dl_onto.getVocabulary().getObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} 			
 	}

@@ -31,8 +31,8 @@ public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 	private final ImmutableSet<T> components;
 	
 	NaryAxiomImpl(ImmutableSet<T> components) {
-		if (components.size() < 2)
-			throw new IllegalArgumentException("At least 2 componets are expeccted in NaryAxiom");
+		if (components.isEmpty())
+			throw new IllegalArgumentException("At least one component is expected in NaryAxiom");
 
 		this.components = components;
 	}

@@ -236,13 +236,30 @@ public class OntologyImpl implements Ontology {
 	}
 	
 
+	/**
+	 * adds a normalized subclass axiom
+	 *
+	 * SubClassOf := 'SubClassOf' '(' axiomAnnotations subClassExpression superClassExpression ')'
+	 * 
+	 * implements rule [C1]:
+	 *    - ignore the axiom if the first argument is owl:Nothing or the second argument is owl:Thing 
+	 *    - replace by a disjointness axiom if the second argument is owl:Nothing
+	 * 
+	 */
 	
 	@Override
-	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
-		checkSignature(concept1);
-		checkSignature(concept2);
-		if (!concept1.isNothing() && !concept2.isThing()) {
-			BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<>(concept1, concept2);
+	public void addSubClassOfAxiom(ClassExpression ce1, ClassExpression ce2) {
+		checkSignature(ce1);
+		checkSignature(ce2);
+		if (ce1.isNothing() || ce2.isThing()) 
+			return;
+		
+		if (ce2.isNothing()) {
+			NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<>(ImmutableSet.<ClassExpression>of(ce1));
+			disjointClassesAxioms.add(ax);
+		}
+		else {
+			BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<>(ce1, ce2);
 			subClassAxioms.add(ax);
 		}
 	}	
@@ -255,24 +272,67 @@ public class OntologyImpl implements Ontology {
 		subDataRangeAxioms.add(ax);
 	}
 
+	
+	/**
+	 * adds a normalized data subproperty axiom
+	 * 
+	 * SubObjectPropertyOf := 'SubObjectPropertyOf' '(' axiomAnnotations 
+	 * 						ObjectPropertyExpression ObjectPropertyExpression ')'
+	 * 
+	 * implements rule [O1]:
+	 *    - ignore the axiom if the first argument is owl:bottomObjectProperty 
+	 *    				or the second argument is owl:topObjectProperty 
+	 *    - replace by a disjointness axiom if the second argument is owl:bottomObjectProperty
+	 * 
+	 */
+	
 	@Override
-	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		checkSignature(included);
-		checkSignature(including);
-		if (!included.isBottom() && !including.isTop()) {
-			BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<>(included, including);
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression ope1, ObjectPropertyExpression ope2) {
+		checkSignature(ope1);
+		checkSignature(ope2);
+		if (ope1.isBottom() || ope2.isTop()) 
+			return;
+
+		if (ope2.isBottom()) {
+			NaryAxiom<ObjectPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableSet.<ObjectPropertyExpression>of(ope1));
+			disjointObjectPropertiesAxioms.add(ax);
+		}
+		else {
+			BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<>(ope1, ope2);
 			subObjectPropertyAxioms.add(ax);
 		}
 	}
 	
+	/**
+	 * adds a normalized data subproperty axiom
+	 * 
+	 * SubDataPropertyOf := 'SubDataPropertyOf' '(' axiomAnnotations 
+	 * 					subDataPropertyExpression superDataPropertyExpression ')'
+	 * subDataPropertyExpression := DataPropertyExpression
+	 * superDataPropertyExpression := DataPropertyExpression
+	 * 
+	 * implements rule [D1]:
+	 *    - ignore the axiom if the first argument is owl:bottomDataProperty or the second argument is owl:topDataProperty 
+	 *    - replace by a disjointness axiom if the second argument is owl:bottomDataProperty
+	 * 
+	 */
+	
 	@Override
-	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
-		checkSignature(included);
-		checkSignature(including);
-		if (!included.isBottom() && !including.isTop()) {
-			BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<>(included, including);
+	public void addSubPropertyOfAxiom(DataPropertyExpression dpe1, DataPropertyExpression dpe2) {
+		checkSignature(dpe1);
+		checkSignature(dpe2);
+		if (dpe1.isBottom() || dpe2.isTop()) 
+			return;
+
+		if (dpe2.isBottom()) {
+			NaryAxiom<DataPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableSet.<DataPropertyExpression>of(dpe1));
+			disjointDataPropertiesAxioms.add(ax);
+		}
+		else {
+			BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<>(dpe1, dpe2);
 			subDataPropertyAxioms.add(ax);
 		}
+
 	}
 
 	@Override

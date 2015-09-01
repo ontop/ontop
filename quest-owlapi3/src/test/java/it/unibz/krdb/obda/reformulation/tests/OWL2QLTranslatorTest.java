@@ -19,11 +19,9 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -44,6 +42,8 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 public class OWL2QLTranslatorTest extends TestCase {
 
+	private static final String owl = "http://www.w3.org/2002/07/owl#";
+	
 	@Test
 	public void test_R1_2() throws Exception {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -457,5 +457,107 @@ public class OWL2QLTranslatorTest extends TestCase {
 	
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);		
 	}
+	
+	@Test
+	public void test_C1() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLClass class1 = factory.getOWLClass(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
+		OWLClass class2 = factory.getOWLClass(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
+		OWLClass class3 = factory.getOWLClass(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
+		OWLClass owlThing = factory.getOWLClass(IRI.create(owl + "Thing"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlThing));
+		OWLClass owlNothing = factory.getOWLClass(IRI.create(owl + "Nothing"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlNothing));
+		
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(owlNothing, class1));
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class2, owlThing));
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class3, owlNothing));
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		assertEquals(0, axs.size());
+		Collection<NaryAxiom<ClassExpression>> axs1 = dlliteonto.getDisjointClassesAxioms();
+		assertEquals(1, axs1.size());
+		
+		NaryAxiom<ClassExpression> ax = axs1.iterator().next();
+		assertEquals(1, ax.getComponents().size());
+		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+	}	
+	
+	@Test
+	public void test_D1() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLDataProperty dpe1 = factory.getOWLDataProperty(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe1));
+		OWLDataProperty dpe2 = factory.getOWLDataProperty(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe2));
+		OWLDataProperty dpe3 = factory.getOWLDataProperty(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe3));
+		OWLDataProperty owlTop = factory.getOWLDataProperty(IRI.create(owl + "topDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLDataProperty owlBottom = factory.getOWLDataProperty(IRI.create(owl + "bottomDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		manager.addAxiom(onto, factory.getOWLSubDataPropertyOfAxiom(owlBottom, dpe1));
+		manager.addAxiom(onto, factory.getOWLSubDataPropertyOfAxiom(dpe2, owlTop));
+		manager.addAxiom(onto, factory.getOWLSubDataPropertyOfAxiom(dpe3, owlBottom));
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<DataPropertyExpression>> axs = dlliteonto.getSubDataPropertyAxioms();
+		assertEquals(0, axs.size());
+		Collection<NaryAxiom<DataPropertyExpression>> axs1 = dlliteonto.getDisjointDataPropertiesAxioms();
+		assertEquals(1, axs1.size());
+		
+		NaryAxiom<DataPropertyExpression> ax = axs1.iterator().next();
+		assertEquals(1, ax.getComponents().size());
+		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+	}	
+	
+	@Test
+	public void test_O1() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLObjectProperty ope1 = factory.getOWLObjectProperty(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope1));
+		OWLObjectProperty ope2 = factory.getOWLObjectProperty(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope2));
+		OWLObjectProperty ope3 = factory.getOWLObjectProperty(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope3));
+		OWLObjectProperty owlTop = factory.getOWLObjectProperty(IRI.create(owl + "topObjectProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLObjectProperty owlBottom = factory.getOWLObjectProperty(IRI.create(owl + "bottomObjectProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		manager.addAxiom(onto, factory.getOWLSubObjectPropertyOfAxiom(owlBottom, ope1));
+		manager.addAxiom(onto, factory.getOWLSubObjectPropertyOfAxiom(ope2, owlTop));
+		manager.addAxiom(onto, factory.getOWLSubObjectPropertyOfAxiom(ope3, owlBottom));
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getSubObjectPropertyAxioms();
+		assertEquals(0, axs.size());
+		Collection<NaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getDisjointObjectPropertiesAxioms();
+		assertEquals(1, axs1.size());
+		
+		NaryAxiom<ObjectPropertyExpression> ax = axs1.iterator().next();
+		assertEquals(1, ax.getComponents().size());
+		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+	}	
 	
 }
