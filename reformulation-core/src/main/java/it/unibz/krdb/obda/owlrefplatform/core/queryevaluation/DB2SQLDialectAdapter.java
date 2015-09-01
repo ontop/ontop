@@ -61,6 +61,27 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "LOCATE(%2$s , %1$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,LOCATE(%s,%s)-1)", str,   before, str);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTR(%s,LOCATE(%s,%s)+LENGTH(%s))",
+				str, after, str , after); //FIXME when no match found should return empty string
+	}
+
+	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
 		if (type == Types.VARCHAR) {

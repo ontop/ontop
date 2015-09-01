@@ -23,8 +23,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
@@ -51,16 +51,42 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	public String sqlSlice(long limit, long offset) {
 		return String.format("WHERE ROWNUM <= %s", limit);
 	}
-	
-	  @Override
-	  	public String SHA1(String str) {
+
+	@Override
+	public String SHA1(String str) {
 	  		return String.format("HASH(%s,'SH1')", str);
 	  	}
 	  
-	  @Override
-	  	public String MD5(String str) {
-	  		return String.format("HASH(%s,'MD5')", str);
-	  	}
+	@Override
+	public String MD5(String str) {
+		return String.format("HASH(%s,'MD5')", str);
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "SUBSTR(%1$s, -LENGTH(%2$s) ) LIKE %2$s";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "SUBSTR(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "INSTR(%1$s,%2$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("NVL(SUBSTR(%s, 0, INSTR(%s,%s )-1), '\\u00A0') ", str,  str , before);
+	};
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s))",
+				str, str, after, after); //FIXME when no match found should return empty string
+	}
 
 	@Override
 	public String sqlCast(String value, int type) {

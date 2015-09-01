@@ -1672,6 +1672,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_TRUE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
 			operator = LIKE_OPERATOR;
+			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
 		} else if (functionSymbol.equals(OBDAVocabulary.STR_STARTS)) {
@@ -1697,11 +1698,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.ABS)) {
 				operator = ABS_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.CEIL)) {
-			operator = CEIL_OPERATOR;
+			operator = sqladapter.ceil();
 		} else if (functionSymbol.equals(OBDAVocabulary.FLOOR)) {
 			operator = FLOOR_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.ROUND)) {
-			operator = ROUND_OPERATOR;
+			operator = sqladapter.round();
 		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
 			operator = RAND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.UUID)) {

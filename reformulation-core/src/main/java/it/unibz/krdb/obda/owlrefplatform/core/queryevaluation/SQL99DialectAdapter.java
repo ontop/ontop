@@ -22,16 +22,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.sql.Types;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.Set;
-
-import org.openrdf.model.util.URIUtil;
+import java.util.regex.Pattern;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
@@ -133,7 +127,17 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String uuid() {
 		return "UUID()";
 	}
-    
+
+	@Override
+	public String ceil() {
+		return "CEIL(%s)";
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s)";
+	}
+
 	@Override
 	public String strConcat(String[] strings) {
 		if (strings.length == 0)
@@ -159,7 +163,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	
 	@Override
 	public String strStartsOperator(){
-		return "SUBSTRING(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";	
+		return "SUBSTRING(%1$s, 1, LENGTH(%2$s)) LIKE %2$s";
 	} 
 	
 	@Override

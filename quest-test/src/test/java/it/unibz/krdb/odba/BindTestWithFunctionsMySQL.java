@@ -65,7 +65,7 @@ public class BindTestWithFunctionsMySQL {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/bindTest/sparqlBind.owl";
-	final String obdafile = "src/test/resources/bindTest/sparqlBindPostgreSQL.obda";
+	final String obdafile = "src/test/resources/bindTest/sparqlBindMySQL.obda";
 
     @Before
 	public void setUp() throws Exception {
@@ -236,10 +236,10 @@ public class BindTestWithFunctionsMySQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.6\"");
-        expectedValues.add("\"5.75\"");
-        expectedValues.add("\"6.8\"");
-        expectedValues.add("\"1.50\"");
+        expectedValues.add("\"8.5000\"");
+        expectedValues.add("\"5.7500\"");
+        expectedValues.add("\"6.7000\"");
+        expectedValues.add("\"1.5000\"");
         checkReturnedValues(p, queryBind, expectedValues);
 	}
 
@@ -555,9 +555,9 @@ public class BindTestWithFunctionsMySQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial\"");
-        expectedValues.add("\" Semantic Web\"");
-        expectedValues.add("\"Crime and Punishment\"");
+        expectedValues.add("\"\"");
+        expectedValues.add("\"\"");
+        expectedValues.add("\"\"");
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
 

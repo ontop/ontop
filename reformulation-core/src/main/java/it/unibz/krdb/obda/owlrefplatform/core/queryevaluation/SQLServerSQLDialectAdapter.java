@@ -43,8 +43,83 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	  	public String MD5(String str) {
 		    	return String.format("HASHBYTES('MD5',%s)", str);
 	  	}
-	
-		
+
+	@Override
+	public String dateYear(String str) {
+		return String.format("YEAR ( %s)",str);
+	}
+
+	@Override
+	public String dateDay(String str) {
+		return String.format("DAY ( %s)",str);
+	}
+
+	@Override
+	public String dateHours(String str) {
+		return String.format("HOUR ( %s)",str);
+	}
+
+	@Override
+	public String dateMonth(String str) {
+		return String.format("MONTH (%s)",str);
+	}
+
+	@Override
+	public String dateMinutes(String str) {
+		return String.format("MINUTE (%s)",str);
+	}
+
+	@Override
+	public String dateSeconds(String str) {
+		return String.format("SECOND (%s)",str);
+	}
+
+	@Override
+	public String ceil() {
+		return "CEILING(%s)";
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s, 0)";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LEN(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, LEN(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "CHARINDEX(%2$s,%1$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s), LEN(%s))",
+				str,  after, str,after, after); //FIXME when no match found should return empty string
+	}
+
+	@Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s,%s,%s)", str, start, end);
+	}
+
+	@Override
+	public String strLength(String str) {
+		return String.format("LEN(%s)", str);
+	}
+
 	@Override
 	public String strConcat(String[] strings) {
 		if (strings.length == 0)
@@ -55,7 +130,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(String.format("(%s", strings[0]));
+		sql.append(String.format("(CAST (%s as varchar(8000))", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
 			sql.append(String.format(" + CAST(%s as varchar(8000))", strings[i]));
 		}

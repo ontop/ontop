@@ -46,7 +46,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String strStartsOperator(){
-		return "SUBSTRING(%1$s, 0, CHAR_LENGTH(%2$s)) LIKE %2$s";	
+		return "SUBSTRING(%1$s, 1, CHAR_LENGTH(%2$s)) LIKE %2$s";
 	}
 	
 	@Override
@@ -56,10 +56,21 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String strContainsOperator(){
-		return "INSTR(%2$s,%1$s) > 0";		
+		return "INSTR(%1$s,%2$s) > 0";
 	}
-	
-	 @Override
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,INSTR(%s,%s)-1)", str,  str, before);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s))",
+				str, str, after, after); //FIXME when no match found should return empty string
+	}
+
+	@Override
 	  	public String SHA1(String str) {
 	  		return String.format("SHA1(%s)", str);
 	  	}

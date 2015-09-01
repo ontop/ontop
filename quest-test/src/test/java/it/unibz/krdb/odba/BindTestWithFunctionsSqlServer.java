@@ -35,11 +35,17 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
@@ -50,8 +56,8 @@ import static org.junit.Assert.assertTrue;
  * It expands the tests from {@link it.unibz.krdb.obda.reformulation.test.BindTest}.
  */
 
-public class BindTestWithFunctionsPostgreSQL {
-	
+public class BindTestWithFunctionsSqlServer {
+
 	private OBDADataFactory fac;
 	private Connection conn;
 
@@ -59,11 +65,11 @@ public class BindTestWithFunctionsPostgreSQL {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/bindTest/sparqlBind.owl";
-	final String obdafile = "src/test/resources/bindTest/sparqlBindPostgreSQL.obda";
+	final String obdafile = "src/test/resources/bindTest/sparqlBindSqlServer.obda";
 
     @Before
 	public void setUp() throws Exception {
-	
+
 
 		fac = OBDADataFactoryImpl.getInstance();
 
@@ -80,13 +86,60 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
 
+	private void dropTables() throws SQLException, IOException {
 
-	
+		Statement st = conn.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-drop-postgresql.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+		in.close();
+
+		st.executeUpdate(bf.toString());
+		st.close();
+		//conn.commit();
+	}
+
+	private OWLObject runTests(Properties p, String query) throws Exception {
+
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+		factory.setOBDAController(obdaModel);
+
+		factory.setPreferenceHolder(p);
+
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+		// Now we are ready for querying
+		QuestOWLConnection conn = reasoner.getConnection();
+		QuestOWLStatement st = conn.createStatement();
+
+
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+            rs.nextRow();
+			OWLObject ind1 = rs.getOWLObject("title");
+            OWLObject ind2 = rs.getOWLObject("price");
+
+         return ind2;
+
+		}
+		finally {
+			st.close();
+			reasoner.dispose();
+		}
+	}
+
 	/*
 	 * Tests for numeric functions
 	 */
-	
-	
+
+
 	 @Test
     public void testCeil() throws Exception {
 
@@ -109,11 +162,11 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"1\"");
         expectedValues.add("\"1\"");
         expectedValues.add("\"1\"");
-        expectedValues.add("\"1\""); 
+        expectedValues.add("\"1\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-	
-	
+
+
 	 @Test
     public void testFloor() throws Exception {
 
@@ -137,9 +190,9 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"0\"");
         expectedValues.add("\"0\"");
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
-	
-	
+    }
+
+
 	 @Test
     public void testRound() throws Exception {
 
@@ -164,7 +217,7 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"0, 10\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-	
+
 	 @Test
     public void testAbs() throws Exception {
 
@@ -183,17 +236,17 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.6\"");
-        expectedValues.add("\"5.75\"");
-        expectedValues.add("\"6.8\"");
-        expectedValues.add("\"1.50\"");
+        expectedValues.add("\"8.5000\"");
+        expectedValues.add("\"5.7500\"");
+        expectedValues.add("\"6.7000\"");
+        expectedValues.add("\"1.5000\"");
         checkReturnedValues(p, queryBind, expectedValues);
-	}	
-	
+	}
+
 	/*
 	 * Tests for hash functions. H2 supports only SHA25 algorithm.
 	 */
-	
+
 	 @Test
     public void testHash() throws Exception {
 
@@ -212,7 +265,7 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "   BIND (MD5(\"The Semantic Web\") AS ?w)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>(); 
+        List<String> expectedValues = new ArrayList<>();
         try{
 	          MessageDigest digest = MessageDigest.getInstance("MD5");
 	          byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
@@ -235,7 +288,7 @@ public class BindTestWithFunctionsPostgreSQL {
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
-	
+
 	public static String sha256(String base) {
 	      try{
 	          MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -253,12 +306,12 @@ public class BindTestWithFunctionsPostgreSQL {
 	     throw new RuntimeException(ex);
 	  }
 	}
-	
+
 	/*
 	 * Tests for functions on strings.
 	 */
-	
-	
+
+
      @Test
     public void testURIEncoding() throws Exception {
 
@@ -285,10 +338,10 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"Crime%20and%20Punishment\"");
         expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
-	
+    }
 
-    
+
+
      @Test
     public void testStrEnds() throws Exception {
 
@@ -309,10 +362,10 @@ public class BindTestWithFunctionsPostgreSQL {
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en");        
+        expectedValues.add("\"The Semantic Web\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
-    
+    }
+
     @Test
     public void testStrStarts() throws Exception {
 
@@ -333,13 +386,13 @@ public class BindTestWithFunctionsPostgreSQL {
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en"); 
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");        
+        expectedValues.add("\"The Semantic Web\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
 
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
-    
-    
+    }
+
+
     @Test
     public void testStrSubstring() throws Exception {
 
@@ -360,13 +413,13 @@ public class BindTestWithFunctionsPostgreSQL {
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\""); 
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"");        
+        expectedValues.add("\"The Semantic Web\"");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"");
 
         checkReturnedValues(p, queryBind, expectedValues);
     }
-    
-    
+
+
      @Test
     public void testContains() throws Exception {
 
@@ -389,9 +442,9 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"The Semantic Web\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
 
-    }    
-    
-  
+    }
+
+
      @Test
     public void testBindWithUcase() throws Exception {
 
@@ -416,12 +469,12 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"");
         expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"");
         expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
         "The Logic Book: Introduction, Second Edition\"".toUpperCase());
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
-    
+
      @Test
     public void testBindWithLcase() throws Exception {
 
@@ -446,13 +499,13 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"SPARQL Tutorial sparql tutorial\"");
         expectedValues.add("\"The Semantic Web the semantic web\"");
         expectedValues.add("\"Crime and Punishment crime and punishment\"");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
         "The Logic Book: Introduction, Second Edition\"".toLowerCase());
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
-    
-    
+
+
      @Test
     public void testBindWithBefore() throws Exception {
 
@@ -468,7 +521,7 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRBEFORE(?title,\"ba\") AS ?w)\n"
+                + "   BIND (STRBEFORE(?title,\" \") AS ?w)\n"
              + "}";
 
 
@@ -480,8 +533,8 @@ public class BindTestWithFunctionsPostgreSQL {
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
-    
-    
+
+
      @Test
     public void testBindWithAfter() throws Exception {
 
@@ -502,21 +555,21 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial\"");
         expectedValues.add("\"\"");
+        expectedValues.add("\" Semantic Web\"");
         expectedValues.add("\"\"");
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
     } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
     //here instead the whole string is returned
-    
-    
+
+
 	/*
 	 * Tests for functions on date and time
 	 */
-    
-    
+
+
      @Test
     public void testMonth() throws Exception {
 
@@ -538,13 +591,13 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"6\"");        
-        expectedValues.add("\"12\""); 
-        expectedValues.add("\"7\"");      
-        expectedValues.add("\"11\"");        
+        expectedValues.add("\"6\"");
+        expectedValues.add("\"12\"");
+        expectedValues.add("\"7\"");
+        expectedValues.add("\"11\"");
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
-    
+    }
+
      @Test
     public void testYear() throws Exception {
 
@@ -566,12 +619,12 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2014\"");        
-        expectedValues.add("\"2011\""); 
-        expectedValues.add("\"1866\"");      
-        expectedValues.add("\"1967\"");        
+        expectedValues.add("\"2014\"");
+        expectedValues.add("\"2011\"");
+        expectedValues.add("\"1866\"");
+        expectedValues.add("\"1967\"");
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
+    }
 
         private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 
@@ -597,7 +650,7 @@ public class BindTestWithFunctionsPostgreSQL {
                     OWLObject ind1 = rs.getOWLObject("w");
                     // log.debug(ind1.toString());
                     returnedValues.add(ind1.toString());
-                    java.lang.System.out.println(ind1);
+                    System.out.println(ind1);
                     i++;
                 }
             } catch (Exception e) {

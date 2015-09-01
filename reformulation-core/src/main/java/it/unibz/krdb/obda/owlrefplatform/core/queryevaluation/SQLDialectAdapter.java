@@ -36,6 +36,10 @@ public interface SQLDialectAdapter {
 	public String SHA1(String str);
 
 	public String uuid();
+
+	public String ceil();
+
+	public String round();
 	
 	public String strStartsOperator();
 	
@@ -127,4 +131,7 @@ public interface SQLDialectAdapter {
 	public String dateTimezone(String date);
 
 	public String dateMonth(String date);
+
+
+
 }
