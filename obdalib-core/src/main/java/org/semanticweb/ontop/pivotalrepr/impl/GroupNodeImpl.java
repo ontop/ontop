@@ -39,7 +39,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
     @Override
     public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException {
+            throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 

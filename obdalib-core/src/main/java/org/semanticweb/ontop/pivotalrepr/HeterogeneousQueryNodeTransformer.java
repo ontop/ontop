@@ -19,6 +19,6 @@ public interface HeterogeneousQueryNodeTransformer<T extends QueryNodeTransforma
 
     QueryNode transform(ConstructionNode constructionNode) throws T;
 
-    QueryNode transform(GroupNode groupNode) throws T, NotNeededNodeException;
+    QueryNode transform(GroupNode groupNode) throws T;
 
 }
