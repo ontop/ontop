@@ -28,6 +28,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
+    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
     public String toString() {
         return JOIN_NODE_STR + getOptionalFilterString();
     }

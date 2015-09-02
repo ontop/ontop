@@ -10,6 +10,6 @@ public interface BinaryAsymmetricOperatorNode {
 
     public static enum ArgumentPosition {
         LEFT,
-        RIGHT
+        childPosition, RIGHT
     }
 }

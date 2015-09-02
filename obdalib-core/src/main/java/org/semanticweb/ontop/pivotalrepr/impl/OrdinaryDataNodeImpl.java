@@ -27,6 +27,12 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     }
 
     @Override
+    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
     public String toString() {
         return ORDINARY_DATA_NODE_STR + " " + getAtom();
     }

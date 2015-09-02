@@ -37,4 +37,15 @@ public interface QueryNode extends Cloneable {
      *
      */
     QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
+
+    /**
+     * "Accept" method for the "Visitor" pattern.
+     *
+     * To be implemented by leaf classes.
+     *
+     * If the transformation cannot be done,
+     * throw a QueryNodeTransformationException
+     *
+     */
+    QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
 }

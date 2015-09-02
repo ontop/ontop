@@ -31,6 +31,7 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
      * Recursive!
      */
     private IntermediateQuery analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode) throws EmptyQueryException {
+        ReactToChildDeletionTransformer transformer = new ReactToChildDeletionTransformer(query);
 
         ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(parentNode);
 

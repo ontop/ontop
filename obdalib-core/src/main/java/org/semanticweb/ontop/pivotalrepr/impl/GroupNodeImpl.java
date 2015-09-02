@@ -38,6 +38,12 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
+    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException, NotNeededNodeException {
+        return transformer.transform(this);
+    }
+
+    @Override
     public String toString() {
         return GROUP_NODE_STR + " " + groupingTerms;
     }
