@@ -25,37 +25,37 @@ public class PredicateRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public FilterNode transform(FilterNode filterNode) throws QueryNodeTransformationException {
+    public FilterNode transform(FilterNode filterNode) {
         return filterNode;
     }
 
     @Override
-    public TableNode transform(TableNode tableNode) throws QueryNodeTransformationException {
+    public TableNode transform(TableNode tableNode) {
         return tableNode;
     }
 
     @Override
-    public LeftJoinNode transform(LeftJoinNode leftJoinNode) throws QueryNodeTransformationException {
+    public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
         return leftJoinNode;
     }
 
     @Override
-    public UnionNode transform(UnionNode unionNode) throws QueryNodeTransformationException {
+    public UnionNode transform(UnionNode unionNode) {
         return unionNode;
     }
 
     @Override
-    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) throws QueryNodeTransformationException {
+    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) {
         return ordinaryDataNode;
     }
 
     @Override
-    public InnerJoinNode transform(InnerJoinNode innerJoinNode) throws QueryNodeTransformationException {
+    public InnerJoinNode transform(InnerJoinNode innerJoinNode){
         return innerJoinNode;
     }
 
     @Override
-    public ConstructionNode transform(ConstructionNode formerNode) throws QueryNodeTransformationException {
+    public ConstructionNode transform(ConstructionNode formerNode) {
         DataAtom currentAtom = formerNode.getProjectionAtom();
         AtomPredicate currentPredicate = currentAtom.getPredicate();
 
@@ -75,7 +75,7 @@ public class PredicateRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
+    public GroupNode transform(GroupNode groupNode) {
         return groupNode;
     }
 }

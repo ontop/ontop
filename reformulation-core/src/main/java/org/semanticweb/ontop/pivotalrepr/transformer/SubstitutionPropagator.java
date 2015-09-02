@@ -15,7 +15,8 @@ import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
  * Abstract: does not define transform(ConstructionNode ...).
  *
  */
-public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTransformer {
+public abstract class SubstitutionPropagator
+        implements HomogeneousQueryNodeTransformer<SubstitutionPropagator.UnificationException, SubstitutionPropagator.NewSubstitutionException> {
 
     /**
      * TODO: explain
@@ -25,11 +26,11 @@ public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTran
         private final QueryNode transformedNode;
 
         protected NewSubstitutionException(ImmutableSubstitution<VariableOrGroundTerm> substitution,
-                                        QueryNode transformedNode) {
+                                           QueryNode transformedNode) {
             super("New substitution to propagate (" + substitution + ") and new node (" + transformedNode + ")");
             this.substitution = substitution;
             this.transformedNode = transformedNode;
-       }
+        }
 
         public ImmutableSubstitution<VariableOrGroundTerm> getSubstitution() {
             return substitution;
@@ -94,7 +95,7 @@ public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTran
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
+    public GroupNode transform(GroupNode groupNode) throws NotNeededNodeException {
         ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
         for (NonGroundTerm term : groupNode.getGroupingTerms()) {
 

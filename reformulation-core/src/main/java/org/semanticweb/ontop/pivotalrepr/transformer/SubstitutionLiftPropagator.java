@@ -18,8 +18,7 @@ public class SubstitutionLiftPropagator extends SubstitutionPropagator {
     }
 
     @Override
-    public ConstructionNode transform(ConstructionNode constructionNode)
-            throws QueryNodeTransformationException {
-        throw new QueryNodeTransformationException("The propagated substitution MUST NOT be applied to construction nodes");
+    public ConstructionNode transform(ConstructionNode constructionNode) {
+        throw new IllegalArgumentException("The propagated substitution MUST NOT be applied to construction nodes");
     }
 }

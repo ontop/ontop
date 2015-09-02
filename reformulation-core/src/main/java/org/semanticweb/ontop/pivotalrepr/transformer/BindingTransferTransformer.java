@@ -65,7 +65,7 @@ public class BindingTransferTransformer implements HomogeneousQueryNodeTransform
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
+    public GroupNode transform(GroupNode groupNode) throws NotNeededNodeException {
         ImmutableList.Builder<NonGroundTerm> groupingTermBuilder = ImmutableList.builder();
         for (NonGroundTerm groupingTerm : groupNode.getGroupingTerms()) {
             ImmutableTerm newTerm = transferredBindings.apply(groupingTerm);
