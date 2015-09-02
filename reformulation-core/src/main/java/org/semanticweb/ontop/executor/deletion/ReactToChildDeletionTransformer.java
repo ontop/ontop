@@ -100,7 +100,7 @@ public class ReactToChildDeletionTransformer
     }
 
     @Override
-    public QueryNode transform(GroupNode groupNode) throws NodeToDeleteException, NotNeededNodeException {
+    public QueryNode transform(GroupNode groupNode) throws NodeToDeleteException {
         return checkHasChildren(groupNode);
     }
 

@@ -1,10 +1,8 @@
 package org.semanticweb.ontop.executor.deletion;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
-import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
-import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
@@ -19,10 +17,11 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
     public ProposalResults apply(ReactToChildDeletionProposal proposal, IntermediateQuery query,
                                  QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-        IntermediateQuery newQuery = analyzeAndUpdate(query, proposal.getParentNode());
+        // May alter the query and its tree component
+        analyzeAndUpdate(query, proposal.getParentNode(), treeComponent);
 
         // TODO: should we return more details?
-        return new ProposalResultsImpl(newQuery);
+        return new ProposalResultsImpl(query);
     }
 
     /**
@@ -30,15 +29,59 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
      *
      * Recursive!
      */
-    private IntermediateQuery analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode) throws EmptyQueryException {
+    private static void analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode,
+                                               QueryTreeComponent treeComponent) throws EmptyQueryException {
         ReactToChildDeletionTransformer transformer = new ReactToChildDeletionTransformer(query);
 
-        ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(parentNode);
+        try {
+            QueryNode newParentNode = parentNode.acceptNodeTransformer(transformer);
+            updateParentNode(query, parentNode, treeComponent, newParentNode);
+        }
+        catch (ReactToChildDeletionTransformer.NodeToDeleteException e) {
+            Optional<QueryNode> optionalGrandParent = query.getParent(parentNode);
+            treeComponent.removeSubTree(parentNode);
 
+            /**
+             * Recursive (cascade)
+             */
+            if (optionalGrandParent.isPresent()) {
+                analyzeAndUpdate(query, optionalGrandParent.get(), treeComponent);
+            }
+            /**
+             * Arrived to the root
+             */
+            else {
+                throw new EmptyQueryException();
+            }
+        }
+        catch (QueryNodeTransformationException e) {
+            throw new RuntimeException("Unexpected exception: " + e.getMessage());
+        }
+    }
 
+    private static void updateParentNode(IntermediateQuery query, QueryNode parentNode, QueryTreeComponent treeComponent,
+                                         QueryNode newParentNode) {
         /**
-         * TODO: implement it seriously
+         * Only updates if a new parent node is
          */
-        throw new EmptyQueryException();
+        if (parentNode != newParentNode) {
+            if (treeComponent.contains(newParentNode)) {
+
+                Optional<QueryNode> optionalFirstChild = query.getFirstChild(parentNode);
+                if (optionalFirstChild.isPresent() && optionalFirstChild.get() == newParentNode) {
+                    throw new RuntimeException("TODO: replace the parent by the child");
+                }
+                else {
+                    throw new UnsupportedOperationException("Unsupported QueryNode returned " +
+                            "by the ReactToChildDeletionTransformer");
+                }
+            }
+            /**
+             * New node
+             */
+            else {
+                treeComponent.replaceNode(parentNode, newParentNode);
+            }
+        }
     }
 }
