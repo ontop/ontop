@@ -66,8 +66,10 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s))",
-				str, str, after, after); //FIXME when no match found should return empty string
+//		sign return 1 if positive number, 0 if 0 and -1 if negative number
+//		it will return everything after the value if it is present or it will return an empty string if it is not present
+		return String.format("SUBSTRING(%s,LOCATE(%s,%s) + LENGTH(%s), SIGN(LOCATE(%s,%s)) * LENGTH(%s))",
+				str, after, str , after , after, str, str);
 	}
 
 	@Override

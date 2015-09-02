@@ -39,8 +39,8 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     
     @Override
 	public String strBefore(String str, String before) {
-		return String.format("LEFT(%s,POSITION(%s IN %s)-1)", str, before, str);
-	}
+		return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
+		}
     
     @Override
 	public String strStartsOperator(){
@@ -54,10 +54,12 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     
     @Override
 	public String strAfter(String str, String after) {
-		return String.format("SUBSTR(%s,POSITION(REGEXP_REPLACE(%s, (CONCAT('.*',%s) ), '') IN %s))",
-				str, str, after,str); //FIXME when no match found should return empty string
+//SIGN return a double precision, we need to cast to numeric to avoid conversion exception while using substring
+		return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
+				str, after, str , after , after, str, str);
+
 	}
-    
+
     @Override
     public String dateTimezone(String str){
     	return String.format("EXTRACT(TIMEZONE_ABBR, %s)", str);
@@ -149,7 +151,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param v
 	 * @return
 	 */
 	@Override

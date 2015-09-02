@@ -468,16 +468,16 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRBEFORE(?title,\"ba\") AS ?w)\n"
+                + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
              + "}";
 
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL\"");
-        expectedValues.add("\"The\"");
-        expectedValues.add("\"Crime\"");
-        expectedValues.add("\"The\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+         List<String> expectedValues = new ArrayList<>();
+         expectedValues.add("\"\"");
+         expectedValues.add("\"The Seman\"");
+         expectedValues.add("\"\"");
+         expectedValues.add("\"The Logic Book: Introduc\"");
+         checkReturnedValues(p, queryBind, expectedValues);
 
     }
     
@@ -502,10 +502,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial\"");
-        expectedValues.add("\"\"");
-        expectedValues.add("\"\"");
-        expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
+         expectedValues.add("\"\"");
+         expectedValues.add("\" Semantic Web\"");
+         expectedValues.add("\"\"");
+         expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
     } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,

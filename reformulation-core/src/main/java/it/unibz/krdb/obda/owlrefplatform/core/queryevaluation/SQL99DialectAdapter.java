@@ -183,8 +183,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("SUBSTR(%s,CHARINDEX(REGEXP_REPLACE(%s, (CONCAT('.*',%s) ), ''),%s))",
-				str, str, after,str); //FIXME when no match found should return empty string
+//		sign return 1 if positive number, 0 if 0, and -1 if negative number
+//		it will return everything after the value if it is present or it will return an empty string if it is not present
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s) + LENGTH(%s), SIGN(CHARINDEX(%s,%s)) * LENGTH(%s))",
+				str, after, str , after , after, str, str);
 	}
 	
 	@Override
