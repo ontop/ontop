@@ -107,4 +107,46 @@ public class NodeDeletionTest {
         assertEquals(((TableNode) viceRootNode).getAtom().getPredicate().getName(), table1Name);
         assertTrue(optimizedQuery.getCurrentSubNodesOf(viceRootNode).isEmpty());
     }
+
+    @Test(expected = EmptyQueryException.class)
+    public void testInvalidLeftPartOfLeftJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
+        Variable x = DATA_FACTORY.getVariable("x");
+        Variable y = DATA_FACTORY.getVariable("y");
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y));
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        queryBuilder.init(rootNode);
+
+        ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>absent());
+        queryBuilder.addChild(rootNode, ljNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
+        queryBuilder.addChild(ljNode, joinNode, LEFT);
+
+        TableNode table2 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
+        queryBuilder.addChild(joinNode, table2);
+
+        TableNode table3 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table3", 2), x, y));
+        queryBuilder.addChild(joinNode, table3);
+
+        TableNode table4 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 1), x));
+        queryBuilder.addChild(ljNode, table4, RIGHT);
+
+
+        IntermediateQuery initialQuery = queryBuilder.build();
+        System.out.println("Initial query: " + initialQuery.toString());
+
+        IntermediateQueryOptimizer joinOptimizer = new BasicJoinOptimizer();
+
+        /**
+         * Should throw the EmptyQueryException
+         */
+        IntermediateQuery optimizedQuery = joinOptimizer.optimize(initialQuery);
+        System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
+    }
 }
