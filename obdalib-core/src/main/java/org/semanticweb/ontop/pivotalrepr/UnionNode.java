@@ -6,5 +6,5 @@ public interface UnionNode extends QueryNode {
     UnionNode clone();
 
     @Override
-    UnionNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 }

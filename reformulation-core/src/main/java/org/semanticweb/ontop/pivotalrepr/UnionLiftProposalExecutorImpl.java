@@ -7,7 +7,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 
 public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor {
 
-    private final QueryNodeTransformer queryNodeCloner = new QueryNodeCloner();
+    private final HomogeneousQueryNodeTransformer queryNodeCloner = new QueryNodeCloner();
 
     public IntermediateQuery apply(UnionNode unionNode, QueryNode targetQueryNode, IntermediateQuery inputQuery) {
 

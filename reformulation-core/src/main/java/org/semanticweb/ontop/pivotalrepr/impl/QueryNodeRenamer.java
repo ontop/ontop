@@ -10,7 +10,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 /**
  * Renames query nodes according to one renaming substitution.
  */
-public class QueryNodeRenamer implements QueryNodeTransformer {
+public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final InjectiveVar2VarSubstitution renamingSubstitution;

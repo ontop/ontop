@@ -11,7 +11,7 @@ public interface FilterNode extends JoinOrFilterNode {
     FilterNode clone();
 
     @Override
-    FilterNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     /**
      * Not optional for a FilterNode.

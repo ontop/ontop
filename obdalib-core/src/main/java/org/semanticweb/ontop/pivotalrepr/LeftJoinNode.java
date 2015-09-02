@@ -6,5 +6,5 @@ public interface LeftJoinNode extends JoinLikeNode, BinaryAsymmetricOperatorNode
     LeftJoinNode clone();
 
     @Override
-    LeftJoinNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 }

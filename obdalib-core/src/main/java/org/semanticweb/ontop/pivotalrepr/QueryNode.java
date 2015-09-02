@@ -1,8 +1,5 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
-
 /**
  * Mutable BUT ONLY WHEN APPLYING LocalOptimizationProposal forwarded by the IntermediateQuery.
  *
@@ -39,5 +36,5 @@ public interface QueryNode extends Cloneable {
      * throw a QueryNodeTransformationException
      *
      */
-    QueryNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
+    QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
 }

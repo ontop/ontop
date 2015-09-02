@@ -3,7 +3,7 @@ package org.semanticweb.ontop.pivotalrepr;
 /**
  * TODO: explain
  */
-public interface QueryNodeTransformer {
+public interface HomogeneousQueryNodeTransformer {
 
     FilterNode transform(FilterNode filterNode) throws QueryNodeTransformationException;
 

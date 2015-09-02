@@ -1,10 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.NonGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
@@ -34,7 +32,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
-    public GroupNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException,
+    public GroupNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException,
             NotNeededNodeException {
         return transformer.transform(this);
     }

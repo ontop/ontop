@@ -198,7 +198,7 @@ public class IntermediateQueryUtils {
     public static IntermediateQueryBuilder convertToBuilder(IntermediateQuery originalQuery)
             throws IntermediateQueryBuilderException {
         try {
-            return convertToBuilderAndTransform(originalQuery, Optional.<QueryNodeTransformer>absent());
+            return convertToBuilderAndTransform(originalQuery, Optional.<HomogeneousQueryNodeTransformer>absent());
             /**
              * No transformer so should not be expected
              */
@@ -212,7 +212,7 @@ public class IntermediateQueryUtils {
      *
      */
     public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                        QueryNodeTransformer transformer)
+                                                                        HomogeneousQueryNodeTransformer transformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         return convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
     }
@@ -224,7 +224,7 @@ public class IntermediateQueryUtils {
      *
      */
     private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                        Optional<QueryNodeTransformer> optionalTransformer)
+                                                                        Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
 
@@ -250,7 +250,7 @@ public class IntermediateQueryUtils {
                                                                        IntermediateQueryBuilder queryBuilder,
                                                                        final QueryNode originalParentNode,
                                                                        final QueryNode newParentNode,
-                                                                       Optional<QueryNodeTransformer> optionalTransformer)
+                                                                       Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(originalParentNode)) {
 

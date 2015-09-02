@@ -6,6 +6,6 @@ public interface InnerJoinNode extends JoinLikeNode {
     InnerJoinNode clone();
 
     @Override
-    InnerJoinNode acceptNodeTransformer(QueryNodeTransformer transformer)
+    InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 }
