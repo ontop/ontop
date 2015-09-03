@@ -244,11 +244,49 @@ public class BindTestWithFunctionsMySQL {
 	}
 
 	/*
-	 * Tests for hash functions. H2 supports only SHA25 algorithm.
+	 * Tests for hash functions.
 	 */
 
+    @Test
+    public void testHashSHA1() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA1(?title) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(p, queryBind, expectedValues);
+
+    }
+
 	 @Test
-    public void testHash() throws Exception {
+    public void testHashMD5() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

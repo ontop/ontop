@@ -47,7 +47,7 @@ import static org.junit.Assert.assertTrue;
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  * Refer in particular to the class {@link it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
  *
- * It expands the tests from {@link it.unibz.krdb.obda.reformulation.test.BindTest}.
+ * It expands the tests from {@link it.unibz.krdb.obda.reformulation.tests.BindTest}.
  */
 
 public class BindTestWithFunctionsOracle {
@@ -596,6 +596,7 @@ public class BindTestWithFunctionsOracle {
                     OWLObject ind1 = rs.getOWLObject("w");
                     // log.debug(ind1.toString());
                     returnedValues.add(ind1.toString());
+
                     System.out.println(ind1);
                     i++;
                 }
