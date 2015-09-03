@@ -157,14 +157,14 @@ public class ComplexSelectMappingVirtualABoxTest  {
         OWLLiteral val;
 		try {
 			String sql = st.getUnfolding(this.query);
-			Pattern pat = Pattern.compile("TABLE1");
+			Pattern pat = Pattern.compile("TABLE1 ");
 		    Matcher m = pat.matcher(sql);
-		    int num_joins = -1;
+		    int num_joins = 0;
 		    while (m.find()){
 		    	num_joins +=1;
 		    }
 //		    System.out.println(sql);
-			assertEquals(num_joins, 0);
+			assertEquals(1, num_joins);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
