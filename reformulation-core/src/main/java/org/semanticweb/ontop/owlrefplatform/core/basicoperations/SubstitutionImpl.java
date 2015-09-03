@@ -145,19 +145,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
             }
             else if (t instanceof FunctionalTermImpl) {
                 FunctionalTermImpl fclone = (FunctionalTermImpl)t.clone();
-                List<Term> innerTerms = fclone.getTerms();
-                boolean innerchanges = false;
-                // TODO this ways of changing inner terms in functions is not
-                // optimal, modify
-
-                for (int i = 0; i < innerTerms.size(); i++) {
-                    Term innerTerm = innerTerms.get(i);
-
-                    if (substitution.getVariable().equals(innerTerm)) { // ROMAN: no need in isEqual(innerTerm, s.getVariable())
-                        fclone.getTerms().set(i, substitution.getTerm());
-                        innerchanges = true;
-                    }
-                }
+                boolean innerchanges = applySingletonSubstitution(fclone, substitution);
                 if (innerchanges)
                     map.put(v, fclone);
             }
@@ -166,6 +154,33 @@ public class SubstitutionImpl implements AppendableSubstitution {
         map.put(substitution.getVariable(), substitution.getTerm());
         return true;
     }
+
+    /**
+     * May alter the functionalTerm (mutable style)
+     *
+     * Recursive
+     */
+    private static boolean applySingletonSubstitution(Function functionalTerm, SingletonSubstitution substitution) {
+        List<Term> innerTerms = functionalTerm.getTerms();
+        boolean innerchanges = false;
+        // TODO this ways of changing inner terms in functions is not
+        // optimal, modify
+
+        for (int i = 0; i < innerTerms.size(); i++) {
+            Term innerTerm = innerTerms.get(i);
+
+            if (innerTerm instanceof Function) {
+                // Recursive call
+                innerchanges = innerchanges || applySingletonSubstitution((Function)innerTerm, substitution);
+            }
+            else if (substitution.getVariable().equals(innerTerm)) { // ROMAN: no need in isEqual(innerTerm, s.getVariable())
+                functionalTerm.getTerms().set(i, substitution.getTerm());
+                innerchanges = true;
+            }
+        }
+        return innerchanges;
+    }
+
 
     @Override
     public boolean composeFunctions(Function first, Function second) {
