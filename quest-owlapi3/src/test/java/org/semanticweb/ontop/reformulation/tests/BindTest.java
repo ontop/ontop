@@ -247,7 +247,7 @@ public class BindTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"17.25\"");
+        expectedValues.add("\"17.25\"^^xsd:decimal");
 
 
         checkReturnedValues(p, queryBind, expectedValues);
