@@ -9,10 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
-import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
+import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
 
@@ -39,17 +36,37 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
         Optional<QueryNode> optionalParent = query.getParent(originalTopJoinNode);
         Optional<QueryNode> optionalNextSibling = query.nextSibling(originalTopJoinNode);
 
+        /**
+         * Optimizes
+         */
         Optional<InnerJoinNode> optionalNewJoinNode = transformJoin(originalTopJoinNode, query, treeComponent);
 
         if (optionalNewJoinNode.isPresent()) {
             return new NodeCentricOptimizationResultsImpl(query, optionalNewJoinNode.get());
         }
         else {
-            // TODO: clean that!
-            ProposalResults results = query.applyProposal(new ReactToChildDeletionProposalImpl(originalTopJoinNode,
-                    optionalParent.get()));
-            throw new RuntimeException("TODO: handle the deletion of the node properly");
-            //return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling, optionalParent);
+            ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
+                    optionalParent.get());
+
+            /**
+             * TODO: try to get richer feedback from the optimization (for instance, which is the next sibling).
+             */
+            ReactToChildDeletionResults deletionResults = reactionProposal.castResults(query.applyProposal(reactionProposal));
+
+            QueryNode closestRemainingAncestor = deletionResults.getClosestRemainingAncestor();
+            /**
+             * Tries to recognize the closest remaining ancestor (can only work if an InternalExecutor has been used)
+             */
+            if (closestRemainingAncestor == optionalParent.get()) {
+                return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling, optionalParent);
+            }
+            /**
+             * Fallback mode
+             * TODO: may need to improve ReactToChildDeletionResults.
+             */
+            else {
+                throw new RuntimeException("TODO: handle the cascade deletion of the node properly");
+            }
         }
     }
 

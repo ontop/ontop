@@ -2,7 +2,9 @@ package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
 
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
 
 public class ReactToChildDeletionProposalImpl implements ReactToChildDeletionProposal {
 
@@ -22,6 +24,11 @@ public class ReactToChildDeletionProposalImpl implements ReactToChildDeletionPro
     @Override
     public QueryNode getDeletedChild() {
         return deletedChild;
+    }
+
+    @Override
+    public ReactToChildDeletionResults castResults(ProposalResults results) {
+        return (ReactToChildDeletionResults) results;
     }
 
 }

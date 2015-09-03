@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.proposal;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
@@ -20,6 +21,9 @@ public interface NodeCentricOptimizationResults extends ProposalResults {
 
     /**
      * TODO: explain
+     *
+     * No ob
+     *
      */
-    Optional<QueryNode> getOptionalParentNode();
+    Optional<QueryNode> getOptionalClosestAncestor();
 }

@@ -91,7 +91,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                      * TODO: analyze and apply the consequences of the removal of the JOIN node.
                      */
                     else {
-                        currentParent = childResults.getOptionalParentNode().get();
+                        currentParent = childResults.getOptionalClosestAncestor().get();
                          // Continues with the next sibling
                         optionalChild = childResults.getOptionalNextSibling();
                     }

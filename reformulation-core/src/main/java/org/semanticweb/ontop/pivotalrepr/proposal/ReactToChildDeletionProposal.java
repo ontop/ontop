@@ -16,4 +16,6 @@ public interface ReactToChildDeletionProposal extends QueryOptimizationProposal 
     QueryNode getParentNode();
 
     QueryNode getDeletedChild();
+
+    ReactToChildDeletionResults castResults(ProposalResults results);
 }
