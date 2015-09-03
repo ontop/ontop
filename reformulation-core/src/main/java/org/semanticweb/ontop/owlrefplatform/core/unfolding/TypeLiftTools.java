@@ -383,11 +383,11 @@ public class TypeLiftTools {
      * It must be only composed of (possibly typed) variables.
      */
     private static List<Variable> extractVariablesFromTargetAtom(final Function targetAtom) {
-        return List.iterableList(targetAtom.getTerms()).map(new F<Term, Variable>() {
+        List<Option<Variable>> variableList = List.iterableList(targetAtom.getTerms()).map(new F<Term, Option<Variable>>() {
             @Override
-            public Variable f(Term term) {
+            public Option<Variable> f(Term term) {
                 if (term instanceof Variable)
-                    return (Variable) term;
+                    return Option.some((Variable) term);
 
                 else if (term instanceof Function) {
                     Function functionalTerm = (Function) term;
@@ -405,13 +405,14 @@ public class TypeLiftTools {
                     if (functionSymbol.isDataTypePredicate() || functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI)) {
                         Term firstTerm = functionalTerm.getTerm(0);
                         if (firstTerm instanceof Variable)
-                            return (Variable) firstTerm;
+                            return Option.some((Variable) firstTerm);
                     }
                 }
-
-                throw new IllegalArgumentException("The target atom must be only composed of (possibly typed) variables. Bad term: " + term);
+                return Option.none();
             }
         });
+
+        return Option.somes(variableList);
     }
 
     /**
