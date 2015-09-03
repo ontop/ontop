@@ -521,15 +521,15 @@ public class BindTestWithFunctionsSqlServer {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRBEFORE(?title,\" \") AS ?w)\n"
+                + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL\"");
-        expectedValues.add("\"The\"");
-        expectedValues.add("\"Crime\"");
-        expectedValues.add("\"The\"");
+         expectedValues.add("\"\"");
+         expectedValues.add("\"The Seman\"");
+         expectedValues.add("\"\"");
+         expectedValues.add("\"The Logic Book: Introduc\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
     }

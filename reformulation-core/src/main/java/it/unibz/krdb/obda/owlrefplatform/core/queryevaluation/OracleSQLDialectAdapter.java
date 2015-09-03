@@ -84,9 +84,11 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s))",
-				str, str, after, after); //FIXME when no match found should return empty string
+		return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s), SIGN(INSTR(%s,%s))*LENGTH(%s)), '\\u00A0')",
+				str, str, after, after, str, after, str); //FIXME when no match found should return empty string
 	}
+//	"SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
+//	str, after, str , after , after, str, str
 
 	@Override
 	public String sqlCast(String value, int type) {

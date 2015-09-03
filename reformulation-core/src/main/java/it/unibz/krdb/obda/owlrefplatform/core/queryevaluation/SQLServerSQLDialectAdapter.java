@@ -101,13 +101,14 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String strBefore(String str, String before) {
-		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
+		return String.format("LEFT(%s,SIGN(CHARINDEX(%s,%s))* (CHARINDEX(%s,%s)-1))", str, before, str, before, str);
+
 	}
 
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s), LEN(%s))",
-				str,  after, str,after, after); //FIXME when no match found should return empty string
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
+				str, after, str , after , after, str, str); //FIXME when no match found should return empty string
 	}
 
 	@Override
