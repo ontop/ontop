@@ -46,27 +46,13 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
         }
         else {
             ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
-                    optionalParent.get());
+                    optionalParent.get(), optionalNextSibling);
 
-            /**
-             * TODO: try to get richer feedback from the optimization (for instance, which is the next sibling).
-             */
             ReactToChildDeletionResults deletionResults = reactionProposal.castResults(query.applyProposal(reactionProposal));
 
-            QueryNode closestRemainingAncestor = deletionResults.getClosestRemainingAncestor();
-            /**
-             * Tries to recognize the closest remaining ancestor (can only work if an InternalExecutor has been used)
-             */
-            if (closestRemainingAncestor == optionalParent.get()) {
-                return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling, optionalParent);
-            }
-            /**
-             * Fallback mode
-             * TODO: may need to improve ReactToChildDeletionResults.
-             */
-            else {
-                throw new RuntimeException("TODO: handle the cascade deletion of the node properly");
-            }
+            return new NodeCentricOptimizationResultsImpl(deletionResults.getResultingQuery(),
+                    deletionResults.getOptionalNextSibling(),
+                    Optional.of(deletionResults.getClosestRemainingAncestor()));
         }
     }
 

@@ -27,7 +27,7 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

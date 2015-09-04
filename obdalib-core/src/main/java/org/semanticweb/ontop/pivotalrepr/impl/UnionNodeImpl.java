@@ -24,8 +24,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

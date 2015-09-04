@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.proposal;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
@@ -18,4 +19,6 @@ public interface ReactToChildDeletionProposal extends QueryOptimizationProposal 
     QueryNode getDeletedChild();
 
     ReactToChildDeletionResults castResults(ProposalResults results);
+
+    Optional<QueryNode> getOptionalNextSibling();
 }

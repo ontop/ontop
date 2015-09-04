@@ -22,13 +22,13 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     }
 
     @Override
-    public OrdinaryDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public OrdinaryDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

@@ -28,7 +28,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.proposal;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
@@ -21,4 +22,10 @@ public interface ReactToChildDeletionResults extends ProposalResults {
      * that has not been deleted.
      */
     QueryNode getClosestRemainingAncestor();
+
+    /**
+     * First sibling found of a deleted node.
+     * By definition, must be a child of the closest ancestor.
+     */
+    Optional<QueryNode> getOptionalNextSibling();
 }

@@ -31,8 +31,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * Should not be expected (internal error).
      *
      */
-    protected static class InconsistentIntermediateQueryException extends RuntimeException {
-        protected InconsistentIntermediateQueryException(String message) {
+    public static class InconsistentIntermediateQueryException extends RuntimeException {
+        public InconsistentIntermediateQueryException(String message) {
             super(message);
         }
     }

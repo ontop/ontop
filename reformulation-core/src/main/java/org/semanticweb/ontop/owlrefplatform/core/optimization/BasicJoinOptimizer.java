@@ -20,19 +20,19 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
      */
     private static class OneLevelOptimizationResult {
         private final IntermediateQuery query;
-        private final QueryNode newParentNode;
+        private final Optional<QueryNode> optionalNewParentNode;
 
-        private OneLevelOptimizationResult(IntermediateQuery query, QueryNode newParentNode) {
+        private OneLevelOptimizationResult(IntermediateQuery query, Optional<QueryNode> optionalNewParentNode) {
             this.query = query;
-            this.newParentNode = newParentNode;
+            this.optionalNewParentNode = optionalNewParentNode;
         }
 
         public IntermediateQuery getQuery() {
             return query;
         }
 
-        public QueryNode getNewParentNode() {
-            return newParentNode;
+        public Optional<QueryNode> getOptionalNewParentNode() {
+            return optionalNewParentNode;
         }
     }
 
@@ -46,6 +46,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      * TODO: simplify so that the update of currentQuery, currentParent and optionalChild is getting clearer.
+     * Clarify when DELETE CASCADING can happen.
      *
      * Recursive
      */
@@ -81,7 +82,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                         OneLevelOptimizationResult grandChildResults = optimizeChildren(childResults.getResultingQuery(), optionalNewChild.get());
                         currentQuery = grandChildResults.getQuery();
 
-                        QueryNode newNewChild = grandChildResults.getNewParentNode();
+                        QueryNode newNewChild = grandChildResults.getOptionalNewParentNode().get();
                         currentParent = currentQuery.getParent(newNewChild).get();
 
                         // Continues with the next sibling
@@ -108,13 +109,23 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
                 OneLevelOptimizationResult grandChildResults = optimizeChildren(currentQuery, child);
                 currentQuery = grandChildResults.getQuery();
 
-                QueryNode newChild = grandChildResults.getNewParentNode();
-                currentParent = currentQuery.getParent(newChild).get();
+                // TODO: ugly!!
+                QueryNode newChild = grandChildResults.getOptionalNewParentNode().get();
 
-                optionalChild = currentQuery.nextSibling(newChild);
+                Optional<QueryNode> optionalNewParent = currentQuery.getParent(newChild);
+                if (!optionalNewParent.isPresent()) {
+                    return new OneLevelOptimizationResult(currentQuery, Optional.<QueryNode>absent());
+                }
+                /**
+                 * Continue looping
+                 */
+                else {
+                    currentParent = optionalNewParent.get();
+                    optionalChild = currentQuery.nextSibling(newChild);
+                }
             }
         }
 
-        return new OneLevelOptimizationResult(currentQuery, currentParent);
+        return new OneLevelOptimizationResult(currentQuery, Optional.of(currentParent));
     }
 }

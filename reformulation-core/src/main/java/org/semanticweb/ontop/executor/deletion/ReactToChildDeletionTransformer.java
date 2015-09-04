@@ -5,18 +5,14 @@ import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.FilterNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.NodeTransformationProposalImpl;
+
+import static org.semanticweb.ontop.pivotalrepr.NodeTransformationProposedState.*;
 
 /**
  * TODO: explain
  */
-public class ReactToChildDeletionTransformer
-        implements HeterogeneousQueryNodeTransformer<ReactToChildDeletionTransformer.NodeToDeleteException> {
-
-    /**
-     * TODO: explain
-     */
-    public static class NodeToDeleteException extends QueryNodeTransformationException {
-    }
+public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTransformer {
 
     private final IntermediateQuery query;
 
@@ -25,95 +21,95 @@ public class ReactToChildDeletionTransformer
     }
 
     @Override
-    public QueryNode transform(FilterNode filterNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(FilterNode filterNode) {
         return checkHasChildren(filterNode);
     }
 
     @Override
-    public QueryNode transform(TableNode tableNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(TableNode tableNode){
         throw new UnsupportedOperationException("A TableNode is not expected to have a child");
     }
 
     @Override
-    public QueryNode transform(LeftJoinNode leftJoinNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(LeftJoinNode leftJoinNode){
         ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(leftJoinNode);
         switch (children.size()) {
             case 0:
                 // Should normally not happen
-                throw new NodeToDeleteException();
+                return new NodeTransformationProposalImpl(DELETE);
             case 1:
                 QueryNode remainingChild = children.get(0);
                 switch(query.getOptionalPosition(leftJoinNode, remainingChild).get()) {
                     case LEFT:
-                        return remainingChild;
+                        return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, remainingChild);
                     /**
                      * No left-part means that the LJ will return no result.
                      */
                     case RIGHT:
-                        throw new NodeToDeleteException();
+                        return new NodeTransformationProposalImpl(DELETE);
                 }
             default:
-                return leftJoinNode;
+                return new NodeTransformationProposalImpl(NO_CHANGE);
         }
     }
 
     @Override
-    public QueryNode transform(UnionNode unionNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(UnionNode unionNode) {
         ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(unionNode);
         switch (children.size()) {
             case 0:
-                throw new NodeToDeleteException();
+                return new NodeTransformationProposalImpl(DELETE);
             case 1:
-                return children.get(0);
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, children.get(0));
             default:
-                return unionNode;
+                return new NodeTransformationProposalImpl(NO_CHANGE);
         }
     }
 
     @Override
-    public QueryNode transform(OrdinaryDataNode ordinaryDataNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(OrdinaryDataNode ordinaryDataNode) {
         throw new UnsupportedOperationException("A OrdinaryDataNode is not expected to have a child");
     }
 
     @Override
-    public QueryNode transform(InnerJoinNode innerJoinNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(InnerJoinNode innerJoinNode) {
         ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(innerJoinNode);
         switch (children.size()) {
             case 0:
-                throw new NodeToDeleteException();
+                return new NodeTransformationProposalImpl(DELETE);
             case 1:
                 Optional<ImmutableBooleanExpression> optionalFilterCondition = innerJoinNode.getOptionalFilterCondition();
                 if (optionalFilterCondition.isPresent()) {
-                    return new FilterNodeImpl(optionalFilterCondition.get());
+                    return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
+                            new FilterNodeImpl(optionalFilterCondition.get()));
                 }
                 else {
-                    return children.get(0);
+                    return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, children.get(0));
                 }
             default:
-                return innerJoinNode;
+                return new NodeTransformationProposalImpl(NO_CHANGE);
         }
     }
 
     @Override
-    public QueryNode transform(ConstructionNode constructionNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(ConstructionNode constructionNode) {
         return checkHasChildren(constructionNode);
     }
 
     @Override
-    public QueryNode transform(GroupNode groupNode) throws NodeToDeleteException {
+    public NodeTransformationProposal transform(GroupNode groupNode) {
         return checkHasChildren(groupNode);
     }
-
 
     /**
      * TODO: find a better name
      */
-    private QueryNode checkHasChildren(QueryNode node) throws NodeToDeleteException {
+    private NodeTransformationProposal checkHasChildren(QueryNode node) {
         if (hasChildren(node)) {
-            return node;
+            return new NodeTransformationProposalImpl(NO_CHANGE);
         }
         else {
-            throw new NodeToDeleteException();
+            return new NodeTransformationProposalImpl(DELETE);
         }
     }
 

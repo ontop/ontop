@@ -3,22 +3,22 @@ package org.semanticweb.ontop.pivotalrepr;
 /**
  * TODO: explain
  */
-public interface HeterogeneousQueryNodeTransformer<T extends QueryNodeTransformationException> {
+public interface HeterogeneousQueryNodeTransformer<P extends NodeTransformationProposal> {
 
-    QueryNode transform(FilterNode filterNode) throws T;
+    P transform(FilterNode filterNode);
 
-    QueryNode transform(TableNode tableNode) throws T;
+    P transform(TableNode tableNode);
 
-    QueryNode transform(LeftJoinNode leftJoinNode) throws T;
+    P transform(LeftJoinNode leftJoinNode);
 
-    QueryNode transform(UnionNode unionNode) throws T;
+    P transform(UnionNode unionNode);
 
-    QueryNode transform(OrdinaryDataNode ordinaryDataNode) throws T;
+    P transform(OrdinaryDataNode ordinaryDataNode);
 
-    QueryNode transform(InnerJoinNode innerJoinNode) throws T;
+    P transform(InnerJoinNode innerJoinNode);
 
-    QueryNode transform(ConstructionNode constructionNode) throws T;
+    P transform(ConstructionNode constructionNode);
 
-    QueryNode transform(GroupNode groupNode) throws T;
+    P transform(GroupNode groupNode);
 
 }

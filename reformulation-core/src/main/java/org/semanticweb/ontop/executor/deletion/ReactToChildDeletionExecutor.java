@@ -3,7 +3,6 @@ package org.semanticweb.ontop.executor.deletion;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -20,9 +19,7 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                                  QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         // May alter the query and its tree component
-        QueryNode closestUnmodifiedAncestor = analyzeAndUpdate(query, proposal.getParentNode(), treeComponent);
-
-        return new ReactToChildDeletionResultsImpl(query, closestUnmodifiedAncestor);
+        return analyzeAndUpdate(query, proposal.getParentNode(), proposal.getOptionalNextSibling(), treeComponent);
     }
 
     /**
@@ -30,95 +27,84 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
      *
      * Recursive!
      */
-    private static QueryNode analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode,
-                                                    QueryTreeComponent treeComponent)
+    private static ReactToChildDeletionResults analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode,
+                                                                Optional<QueryNode> optionalNextSibling,
+                                                                QueryTreeComponent treeComponent)
             throws EmptyQueryException {
         ReactToChildDeletionTransformer transformer = new ReactToChildDeletionTransformer(query);
 
-        try {
-            QueryNode newParentNode = parentNode.acceptNodeTransformer(transformer);
+        NodeTransformationProposal transformationProposal = parentNode.acceptNodeTransformer(transformer);
 
-            return updateParentNode(query, parentNode, treeComponent, newParentNode);
-        }
-        catch (ReactToChildDeletionTransformer.NodeToDeleteException e) {
-            return reactToDeletionException(query, parentNode, treeComponent);
-        }
-        catch (QueryNodeTransformationException e) {
-            throw new RuntimeException("Unexpected exception: " + e.getMessage());
+        switch (transformationProposal.getState()) {
+            case NO_CHANGE:
+                return new ReactToChildDeletionResultsImpl(query, parentNode, optionalNextSibling);
+
+            case REPLACE_BY_UNIQUE_CHILD:
+                return applyReplacementProposal(query, parentNode, treeComponent, transformationProposal, true);
+
+            case REPLACE_BY_NEW_NODE:
+                return applyReplacementProposal(query, parentNode, treeComponent, transformationProposal, false);
+
+            case DELETE:
+                return applyDeletionProposal(query, parentNode, treeComponent);
+
+            default:
+                throw new RuntimeException("Unexpected state: " + transformationProposal.getState());
         }
     }
 
-    /**
-     * Returns true if the parent has been removed/replaced
-     */
-    private static QueryNode updateParentNode(IntermediateQuery query, QueryNode parentNode, QueryTreeComponent treeComponent,
-                                         QueryNode newParentNode) {
-        /**
-         * Only updates if a new parent node is
-         */
-        if (parentNode == newParentNode) {
-            return parentNode;
-        }
-        else if (treeComponent.contains(newParentNode)) {
+    private static ReactToChildDeletionResults applyReplacementProposal(IntermediateQuery query,
+                                                                        QueryNode parentNode,
+                                                                        QueryTreeComponent treeComponent,
+                                                                        NodeTransformationProposal transformationProposal,
+                                                                        boolean isReplacedByUniqueChild) {
+        Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode);
 
-                Optional<QueryNode> optionalFirstChild = query.getFirstChild(parentNode);
-                if (optionalFirstChild.isPresent() && optionalFirstChild.get() == newParentNode) {
-                    // Here will replace (not remove)
-                    try {
-                        treeComponent.removeOrReplaceNodeByUniqueChildren(parentNode);
-                    }
-                    /**
-                     * Unexpected
-                     */
-                    catch (IllegalTreeUpdateException e) {
-                        // TODO: should we throw another exception?
-                        throw new RuntimeException("Unexpected: " + e.getMessage());
-                    }
-                }
-                else {
-                    throw new UnsupportedOperationException("Unsupported QueryNode returned " +
-                            "by the ReactToChildDeletionTransformer");
-                }
-            }
-        /**
-         * New node
-         */
-        else {
-            treeComponent.replaceNode(parentNode, newParentNode);
+        if (!optionalGrandParent.isPresent()) {
+            throw new RuntimeException("The root of the tree is not expected to be replaced.");
         }
 
-        /**
-         * Gets the closest ancestor that has not been modified
-         */
+        Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode();
+        if (!optionalReplacingNode.isPresent()) {
+            throw new RuntimeException("Inconsistent transformation proposal: a replacing node must be given");
+        }
         try {
-            Optional<QueryNode> optionalGrandParent = treeComponent.getParent(newParentNode);
-            if (optionalGrandParent.isPresent()) {
-                return optionalGrandParent.get();
+            if (isReplacedByUniqueChild) {
+                treeComponent.removeOrReplaceNodeByUniqueChildren(parentNode);
             }
             else {
-                // TODO: should we throw another exception?
-                throw new RuntimeException("The root of the tree is not expected to be replaced.");
+                treeComponent.replaceNode(parentNode, optionalReplacingNode.get());
             }
-        } catch (IllegalTreeException e) {
-            // TODO: should we throw another exception?
+        } catch (IllegalTreeUpdateException e) {
             throw new RuntimeException("Unexpected: " + e.getMessage());
         }
 
+        /**
+         * Next sibling: only when the parent is replaced by its unique remaining child.
+         */
+        Optional<QueryNode> optionalNextSibling;
+        if (isReplacedByUniqueChild) {
+            optionalNextSibling = optionalReplacingNode;
+        }
+        else {
+            optionalNextSibling = Optional.absent();
+        }
+        return new ReactToChildDeletionResultsImpl(query, optionalGrandParent.get(), optionalNextSibling);
     }
 
-    /**
-     * TODO: explain
-     */
-    private static QueryNode reactToDeletionException(IntermediateQuery query, QueryNode parentNode,
-                                                            QueryTreeComponent treeComponent) throws EmptyQueryException {
+    private static ReactToChildDeletionResults applyDeletionProposal(IntermediateQuery query, QueryNode parentNode,
+                                                                     QueryTreeComponent treeComponent)
+            throws EmptyQueryException {
         Optional<QueryNode> optionalGrandParent = query.getParent(parentNode);
+        Optional<QueryNode> optionalNextSibling = query.nextSibling(parentNode);
+
         treeComponent.removeSubTree(parentNode);
 
         /**
          * Recursive (cascade)
          */
         if (optionalGrandParent.isPresent()) {
-            return analyzeAndUpdate(query, optionalGrandParent.get(), treeComponent);
+            return analyzeAndUpdate(query, optionalGrandParent.get(), optionalNextSibling, treeComponent);
         }
         /**
          * Arrived to the root
