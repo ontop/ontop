@@ -145,13 +145,13 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		else {
 			for (OClass oc : v.getClasses())
 				if (!oc.isThing() && !oc.isNothing())
-					concepts.put(oc.getPredicate().getName(), oc);
+					concepts.put(oc.getName(), oc);
 			for (ObjectPropertyExpression ope : v.getObjectProperties())
 				if (!ope.isTop() && !ope.isBottom())
-					objectProperties.put(ope.getPredicate().getName(), ope);
+					objectProperties.put(ope.getName(), ope);
 			for (DataPropertyExpression dpe : v.getDataProperties())
 				if (!dpe.isTop() && !dpe.isBottom())
-					dataProperties.put(dpe.getPredicate().getName(), dpe);
+					dataProperties.put(dpe.getName(), dpe);
 		}
 	}
 	

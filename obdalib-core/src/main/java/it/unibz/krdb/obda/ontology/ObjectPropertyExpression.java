@@ -52,6 +52,8 @@ public interface ObjectPropertyExpression extends Description {
 	 */
 	
 	public Predicate getPredicate();
+
+	public String getName();
 	
 	/**
 	 * the inverse of the object property

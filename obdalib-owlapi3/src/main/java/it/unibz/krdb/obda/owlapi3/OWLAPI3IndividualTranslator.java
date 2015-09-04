@@ -61,7 +61,7 @@ public class OWLAPI3IndividualTranslator {
 	} 
 	
 	public OWLIndividualAxiom translate(ObjectPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getPredicate().getName().toString());
+		IRI roleIRI = IRI.create(opa.getProperty().getName());
 
 		OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
 		OWLIndividual subject = translate(opa.getSubject());

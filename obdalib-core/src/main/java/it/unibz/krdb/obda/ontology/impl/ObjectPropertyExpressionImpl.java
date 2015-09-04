@@ -122,6 +122,11 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	public Predicate getPredicate() {
 		return predicate;
 	}
+
+	@Override
+	public String getName() {
+		return predicate.getName();
+	}
 	
 	@Override
 	public ObjectPropertyExpression getInverse() {

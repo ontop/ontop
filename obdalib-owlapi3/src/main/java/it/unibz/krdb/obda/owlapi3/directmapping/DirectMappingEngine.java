@@ -154,21 +154,21 @@ public class DirectMappingEngine {
 		
 		//Add all the classes
 		for (OClass c :  model.getOntologyVocabulary().getClasses()) {
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(c.getPredicate().getName()));
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(c.getName()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology, declarationAxiom);
 		}
 		
 		//Add all the object properties
 		for (ObjectPropertyExpression p : model.getOntologyVocabulary().getObjectProperties()){
-			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(p.getPredicate().getName()));
+			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology, declarationAxiom);
 		}
 		
 		//Add all the data properties
 		for (DataPropertyExpression p : model.getOntologyVocabulary().getDataProperties()){
-			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(p.getPredicate().getName()));
+			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology, declarationAxiom);
 		}

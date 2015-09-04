@@ -242,7 +242,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private static final Comparator<DataPropertyExpression> dataPropertyComparator = new Comparator<DataPropertyExpression>() {
 		@Override
 		public int compare(DataPropertyExpression o1, DataPropertyExpression o2) {
-			int compared = o1.getPredicate().getName().compareTo(o2.getPredicate().getName()); 
+			int compared = o1.getName().compareTo(o2.getName()); 
 			return compared;
 		}
 	}; 

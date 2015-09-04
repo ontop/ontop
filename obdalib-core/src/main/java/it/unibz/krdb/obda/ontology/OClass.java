@@ -31,4 +31,6 @@ import it.unibz.krdb.obda.model.Predicate;
 public interface OClass extends ClassExpression {
 	
 	public Predicate getPredicate();
+	
+	public String getName();
 }

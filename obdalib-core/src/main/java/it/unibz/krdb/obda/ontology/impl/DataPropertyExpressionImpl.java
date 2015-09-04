@@ -79,6 +79,11 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public Predicate getPredicate() {
 		return predicate;
 	}
+
+	@Override
+	public String getName() {
+		return predicate.getName();
+	}
 	
 	@Override
 	public DataSomeValuesFrom getDomainRestriction(Datatype datatype) {

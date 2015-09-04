@@ -44,7 +44,6 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,7 +53,6 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 public class OntologyImpl implements Ontology {
 
@@ -566,7 +564,7 @@ public class OntologyImpl implements Ontology {
 	private void checkSignature(ClassExpression desc) {		
 		if (desc instanceof OClass) {
 			OClass cl = (OClass) desc;
-			if (!vocabulary.concepts.containsKey(cl.getPredicate().getName()))
+			if (!vocabulary.concepts.containsKey(cl.getName()))
 				throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
 		}	
 		else if (desc instanceof ObjectSomeValuesFrom) {
@@ -594,7 +592,7 @@ public class OntologyImpl implements Ontology {
 		if (prop.isInverse()) 
 			prop = prop.getInverse();
 		
-		if (!vocabulary.containsObjectProperty(prop.getPredicate().getName()) && !auxObjectProperties.contains(prop)) 
+		if (!vocabulary.containsObjectProperty(prop.getName()) && !auxObjectProperties.contains(prop)) 
 				throw new IllegalArgumentException(OBJECT_PROPERTY_NOT_FOUND + prop);
 	}
 

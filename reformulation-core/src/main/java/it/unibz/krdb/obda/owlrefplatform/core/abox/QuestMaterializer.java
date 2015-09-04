@@ -138,13 +138,13 @@ public class QuestMaterializer {
 			// TODO: use Vocabulary for OBDAModel as well
 			
 			for (OClass pred : model.getOntologyVocabulary().getClasses()) 
-				vb.createClass(pred.getPredicate().getName());				
+				vb.createClass(pred.getName());				
 			
 			for (ObjectPropertyExpression prop : model.getOntologyVocabulary().getObjectProperties()) 
-				vb.createObjectProperty(prop.getPredicate().getName());
+				vb.createObjectProperty(prop.getName());
 
 			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
-				vb.createDataProperty(prop.getPredicate().getName());
+				vb.createDataProperty(prop.getName());
 			
 			ontology = ofac.createOntology(vb);			
 		}

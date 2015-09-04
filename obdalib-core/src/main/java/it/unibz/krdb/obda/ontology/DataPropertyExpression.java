@@ -50,6 +50,8 @@ public interface DataPropertyExpression extends Description {
 
 	public Predicate getPredicate();
 
+	public String getName();
+	
 	/**
 	 * returns the DataSomeValuesFrom for the domain of the data property
 	 * 

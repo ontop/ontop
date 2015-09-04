@@ -62,12 +62,12 @@ public class SesameStatement implements Statement {
 			//object or data property assertion
 			DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
 			ObjectConstant subj = ba.getSubject();
-			Predicate pred = ba.getProperty().getPredicate();
+			String pred = ba.getProperty().getName();
 			ValueConstant obj = ba.getValue();
 			
 			// convert string into respective type
 			subject = helper.getResource(subj);	
-			predicate = helper.createURI(pred.getName().toString()); // URI
+			predicate = helper.createURI(pred); // URI
 			
 			if (obj instanceof ValueConstant)
 				object = helper.getLiteral((ValueConstant)obj);		

@@ -1166,7 +1166,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			// inserting index data for classes and properties 
 			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
-					stm.setString(1, concept.getKey().getPredicate().getName());
+					stm.setString(1, concept.getKey().getName());
 					stm.setInt(2, concept.getValue().getIndex());
 					stm.setInt(3, CLASS_TYPE);
 					stm.addBatch();
@@ -1190,7 +1190,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					for (Interval it : concept.getValue().getIntervals()) {
-						stm.setString(1, concept.getKey().getPredicate().getName());
+						stm.setString(1, concept.getKey().getName());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, CLASS_TYPE);

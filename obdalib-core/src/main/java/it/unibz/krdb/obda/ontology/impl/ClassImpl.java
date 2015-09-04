@@ -59,6 +59,11 @@ public class ClassImpl implements OClass {
 	}
 
 	@Override
+	public String getName() {
+		return predicate.getName();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ClassImpl)) {
 			return false;

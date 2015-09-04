@@ -40,6 +40,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
+import com.google.common.collect.UnmodifiableIterator;
+
 public class OWL2QLTranslatorTest extends TestCase {
 
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
@@ -68,13 +70,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			OClass subC = (OClass)a.getSub();
 			OClass superC = (OClass)a.getSuper();
-			if (subC.getPredicate().getName().equals("http://example/A"))
-				assertEquals("http://example/B", superC.getPredicate().getName());				
-			else if (subC.getPredicate().getName().equals("http://example/B"))
-				assertEquals("http://example/C", superC.getPredicate().getName());				
+			if (subC.getName().equals("http://example/A"))
+				assertEquals("http://example/B", superC.getName());				
+			else if (subC.getName().equals("http://example/B"))
+				assertEquals("http://example/C", superC.getName());				
 			else { 
-				assertEquals("http://example/C", subC.getPredicate().getName());				
-				assertEquals("http://example/A", superC.getPredicate().getName());				
+				assertEquals("http://example/C", subC.getName());				
+				assertEquals("http://example/A", superC.getName());				
 			}
 		}
 	}	
@@ -103,13 +105,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ObjectPropertyExpression> a : axs) {
 			ObjectPropertyExpression subC = a.getSub();
 			ObjectPropertyExpression superC = a.getSuper();
-			if (subC.getPredicate().getName().equals("http://example/P"))
-				assertEquals("http://example/Q", superC.getPredicate().getName());				
-			else if (subC.getPredicate().getName().equals("http://example/Q"))
-				assertEquals("http://example/R", superC.getPredicate().getName());				
+			if (subC.getName().equals("http://example/P"))
+				assertEquals("http://example/Q", superC.getName());				
+			else if (subC.getName().equals("http://example/Q"))
+				assertEquals("http://example/R", superC.getName());				
 			else { 
-				assertEquals("http://example/R", subC.getPredicate().getName());				
-				assertEquals("http://example/P", superC.getPredicate().getName());				
+				assertEquals("http://example/R", subC.getName());				
+				assertEquals("http://example/P", superC.getName());				
 			}
 		}
 	}	
@@ -136,13 +138,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ObjectPropertyExpression> a : axs) {
 			ObjectPropertyExpression subC = a.getSub();
 			ObjectPropertyExpression superC = a.getSuper();
-			if (subC.getPredicate().getName().equals("http://example/P")) {
-				assertEquals("http://example/Q", superC.getPredicate().getName());
+			if (subC.getName().equals("http://example/P")) {
+				assertEquals("http://example/Q", superC.getName());
 				assertEquals(true, superC.isInverse() != subC.isInverse());
 			}
 			else { 
-				assertEquals("http://example/Q", subC.getPredicate().getName());				
-				assertEquals("http://example/P", superC.getPredicate().getName());				
+				assertEquals("http://example/Q", subC.getName());				
+				assertEquals("http://example/P", superC.getName());				
 				assertEquals(true, superC.isInverse() != subC.isInverse());
 			}
 		}
@@ -172,13 +174,13 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<DataPropertyExpression> a : axs) {
 			DataPropertyExpression subC = a.getSub();
 			DataPropertyExpression superC = a.getSuper();
-			if (subC.getPredicate().getName().equals("http://example/P"))
-				assertEquals("http://example/Q", superC.getPredicate().getName());				
-			else if (subC.getPredicate().getName().equals("http://example/Q"))
-				assertEquals("http://example/R", superC.getPredicate().getName());				
+			if (subC.getName().equals("http://example/P"))
+				assertEquals("http://example/Q", superC.getName());				
+			else if (subC.getName().equals("http://example/Q"))
+				assertEquals("http://example/R", superC.getName());				
 			else { 
-				assertEquals("http://example/R", subC.getPredicate().getName());				
-				assertEquals("http://example/P", superC.getPredicate().getName());				
+				assertEquals("http://example/R", subC.getName());				
+				assertEquals("http://example/P", superC.getName());				
 			}
 		}
 	}	
@@ -205,9 +207,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			ObjectSomeValuesFrom subC = (ObjectSomeValuesFrom) a.getSub();
 			OClass superC = (OClass) a.getSuper();
-			assertEquals("http://example/P", subC.getProperty().getPredicate().getName());				
+			assertEquals("http://example/P", subC.getProperty().getName());				
 			assertEquals(false, subC.getProperty().isInverse());				
-			assertEquals("http://example/A", superC.getPredicate().getName());				
+			assertEquals("http://example/A", superC.getName());				
 		}
 	}	
 
@@ -233,9 +235,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			ObjectSomeValuesFrom subC = (ObjectSomeValuesFrom) a.getSub();
 			OClass superC = (OClass) a.getSuper();
-			assertEquals("http://example/P", subC.getProperty().getPredicate().getName());				
+			assertEquals("http://example/P", subC.getProperty().getName());				
 			assertEquals(true, subC.getProperty().isInverse());				
-			assertEquals("http://example/A", superC.getPredicate().getName());				
+			assertEquals("http://example/A", superC.getName());				
 		}
 	}	
 
@@ -261,8 +263,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			DataSomeValuesFrom subC = (DataSomeValuesFrom) a.getSub();
 			OClass superC = (OClass) a.getSuper();
-			assertEquals("http://example/P", subC.getProperty().getPredicate().getName());				
-			assertEquals("http://example/A", superC.getPredicate().getName());				
+			assertEquals("http://example/P", subC.getProperty().getName());				
+			assertEquals("http://example/A", superC.getName());				
 		}
 	}	
 	
@@ -286,8 +288,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ObjectPropertyExpression> a : axs) {
 			ObjectPropertyExpression subC = a.getSub();
 			ObjectPropertyExpression superC = a.getSuper();
-			assertEquals("http://example/P", subC.getPredicate().getName());				
-			assertEquals("http://example/P", superC.getPredicate().getName());				
+			assertEquals("http://example/P", subC.getName());				
+			assertEquals("http://example/P", superC.getName());				
 			assertEquals(true, subC.isInverse() != superC.isInverse());				
 		}
 	}	
@@ -314,8 +316,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 			Iterator<ObjectPropertyExpression> it = a.getComponents().iterator();
 			ObjectPropertyExpression subC = it.next();
 			ObjectPropertyExpression superC = it.next();
-			assertEquals("http://example/P", subC.getPredicate().getName());				
-			assertEquals("http://example/P", superC.getPredicate().getName());				
+			assertEquals("http://example/P", subC.getName());				
+			assertEquals("http://example/P", superC.getName());				
 			assertEquals(true, subC.isInverse() != superC.isInverse());				
 		}
 	}	
@@ -349,8 +351,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			OClass subC = (OClass)a.getSub();
 			OClass superC = (OClass)a.getSuper();
-			assertEquals("http://example/A", subC.getPredicate().getName());
-			String name = superC.getPredicate().getName();
+			assertEquals("http://example/A", subC.getName());
+			String name = superC.getName();
 			classNames.add(name);
 			assertTrue(name.equals("http://example/B") || name.equals("http://example/C") || name.equals("http://example/D"));				
 		}
@@ -386,8 +388,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 		for (BinaryAxiom<ClassExpression> a : axs) {
 			OClass subC = (OClass)a.getSub();
 			OClass superC = (OClass)a.getSuper();
-			assertEquals("http://example/A", subC.getPredicate().getName());
-			String name = superC.getPredicate().getName();
+			assertEquals("http://example/A", subC.getName());
+			String name = superC.getName();
 			classNames.add(name);
 			assertTrue(name.equals("http://example/B") || name.equals("http://example/D"));				
 		}
@@ -401,8 +403,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 			Iterator<ClassExpression> it = a.getComponents().iterator();
 			OClass subC = (OClass) it.next();
 			OClass superC = (OClass) it.next();
-			assertEquals("http://example/A", subC.getPredicate().getName());				
-			assertEquals("http://example/C", superC.getPredicate().getName());				
+			assertEquals("http://example/A", subC.getName());				
+			assertEquals("http://example/C", superC.getName());				
 		}
 	}	
 	
@@ -489,8 +491,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		
 		NaryAxiom<ClassExpression> ax = axs1.iterator().next();
 		assertEquals(2, ax.getComponents().size());
-		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
-		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+		Iterator<ClassExpression> it = ax.getComponents().iterator();
+		assertEquals("http://example/C", it.next().toString());
+		assertEquals("http://example/C", it.next().toString());
 	}	
 	
 	@Test
@@ -524,8 +527,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		
 		NaryAxiom<DataPropertyExpression> ax = axs1.iterator().next();
 		assertEquals(2, ax.getComponents().size());
-		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
-		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+		UnmodifiableIterator<DataPropertyExpression> it = ax.getComponents().iterator();
+		assertEquals("http://example/C", it.next().toString());
+		assertEquals("http://example/C", it.next().toString());
 	}	
 	
 	@Test
@@ -559,8 +563,9 @@ public class OWL2QLTranslatorTest extends TestCase {
 		
 		NaryAxiom<ObjectPropertyExpression> ax = axs1.iterator().next();
 		assertEquals(2, ax.getComponents().size());
-		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
-		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+		UnmodifiableIterator<ObjectPropertyExpression> it = ax.getComponents().iterator();
+		assertEquals("http://example/C", it.next().toString());
+		assertEquals("http://example/C", it.next().toString());
 	}	
 
 	@Test
