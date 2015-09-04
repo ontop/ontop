@@ -897,7 +897,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!voc.containsObjectProperty(ope.getPredicate().getName())) 
+			if (!voc.containsObjectProperty(ope.getName())) 
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -935,7 +935,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!voc.containsDataProperty(dpe.getPredicate().getName())) 
+			if (!voc.containsDataProperty(dpe.getName())) 
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);
@@ -1172,13 +1172,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					stm.addBatch();
 				}
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
-					stm.setString(1, role.getKey().getPredicate().getName());
+					stm.setString(1, role.getKey().getName());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
 				}
 				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
-					stm.setString(1, role.getKey().getPredicate().getName());
+					stm.setString(1, role.getKey().getName());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
@@ -1199,7 +1199,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				}
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
 					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getPredicate().getName());
+						stm.setString(1, role.getKey().getName());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, ROLE_TYPE);
@@ -1208,7 +1208,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				}
 				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
 					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getPredicate().getName());
+						stm.setString(1, role.getKey().getName());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, ROLE_TYPE);

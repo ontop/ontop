@@ -251,7 +251,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private static final Comparator<ObjectPropertyExpression> objectPropertyComparator = new Comparator<ObjectPropertyExpression>() {
 		@Override
 		public int compare(ObjectPropertyExpression o1, ObjectPropertyExpression o2) {
-			int compared = o1.getPredicate().getName().compareTo(o2.getPredicate().getName()); 
+			int compared = o1.getName().compareTo(o2.getName()); 
 			if (compared == 0) {
 				if (o1.isInverse() == o2.isInverse())
 					return 0;
@@ -319,7 +319,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private static final Comparator<OClass> classComparator = new Comparator<OClass>() {
 		@Override
 		public int compare(OClass o1, OClass o2) {
-			return o1.getPredicate().getName().compareTo(o2.getPredicate().getName());
+			return o1.getName().compareTo(o2.getName());
 		}
 	}; 
 	

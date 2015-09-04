@@ -252,9 +252,9 @@ public class EmptyEntitiesTest {
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
 		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role.getName());
+			String role = prop.getName();
+			if (!runSPARQLRolesQuery("<" + role + ">")) {
+				emptyRoles.add(role);
 				r++;
 			}
 		}

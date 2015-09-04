@@ -597,7 +597,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	private void checkSignature(DataPropertyExpression prop) {
-		if (!vocabulary.containsDataProperty(prop.getPredicate().getName()) && !auxDataProperties.contains(prop))
+		if (!vocabulary.containsDataProperty(prop.getName()) && !auxDataProperties.contains(prop))
 			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
 	}
 	

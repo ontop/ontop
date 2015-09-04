@@ -47,8 +47,8 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	Logger log = LoggerFactory.getLogger(QuestOWLEmptyEntitiesChecker.class);
 
-	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
-	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
+	private List<Predicate> emptyConcepts = new ArrayList<>();
+	private List<Predicate> emptyRoles = new ArrayList<>();
 
 	/**
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology

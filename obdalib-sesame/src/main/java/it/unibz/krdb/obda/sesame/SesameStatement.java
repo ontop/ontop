@@ -50,12 +50,12 @@ public class SesameStatement implements Statement {
 			//object or data property assertion
 			ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
 			ObjectConstant subj = ba.getSubject();
-			Predicate pred = ba.getProperty().getPredicate();
+			String pred = ba.getProperty().getName();
 			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
 			subject = helper.getResource(subj);
-			predicate = helper.createURI(pred.getName().toString()); // URI	
+			predicate = helper.createURI(pred); // URI	
 			object = helper.getResource(obj);
 		} 
 		else if (assertion instanceof DataPropertyAssertion) {
@@ -78,12 +78,12 @@ public class SesameStatement implements Statement {
 			//class assertion
 			ClassAssertion ua = (ClassAssertion) assertion;
 			ObjectConstant subj = ua.getIndividual();
-			Predicate obj = ua.getConcept().getPredicate();
+			String obj = ua.getConcept().getName();
 			
 			// convert string into respective type
 			subject = helper.getResource(subj);
 			predicate = helper.createURI(OBDAVocabulary.RDF_TYPE); // URI
-			object = helper.createURI(obj.getName().toString());	
+			object = helper.createURI(obj);	
 		}
 	}
 	

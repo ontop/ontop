@@ -53,7 +53,7 @@ public class OWLAPI3IndividualTranslator {
 	private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 
 	public OWLIndividualAxiom translate(ClassAssertion ca) {
-		IRI conceptIRI = IRI.create(ca.getConcept().getPredicate().getName().toString());
+		IRI conceptIRI = IRI.create(ca.getConcept().getName());
 
 		OWLClass description = dataFactory.getOWLClass(conceptIRI);
 		OWLIndividual object = translate(ca.getIndividual());
@@ -70,7 +70,7 @@ public class OWLAPI3IndividualTranslator {
 	}
 	
 	public OWLIndividualAxiom translate(DataPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getPredicate().getName().toString());
+		IRI roleIRI = IRI.create(opa.getProperty().getName());
 
 		OWLDataProperty property = dataFactory.getOWLDataProperty(roleIRI);
 		OWLIndividual subject = translate(opa.getSubject());

@@ -84,13 +84,13 @@ public class MappingVocabularyRepair {
 
 		Map<String, Predicate> urimap = new HashMap<>();
 		for (OClass p : vocabulary.getClasses()) 
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+			urimap.put(p.getName(), p.getPredicate());
 
 		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+			urimap.put(p.getName(), p.getPredicate());
 		
 		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+			urimap.put(p.getName(), p.getPredicate());
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {

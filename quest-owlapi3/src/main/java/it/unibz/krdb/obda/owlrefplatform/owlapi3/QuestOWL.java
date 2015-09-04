@@ -691,7 +691,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getPredicate().getName();
+			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -702,7 +702,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
-			String propFunc = pfa.getPredicate().getName();
+			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);

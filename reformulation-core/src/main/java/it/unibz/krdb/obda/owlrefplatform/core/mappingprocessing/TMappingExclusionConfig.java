@@ -33,7 +33,7 @@ public class TMappingExclusionConfig {
     }
 
     public boolean contains(ObjectPropertyExpression propertyExpression){
-        return !propertyExpression.isInverse() && properties.contains(propertyExpression.getPredicate().getName());
+        return !propertyExpression.isInverse() && properties.contains(propertyExpression.getName());
     }
 
     public boolean contains(DataPropertyExpression propertyExpression){
