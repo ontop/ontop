@@ -84,13 +84,13 @@ public class ClassImpl implements OClass {
 
 
 	@Override
-	public boolean isNothing() {
+	public boolean isBottom() {
 		return isNothing;
 	}
 
 
 	@Override
-	public boolean isThing() {
+	public boolean isTop() {
 		return isThing;
 	}
 }

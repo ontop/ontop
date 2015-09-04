@@ -125,7 +125,7 @@ public class OntologyGraph {
 									= new  DefaultDirectedGraph<ClassExpression,DefaultEdge>(DefaultEdge.class);
 		
 		for (OClass concept : ontology.getVocabulary().getClasses()) 
-			if (!concept.isNothing() && !concept.isThing()) 
+			if (!concept.isBottom() && !concept.isTop()) 
 				classGraph.addVertex(concept);
 	
 		// domains and ranges of roles

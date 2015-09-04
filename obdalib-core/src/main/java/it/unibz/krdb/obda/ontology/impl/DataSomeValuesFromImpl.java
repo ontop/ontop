@@ -53,12 +53,12 @@ public class DataSomeValuesFromImpl implements DataSomeValuesFrom {
 	}
 
 	@Override
-	public boolean isNothing() {
+	public boolean isBottom() {
 		return property.isBottom();
 	}
 
 	@Override
-	public boolean isThing() {
+	public boolean isTop() {
 		return property.isTop();
 	}
 }

@@ -35,7 +35,7 @@ import it.unibz.krdb.obda.model.Predicate;
  *
  */
 
-public interface ObjectPropertyExpression extends Description {
+public interface ObjectPropertyExpression extends DescriptionBT {
 
 	/**
 	 * checks whether the property expression is the inverse of an object property
@@ -89,19 +89,4 @@ public interface ObjectPropertyExpression extends Description {
 	 */
 	
 	public ObjectSomeValuesFrom getRange();
-	
-	/**
-	 * checks (syntactically, irrespective of any ontology) whether the property is bottom
-	 * 
-	 * @return true if the predicate is owl:BottomObjectProperty (and inverse is true or false)
-	 */
-	public boolean isBottom();
-	
-	/**
-	 * checks (syntactically, irrespective of any ontology) whether the property is top
-	 * 
-	 * @return true if the predicate is owl:TopObjectProperty (and inverse is true or false)
-	 */
-	public boolean isTop();
-	
 }

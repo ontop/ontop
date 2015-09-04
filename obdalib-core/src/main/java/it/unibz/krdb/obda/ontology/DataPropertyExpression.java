@@ -46,7 +46,7 @@ import it.unibz.krdb.obda.model.Predicate;
  */
 
 
-public interface DataPropertyExpression extends Description {
+public interface DataPropertyExpression extends DescriptionBT {
 
 	public Predicate getPredicate();
 
@@ -67,7 +67,4 @@ public interface DataPropertyExpression extends Description {
 	 */
 	public DataPropertyRangeExpression getRange();
 	
-	public boolean isBottom();
-	
-	public boolean isTop();
 }

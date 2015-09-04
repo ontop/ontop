@@ -111,6 +111,9 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + ax);
+		}
 	}
 
 	
@@ -162,15 +165,20 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLDisjointClassesAxiom ax) {
 		try {
-			Set<ClassExpression> disjointClasses = new HashSet<>();
-			for (OWLClassExpression oc : ax.getClassExpressionsAsList()) {
-				ClassExpression c = getSubclassExpression(oc);
-				disjointClasses.add(c);
-			}			
-			dl_onto.addDisjointClassesAxiom(ImmutableList.copyOf(disjointClasses));
-		} 
+			// ax.Properties() is a set!
+			ClassExpression[] disjointProperties = new ClassExpression[ax.getClassExpressions().size()];
+			int i = 0;
+			for (OWLClassExpression ce : ax.getClassExpressions()) {
+				ClassExpression c = getSubclassExpression(ce);
+				disjointProperties[i++] = c;
+			}
+			dl_onto.addDisjointClassesAxiom(disjointProperties);		
+		}
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException:" + ax);
 		}
 	}
 
@@ -187,7 +195,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLDisjointObjectPropertiesAxiom ax) {
-		/*
 		try {
 			// ax.Properties() is a set!
 			ObjectPropertyExpression[] disjointProperties = new ObjectPropertyExpression[ax.getProperties().size()];
@@ -201,14 +208,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		catch (InconsistentOntologyException e) {
 			throw new RuntimeException("InconsistentOntologyException:" + ax);
 		}
-		*/
-		
-		Set<ObjectPropertyExpression> disjointProperties = new HashSet<>();
-		for (OWLObjectPropertyExpression prop : ax.getProperties()) {
-			ObjectPropertyExpression p = getPropertyExpression(prop);
-			disjointProperties.add(p);
-		}
-		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableList.copyOf(disjointProperties));		
 	}
 
 
@@ -302,6 +301,9 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + ax);
+		}
 	}
 	
 	/**
@@ -320,6 +322,9 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + ax);
 		}
 	}
 	
@@ -347,9 +352,13 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	
 	@Override
 	public void visit(OWLAsymmetricObjectPropertyAxiom ax) {
-		ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
-		ImmutableList<ObjectPropertyExpression> disjointProperties = ImmutableList.of(p, p.getInverse());
-		dl_onto.addDisjointObjectPropertiesAxiom(disjointProperties);
+		try {
+			ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
+			dl_onto.addDisjointObjectPropertiesAxiom(p, p.getInverse());
+		} 
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + ax);
+		}
 	}
 
 	
@@ -486,6 +495,9 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + ax);
 		}
 	}
 
@@ -824,9 +836,10 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 * 
 	 * replaces ObjectIntersectionOf by a number of subClassOf axioms (rule [R4])
 	 *          superObjectComplementOf by disjointness axioms (rule [R5])
+	 * @throws InconsistentOntologyException 
 	 */
 	
-	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superClasses) throws TranslationException {
+	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superClasses) throws TranslationException, InconsistentOntologyException {
 		
 		//System.out.println(superclasses);
 		//System.out.println(superclasses.asConjunctSet());
@@ -866,7 +879,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 				// [R5]
 				OWLObjectComplementOf superC = (OWLObjectComplementOf)superClass;
 				ClassExpression subDescription2 = getSubclassExpression(superC.getOperand());
-				dl_onto.addDisjointClassesAxiom(ImmutableList.of(subDescription, subDescription2));
+				dl_onto.addDisjointClassesAxiom(subDescription, subDescription2);
 			}
 			else
 				throw new TranslationException("unsupported operation in " + superClass);			

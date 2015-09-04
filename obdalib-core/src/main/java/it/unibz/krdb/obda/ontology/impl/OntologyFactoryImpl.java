@@ -67,9 +67,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	
 	@Override
 	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
-		if (ce.isThing())
+		if (ce.isTop())
 			return null;
-		if (ce.isNothing())
+		if (ce.isBottom())
 			throw new InconsistentOntologyException();	
 		
 		return new ClassAssertionImpl(ce, object);

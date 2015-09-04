@@ -58,9 +58,9 @@ public interface Ontology extends Serializable {
 
 	// DISJOINTNESS
 	
-	public void addDisjointClassesAxiom(ImmutableList<ClassExpression> classes);
+	public void addDisjointClassesAxiom(ClassExpression... classes) throws InconsistentOntologyException;
 
-	public void addDisjointObjectPropertiesAxiom(ImmutableList<ObjectPropertyExpression> properties);
+	public void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... properties) throws InconsistentOntologyException;
 	
 	public void addDisjointDataPropertiesAxiom(DataPropertyExpression... properties) throws InconsistentOntologyException;
 	

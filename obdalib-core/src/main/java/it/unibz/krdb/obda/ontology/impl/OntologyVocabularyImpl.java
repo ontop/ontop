@@ -110,7 +110,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	public OClass createClass(String uri) {
 		Predicate classp = fac.getClassPredicate(uri);
 		OClass cd = new ClassImpl(classp);
-		if (!cd.isNothing() && !cd.isThing())
+		if (!cd.isBottom() && !cd.isTop())
 			concepts.put(uri, cd);
 		return cd;
 	}
@@ -144,7 +144,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		}
 		else {
 			for (OClass oc : v.getClasses())
-				if (!oc.isThing() && !oc.isNothing())
+				if (!oc.isTop() && !oc.isBottom())
 					concepts.put(oc.getName(), oc);
 			for (ObjectPropertyExpression ope : v.getObjectProperties())
 				if (!ope.isTop() && !ope.isBottom())

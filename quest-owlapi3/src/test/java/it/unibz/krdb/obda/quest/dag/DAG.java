@@ -93,7 +93,7 @@ public class DAG implements Serializable {
 		// classes.put(thingConcept, thing);
 
 		for (OClass concept : ontology.getVocabulary().getClasses()) {
-			if (!concept.isNothing() && !concept.isThing()) {
+			if (!concept.isBottom() && !concept.isTop()) {
 				DAGNode node = new DAGNode(concept);
 
 				// if (!concept.equals(thingConcept)) {
