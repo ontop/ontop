@@ -10,10 +10,7 @@ import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer
 import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.*;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 
 import static junit.framework.Assert.assertEquals;
@@ -62,7 +59,7 @@ public class NodeDeletionTest {
     }
 
     @Test
-    public void testInvalidRightPartOfLeftJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
+    public void testInvalidRightPartOfLeftJoin1() throws IntermediateQueryBuilderException, EmptyQueryException {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
@@ -100,12 +97,147 @@ public class NodeDeletionTest {
          * Should replace the left join node by table 1.
          */
         IntermediateQuery optimizedQuery = joinOptimizer.optimize(initialQuery);
-        System.err.println("Optimized query : " + optimizedQuery.toString());
+        System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
         assertTrue(viceRootNode instanceof TableNode);
         assertEquals(((TableNode) viceRootNode).getAtom().getPredicate().getName(), table1Name);
         assertTrue(optimizedQuery.getCurrentSubNodesOf(viceRootNode).isEmpty());
+    }
+
+    @Test
+    public void testUnion1() throws IntermediateQueryBuilderException, EmptyQueryException {
+        Variable x = DATA_FACTORY.getVariable("x");
+        Variable y = DATA_FACTORY.getVariable("y");
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y));
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        queryBuilder.init(rootNode);
+
+        ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+
+        UnionNode topUnion = new UnionNodeImpl();
+        queryBuilder.addChild(rootNode, topUnion);
+
+        DataAtom subAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(subAtom);
+        queryBuilder.addChild(topUnion, constructionNode1);
+
+        String table1Name = "table1";
+        TableNode table1 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl(table1Name, 2), x, y));
+        queryBuilder.addChild(constructionNode1, table1);
+
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(subAtom);
+        queryBuilder.addChild(topUnion, constructionNode2);
+
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(falseCondition));
+        queryBuilder.addChild(constructionNode2, joinNode1);
+
+        TableNode table2 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
+        queryBuilder.addChild(joinNode1, table2);
+
+        TableNode table3 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table3", 2), x, y));
+        queryBuilder.addChild(joinNode1, table3);
+
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(subAtom);
+        queryBuilder.addChild(topUnion, constructionNode3);
+
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(falseCondition));
+        queryBuilder.addChild(constructionNode3, joinNode2);
+
+        TableNode table4 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 2), x, y));
+        queryBuilder.addChild(joinNode2, table4);
+
+        TableNode table5 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table5", 2), x, y));
+        queryBuilder.addChild(joinNode2, table5);
+
+        IntermediateQuery initialQuery = queryBuilder.build();
+        System.out.println("Initial query: " + initialQuery.toString());
+
+        IntermediateQueryOptimizer joinOptimizer = new BasicJoinOptimizer();
+
+        /**
+         * Should replace the left join node by table 1.
+         */
+        IntermediateQuery optimizedQuery = joinOptimizer.optimize(initialQuery);
+        System.out.println("Optimized query : " + optimizedQuery.toString());
+
+        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
+        assertTrue(viceRootNode instanceof ConstructionNode);
+        assertEquals(optimizedQuery.getCurrentSubNodesOf(viceRootNode).size(), 1);
+
+        QueryNode viceViceRootNode = optimizedQuery.getFirstChild(viceRootNode).get();
+        assertTrue(viceViceRootNode instanceof TableNode);
+        assertEquals(((TableNode) viceViceRootNode).getAtom().getPredicate().getName(), table1Name);
+        assertTrue(optimizedQuery.getCurrentSubNodesOf(viceViceRootNode).isEmpty());
+    }
+
+    @Test
+    public void testUnion2() throws IntermediateQueryBuilderException, EmptyQueryException {
+        Variable x = DATA_FACTORY.getVariable("x");
+        Variable y = DATA_FACTORY.getVariable("y");
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y));
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        queryBuilder.init(rootNode);
+
+        ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+
+        UnionNode topUnion = new UnionNodeImpl();
+        queryBuilder.addChild(rootNode, topUnion);
+
+        DataAtom subAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(subAtom);
+        queryBuilder.addChild(topUnion, constructionNode1);
+
+        String table1Name = "table1";
+        TableNode table1 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl(table1Name, 2), x, y));
+        queryBuilder.addChild(constructionNode1, table1);
+
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(subAtom);
+        queryBuilder.addChild(topUnion, constructionNode2);
+
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(falseCondition));
+        queryBuilder.addChild(constructionNode2, joinNode1);
+
+        TableNode table2 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
+        queryBuilder.addChild(joinNode1, table2);
+
+        TableNode table3 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table3", 2), x, y));
+        queryBuilder.addChild(joinNode1, table3);
+
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(subAtom);
+        queryBuilder.addChild(topUnion, constructionNode3);
+
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>absent());
+        queryBuilder.addChild(constructionNode3, joinNode2);
+
+        TableNode table4 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 2), x, y));
+        queryBuilder.addChild(joinNode2, table4);
+
+        TableNode table5 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table5", 2), x, y));
+        queryBuilder.addChild(joinNode2, table5);
+
+        IntermediateQuery initialQuery = queryBuilder.build();
+        System.out.println("Initial query: " + initialQuery.toString());
+
+        IntermediateQueryOptimizer joinOptimizer = new BasicJoinOptimizer();
+
+        /**
+         * Should replace the left join node by table 1.
+         */
+        IntermediateQuery optimizedQuery = joinOptimizer.optimize(initialQuery);
+        System.out.println("Optimized query : " + optimizedQuery.toString());
+
+        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
+        assertTrue(viceRootNode instanceof UnionNode);
+        assertEquals(optimizedQuery.getCurrentSubNodesOf(viceRootNode).size(), 2);
     }
 
     @Test(expected = EmptyQueryException.class)
