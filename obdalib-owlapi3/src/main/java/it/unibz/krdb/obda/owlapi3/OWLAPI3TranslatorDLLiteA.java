@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -91,6 +92,7 @@ import org.semanticweb.owlapi.model.SWRLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 
@@ -190,7 +192,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		Set<ObjectPropertyExpression> disjointProperties = new HashSet<>();
 		disjointProperties.add(p);
 		disjointProperties.add(p.getInverse());
-		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));
+		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableList.copyOf(disjointProperties));
 	}
 
 	@Override
@@ -211,7 +213,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 				ClassExpression c = getSubclassExpression(oc);
 				disjointClasses.add(c);
 			}			
-			dl_onto.addDisjointClassesAxiom(ImmutableSet.copyOf(disjointClasses));
+			dl_onto.addDisjointClassesAxiom(ImmutableList.copyOf(disjointClasses));
 		} 
 		catch (TranslationException e) {
 			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
@@ -282,12 +284,18 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLDisjointDataPropertiesAxiom ax) {
-		Set<DataPropertyExpression> disjointProperties = new HashSet<>();
-		for (OWLDataPropertyExpression prop : ax.getProperties()) {
-			DataPropertyExpression p = getPropertyExpression(dl_onto.getVocabulary(), prop);
-			disjointProperties.add(p);
+		try {
+			DataPropertyExpression[] disjointProperties = new DataPropertyExpression[ax.getProperties().size()];
+			int i = 0;
+			for (OWLDataPropertyExpression prop : ax.getProperties()) {
+				DataPropertyExpression p = getPropertyExpression(dl_onto.getVocabulary(), prop);
+				disjointProperties[i++] = p;
+			}
+			dl_onto.addDisjointDataPropertiesAxiom(disjointProperties);		
 		}
-		dl_onto.addDisjointDataPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));		
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException:" + ax);
+		}
 	}
 
 	@Override
@@ -297,7 +305,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			ObjectPropertyExpression p = getPropertyExpression(dl_onto.getVocabulary(), prop);
 			disjointProperties.add(p);
 		}
-		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));		
+		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableList.copyOf(disjointProperties));		
 	}
 
 	/**

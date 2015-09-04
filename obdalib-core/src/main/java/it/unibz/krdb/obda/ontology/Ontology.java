@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 public interface Ontology extends Serializable {
 
@@ -58,11 +58,11 @@ public interface Ontology extends Serializable {
 
 	// DISJOINTNESS
 	
-	public void addDisjointClassesAxiom(ImmutableSet<ClassExpression> classes);
+	public void addDisjointClassesAxiom(ImmutableList<ClassExpression> classes);
 
-	public void addDisjointObjectPropertiesAxiom(ImmutableSet<ObjectPropertyExpression> properties);
+	public void addDisjointObjectPropertiesAxiom(ImmutableList<ObjectPropertyExpression> properties);
 	
-	public void addDisjointDataPropertiesAxiom(ImmutableSet<DataPropertyExpression> properties);
+	public void addDisjointDataPropertiesAxiom(DataPropertyExpression... properties) throws InconsistentOntologyException;
 	
 	
 	public Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();

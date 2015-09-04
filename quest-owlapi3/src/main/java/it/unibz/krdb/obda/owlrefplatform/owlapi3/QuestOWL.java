@@ -625,7 +625,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			
 			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
-				Set<ClassExpression> disj = dda.getComponents();
+				Collection<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
 				ClassExpression s1 = classIterator.next();
 				ClassExpression s2 = classIterator.next();
@@ -646,7 +646,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			for(NaryAxiom<ObjectPropertyExpression> dda
 						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				Set<ObjectPropertyExpression> props = dda.getComponents();
+				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
 				ObjectPropertyExpression p1 = iterator.next();
 				ObjectPropertyExpression p2 = iterator.next();
@@ -666,7 +666,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			for(NaryAxiom<DataPropertyExpression> dda 
 						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				Set<DataPropertyExpression> props = dda.getComponents();
+				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
 				DataPropertyExpression p1 = iterator.next();
 				DataPropertyExpression p2 = iterator.next();

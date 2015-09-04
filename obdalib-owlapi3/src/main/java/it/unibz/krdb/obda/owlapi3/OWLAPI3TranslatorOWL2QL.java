@@ -21,6 +21,7 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -166,7 +167,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 				ClassExpression c = getSubclassExpression(oc);
 				disjointClasses.add(c);
 			}			
-			dl_onto.addDisjointClassesAxiom(ImmutableSet.copyOf(disjointClasses));
+			dl_onto.addDisjointClassesAxiom(ImmutableList.copyOf(disjointClasses));
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
@@ -185,23 +186,29 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	}
 
 	@Override
-	public void visit(OWLDisjointDataPropertiesAxiom ax) {
-		Set<DataPropertyExpression> disjointProperties = new HashSet<>();
-		for (OWLDataPropertyExpression prop : ax.getProperties()) {
-			DataPropertyExpression p = getPropertyExpression(prop);
-			disjointProperties.add(p);
-		}
-		dl_onto.addDisjointDataPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));		
-	}
-
-	@Override
 	public void visit(OWLDisjointObjectPropertiesAxiom ax) {
+		/*
+		try {
+			// ax.Properties() is a set!
+			ObjectPropertyExpression[] disjointProperties = new ObjectPropertyExpression[ax.getProperties().size()];
+			int i = 0;
+			for (OWLObjectPropertyExpression prop : ax.getProperties()) {
+				ObjectPropertyExpression p = getPropertyExpression(prop);
+				disjointProperties[i++] = p;
+			}
+			dl_onto.addDisjointObjectPropertiesAxiom(disjointProperties);		
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException:" + ax);
+		}
+		*/
+		
 		Set<ObjectPropertyExpression> disjointProperties = new HashSet<>();
 		for (OWLObjectPropertyExpression prop : ax.getProperties()) {
 			ObjectPropertyExpression p = getPropertyExpression(prop);
 			disjointProperties.add(p);
 		}
-		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableSet.copyOf(disjointProperties));		
+		dl_onto.addDisjointObjectPropertiesAxiom(ImmutableList.copyOf(disjointProperties));		
 	}
 
 
@@ -341,7 +348,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLAsymmetricObjectPropertyAxiom ax) {
 		ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
-		ImmutableSet<ObjectPropertyExpression> disjointProperties = ImmutableSet.of(p, p.getInverse());
+		ImmutableList<ObjectPropertyExpression> disjointProperties = ImmutableList.of(p, p.getInverse());
 		dl_onto.addDisjointObjectPropertiesAxiom(disjointProperties);
 	}
 
@@ -436,6 +443,31 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			previous = current;
 		}
 		dl_onto.addSubPropertyOfAxiom(previous, first);
+	}
+	
+	/**
+	 * (18)
+	 * 
+	 * DisjointDataProperties := 'DisjointDataProperties' '(' axiomAnnotations 
+	 * 					DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'
+	 * 
+	 */
+	
+	@Override
+	public void visit(OWLDisjointDataPropertiesAxiom ax) {
+		try {
+			// ax.Properties() is a set!
+			DataPropertyExpression[] disjointProperties = new DataPropertyExpression[ax.getProperties().size()];
+			int i = 0;
+			for (OWLDataPropertyExpression prop : ax.getProperties()) {
+				DataPropertyExpression p = getPropertyExpression(prop);
+				disjointProperties[i++] = p;
+			}
+			dl_onto.addDisjointDataPropertiesAxiom(disjointProperties);		
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException:" + ax);
+		}
 	}
 
 	/**
@@ -834,7 +866,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 				// [R5]
 				OWLObjectComplementOf superC = (OWLObjectComplementOf)superClass;
 				ClassExpression subDescription2 = getSubclassExpression(superC.getOperand());
-				dl_onto.addDisjointClassesAxiom(ImmutableSet.of(subDescription, subDescription2));
+				dl_onto.addDisjointClassesAxiom(ImmutableList.of(subDescription, subDescription2));
 			}
 			else
 				throw new TranslationException("unsupported operation in " + superClass);			

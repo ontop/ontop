@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -42,8 +43,8 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,6 +52,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -254,8 +256,8 @@ public class OntologyImpl implements Ontology {
 		if (ce1.isNothing() || ce2.isThing()) 
 			return;
 		
-		if (ce2.isNothing()) {
-			NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<>(ImmutableSet.<ClassExpression>of(ce1));
+		if (ce2.isNothing()) { // disjointness
+			NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<>(ImmutableList.of(ce1, ce1));
 			disjointClassesAxioms.add(ax);
 		}
 		else {
@@ -293,8 +295,8 @@ public class OntologyImpl implements Ontology {
 		if (ope1.isBottom() || ope2.isTop()) 
 			return;
 
-		if (ope2.isBottom()) {
-			NaryAxiom<ObjectPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableSet.<ObjectPropertyExpression>of(ope1));
+		if (ope2.isBottom()) { // disjointness
+			NaryAxiom<ObjectPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableList.of(ope1, ope1));
 			disjointObjectPropertiesAxioms.add(ax);
 		}
 		else {
@@ -324,8 +326,8 @@ public class OntologyImpl implements Ontology {
 		if (dpe1.isBottom() || dpe2.isTop()) 
 			return;
 
-		if (dpe2.isBottom()) {
-			NaryAxiom<DataPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableSet.<DataPropertyExpression>of(dpe1));
+		if (dpe2.isBottom()) { // disjointness
+			NaryAxiom<DataPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableList.of(dpe1, dpe1));
 			disjointDataPropertiesAxioms.add(ax);
 		}
 		else {
@@ -336,7 +338,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addDisjointClassesAxiom(ImmutableSet<ClassExpression> classes) {	
+	public void addDisjointClassesAxiom(ImmutableList<ClassExpression> classes) {	
 		for (ClassExpression c : classes)
 			checkSignature(c);
 		NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<>(classes);
@@ -344,19 +346,58 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addDisjointObjectPropertiesAxiom(ImmutableSet<ObjectPropertyExpression> props) {
+	public void addDisjointObjectPropertiesAxiom(ImmutableList<ObjectPropertyExpression> props) {
 		for (ObjectPropertyExpression p : props)
 			checkSignature(p);
 		NaryAxiomImpl<ObjectPropertyExpression> ax = new NaryAxiomImpl<>(props);
 		disjointObjectPropertiesAxioms.add(ax);
 	}
 
+	/**
+	 * adds a normalized data property disjointness axiom
+	 * 
+	 * DisjointDataProperties := 'DisjointDataProperties' '(' axiomAnnotations 
+	 * 				DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'
+	 * 
+	 * implements rule [D2]:
+	 *     - eliminates all owl:BottomDataProperty
+	 *     - if the remaining list contains no \top and the list contains at least two elements 
+	 *     		then it is a disjointness axiom
+	 *     - if the remaining list contains a single \top then all non-trivial properties are empty 
+	 *          (emptiness axioms are created by duplicating the parameter)
+	 *     - if the remaining list contains multiple \top then the ontology is inconsistent       
+	 * 
+	 */
+	
 	@Override
-	public void addDisjointDataPropertiesAxiom(ImmutableSet<DataPropertyExpression> props) {
-		for (DataPropertyExpression p : props)
-			checkSignature(p);
-		NaryAxiomImpl<DataPropertyExpression> ax = new NaryAxiomImpl<>(props);
-		disjointDataPropertiesAxioms.add(ax);
+	public void addDisjointDataPropertiesAxiom(DataPropertyExpression... dpes) throws InconsistentOntologyException {
+		ImmutableList.Builder<DataPropertyExpression> sb = new ImmutableList.Builder<>();
+		int numberOfTop = 0;
+		for (DataPropertyExpression dpe : dpes) {
+			checkSignature(dpe);
+			if (dpe.isBottom())
+				continue;
+			else if (dpe.isTop()) 
+				numberOfTop++;
+			else 
+				sb.add(dpe);
+		}
+		ImmutableList<DataPropertyExpression> nonTrivialElements = sb.build();
+		if (numberOfTop == 0) {
+			if (nonTrivialElements.size() >= 2) {
+				NaryAxiomImpl<DataPropertyExpression> ax = new NaryAxiomImpl<>(nonTrivialElements);
+				disjointDataPropertiesAxioms.add(ax);
+			}
+			// if 0 or 1 non-bottom elements then do nothing 
+		}
+		else if (numberOfTop == 1) {
+			for (DataPropertyExpression dpe : nonTrivialElements) {
+				NaryAxiomImpl<DataPropertyExpression> ax = new NaryAxiomImpl<>(ImmutableList.of(dpe, dpe));
+				disjointDataPropertiesAxioms.add(ax);
+			}
+		}
+		else // many tops 
+			throw new InconsistentOntologyException();
 	}
 	
 	@Override

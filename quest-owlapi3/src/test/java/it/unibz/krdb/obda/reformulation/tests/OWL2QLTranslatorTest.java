@@ -488,7 +488,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertEquals(1, axs1.size());
 		
 		NaryAxiom<ClassExpression> ax = axs1.iterator().next();
-		assertEquals(1, ax.getComponents().size());
+		assertEquals(2, ax.getComponents().size());
+		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
 		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
 	}	
 	
@@ -522,7 +523,8 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertEquals(1, axs1.size());
 		
 		NaryAxiom<DataPropertyExpression> ax = axs1.iterator().next();
-		assertEquals(1, ax.getComponents().size());
+		assertEquals(2, ax.getComponents().size());
+		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
 		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
 	}	
 	
@@ -556,8 +558,57 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertEquals(1, axs1.size());
 		
 		NaryAxiom<ObjectPropertyExpression> ax = axs1.iterator().next();
-		assertEquals(1, ax.getComponents().size());
+		assertEquals(2, ax.getComponents().size());
 		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+		assertEquals("http://example/C", ax.getComponents().iterator().next().toString());
+	}	
+
+	@Test
+	public void test_D2() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLDataProperty dpe1 = factory.getOWLDataProperty(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe1));
+		OWLDataProperty dpe2 = factory.getOWLDataProperty(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe2));
+		OWLDataProperty dpe3 = factory.getOWLDataProperty(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe3));
+		OWLDataProperty dpe4 = factory.getOWLDataProperty(IRI.create("http://example/D"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe4));
+		OWLDataProperty dpe5 = factory.getOWLDataProperty(IRI.create("http://example/E"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe5));
+		OWLDataProperty owlTop = factory.getOWLDataProperty(IRI.create(owl + "topDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLDataProperty owlBottom = factory.getOWLDataProperty(IRI.create(owl + "bottomDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(owlBottom, dpe1)); // nothing
+		manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe2, owlTop, owlBottom)); // empty
+		//manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe3, owlBottom, owlTop, owlTop)); // inconsistent
+		manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe4, owlBottom, dpe5)); // normal
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<DataPropertyExpression>> axs = dlliteonto.getSubDataPropertyAxioms();
+		assertEquals(0, axs.size());
+		Collection<NaryAxiom<DataPropertyExpression>> axs1 = dlliteonto.getDisjointDataPropertiesAxioms();
+		assertEquals(2, axs1.size());
+		
+		Iterator<NaryAxiom<DataPropertyExpression>> axIt = axs1.iterator();
+		NaryAxiom<DataPropertyExpression> ax = axIt.next();
+		assertEquals(2, ax.getComponents().size()); // dpe2 (B) is empty
+		Iterator<DataPropertyExpression> it = ax.getComponents().iterator();
+		assertEquals("http://example/D", it.next().toString());
+		assertEquals("http://example/E", it.next().toString());
+		
+		ax = axIt.next();
+		assertEquals(2, ax.getComponents().size()); // dpe4, dpe5 (D, E) are disjoint
+		it = ax.getComponents().iterator();
+		assertEquals("http://example/B", it.next().toString());
+		assertEquals("http://example/B", it.next().toString());
 	}	
 	
 }

@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.ontology;
 
 import java.io.Serializable;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Represents the following from OWL 2 QL Specification:
@@ -42,6 +42,6 @@ import com.google.common.collect.ImmutableSet;
 
 public interface NaryAxiom<T> extends Serializable {
 
-	public ImmutableSet<T> getComponents();
+	public ImmutableList<T> getComponents();
 
 }
