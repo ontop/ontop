@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.quest.dag;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;

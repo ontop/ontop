@@ -460,10 +460,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		log.debug("Load ontologies called. Translating ontologies.");
 
 		try {
-
-			OWLOntologyManager man = ontology.getOWLOntologyManager();
-			Set<OWLOntology> closure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
+			Ontology mergeOntology = OWLAPI3TranslatorUtility.translateImportsClosure(ontology);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;

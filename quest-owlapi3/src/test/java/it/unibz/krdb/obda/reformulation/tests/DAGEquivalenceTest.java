@@ -31,14 +31,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.io.File;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class DAGEquivalenceTest extends TestCase {
 
@@ -63,10 +59,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/test.owl#";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
-				testEquivalenceClasses));
-		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
@@ -123,10 +116,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/Ontology1314774461138.owl#";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
-				testEquivalenceRoles));
-		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
@@ -183,10 +173,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
-				testEquivalenceRolesInverse));
-		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG

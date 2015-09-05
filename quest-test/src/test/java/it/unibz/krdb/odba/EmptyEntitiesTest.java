@@ -144,10 +144,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		onto = translator.translate(ontology);
-
+		onto = OWLAPI3TranslatorUtility.translate(ontology);
 	}
 
 	@After

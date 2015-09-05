@@ -57,9 +57,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @throws Exception
 	 */
 	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		this.onto = translator.translate(onto);
+		this.onto = OWLAPI3TranslatorUtility.translate(onto);
 		this.conn = conn;
 		runQueries();
 

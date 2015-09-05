@@ -47,9 +47,7 @@ public class R_TBoxReasonerImpl extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/test.owl#";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testIndexClasses));
-		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testIndexClasses);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);

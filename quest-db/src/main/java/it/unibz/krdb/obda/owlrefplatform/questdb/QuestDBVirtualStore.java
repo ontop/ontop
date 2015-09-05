@@ -164,7 +164,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			//read owl file
 			OWLOntology owlontology = getOntologyFromFile(tboxFile);
 			//get transformation from owlontology into ontology
-			 tbox = getOntologyFromOWLOntology(owlontology);
+			 tbox = OWLAPI3TranslatorUtility.translateImportsClosure(owlontology);
 
 		} else { 
 			// create empty ontology
@@ -196,7 +196,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		super(name);
 		
 		//obtain ontology
-		Ontology ontology = getOntologyFromOWLOntology(tbox);
+		Ontology ontology = OWLAPI3TranslatorUtility.translateImportsClosure(tbox);
 		//obtain datasource
 		OBDADataSource source = getDataSourceFromConfig(config);
 		//obtain obdaModel
@@ -243,18 +243,6 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 		return owlontology;
 	}
 	
-	/**
-	 * Given an OWL ontology returns the translated Ontology 
-	 * of its closure
-	 * @param owlontology
-	 * @return the translated Ontology
-	 * @throws Exception
-	 */
-	private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
-		//compute closure first (owlontology might contain include other source declarations)
-		Set<OWLOntology> clousure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(clousure);
-	}
 	
 	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
 		//start Quest with the given ontology and model and preferences

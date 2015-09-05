@@ -41,9 +41,7 @@ import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import sesameWrapper.SesameMaterializer;
 
 /**
@@ -109,19 +107,12 @@ class QuestSesameMaterializerCMD {
 			
 			//create onto
 			Ontology onto = null;
-			OWLOntology ontology = null;
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			
 			if (owlFile != null) {
 			// Loading the OWL ontology from the file as with normal OWLReasoners
-				ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-				 onto =  OWLAPI3TranslatorUtility.translate(ontology);
+				 onto =  OWLAPI3TranslatorUtility.loadOntologyFromFile(owlFile);
 				 model.getOntologyVocabulary().merge(onto.getVocabulary());
 			}
-			else {
-				ontology = manager.createOntology();
-			}
-			//OBDAModelSynchronizer.declarePredicates(ontology, model);
 
 			 //start materializer
 			SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);

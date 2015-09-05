@@ -93,24 +93,22 @@ public class OWLAPI3IndividualTranslator {
 	}
 	
 	public OWLLiteral translate(ValueConstant v) {
-		OWLLiteral result = null;
 		if (v == null)
 			return null;
 		
 		String value = v.getValue();
 		if (value == null) {
-			result = null;
+			return null;
 		} 
 		else if (v.getType() == COL_TYPE.LITERAL_LANG) {
-			result = dataFactory.getOWLLiteral(value, v.getLanguage());
+			return dataFactory.getOWLLiteral(value, v.getLanguage());
 		} 
 		else {
 			OWL2Datatype datatype = OWLTypeMapper.getOWLType(v.getType());
 			if (datatype != null)
-				result = dataFactory.getOWLLiteral(value, datatype);
+				return dataFactory.getOWLLiteral(value, datatype);
 			else 
 				throw new IllegalArgumentException(v.getType().toString());
 		}
-		return result;
 	}
 }

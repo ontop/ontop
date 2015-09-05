@@ -25,19 +25,12 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAGImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.io.File;
-
 import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class EquivalenceSimplificationTest extends TestCase {
 
@@ -50,10 +43,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * The ontology contains classes A1 = A2 = A3 >= B1 = B2 = B3 >= C1 = C2 = C3
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_401.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
 
 		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -93,10 +83,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * The ontology contains object properties A1 = A2 = A3 >= B1 = B2 = B3 >= C1 = C2 = C3
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_402.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
 		
 		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -139,10 +126,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * and classes A1 = A3 = \exists R <= B1 = B3 = \exists S^- <= C1 = C3 = \exists M
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_403.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
 
 		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -175,10 +159,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * The ontology contains object properties A1 = A2^- = A3 >= B1 = B2^- = B3 >= C1 = C2^- = C3
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_404.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
 
 		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);

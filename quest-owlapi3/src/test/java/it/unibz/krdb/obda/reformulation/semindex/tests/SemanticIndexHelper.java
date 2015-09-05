@@ -26,9 +26,7 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -50,9 +48,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.h2.jdbcx.JdbcDataSource;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -72,14 +68,10 @@ import org.xml.sax.SAXException;
 public class SemanticIndexHelper {
     public final static Logger log = LoggerFactory.getLogger(SemanticIndexHelper.class);
 
-    public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-       
     public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     private Ontology onto;
     
     public transient Connection conn;
-
-    private final  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     private String owl_exists = "::__exists__::";
     private String owl_inverse_exists = "::__inverse__exists__::";
@@ -98,9 +90,7 @@ public class SemanticIndexHelper {
 
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
-        OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
- 
-        Ontology ontology = OWLAPI3TranslatorUtility.translate(owlOntology);
+        Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(owlfile);
         return ontology;
     }
 

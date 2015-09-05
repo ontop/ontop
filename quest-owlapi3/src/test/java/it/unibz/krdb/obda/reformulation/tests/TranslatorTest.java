@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -53,12 +52,12 @@ public class TranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/prop1")));
+		OWLClass class1 = factory.getOWLClass(IRI.create("http://example/A"));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create("http://example/prop1"));
 		
 		OWLObjectPropertyRangeAxiom ax = factory.getOWLObjectPropertyRangeAxiom(prop, class1);
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
@@ -78,12 +77,12 @@ public class TranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/prop1")));
+		OWLClass class1 = factory.getOWLClass(IRI.create("http://example/A"));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create("http://example/prop1"));
 		
 		OWLObjectPropertyDomainAxiom ax = factory.getOWLObjectPropertyDomainAxiom(prop, class1);
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
 		
 		manager.addAxiom(onto, ax);
@@ -103,12 +102,12 @@ public class TranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/R")));
-		OWLObjectProperty invofprop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/S")));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create("http://example/R"));
+		OWLObjectProperty invofprop =  factory.getOWLObjectProperty(IRI.create("http://example/S"));
 		
 		OWLInverseObjectPropertiesAxiom ax = factory.getOWLInverseObjectPropertiesAxiom(prop, invofprop);
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
@@ -140,12 +139,12 @@ public class TranslatorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass clsA = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
-		OWLClass clsB = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
+		OWLClass clsA = factory.getOWLClass(IRI.create("http://example/A"));
+		OWLClass clsB = factory.getOWLClass(IRI.create("http://example/B"));
 		
 		OWLEquivalentClassesAxiom ax = factory.getOWLEquivalentClassesAxiom(clsA, clsB);
 				
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
