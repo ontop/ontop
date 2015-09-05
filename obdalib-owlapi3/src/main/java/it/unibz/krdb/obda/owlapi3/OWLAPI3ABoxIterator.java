@@ -21,11 +21,8 @@ package it.unibz.krdb.obda.owlapi3;
  */
 
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorOWL2QL.TranslationException;
 
 import java.util.Collection;
@@ -49,19 +46,18 @@ import org.semanticweb.owlapi.model.OWLOntology;
  */
 public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 
-	private final Iterator<OWLOntology> ontologies;
-	private Iterator<OWLAxiom> owlaxiomiterator = null;
+	private final Iterator<OWLOntology> ontologiesIterator;
+	
+	private Iterator<OWLAxiom> owlaxiomIterator = null;
 	private Assertion next = null;
-	//private final ImmutableOntologyVocabulary voc;
+	
 	private final OWLAPI3TranslatorHelper helper;
 
 	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc) {
-		//this.voc = voc;
 		helper = new OWLAPI3TranslatorHelper(voc);
-		this.ontologies = ontologies.iterator();
-		if (ontologies.size() > 0) {
-			this.owlaxiomiterator = this.ontologies.next().getAxioms().iterator();
-		}
+		ontologiesIterator = ontologies.iterator();
+		if (ontologiesIterator.hasNext()) 
+			owlaxiomIterator = ontologiesIterator.next().getAxioms().iterator();
 	}
 
 	@Override
@@ -112,8 +108,8 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	 * @throws NoSuchElementException
 	 */
 	private void switchToNextIterator() throws NoSuchElementException {
-		OWLOntology nextOntology = ontologies.next();
-		owlaxiomiterator = nextOntology.getAxioms().iterator();
+		OWLOntology nextOntology = ontologiesIterator.next();
+		owlaxiomIterator = nextOntology.getAxioms().iterator();
 	}
 
 	/***
@@ -125,7 +121,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	 */
 	private Assertion nextInCurrentIterator() throws NoSuchElementException {
 
-		if (owlaxiomiterator == null)
+		if (owlaxiomIterator == null)
 			throw new NoSuchElementException();
 
 		if (next != null) {
@@ -135,7 +131,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 		}
 
 		while (true) {
-			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
+			OWLAxiom currentABoxAssertion = owlaxiomIterator.next();
 	
 			Assertion ax = translate(currentABoxAssertion);
 			if (ax != null)
@@ -167,11 +163,11 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	}
 
 	private boolean hasNextInCurrentIterator() {
-		if (owlaxiomiterator == null)
+		if (owlaxiomIterator == null)
 			return false;
 		
 		while (true) {
-			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
+			OWLAxiom currentABoxAssertion = owlaxiomIterator.next();
 
 			Assertion ax = translate(currentABoxAssertion);
 			if (ax != null) {

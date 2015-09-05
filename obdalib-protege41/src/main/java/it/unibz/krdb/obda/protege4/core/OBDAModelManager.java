@@ -536,9 +536,10 @@ public class OBDAModelManager implements Disposable {
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
-					OBDAModelValidator refactorer = new OBDAModelValidator(activeOBDAModel, activeOntology);
-					refactorer.run(); // adding type information to the mapping predicates.
-				} catch (Exception e) {
+					// adding type information to the mapping predicates
+					OBDAModelValidator.validate(activeOBDAModel);
+				} 
+				catch (Exception e) {
 					OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
 					DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
 					log.error(e.getMessage());

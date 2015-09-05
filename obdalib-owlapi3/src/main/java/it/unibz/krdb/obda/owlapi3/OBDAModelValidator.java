@@ -29,11 +29,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.semanticweb.owlapi.model.OWLOntology;
-
 /***
- * Validates an OBDAModel (mappings) against the vocabulary of an ontology. Used
- * by the Protege 4 plugin in
+ * Validates an OBDAModel (mappings) against the vocabulary of an ontology 
+ * and adds type information to the mapping predicates
+ * 
+ * Used by the Protege 4 plugin in
  * OBDAModelManager.OBDAPluginOWLModelManagerListener.handleChange
  * 
  * {@see TargetQueryValidator}
@@ -41,27 +41,24 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
+
+//TODO: move to a more appropriate package
+
 public class OBDAModelValidator {
 
-	private final OBDAModel obdaModel;
-	private final TargetQueryVocabularyValidator validator;
-
-	// TODO We should reduce the dependency to OWL-API to define the ontology.
-	public OBDAModelValidator(OBDAModel obdaModel, OWLOntology ontology) {
-		this.obdaModel = obdaModel;
-		validator = new TargetQueryValidator(obdaModel);
-	}
-
-	public void run() throws Exception {
-		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
-		for (URI datasourceUri : mappingTable.keySet()) {
-			for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
-				CQIE tq = mapping.getTargetQuery();
-				boolean bSuccess = validator.validate(tq);
-				if (!bSuccess) {
-					throw new Exception("Found an invalid target query: " + tq.toString());
-				}
-			}
+	public static void validate(OBDAModel obdaModel) throws Exception {
+		
+		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
+		
+		 Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
+		 for (URI datasourceUri : mappingTable.keySet()) {
+			 for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
+				 CQIE tq = mapping.getTargetQuery();
+				 boolean bSuccess = validator.validate(tq);
+				 if (!bSuccess) {
+					 throw new Exception("Found an invalid target query: " + tq.toString());
+				 }
+			 }
+		 }
 		}
-	}
 }
