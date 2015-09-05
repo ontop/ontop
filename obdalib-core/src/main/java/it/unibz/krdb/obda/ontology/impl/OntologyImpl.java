@@ -591,5 +591,17 @@ public class OntologyImpl implements Ontology {
 		if (!vocabulary.containsDataProperty(prop.getName()) && !auxDataProperties.contains(prop))
 			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
 	}
+
+	@Override
+	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

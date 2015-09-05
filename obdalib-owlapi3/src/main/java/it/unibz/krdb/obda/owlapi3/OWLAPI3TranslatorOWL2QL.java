@@ -21,9 +21,7 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * 
@@ -33,26 +31,27 @@ import com.google.common.collect.ImmutableSet;
 public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	
-	/*
-	 * If we need to construct auxiliary subclass axioms for A ISA exists R.C we
-	 * put them in this map to avoid generating too many auxiliary
-	 * roles/classes.
-	 */
-	private final Map<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom> auxiliaryClassProperties = new HashMap<>();
 	
+	// If we need to construct auxiliary subclass axioms for A ISA exists R.C we
+	// put them in this map to avoid generating too many auxiliary roles/classes
+	private final Map<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom> auxiliaryClassProperties = new HashMap<>();
 	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties = new HashMap<>();
 
-	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	private static final Logger log = LoggerFactory.getLogger(OWLAPI3TranslatorDLLiteA.class);
+	private static final Logger log = LoggerFactory.getLogger(OWLAPI3TranslatorOWL2QL.class);
 	
+	private static final String INCONSISTENT_ONTOLOGY = "The OWL 2 QL ontology is inconsistent due to axiom {}";
+	private static final String INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE = "Inconsistency due to axiom ";
 	private static final String NOT_SUPPORTED = "Axiom does not belong to OWL 2 QL: {}";
 	private static final String NOT_SUPPORTED_EXT = "Axiom does not belong to OWL 2 QL: {} ({})";
 	
 	
 	private Ontology dl_onto;
+	
+	private final boolean functionalityAxioms = true; // TEMPORARY FIX
+	private final boolean minCardinalityClassExpressions = true; // TEMPORARY FIX
 	
 	public ImmutableOntologyVocabulary getVocabulary() {
 		return dl_onto.getVocabulary();
@@ -62,31 +61,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		return dl_onto;
 	}
 	
-	@Override
-	public void visit(OWLAnnotationAssertionAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
-	}
-
-	@Override
-	public void visit(OWLSubAnnotationPropertyOfAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
-	}
-
-	@Override
-	public void visit(OWLAnnotationPropertyDomainAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
-	}
-
-	@Override
-	public void visit(OWLAnnotationPropertyRangeAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
-	}
-
-	@Override
-	public void visit(OWLDeclarationAxiom ax) {
-		// NO-OP: DeclarationAxioms are handled in prepare()
-	}
-
 	/**
 	 * (1)
 	 * 
@@ -112,7 +86,8 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
 
@@ -144,17 +119,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		}
 	}
 	
-
-	@Override
-	public void visit(OWLNegativeObjectPropertyAssertionAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
-	@Override
-	public void visit(OWLReflexiveObjectPropertyAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
 	/**
 	 * (3)
 	 * 
@@ -165,7 +129,7 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLDisjointClassesAxiom ax) {
 		try {
-			// ax.Properties() is a set!
+			// ax.getClassExpressions() is a set!
 			ClassExpression[] disjointProperties = new ClassExpression[ax.getClassExpressions().size()];
 			int i = 0;
 			for (OWLClassExpression ce : ax.getClassExpressions()) {
@@ -178,53 +142,46 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException:" + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
-
-
+	
+	/**
+	 * (4) 
+	 * 
+	 * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
+	 */
+	
 	@Override
-	public void visit(OWLNegativeDataPropertyAssertionAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
-	@Override
-	public void visit(OWLDifferentIndividualsAxiom ax) {
-		// NO-OP: DifferentInfividualsAxioms have no effect in OWL 2 QL
-	}
-
-	@Override
-	public void visit(OWLDisjointObjectPropertiesAxiom ax) {
+	public void visit(OWLClassAssertionAxiom ax) {
 		try {
-			// ax.Properties() is a set!
-			ObjectPropertyExpression[] disjointProperties = new ObjectPropertyExpression[ax.getProperties().size()];
-			int i = 0;
-			for (OWLObjectPropertyExpression prop : ax.getProperties()) {
-				ObjectPropertyExpression p = getPropertyExpression(prop);
-				disjointProperties[i++] = p;
-			}
-			dl_onto.addDisjointObjectPropertiesAxiom(disjointProperties);		
+			ClassAssertion a = translate(ax);
+			if (a != null)
+				dl_onto.addClassAssertion(a);
 		}
+		catch (TranslationException e) {
+			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}		
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException:" + ax);
-		}
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		} 
 	}
 
-
-	@Override
-	public void visit(OWLObjectPropertyAssertionAxiom ax) {
-		ObjectPropertyAssertion assertion = translate(ax);
-		dl_onto.addObjectPropertyAssertion(assertion);
-	}
-
-	@Override
-	public void visit(OWLFunctionalObjectPropertyAxiom ax) {
-		//if (profile.order() < LanguageProfile.OWL2QL.order())
-		//	throw new TranslationException();
+	public ClassAssertion translate(OWLClassAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
+		OWLClassExpression classExpression = ax.getClassExpression();
+		if (!(classExpression instanceof OWLClass))
+			throw new TranslationException("complex class expressions are not supported");
 		
-		ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());	
-		dl_onto.addFunctionalObjectPropertyAxiom(role);				
+		OWLClass namedclass = (OWLClass) classExpression;
+		OClass concept = dl_onto.getVocabulary().getClass(namedclass.getIRI().toString());
+		
+		URIConstant c = getIndividual(ax.getIndividual());
+
+		return ofac.createClassAssertion(concept, c);
 	}
+	
 
 	/**
 	 * (5)
@@ -236,12 +193,11 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	 */
 	
 	@Override
-	public void visit(OWLSubObjectPropertyOfAxiom ax) {
-		
-		ObjectPropertyExpression subrole = getPropertyExpression(ax.getSubProperty());
-		ObjectPropertyExpression superrole = getPropertyExpression(ax.getSuperProperty());
+	public void visit(OWLSubObjectPropertyOfAxiom ax) {		
+		ObjectPropertyExpression ope1 = getPropertyExpression(ax.getSubProperty());
+		ObjectPropertyExpression ope2 = getPropertyExpression(ax.getSuperProperty());
 
-		dl_onto.addSubPropertyOfAxiom(subrole, superrole);	
+		dl_onto.addSubPropertyOfAxiom(ope1, ope2);	
 	}
 
 	/**
@@ -267,6 +223,32 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	}
 	
 	/**
+	 * (7)
+	 * 
+	 * DisjointObjectProperties := 'DisjointObjectProperties' '(' axiomAnnotations 
+	 * 			ObjectPropertyExpression ObjectPropertyExpression { ObjectPropertyExpression } ')'
+	 * 
+	 */
+	
+	@Override
+	public void visit(OWLDisjointObjectPropertiesAxiom ax) {
+		try {
+			// ax.Properties() is a set!
+			ObjectPropertyExpression[] opes = new ObjectPropertyExpression[ax.getProperties().size()];
+			int i = 0;
+			for (OWLObjectPropertyExpression prop : ax.getProperties()) {
+				ObjectPropertyExpression ope = getPropertyExpression(prop);
+				opes[i++] = ope;
+			}
+			dl_onto.addDisjointObjectPropertiesAxiom(opes);		
+		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
+	}
+	
+	/**
 	 * (8)
 	 * 
 	 * InverseObjectProperties := 'InverseObjectProperties' '(' axiomAnnotations 
@@ -277,11 +259,11 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	
 	@Override
 	public void visit(OWLInverseObjectPropertiesAxiom ax) {		
-		ObjectPropertyExpression role1 = getPropertyExpression(ax.getFirstProperty());
-		ObjectPropertyExpression role2 = getPropertyExpression(ax.getSecondProperty());
+		ObjectPropertyExpression ope1 = getPropertyExpression(ax.getFirstProperty());
+		ObjectPropertyExpression ope2 = getPropertyExpression(ax.getSecondProperty());
 
-		dl_onto.addSubPropertyOfAxiom(role1, role2.getInverse());
-		dl_onto.addSubPropertyOfAxiom(role2, role1.getInverse());		
+		dl_onto.addSubPropertyOfAxiom(ope1, ope2.getInverse());
+		dl_onto.addSubPropertyOfAxiom(ope2, ope1.getInverse());		
 	}
 	
 	/**
@@ -295,14 +277,15 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLObjectPropertyDomainAxiom ax) {
 		try {
-			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-			addSubClassAxioms(role.getDomain(), ax.getDomain());
+			ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+			addSubClassAxioms(ope.getDomain(), ax.getDomain());
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
 	
@@ -317,16 +300,44 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLObjectPropertyRangeAxiom ax) {
 		try {
-			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-			addSubClassAxioms(role.getRange(), ax.getRange());
+			ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+			addSubClassAxioms(ope.getRange(), ax.getRange());
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
+
+	/**
+	 * (11)
+	 * 
+	 * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * 
+	 */
+	
+	@Override
+	public void visit(OWLReflexiveObjectPropertyAxiom ax) {
+		ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+		dl_onto.addReflexiveObjectPropertyAxiom(ope);
+	}
+
+	/**
+	 * (12)
+	 * 
+	 * IrreflexiveObjectProperty := 'IrreflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * 
+	 */
+	
+	@Override
+	public void visit(OWLIrreflexiveObjectPropertyAxiom ax) {
+		ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+		dl_onto.addIrreflexiveObjectPropertyAxiom(ope);
+	}
+
 	
 	/**
 	 * (13)
@@ -338,8 +349,8 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLSymmetricObjectPropertyAxiom ax) {
-		ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-		dl_onto.addSubPropertyOfAxiom(role, role.getInverse());
+		ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+		dl_onto.addSubPropertyOfAxiom(ope, ope.getInverse());
 	}
 
 	/**
@@ -353,66 +364,45 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLAsymmetricObjectPropertyAxiom ax) {
 		try {
-			ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
-			dl_onto.addDisjointObjectPropertiesAxiom(p, p.getInverse());
+			ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+			dl_onto.addDisjointObjectPropertiesAxiom(ope, ope.getInverse());
 		} 
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
 
-	
-	
-	
-	@Override
-	public void visit(OWLDisjointUnionAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-	
 	/**
-	 * DataPropertyRange := 'DataPropertyRange' '(' axiomAnnotations DataPropertyExpression DataRange ')'
+	 * (15)
 	 * 
-	 * replaced by data property inclusion with bottomDataProperty if DataRange is empty (rule [DT1.1])
-	 * 
-	 * @param ax
+	 * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations ObjectPropertyExpression 
+	 * 				sourceIndividual targetIndividual ')'
 	 */
 	
 	@Override
-	public void visit(OWLDataPropertyRangeAxiom ax) {
-
-		DataPropertyExpression role = getPropertyExpression(ax.getProperty());
-
-		OWL2Datatype owlDatatype;
+	public void visit(OWLObjectPropertyAssertionAxiom ax) {
 		try {
-			owlDatatype = getCanonicalDatatype(ax.getRange());
-			if (owlDatatype == null) {
-				// range is empty (rule [DT1.1])
-				dl_onto.addSubPropertyOfAxiom(role, DataPropertyExpressionImpl.owlBottomDataProperty);
-			}
-			else {
-				DataPropertyRangeExpression subclass = role.getRange(); 			
-				
-				//Predicate.COL_TYPE columnType = OWLTypeMapper.getType(owlDatatype);
-				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
-				//Datatype datatype = ofac.createDataType(columnType);
-				dl_onto.addSubClassOfAxiom(subclass, datatype);		
-			}		
+			ObjectPropertyAssertion a = translate(ax);
+			if (a != null)
+				dl_onto.addObjectPropertyAssertion(a);
 		} 
-		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
-		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}						
 	}
 
-	@Override
-	public void visit(OWLFunctionalDataPropertyAxiom ax) {
-		//if (profile.order() < LanguageProfile.DLLITEA.order())
-		//	throw new TranslationException();
-		
-		DataPropertyExpression role = getPropertyExpression(ax.getProperty());
-		dl_onto.addFunctionalDataPropertyAxiom(role);		
-	}
+	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws InconsistentOntologyException {
+		URIConstant c1 = getIndividual(ax.getSubject());
+		URIConstant c2 = getIndividual(ax.getObject());
 
+		ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+
+		return ofac.createObjectPropertyAssertion(ope, c1, c2);
+	}
 	
+
 	/**
 	 * (16) 
 	 * 
@@ -466,16 +456,17 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 	public void visit(OWLDisjointDataPropertiesAxiom ax) {
 		try {
 			// ax.Properties() is a set!
-			DataPropertyExpression[] disjointProperties = new DataPropertyExpression[ax.getProperties().size()];
+			DataPropertyExpression[] dpes = new DataPropertyExpression[ax.getProperties().size()];
 			int i = 0;
 			for (OWLDataPropertyExpression prop : ax.getProperties()) {
-				DataPropertyExpression p = getPropertyExpression(prop);
-				disjointProperties[i++] = p;
+				DataPropertyExpression dpe = getPropertyExpression(prop);
+				dpes[i++] = dpe;
 			}
-			dl_onto.addDisjointDataPropertiesAxiom(disjointProperties);		
+			dl_onto.addDisjointDataPropertiesAxiom(dpes);		
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException:" + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
 
@@ -497,42 +488,95 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + ax);
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
 
 	
+	/**
+	 * (20)
+	 * 
+	 * DataPropertyRange := 'DataPropertyRange' '(' axiomAnnotations DataPropertyExpression DataRange ')'
+	 * 
+	 * replaced by data property inclusion with bottomDataProperty if DataRange is empty (rule [DT1.1])
+	 * 
+	 */
 	
 	@Override
-	public void visit(OWLClassAssertionAxiom ax) {
-		ClassAssertion a = translate(ax);
-		if (a != null)
-			dl_onto.addClassAssertion(a);
+	public void visit(OWLDataPropertyRangeAxiom ax) {
+
+		DataPropertyExpression role = getPropertyExpression(ax.getProperty());
+
+		OWL2Datatype owlDatatype;
+		try {
+			owlDatatype = getCanonicalDatatype(ax.getRange());
+			if (owlDatatype == null) {
+				// range is empty (rule [DT1.1])
+				dl_onto.addSubPropertyOfAxiom(role, DataPropertyExpressionImpl.owlBottomDataProperty);
+			}
+			else {
+				DataPropertyRangeExpression subclass = role.getRange(); 			
+				
+				//Predicate.COL_TYPE columnType = OWLTypeMapper.getType(owlDatatype);
+				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+				//Datatype datatype = ofac.createDataType(columnType);
+				dl_onto.addSubClassOfAxiom(subclass, datatype);		
+			}		
+		} 
+		catch (TranslationException e) {
+			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}
 	}
+	
+	/**
+	 * (21)
+	 * 
+	 * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations 
+	 * 			DataPropertyExpression sourceIndividual targetValue ')'
+	 */
 
 	@Override
 	public void visit(OWLDataPropertyAssertionAxiom ax) {
-		DataPropertyAssertion assertion = translate(ax);
-		dl_onto.addDataPropertyAssertion(assertion);
+		try {
+			DataPropertyAssertion a = translate(ax);
+			if (a != null)
+				dl_onto.addDataPropertyAssertion(a);
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
+		catch (TranslationException e) {
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 
-	@Override
-	public void visit(OWLTransitiveObjectPropertyAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
+	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
+		OWLLiteral object = ax.getObject();		
+		Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
+		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
+		
+		URIConstant c1 = getIndividual(ax.getSubject());
 
-	@Override
-	public void visit(OWLIrreflexiveObjectPropertyAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
+		DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
+		
+		return ofac.createDataPropertyAssertion(dpe, c1, c2);	
 	}
-
+	
+	/**
+	 * (22)
+	 * 
+	 * DifferentIndividuals := 'DifferentIndividuals' '(' axiomAnnotations Individual Individual { Individual } ')'
+	 * 
+	 * (simply ignored because it has no effect on reasoning)
+	 */
+	
 	@Override
-	public void visit(OWLInverseFunctionalObjectPropertyAxiom ax) {
-		//if (profile.order() < LanguageProfile.OWL2QL.order())
-		//	throw new TranslationException();
-		ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-		dl_onto.addFunctionalObjectPropertyAxiom(role.getInverse());
+	public void visit(OWLDifferentIndividualsAxiom ax) {
+		// NO-OP: DifferentInfividualsAxioms have no effect in OWL 2 QL
 	}
+	
 
 	/**
 	 * (23)
@@ -706,27 +750,13 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		return dt1;
 	}
 	
+	private static URIConstant getIndividual(OWLIndividual ind) {
+		if (ind.isAnonymous()) 
+			throw new RuntimeException("Found anonymous individual, this feature is not supported:" + ind);
+
+		 return dfac.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
+	}
 	
-	@Override
-	public void visit(OWLSameIndividualAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
-	@Override
-	public void visit(OWLSubPropertyChainOfAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
-	@Override
-	public void visit(OWLHasKeyAxiom ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
-	@Override
-	public void visit(SWRLRule ax) {
-		log.warn(NOT_SUPPORTED, ax);
-	}
-
 
 	
 	/**
@@ -760,13 +790,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			
 			return getPropertyExpression(someexp.getProperty()).getDomain();		
 		} 
-		else if (owlExpression instanceof OWLObjectMinCardinality) {
-			OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) owlExpression;
-			if (someexp.getCardinality() != 1 || !someexp.getFiller().isOWLThing()) 
-				throw new TranslationException();
-				
-			return getPropertyExpression(someexp.getProperty()).getDomain();
-		} 
 		else if (owlExpression instanceof OWLDataSomeValuesFrom) {
 			OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) owlExpression;
 			OWLDataRange filler = someexp.getFiller();
@@ -776,7 +799,14 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 			
 			return getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
 		}
-		else if (owlExpression instanceof OWLDataMinCardinality) {
+		else if (minCardinalityClassExpressions && owlExpression instanceof OWLObjectMinCardinality) {
+			OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) owlExpression;
+			if (someexp.getCardinality() != 1 || !someexp.getFiller().isOWLThing()) 
+				throw new TranslationException();
+				
+			return getPropertyExpression(someexp.getProperty()).getDomain();
+		} 
+		else if (minCardinalityClassExpressions && owlExpression instanceof OWLDataMinCardinality) {
 			OWLDataMinCardinality someexp = (OWLDataMinCardinality) owlExpression;
 			
 			OWLDataRange range = someexp.getFiller();
@@ -881,6 +911,25 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 				ClassExpression subDescription2 = getSubclassExpression(superC.getOperand());
 				dl_onto.addDisjointClassesAxiom(subDescription, subDescription2);
 			}
+			else if (minCardinalityClassExpressions && superClass instanceof OWLObjectMinCardinality) {
+				OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) superClass;
+				if (someexp.getCardinality() != 1 || !someexp.getFiller().isOWLThing()) 
+					throw new TranslationException();
+					
+				ClassExpression superClassExp = getPropertyExpression(someexp.getProperty()).getDomain();
+				
+				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);
+			} 
+			else if (minCardinalityClassExpressions && superClass instanceof OWLDataMinCardinality) {
+				OWLDataMinCardinality someexp = (OWLDataMinCardinality) superClass;
+				
+				OWLDataRange range = someexp.getFiller();
+				if (someexp.getCardinality() != 1 || !range.isTopDatatype()) 
+					throw new TranslationException();
+				
+				ClassExpression superClassExp = getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
+				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);
+			} 
 			else
 				throw new TranslationException("unsupported operation in " + superClass);			
 		}
@@ -952,70 +1001,117 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 
 	
 	
-	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) {
-		try {
-			URIConstant c1 = getIndividual(ax.getSubject());
-			URIConstant c2 = getIndividual(ax.getObject());
+	
 
-			ObjectPropertyExpression prop = getPropertyExpression(ax.getProperty());
-
-			return ofac.createObjectPropertyAssertion(prop, c1, c2);
-		} 
-		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + ax);
-		}						
+	
+	
+	
+	
+	
+	@Override
+	public void visit(OWLDisjointUnionAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
 	}
 	
-	
-	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
-		
-		try {
-			OWLLiteral object = aux.getObject();
-			
-			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
-			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
-			URIConstant c1 = getIndividual(aux.getSubject());
-
-			DataPropertyExpression prop = getPropertyExpression(aux.getProperty());
-			
-			return ofac.createDataPropertyAssertion(prop, c1, c2);	
-		} 
-		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + aux);
+	@Override
+	public void visit(OWLFunctionalObjectPropertyAxiom ax) {
+		// TEMPORARY FIX
+		if (functionalityAxioms) {
+			ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+			dl_onto.addFunctionalObjectPropertyAxiom(ope);
 		}
-		catch (TranslationException e) {
-			throw new RuntimeException(e.getMessage());
+		else
+			log.warn(NOT_SUPPORTED, ax);
+	}
+	
+	@Override
+	public void visit(OWLInverseFunctionalObjectPropertyAxiom ax) {
+		// TEMPORARY FIX
+		if (functionalityAxioms) {
+			ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
+			dl_onto.addFunctionalObjectPropertyAxiom(ope.getInverse());
 		}
+		else
+			log.warn(NOT_SUPPORTED, ax);
+	}
+	
+	@Override
+	public void visit(OWLTransitiveObjectPropertyAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
 	}
 
-	
-	public ClassAssertion translate(OWLClassAssertionAxiom aux) {
+	@Override
+	public void visit(OWLNegativeObjectPropertyAssertionAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
+	}
 
-		try {
-			OWLClassExpression classExpression = aux.getClassExpression();
-			if (!(classExpression instanceof OWLClass))
-				throw new RuntimeException("Found complex class in assertion, this feature is not supported");
-			
-			OWLClass namedclass = (OWLClass) classExpression;
-			OClass concept = dl_onto.getVocabulary().getClass(namedclass.getIRI().toString());
-			
-			URIConstant c = getIndividual(aux.getIndividual());
-
-			return ofac.createClassAssertion(concept, c);
+	@Override
+	public void visit(OWLFunctionalDataPropertyAxiom ax) {
+		// TEMPORARY FIX
+		if (functionalityAxioms) {
+			DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
+			dl_onto.addFunctionalDataPropertyAxiom(dpe);		
 		}
-		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + aux);
-		}		
+		else
+			log.warn(NOT_SUPPORTED, ax);
 	}
-	
-	private static URIConstant getIndividual(OWLIndividual ind) {
-		if (ind.isAnonymous()) 
-			throw new RuntimeException("Found anonymous individual, this feature is not supported:" + ind);
 
-		 return dfac.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
+	@Override
+	public void visit(OWLNegativeDataPropertyAssertionAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
 	}
 	
-	private OWLOntology owlOntology;
+	@Override
+	public void visit(OWLSameIndividualAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
+	}
+
+	@Override
+	public void visit(OWLSubPropertyChainOfAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
+	}
+
+	@Override
+	public void visit(OWLHasKeyAxiom ax) {
+		log.warn(NOT_SUPPORTED, ax);
+	}
+
+	@Override
+	public void visit(SWRLRule ax) {
+		log.warn(NOT_SUPPORTED, ax);
+	}
+
+	
+	
+	
+	@Override
+	public void visit(OWLAnnotationAssertionAxiom arg0) {
+		// NO-OP: AnnotationAxioms have no effect
+	}
+
+	@Override
+	public void visit(OWLSubAnnotationPropertyOfAxiom arg0) {
+		// NO-OP: AnnotationAxioms have no effect
+	}
+
+	@Override
+	public void visit(OWLAnnotationPropertyDomainAxiom arg0) {
+		// NO-OP: AnnotationAxioms have no effect
+	}
+
+	@Override
+	public void visit(OWLAnnotationPropertyRangeAxiom arg0) {
+		// NO-OP: AnnotationAxioms have no effect
+	}
+
+	@Override
+	public void visit(OWLDeclarationAxiom ax) {
+		// NO-OP: DeclarationAxioms are handled in prepare()
+	}
+
+	
+	
+	private OWLOntology owlOntology; // required to retrive datatype defintions 
 	
 	private final Set<String> objectproperties = new HashSet<>();
 	private final Set<String> dataproperties = new HashSet<>();
@@ -1028,19 +1124,14 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		
 		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
 		
-		// add all definitions for classes and roles		
+		// add all definitions for classes and properties		
 		
 		for (OWLClass entity : owl.getClassesInSignature())  {
-			/* We ignore TOP and BOTTOM (Thing and Nothing) */
-			//if (entity.isOWLThing() || entity.isOWLNothing()) 
-			//	continue;				
 			String uri = entity.getIRI().toString();
 			vb.createClass(uri);			
 		}
 
 		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
-			//if (prop.isOWLTopObjectProperty() || prop.isOWLBottomObjectProperty()) 
-			//	continue;
 			String uri = prop.getIRI().toString();
 			if (dataproperties.contains(uri))  {
 				punnedPredicates.add(uri); 
@@ -1053,8 +1144,6 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		}
 		
 		for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
-			//if (prop.isOWLTopDataProperty() || prop.isOWLBottomDataProperty()) 
-			//	continue;
 			String uri = prop.getIRI().toString();
 			if (objectproperties.contains(uri)) {
 				punnedPredicates.add(uri);
@@ -1067,31 +1156,5 @@ public class OWLAPI3TranslatorOWL2QL extends OWLAPI3TranslatorBase {
 		}
 		dl_onto = ofac.createOntology(vb);
 	}
-	
-	
-
-	
-	
-	
-
-/*		
-	OWL2QLProfile owlprofile = new OWL2QLProfile();
-	OWLProfileReport report = owlprofile.checkOntology(owl);
-	if (!report.isInProfile()) {
-		log.warn("WARNING. The current ontology is not in the OWL 2 QL profile.");
-		try {
-			File profileReport = new File("quest-profile-report.log");
-			if (profileReport.canWrite()) {
-				BufferedWriter bf = new BufferedWriter(new FileWriter(profileReport));
-				bf.write(report.toString());
-				bf.flush();
-				bf.close();
-			}
-		} catch (Exception e) {
-
-		}
-	}
-*/
-	
 	
 }

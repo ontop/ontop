@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ClassExpression;
@@ -24,9 +23,7 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorBase.TranslationException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -92,9 +89,6 @@ import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 
 /* 	RDFS(1), OWL2QL(2), DLLITEA(3); */
