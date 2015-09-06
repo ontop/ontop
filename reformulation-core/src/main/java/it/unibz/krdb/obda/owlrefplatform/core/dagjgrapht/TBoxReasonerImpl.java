@@ -36,17 +36,20 @@ import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Allows to reason over the TBox using  DAG or graph
+ * TBoxReasonerImpl
+ * 
+ *    a DAG-based TBox reasoner
+ *    
+ * @author Roman Kontchakov
  * 
  */
 
@@ -58,7 +61,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
 
 	/**
-	 * constructs from a raw ontology
+	 * constructs a TBox reasoner from an ontology
 	 * @param onto: ontology
 	 */
 
@@ -148,32 +151,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		return dataPropertyDAG;
 	}
 	
-	@Override
-	public OClass getClassRepresentative(OClass p) {
-		Equivalences<ClassExpression> ces = classDAG.equivalenceIndex.get(p);
-		if (ces == null)
-			return null;
-		
-		return (OClass)ces.getRepresentative();
-	}
-
-	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
-		Equivalences<ObjectPropertyExpression> opes = objectPropertyDAG.equivalenceIndex.get(p);
-		if (opes == null)
-			return null;
-		
-		return opes.getRepresentative();
-	}
-		
-	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
-		Equivalences<DataPropertyExpression> dpes = dataPropertyDAG.equivalenceIndex.get(p);
-		if (dpes == null)
-			return null;
-		
-		return dpes.getRepresentative();
-	}
 	
 	// INTERNAL DETAILS
 	
@@ -502,30 +479,28 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	private static <T> EquivalencesDAGImpl<T> factorize(EquivalencesDAG<T> source, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> target) {
 		
-		Map<T, Equivalences<T>> map = new HashMap<>();
-		Map<T, Equivalences<T>> equivalences = new HashMap<>();
-		for (Equivalences<T> v : target.vertexSet()) {
-			for (T equi : v.getMembers()) 
-				equivalences.put(equi, v);
-			
-			for (T s : source.getVertex(v.getRepresentative()))
-				if (!v.contains(s)) 		
-					map.put(s, v);	
+		ImmutableMap.Builder<T, Equivalences<T>> map = new ImmutableMap.Builder<>();
+		ImmutableMap.Builder<T, Equivalences<T>> vertexIndexBuilder = new ImmutableMap.Builder<>();
+		for (Equivalences<T> tSet : target.vertexSet()) {
+			for (T s : source.getVertex(tSet.getRepresentative()))
+				if (tSet.contains(s)) 		
+					vertexIndexBuilder.put(s, tSet);
+				else
+					map.put(s, tSet);	
 		}
-			
+		ImmutableMap<T, Equivalences<T>> vertexIndex = vertexIndexBuilder.build();	
+		
 		// create induced edges in the target graph		
-		for (Equivalences<T> node : source) {
-			T rep = node.getRepresentative();
-			Equivalences<T> reducedNode = equivalences.get(rep);
+		for (Equivalences<T> sSet : source) {
+			Equivalences<T> tSet = vertexIndex.get(sSet.getRepresentative());
 			
-			for (Equivalences<T> subNode : source.getDirectSub(node)) {
-				T subRep = subNode.getRepresentative();
-				Equivalences<T> subReducedNode = equivalences.get(subRep);
-				target.addEdge(subReducedNode, reducedNode);
+			for (Equivalences<T> sSetSub : source.getDirectSub(sSet)) {
+				Equivalences<T> tSetSub = vertexIndex.get(sSetSub.getRepresentative());
+				target.addEdge(tSetSub, tSet);
 			}
 		}		
 		
-		return new EquivalencesDAGImpl<>(null, target, equivalences, map);
+		return new EquivalencesDAGImpl<>(null, target, vertexIndex, map.build());
 	}
 	
 	

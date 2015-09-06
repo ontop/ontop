@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 
@@ -64,17 +63,4 @@ public interface TBoxReasoner {
 	 */
 
 	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG();
-	
-	/**
-	 * 
-	 * @param p: a description
-	 * @return null if p is the representative of its own class **or p is not part of the graph**
-	 *         the representative of the equivalence class otherwise  
-	 */
-
-	public OClass getClassRepresentative(OClass p);
-	
-	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p);
-	
-	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p);
 }

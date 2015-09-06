@@ -70,7 +70,8 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		try {
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion ca = (ClassAssertion) assertion;
-				OClass description = reasoner.getClassRepresentative(ca.getConcept());
+				OClass description = (OClass)reasoner.getClassDAG()
+									.getCanonicalRepresentative(ca.getConcept());
 				
 				if (description != null) {
 					ObjectConstant object = ca.getIndividual();
@@ -79,7 +80,8 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 			} 
 			else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-				ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(opa.getProperty());
+				ObjectPropertyExpression property = reasoner.getObjectPropertyDAG()
+										.getCanonicalRepresentative(opa.getProperty());
 				
 				if (property != null) {
 					ObjectConstant object1 = opa.getSubject();
@@ -89,12 +91,13 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 			} 
 			else if (assertion instanceof DataPropertyAssertion) {
 				DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
-				DataPropertyExpression property = reasoner.getDataPropertyRepresentative(opa.getProperty());
+				DataPropertyExpression property = reasoner.getDataPropertyDAG()
+										.getCanonicalRepresentative(opa.getProperty());
 				
 				if (property != null) {
 					ObjectConstant object1 = opa.getSubject();
 					ValueConstant constant = opa.getValue();
-						return ofac.createDataPropertyAssertion(property, object1, constant);
+					return ofac.createDataPropertyAssertion(property, object1, constant);
 				}
 			} 
 		} 

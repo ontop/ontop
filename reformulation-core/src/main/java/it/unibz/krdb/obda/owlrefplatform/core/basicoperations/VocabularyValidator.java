@@ -31,8 +31,6 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ public class VocabularyValidator {
 	private final ImmutableOntologyVocabulary voc;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 
 	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
@@ -92,13 +89,13 @@ public class VocabularyValidator {
 		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
 		if (/*p.isClass()*/ (p.getArity() == 1) && voc.containsClass(p.getName())) {
 			OClass c = voc.getClass(p.getName());
-			OClass equivalent = reasoner.getClassRepresentative(c);
+			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalRepresentative(c);
 			if (equivalent != null)
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
 			ObjectPropertyExpression op = voc.getObjectProperty(p.getName());
-			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyRepresentative(op);
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalRepresentative(op);
 			if (equivalent != null) { 
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
@@ -108,7 +105,7 @@ public class VocabularyValidator {
 		}
 		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
 			DataPropertyExpression dp = voc.getDataProperty(p.getName());
-			DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(dp);
+			DataPropertyExpression equiv2 = reasoner.getDataPropertyDAG().getCanonicalRepresentative(dp);
 			if (equiv2 != null) 
 				return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
 		}

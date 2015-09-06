@@ -36,6 +36,9 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import com.google.common.collect.ImmutableMap;
+
+
 /**
  * DAG from an OntologyGraph
  * 
@@ -51,7 +54,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
-	private final Map<T, Equivalences<T>> vertexIndex;
+	private final ImmutableMap<T, Equivalences<T>> vertexIndex;
 	
 	/**
 	 * the EquivalenceIndex maps predicates to the representatives of their equivalence class (in TBox)
@@ -64,8 +67,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	
 
-	// maps Ts to the vertices of the DAG that they would be in in the non-lean DAG
-	final Map<T, Equivalences<T>> equivalenceIndex;   
+	// maps Ts to the vertices of the DAG that they would be in in the non-reduced DAG
+	final ImmutableMap<T, Equivalences<T>> equivalenceIndex;   
 	
 	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
 	private final Map<T, Set<T>> cacheSubRep;
@@ -73,7 +76,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests and SIGMA reduction
 	
-	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> vertexIndex, Map<T, Equivalences<T>> equivalenceIndex) {	
+	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> equivalenceIndex) {	
 		this.graph = graph;
 		this.dag = dag;
 		this.vertexIndex = vertexIndex;
@@ -90,6 +93,15 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public Equivalences<T> getVertex(T v) {
 		return vertexIndex.get(v);
+	}
+	
+	@Override
+	public T getCanonicalRepresentative(T v) {
+		Equivalences<T> vs = equivalenceIndex.get(v);
+		if (vs == null)
+			return null;
+		
+		return vs.getRepresentative();		
 	}
 	
 	/**
@@ -257,15 +269,17 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
 					new SimpleDirectedGraph<>(DefaultEdge.class);
-		Map<TT, Equivalences<TT>> equivalencesMap = new HashMap<>();
+		ImmutableMap.Builder<TT, Equivalences<TT>> equivalencesMapB = new ImmutableMap.Builder<>();
 
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT node : equivalenceSet) 
-				equivalencesMap.put(node, equivalenceSet);
+				equivalencesMapB.put(node, equivalenceSet);
 
 			dag0.addVertex(equivalenceSet);
 		}
 
+		ImmutableMap<TT, Equivalences<TT>> equivalencesMap = equivalencesMapB.build();
+		
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT e : equivalenceSet) {			
 				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
@@ -309,7 +323,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 				dag.addEdge(v1, v2);
 		}
 		
-		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap, Collections.<TT, Equivalences<TT>> emptyMap());
+		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap, ImmutableMap.<TT, Equivalences<TT>>of());
 	}
 
 }
