@@ -70,33 +70,30 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		try {
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion ca = (ClassAssertion) assertion;
-				OClass description = (OClass)reasoner.getClassDAG()
-									.getCanonicalRepresentative(ca.getConcept());
+				OClass ce = (OClass)reasoner.getClassDAG().getCanonicalForm(ca.getConcept());
 				
-				if (description != null) {
+				if (ce != null && !ce.equals(ca.getConcept())) {
 					ObjectConstant object = ca.getIndividual();
-					return ofac.createClassAssertion(description, object);
+					return ofac.createClassAssertion(ce, object);
 				}			
 			} 
 			else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-				ObjectPropertyExpression property = reasoner.getObjectPropertyDAG()
-										.getCanonicalRepresentative(opa.getProperty());
+				ObjectPropertyExpression property = reasoner.getObjectPropertyDAG().getCanonicalForm(opa.getProperty());
 				
-				if (property != null) {
+				if (property != null && !property.equals(opa.getProperty())) {
 					ObjectConstant object1 = opa.getSubject();
 					ObjectConstant object2 = opa.getObject();
 					return ofac.createObjectPropertyAssertion(property, object1, object2);
 				}
 			} 
 			else if (assertion instanceof DataPropertyAssertion) {
-				DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
-				DataPropertyExpression property = reasoner.getDataPropertyDAG()
-										.getCanonicalRepresentative(opa.getProperty());
+				DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
+				DataPropertyExpression property = reasoner.getDataPropertyDAG().getCanonicalForm(dpa.getProperty());
 				
-				if (property != null) {
-					ObjectConstant object1 = opa.getSubject();
-					ValueConstant constant = opa.getValue();
+				if (property != null && !property.equals(dpa.getProperty())) {
+					ObjectConstant object1 = dpa.getSubject();
+					ValueConstant constant = dpa.getValue();
 					return ofac.createDataPropertyAssertion(property, object1, constant);
 				}
 			} 

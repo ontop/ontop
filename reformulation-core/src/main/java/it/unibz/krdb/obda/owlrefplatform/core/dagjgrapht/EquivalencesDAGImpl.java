@@ -54,7 +54,7 @@ import com.google.common.collect.ImmutableMap;
 public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
-	private final ImmutableMap<T, Equivalences<T>> vertexIndex;
+	final ImmutableMap<T, Equivalences<T>> vertexIndex;
 	
 	/**
 	 * the EquivalenceIndex maps predicates to the representatives of their equivalence class (in TBox)
@@ -96,7 +96,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	}
 	
 	@Override
-	public T getCanonicalRepresentative(T v) {
+	public T getCanonicalForm(T v) {
 		Equivalences<T> vs = equivalenceIndex.get(v);
 		if (vs == null)
 			return null;

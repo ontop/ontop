@@ -314,7 +314,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 		}
 
 		@Override
-		public T getCanonicalRepresentative(T v) {
+		public T getCanonicalForm(T v) {
 			// TODO Auto-generated method stub
 			return null;
 		}

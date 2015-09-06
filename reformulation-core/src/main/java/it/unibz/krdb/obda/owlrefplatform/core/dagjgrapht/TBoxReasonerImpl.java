@@ -414,7 +414,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 		
 		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG 
-					= factorize(reasoner.getObjectPropertyDAG(), objectProperties);
+					= factorize((EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.getObjectPropertyDAG(), 
+							objectProperties);
 
 		// DATA PROPERTIES
 		// 		
@@ -430,7 +431,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 		
 		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = 
-							factorize(reasoner.getDataPropertyDAG(), dataProperties);
+							factorize((EquivalencesDAGImpl<DataPropertyExpression>)reasoner.getDataPropertyDAG(), dataProperties);
 				
 		// CLASSES
 		// 
@@ -466,7 +467,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			classes.addVertex(reducedNode);
 		}			
 
-		EquivalencesDAGImpl<ClassExpression> classDAG = factorize(reasoner.getClassDAG(), classes);
+		EquivalencesDAGImpl<ClassExpression> classDAG = factorize(
+				(EquivalencesDAGImpl<ClassExpression>)reasoner.getClassDAG(), classes);
 		
 		// DATA RANGES
 		// 
@@ -477,16 +479,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	private static <T> EquivalencesDAGImpl<T> factorize(EquivalencesDAG<T> source, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> target) {
+	private static <T> EquivalencesDAGImpl<T> factorize(EquivalencesDAGImpl<T> source, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> target) {
 		
-		ImmutableMap.Builder<T, Equivalences<T>> map = new ImmutableMap.Builder<>();
 		ImmutableMap.Builder<T, Equivalences<T>> vertexIndexBuilder = new ImmutableMap.Builder<>();
 		for (Equivalences<T> tSet : target.vertexSet()) {
-			for (T s : source.getVertex(tSet.getRepresentative()))
+			for (T s : source.getVertex(tSet.getRepresentative())) 
 				if (tSet.contains(s)) 		
 					vertexIndexBuilder.put(s, tSet);
-				else
-					map.put(s, tSet);	
 		}
 		ImmutableMap<T, Equivalences<T>> vertexIndex = vertexIndexBuilder.build();	
 		
@@ -500,7 +499,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			}
 		}		
 		
-		return new EquivalencesDAGImpl<>(null, target, vertexIndex, map.build());
+		return new EquivalencesDAGImpl<>(null, target, vertexIndex, source.vertexIndex);
 	}
 	
 	

@@ -57,24 +57,26 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(0, propDAG.edgeSetSize());  // no properties
 
 		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		ClassExpression A1 = voc.getClass(testURI + "A1");
+		ClassExpression B1 = voc.getClass(testURI + "B1");
+		ClassExpression C1 = voc.getClass(testURI + "C1");
+		ClassExpression A2 = voc.getClass(testURI + "A2");
+		ClassExpression A3 = voc.getClass(testURI + "A3");
+		ClassExpression B2 = voc.getClass(testURI + "B2");
+		ClassExpression B3 = voc.getClass(testURI + "B3");
+		ClassExpression C2 = voc.getClass(testURI + "C2");
+		ClassExpression C3 = voc.getClass(testURI + "C3");
 
-		assertFalse(classes.getCanonicalRepresentative(voc.getClass(testURI + "A1")) != null);
-		assertFalse(classes.getCanonicalRepresentative(voc.getClass(testURI + "B1")) != null);
-		assertFalse(classes.getCanonicalRepresentative(voc.getClass(testURI + "C1")) != null);
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "A2")) != null); 
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "A3")) != null);
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "B2")) != null);
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "B3")) != null); 
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "C2")) != null);
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "C3")) != null);
-		
-		assertEquals(voc.getClass(testURI + "A1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "A2")));
-		assertEquals(voc.getClass(testURI + "A1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "A3")));
-		assertEquals(voc.getClass(testURI + "B1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "B2"))); 
-		assertEquals(voc.getClass(testURI + "B1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "B3"))); 
-		assertEquals(voc.getClass(testURI + "C1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "C2")));
-		assertEquals(voc.getClass(testURI + "C1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "C3")));
+		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		assertEquals(classes.getCanonicalForm(A1), A1);
+		assertEquals(classes.getCanonicalForm(B1), B1);
+		assertEquals(classes.getCanonicalForm(C1), C1);
+		assertEquals(classes.getCanonicalForm(A2), A1);
+		assertEquals(classes.getCanonicalForm(A3), A1);
+		assertEquals(classes.getCanonicalForm(B2), B1);
+		assertEquals(classes.getCanonicalForm(B3), B1);
+		assertEquals(classes.getCanonicalForm(C2), C1);
+		assertEquals(classes.getCanonicalForm(C3), C1);
 	}
 	
 	
@@ -99,25 +101,28 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); 
 		assertEquals(4, classDAG.edgeSetSize()); // A1 <- B1 <- C1, A1^- <- B1^- <- C1^-
 
+		
 		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
+		ObjectPropertyExpression A1 = voc.getObjectProperty(testURI + "A1");
+		ObjectPropertyExpression B1 = voc.getObjectProperty(testURI + "B1");
+		ObjectPropertyExpression C1 = voc.getObjectProperty(testURI + "C1");
+		ObjectPropertyExpression A2 = voc.getObjectProperty(testURI + "A2");
+		ObjectPropertyExpression A3 = voc.getObjectProperty(testURI + "A3");
+		ObjectPropertyExpression B2 = voc.getObjectProperty(testURI + "B2");
+		ObjectPropertyExpression B3 = voc.getObjectProperty(testURI + "B3");
+		ObjectPropertyExpression C2 = voc.getObjectProperty(testURI + "C2");
+		ObjectPropertyExpression C3 = voc.getObjectProperty(testURI + "C3");
+
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
-		
-		assertFalse(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
-		assertFalse(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
-		assertFalse(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C1")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A2")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A3")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B2")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B3")) != null); 
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C2")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C3")) != null);
-		
-		assertEquals(voc.getObjectProperty(testURI + "A1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A2")));
-		assertEquals(voc.getObjectProperty(testURI + "A1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A3")));
-		assertEquals(voc.getObjectProperty(testURI + "B1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B2"))); 
-		assertEquals(voc.getObjectProperty(testURI + "B1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B3"))); 
-		assertEquals(voc.getObjectProperty(testURI + "C1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C2")));
-		assertEquals(voc.getObjectProperty(testURI + "C1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C3")));
+		assertEquals(ops.getCanonicalForm(A1), A1);
+		assertEquals(ops.getCanonicalForm(B1), B1);
+		assertEquals(ops.getCanonicalForm(C1), C1);
+		assertEquals(ops.getCanonicalForm(A2), A1);
+		assertEquals(ops.getCanonicalForm(A3), A1);
+		assertEquals(ops.getCanonicalForm(B2), B1);
+		assertEquals(ops.getCanonicalForm(B3), B1); 
+		assertEquals(ops.getCanonicalForm(C2), C1);
+		assertEquals(ops.getCanonicalForm(C3), C1);
 	}
 	
 	
@@ -141,19 +146,22 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(0, propDAG.edgeSetSize()); // 
 		assertEquals(2, classDAG.edgeSetSize()); // A1 <- B1 <- C1
 
-		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
-
-		assertFalse(classes.getCanonicalRepresentative(voc.getClass(testURI + "A1")) != null);
-		assertFalse(classes.getCanonicalRepresentative(voc.getClass(testURI + "B1")) != null);
-		assertFalse(classes.getCanonicalRepresentative(voc.getClass(testURI + "C1")) != null);
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "A3")) != null);
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "B3")) != null); 
-		assertTrue(classes.getCanonicalRepresentative(voc.getClass(testURI + "C3")) != null);
 		
-		assertEquals(voc.getClass(testURI + "A1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "A3")));
-		assertEquals(voc.getClass(testURI + "B1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "B3"))); 
-		assertEquals(voc.getClass(testURI + "C1"), classes.getCanonicalRepresentative(voc.getClass(testURI + "C3")));
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
+		ClassExpression A1 = voc.getClass(testURI + "A1");
+		ClassExpression B1 = voc.getClass(testURI + "B1");
+		ClassExpression C1 = voc.getClass(testURI + "C1");
+		ClassExpression A3 = voc.getClass(testURI + "A3");
+		ClassExpression B3 = voc.getClass(testURI + "B3");
+		ClassExpression C3 = voc.getClass(testURI + "C3");
+
+		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		assertEquals(classes.getCanonicalForm(A1), A1);
+		assertEquals(classes.getCanonicalForm(B1), B1);
+		assertEquals(classes.getCanonicalForm(C1), C1);
+		assertEquals(classes.getCanonicalForm(A3), A1);
+		assertEquals(classes.getCanonicalForm(B3), B1);
+		assertEquals(classes.getCanonicalForm(C3), C1);		
 	}
 	
 	public void test_equivalence_namedproperties_and_inverses() throws Exception {
@@ -176,24 +184,26 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, propDAG.edgeSetSize()); //
 
 		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
+		ObjectPropertyExpression A1 = voc.getObjectProperty(testURI + "A1");
+		ObjectPropertyExpression B1 = voc.getObjectProperty(testURI + "B1");
+		ObjectPropertyExpression C1 = voc.getObjectProperty(testURI + "C1");
+		ObjectPropertyExpression A2 = voc.getObjectProperty(testURI + "A2");
+		ObjectPropertyExpression A3 = voc.getObjectProperty(testURI + "A3");
+		ObjectPropertyExpression B2 = voc.getObjectProperty(testURI + "B2");
+		ObjectPropertyExpression B3 = voc.getObjectProperty(testURI + "B3");
+		ObjectPropertyExpression C2 = voc.getObjectProperty(testURI + "C2");
+		ObjectPropertyExpression C3 = voc.getObjectProperty(testURI + "C3");
 
-		assertFalse(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
-		assertFalse(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
-		assertFalse(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C1")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A2")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A3")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B2")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B3")) != null); 
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C2")) != null);
-		assertTrue(ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C3")) != null);
-		
-		assertEquals(voc.getObjectProperty(testURI + "A1").getInverse(), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A2")));
-		assertEquals(voc.getObjectProperty(testURI + "A1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "A3")));
-		assertEquals(voc.getObjectProperty(testURI + "B1").getInverse(), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B2"))); 
-		assertEquals(voc.getObjectProperty(testURI + "B1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "B3")));  
-		assertEquals(voc.getObjectProperty(testURI + "C1").getInverse(), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C2")));
-		assertEquals(voc.getObjectProperty(testURI + "C1"), ops.getCanonicalRepresentative(voc.getObjectProperty(testURI + "C3")));
+		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
+		assertEquals(ops.getCanonicalForm(A1), A1);
+		assertEquals(ops.getCanonicalForm(B1), B1);
+		assertEquals(ops.getCanonicalForm(C1), C1);
+		assertEquals(ops.getCanonicalForm(A2), A1.getInverse());
+		assertEquals(ops.getCanonicalForm(A3), A1);
+		assertEquals(ops.getCanonicalForm(B2), B1.getInverse());
+		assertEquals(ops.getCanonicalForm(B3), B1); 
+		assertEquals(ops.getCanonicalForm(C2), C1.getInverse());
+		assertEquals(ops.getCanonicalForm(C3), C1);
 	}
 
 }

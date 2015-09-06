@@ -12,7 +12,7 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 	 * @return null if either v is the representative itself or the DAG does not contain the vertex
 	 */
 	
-	T getCanonicalRepresentative(T v);
+	T getCanonicalForm(T v);
 	
 	Set<Equivalences<T>> getDirectSub(Equivalences<T> v);
 

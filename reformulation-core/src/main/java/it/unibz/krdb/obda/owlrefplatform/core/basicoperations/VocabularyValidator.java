@@ -89,14 +89,14 @@ public class VocabularyValidator {
 		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
 		if (/*p.isClass()*/ (p.getArity() == 1) && voc.containsClass(p.getName())) {
 			OClass c = voc.getClass(p.getName());
-			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalRepresentative(c);
-			if (equivalent != null)
+			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
+			if (equivalent != null && !equivalent.equals(c))
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
-			ObjectPropertyExpression op = voc.getObjectProperty(p.getName());
-			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalRepresentative(op);
-			if (equivalent != null) { 
+			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
+			if (equivalent != null && !equivalent.equals(ope)) { 
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
@@ -104,10 +104,10 @@ public class VocabularyValidator {
 			}
 		}
 		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
-			DataPropertyExpression dp = voc.getDataProperty(p.getName());
-			DataPropertyExpression equiv2 = reasoner.getDataPropertyDAG().getCanonicalRepresentative(dp);
-			if (equiv2 != null) 
-				return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
+			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
+			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
+			if (equivalent != null && !equivalent.equals(dpe)) 
+				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		}
 		return atom;
 	}
