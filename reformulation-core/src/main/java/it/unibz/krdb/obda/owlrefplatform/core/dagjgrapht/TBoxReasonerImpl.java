@@ -138,7 +138,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	/**
-	 * Return the DAG of properties
+	 * Return the DAG of object properties
 	 * 
 	 * @return DAG 
 	 */
@@ -146,6 +146,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
 		return objectPropertyDAG;
 	}
+	
+	/**
+	 * Return the DAG of data properties
+	 * 
+	 * @return DAG 
+	 */
 	
 	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
 		return dataPropertyDAG;

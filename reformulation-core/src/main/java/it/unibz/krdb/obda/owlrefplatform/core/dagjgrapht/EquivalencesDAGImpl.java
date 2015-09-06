@@ -56,31 +56,19 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
 	final ImmutableMap<T, Equivalences<T>> vertexIndex;
 	
-	/**
-	 * the EquivalenceIndex maps predicates to the representatives of their equivalence class (in TBox)
-	 * (these maps are only used for the equivalence-reduced TBoxes)
-	 * 
-	 * it contains 
-	 * 		- an entry for each property name other than the representative of an equivalence class 
-	 * 				(or its inverse)
-	 * 		- an entry for each class name other than the representative of its equivalence class
-	 */
-	
-
-	// maps Ts to the vertices of the DAG that they would be in in the non-reduced DAG
-	final ImmutableMap<T, Equivalences<T>> equivalenceIndex;   
+	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced  DAG
+	private final ImmutableMap<T, Equivalences<T>> fullVertexIndex;   
 	
 	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
 	private final Map<T, Set<T>> cacheSubRep;
 
+	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests only
 	
-	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests and SIGMA reduction
-	
-	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> equivalenceIndex) {	
+	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> fullVertexIndex) {	
 		this.graph = graph;
 		this.dag = dag;
 		this.vertexIndex = vertexIndex;
-		this.equivalenceIndex = equivalenceIndex;
+		this.fullVertexIndex = fullVertexIndex;
 		
 		this.cacheSub = new HashMap<>();
 		this.cacheSubRep = new HashMap<>();
@@ -97,7 +85,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	@Override
 	public T getCanonicalForm(T v) {
-		Equivalences<T> vs = equivalenceIndex.get(v);
+		Equivalences<T> vs = fullVertexIndex.get(v);
 		if (vs == null)
 			return null;
 		
@@ -269,34 +257,33 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
 					new SimpleDirectedGraph<>(DefaultEdge.class);
-		ImmutableMap.Builder<TT, Equivalences<TT>> equivalencesMapB = new ImmutableMap.Builder<>();
-
+					
+		ImmutableMap.Builder<TT, Equivalences<TT>> vertexIndexBuilder = new ImmutableMap.Builder<>();
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT node : equivalenceSet) 
-				equivalencesMapB.put(node, equivalenceSet);
+				vertexIndexBuilder.put(node, equivalenceSet);
 
 			dag0.addVertex(equivalenceSet);
 		}
-
-		ImmutableMap<TT, Equivalences<TT>> equivalencesMap = equivalencesMapB.build();
+		ImmutableMap<TT, Equivalences<TT>> vertexIndex = vertexIndexBuilder.build();
 		
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT e : equivalenceSet) {			
 				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
 					TT t = graph.getEdgeTarget(edge);
-					if (!equivalenceSet.contains(t))
-						dag0.addEdge(equivalenceSet, equivalencesMap.get(t));
+					if (!equivalenceSet.contains(t))  // do not add loops
+						dag0.addEdge(equivalenceSet, vertexIndex.get(t));
 				}
 				for (DefaultEdge edge : graph.incomingEdgesOf(e)) {
 					TT s = graph.getEdgeSource(edge);
-					if (!equivalenceSet.contains(s))
-						dag0.addEdge(equivalencesMap.get(s), equivalenceSet);
+					if (!equivalenceSet.contains(s)) // do not add loops
+						dag0.addEdge(vertexIndex.get(s), equivalenceSet);
 				}
 			}
 		}
 		
 
-		// removed redundant edges
+		// remove redundant edges
 		
 		SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> dag = 
 						new SimpleDirectedGraph<>(DefaultEdge.class);
@@ -323,7 +310,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 				dag.addEdge(v1, v2);
 		}
 		
-		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap, ImmutableMap.<TT, Equivalences<TT>>of());
+		return new EquivalencesDAGImpl<TT>(graph, dag, vertexIndex, vertexIndex);
 	}
 
 }

@@ -100,7 +100,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	
 	public static final class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
-		private EquivalencesDAG<T> reasonerDAG;
+		private final EquivalencesDAG<T> reasonerDAG;
 		
 		EquivalencesDAGImpl(EquivalencesDAG<T> reasonerDAG) {
 			this.reasonerDAG = reasonerDAG;
