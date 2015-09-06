@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +68,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		this.cacheSub = new HashMap<>();
 		this.cacheSubRep = new HashMap<>();
 	}
+
 	
 	/** 
 	 * 

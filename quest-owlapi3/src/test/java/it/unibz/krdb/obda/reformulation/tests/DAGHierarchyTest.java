@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -35,6 +34,8 @@ import it.unibz.krdb.obda.quest.dag.TestTBoxReasonerImpl_OnNamedDAG;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 import junit.framework.TestCase;
 
@@ -115,10 +116,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(descendants.size(), 1);
 
-		Set<ClassExpression> equivalents = new HashSet<ClassExpression>();
-		equivalents.add(C);
-		equivalents.add(D); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<ClassExpression>(equivalents)));
+		assertTrue(descendants.contains(new Equivalences<ClassExpression>(ImmutableSet.of(C, D)))); // getDescendants is reflexive
 
 		/**
 		 * The initial node is Node E.
@@ -140,10 +138,7 @@ public class DAGHierarchyTest extends TestCase {
 		assertTrue(descendants.contains(classes.getVertex(C)));
 		assertTrue(descendants.contains(classes.getVertex(D)));
 		
-		equivalents = new HashSet<ClassExpression>();
-		equivalents.add(E);
-		equivalents.add(F); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<ClassExpression>(equivalents)));
+		assertTrue(descendants.contains(new Equivalences<ClassExpression>(ImmutableSet.of(E, F)))); // getDescendants is reflexive
 	}
 
 	/**
@@ -207,10 +202,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = classes.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors), 4); // ancestors is now reflexive
 
-		Set<ClassExpression> equivalents = new HashSet<ClassExpression>();
-		equivalents.add(C);
-		equivalents.add(D);  // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(equivalents)));
+		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(ImmutableSet.of(C, D)))); // ancestor is reflexive now
 		assertTrue(ancestors.contains(classes.getVertex(E)));
 		assertTrue(ancestors.contains(classes.getVertex(F)));
 
@@ -230,10 +222,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(ancestors.size(), 1);
 
-		equivalents = new HashSet<ClassExpression>();
-		equivalents.add(E);
-		equivalents.add(F);  // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(equivalents)));
+		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(ImmutableSet.of(E, F))));// ancestor is reflexive now
 	}
 
 	/**
@@ -292,10 +281,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(descendants.size(), 1);
 
-		Set<ObjectPropertyExpression> equivalents = new HashSet<ObjectPropertyExpression>();
-		equivalents.add(R);
-		equivalents.add(S); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<ObjectPropertyExpression>(equivalents)));
+		assertTrue(descendants.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(R, S)))); // getDescendants is reflexive
 
 		/**
 		 * The initial node is Node T.
@@ -316,10 +302,7 @@ public class DAGHierarchyTest extends TestCase {
 		assertTrue(descendants.contains(properties.getVertex(Q)));
 		assertTrue(descendants.contains(properties.getVertex(R)));
 		assertTrue(descendants.contains(properties.getVertex(S)));
-		equivalents = new HashSet<ObjectPropertyExpression>();
-		equivalents.add(T);													// role
-		equivalents.add(U); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<ObjectPropertyExpression>(equivalents)));
+		assertTrue(descendants.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(T, U))));// getDescendants is reflexive
 	}
 
 	/**
@@ -381,10 +364,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = properties.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors),4); // ancestor is reflexive now
 
-		Set<ObjectPropertyExpression> equivalents = new HashSet<ObjectPropertyExpression>();
-		equivalents.add(R);
-		equivalents.add(S); // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<ObjectPropertyExpression>(equivalents)));
+		assertTrue(ancestors.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(R, S)))); // ancestor is reflexive now
 		
 		assertTrue(ancestors.contains(properties.getVertex(T)));
 		assertTrue(ancestors.contains(properties.getVertex(U)));
@@ -404,9 +384,6 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = properties.getSuper(initialNode);
 		assertEquals(ancestors.size(), 1);
 
-		equivalents = new HashSet<ObjectPropertyExpression>();
-		equivalents.add(T); 
-		equivalents.add(U); // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<ObjectPropertyExpression>(equivalents)));		
+		assertTrue(ancestors.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(T, U))));		// ancestor is reflexive now
 	}
 }

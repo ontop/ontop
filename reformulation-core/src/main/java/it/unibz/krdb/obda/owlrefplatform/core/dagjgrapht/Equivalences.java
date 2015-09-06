@@ -24,20 +24,22 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 public class Equivalences<T> implements Iterable<T> {
 	
-	final private Set<T> members;
+	final private ImmutableSet<T> members;
 	private T representative;
 	private boolean isIndexed;
 
-	public Equivalences(Set<T> members) {
-		this(members, null);
+	public Equivalences(ImmutableSet<T> members) {
+		this(members, null, false);
 	}
 	
-	public Equivalences(Set<T> members, T representative) {
+	public Equivalences(ImmutableSet<T> members, T representative, boolean isIndexed) {
 		this.members = members;
 		this.representative = representative;
-		this.isIndexed = false;
+		this.isIndexed = isIndexed;
 	}
 	
 	public void setRepresentative(T representative) {

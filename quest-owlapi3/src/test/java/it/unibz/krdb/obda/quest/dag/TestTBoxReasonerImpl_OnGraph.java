@@ -45,6 +45,8 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Reasoning over the TBox using the ontology graph
  * 
@@ -156,7 +158,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 								return new Equivalences<Description>(equivalences);
 							}
 						*/
-						return new Equivalences<T>(equivalenceSet, equivalenceSet.iterator().next());
+						return new Equivalences<T>(ImmutableSet.copyOf(equivalenceSet), equivalenceSet.iterator().next(), false);
 					}
 				}
 			}
@@ -172,7 +174,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 						return new Equivalences<Description>(equivalences);
 					}
 			}*/
-			return new Equivalences<T>(Collections.singleton(desc), desc);
+			return new Equivalences<T>(ImmutableSet.of(desc), desc, false);
 		}
 
 		@Override
@@ -235,9 +237,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-				Set<T> sources = new HashSet<T>();
-				sources.add(node);
-				result.add(new Equivalences<T>(sources));
+				result.add(new Equivalences<T>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
@@ -302,9 +302,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-				Set<T> sources = new HashSet<T>();
-				sources.add(node);
-				result.add(new Equivalences<T>(sources));
+				result.add(new Equivalences<T>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
