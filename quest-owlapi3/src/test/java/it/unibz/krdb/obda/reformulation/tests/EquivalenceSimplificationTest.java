@@ -44,9 +44,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
-
-		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
-		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
@@ -87,9 +85,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
-		
-		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
-		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
@@ -134,9 +130,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
-
-		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
-		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 		
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
@@ -171,9 +165,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
-
-		TBoxReasoner reasoner = TBoxReasonerImpl.create(ontology);
-		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();

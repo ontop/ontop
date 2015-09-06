@@ -41,7 +41,6 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -66,6 +65,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	public static TBoxReasoner create(Ontology onto) {
+		return create(onto, false);
+	}
+	
+	public static TBoxReasoner create(Ontology onto, boolean equivalenceReduced) {
 		final DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph = 
 				getObjectPropertyGraph(onto);
 		final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = 
@@ -87,7 +90,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 		
-		return new TBoxReasonerImpl(classDAG, dataRangeDAG, objectPropertyDAG, dataPropertyDAG);
+		TBoxReasonerImpl r = new TBoxReasonerImpl(classDAG, dataRangeDAG, objectPropertyDAG, dataPropertyDAG);
+		if (equivalenceReduced) {
+			r = getEquivalenceSimplifiedReasoner(r);
+		}
+		return r;
 	}
 	
 	/**
@@ -246,13 +253,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				set.setIndexed();
 			
 			set.setRepresentative(rep);
-			// System.out.println("SET REP: " + set);
 			if (!set.contains(repInv)) {
 				// if not symmetric 
 				// (each set either consists of symmetric properties 
 				//        or none of the properties in the set is symmetric)
 				setInv.setRepresentative(repInv);
-				//System.out.println("SET REP: " + setInv);
 			}
 		}				
 	}	
@@ -390,14 +395,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *  in other words, the constructed TBoxReasoner is the restriction to the vocabulary of the representatives
 	 *     all other symbols are mapped to the nodes via *Equivalences hash-maps
 	 *     
-	 *  note that *EquivalenceMap's are required for compatibility with older code
-	 * 
 	 * @param reasoner
 	 * @return reduced reasoner
 	 */
 	
 	
-	public static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
+	private static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
 
 		// OBJECT PROPERTIES
 		// 		
@@ -419,9 +422,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			objectProperties.addVertex(reducedNode);
 		}
 		
-		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG 
-					= factorize((EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.getObjectPropertyDAG(), 
-							objectProperties);
+		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = EquivalencesDAGImpl.reduce(
+				(EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.getObjectPropertyDAG(), objectProperties);
 
 		// DATA PROPERTIES
 		// 		
@@ -436,8 +438,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			dataProperties.addVertex(reducedNode);
 		}
 		
-		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = 
-							factorize((EquivalencesDAGImpl<DataPropertyExpression>)reasoner.getDataPropertyDAG(), dataProperties);
+		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = EquivalencesDAGImpl.reduce(
+				(EquivalencesDAGImpl<DataPropertyExpression>)reasoner.getDataPropertyDAG(), dataProperties);
 				
 		// CLASSES
 		// 
@@ -473,7 +475,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			classes.addVertex(reducedNode);
 		}			
 
-		EquivalencesDAGImpl<ClassExpression> classDAG = factorize(
+		EquivalencesDAGImpl<ClassExpression> classDAG = EquivalencesDAGImpl.reduce(
 				(EquivalencesDAGImpl<ClassExpression>)reasoner.getClassDAG(), classes);
 		
 		// DATA RANGES
@@ -485,28 +487,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	
-	private static <T> EquivalencesDAGImpl<T> factorize(EquivalencesDAGImpl<T> source, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> target) {
-		
-		ImmutableMap.Builder<T, Equivalences<T>> vertexIndexBuilder = new ImmutableMap.Builder<>();
-		for (Equivalences<T> tSet : target.vertexSet()) {
-			for (T s : source.getVertex(tSet.getRepresentative())) 
-				if (tSet.contains(s)) 		
-					vertexIndexBuilder.put(s, tSet);
-		}
-		ImmutableMap<T, Equivalences<T>> vertexIndex = vertexIndexBuilder.build();	
-		
-		// create induced edges in the target graph		
-		for (Equivalences<T> sSet : source) {
-			Equivalences<T> tSet = vertexIndex.get(sSet.getRepresentative());
-			
-			for (Equivalences<T> sSetSub : source.getDirectSub(sSet)) {
-				Equivalences<T> tSetSub = vertexIndex.get(sSetSub.getRepresentative());
-				target.addEdge(tSetSub, tSet);
-			}
-		}		
-		
-		return new EquivalencesDAGImpl<>(null, target, vertexIndex, source.vertexIndex);
-	}
 	
 	
 	

@@ -47,15 +47,14 @@ import com.google.common.collect.ImmutableMap;
  * The edges form the minimal set whose transitive and reflexive closure
  * coincides with the transitive and reflexive closure of the ontology graph
  *  
- * The key component is the Gabow SCC algorithm for computing 
- * strongly connected components
+ *  @author Roman Kontchakov
  * 
 */
 
 public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
-	final ImmutableMap<T, Equivalences<T>> vertexIndex;
+	private final ImmutableMap<T, Equivalences<T>> vertexIndex;
 	
 	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced  DAG
 	private final ImmutableMap<T, Equivalences<T>> fullVertexIndex;   
@@ -65,7 +64,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests only
 	
-	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> fullVertexIndex) {	
+	private EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> fullVertexIndex) {	
 		this.graph = graph;
 		this.dag = dag;
 		this.vertexIndex = vertexIndex;
@@ -251,7 +250,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	public static <TT> EquivalencesDAGImpl<TT> getEquivalencesDAG(DefaultDirectedGraph<TT,DefaultEdge> graph) {
 		
 		// each set contains vertices which together form a strongly connected
-		// component within the given graph
+		// component within the given graph		
 		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<>(graph);
 		List<Equivalences<TT>> equivalenceSets = inspector.stronglyConnectedSets();
 
@@ -312,4 +311,28 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		return new EquivalencesDAGImpl<TT>(graph, dag, vertexIndex, vertexIndex);
 	}
 
+	
+	public static <T> EquivalencesDAGImpl<T> reduce(EquivalencesDAGImpl<T> source, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> target) {
+		
+		ImmutableMap.Builder<T, Equivalences<T>> vertexIndexBuilder = new ImmutableMap.Builder<>();
+		for (Equivalences<T> tSet : target.vertexSet()) {
+			for (T s : source.getVertex(tSet.getRepresentative())) 
+				if (tSet.contains(s)) 		
+					vertexIndexBuilder.put(s, tSet);
+		}
+		ImmutableMap<T, Equivalences<T>> vertexIndex = vertexIndexBuilder.build();	
+		
+		// create induced edges in the target graph		
+		for (Equivalences<T> sSet : source) {
+			Equivalences<T> tSet = vertexIndex.get(sSet.getRepresentative());
+			
+			for (Equivalences<T> sSetSub : source.getDirectSub(sSet)) {
+				Equivalences<T> tSetSub = vertexIndex.get(sSetSub.getRepresentative());
+				target.addEdge(tSetSub, tSet);
+			}
+		}		
+		
+		return new EquivalencesDAGImpl<>(null, target, vertexIndex, source.vertexIndex);
+	}
+	
 }

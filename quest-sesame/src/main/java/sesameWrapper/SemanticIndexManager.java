@@ -67,9 +67,7 @@ public class SemanticIndexManager {
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 		voc = ontologyClosure.getVocabulary();
 
-		TBoxReasoner ontoReasoner = TBoxReasonerImpl.create(ontologyClosure);
-		// generate a new TBox with a simpler vocabulary
-		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
+		reasoner = TBoxReasonerImpl.create(ontologyClosure, true);
 			
 		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
 		dataRepository.generateMetadata(); // generate just in case

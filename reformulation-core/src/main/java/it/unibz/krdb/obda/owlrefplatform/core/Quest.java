@@ -527,12 +527,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Simplifying the vocabulary of the TBox
 		 */
 
-		reformulationReasoner = TBoxReasonerImpl.create(inputOntology);
-		
-		if (bOptimizeEquivalences) {
-			// generate a new TBox with a simpler vocabulary
-			reformulationReasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reformulationReasoner);
-		} 
+		reformulationReasoner = TBoxReasonerImpl.create(inputOntology, bOptimizeEquivalences);
 		vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
 
 		try {
