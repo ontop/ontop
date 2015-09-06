@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,7 +51,21 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
-	private final Map<T, Equivalences<T>> equivalencesMap;
+	private final Map<T, Equivalences<T>> vertexIndex;
+	
+	/**
+	 * the EquivalenceIndex maps predicates to the representatives of their equivalence class (in TBox)
+	 * (these maps are only used for the equivalence-reduced TBoxes)
+	 * 
+	 * it contains 
+	 * 		- an entry for each property name other than the representative of an equivalence class 
+	 * 				(or its inverse)
+	 * 		- an entry for each class name other than the representative of its equivalence class
+	 */
+	
+
+	// maps Ts to the vertices of the DAG that they would be in in the non-lean DAG
+	final Map<T, Equivalences<T>> equivalenceIndex;   
 	
 	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
 	private final Map<T, Set<T>> cacheSubRep;
@@ -60,10 +73,11 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests and SIGMA reduction
 	
-	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> equivalencesMap) {	
+	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> vertexIndex, Map<T, Equivalences<T>> equivalenceIndex) {	
 		this.graph = graph;
 		this.dag = dag;
-		this.equivalencesMap = equivalencesMap;
+		this.vertexIndex = vertexIndex;
+		this.equivalenceIndex = equivalenceIndex;
 		
 		this.cacheSub = new HashMap<>();
 		this.cacheSubRep = new HashMap<>();
@@ -75,7 +89,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	@Override
 	public Equivalences<T> getVertex(T v) {
-		return equivalencesMap.get(v);
+		return vertexIndex.get(v);
 	}
 	
 	/**
@@ -121,7 +135,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	@Override
 	public Set<T> getSubRepresentatives(T v) {
-		Equivalences<T> eq = equivalencesMap.get(v);
+		Equivalences<T> eq = vertexIndex.get(v);
 		
 		if (eq == null)
 			return Collections.singleton(v);
@@ -181,7 +195,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public String toString() {
 		return dag.toString() + 
-				"\n\nEquivalencesMap\n" + equivalencesMap;
+				"\n\nEquivalencesMap\n" + vertexIndex;
 	}
 
 	/** 
@@ -295,7 +309,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 				dag.addEdge(v1, v2);
 		}
 		
-		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap);
+		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap, Collections.<TT, Equivalences<TT>> emptyMap());
 	}
 
 }
