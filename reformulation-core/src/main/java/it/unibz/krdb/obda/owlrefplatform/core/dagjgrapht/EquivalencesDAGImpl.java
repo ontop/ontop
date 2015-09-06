@@ -24,6 +24,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -249,65 +250,63 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	public static <TT> EquivalencesDAGImpl<TT> getEquivalencesDAG(DefaultDirectedGraph<TT,DefaultEdge> graph) {
 		
-		
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
 		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<>(graph);
 		List<Equivalences<TT>> equivalenceSets = inspector.stronglyConnectedSets();
 
-		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
-					new SimpleDirectedGraph<>(DefaultEdge.class);
-					
+		// create the vertex index
+		
 		ImmutableMap.Builder<TT, Equivalences<TT>> vertexIndexBuilder = new ImmutableMap.Builder<>();
-		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
+		for (Equivalences<TT> equivalenceSet : equivalenceSets) {
 			for (TT node : equivalenceSet) 
 				vertexIndexBuilder.put(node, equivalenceSet);
-
-			dag0.addVertex(equivalenceSet);
 		}
 		ImmutableMap<TT, Equivalences<TT>> vertexIndex = vertexIndexBuilder.build();
 		
-		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
-			for (TT e : equivalenceSet) {			
-				for (DefaultEdge edge : graph.outgoingEdgesOf(e)) {
-					TT t = graph.getEdgeTarget(edge);
-					if (!equivalenceSet.contains(t))  // do not add loops
-						dag0.addEdge(equivalenceSet, vertexIndex.get(t));
-				}
-				for (DefaultEdge edge : graph.incomingEdgesOf(e)) {
-					TT s = graph.getEdgeSource(edge);
-					if (!equivalenceSet.contains(s)) // do not add loops
-						dag0.addEdge(vertexIndex.get(s), equivalenceSet);
-				}
+		// compute the edges between the SCCs
+		
+		Map<Equivalences<TT>, Set<Equivalences<TT>>> outgoingEdges = new HashMap<>();
+		
+		for (DefaultEdge edge : graph.edgeSet()) {
+			Equivalences<TT> v1 = vertexIndex.get(graph.getEdgeSource(edge));
+			Equivalences<TT> v2 = vertexIndex.get(graph.getEdgeTarget(edge));
+			if (v1 == v2)
+				continue; // do not add loops
+			
+			Set<Equivalences<TT>> out = outgoingEdges.get(v1);
+			if (out == null) {
+				out = new HashSet<>();
+				outgoingEdges.put(v1, out);
 			}
+			out.add(v2);
 		}
+
+		// compute the transitively reduced DAG
 		
-
-		// remove redundant edges
+		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag = new SimpleDirectedGraph<>(DefaultEdge.class);
+		for (Equivalences<TT> equivalenceSet : equivalenceSets)  
+			dag.addVertex(equivalenceSet);
 		
-		SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> dag = 
-						new SimpleDirectedGraph<>(DefaultEdge.class);
-
-		for (Equivalences<TT> v : dag0.vertexSet())
-			dag.addVertex(v);
-
-		for (DefaultEdge edge : dag0.edgeSet()) {
-			Equivalences<TT> v1 = dag0.getEdgeSource(edge);
-			Equivalences<TT> v2 = dag0.getEdgeTarget(edge);
-			boolean redundant = false;
-
-			if (dag0.outDegreeOf(v1) > 1) {
-				// an edge is redundant if 
-				//  its source has an edge going to a vertex 
-				//         from which the target is reachable (in one step) 
-				for (DefaultEdge e2 : dag0.outgoingEdgesOf(v1)) 
-					if (dag0.containsEdge(dag0.getEdgeTarget(e2), v2)) {
-						redundant = true;
-						break;
+		for (Map.Entry<Equivalences<TT>, Set<Equivalences<TT>>> edges : outgoingEdges.entrySet()) {
+			Equivalences<TT> v1 = edges.getKey();
+			for (Equivalences<TT> v2 : edges.getValue()) {
+				// an edge from v1 to v2 is redundant if 
+				//  v1 has an edge going to a vertex v2p 
+				//         from which v2 is reachable (in one step) 
+				boolean redundant = false;
+				if (edges.getValue().size() > 1) {
+	 				for (Equivalences<TT> v2p : edges.getValue()) {
+						Set<Equivalences<TT>> t2p = outgoingEdges.get(v2p);
+						if (t2p!= null && t2p.contains(v2)) {
+							redundant = true;
+							break;
+						}	
 					}
+				}
+				if (!redundant)
+					dag.addEdge(v1, v2);
 			}
-			if (!redundant)
-				dag.addEdge(v1, v2);
 		}
 		
 		return new EquivalencesDAGImpl<TT>(graph, dag, vertexIndex, vertexIndex);
