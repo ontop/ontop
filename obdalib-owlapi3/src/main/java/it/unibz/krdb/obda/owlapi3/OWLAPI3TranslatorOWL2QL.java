@@ -502,26 +502,26 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	@Override
 	public void visit(OWLDataPropertyRangeAxiom ax) {
 
-		DataPropertyExpression role = helper.getPropertyExpression(ax.getProperty());
-
-		OWL2Datatype owlDatatype;
+		DataPropertyExpression dpe = helper.getPropertyExpression(ax.getProperty());
 		try {
-			owlDatatype = getCanonicalDatatype(ax.getRange());
+			OWL2Datatype owlDatatype = getCanonicalDatatype(ax.getRange());
 			if (owlDatatype == null) {
 				// range is empty (rule [DT1.1])
-				dl_onto.addSubPropertyOfAxiom(role, DataPropertyExpressionImpl.owlBottomDataProperty);
+				dl_onto.addSubPropertyOfAxiom(dpe, DataPropertyExpressionImpl.owlBottomDataProperty);
 			}
 			else {
-				DataPropertyRangeExpression subclass = role.getRange(); 			
-				
 				//Predicate.COL_TYPE columnType = OWLTypeMapper.getType(owlDatatype);
-				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
 				//Datatype datatype = ofac.createDataType(columnType);
-				dl_onto.addSubClassOfAxiom(subclass, datatype);		
+				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+				dl_onto.addDataPropertyRangeAxiom(dpe.getRange(), datatype);		
 			}		
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 	}
 	
@@ -930,7 +930,12 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
 			dl_onto.addSubPropertyOfAxiom(auxRole, dpe);
-			dl_onto.addSubClassOfAxiom(auxRole.getRange(), filler);
+			try {
+				dl_onto.addDataPropertyRangeAxiom(auxRole.getRange(), filler);
+			} catch (InconsistentOntologyException e) {
+				// TEMPORARY FIX
+				e.printStackTrace();
+			}
 		}
 
 		return auxclass;

@@ -134,6 +134,9 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+
 		if (obj instanceof ObjectPropertyExpressionImpl) {
 			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
 			return string.equals(other.string) && (isInverse == other.isInverse);

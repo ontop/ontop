@@ -69,11 +69,20 @@ public class OntologyImpl implements Ontology {
 		private final List<BinaryAxiom<T>> inclusions = new ArrayList<>();
 		private final List<NaryAxiom<T>> disjointness = new ArrayList<>();
 		
+		/**
+		 * implements rules [D1], [O1] and [C1]:<br>
+		 *    - ignore if e1 is bot or e2 is top<br>
+		 *    - replace by emptiness if e2 is bot
+		 *    
+		 * @param e1
+		 * @param e2
+		 */
+		
 		void addInclusion(T e1, T e2) {
 			if (e1.isBottom() || e2.isTop()) 
 				return;
 			
-			if (e2.isBottom()) { // disjointness
+			if (e2.isBottom()) { // emptiness
 				NaryAxiom<T> ax = new NaryAxiomImpl<>(ImmutableList.of(e1, e1));
 				disjointness.add(ax);
 			}
@@ -82,6 +91,17 @@ public class OntologyImpl implements Ontology {
 				inclusions.add(ax);
 			}	
 		}
+		
+		/**
+		 * implements an extension of [D1], [O1] and [C1]:<br>
+		 *     - eliminates all occurrences of bot and if the result contains<br>
+		 *     - no top and at least two elements then disjointness<br>
+		 *     - one top then emptiness of all other elements<br>
+		 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list)
+		 *     
+		 * @param es
+		 * @throws InconsistentOntologyException
+		 */
 		
 		void addDisjointness(T... es) throws InconsistentOntologyException {
 			ImmutableList.Builder<T> sb = new ImmutableList.Builder<>();
@@ -146,38 +166,67 @@ public class OntologyImpl implements Ontology {
 	
 	public static final ImmutableMap<String, Datatype> OWL2QLDatatypes;
 	
-	private static final String xml  = "http://www.w3.org/1999/02/22-rdf-syntax-ns";
-	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema";	
-	private static final String owl = "http://www.w3.org/2002/07/owl";
-	private static final String xsd = "http://www.w3.org/2001/XMLSchema";
+	private static final String xml  = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";	
+	private static final String owl = "http://www.w3.org/2002/07/owl#";
+	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
 	
 	static {
 		DatatypeFactory ofac = obdafac.getDatatypeFactory();
 		
 		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
-				.put(xml + "#PlainLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
-				.put(xml + "#XMLLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
-				.put(rdfs + "#Literal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
-				.put(owl + "#real", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
-				.put(owl + "#rational", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational		
-				.put(xsd + "#decimal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal
-				.put(xsd + "#integer", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INTEGER))) // 	xsd:integer
-				.put(xsd + "#nonNegativeInteger", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER))) // 	xsd:nonNegativeInteger
-				.put(xsd + "#string", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:string
-				.put(xsd + "#normalizedString", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:normalizedString
-				.put(xsd + "#token", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:token
-				.put(xsd + "#Name", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:Name
-				.put(xsd + "#NCName", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	xsd:NCName
-				.put(xsd + "#NMTOKEN", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:NMTOKEN
-				.put(xsd + "#hexBinary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:hexBinary
-				.put(xsd + "#base64Binary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:base64Binary
-				.put(xsd + "#anyURI", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:anyURI
-				.put(xsd + "#dateTime", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME))) // 	xsd:dateTime
-				.put(xsd + "#dateTimeStamp", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME_STAMP))) // 	xsd:dateTimeStamp
-				.put(xsd + "#int", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INT))) // 	TEMPORARY FOR Q9 / FISHMARK
-				.put(xsd + "#long", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LONG))) // 	TEMPORARY FOR OntologyTypesTest
+				.put(xml + "PlainLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
+				.put(xml + "XMLLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
+				.put(rdfs + "Literal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
+				.put(owl + "real", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
+				.put(owl + "rational", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational		
+				.put(xsd + "decimal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal
+				.put(xsd + "integer", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INTEGER))) // 	xsd:integer
+				.put(xsd + "nonNegativeInteger", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER))) // 	xsd:nonNegativeInteger
+				.put(xsd + "string", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:string
+				.put(xsd + "normalizedString", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:normalizedString
+				.put(xsd + "token", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:token
+				.put(xsd + "Name", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:Name
+				.put(xsd + "NCName", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	xsd:NCName
+				.put(xsd + "NMTOKEN", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:NMTOKEN
+				.put(xsd + "hexBinary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:hexBinary
+				.put(xsd + "base64Binary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:base64Binary
+				.put(xsd + "anyURI", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:anyURI
+				.put(xsd + "dateTime", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME))) // 	xsd:dateTime
+				.put(xsd + "dateTimeStamp", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME_STAMP))) // 	xsd:dateTimeStamp
+				.put(xsd + "int", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INT))) // 	TEMPORARY FOR Q9 / FISHMARK
+				.put(xsd + "long", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LONG))) // 	TEMPORARY FOR OntologyTypesTest
 				.build();
 	}
+	
+/*	
+	// PREVIOUSLY SUPPORTED built-in datatypes 
+	
+	final static Set<Predicate> builtinDatatypes;
+
+	static { // static block
+		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+		
+		builtinDatatypes = new HashSet<>();
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NEGATIVE_INTEGER)); // XSD_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INT)); // OBDAVocabulary.XSD_INT);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER)); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.UNSIGNED_INT)); // OBDAVocabulary.XSD_UNSIGNED_INT);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.POSITIVE_INTEGER)); //.XSD_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_POSITIVE_INTEGER)); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LONG)); // OBDAVocabulary.XSD_LONG);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DECIMAL)); // OBDAVocabulary.XSD_DECIMAL);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DOUBLE)); // OBDAVocabulary.XSD_DOUBLE);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.FLOAT)); // OBDAVocabulary.XSD_FLOAT);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME)); // OBDAVocabulary.XSD_DATETIME);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.BOOLEAN)); // OBDAVocabulary.XSD_BOOLEAN
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
+	}
+*/	
+	
 	
 	
 	
@@ -300,12 +349,33 @@ public class OntologyImpl implements Ontology {
 		checkSignature(ce2);
 		classAxioms.addInclusion(ce1, ce2);
 	}	
+	
+	/**
+	 * Normalizes and adds a data property range axiom
+	 * <p>
+	 * DataPropertyRange := 'DataPropertyRange' '(' axiomAnnotations DataPropertyExpression DataRange ')'
+	 * <p>
+	 * Implements rule [D3]:
+	 *     - ignore if the property is bot or the range is rdfs:Literal (top datatype)
+	 *     - inconsistency if the property is top but the range is not rdfs:Literal
+	 *     
+	 * @throws InconsistentOntologyException 
+	 */
 
 	@Override
-	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
-		checkSignature(concept1);
-		checkSignature(concept2);
-		BinaryAxiom<DataRangeExpression> ax = new BinaryAxiomImpl<>(concept1, concept2);
+	public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException {
+		checkSignature(range);
+		checkSignature(datatype);
+		if (datatype.equals(DatatypeImpl.rdfsLiteral))
+			return;
+		
+		// otherwise the datatype is not top
+		if (range.getProperty().isBottom())
+			return;
+		if (range.getProperty().isTop())
+			throw new InconsistentOntologyException();
+		
+		BinaryAxiom<DataRangeExpression> ax = new BinaryAxiomImpl<>(range, datatype);
 		subDataRangeAxioms.add(ax);
 	}
 
@@ -331,17 +401,16 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	/**
-	 * adds a normalized data subproperty axiom
-	 * 
+	 * Normalizes and adds a data subproperty axiom
+	 * <p>
 	 * SubDataPropertyOf := 'SubDataPropertyOf' '(' axiomAnnotations 
-	 * 					subDataPropertyExpression superDataPropertyExpression ')'
-	 * subDataPropertyExpression := DataPropertyExpression
-	 * superDataPropertyExpression := DataPropertyExpression
-	 * 
-	 * implements rule [D1]:
-	 *    - ignore the axiom if the first argument is owl:bottomDataProperty or the second argument is owl:topDataProperty 
+	 * 					subDataPropertyExpression superDataPropertyExpression ')'<br>
+	 * subDataPropertyExpression := DataPropertyExpression<br>
+	 * superDataPropertyExpression := DataPropertyExpression<br>
+	 * <p>
+	 * implements rule [D1]:<br>
+	 *    - ignore the axiom if the first argument is owl:bottomDataProperty or the second argument is owl:topDataProperty<br>
 	 *    - replace by a disjointness axiom if the second argument is owl:bottomDataProperty
-	 * 
 	 */
 	
 	@Override
@@ -351,6 +420,19 @@ public class OntologyImpl implements Ontology {
 		dataPropertyAxioms.addInclusion(dpe1, dpe2);
 	}
 
+	/**
+	 * Normalizes and adds data property disjointness axiom
+	 * <p>
+	 * DisjointDataProperties := 'DisjointDataProperties' '(' axiomAnnotations 
+	 * 				DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'<br>
+	 * <p>
+	 * implements rule [D2]:<br>
+	 *     - eliminates all occurrences of bot and if the result contains<br>
+	 *     - no top and at least two elements then disjointness<br>
+	 *     - one top then emptiness of all other elements<br>
+	 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list) 
+	 */
+	
 	@Override
 	public void addDisjointClassesAxiom(ClassExpression... ces) throws InconsistentOntologyException {	
 		for (ClassExpression c : ces)
@@ -522,34 +604,6 @@ public class OntologyImpl implements Ontology {
 
 	
 	
-	// built-in datatypes 
-	
-	final static Set<Predicate> builtinDatatypes;
-
-	static { // static block
-		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-		
-		builtinDatatypes = new HashSet<>();
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NEGATIVE_INTEGER)); // XSD_NEGATIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INT)); // OBDAVocabulary.XSD_INT);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER)); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.UNSIGNED_INT)); // OBDAVocabulary.XSD_UNSIGNED_INT);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.POSITIVE_INTEGER)); //.XSD_POSITIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_POSITIVE_INTEGER)); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LONG)); // OBDAVocabulary.XSD_LONG);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DECIMAL)); // OBDAVocabulary.XSD_DECIMAL);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DOUBLE)); // OBDAVocabulary.XSD_DOUBLE);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.FLOAT)); // OBDAVocabulary.XSD_FLOAT);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME)); // OBDAVocabulary.XSD_DATETIME);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.BOOLEAN)); // OBDAVocabulary.XSD_BOOLEAN
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
-	}
-	
-	
-	
 	private void checkSignature(ClassExpression desc) {		
 		if (desc instanceof OClass) {
 			OClass cl = (OClass) desc;
@@ -565,16 +619,14 @@ public class OntologyImpl implements Ontology {
 		}
 	}	
 	
-	private void checkSignature(DataRangeExpression desc) {		
-		if (desc instanceof Datatype) {
-			Predicate pred = ((Datatype) desc).getPredicate();
-			if (!builtinDatatypes.contains(pred)) 
-				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
-		}
-		else {
-			assert (desc instanceof DataPropertyRangeExpression);
-			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
-		}
+	private void checkSignature(Datatype desc) {		
+		Predicate pred = desc.getPredicate();
+		if (!OWL2QLDatatypes.containsKey(pred.getName())) 
+			throw new IllegalArgumentException(DATATYPE_NOT_FOUND + pred);
+	}
+	
+	private void checkSignature(DataPropertyRangeExpression desc) {		
+		checkSignature(desc.getProperty());
 	}
 
 	private void checkSignature(ObjectPropertyExpression prop) {	

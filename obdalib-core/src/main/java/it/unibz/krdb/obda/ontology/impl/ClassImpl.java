@@ -60,9 +60,12 @@ public class ClassImpl implements OClass {
 	
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+		
 		if (obj instanceof ClassImpl) {
-			ClassImpl concept2 = (ClassImpl) obj;
-			return name.equals(concept2.name);
+			ClassImpl other = (ClassImpl) obj;
+			return name.equals(other.name);
 		}
 		return false;
 	}

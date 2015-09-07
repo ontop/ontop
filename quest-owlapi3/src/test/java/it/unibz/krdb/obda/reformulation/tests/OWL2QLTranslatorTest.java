@@ -1,13 +1,9 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-/**
- * 
- * @author Roman Kontchakov
- */
-
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -42,9 +38,18 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import com.google.common.collect.UnmodifiableIterator;
 
+/**
+ * Test for OWLAPI3TranslatorOWL2QL
+ * 
+ * @author Roman Kontchakov
+ * 
+ */
+
 public class OWL2QLTranslatorTest extends TestCase {
 
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
+	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
+	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";	
 	
 	@Test
 	public void test_R1_2() throws Exception {
@@ -712,5 +717,32 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertEquals("http://example/B", it.next().toString());
 		assertEquals("http://example/B", it.next().toString());
 	}	
+	
+	@Test
+	public void test_D3() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLDataProperty dpe1 = factory.getOWLDataProperty(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(dpe1));
+		OWLDataProperty owlTop = factory.getOWLDataProperty(IRI.create(owl + "topDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLDataProperty owlBottom = factory.getOWLDataProperty(IRI.create(owl + "bottomDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		OWLDataRange integer = factory.getOWLDatatype(IRI.create(xsd + "integer"));
+		OWLDataRange literal = factory.getOWLDatatype(IRI.create(rdfs + "Literal"));
+		
+		manager.addAxiom(onto, factory.getOWLDataPropertyRangeAxiom(owlBottom, integer)); // nothing
+		manager.addAxiom(onto, factory.getOWLDataPropertyRangeAxiom(dpe1, literal)); // empty
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<DataRangeExpression>> axs = dlliteonto.getSubDataRangeAxioms();
+		assertEquals(0, axs.size());
+	}	
+	
 	
 }

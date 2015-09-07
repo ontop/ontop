@@ -40,7 +40,7 @@ public interface Ontology extends Serializable {
 
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
 
-	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
+	public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException;
 	
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
