@@ -493,7 +493,7 @@ public class CQCUtilitiesTest {
 	}
 
     @Test
-	public void testSemanticContainment() {
+	public void testSemanticContainment() throws Exception {
 		OntologyFactory dfac = OntologyFactoryImpl.getInstance();
 
 		/* we always assert true = isContainedIn(q1, q2) */
@@ -658,7 +658,7 @@ public class CQCUtilitiesTest {
 
     //Facts should not be removed by the CQCUtilities
     @Test
-    public void testFacts() {
+    public void testFacts() throws Exception {
 
         OntologyFactory dfac = OntologyFactoryImpl.getInstance();
 

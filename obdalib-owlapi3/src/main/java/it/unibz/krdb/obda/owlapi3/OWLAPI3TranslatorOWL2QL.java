@@ -135,6 +135,10 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e);
 		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 	
 	/**
@@ -199,10 +203,16 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	@Override
 	public void visit(OWLSubObjectPropertyOfAxiom ax) {		
-		ObjectPropertyExpression ope1 = helper.getPropertyExpression(ax.getSubProperty());
-		ObjectPropertyExpression ope2 = helper.getPropertyExpression(ax.getSuperProperty());
+		try {
+			ObjectPropertyExpression ope1 = helper.getPropertyExpression(ax.getSubProperty());
+			ObjectPropertyExpression ope2 = helper.getPropertyExpression(ax.getSuperProperty());
 
-		dl_onto.addSubPropertyOfAxiom(ope1, ope2);	
+			dl_onto.addSubPropertyOfAxiom(ope1, ope2);	
+		}		
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		} 
 	}
 
 	/**
@@ -216,15 +226,21 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLEquivalentObjectPropertiesAxiom ax) {
-		Iterator<OWLObjectPropertyExpression> it = ax.getProperties().iterator();
-		ObjectPropertyExpression first = helper.getPropertyExpression(it.next());
-		ObjectPropertyExpression previous = first;
-		while (it.hasNext()) {
-			ObjectPropertyExpression current = helper.getPropertyExpression(it.next());
-			dl_onto.addSubPropertyOfAxiom(previous, current);
-			previous = current;
+		try {
+			Iterator<OWLObjectPropertyExpression> it = ax.getProperties().iterator();
+			ObjectPropertyExpression first = helper.getPropertyExpression(it.next());
+			ObjectPropertyExpression previous = first;
+			while (it.hasNext()) {
+				ObjectPropertyExpression current = helper.getPropertyExpression(it.next());
+				dl_onto.addSubPropertyOfAxiom(previous, current);
+				previous = current;
+			}
+			dl_onto.addSubPropertyOfAxiom(previous, first);
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
-		dl_onto.addSubPropertyOfAxiom(previous, first);
 	}
 	
 	/**
@@ -264,11 +280,17 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	@Override
 	public void visit(OWLInverseObjectPropertiesAxiom ax) {		
-		ObjectPropertyExpression ope1 = helper.getPropertyExpression(ax.getFirstProperty());
-		ObjectPropertyExpression ope2 = helper.getPropertyExpression(ax.getSecondProperty());
+		try {
+			ObjectPropertyExpression ope1 = helper.getPropertyExpression(ax.getFirstProperty());
+			ObjectPropertyExpression ope2 = helper.getPropertyExpression(ax.getSecondProperty());
 
-		dl_onto.addSubPropertyOfAxiom(ope1, ope2.getInverse());
-		dl_onto.addSubPropertyOfAxiom(ope2, ope1.getInverse());		
+			dl_onto.addSubPropertyOfAxiom(ope1, ope2.getInverse());
+			dl_onto.addSubPropertyOfAxiom(ope2, ope1.getInverse());		
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 	
 	/**
@@ -354,8 +376,14 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLSymmetricObjectPropertyAxiom ax) {
-		ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-		dl_onto.addSubPropertyOfAxiom(ope, ope.getInverse());
+		try {
+			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
+			dl_onto.addSubPropertyOfAxiom(ope, ope.getInverse());
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 
 	/**
@@ -411,10 +439,16 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	@Override
 	public void visit(OWLSubDataPropertyOfAxiom ax) {
-		DataPropertyExpression dpe1 = helper.getPropertyExpression(ax.getSubProperty());
-		DataPropertyExpression dpe2 = helper.getPropertyExpression(ax.getSuperProperty());
+		try {
+			DataPropertyExpression dpe1 = helper.getPropertyExpression(ax.getSubProperty());
+			DataPropertyExpression dpe2 = helper.getPropertyExpression(ax.getSuperProperty());
 
-		dl_onto.addSubPropertyOfAxiom(dpe1, dpe2);	
+			dl_onto.addSubPropertyOfAxiom(dpe1, dpe2);	
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}						
 	}
 	
 	
@@ -428,16 +462,22 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	 */
 	
 	@Override
-	public void visit(OWLEquivalentDataPropertiesAxiom ax) {		
-		Iterator<OWLDataPropertyExpression> it = ax.getProperties().iterator();
-		DataPropertyExpression first = helper.getPropertyExpression(it.next());
-		DataPropertyExpression previous = first;
-		while (it.hasNext()) {
-			DataPropertyExpression current = helper.getPropertyExpression(it.next());
-			dl_onto.addSubPropertyOfAxiom(previous, current);
-			previous = current;
-		}
-		dl_onto.addSubPropertyOfAxiom(previous, first);
+	public void visit(OWLEquivalentDataPropertiesAxiom ax) {	
+		try {
+			Iterator<OWLDataPropertyExpression> it = ax.getProperties().iterator();
+			DataPropertyExpression first = helper.getPropertyExpression(it.next());
+			DataPropertyExpression previous = first;
+			while (it.hasNext()) {
+				DataPropertyExpression current = helper.getPropertyExpression(it.next());
+				dl_onto.addSubPropertyOfAxiom(previous, current);
+				previous = current;
+			}
+			dl_onto.addSubPropertyOfAxiom(previous, first);
+		} 
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}						
 	}
 	
 	/**
@@ -903,8 +943,13 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			auxclass = auxRole.getDomain();
 			auxiliaryClassProperties.put(someexp, auxclass);
 
-			dl_onto.addSubPropertyOfAxiom(auxRole, role);
-			dl_onto.addSubClassOfAxiom(auxRole.getRange(), filler);
+			try {
+				dl_onto.addSubPropertyOfAxiom(auxRole, role);
+				dl_onto.addSubClassOfAxiom(auxRole.getRange(), filler);
+			} catch (InconsistentOntologyException e) {
+				// TEMPORARY FIX
+				e.printStackTrace();
+			}
 		}
 
 		return auxclass;
@@ -929,8 +974,8 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			auxclass = auxRole.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
-			dl_onto.addSubPropertyOfAxiom(auxRole, dpe);
 			try {
+				dl_onto.addSubPropertyOfAxiom(auxRole, dpe);
 				dl_onto.addDataPropertyRangeAxiom(auxRole.getRange(), filler);
 			} catch (InconsistentOntologyException e) {
 				// TEMPORARY FIX

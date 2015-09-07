@@ -50,7 +50,7 @@ public interface OntologyFactory {
 	public Ontology createOntology(ImmutableOntologyVocabulary voc);
 	
 	/**
-	 * creates a class assertion 
+	 * Creates a class assertion 
 	 *    (implements rule [C4])
 	 * 
 	 * @param ce 
@@ -64,7 +64,7 @@ public interface OntologyFactory {
 	
 	
 	/**
-	 * creates an object property assertion 
+	 * Creates an object property assertion 
 	 * (ensures that the property is not inverse by swapping arguments if necessary)
 	 *    (implements rule [O4])
 	 * 
@@ -78,7 +78,7 @@ public interface OntologyFactory {
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
 
 	/**
-	 * creates a data property assertion 
+	 * Creates a data property assertion 
 	 *    (implements rule [D4])
 	 * 
 	 * @param dpe

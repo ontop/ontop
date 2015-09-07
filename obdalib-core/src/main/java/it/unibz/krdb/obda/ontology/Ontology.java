@@ -38,13 +38,13 @@ public interface Ontology extends Serializable {
 	
 	// SUBCLASS/PROPERTY
 
-	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
+	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) throws InconsistentOntologyException;
 
 	public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException;
 	
-	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) throws InconsistentOntologyException;
 
-	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including);
+	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) throws InconsistentOntologyException;
 
 
 	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms();

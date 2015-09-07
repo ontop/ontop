@@ -744,5 +744,37 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertEquals(0, axs.size());
 	}	
 	
+	@Test
+	public void test_D5() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+
+		OWLClass ce1 = factory.getOWLClass(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		
+		OWLClass ce2 = factory.getOWLClass(IRI.create("http://example/D"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		
+		OWLDataProperty owlTop = factory.getOWLDataProperty(IRI.create(owl + "topDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLDataProperty owlBottom = factory.getOWLDataProperty(IRI.create(owl + "bottomDataProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		OWLDataRange literal = factory.getOWLDatatype(IRI.create(rdfs + "Literal"));
+		
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
+							factory.getOWLDataSomeValuesFrom(owlTop, literal))); 
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(
+							factory.getOWLDataSomeValuesFrom(owlBottom, literal), ce2)); 
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		assertEquals(0, axs.size());
+		Collection<NaryAxiom<ClassExpression>> axs1 = dlliteonto.getDisjointClassesAxioms();
+		assertEquals(0, axs1.size());
+	}	
 	
 }

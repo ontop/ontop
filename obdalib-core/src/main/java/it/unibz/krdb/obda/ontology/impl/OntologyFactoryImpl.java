@@ -63,7 +63,15 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new OntologyImpl((OntologyVocabularyImpl)vb);
 	}
 	
-	
+	/**
+	 * Creates a class assertion
+	 * <p>
+	 * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
+	 * <p>
+	 * Implements rule [C4]:
+	 *     - ignore (return null) if the class is top
+	 *     - inconsistency if the class is bot
+	 */
 	
 	@Override
 	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
@@ -75,6 +83,17 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new ClassAssertionImpl(ce, object);
 	}
 
+	/**
+	 * Creates an object property assertion
+	 * <p>
+	 * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations 
+	 *				ObjectPropertyExpression sourceIndividual targetIndividual ')'
+	 * <p>
+	 * Implements rule [O4]:
+	 *     - ignore (return null) if the property is top
+	 *     - inconsistency if the property is bot
+	 */
+	
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
 		if (ope.isTop())
 			return null;
@@ -87,6 +106,17 @@ public class OntologyFactoryImpl implements OntologyFactory {
 			return new ObjectPropertyAssertionImpl(ope, o1, o2);			
 	}
 
+	/**
+	 * Creates a data property assertion
+	 * <p>
+	 * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations 
+	 * 					DataPropertyExpression sourceIndividual targetValue ')'
+	 * <p>
+	 * Implements rule [D4]:
+	 *     - ignore (return null) if the property is top
+	 *     - inconsistency if the property is bot
+	 */
+	
 	@Override
 	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
 		if (dpe.isTop())

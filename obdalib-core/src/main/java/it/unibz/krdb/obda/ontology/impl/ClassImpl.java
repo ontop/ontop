@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.ontology.impl;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DescriptionBT;
 import it.unibz.krdb.obda.ontology.OClass;
 
 public class ClassImpl implements OClass {
