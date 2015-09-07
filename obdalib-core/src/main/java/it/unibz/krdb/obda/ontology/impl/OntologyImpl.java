@@ -97,7 +97,7 @@ public class OntologyImpl implements Ontology {
 		}
 		
 		/**
-		 * implements an extension of [D1], [O1] and [C1]:<br>
+		 * implements an extension of [D2], [O2] and [C2]:<br>
 		 *     - eliminates all occurrences of bot and if the result contains<br>
 		 *     - no top and at least two elements then disjointness<br>
 		 *     - one top then emptiness of all other elements<br>
@@ -144,6 +144,9 @@ public class OntologyImpl implements Ontology {
 	
 	private final List<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new ArrayList<>();
 
+	private final Set<ObjectPropertyExpression> reflexiveObjectPropertyAxioms = new HashSet<>();
+	private final Set<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms = new HashSet<>();
+	
 	private final Set<ObjectPropertyExpression> functionalObjectPropertyAxioms = new LinkedHashSet<>();
 	private final Set<DataPropertyExpression> functionalDataPropertyAxioms = new LinkedHashSet<>();
 	
@@ -357,7 +360,7 @@ public class OntologyImpl implements Ontology {
 		checkSignature(ce1);
 		checkSignature(ce2);
 		if (ce1.isTop())
-			ce1 = ClassImpl.owlThing; // rule [D5] and [O5]
+			ce1 = ClassImpl.owlThing; // rules [D5] and [O5]
 		classAxioms.addInclusion(ce1, ce2);
 	}	
 	
@@ -448,6 +451,19 @@ public class OntologyImpl implements Ontology {
 		classAxioms.addDisjointness(ces);
 	}
 
+	/**
+	 * Normalizes and adds object property disjointness axiom
+	 * <p>
+	 * DisjointObjectProperties := 'DisjointObjectProperties' '(' axiomAnnotations
+	 * 		 ObjectPropertyExpression ObjectPropertyExpression { ObjectPropertyExpression } ')'<br>
+	 * <p>
+	 * Implements rule [O2]:<br>
+	 *     - eliminates all occurrences of bot and if the result contains<br>
+	 *     - no top and at least two elements then disjointness<br>
+	 *     - one top then emptiness of all other elements<br>
+	 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list) 
+	 */
+
 	@Override
 	public void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... opes) throws InconsistentOntologyException {
 		for (ObjectPropertyExpression p : opes)
@@ -461,7 +477,7 @@ public class OntologyImpl implements Ontology {
 	 * DisjointDataProperties := 'DisjointDataProperties' '(' axiomAnnotations 
 	 * 				DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'<br>
 	 * <p>
-	 * implements rule [D2]:<br>
+	 * Implements rule [D2]:<br>
 	 *     - eliminates all occurrences of bot and if the result contains<br>
 	 *     - no top and at least two elements then disjointness<br>
 	 *     - one top then emptiness of all other elements<br>
@@ -474,6 +490,63 @@ public class OntologyImpl implements Ontology {
 			checkSignature(dpe);
 		dataPropertyAxioms.addDisjointness(dpes);
 	}
+	
+	
+	/**
+	 * Normalizes and adds a reflexive object property axiom
+	 * <p>
+	 * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * <p>
+	 * Implements rule [O3]:<br>
+	 *     - ignores if top (which is reflexive by definition)<br>
+	 *     - inconsistency if bot (which is not reflexive)<br>
+	 *     - otherwise, removes the inverse if required
+	 *     
+	 * @throws InconsistentOntologyException 
+	 */
+	
+	@Override
+	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException {
+		if (ope.isTop())
+			return;
+		if (ope.isBottom())
+			throw new InconsistentOntologyException();
+		
+		if (ope.isInverse())
+			reflexiveObjectPropertyAxioms.add(ope.getInverse());
+		else
+			reflexiveObjectPropertyAxioms.add(ope);
+	}
+
+	/**
+	 * Normalizes and adds an irreflexive object property axiom
+	 * <p>
+	 * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+	 * <p>
+	 * Implements rule [O3]:<br>
+	 *     - ignores if bot (which is irreflexive by definition)<br>
+	 *     - inconsistency if top (which is reflexive)<br>
+	 *     - otherwise, removes the inverse if required
+	 *     
+	 * @throws InconsistentOntologyException 
+	 */
+	
+	@Override
+	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException {
+		if (ope.isTop())
+			throw new InconsistentOntologyException();
+		if (ope.isBottom())
+			return;
+		
+		if (ope.isInverse())
+			irreflexiveObjectPropertyAxioms.add(ope.getInverse());
+		else
+			irreflexiveObjectPropertyAxioms.add(ope);
+	}
+
+	
+	
+	
 	
 	@Override
 	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop) {
@@ -567,6 +640,17 @@ public class OntologyImpl implements Ontology {
 		return Collections.unmodifiableList(dataPropertyAxioms.disjointness);
 	}
 
+	@Override
+	public Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms() {
+		return Collections.unmodifiableSet(reflexiveObjectPropertyAxioms);
+	}
+
+	@Override
+	public Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms() {
+		return Collections.unmodifiableSet(irreflexiveObjectPropertyAxioms);
+	}
+	
+
 	
 	@Override
 	public String toString() {
@@ -647,16 +731,4 @@ public class OntologyImpl implements Ontology {
 			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
 	}
 
-	@Override
-	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

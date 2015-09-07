@@ -92,6 +92,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * Implements rule [O4]:
 	 *     - ignore (return null) if the property is top
 	 *     - inconsistency if the property is bot
+	 *     - swap the arguments to eliminate inversess
 	 */
 	
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {

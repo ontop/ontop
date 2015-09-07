@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -768,6 +769,90 @@ public class OWL2QLTranslatorTest extends TestCase {
 							factory.getOWLDataSomeValuesFrom(owlTop, literal))); 
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(
 							factory.getOWLDataSomeValuesFrom(owlBottom, literal), ce2)); 
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		assertEquals(0, axs.size());
+		Collection<NaryAxiom<ClassExpression>> axs1 = dlliteonto.getDisjointClassesAxioms();
+		assertEquals(0, axs1.size());
+	}	
+
+	
+	@Test
+	public void test_O3() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+		
+		OWLObjectProperty owlTop = factory.getOWLObjectProperty(IRI.create(owl + "topObjectProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLObjectProperty owlBottom = factory.getOWLObjectProperty(IRI.create(owl + "bottomObjectProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		manager.addAxiom(onto, factory.getOWLReflexiveObjectPropertyAxiom(owlTop)); // nothing
+		manager.addAxiom(onto, factory.getOWLIrreflexiveObjectPropertyAxiom(owlBottom)); // nothing
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		
+		
+		Collection<ObjectPropertyExpression> axs = dlliteonto.getReflexiveObjectPropertyAxioms();
+		assertEquals(0, axs.size());
+		Collection<ObjectPropertyExpression> axs1 = dlliteonto.getIrreflexiveObjectPropertyAxioms();
+		assertEquals(0, axs1.size());
+
+		{
+			boolean flag = false;
+			try {
+				manager.addAxiom(onto, factory.getOWLReflexiveObjectPropertyAxiom(owlBottom)); 
+				OWLAPI3TranslatorUtility.translate(onto);
+			}
+			catch (RuntimeException e) {
+				if (e.getMessage().startsWith("Incon"))
+					flag = true;
+			}
+			assertTrue(flag);
+		}
+		{
+			boolean flag = false;
+			try {
+				OWLOntology onto2 = manager.createOntology(IRI.create("http://example/testonto2"));
+				manager.addAxiom(onto2, factory.getOWLIrreflexiveObjectPropertyAxiom(owlTop)); 
+				OWLAPI3TranslatorUtility.translate(onto2);
+			}
+			catch (RuntimeException e) {
+				if (e.getMessage().startsWith("Incon"))
+					flag = true;
+			}
+			assertTrue(flag);
+		}
+	}	
+	
+	
+	@Test
+	public void test_O5() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+
+		OWLClass ce1 = factory.getOWLClass(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce2 = factory.getOWLClass(IRI.create("http://example/D"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		
+		OWLObjectProperty owlTop = factory.getOWLObjectProperty(IRI.create(owl + "topObjectProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlTop));
+		OWLObjectProperty owlBottom = factory.getOWLObjectProperty(IRI.create(owl + "bottomObjectProperty"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(owlBottom));
+		
+		OWLClass thing = factory.getOWLClass(IRI.create(owl + "Thing"));
+		
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
+							factory.getOWLObjectSomeValuesFrom(owlTop, thing))); 
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(
+							factory.getOWLObjectSomeValuesFrom(owlBottom, thing), ce2)); 
 		
 		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		

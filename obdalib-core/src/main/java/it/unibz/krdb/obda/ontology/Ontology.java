@@ -74,9 +74,13 @@ public interface Ontology extends Serializable {
 	
 	// REFLEXIVITY / IRREFLEXIVITY
 	
-	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope);
+	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
 
-	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope);
+	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
+	
+	public Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms();
+	
+	public Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms();
 	
 	// FUNCTIONALITY 
 	
@@ -145,6 +149,7 @@ public interface Ontology extends Serializable {
 	 */
 	
 	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
+
 
 
 }

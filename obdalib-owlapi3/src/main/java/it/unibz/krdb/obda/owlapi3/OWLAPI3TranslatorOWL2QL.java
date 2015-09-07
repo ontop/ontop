@@ -348,8 +348,14 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	@Override
 	public void visit(OWLReflexiveObjectPropertyAxiom ax) {
-		ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-		dl_onto.addReflexiveObjectPropertyAxiom(ope);
+		try {
+			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
+			dl_onto.addReflexiveObjectPropertyAxiom(ope);
+		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 
 	/**
@@ -361,8 +367,14 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	@Override
 	public void visit(OWLIrreflexiveObjectPropertyAxiom ax) {
-		ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-		dl_onto.addIrreflexiveObjectPropertyAxiom(ope);
+		try {
+			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
+			dl_onto.addIrreflexiveObjectPropertyAxiom(ope);
+		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 
 	
