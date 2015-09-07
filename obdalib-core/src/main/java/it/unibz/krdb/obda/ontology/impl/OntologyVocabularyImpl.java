@@ -1,12 +1,31 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+
+/*
+ * #%L
+ * ontop-obdalib-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
@@ -14,10 +33,21 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
+/**
+ * Implements OntologyVocabulary 
+ * by providing look-up tables for classes, object and data properties
+ * (checks whether the name has been declared)
+ * 
+ * NOTE: the sets of classes, object and data properties DO NOT contain 
+ *       top/bottom elements
+ *       HOWEVER, they are recognized as valid class and property names
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	
 	final Map<String, OClass> concepts = new HashMap<>();
 	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
 	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
@@ -108,8 +138,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	@Override
 	public OClass createClass(String uri) {
-		Predicate classp = fac.getClassPredicate(uri);
-		OClass cd = new ClassImpl(classp);
+		OClass cd = new ClassImpl(uri);
 		if (!cd.isBottom() && !cd.isTop())
 			concepts.put(uri, cd);
 		return cd;
@@ -117,8 +146,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	@Override
 	public DataPropertyExpression createDataProperty(String uri) {
-		Predicate prop = fac.getDataPropertyPredicate(uri);
-		DataPropertyExpression rd = new DataPropertyExpressionImpl(prop);
+		DataPropertyExpression rd = new DataPropertyExpressionImpl(uri);
 		if (!rd.isBottom() && !rd.isTop()) 
 			dataProperties.put(uri, rd);
 		return rd;
@@ -183,6 +211,4 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	public boolean containsDataProperty(String uri) {
 		return dataProperties.containsKey(uri);
 	}
-
-	
 }

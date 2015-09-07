@@ -20,11 +20,8 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
@@ -52,7 +49,6 @@ public class AssertionFactoryImpl implements AssertionFactory {
 	private static final AssertionFactoryImpl instance = new AssertionFactoryImpl();
 
 	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 			
 	private AssertionFactoryImpl() {
 		// NO-OP to make the default constructor private
@@ -71,8 +67,7 @@ public class AssertionFactoryImpl implements AssertionFactory {
 
 	@Override
 	public ClassAssertion createClassAssertion(String className, ObjectConstant o) throws InconsistentOntologyException {
-		Predicate classp = fac.getClassPredicate(className);
-		OClass oc = new ClassImpl(classp);
+		OClass oc = new ClassImpl(className);
 		return ofac.createClassAssertion(oc, o);
 	}
 
@@ -98,8 +93,7 @@ public class AssertionFactoryImpl implements AssertionFactory {
 	
 	@Override
 	public DataPropertyAssertion createDataPropertyAssertion(String propertyName, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
-		Predicate prop = fac.getDataPropertyPredicate(propertyName);
-		DataPropertyExpression dpe = new DataPropertyExpressionImpl(prop);
+		DataPropertyExpression dpe = new DataPropertyExpressionImpl(propertyName);
 		return ofac.createDataPropertyAssertion(dpe, o1, o2);
 	}
 

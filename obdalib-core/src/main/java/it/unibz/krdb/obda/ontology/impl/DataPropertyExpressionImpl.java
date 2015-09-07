@@ -44,7 +44,9 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	private static final long serialVersionUID = 500873858691854474L;
 
 	private final Predicate predicate;
-	private final String string;
+	private final String name;
+	
+	private final boolean isTop, isBottom;
 	
 	private final DataSomeValuesFromImpl domain;
 	private final DataPropertyRangeExpressionImpl range;
@@ -52,23 +54,17 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
 	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
 	
-    static final DataPropertyExpression owlTopDataProperty; 
-    public static final DataPropertyExpression owlBottomDataProperty; 
+	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	static {
-		OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
-		Predicate prop = ofac.getDataPropertyPredicate(owlTopDataPropertyIRI);
-		owlTopDataProperty = new DataPropertyExpressionImpl(prop);  	
-	    
-		Predicate propbot = ofac.getDataPropertyPredicate(owlBottomDataPropertyIRI);
-		owlBottomDataProperty = new DataPropertyExpressionImpl(propbot);  	
-	}
+    public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(owlTopDataPropertyIRI);
+    public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(owlBottomDataPropertyIRI);
 	
 
-	DataPropertyExpressionImpl(Predicate p) {
-		this.predicate = p;
-		this.string = predicate.toString();		
+	DataPropertyExpressionImpl(String name) {
+		this.predicate = ofac.getDataPropertyPredicate(name);
+		this.name = name;		
+		this.isTop = name.equals(owlTopDataPropertyIRI);
+		this.isBottom = name.equals(owlBottomDataPropertyIRI);
 
 		this.domain = new DataSomeValuesFromImpl(this, DatatypeImpl.rdfsLiteral);
 		this.range = new DataPropertyRangeExpressionImpl(this);
@@ -82,7 +78,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
 	@Override
 	public String getName() {
-		return predicate.getName();
+		return name;
 	}
 	
 	@Override
@@ -99,38 +95,37 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
 	@Override 
 	public boolean isBottom() {
-		return predicate.getName().equals(owlBottomDataPropertyIRI);
+		return isBottom;
 	}
 	
 	@Override 
 	public boolean isTop() {
-		return predicate.getName().equals(owlTopDataPropertyIRI);
+		return isTop;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DataPropertyExpressionImpl) {
 			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
-			return predicate.equals(other.predicate);
+			return name.equals(other.name);
 		}
 		
-		// object and data properties share the same name space
-		
+		// object and data properties share the same name space	
 		if (obj instanceof ObjectPropertyExpressionImpl) {
 			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
-			return (false == other.isInverse()) && predicate.equals(other.getPredicate());
+			return (false == other.isInverse()) && name.equals(other.getName());
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return string.hashCode();
+		return name.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return string;
+		return name;
 	}
 
 }
