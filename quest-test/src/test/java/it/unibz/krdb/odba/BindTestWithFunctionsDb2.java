@@ -211,10 +211,10 @@ public class BindTestWithFunctionsDb2 {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.00, 43.00\"");
-        expectedValues.add("\"0.00, 23.00\"");
-        expectedValues.add("\"0.00, 34.00\"");
-        expectedValues.add("\"0.00, 10.00\"");
+        expectedValues.add("\".00, 43.00\"");
+        expectedValues.add("\".00, 23.00\"");
+        expectedValues.add("\".00, 34.00\"");
+        expectedValues.add("\".00, 10.00\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 

@@ -211,10 +211,10 @@ public class BindTestWithFunctionsSqlServer {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0, 43\"");
-        expectedValues.add("\"0, 23\"");
-        expectedValues.add("\"0, 34\"");
-        expectedValues.add("\"0, 10\"");
+        expectedValues.add("\"0.00, 43.00\"");
+        expectedValues.add("\"0.00, 23.00\"");
+        expectedValues.add("\"0.00, 34.00\"");
+        expectedValues.add("\"0.00, 10.00\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -255,57 +255,112 @@ public class BindTestWithFunctionsSqlServer {
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount.\n"
-                + "   ?x dc:title ?title .\n"
-               // + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (MD5(\"The Semantic Web\") AS ?w)\n"
-                + "}";
 
-        List<String> expectedValues = new ArrayList<>();
+
+         String querymd5Bind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                 + "SELECT  ?title ?w WHERE \n"
+                 + "{  ?x ns:price ?p .\n"
+                 + "   ?x ns:discount ?discount.\n"
+                 + "   ?x dc:title ?title .\n"
+                 + "   BIND (MD5(\"The Semantic Web\") AS ?w)\n"
+                 + "}";
+
+         List<String> expectedValuesMD5 = new ArrayList<>();
+
+         String resultmd5 = messageDigest(MessageDigest.getInstance("MD5"), "The Semantic Web");
+         expectedValuesMD5.add(String.format("\"%s\"",resultmd5));
+         expectedValuesMD5.add(String.format("\"%s\"",resultmd5));
+         expectedValuesMD5.add(String.format("\"%s\"", resultmd5));
+         expectedValuesMD5.add(String.format("\"%s\"", resultmd5));
+
+
+         checkReturnedValues(p, querymd5Bind, expectedValuesMD5);
+
+         String querySHA256Bind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                 + "SELECT  ?title ?w WHERE \n"
+                 + "{  ?x ns:price ?p .\n"
+                 + "   ?x ns:discount ?discount.\n"
+                 + "   ?x dc:title ?title .\n"
+                 + "   BIND (SHA256(\"The Semantic Web\") AS ?w)\n"
+                 + "}";
+
+         List<String> expectedValuesSHA256 = new ArrayList<>();
+
+         String resultsha256 =  messageDigest(MessageDigest.getInstance("SHA-256"), "The Semantic Web");
+         expectedValuesSHA256.add(String.format("\"%s\"",resultsha256));
+         expectedValuesSHA256.add(String.format("\"%s\"",resultsha256));
+         expectedValuesSHA256.add(String.format("\"%s\"", resultsha256));
+         expectedValuesSHA256.add(String.format("\"%s\"", resultsha256));
+
+
+         checkReturnedValues(p, querySHA256Bind, expectedValuesSHA256);
+
+         String querySHA1Bind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                 + "SELECT  ?title ?w WHERE \n"
+                 + "{  ?x ns:price ?p .\n"
+                 + "   ?x ns:discount ?discount.\n"
+                 + "   ?x dc:title ?title .\n"
+                 + "   BIND (SHA1(\"The Semantic Web\") AS ?w)\n"
+                 + "}";
+
+         List<String> expectedValuesSHA1 = new ArrayList<>();
+
+         String resultsha1 =  messageDigest(MessageDigest.getInstance("SHA-1"), "The Semantic Web");
+         expectedValuesSHA1.add(String.format("\"%s\"",resultsha1));
+         expectedValuesSHA1.add(String.format("\"%s\"",resultsha1));
+         expectedValuesSHA1.add(String.format("\"%s\"", resultsha1));
+         expectedValuesSHA1.add(String.format("\"%s\"", resultsha1));
+
+
+         checkReturnedValues(p, querySHA1Bind, expectedValuesSHA1);
+
+         String querySHA512Bind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                 + "SELECT  ?title ?w WHERE \n"
+                 + "{  ?x ns:price ?p .\n"
+                 + "   ?x ns:discount ?discount.\n"
+                 + "   ?x dc:title ?title .\n"
+                 + "   BIND (SHA512(\"The Semantic Web\") AS ?w)\n"
+                 + "}";
+
+         List<String> expectedValuesSHA512 = new ArrayList<>();
+
+         String resultsha512 =  messageDigest(MessageDigest.getInstance("SHA-512"), "The Semantic Web");
+         expectedValuesSHA512.add(String.format("\"%s\"",resultsha512));
+         expectedValuesSHA512.add(String.format("\"%s\"",resultsha512));
+         expectedValuesSHA512.add(String.format("\"%s\"", resultsha512));
+         expectedValuesSHA512.add(String.format("\"%s\"", resultsha512));
+
+
+         checkReturnedValues(p, querySHA512Bind, expectedValuesSHA512);
+
+
+     }
+
+
+
+    public static String messageDigest(MessageDigest digest, String base) {
         try{
-	          MessageDigest digest = MessageDigest.getInstance("MD5");
-	          byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
-	          StringBuffer hexString = new StringBuffer();
 
-	          for (int i = 0; i < hash.length; i++) {
-	              String hex = Integer.toHexString(0xff & hash[i]);
-	              if(hex.length() == 1) hexString.append('0');
-	              hexString.append(hex);
-	          }
+            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
 
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
 
-	  } catch(Exception ex){
-	     throw new RuntimeException(ex);
-	  }
-        checkReturnedValues(p, queryBind, expectedValues);
-
+            return hexString.toString();
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
     }
 
-	public static String sha256(String base) {
-	      try{
-	          MessageDigest digest = MessageDigest.getInstance("MD5");
-	          byte[] hash = digest.digest(base.getBytes("UTF-8"));
-	          StringBuffer hexString = new StringBuffer();
 
-	          for (int i = 0; i < hash.length; i++) {
-	              String hex = Integer.toHexString(0xff & hash[i]);
-	              if(hex.length() == 1) hexString.append('0');
-	              hexString.append(hex);
-	          }
-
-	      return hexString.toString();
-	  } catch(Exception ex){
-	     throw new RuntimeException(ex);
-	  }
-	}
 
 	/*
 	 * Tests for functions on strings.

@@ -26,22 +26,22 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	 @Override
 	  	public String SHA256(String str) {
-	    	return String.format("HASHBYTES('SHA_256',%s)", str);
+	    	return String.format("LOWER(CONVERT(VARCHAR(64),  HashBytes('SHA2_256',%s),2 ))", str);
 	  	}
 	    
 	    @Override
 	  	public String SHA1(String str) {
-	    	return String.format("HASHBYTES('SHA1',%s)", str);
+	    	return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('SHA1',%s),2 ))", str);
 	  	}
 	    
 	    @Override
 	  	public String SHA512(String str) {
-	    	return String.format("HASHBYTES('SHA_512',%s)", str);
+	    	return String.format("LOWER(CONVERT(VARCHAR(128),HASHBYTES('SHA2_512',%s) ,2 ))", str);
 	  	}
 	      
 	      @Override
 	  	public String MD5(String str) {
-		    	return String.format("HASHBYTES('MD5',%s)", str);
+		    	return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('MD5',%s) ,2 ))", str);
 	  	}
 
 	@Override
