@@ -808,6 +808,7 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	 * 
 	 * replaces ObjectIntersectionOf by a number of subClassOf axioms (rule [R4])
 	 *          superObjectComplementOf by disjointness axioms (rule [R5])
+	 *          
 	 * @throws InconsistentOntologyException 
 	 */
 	

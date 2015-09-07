@@ -126,8 +126,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
-		Predicate prop = fac.getObjectPropertyPredicate(uri);
-		ObjectPropertyExpression rd = new ObjectPropertyExpressionImpl(prop);
+		ObjectPropertyExpression rd = new ObjectPropertyExpressionImpl(uri);
 		if (!rd.isBottom() && !rd.isTop()) 
 			objectProperties.put(uri, rd);
 		return rd;

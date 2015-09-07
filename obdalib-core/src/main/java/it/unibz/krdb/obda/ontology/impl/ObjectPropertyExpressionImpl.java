@@ -33,7 +33,7 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
  * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
  * 
  * Support for owl:topObjectProperty and owl:bottomObjectProperty
- *     - the inverses of the two coincide with themselves 
+ *     - the inverses of the two coincide with themselves (rule [R6])
  * 
  * @author Roman Kontchakov
  *
@@ -56,31 +56,27 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	public static final String owlTopObjectPropertyIRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
 	public static final String owlBottomObjectPropertyIRI = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
 	
-	static final ObjectPropertyExpression owlTopObjectProperty = initialize(owlTopObjectPropertyIRI); 
-	static final ObjectPropertyExpression owlBottomObjectProperty = initialize(owlBottomObjectPropertyIRI); 
-	    
-	private static ObjectPropertyExpression initialize(String uri) {
-		final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new ObjectPropertyExpressionImpl(prop);  	
-	}
+	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
+	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(owlTopObjectPropertyIRI); 
+	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(owlBottomObjectPropertyIRI); 
+
 	/**
 	 * general constructor 
 	 * 
 	 * @param p
 	 */
 	
-	ObjectPropertyExpressionImpl(Predicate p) {
-		this.predicate = p;
+	ObjectPropertyExpressionImpl(String name) {
+		this.predicate = ofac.getObjectPropertyPredicate(name);
 		this.isInverse = false;
-		this.string = predicate.getName();
-		this.isTop = string.equals(owlTopObjectPropertyIRI);
-		this.isBottom = string.equals(owlBottomObjectPropertyIRI);
+		this.string = name;
+		this.isTop = name.equals(owlTopObjectPropertyIRI);
+		this.isBottom = name.equals(owlBottomObjectPropertyIRI);
 		if (isTop || isBottom) 
 			this.inverseProperty = this;   // rule [R6] 
 		else
-			this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
+			this.inverseProperty = new ObjectPropertyExpressionImpl(predicate, this);
 		
 		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
@@ -90,26 +86,17 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	 *  (this constructor is never applied to the top and bottom properties)
 	 * 
 	 * @param p
-	 * @param isInverse
 	 * @param inverseProperty
 	 */
 
-	private ObjectPropertyExpressionImpl(Predicate p, boolean isInverse, ObjectPropertyExpressionImpl inverseProperty) {
+	private ObjectPropertyExpressionImpl(Predicate p, ObjectPropertyExpressionImpl inverseProperty) {
 		this.predicate = p;
-		this.isInverse = isInverse;
+		this.isInverse = true; // always inverted
 		this.isTop = false; // cannot be the top property
 		this.isBottom = false; // cannot be the bottom property
 		this.inverseProperty = inverseProperty;
-
-		if (isInverse) {
-			StringBuilder bf = new StringBuilder();
-			bf.append(predicate.getName());
-			bf.append("^-");
-			this.string =  bf.toString();
-		}
-		else 
-			this.string = predicate.getName();
-		
+		// always inverted
+		this.string = new StringBuilder().append(predicate.getName()).append("^-").toString();
 		this.domain = new ObjectSomeValuesFromImpl(this);		
 	}
 
@@ -149,14 +136,13 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	public boolean equals(Object obj) {
 		if (obj instanceof ObjectPropertyExpressionImpl) {
 			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
-			return (isInverse == other.isInverse) && predicate.equals(other.predicate);
+			return string.equals(other.string) && (isInverse == other.isInverse);
 		}
 		
 		// the two types of properties share the same name space
-
 		if (obj instanceof DataPropertyExpressionImpl) {
 			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
-			return (isInverse == false) && predicate.equals(other.getPredicate());
+			return (isInverse == false) && getName().equals(other.getName());
 		}
 		return false;
 	}

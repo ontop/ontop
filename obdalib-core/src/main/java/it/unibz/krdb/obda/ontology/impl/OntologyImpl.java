@@ -496,8 +496,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public ObjectPropertyExpression createAuxiliaryObjectProperty() {
-		Predicate prop = obdafac.getDataPropertyPredicate(AUXROLEURI + auxCounter);
-		ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(prop);
+		ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(AUXROLEURI + auxCounter);
 		auxCounter++ ;
 		auxObjectProperties.add(ope);
 		return ope;

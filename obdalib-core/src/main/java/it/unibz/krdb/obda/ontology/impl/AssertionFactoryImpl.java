@@ -85,8 +85,7 @@ public class AssertionFactoryImpl implements AssertionFactory {
 
 	@Override
 	public ObjectPropertyAssertion createObjectPropertyAssertion(String propertyName, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
-		Predicate prop = fac.getObjectPropertyPredicate(propertyName);
-		ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(prop);
+		ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(propertyName);
 		return ofac.createObjectPropertyAssertion(ope, o1, o2);
 	}
 
