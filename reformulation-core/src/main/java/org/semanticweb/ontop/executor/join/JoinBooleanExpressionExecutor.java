@@ -34,7 +34,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
          * Will remain the sames, whatever happens
          */
         Optional<QueryNode> optionalParent = query.getParent(originalTopJoinNode);
-        Optional<QueryNode> optionalNextSibling = query.nextSibling(originalTopJoinNode);
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(originalTopJoinNode);
 
         /**
          * Optimizes

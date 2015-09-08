@@ -25,7 +25,7 @@ public class BasicQueryTreePrinter implements IntermediateQueryPrinter {
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(rootOffsetString + subTreeRoot + "\n");
 
-        for (QueryNode child : query.getCurrentSubNodesOf(subTreeRoot)) {
+        for (QueryNode child : query.getChildren(subTreeRoot)) {
             strBuilder.append(stringifySubTree(query, child, rootOffsetString + TAB_STR));
         }
         return strBuilder.toString();

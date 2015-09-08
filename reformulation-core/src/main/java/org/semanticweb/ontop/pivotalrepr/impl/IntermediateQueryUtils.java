@@ -252,7 +252,7 @@ public class IntermediateQueryUtils {
                                                                        final QueryNode newParentNode,
                                                                        Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(originalParentNode)) {
+        for(QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
 
             // QueryNode are mutable
             QueryNode newChildNode;

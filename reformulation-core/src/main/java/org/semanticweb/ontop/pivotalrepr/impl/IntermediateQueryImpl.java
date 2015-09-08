@@ -107,7 +107,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+    public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return treeComponent.getCurrentSubNodesOf(node);
     }
 
@@ -194,7 +194,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public Optional<QueryNode> nextSibling(QueryNode node) {
+    public Optional<QueryNode> getNextSibling(QueryNode node) {
         try {
             return treeComponent.nextSibling(node);
         } catch (IllegalTreeException e) {

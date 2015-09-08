@@ -121,7 +121,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
         while(optionalAlreadyExploredNode.isPresent()) {
             QueryNode currentAlreadyExploredNode = optionalAlreadyExploredNode.get();
 
-            Optional<QueryNode> optionalNextSibling = query.nextSibling(currentAlreadyExploredNode);
+            Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAlreadyExploredNode);
             if (optionalNextSibling.isPresent()) {
                 return optionalNextSibling;
             }

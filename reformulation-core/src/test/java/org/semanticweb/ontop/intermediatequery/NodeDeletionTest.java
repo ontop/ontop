@@ -102,7 +102,7 @@ public class NodeDeletionTest {
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
         assertTrue(viceRootNode instanceof TableNode);
         assertEquals(((TableNode) viceRootNode).getAtom().getPredicate().getName(), table1Name);
-        assertTrue(optimizedQuery.getCurrentSubNodesOf(viceRootNode).isEmpty());
+        assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
     }
 
     @Test
@@ -167,12 +167,12 @@ public class NodeDeletionTest {
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
         assertTrue(viceRootNode instanceof ConstructionNode);
-        assertEquals(optimizedQuery.getCurrentSubNodesOf(viceRootNode).size(), 1);
+        assertEquals(optimizedQuery.getChildren(viceRootNode).size(), 1);
 
         QueryNode viceViceRootNode = optimizedQuery.getFirstChild(viceRootNode).get();
         assertTrue(viceViceRootNode instanceof TableNode);
         assertEquals(((TableNode) viceViceRootNode).getAtom().getPredicate().getName(), table1Name);
-        assertTrue(optimizedQuery.getCurrentSubNodesOf(viceViceRootNode).isEmpty());
+        assertTrue(optimizedQuery.getChildren(viceViceRootNode).isEmpty());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class NodeDeletionTest {
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
         assertTrue(viceRootNode instanceof UnionNode);
-        assertEquals(optimizedQuery.getCurrentSubNodesOf(viceRootNode).size(), 2);
+        assertEquals(optimizedQuery.getChildren(viceRootNode).size(), 2);
     }
 
     @Test(expected = EmptyQueryException.class)

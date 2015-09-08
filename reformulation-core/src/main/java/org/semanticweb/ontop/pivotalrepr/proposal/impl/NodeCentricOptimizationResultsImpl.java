@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -16,7 +15,7 @@ public class NodeCentricOptimizationResultsImpl extends ProposalResultsImpl
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               QueryNode newNode) {
         super(query);
-        this.optionalNextSibling = query.nextSibling(newNode);
+        this.optionalNextSibling = query.getNextSibling(newNode);
         this.optionalNewNode = Optional.of(newNode);
         this.optionalClosestAncestor = query.getParent(newNode);
     }

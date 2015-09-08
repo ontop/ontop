@@ -172,7 +172,7 @@ public class SubQueryUnificationTools {
                                                                 SubstitutionPropagator substitutionPropagator,
                                                                 QueryNodeRenamer renamer)
             throws IntermediateQueryBuilderException, SubQueryUnificationException {
-        for(QueryNode originalChild : originalSubQuery.getCurrentSubNodesOf(originalParentNode)) {
+        for(QueryNode originalChild : originalSubQuery.getChildren(originalParentNode)) {
             Optional<QueryNode> optionalNewChild;
             SubstitutionPropagator propagatorForChild;
             try {

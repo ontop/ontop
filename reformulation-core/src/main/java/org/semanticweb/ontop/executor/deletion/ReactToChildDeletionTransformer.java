@@ -32,7 +32,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
     @Override
     public NodeTransformationProposal transform(LeftJoinNode leftJoinNode){
-        ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(leftJoinNode);
+        ImmutableList<QueryNode> children = query.getChildren(leftJoinNode);
         switch (children.size()) {
             case 0:
                 // Should normally not happen
@@ -55,7 +55,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
     @Override
     public NodeTransformationProposal transform(UnionNode unionNode) {
-        ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(unionNode);
+        ImmutableList<QueryNode> children = query.getChildren(unionNode);
         switch (children.size()) {
             case 0:
                 return new NodeTransformationProposalImpl(DELETE);
@@ -73,7 +73,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
     @Override
     public NodeTransformationProposal transform(InnerJoinNode innerJoinNode) {
-        ImmutableList<QueryNode> children = query.getCurrentSubNodesOf(innerJoinNode);
+        ImmutableList<QueryNode> children = query.getChildren(innerJoinNode);
         switch (children.size()) {
             case 0:
                 return new NodeTransformationProposalImpl(DELETE);
@@ -114,6 +114,6 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
     }
 
     private boolean hasChildren(QueryNode node) {
-        return !query.getCurrentSubNodesOf(node).isEmpty();
+        return !query.getChildren(node).isEmpty();
     }
 }

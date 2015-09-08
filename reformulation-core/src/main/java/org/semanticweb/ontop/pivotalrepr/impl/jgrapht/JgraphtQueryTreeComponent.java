@@ -175,7 +175,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
      */
     @Override
     public void addSubTree(IntermediateQuery subQuery, QueryNode externalParent, QueryNode localParent) throws IllegalTreeUpdateException {
-        for (QueryNode externalChild : subQuery.getCurrentSubNodesOf(externalParent)) {
+        for (QueryNode externalChild : subQuery.getChildren(externalParent)) {
             QueryNode localChild = externalChild.clone();
             queryDAG.addVertex(localChild);
             try {

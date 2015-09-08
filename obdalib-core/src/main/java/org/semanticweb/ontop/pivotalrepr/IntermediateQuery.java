@@ -15,7 +15,23 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getNodesInTopDownOrder();
 
-    ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
+    ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    /**
+     * From the parent to the oldest ancestor.
+     */
+    ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
+
+    Optional<QueryNode> getParent(QueryNode node);
+
+    Optional<QueryNode> getNextSibling(QueryNode node);
+
+    Optional<QueryNode> getFirstChild(QueryNode node);
+
+    /**
+     * TODO: explain
+     */
+    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
     /**
      * EXCLUDES the root of the sub-tree (currentNode).
@@ -44,21 +60,4 @@ public interface IntermediateQuery {
      * TODO: find an exception to throw
      */
     void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
-
-    /**
-     * TODO: explain
-     */
-    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
-
-    /**
-     * From the parent to the oldest ancestor.
-     */
-    ImmutableList<QueryNode> getAncestors(QueryNode descendantNode);
-
-    Optional<QueryNode> getParent(QueryNode node);
-
-    Optional<QueryNode> nextSibling(QueryNode node);
-
-    Optional<QueryNode> getFirstChild(QueryNode node);
-    
 }

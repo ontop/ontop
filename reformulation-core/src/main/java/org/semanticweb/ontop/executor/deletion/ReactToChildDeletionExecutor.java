@@ -96,7 +96,7 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                                                                      QueryTreeComponent treeComponent)
             throws EmptyQueryException {
         Optional<QueryNode> optionalGrandParent = query.getParent(parentNode);
-        Optional<QueryNode> optionalNextSibling = query.nextSibling(parentNode);
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(parentNode);
 
         treeComponent.removeSubTree(parentNode);
 

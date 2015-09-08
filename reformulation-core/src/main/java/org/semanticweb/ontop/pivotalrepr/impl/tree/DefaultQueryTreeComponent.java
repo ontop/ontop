@@ -72,7 +72,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
             QueryNode localParent = localParents.poll();
             QueryNode externalParent = localToExternalNodeMap.get(localParent);
 
-            for (QueryNode externalChild : subQuery.getCurrentSubNodesOf(externalParent)) {
+            for (QueryNode externalChild : subQuery.getChildren(externalParent)) {
                 QueryNode localChild = externalChild.clone();
                 localToExternalNodeMap.put(localChild, externalChild);
                 localParents.add(localChild);
