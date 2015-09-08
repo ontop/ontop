@@ -1,12 +1,9 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 /**
- * Mutable BUT ONLY WHEN APPLYING LocalOptimizationProposal forwarded by the IntermediateQuery.
+ * Immutable.
  *
- * --> Mutations under control.
- *
- * Golden rule: after mutation, the node must be semantically equivalent (for instance, not specialized).
- *
+ * However, needs to be cloned to have multiple copies (distinct nodes) in an query tree.
  */
 public interface QueryNode extends Cloneable {
 
@@ -18,11 +15,9 @@ public interface QueryNode extends Cloneable {
      */
     void acceptVisitor(QueryNodeVisitor visitor);
 
-    boolean isRejected();
-
     /**
-     * Since a QueryNode is mutable (under some control however),
-     * cloning is needed (at a limited number of places).
+     * Cloning is needed for having multiple copies
+     * in the same intermediate query tree.
      */
     QueryNode clone();
 
