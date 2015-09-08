@@ -20,6 +20,10 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -48,7 +52,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
 	private final boolean isTop, isBottom;
 	
-	private final DataSomeValuesFromImpl domain;
+	private final Map<Datatype, DataSomeValuesFrom> domains = new HashMap<>();
 	private final DataPropertyRangeExpressionImpl range;
 
 	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
@@ -66,7 +70,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 		this.isTop = name.equals(owlTopDataPropertyIRI);
 		this.isBottom = name.equals(owlBottomDataPropertyIRI);
 
-		this.domain = new DataSomeValuesFromImpl(this, DatatypeImpl.rdfsLiteral);
+		this.domains.put(DatatypeImpl.rdfsLiteral, new DataSomeValuesFromImpl(this, DatatypeImpl.rdfsLiteral));
 		this.range = new DataPropertyRangeExpressionImpl(this);
 	}
 
@@ -83,11 +87,20 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
 	@Override
 	public DataSomeValuesFrom getDomainRestriction(Datatype datatype) {
-		if (datatype.equals(DatatypeImpl.rdfsLiteral))
-			return domain;
-		return new DataSomeValuesFromImpl(this, datatype);
+		DataSomeValuesFrom domain = domains.get(datatype);
+		if (domain == null) {
+			domain = new DataSomeValuesFromImpl(this, datatype);
+			domains.put(datatype, domain);
+		}
+		return domain;
 	}
 
+	@Override
+	public Collection<DataSomeValuesFrom> getAllDomainRestrictions() {
+		return domains.values();
+	}
+
+	
 	@Override
 	public DataPropertyRangeExpression getRange() {
 		return range;
@@ -130,5 +143,4 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public String toString() {
 		return name;
 	}
-
 }

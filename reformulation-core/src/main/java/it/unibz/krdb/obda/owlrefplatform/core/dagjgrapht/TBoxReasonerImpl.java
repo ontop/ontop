@@ -547,9 +547,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			if (!role.isBottom() && !role.isTop()) 
 				graph.addVertex(role);
 		
-		for (DataPropertyExpression role : ontology.getAuxiliaryDataProperties()) 
-			graph.addVertex(role);
-
 		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) 
 			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 		
@@ -593,7 +590,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		// domains and ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) 
-			graph.addVertex(role.getDomainRestriction(DatatypeImpl.rdfsLiteral));			
+			for (DataSomeValuesFrom dom : role.getAllDomainRestrictions())
+				graph.addVertex(dom);			
 		
 		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {

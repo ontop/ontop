@@ -32,6 +32,8 @@ package it.unibz.krdb.obda.ontology;
  *
  */
 
+import java.util.Collection;
+
 import it.unibz.krdb.obda.model.Predicate;
 
 /**
@@ -59,6 +61,8 @@ public interface DataPropertyExpression extends DescriptionBT {
 	 */
 	
 	public DataSomeValuesFrom getDomainRestriction(Datatype datatype);
+	
+	public Collection<DataSomeValuesFrom> getAllDomainRestrictions();
 
 	/**
 	 * returns the DataPropertyRangeExpression for the range of the data property

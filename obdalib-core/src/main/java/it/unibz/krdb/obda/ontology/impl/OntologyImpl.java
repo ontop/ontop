@@ -159,7 +159,6 @@ public class OntologyImpl implements Ontology {
 	// auxiliary symbols (for normalization)
 	
 	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
-	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
 	
 	private static final String AUXROLEURI = "AUX.ROLE"; 
 	private int auxCounter = 0; 
@@ -687,22 +686,10 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public DataPropertyExpression createAuxiliaryDataProperty() {
-		DataPropertyExpression dpe = new DataPropertyExpressionImpl(AUXROLEURI + auxCounter);
-		auxCounter++ ;
-		auxDataProperties.add(dpe);
-		return dpe;
-	}
-	
-	@Override
 	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
 		return Collections.unmodifiableSet(auxObjectProperties);
 	}
 
-	@Override
-	public Collection<DataPropertyExpression> getAuxiliaryDataProperties() {
-		return Collections.unmodifiableSet(auxDataProperties);
-	}
 
 	
 	
@@ -740,7 +727,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	private void checkSignature(DataPropertyExpression prop) {
-		if (!vocabulary.containsDataProperty(prop.getName()) && !auxDataProperties.contains(prop))
+		if (!vocabulary.containsDataProperty(prop.getName()))
 			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
 	}
 

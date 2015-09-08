@@ -32,7 +32,6 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	// If we need to construct auxiliary subclass axioms for A ISA exists R.C we
 	// put them in this map to avoid generating too many auxiliary roles/classes
 	private final Map<OWLObjectPropertyExpression, Map<OWLClassExpression, ObjectSomeValuesFrom>> auxiliaryClassProperties = new HashMap<>();
-	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties = new HashMap<>();
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -877,14 +876,12 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			} 
 			else if (superClass instanceof OWLDataSomeValuesFrom) {
 				OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
-				OWLDataRange filler = someexp.getFiller();
-
-				ClassExpression superClassExp; 
-				if (filler.isTopDatatype()) 
-					superClassExp = helper.getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
-				else
-					superClassExp = getPropertySomeDatatypeRestriction(someexp);
 				
+				ClassExpression superClassExp = getDataSomevaluesFrom(someexp.getProperty(), someexp.getFiller());
+				if ((superClassExp instanceof DataSomeValuesFrom) && 
+						!((DataSomeValuesFrom)superClassExp).getDatatype().equals(DatatypeImpl.rdfsLiteral))
+					System.err.println("CI WITH QDD: " + ce1 + " <= " + superClassExp);
+
 				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
 			} 
 			else if (superClass instanceof OWLObjectComplementOf) {
@@ -901,13 +898,11 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 				addSubClassOfObjectSomeValuesFromAxiom(ce1, someexp.getProperty(), someexp.getFiller());
 			} 
 			else if (minCardinalityClassExpressions && superClass instanceof OWLDataMinCardinality) {
-				OWLDataMinCardinality someexp = (OWLDataMinCardinality) superClass;
-				
-				OWLDataRange range = someexp.getFiller();
-				if (someexp.getCardinality() != 1 || !range.isTopDatatype()) 
+				OWLDataMinCardinality someexp = (OWLDataMinCardinality) superClass;				
+				if (someexp.getCardinality() != 1) 
 					throw new TranslationException();
 				
-				ClassExpression superClassExp = helper.getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
+				ClassExpression superClassExp = getDataSomevaluesFrom(someexp.getProperty(), someexp.getFiller());
 				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
 			} 
 			else
@@ -961,36 +956,19 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 		}
 	}
 	
+	private ClassExpression getDataSomevaluesFrom(OWLDataPropertyExpression owlDPE, OWLDataRange owlDR) throws TranslationException {
 
-	private ClassExpression getPropertySomeDatatypeRestriction(OWLDataSomeValuesFrom someexp) throws TranslationException {
+		DataPropertyExpression dpe = helper.getPropertyExpression(owlDPE);
 		
-		DataSomeValuesFrom auxclass = auxiliaryDatatypeProperties.get(someexp);
-		if (auxclass == null) {			
-			// no replacement found for this exists R.A, creating a new one
-			
-			DataPropertyExpression dpe = helper.getPropertyExpression(someexp.getProperty());
-
-			// TODO: handle more complex fillers
-			// if (filler instanceof OWLDatatype);
-			OWLDatatype owlDatatype = (OWLDatatype) someexp.getFiller();
-			//COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
-			Datatype filler = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
-			
-			DataPropertyExpression auxRole = dl_onto.createAuxiliaryDataProperty();
-
-			auxclass = auxRole.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
-			auxiliaryDatatypeProperties.put(someexp, auxclass);
-
-			try {
-				dl_onto.addSubPropertyOfAxiom(auxRole, dpe);
-				dl_onto.addDataPropertyRangeAxiom(auxRole.getRange(), filler);
-			} catch (InconsistentOntologyException e) {
-				// TEMPORARY FIX
-				e.printStackTrace();
-			}
+		OWL2Datatype owlDatatype = getCanonicalDatatype(owlDR);
+		if (owlDatatype == null) {
+			// rule [DT1.2]
+			return ClassImpl.owlNothing;
 		}
-
-		return auxclass;
+		else {
+			Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+			return dpe.getDomainRestriction(datatype);
+		}				
 	}
 
 	

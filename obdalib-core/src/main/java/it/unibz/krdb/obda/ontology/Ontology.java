@@ -120,15 +120,6 @@ public interface Ontology extends Serializable {
 
 	public ObjectPropertyExpression createAuxiliaryObjectProperty();
 	
-	/**
-	 * create an auxiliary data property 
-	 * (auxiliary properties result from ontology normalization)
-	 * 
-	 * @param uri
-	 */
-	
-	public DataPropertyExpression createAuxiliaryDataProperty();
-	
 	
 	/**
 	 * return all auxiliary object properties
@@ -138,16 +129,5 @@ public interface Ontology extends Serializable {
 	 */
 	
 	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
-
-	/**
-	 * return all auxiliary data properties
-	 * (auxiliary properties result from ontology normalization)
-	 * 
-	 * @return
-	 */
-	
-	public Collection<DataPropertyExpression> getAuxiliaryDataProperties();
-
-
 
 }
