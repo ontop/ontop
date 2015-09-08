@@ -466,8 +466,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
 						ansTypes.set(j, unifiedType);
 
-					//} else if (typePred.equals(dtfac.getTypePredicate(COL_TYPE.BNODE))){
-					} else if (typePred.getName().equals(COL_TYPE.BNODE)){
+					} else if (typePred instanceof BNodePredicate){
 						ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 
 					}else if (  (typePred.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
