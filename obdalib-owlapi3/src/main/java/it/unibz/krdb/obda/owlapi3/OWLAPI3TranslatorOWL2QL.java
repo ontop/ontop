@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.ontology.*;
+import it.unibz.krdb.obda.ontology.impl.ClassImpl;
 import it.unibz.krdb.obda.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -30,7 +31,7 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	// If we need to construct auxiliary subclass axioms for A ISA exists R.C we
 	// put them in this map to avoid generating too many auxiliary roles/classes
-	private final Map<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom> auxiliaryClassProperties = new HashMap<>();
+	private final Map<OWLObjectPropertyExpression, Map<OWLClassExpression, ObjectSomeValuesFrom>> auxiliaryClassProperties = new HashMap<>();
 	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties = new HashMap<>();
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -48,11 +49,9 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	private final boolean functionalityAxioms = true; // TEMPORARY FIX
 	private final boolean minCardinalityClassExpressions = true; // TEMPORARY FIX
-	
+	private final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
 	
 	public OWLAPI3TranslatorOWL2QL(Collection<OWLOntology> owls) {
-		//owlOntology = owl;
-		
 		dl_onto = createOntology(owls);
 		helper = new OWLAPI3TranslatorHelper(dl_onto.getVocabulary());
 	}
@@ -864,26 +863,17 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	 * @throws InconsistentOntologyException 
 	 */
 	
-	private void addSubClassAxioms(ClassExpression subDescription, OWLClassExpression superClasses) throws TranslationException, InconsistentOntologyException {
+	private void addSubClassAxioms(ClassExpression ce1, OWLClassExpression superClasses) throws TranslationException, InconsistentOntologyException {
 		
 		// .asConjunctSet() flattens out the intersections and the loop deals with [R4]
 		for (OWLClassExpression superClass : superClasses.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {				
 				ClassExpression superClassExp = helper.getOClass((OWLClass)superClass);
-				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);
+				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
 			} 
 			else if (superClass instanceof OWLObjectSomeValuesFrom) {
 				OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
-				OWLClassExpression filler = someexp.getFiller();
-
-				ClassExpression superClassExp; 
-				if (filler.isOWLThing())  
-					superClassExp =  helper.getPropertyExpression(someexp.getProperty()).getDomain();		
-				else 
-					// grammar simplifications
-					superClassExp = getPropertySomeClassRestriction(someexp);
-				
-				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);			
+				addSubClassOfObjectSomeValuesFromAxiom(ce1, someexp.getProperty(), someexp.getFiller());
 			} 
 			else if (superClass instanceof OWLDataSomeValuesFrom) {
 				OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
@@ -895,22 +885,20 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 				else
 					superClassExp = getPropertySomeDatatypeRestriction(someexp);
 				
-				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);
+				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
 			} 
 			else if (superClass instanceof OWLObjectComplementOf) {
 				// [R5]
 				OWLObjectComplementOf superC = (OWLObjectComplementOf)superClass;
 				ClassExpression subDescription2 = getSubclassExpression(superC.getOperand());
-				dl_onto.addDisjointClassesAxiom(subDescription, subDescription2);
+				dl_onto.addDisjointClassesAxiom(ce1, subDescription2);
 			}
 			else if (minCardinalityClassExpressions && superClass instanceof OWLObjectMinCardinality) {
 				OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) superClass;
-				if (someexp.getCardinality() != 1 || !someexp.getFiller().isOWLThing()) 
+				if (someexp.getCardinality() != 1) 
 					throw new TranslationException();
-					
-				ClassExpression superClassExp = helper.getPropertyExpression(someexp.getProperty()).getDomain();
 				
-				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);
+				addSubClassOfObjectSomeValuesFromAxiom(ce1, someexp.getProperty(), someexp.getFiller());
 			} 
 			else if (minCardinalityClassExpressions && superClass instanceof OWLDataMinCardinality) {
 				OWLDataMinCardinality someexp = (OWLDataMinCardinality) superClass;
@@ -920,52 +908,59 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 					throw new TranslationException();
 				
 				ClassExpression superClassExp = helper.getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
-				dl_onto.addSubClassOfAxiom(subDescription, superClassExp);
+				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
 			} 
 			else
 				throw new TranslationException("unsupported operation in " + superClass);			
 		}
 	}
 	
-	
-	// [R5] of the grammar simplification
-	
-	private ClassExpression getPropertySomeClassRestriction(OWLObjectSomeValuesFrom someexp) throws TranslationException {
-		
-		ObjectSomeValuesFrom auxclass = auxiliaryClassProperties.get(someexp);
-		if (auxclass == null) {
-			// no replacement found for this exists R.A, creating a new one
-						
-			ObjectPropertyExpression role = helper.getPropertyExpression(someexp.getProperty());
-			
-			OWLClassExpression owlFiller = someexp.getFiller();
-			if (!(owlFiller instanceof OWLClass)) 
-				throw new TranslationException();
-			
-			ClassExpression filler = getSubclassExpression(owlFiller);
+	private void addSubClassOfObjectSomeValuesFromAxiom(ClassExpression ce1, OWLObjectPropertyExpression owlOPE, OWLClassExpression owlCE) throws TranslationException, InconsistentOntologyException {
+		// rule [C0]
+		if (owlOPE.isOWLBottomObjectProperty() || owlCE.isOWLNothing()) {
+			dl_onto.addSubClassOfAxiom(ce1, ClassImpl.owlNothing);
+		}
+		else {
+			if (owlCE.isOWLThing()) {
+				if (!owlOPE.isOWLTopObjectProperty()) { // this check is not really needed
+					ObjectPropertyExpression ope = helper.getPropertyExpression(owlOPE);
+					dl_onto.addSubClassOfAxiom(ce1, ope.getDomain());		
+				}
+			}
+			else {
+				Map<OWLClassExpression, ObjectSomeValuesFrom> entry = auxiliaryClassProperties.get(owlOPE);
+				if (entry == null) {
+					entry = new HashMap<>();
+					auxiliaryClassProperties.put(owlOPE, entry);
+				}
+				ObjectSomeValuesFrom existsSA = entry.get(owlCE);
+				if (existsSA == null) {
+					// no replacement found for this exists R.A, creating a new one						
+					ObjectPropertyExpression R = helper.getPropertyExpression(owlOPE);
+					ObjectPropertyExpression SA = dl_onto.createAuxiliaryObjectProperty();
+					if (R.isInverse())
+						SA = SA.getInverse();
 
-			ObjectPropertyExpression auxRole = dl_onto.createAuxiliaryObjectProperty();
+					existsSA = SA.getDomain();
+					entry.put(owlCE, existsSA);
 
-			// if \exists R.C then auxRole = P, auxclass = \exists P, P <= R, \exists P^- <= C
-			// if \exists R^-.C then auxRole = P^-, auxclass = \exists P^-, P^- <= R^-, \exists P <= C
-			
-			if (role.isInverse())
-				auxRole = auxRole.getInverse();
-			
-			auxclass = auxRole.getDomain();
-			auxiliaryClassProperties.put(someexp, auxclass);
-
-			try {
-				dl_onto.addSubPropertyOfAxiom(auxRole, role);
-				dl_onto.addSubClassOfAxiom(auxRole.getRange(), filler);
-			} catch (InconsistentOntologyException e) {
-				// TEMPORARY FIX
-				e.printStackTrace();
+					if (owlCE instanceof OWLClass) {
+						ClassExpression A = getSubclassExpression(owlCE);
+						dl_onto.addSubClassOfAxiom(SA.getRange(), A);
+					}
+					else if (nestedQualifiedExistentials) {
+						addSubClassAxioms(SA.getRange(), owlCE);
+					}
+					else
+						throw new TranslationException("Complex expression in the superclass filler"); 
+					
+					dl_onto.addSubPropertyOfAxiom(SA, R);
+				}
+				dl_onto.addSubClassOfAxiom(ce1, existsSA);			
 			}
 		}
-
-		return auxclass;
 	}
+	
 
 	private ClassExpression getPropertySomeDatatypeRestriction(OWLDataSomeValuesFrom someexp) throws TranslationException {
 		

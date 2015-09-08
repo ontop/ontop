@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -860,6 +861,184 @@ public class OWL2QLTranslatorTest extends TestCase {
 		assertEquals(0, axs.size());
 		Collection<NaryAxiom<ClassExpression>> axs1 = dlliteonto.getDisjointClassesAxioms();
 		assertEquals(0, axs1.size());
+	}	
+
+	@Test
+	public void test_O0() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+
+		OWLClass ce1 = factory.getOWLClass(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce2 = factory.getOWLClass(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce3 = factory.getOWLClass(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce3));
+		
+		OWLObjectProperty ope1 = factory.getOWLObjectProperty(IRI.create("http://example/R"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope1));
+		OWLObjectProperty ope2 = factory.getOWLObjectProperty(IRI.create("http://example/S"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope2));
+		
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
+							factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2))); 
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce3, 
+				factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2))); 
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		ImmutableOntologyVocabulary voc = dlliteonto.getVocabulary();
+		
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		//System.out.println(axs);
+		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
+		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
+		BinaryAxiom<ClassExpression> ax = it.next();
+		assertEquals(ax.getSuper(), voc.getClass("http://example/B"));
+		assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+		ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
+		ObjectPropertyExpression ope = e.getProperty();
+		assertEquals(ope.isInverse(), false);
+		
+		ax = it.next();
+		assertEquals(ax.getSub(), voc.getClass("http://example/C"));
+		assertEquals(ax.getSuper(), ope.getInverse().getDomain());
+
+		ax = it.next();
+		assertEquals(ax.getSub(), voc.getClass("http://example/A"));
+		assertEquals(ax.getSuper(), ope.getInverse().getDomain());
+		
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+		assertEquals(1, axs1.size());
+		
+		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
+		assertEquals(ax1.getSub(), ope.getInverse());
+		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
+	}	
+
+	@Test
+	public void test_O0nested() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+
+		OWLClass ce1 = factory.getOWLClass(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce2 = factory.getOWLClass(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce3 = factory.getOWLClass(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce3));
+		OWLClass ce4 = factory.getOWLClass(IRI.create("http://example/D"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce4));
+		
+		OWLObjectProperty ope1 = factory.getOWLObjectProperty(IRI.create("http://example/R"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope1));
+		OWLObjectProperty ope2 = factory.getOWLObjectProperty(IRI.create("http://example/S"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope2));
+		
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
+							factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), 
+									factory.getOWLObjectIntersectionOf(
+											factory.getOWLObjectSomeValuesFrom(ope2, ce2), 
+											factory.getOWLObjectComplementOf(ce3), ce4)))); 
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		ImmutableOntologyVocabulary voc = dlliteonto.getVocabulary();
+		
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		assertEquals(4, axs.size()); // surrogates for existential restrictions are re-used
+		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
+		BinaryAxiom<ClassExpression> ax = it.next();
+		
+		assertEquals(ax.getSuper(), voc.getClass("http://example/B"));
+		assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+		ObjectPropertyExpression opep = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux1^-
+		assertEquals(opep.isInverse(), true);
+		
+		ax = it.next();
+		assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+		ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux
+		assertEquals(ope.isInverse(), false);
+		assertEquals(ax.getSuper(), opep.getInverse().getDomain());
+
+		ax = it.next();
+		assertEquals(ax.getSub(), ope.getDomain());
+		assertEquals(ax.getSuper(), voc.getClass("http://example/D"));
+		
+		ax = it.next();
+		assertEquals(ax.getSub(), voc.getClass("http://example/A"));
+		assertEquals(ax.getSuper(), ope.getInverse().getDomain());
+		
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+		assertEquals(2, axs1.size());
+		
+		Iterator<BinaryAxiom<ObjectPropertyExpression>> it1 = axs1.iterator();
+		BinaryAxiom<ObjectPropertyExpression> ax1 = it1.next();
+		assertEquals(ax1.getSub(), opep.getInverse());
+		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/S"));
+		
+		ax1 = it1.next();
+		assertEquals(ax1.getSub(), ope.getInverse());
+		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
+		
+		Collection<NaryAxiom<ClassExpression>> axs2 = dlliteonto.getDisjointClassesAxioms();
+		assertEquals(axs2.size(), 1);
+	}	
+	
+	@Test
+	public void test_O0min() throws Exception {
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLDataFactory factory = manager.getOWLDataFactory(); 
+		
+		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
+
+		OWLClass ce1 = factory.getOWLClass(IRI.create("http://example/A"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce2 = factory.getOWLClass(IRI.create("http://example/B"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce1));
+		OWLClass ce3 = factory.getOWLClass(IRI.create("http://example/C"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ce3));
+		
+		OWLObjectProperty ope1 = factory.getOWLObjectProperty(IRI.create("http://example/R"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope1));
+		OWLObjectProperty ope2 = factory.getOWLObjectProperty(IRI.create("http://example/S"));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(ope2));
+		
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
+							factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2))); 
+		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce3, 
+				factory.getOWLObjectMinCardinality(1, factory.getOWLObjectInverseOf(ope1), ce2))); 
+		
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		ImmutableOntologyVocabulary voc = dlliteonto.getVocabulary();
+		
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		//System.out.println(axs);
+		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
+		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
+		BinaryAxiom<ClassExpression> ax = it.next();
+		assertEquals(ax.getSuper(), voc.getClass("http://example/B"));
+		assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+		ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
+		ObjectPropertyExpression ope = e.getProperty();
+		assertEquals(ope.isInverse(), false);
+		
+		ax = it.next();
+		assertEquals(ax.getSub(), voc.getClass("http://example/C"));
+		assertEquals(ax.getSuper(), ope.getInverse().getDomain());
+
+		ax = it.next();
+		assertEquals(ax.getSub(), voc.getClass("http://example/A"));
+		assertEquals(ax.getSuper(), ope.getInverse().getDomain());
+		
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+		assertEquals(1, axs1.size());
+		
+		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
+		assertEquals(ax1.getSub(), ope.getInverse());
+		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
 	}	
 	
 }

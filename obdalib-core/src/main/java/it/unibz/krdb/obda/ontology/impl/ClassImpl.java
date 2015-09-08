@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.ontology.impl;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.DescriptionBT;
 import it.unibz.krdb.obda.ontology.OClass;
 
 public class ClassImpl implements OClass {
@@ -34,13 +33,13 @@ public class ClassImpl implements OClass {
 	private final String name;
 	private final boolean isNothing, isThing;
 
-	public static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
-	public static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
+	static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
+	static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
 
    	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-    static final OClass owlThing = new ClassImpl(owlThingIRI); 
-    static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
+    public static final OClass owlThing = new ClassImpl(owlThingIRI); 
+    public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
     	
 	ClassImpl(String name) {
 		this.predicate = ofac.getClassPredicate(name);

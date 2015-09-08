@@ -161,7 +161,7 @@ public class OntologyImpl implements Ontology {
 	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
 	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<>();
 	
-	private static final String AUXROLEURI = "ER.A-AUXROLE"; 
+	private static final String AUXROLEURI = "AUX.ROLE"; 
 	private int auxCounter = 0; 
 	
 	// exception messages
@@ -443,6 +443,19 @@ public class OntologyImpl implements Ontology {
 		dataPropertyAxioms.addInclusion(dpe1, dpe2);
 	}
 
+	
+	/**
+	 * Normalizes and adds class disjointness axiom
+	 * <p>
+	 * DisjointClasses := 'DisjointClasses' '(' axiomAnnotations 
+	 * 			subClassExpression subClassExpression { subClassExpression } ')'<br>
+	 * <p>
+	 * Implements rule [C2]:<br>
+	 *     - eliminates all occurrences of bot and if the result contains<br>
+	 *     - no top and at least two elements then disjointness<br>
+	 *     - one top then emptiness of all other elements<br>
+	 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list) 
+	 */
 	
 	@Override
 	public void addDisjointClassesAxiom(ClassExpression... ces) throws InconsistentOntologyException {	

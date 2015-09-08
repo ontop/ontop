@@ -25,8 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-
 public interface Ontology extends Serializable {
 
 	/**
