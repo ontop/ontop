@@ -793,55 +793,50 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	
 	/**
+	 * (CL)
+	 * 
 	 * subClassExpression := Class | subObjectSomeValuesFrom | DataSomeValuesFrom
 	 * 
 	 * subObjectSomeValuesFrom := 'ObjectSomeValuesFrom' '(' ObjectPropertyExpression owl:Thing ')'
 	 * DataSomeValuesFrom := 'DataSomeValuesFrom' '(' DataPropertyExpression DataRange ')'
 	 * 
-	 * @param owlExpression
+	 * @param owlCE
 	 * @return
 	 * @throws TranslationException
 	 */
 	
-	private ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
+	private ClassExpression getSubclassExpression(OWLClassExpression owlCE) throws TranslationException {
 		
-		if (owlExpression instanceof OWLClass) {
-			return helper.getOClass((OWLClass)owlExpression);
+		if (owlCE instanceof OWLClass) {
+			return helper.getOClass((OWLClass)owlCE);
 		} 
-		else if (owlExpression instanceof OWLObjectSomeValuesFrom) {
-			OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom)owlExpression;
+		else if (owlCE instanceof OWLObjectSomeValuesFrom) {
+			OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom)owlCE;
 			if (!someexp.getFiller().isOWLThing()) 
 				throw new TranslationException();
 			
 			return helper.getPropertyExpression(someexp.getProperty()).getDomain();		
 		} 
-		else if (owlExpression instanceof OWLDataSomeValuesFrom) {
-			OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) owlExpression;
-			OWLDataRange filler = someexp.getFiller();
-
-			if (!filler.isTopDatatype()) 
-				throw new TranslationException();
-			
-			return helper.getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
+		else if (owlCE instanceof OWLDataSomeValuesFrom) {
+			OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) owlCE;
+			return getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
 		}
-		else if (minCardinalityClassExpressions && owlExpression instanceof OWLObjectMinCardinality) {
-			OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) owlExpression;
+		else if (minCardinalityClassExpressions && owlCE instanceof OWLObjectMinCardinality) {
+			OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) owlCE;
 			if (someexp.getCardinality() != 1 || !someexp.getFiller().isOWLThing()) 
 				throw new TranslationException();
 				
 			return helper.getPropertyExpression(someexp.getProperty()).getDomain();
 		} 
-		else if (minCardinalityClassExpressions && owlExpression instanceof OWLDataMinCardinality) {
-			OWLDataMinCardinality someexp = (OWLDataMinCardinality) owlExpression;
-			
-			OWLDataRange range = someexp.getFiller();
-			if (someexp.getCardinality() != 1 || !range.isTopDatatype()) 
+		else if (minCardinalityClassExpressions && owlCE instanceof OWLDataMinCardinality) {
+			OWLDataMinCardinality someexp = (OWLDataMinCardinality) owlCE;
+			if (someexp.getCardinality() != 1) 
 				throw new TranslationException();
 			
-			return helper.getPropertyExpression(someexp.getProperty()).getDomainRestriction(DatatypeImpl.rdfsLiteral);
+			return getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
 		} 
 		else
-			throw new TranslationException("unsupported construct " + owlExpression);
+			throw new TranslationException("unsupported construct " + owlCE);
 	}
 
 	
@@ -862,13 +857,13 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	 * @throws InconsistentOntologyException 
 	 */
 	
-	private void addSubClassAxioms(ClassExpression ce1, OWLClassExpression superClasses) throws TranslationException, InconsistentOntologyException {
+	private void addSubClassAxioms(ClassExpression ce1, OWLClassExpression owlCE2) throws TranslationException, InconsistentOntologyException {
 		
 		// .asConjunctSet() flattens out the intersections and the loop deals with [R4]
-		for (OWLClassExpression superClass : superClasses.asConjunctSet()) {
+		for (OWLClassExpression superClass : owlCE2.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {				
-				ClassExpression superClassExp = helper.getOClass((OWLClass)superClass);
-				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
+				ClassExpression ce2 = helper.getOClass((OWLClass)superClass);
+				dl_onto.addSubClassOfAxiom(ce1, ce2);
 			} 
 			else if (superClass instanceof OWLObjectSomeValuesFrom) {
 				OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
@@ -877,18 +872,18 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			else if (superClass instanceof OWLDataSomeValuesFrom) {
 				OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
 				
-				ClassExpression superClassExp = getDataSomevaluesFrom(someexp.getProperty(), someexp.getFiller());
-				if ((superClassExp instanceof DataSomeValuesFrom) && 
-						!((DataSomeValuesFrom)superClassExp).getDatatype().equals(DatatypeImpl.rdfsLiteral))
-					System.err.println("CI WITH QDD: " + ce1 + " <= " + superClassExp);
+				ClassExpression ce2 = getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
+				if ((ce2 instanceof DataSomeValuesFrom) && 
+						!((DataSomeValuesFrom)ce2).getDatatype().equals(DatatypeImpl.rdfsLiteral))
+					System.err.println("CI WITH QDD: " + ce1 + " <= " + ce2);
 
-				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
+				dl_onto.addSubClassOfAxiom(ce1, ce2);
 			} 
 			else if (superClass instanceof OWLObjectComplementOf) {
-				// [R5]
 				OWLObjectComplementOf superC = (OWLObjectComplementOf)superClass;
-				ClassExpression subDescription2 = getSubclassExpression(superC.getOperand());
-				dl_onto.addDisjointClassesAxiom(ce1, subDescription2);
+				// [R5]
+				ClassExpression ce2 = getSubclassExpression(superC.getOperand());
+				dl_onto.addDisjointClassesAxiom(ce1, ce2);
 			}
 			else if (minCardinalityClassExpressions && superClass instanceof OWLObjectMinCardinality) {
 				OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) superClass;
@@ -902,8 +897,8 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 				if (someexp.getCardinality() != 1) 
 					throw new TranslationException();
 				
-				ClassExpression superClassExp = getDataSomevaluesFrom(someexp.getProperty(), someexp.getFiller());
-				dl_onto.addSubClassOfAxiom(ce1, superClassExp);
+				ClassExpression ce2 = getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
+				dl_onto.addSubClassOfAxiom(ce1, ce2);
 			} 
 			else
 				throw new TranslationException("unsupported operation in " + superClass);			
@@ -956,10 +951,8 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 		}
 	}
 	
-	private ClassExpression getDataSomevaluesFrom(OWLDataPropertyExpression owlDPE, OWLDataRange owlDR) throws TranslationException {
+	private ClassExpression getDataSomeValuesFrom(OWLDataPropertyExpression owlDPE, OWLDataRange owlDR) throws TranslationException {
 
-		DataPropertyExpression dpe = helper.getPropertyExpression(owlDPE);
-		
 		OWL2Datatype owlDatatype = getCanonicalDatatype(owlDR);
 		if (owlDatatype == null) {
 			// rule [DT1.2]
@@ -967,6 +960,10 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 		}
 		else {
 			Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+			if (!datatype.equals(DatatypeImpl.rdfsLiteral))
+				System.err.println("QDD: " + owlDPE + "." + owlDR);
+			
+			DataPropertyExpression dpe = helper.getPropertyExpression(owlDPE);			
 			return dpe.getDomainRestriction(datatype);
 		}				
 	}
