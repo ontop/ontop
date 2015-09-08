@@ -34,7 +34,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 				return "LIMIT 0";
 			} else {
 				// Max limit: http://www.h2database.com/html/advanced.html#limits_limitations
-				return String.format("LIMIT %d,2147483647", offset);
+				return String.format("LIMIT %d,214748364", offset);
 			}
 		} else {
 			if (offset < 0) {
