@@ -1806,7 +1806,38 @@ public class SQLGenerator implements SQLQueryGenerator {
 				if (mainFunctionSymbol instanceof URITemplatePredicate) {
 					type = COL_TYPE.OBJECT;
 				}else if(mainFunctionSymbol instanceof StringOperationPredicate){
-                    type = COL_TYPE.LITERAL;
+                    if (mainFunctionSymbol.equals(OBDAVocabulary.CONCAT)) {
+
+                        COL_TYPE type1, type2;
+
+                        type1 = getTypeFromStringOperationSubTerm(compositeTerm.getTerm(0));
+                        type2 = getTypeFromStringOperationSubTerm(compositeTerm.getTerm(1));
+
+                        if (type1.equals(type2) && (type1.equals(COL_TYPE.STRING)) ) {
+
+                            type =  type1; //only if both values are string return string
+
+                        } else{
+
+                            type = COL_TYPE.LITERAL;
+                        }
+
+                    } else if (mainFunctionSymbol.equals(OBDAVocabulary.REPLACE)){
+                        COL_TYPE type1;
+                        type1 = getTypeFromStringOperationSubTerm(compositeTerm.getTerm(0));
+
+                        if(type1.equals(COL_TYPE.STRING)) {
+                            type = type1;
+                        }
+                        else{
+                            type = COL_TYPE.LITERAL;
+                        }
+
+                    }
+                    else {
+
+                        type = COL_TYPE.LITERAL;
+                    }
                 } else if (mainFunctionSymbol instanceof BNodePredicate) {
 					type = COL_TYPE.BNODE;
 				}else if (mainFunctionSymbol.isArithmeticPredicate()){
@@ -1824,7 +1855,29 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return type;
 	}
 
-	/**
+    private COL_TYPE getTypeFromStringOperationSubTerm(Term term) {
+        if (term instanceof Function) {
+            return getCompositeTermType((Function) term);
+        }
+        else if (term instanceof URIConstant) {
+            return COL_TYPE.OBJECT;
+        }
+        else if (term == OBDAVocabulary.NULL) {
+            return COL_TYPE.NULL;
+        }
+        /**
+         * TODO: try to infer the type
+         */
+        else if (term instanceof Variable) {
+            // By default
+            return COL_TYPE.LITERAL;
+        }
+        else {
+            throw new IllegalArgumentException("Unexpected term: " + term);
+        }
+    }
+
+    /**
 	 * Gets the type of a variable.
 	 *
 	 * Such variable does not hold this information, so we have to look
