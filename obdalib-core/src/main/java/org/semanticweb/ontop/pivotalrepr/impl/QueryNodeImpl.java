@@ -13,6 +13,6 @@ public abstract class QueryNodeImpl implements QueryNode {
      */
     @Override
     public QueryNode clone() {
-        throw new RuntimeException("This method must be override. Tricks the compiler");
+        throw new UnsupportedOperationException("This method must be override. Tricks the compiler");
     }
 }

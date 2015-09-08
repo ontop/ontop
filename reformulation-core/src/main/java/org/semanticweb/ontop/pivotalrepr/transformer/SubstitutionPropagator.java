@@ -16,7 +16,8 @@ import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
  *
  */
 public abstract class SubstitutionPropagator
-        implements HomogeneousQueryNodeTransformer<SubstitutionPropagator.UnificationException, SubstitutionPropagator.NewSubstitutionException> {
+        extends HomogeneousQueryNodeTransformerImpl<SubstitutionPropagator.UnificationException,
+        SubstitutionPropagator.NewSubstitutionException> {
 
     /**
      * TODO: explain

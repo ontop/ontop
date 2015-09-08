@@ -6,13 +6,14 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.HomogeneousQueryNodeTransformerImpl;
 
 /**
  * TODO: explain
  *
  * Immutable
  */
-public class PredicateRenamer implements HomogeneousQueryNodeTransformer {
+public class PredicateRenamer extends HomogeneousQueryNodeTransformerImpl {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final AtomPredicate formerPredicate;
@@ -78,4 +79,5 @@ public class PredicateRenamer implements HomogeneousQueryNodeTransformer {
     public GroupNode transform(GroupNode groupNode) {
         return groupNode;
     }
+
 }

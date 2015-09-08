@@ -1,6 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
+import org.semanticweb.ontop.pivotalrepr.impl.HomogeneousQueryNodeTransformerImpl;
+
+public class QueryNodeCloner extends HomogeneousQueryNodeTransformerImpl {
     @Override
     public FilterNode transform(FilterNode filterNode) {
         return filterNode.clone();

@@ -3,6 +3,8 @@ package org.semanticweb.ontop.pivotalrepr.transformer;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.NonStandardNode;
+import org.semanticweb.ontop.pivotalrepr.NotNeededNodeException;
 import org.semanticweb.ontop.pivotalrepr.QueryNodeTransformationException;
 
 /**

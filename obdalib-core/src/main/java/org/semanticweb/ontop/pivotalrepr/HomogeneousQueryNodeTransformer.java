@@ -21,4 +21,6 @@ public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformat
     ConstructionNode transform(ConstructionNode constructionNode) throws T1, T2;
 
     GroupNode transform(GroupNode groupNode) throws T1, T2, NotNeededNodeException;
+
+    NonStandardNode transform(NonStandardNode nonStandardNode) throws T1, T2, NotNeededNodeException;
 }

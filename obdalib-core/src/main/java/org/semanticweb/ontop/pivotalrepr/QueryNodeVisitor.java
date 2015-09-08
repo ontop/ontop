@@ -23,4 +23,6 @@ public interface QueryNodeVisitor {
     void visit(TableNode tableNode);
 
     void visit(GroupNode groupNode);
+
+    void visit(NonStandardNode nonStandardNode);
 }
