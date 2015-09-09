@@ -23,6 +23,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.*;
@@ -32,6 +33,9 @@ import java.util.*;
 
 /**
  * Mutable reference implementation of a Substitution.
+ *
+ * TODO: rename it AppendableSubstitutionImpl
+ *
  */
 public class SubstitutionImpl implements AppendableSubstitution {
 
@@ -271,8 +275,8 @@ public class SubstitutionImpl implements AppendableSubstitution {
         else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
             return new SingletonSubstitution(t1, t2);
         }
-        else if (t2 instanceof FunctionalTermImpl) {
-            FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
+        else if (t2 instanceof Function) {
+            Function fterm = (Function) t2;
             if (fterm.containsTerm(t1))
                 return null;
             else

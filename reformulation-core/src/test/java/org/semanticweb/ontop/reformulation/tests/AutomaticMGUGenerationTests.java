@@ -23,8 +23,7 @@ package org.semanticweb.ontop.reformulation.tests;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.io.BufferedReader;

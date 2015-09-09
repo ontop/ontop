@@ -73,6 +73,8 @@ public interface Function extends Term {
 
 	public void setPredicate(Predicate p);
 
+	boolean containsTerm(Term t);
+
 	boolean isDataFunction();
 
 	boolean isBooleanFunction();

@@ -20,15 +20,13 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
 
 public interface SQLDialectAdapter {
@@ -54,6 +52,8 @@ public interface SQLDialectAdapter {
 	public String sqlTableName(String tablename, String viewname);
 
 	public String sqlQuote(String name);
+
+	public String getClosingQuote();
 
 	public String sqlSlice(long limit, long offset);
 

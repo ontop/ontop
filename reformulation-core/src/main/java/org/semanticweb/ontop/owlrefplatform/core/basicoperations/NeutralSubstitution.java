@@ -21,28 +21,76 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
-
-import java.util.Map;
-import java.util.Set;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
  * TODO: explain
  */
-public class NeutralSubstitution implements Substitution {
+public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution<ImmutableTerm> {
 
     @Override
-    public Term get(Variable var) {
+    public ImmutableTerm get(Variable var) {
         return null;
     }
 
     @Override
-    public Map<Variable, Term> getMap() {
+    public ImmutableTerm apply(ImmutableTerm term) {
+        return term;
+    }
+
+    @Override
+    public ImmutableTerm applyToVariable(Variable variable) {
+        return variable;
+    }
+
+    @Override
+    public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+        return functionalTerm;
+    }
+
+    @Override
+    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+        return booleanExpression;
+    }
+
+    @Override
+    public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
+        return atom;
+    }
+
+    @Override
+    public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
+        return (ImmutableSubstitution<ImmutableTerm>)g;
+    }
+
+    @Override
+    public Optional<ImmutableSubstitution<ImmutableTerm>> union(ImmutableSubstitution<ImmutableTerm> otherSubstitution) {
+        return Optional.of(otherSubstitution);
+    }
+
+    @Override
+    public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
+        ImmutableMap<Variable, ImmutableTerm> map = ImmutableMap.copyOf(otherSubstitution.getImmutableMap());
+        return new ImmutableSubstitutionImpl<>(map);
+    }
+
+    @Override
+    public final ImmutableMap<Variable, Term> getMap() {
+        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) getImmutableMap();
+    }
+
+    @Override
+    public ImmutableMap<Variable, ImmutableTerm> getImmutableMap() {
         return ImmutableMap.of();
+    }
+
+    @Override
+    public boolean isDefining(Variable variable) {
+        return false;
     }
 
     @Override
@@ -51,28 +99,17 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public void put(Variable var, Term term) {
-        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
-    }
-
-    @Override
-    public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
-    }
-
-    @Override
 	public String toString() {
 		return "{-/-}";
 	}
 
     @Override
-    public boolean compose(Substitution s) {
-        throw new UnsupportedOperationException();
+    public boolean equals(Object other) {
+        if (other instanceof ImmutableSubstitution) {
+            return ((ImmutableSubstitution) other).isEmpty();
+        }
+        else {
+            return false;
+        }
     }
-
-    @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException();
-    }
-
 }

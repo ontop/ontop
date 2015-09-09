@@ -43,19 +43,21 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
+import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
+import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicTypeLiftOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.*;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -447,6 +449,18 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.getQuestUnfolder().getDatalogUnfolder();
 
+
+//		if (query.getRules().size() > 0) {
+//			try {
+//				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(query,
+//						unfolder.getExtensionalPredicates());
+//				log.debug("Initial intermediate query: \n" + intermediateQuery.toString());
+//			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+//				throw new OBDAException(e.getLocalizedMessage());
+//			}
+//		}
+
+
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
 				multiTypedFunctionSymbolIndex);
@@ -478,9 +492,38 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 
 		// PUSH TYPE HERE
-		log.debug("Pushing types...");
-		unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
+		//log.debug("Pushing types...");
+		//unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
+		if (unfolding.getRules().size() > 0) {
+			try {
+				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(unfolding,
+						unfolder.getExtensionalPredicates());
+				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
+
+				//BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				//intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+
+				log.debug("New lifted query: \n" + intermediateQuery.toString());
+
+
+				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+				
+				
+				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+				
+				log.debug("New Datalog query: \n" + unfolding.toString());
+
+				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
+				log.debug("New flattened Datalog query: \n" + unfolding.toString());
+
+				
+			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+				throw new OBDAException(e.getLocalizedMessage());
+			}
+		}
 
 		log.debug("Pulling out equalities...");
 

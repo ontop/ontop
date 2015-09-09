@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
@@ -111,6 +111,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		//TODO: This should depend on quotes in the sql in the mappings
 		return String.format("\"%s\"", name);
 //		return name;
+	}
+
+	@Override
+	public String getClosingQuote() {
+		return "\"";
 	}
 
 	/**

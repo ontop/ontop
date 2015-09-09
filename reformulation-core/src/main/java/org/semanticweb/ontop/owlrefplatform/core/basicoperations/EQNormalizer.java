@@ -2,6 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
@@ -66,7 +67,7 @@ public class EQNormalizer {
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions 
      * and removes EQ functions, substituting the values using the class
-     * {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution#composeTerms(org.semanticweb.ontop.model.Term, org.semanticweb.ontop.model.Term)}
+     * {@link org.semanticweb.ontop.model.Substitution#composeTerms(org.semanticweb.ontop.model.Term, org.semanticweb.ontop.model.Term)}
      * 
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term

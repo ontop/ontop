@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
+package org.semanticweb.ontop.model;
 
 /*
  * #%L
@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
@@ -38,7 +39,6 @@ import java.util.Set;
  *  Typical algebraic operations on substitution functions are composition and union.
  *
  *  See the SubstitutionUtilities
- *  {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities}
  *
  */
 public interface Substitution {

@@ -32,6 +32,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.*;
 

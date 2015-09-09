@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 
 /**
  * Derives a substitution at the level of one definition rule from the child proposals.

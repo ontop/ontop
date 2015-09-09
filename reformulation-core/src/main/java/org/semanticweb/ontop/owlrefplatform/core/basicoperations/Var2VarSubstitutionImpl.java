@@ -1,20 +1,22 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.*;
+import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
+import org.semanticweb.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Immutable { Variable --> Variable } substitution.
  */
-public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
+public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<Variable> implements Var2VarSubstitution {
 
     private final ImmutableMap<Variable, Variable> map;
 
@@ -32,21 +34,53 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
         this.map = ImmutableMap.copyOf(substitutionMap.toMutableMap());
     }
 
-
     @Override
-    public ImmutableMap<Variable, Variable> getVar2VarMap() {
-        return map;
+    public Variable applyToVariable(Variable variable) {
+        if (map.containsKey(variable))
+            return map.get(variable);
+        return variable;
     }
 
+    @Override
+    public VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term) {
+        if (term instanceof Variable) {
+            return applyToVariable((Variable)term);
+        }
+
+        return term;
+    }
 
     @Override
-    public Term get(Variable var) {
+    public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
+        if (term instanceof Variable) {
+            return applyToVariable((Variable) term);
+        }
+        /**
+         * If not a variable, is a functional term.
+         */
+        return new NonGroundFunctionalTermImpl(
+                applyToFunctionalTerm((ImmutableFunctionalTerm) term));
+    }
+
+    @Override
+    public Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers) {
+        ImmutableList.Builder<OrderCondition> orderConditionBuilder = ImmutableList.builder();
+
+        for (OrderCondition orderCondition : immutableQueryModifiers.getSortConditions()) {
+            Variable newVariable = applyToVariable((Variable) orderCondition.getVariable());
+            orderConditionBuilder.add(orderCondition.newVariable(newVariable));
+        }
+        return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());
+    }
+
+    @Override
+    public Variable get(Variable var) {
         return map.get(var);
     }
 
     @Override
-    public Map<Variable, Term> getMap() {
-        return (Map<Variable, Term>)(Map<Variable, ?>)map;
+    public ImmutableMap<Variable, Term> getMap() {
+        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>)map;
     }
 
     @Override
@@ -54,42 +88,19 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
         return map.isEmpty();
     }
 
-    @Deprecated
-    public Set<Variable> keySet() {
-        return map.keySet();
-    }
-
     @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
 
-    /**
-     * Not implemented
-     */
     @Override
-    public boolean compose(Substitution otherSubstitution) {
-        throw new UnsupportedOperationException("Not implemented (yet)!");
-    }
-
-    /***
-     * Not implemented.
-     */
-    @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException("Not implemented (yet)!");
-    }
-
-    /***
-     * Not implemented.
-     */
-    @Override
-    public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException("Not implemented (yet)!");
+    public ImmutableMap<Variable, Variable> getImmutableMap() {
+        return map;
     }
 
     @Override
-    public void put(Variable var, Term term) {
-
+    public boolean isDefining(Variable variable) {
+        return map.containsKey(variable);
     }
+
 }

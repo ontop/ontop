@@ -12,7 +12,6 @@ import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.TermUtils;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 

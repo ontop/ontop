@@ -23,35 +23,20 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BNodePredicate;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatatypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.NonBooleanOperationPredicate;
-import org.semanticweb.ontop.model.NumericalOperationPredicate;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OperationPredicate;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.TermUtils;
-import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+
+import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableBooleanExpression;
+import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertToMutableBooleanExpression;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
 
@@ -59,9 +44,9 @@ public class ExpressionEvaluator {
 
 	private UriTemplateMatcher uriTemplateMatcher;
 	
-	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 	private boolean regexFlag = false;
 
@@ -410,6 +395,45 @@ public class ExpressionEvaluator {
 							+ term.toString());
 		}
 	}
+
+	/**
+	 * No boolean expression (absent) if the evaluation returns false
+	 */
+	public Optional<ImmutableBooleanExpression> evaluateBooleanExpression(ImmutableBooleanExpression expression) {
+		BooleanExpression mutableExpression = convertToMutableBooleanExpression(expression);
+
+		Term evaluatedTerm = evalBoolean(mutableExpression);
+
+		/**
+		 * If a function, convert it into an ImmutableBooleanExpression
+		 */
+		if (evaluatedTerm instanceof Function) {
+			Function evaluatedFunctionalTerm = (Function) evaluatedTerm;
+
+			Predicate predicate = evaluatedFunctionalTerm.getFunctionSymbol();
+			if (!(predicate instanceof BooleanOperationPredicate)) {
+				throw new RuntimeException("Functional term evaluated that does not have a BooleanOperationPredicate: "
+				+ evaluatedFunctionalTerm);
+			}
+
+			return Optional.of(convertIntoImmutableBooleanExpression(
+                    fac.getBooleanExpression((BooleanOperationPredicate) predicate,
+                            evaluatedFunctionalTerm.getTerms())));
+		}
+		else if (evaluatedTerm instanceof Constant) {
+			if (evaluatedTerm.equals(OBDAVocabulary.FALSE)) {
+				return Optional.absent();
+			}
+			else {
+				return Optional.of(fac.getImmutableBooleanExpression(OBDAVocabulary.AND, (Constant) evaluatedTerm,
+						OBDAVocabulary.TRUE));
+			}
+		}
+		else {
+			throw new RuntimeException("Unexpected term returned after evaluation: " + evaluatedTerm);
+		}
+	}
+
 
 	private Term evalNonBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();

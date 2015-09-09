@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 

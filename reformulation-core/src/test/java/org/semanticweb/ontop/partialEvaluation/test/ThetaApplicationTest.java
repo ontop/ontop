@@ -20,13 +20,7 @@ package org.semanticweb.ontop.partialEvaluation.test;
  * #L%
  */
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
@@ -121,10 +115,10 @@ public class ThetaApplicationTest extends TestCase {
 		assertEquals(5, terms.size());
 
 		Variable term1 = (Variable) terms.get(0);
-		FunctionalTermImpl term2 = (FunctionalTermImpl) terms.get(1);
+		Function term2 = (Function) terms.get(1);
 		ValueConstant term3 = (ValueConstant) terms.get(2);
-		FunctionalTermImpl term4 = (FunctionalTermImpl) terms.get(3);
-		FunctionalTermImpl term5 = (FunctionalTermImpl) terms.get(4);
+		Function term4 = (Function) terms.get(3);
+		Function term5 = (Function) terms.get(4);
 
 		assertEquals("t", term1.getName());
 		assertEquals("elf", term3.getValue());

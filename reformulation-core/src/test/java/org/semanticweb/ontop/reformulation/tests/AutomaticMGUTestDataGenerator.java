@@ -27,8 +27,6 @@ import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -22,16 +22,12 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
-
-import java.util.Map;
+import org.semanticweb.ontop.model.*;
 
 /**
  * An atomic substitution accepts only one variable in its domain.
  */
-public class SingletonSubstitution implements Substitution {
+public class SingletonSubstitution extends LocallyImmutableSubstitutionImpl {
 
     private final Variable variable;
     private final Term term;
@@ -50,21 +46,6 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean compose(Substitution substitution) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Term get(Variable var) {
         if (var.equals(variable))
             return term;
@@ -72,7 +53,7 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Map<Variable, Term> getMap() {
+    public ImmutableMap<Variable, Term> getMap() {
         return ImmutableMap.of(variable, term);
     }
 
@@ -80,10 +61,4 @@ public class SingletonSubstitution implements Substitution {
     public boolean isEmpty() {
         return false;
     }
-
-    @Override
-    public void put(Variable var, Term term) {
-        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
-    }
-
 }

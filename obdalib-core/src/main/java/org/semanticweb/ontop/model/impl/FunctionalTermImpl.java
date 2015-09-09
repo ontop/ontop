@@ -29,20 +29,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.utils.EventGeneratingArrayList;
 import org.semanticweb.ontop.utils.EventGeneratingLinkedList;
 import org.semanticweb.ontop.utils.EventGeneratingList;
 import org.semanticweb.ontop.utils.ListListener;
 
-public class FunctionalTermImpl implements Function, ListListener {
+/**
+ * TODO: rename ListenableFunctionImpl
+ *
+ * Please consider using ImmutableFunctionalTermImpl instead.
+ */
+public class FunctionalTermImpl extends AbstractFunctionalTermImpl implements ListenableFunction {
 
 	private static final long serialVersionUID = 2832481815465364535L;
-	
-	private Predicate functor;
+
 	private EventGeneratingList<Term> terms;
 	private int identifier = -1;
 
@@ -62,7 +63,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 	 *            the list of arguments.
 	 */
 	protected FunctionalTermImpl(Predicate functor, Term... terms) {
-		this.functor = functor;
+		super(functor);
 
 		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<Term>();
 		Collections.addAll(eventlist, terms);
@@ -72,7 +73,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
-		this.functor = functor;
+		super(functor);
 
 		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<Term>();
 		eventlist.addAll(terms);	
@@ -88,20 +89,16 @@ public class FunctionalTermImpl implements Function, ListListener {
 			if (!(o instanceof Function)) {
 				continue;
 			}
-			Function f = (Function) o;
-			EventGeneratingList<Term> list = (EventGeneratingList<Term>) f.getTerms();
-			list.addListener(this);
-			registerListeners(list);
+			if (o instanceof ListenableFunction) {
+				ListenableFunction f = (ListenableFunction) o;
+				EventGeneratingList<Term> list = f.getTerms();
+				list.addListener(this);
+				registerListeners(list);
+			}
+			else if (!(o instanceof ImmutableFunctionalTerm)) {
+				throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  " + o);
+			}
 		}
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof FunctionalTermImpl)) {
-			return false;
-		}
-		FunctionalTermImpl other = (FunctionalTermImpl) obj;
-		return this.hashCode() == other.hashCode();
 	}
 
 	@Override
@@ -116,33 +113,23 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public void setPredicate(Predicate predicate) {
-		this.functor = predicate;
+		super.setPredicate(predicate);
 		listChanged();
 	}
 
 	@Override
-	public Predicate getFunctionSymbol() {
-		return functor;
-	}
-
-	@Override
-	public List<Term> getTerms() {
+	public EventGeneratingList<Term> getTerms() {
 		return terms;
 	}
 
 	@Override
-	public int getArity() {
-		return functor.getArity();
-	}
-
-	@Override
-	public FunctionalTermImpl clone() {
+	public Function clone() {
 		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size());
 		
 		for (Term term: terms) {
 			copyTerms.add(term.clone());
 		}
-		FunctionalTermImpl clone = new FunctionalTermImpl(functor, copyTerms);
+		FunctionalTermImpl clone = new FunctionalTermImpl(getFunctionSymbol(), copyTerms);
 		clone.identifier = identifier;
 		clone.string = string;
 		clone.rehash = rehash;
@@ -152,37 +139,9 @@ public class FunctionalTermImpl implements Function, ListListener {
 	@Override
 	public String toString() {
 		if (string == null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(functor.toString());
-			sb.append("(");
-			boolean separator = false;
-			for (Term innerTerm : terms) {
-				if (separator) {
-					sb.append(",");
-				}
-				sb.append(innerTerm.toString());
-				separator = true;
-			}
-			sb.append(")");
-			string = sb.toString();
+			string = super.toString();
 		}
 		return string;
-	}
-
-	/**
-	 * Check whether the function contains a particular term argument or not.
-	 * 
-	 * @param t
-	 *            the term in question.
-	 * @return true if the function contains the term, or false otherwise.
-	 */
-	public boolean containsTerm(Term t) {
-		for (int i = 0; i < terms.size(); i++) {
-			Term t2 = terms.get(i);
-			if (t2.equals(t))
-				return true;
-		}
-		return false;
 	}
 
 
@@ -205,60 +164,34 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	public void updateTerms(List<Term> newterms) {
 		for (Term term : terms) {
-			if (term instanceof FunctionalTermImpl) {
-				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingList<Term> innertermlist = (EventGeneratingList<Term>) function.getTerms();
-				innertermlist.removeListener(this);
+			if (term instanceof Function) {
+				if (term instanceof ListenableFunction) {
+					ListenableFunction function = (ListenableFunction) term;
+					EventGeneratingList<Term> innertermlist = function.getTerms();
+					innertermlist.removeListener(this);
+				}
+				else if (!(term instanceof ImmutableFunctionalTerm)) {
+					throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  "
+							+ term);
+				}
 			}
 		}
 		terms.clear();
 		terms.addAll(newterms);
 
 		for (Term term : terms) {
-			if (term instanceof FunctionalTermImpl) {
-				FunctionalTermImpl function = (FunctionalTermImpl) term;
-				EventGeneratingList<Term> innertermlist = (EventGeneratingList<Term>) function.getTerms();
-				innertermlist.addListener(this);
+			if (term instanceof Function) {
+				if (term instanceof ListenableFunction) {
+					ListenableFunction function = (ListenableFunction) term;
+					EventGeneratingList<Term> innertermlist = function.getTerms();
+					innertermlist.addListener(this);
+				}
+				else if (!(term instanceof ImmutableFunctionalTerm)) {
+					throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  "
+							+ term);
+				}
 			}
 		}
 		listChanged();
 	}
-
-	@Override
-	public boolean isDataFunction() {
-		return this.functor.isDataPredicate();
-	}
-
-	@Override
-	public boolean isBooleanFunction() {
-		return this.functor.isBooleanPredicate();
-	}
-
-	@Override
-	public boolean isAlgebraFunction() {
-		return this.functor.isAlgebraPredicate();
-	}
-
-	@Override
-	public boolean isArithmeticFunction() {
-		return this.functor.isArithmeticPredicate();
-	}
-
-	@Override
-	public boolean isDataTypeFunction() {
-		return this.functor.isDataTypePredicate();
-	}
-
-    @Override
-    public Set<Variable> getVariables() {
-        HashSet<Variable> variables = new LinkedHashSet<Variable>();
-        for (Term t : terms) {
-            Set<Variable> referencedVariables = new HashSet<>();
-            TermUtils.addReferencedVariablesTo(referencedVariables,t);
-            for (Variable v : referencedVariables)
-                variables.add(v);
-        }
-        return variables;
-    }
-
 }

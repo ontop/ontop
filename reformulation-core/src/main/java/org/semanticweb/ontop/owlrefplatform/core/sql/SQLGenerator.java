@@ -23,7 +23,6 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
 
 import com.google.common.collect.*;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -824,12 +823,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (sqls.size() == 1) {
 			unionView = sqls.iterator().next();
 		} else {
-			unionView = "(" + Joiner.on(")\n UNION \n (").join(sqls) + ")";
+			unionView = "(" + Joiner.on(")\n UNION ALL \n (").join(sqls) + ")";
 		}
 
 		//String viewname = String.format(VIEW_ANS_NAME, pred);
 		// String viewname = "Q" + pred + "View";
-		String viewname = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX, viewNames);
+		String safePredicateName = escapeName(pred.getName());
+		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX, viewNames);
 		viewNames.add(viewname);
 
 		List<String> columns = Lists
@@ -846,6 +846,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 				unionView, columns);
 		metadata.add(viewU);
 		sqlAnsViewMap.put(pred, unionView);
+	}
+
+	/**
+	 * Escapes view names.
+	 */
+	private static String escapeName(String name) {
+		return name.replace('.', '_');
 	}
 
 	/***
@@ -1357,6 +1364,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}else if (term instanceof Variable){
 			throw new RuntimeException("Cannot return the SQL type for: "
 					+ term.toString());
+		}
+		/**
+		 * Boolean constant
+		 */
+		else if (term.equals(OBDAVocabulary.FALSE)
+				 || term.equals(OBDAVocabulary.TRUE)) {
+			return Types.BOOLEAN;
 		}
 
 		return Types.VARCHAR;
@@ -2556,6 +2570,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
 		}
+		else if (functionSymbol.getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+			operator = IS_TRUE_OPERATOR;
+		}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
@@ -2633,7 +2650,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
 			String tableName = tablePredicate.getName();
-			String safeTableName = tableName.replace('.', '_');
+			String safeTableName = escapeName(tableName);
 			DataDefinition def = metadata.getDefinition(tableName);
 
 			if (def == null) {

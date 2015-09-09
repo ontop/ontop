@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
@@ -119,40 +120,69 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public Function getFunction(Predicate functor, Term... terms);
 
+	BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments);
+
+	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments);
+
+	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+															 ImmutableList<ImmutableTerm> arguments);
+
 	public Function getFunction(Predicate functor, List<Term> terms);
+
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
+
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms);
+
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+
+	/**
+	 * Beware: a DataAtom is immutable
+	 */
+	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms);
+
+	/**
+	 * Beware: a DataAtom is immutable
+	 */
+	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms);
+
+
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
+
 	/*
 	 * Boolean function terms
 	 */
 
-	public Function getFunctionEQ(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionGT(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionLT(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionNEQ(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionNOT(Term term);
+	public BooleanExpression getFunctionNOT(Term term);
 
-	public Function getFunctionAND(Term term1, Term term2);
+	public BooleanExpression getFunctionAND(Term term1, Term term2);
 
-	public Function getFunctionOR(Term term1, Term term2);
+	public BooleanExpression getFunctionOR(Term term1, Term term2);
 
-	public Function getFunctionIsTrue(Term term);
+	public BooleanExpression getFunctionIsTrue(Term term);
 	
-	public Function getFunctionIsNull(Term term);
+	public BooleanExpression getFunctionIsNull(Term term);
 
-	public Function getFunctionIsNotNull(Term term);
+	public BooleanExpression getFunctionIsNotNull(Term term);
 
-	public Function getLANGMATCHESFunction(Term term1, Term term2);
+	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2);
 	
-	public Function getFunctionLike(Term term1, Term term2);
+	public BooleanExpression getFunctionLike(Term term1, Term term2);
 	
-	public Function getFunctionRegex(Term term1, Term term2, Term term3);
+	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3);
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
@@ -308,6 +338,22 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
+	
+	public Function getSPARQLJoin(List<Function> atoms, Function filter);
+
+	public Function getSPARQLJoin(List<Function> atoms);
+
+	
+
+	
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter);
+
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+	public Function getSPARQLLeftJoin(Function function, Function function2, Function LjoinCondition);
+
+
+
 }

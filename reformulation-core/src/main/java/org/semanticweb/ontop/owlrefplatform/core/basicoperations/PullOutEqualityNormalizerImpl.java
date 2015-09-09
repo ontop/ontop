@@ -2,14 +2,17 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import fj.*;
 import fj.data.*;
+import fj.data.List;
+import fj.data.Set;
+import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.*;
+import static org.semanticweb.ontop.model.impl.DatalogTools.*;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
@@ -487,7 +490,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
             @Override
             public List<P2<Variable, Variable>> f(Var2VarSubstitution substitution) {
                 // Transforms the map of the substitution in a list of pairs
-                return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getVar2VarMap()).toStream().toList();
+                return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getImmutableMap()).toStream().toList();
             }
         });
 
@@ -589,7 +592,11 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      */
     private static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(Function leftJoinMetaAtom) {
         List<Function> subAtoms = List.iterableList(
-                (java.util.List<Function>)(java.util.List<?>) leftJoinMetaAtom.getTerms());
+                (java.util.List<Function>) (java.util.List<?>) leftJoinMetaAtom.getTerms());
+        return splitLeftJoinSubAtoms(subAtoms);
+    }
+
+    public static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(List<Function> ljSubAtoms) {
 
         // TODO: make it static (performance improvement).
         F<Function, Boolean> isNotDataOrCompositeAtomFct = new F<Function, Boolean>() {
@@ -604,7 +611,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          *
          * The first data/composite atom is thus the first element of the right list.
          */
-        P2<List<Function>, List<Function>> firstDataAtomSplit = subAtoms.span(isNotDataOrCompositeAtomFct);
+        P2<List<Function>, List<Function>> firstDataAtomSplit = ljSubAtoms.span(isNotDataOrCompositeAtomFct);
         Function firstDataAtom = firstDataAtomSplit._2().head();
 
         /**

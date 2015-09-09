@@ -35,11 +35,11 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.impl.MutableQueryModifiersImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
+import org.semanticweb.ontop.model.OrderCondition;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -630,7 +630,7 @@ public class DatalogToSparqlTranslatorTest {
 		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
 		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
 		
-		OBDAQueryModifiers modifiers = new OBDAQueryModifiers();
+		OBDAQueryModifiers modifiers = new MutableQueryModifiersImpl();
 		modifiers.setDistinct();
 		modifiers.setLimit(100);
 		modifiers.setOffset(20);

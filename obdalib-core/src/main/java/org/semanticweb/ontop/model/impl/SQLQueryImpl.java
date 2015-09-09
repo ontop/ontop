@@ -59,7 +59,7 @@ public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 
 	@Override
 	public OBDAQueryModifiers getQueryModifiers() {
-		return new OBDAQueryModifiers();
+		return new MutableQueryModifiersImpl();
 	}
 
 	@Override

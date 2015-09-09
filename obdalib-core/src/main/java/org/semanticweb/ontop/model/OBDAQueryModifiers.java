@@ -1,169 +1,38 @@
 package org.semanticweb.ontop.model;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import org.semanticweb.ontop.pivotalrepr.QueryModifiers;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class OBDAQueryModifiers {
-	private boolean isCount;
-	private boolean isDistinct;
+/**
+ * Old-style mutable interface for QueryModifiers.
+ *
+ * Please prefer the new QueryModifiers interface that allows immutable implementations.
+ *
+ * ACCEPTS GROUP BY!
+ *
+ * TODO: rename it into MutableQueryModifiers
+ *
+ */
+public interface OBDAQueryModifiers extends QueryModifiers {
 
-	private long limit;
-	private long offset;
+    OBDAQueryModifiers clone();
 
-	private List<OrderCondition> orderConditions;
-	private List<Variable> groupConditions;
-	
-	public OBDAQueryModifiers() {
-		isCount = false;
-		isDistinct = false;
-		limit = -1;
-		offset = -1;
-		orderConditions = new ArrayList<>();
-		groupConditions = new ArrayList<>();
-	}
+    void copy(OBDAQueryModifiers other);
 
-	public OBDAQueryModifiers clone() {
-		OBDAQueryModifiers clone = new OBDAQueryModifiers();
-		clone.isCount = isCount;
-		clone.isDistinct = isDistinct;
-		clone.limit = limit;
-		clone.offset = offset;
-		for (OrderCondition c : orderConditions) {
-			try {
-				clone.orderConditions.add(c.clone());
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		clone.groupConditions.addAll(groupConditions);
-		return clone;
-	}
+    void setDistinct();
 
-	@Deprecated
-	public void copy(OBDAQueryModifiers other) {
-		isDistinct = other.isDistinct;
-		isCount = other.isCount;
-		limit = other.limit;
-		offset = other.offset;
-		orderConditions.addAll(other.orderConditions);
-		groupConditions.addAll(other.groupConditions);
-	}
 
-	public void setDistinct() {
-		isDistinct = true;
-	}
+    void setLimit(long limit);
 
-	public boolean isDistinct() {
-		return isDistinct;
-	}
-	
-	public void setCount() {
-		isCount = true;
-	}
+    void setOffset(long offset);
 
-	public boolean isCount() {
-		return isCount;
-	}
+    void addOrderCondition(Variable var, int direction);
 
-	public void setLimit(long limit) {
-		this.limit = limit;
-	}
+    void addGroupCondition(Variable var);
 
-	public long getLimit() {
-		return limit;
-	}
+    boolean hasModifiers();
 
-	public boolean hasLimit() {
-		return limit != -1 ? true : false;
-	}
-
-	public void setOffset(long offset) {
-		this.offset = offset;
-	}
-
-	public long getOffset() {
-		return offset;
-	}
-
-	public boolean hasOffset() {
-		return offset != -1 ? true : false;
-	}
-
-	public void addOrderCondition(Variable var, int direction) {
-		OrderCondition condition = new OrderCondition(var, direction);
-		orderConditions.add(condition);
-	}
-	
-	public void addGroupCondition(Variable var) {
-		groupConditions.add(var);
-	}
-
-	public List<Variable> getGroupConditions() {
-		return groupConditions;
-	}
-	
-	public List<OrderCondition> getSortConditions() {
-		return orderConditions;
-	}
-
-	public boolean hasOrder() {
-		return !orderConditions.isEmpty() ? true : false;
-	}
-	
-	public boolean hasGroup() {
-		return !groupConditions.isEmpty() ? true : false;
-	}
-
-	public boolean hasModifiers() {
-		return isDistinct || hasLimit() || hasOffset() || hasOrder() || hasGroup();
-	}
-
-	/**
-	 * A helper class to store the sort conditions
-	 */
-	public class OrderCondition implements Cloneable {
-		public static final int ORDER_ASCENDING = 1;
-		public static final int ORDER_DESCENDING = 2;
-
-		private Variable var;
-		private int direction;
-
-		OrderCondition(Variable var, int direction) {
-			this.var = var;
-			this.direction = direction;
-		}
-
-		public Variable getVariable() {
-			return var;
-		}
-
-		public int getDirection() {
-			return direction;
-		}
-
-		@Override
-		public OrderCondition clone() throws CloneNotSupportedException {
-			return (OrderCondition) super.clone();
-		}
-	}
+    boolean hasGroup();
+    List<Variable> getGroupConditions();
 }

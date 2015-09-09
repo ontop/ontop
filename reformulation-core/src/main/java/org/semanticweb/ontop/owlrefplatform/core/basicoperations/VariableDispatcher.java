@@ -3,7 +3,6 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.VariableGenerator;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,8 +25,19 @@ public class VariableDispatcher {
      */
     private final Set<Variable> allocatedVariables;
 
+    /**
+     * For a datalog rule
+     */
     public VariableDispatcher(CQIE rule) {
         variableGenerator = new VariableGenerator(rule);
+        allocatedVariables = new HashSet<>();
+    }
+
+    /**
+     * Please make sure you cannot use the other constructors!
+     */
+    public VariableDispatcher() {
+        variableGenerator = new VariableGenerator(new HashSet<Variable>());
         allocatedVariables = new HashSet<>();
     }
 

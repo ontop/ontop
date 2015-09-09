@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
@@ -172,12 +173,83 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getBooleanExpression((BooleanOperationPredicate)functor, arguments);
+		}
+
+		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}
-	
+
+	@Override
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments) {
+		return new BooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments) {
+		return new BooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments) {
+		return new ImmutableBooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+																	ImmutableList<ImmutableTerm> arguments) {
+		return new ImmutableBooleanExpressionImpl(functor, arguments);
+	}
+
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getBooleanExpression((BooleanOperationPredicate) functor, arguments);
+		}
+
+		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		}
+
+		// Default constructor
+		return new ImmutableFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		}
+
+		// Default constructor
+		return new ImmutableFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		return new NonGroundFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		return new NonGroundFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms) {
+		return new DataAtomImpl(predicate, terms);
+	}
+
+	@Override
+	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
+		return new DataAtomImpl(predicate, terms);
 	}
 
 	@Override
@@ -279,43 +351,70 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.EQ, firstTerm, secondTerm);
+	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GTE, firstTerm, secondTerm);
+	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GT, firstTerm, secondTerm);
+	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LTE, firstTerm, secondTerm);
+	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LT, firstTerm, secondTerm);
+	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.NEQ, firstTerm, secondTerm);
+	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionNOT(Term term) {
-		return getFunction(OBDAVocabulary.NOT, term);
+	public BooleanExpression getFunctionNOT(Term term) {
+		return getBooleanExpression(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public Function getFunctionAND(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.AND, term1, term2);
+	public BooleanExpression getFunctionAND(Term term1, Term term2) {
+		checkInnerBooleanExpressionTerm(term1);
+		checkInnerBooleanExpressionTerm(term2);
+
+		return getBooleanExpression(OBDAVocabulary.AND, term1, term2);
+	}
+
+	private static void checkInnerBooleanExpressionTerm(Term term) {
+		if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+
+			if (functionalTerm.isBooleanFunction()) {
+				return;
+			}
+
+			String functionSymbol = functionalTerm.getFunctionSymbol().getName();
+			if (functionSymbol.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+				return;
+			}
+		}
+		else if (term.equals(OBDAVocabulary.FALSE)
+				|| term.equals(OBDAVocabulary.TRUE)) {
+			return;
+		} else if (term instanceof Variable) {
+			return;
+		}
+
+		// Illegal argument given to the caller of this
+		throw new IllegalArgumentException(term + " is not a boolean expression");
 	}
 
 //	@Override
@@ -339,8 +438,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public Function getFunctionOR(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.OR, term1, term2);
+	public BooleanExpression getFunctionOR(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.OR, term1, term2);
 	}
 
 	
@@ -365,29 +464,29 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public Function getFunctionIsNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NULL, term);
+	public BooleanExpression getFunctionIsNull(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_NULL, term);
 	}
 
 	@Override
-	public Function getFunctionIsNotNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NOT_NULL, term);
+	public BooleanExpression getFunctionIsNotNull(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_NOT_NULL, term);
 	}
 
 
 	@Override
-	public Function getLANGMATCHESFunction(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
+	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
 
 	@Override
-	public Function getFunctionLike(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LIKE, term1, term2);
+	public BooleanExpression getFunctionLike(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_LIKE, term1, term2);
 	}
 	
 	@Override
-	public Function getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3 );
+	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
 	}
 	
 	@Override
@@ -457,8 +556,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionIsTrue(Term term) {
-        return getFunction(OBDAVocabulary.IS_TRUE, term);
+	public BooleanExpression getFunctionIsTrue(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_TRUE, term);
 	}
 
 	@Override
@@ -472,10 +571,87 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getSPARQLJoin(List<Function> atoms, Function filter) {
+		
+
+		int size = atoms.size();
+		
+		if (size>1){
+			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin((List<Function>) atoms.subList(1, size)), filter);
+			return join;
+
+		}else{
+			return atoms.get(0);
+		}
+	
+	}
+
+	
+	
+	
+	
+	
+	@Override
+	public Function getSPARQLJoin(List<Function> atoms) {
+		
+		int size = atoms.size();
+		
+		if (size>1){
+			List<Function> remainingAtoms = (List<Function>) atoms.subList(1, size);
+			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin(remainingAtoms)  );
+			return join;
+
+		}else{
+			return atoms.get(0);
+		}
+	
+		
+	}	
+	
+	
+	
+
+	
+	
+	@Override
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter){
+		
+		atoms2.add(filter);
+		
+		return  getSPARQLLeftJoin(atoms,atoms2);
+		
+	}
+
+	@Override
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2){
+
+		List<Term> termList= new LinkedList<Term>();
+		atoms.addAll(atoms2);
+		
+		for (Function f: atoms){
+			termList.add(f);
+		}
+		
+		Function function = getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, termList );
+		return  function;
+		
+	}
+
+
+
+	
+	
+	@Override
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {
 		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}
 
+	@Override
+	public Function getSPARQLLeftJoin(Function t1, Function t2, Function filter) {
+		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2, filter);
+	}
+
+	
 	@Override
 	public ValueConstant getBooleanConstant(boolean value) {
 		return value ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE;

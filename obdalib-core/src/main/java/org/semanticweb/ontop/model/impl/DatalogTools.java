@@ -1,14 +1,9 @@
-package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
+package org.semanticweb.ontop.model.impl;
 
 import fj.F;
 import fj.F2;
 import fj.data.List;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.*;
 
 import java.util.ArrayList;
 
@@ -18,7 +13,27 @@ import java.util.ArrayList;
 public class DatalogTools {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+    private final static BooleanExpression TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+
+    private final static  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = new F<Function, Boolean>() {
+        @Override
+        public Boolean f(Function atom) {
+            return isDataOrLeftJoinOrJoinAtom(atom);
+        }
+    };
+    private final static  F<Function, Boolean> IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = new F<Function, Boolean>() {
+        @Override
+        public Boolean f(Function atom) {
+            return !isDataOrLeftJoinOrJoinAtom(atom);
+        }
+    };
+    private final static  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT = new F<Function, Boolean>() {
+        @Override
+        public Boolean f(Function atom) {
+            return atom.isBooleanFunction()
+                    ||  atom.getFunctionSymbol().getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI);
+        }
+    };
 
     public static Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
         return atom.isDataFunction() || isLeftJoinOrJoinAtom(atom);
@@ -30,20 +45,58 @@ public class DatalogTools {
                 predicate.equals(OBDAVocabulary.SPARQL_JOIN);
     }
 
+    public static List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
+        return atoms.filter(IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT);
+    }
+
+    public static List<Function> filterNonDataAndCompositeAtoms(List<Function> atoms) {
+        return atoms.filter(IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT);
+    }
+
+    public static List<Function> filterBooleanAtoms(List<Function> atoms) {
+        return atoms.filter(IS_BOOLEAN_ATOM_FCT);
+    }
+
     /**
      * Folds a list of boolean atoms into one AND(AND(...)) boolean atom.
      */
-    public static Function foldBooleanConditions(List<Function> booleanAtoms) {
+    public static BooleanExpression foldBooleanConditions(List<Function> booleanAtoms) {
         if (booleanAtoms.length() == 0)
             return TRUE_EQ;
 
-        Function firstBooleanAtom = booleanAtoms.head();
-        return booleanAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
+        BooleanExpression firstBooleanAtom = convertOrCastIntoBooleanAtom( booleanAtoms.head());
+
+        return booleanAtoms.tail().foldLeft(new F2<BooleanExpression, Function, BooleanExpression>() {
             @Override
-            public Function f(Function previousAtom, Function currentAtom) {
+            public BooleanExpression f(BooleanExpression previousAtom, Function currentAtom) {
                 return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
             }
         }, firstBooleanAtom);
+    }
+
+    private static BooleanExpression convertOrCastIntoBooleanAtom(Function atom) {
+        if (atom instanceof BooleanExpression)
+            return (BooleanExpression) atom;
+
+        Predicate predicate = atom.getFunctionSymbol();
+        if (predicate instanceof BooleanOperationPredicate)
+            return DATA_FACTORY.getBooleanExpression((BooleanOperationPredicate)predicate,
+                    atom.getTerms());
+
+        String predicateName = predicate.getName();
+        if (predicateName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+
+            BooleanOperationPredicate newPredicate = new BooleanOperationPredicateImpl(predicateName,
+                    atom.getArity());
+
+            return DATA_FACTORY.getBooleanExpression(newPredicate, atom.getTerms());
+        }
+
+        throw new IllegalArgumentException(atom + " is not a boolean atom");
+    }
+
+    public static BooleanExpression foldBooleanConditions(java.util.List<Function> booleanAtoms) {
+        return foldBooleanConditions(List.iterableList(booleanAtoms));
     }
 
     /**

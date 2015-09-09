@@ -24,20 +24,10 @@ import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 
 public class SesameBooleanQuery extends SesameAbstractQuery implements BooleanQuery {
 

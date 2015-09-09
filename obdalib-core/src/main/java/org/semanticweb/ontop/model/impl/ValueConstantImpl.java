@@ -20,13 +20,7 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.util.HashMap;
-
-
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.ValueConstant;
@@ -134,9 +128,5 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public String toString() {
 		return string;
-	}
-
-	public Set<Variable> getReferencedVariables() {
-		return Collections.emptySet();
 	}
 }

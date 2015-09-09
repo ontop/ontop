@@ -44,13 +44,11 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition.*;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -149,7 +147,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 }
                 Var v = (Var) expression;
                 Variable var = ofac.getVariable(v.getName());
-                int direction =  c.isAscending() ? ORDER_ASCENDING : ORDER_DESCENDING;
+                int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING;
                 pr.getQueryModifiers().addOrderCondition(var, direction);
             }
             return translateTupleExpr(order.getArg(), pr, newHeadName); // narrow down the query

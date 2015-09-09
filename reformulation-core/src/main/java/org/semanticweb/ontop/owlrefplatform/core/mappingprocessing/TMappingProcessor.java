@@ -20,14 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import org.semanticweb.ontop.model.BuiltinPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;

@@ -9,20 +9,22 @@ import fj.data.List;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
 import java.util.*;
 import java.util.Set;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.constructNewFunction;
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isDataOrLeftJoinOrJoinAtom;
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.impl.DatalogTools.constructNewFunction;
+import static org.semanticweb.ontop.model.impl.DatalogTools.isDataOrLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.impl.DatalogTools.isLeftJoinOrJoinAtom;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.*;
 
 /**
  * Left-join aware implementation.
+ *
+ * TODO: fix it! Does not lift types when joins are done over "URI templates!"
  *
  */
 public class RuleLevelProposalImpl implements RuleLevelProposal {
@@ -58,13 +60,18 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          * Extends the body data atoms (in a possible complex structure made of Joins and LJs)
          *     so that are compatible with the typed child head for computing a type propagation substitution.
          */
-        List<Function> extendedBodyDataAndCompositeAtoms = computeExtendedBodyDataAtoms(dataAndCompositeAtoms,
+        List<Function> extendedBodyDataAndCompositeAtoms = computeExtendedBodyAtoms(dataAndCompositeAtoms,
                 childProposalIndex);
+
+        /**
+         * Only data atoms (complex structure removed)
+         */
+        List<Function> extendedDataAtoms = flattenDataAtoms(extendedBodyDataAndCompositeAtoms);
 
         /**
          * Computes the type propagating substitution.
          */
-        typingSubstitution = aggregateRuleAndProposals(extendedBodyDataAndCompositeAtoms, childProposalIndex);
+        typingSubstitution = aggregateRuleAndProposals(extendedDataAtoms, childProposalIndex);
 
         typedRule = constructTypedRule(initialRule, typingSubstitution, extendedBodyDataAndCompositeAtoms, otherAtoms);
 
@@ -76,14 +83,32 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     }
 
     /**
-     * Converts each data atom into an unifiable atom thanks to its corresponding type proposal.
+     * TODO: explain
+     */
+    private static List<Function> flattenDataAtoms(List<Function> bodyAtoms) {
+        return bodyAtoms.bind(new F<Function, List<Function>>() {
+            @Override
+            public List<Function> f(Function atom) {
+                if (atom.isDataFunction()) {
+                    return List.cons(atom, List.<Function>nil());
+                } else if (atom.isAlgebraFunction()){
+                    List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>)atom.getTerms());
+                    return flattenDataAtoms(subAtoms);
+                }
+                return List.nil();
+            }
+        });
+    }
+
+    /**
+     * Converts each data/composite atom into an unifiable atom thanks to its corresponding type proposal.
      * If no type proposal corresponds to a data atom, it means it is already unifiable.
      *
      * Some of these conversions may introduce new non-conflicting variables.
      *
      */
-    private static List<Function> computeExtendedBodyDataAtoms(final List<Function> dataAndCompositeAtoms,
-                                                               final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
+    private static List<Function> computeExtendedBodyAtoms(final List<Function> dataAndCompositeAtoms,
+                                                           final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
 
         /**
          * All the variables are supposed to be present in the data atoms (safe Datalog rules).
@@ -153,7 +178,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     private static Function computeExtendedCompositeAtom(Function compositeAtom,
                                                          final HashMap<Predicate, PredicateLevelProposal> childProposalIndex,
                                                          final Set<Variable> alreadyKnownRuleVariables) {
-        List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>)compositeAtom.getTerms());
+        List<Function> subAtoms = List.iterableList((java.util.List<Function>) (java.util.List<?>) compositeAtom.getTerms());
         List<Term> extendedSubAtoms = subAtoms.map(new F<Function, Term>() {
             @Override
             public Term f(Function subAtom) {
@@ -201,7 +226,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
 
 
     /**
-     * Tail-recursive function that "iterates" over the body atoms of a given rule defining the parent predicate.
+     * Tail-recursive function that "iterates" over the body DATA atoms of a given rule defining the parent predicate.
      *
      * For a given body atom, tries to make the *union* (NOT composition) of the current substitution function with
      * the one deduced from the child proposal corresponding to the current atom.
@@ -229,6 +254,9 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         }
 
         Function bodyAtom = remainingBodyDataAtoms.head();
+        /**
+         * TODO: may be composite!!!!
+         */
         Option<PredicateLevelProposal> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
         Option<Substitution> newOptionalSubstitution;
