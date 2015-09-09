@@ -1442,7 +1442,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
-			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index, sqlVariableNames);
+			String langColumn = getLangColumnForSELECT(ht, varName, hpos,	index, sqlVariableNames);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -1588,13 +1588,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return format;
 	}
 
-    private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index,
+    private String getLangColumnForSELECT(Term ht, String signatureVarName, int hpos, QueryAliasIndex index,
                                           Set<String> sqlVariableNames) {
 
         /**
          * Creates a variable name that fits to the restrictions of the SQL dialect.
          */
-        String langVariableName = sqladapter.nameTopVariable(signature.get(hpos), LANG_SUFFIX, sqlVariableNames);
+        String langVariableName = sqladapter.nameTopVariable(signatureVarName, LANG_SUFFIX, sqlVariableNames);
         sqlVariableNames.add(langVariableName);
 
         if (ht instanceof Function) {

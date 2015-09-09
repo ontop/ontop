@@ -63,7 +63,13 @@ public abstract class DataDefinition implements Serializable {
 	@Deprecated
 	public void setAttribute(int pos, Attribute value) {
         // indexes start at 1
-        attributes.set(pos - 1, value);
+        int index = pos - 1;
+        if (index >= attributes.size()) {
+            attributes.add(value);
+        }
+        else {
+            attributes.set(index, value);
+        }
     }
 	public String getAttributeName(int pos) {
 		if (attributes.size() < pos)
