@@ -13,6 +13,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2Va
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.transformer.FullSubstitutionPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
 
@@ -139,7 +140,7 @@ public class SubQueryUnificationTools {
                 targetDataAtom);
 
         try {
-            IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
+            IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
             queryBuilder.init(rootUnification.unifiedNode);
 
             /**
@@ -170,7 +171,7 @@ public class SubQueryUnificationTools {
                                                                 SubstitutionPropagator substitutionPropagator,
                                                                 QueryNodeRenamer renamer)
             throws IntermediateQueryBuilderException, SubQueryUnificationException {
-        for(QueryNode originalChild : originalSubQuery.getCurrentSubNodesOf(originalParentNode)) {
+        for(QueryNode originalChild : originalSubQuery.getChildren(originalParentNode)) {
             Optional<QueryNode> optionalNewChild;
             SubstitutionPropagator propagatorForChild;
             try {

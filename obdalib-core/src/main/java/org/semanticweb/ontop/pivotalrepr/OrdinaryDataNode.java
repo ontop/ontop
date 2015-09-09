@@ -10,5 +10,5 @@ public interface OrdinaryDataNode extends DataNode {
     OrdinaryDataNode clone();
 
     @Override
-    OrdinaryDataNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    OrdinaryDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 }

@@ -1,18 +1,17 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.impl.JgraphtIntermediateQueryBuilder;
+import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 
 public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor {
 
-    private final QueryNodeTransformer queryNodeCloner = new QueryNodeCloner();
+    private final HomogeneousQueryNodeTransformer queryNodeCloner = new QueryNodeCloner();
 
     public IntermediateQuery apply(UnionNode unionNode, QueryNode targetQueryNode, IntermediateQuery inputQuery) {
 
-        IntermediateQueryBuilder builder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder builder = new DefaultIntermediateQueryBuilder();
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {
@@ -37,7 +36,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
                           QueryNode newParentNode, Optional<Integer> optionalBranchIndexInsideUnion)
             throws QueryNodeTransformationException, NotNeededNodeException, IntermediateQueryBuilderException {
 
-        for (QueryNode subNode : query.getCurrentSubNodesOf(parentNode)) {
+        for (QueryNode subNode : query.getChildren(parentNode)) {
 
             Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition
                     = query.getOptionalPosition(parentNode, subNode);
@@ -49,7 +48,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
                 builder.addChild(newParentNode, unionNodeClone, optionalPosition);
 
-                int arityOfUnion = query.getCurrentSubNodesOf(unionNode).size();
+                int arityOfUnion = query.getChildren(unionNode).size();
 
                 for (int i = 0; i < arityOfUnion; i++) {
                     if (i > 0) {
@@ -65,7 +64,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
                 }
 
                 Integer index = optionalBranchIndexInsideUnion.get();
-                QueryNode subNodeOfUnion = query.getCurrentSubNodesOf(subNode).get(index);
+                QueryNode subNodeOfUnion = query.getChildren(subNode).get(index);
 
                 QueryNode subNodeOfUnionClone = subNodeOfUnion.acceptNodeTransformer(queryNodeCloner);
 

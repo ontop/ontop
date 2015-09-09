@@ -4,7 +4,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
@@ -25,7 +24,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public FilterNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public FilterNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

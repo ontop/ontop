@@ -11,6 +11,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitu
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.PredicateRenamingProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PredicateRenamingProposalImpl;
@@ -71,10 +72,10 @@ public class IntermediateQueryUtils {
             PredicateRenamingProposal renamingProposal = new PredicateRenamingProposalImpl(normalPredicate,
                     subQueryPredicate);
 
-            IntermediateQuery renamedDefinition = null;
+            IntermediateQuery renamedDefinition;
             try {
                 renamedDefinition = originalDefinition.applyProposal(renamingProposal).getResultingQuery();
-            } catch (InvalidQueryOptimizationProposalException e) {
+            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
                 throw new RuntimeException("Internal error: bad renaming proposal: " + e.getMessage());
             }
             mergedDefinition.mergeSubQuery(renamedDefinition);
@@ -141,7 +142,7 @@ public class IntermediateQueryUtils {
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
 
-        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
         try {
             queryBuilder.init(rootNode);
             queryBuilder.addChild(rootNode, unionNode);
@@ -196,7 +197,7 @@ public class IntermediateQueryUtils {
     public static IntermediateQueryBuilder convertToBuilder(IntermediateQuery originalQuery)
             throws IntermediateQueryBuilderException {
         try {
-            return convertToBuilderAndTransform(originalQuery, Optional.<QueryNodeTransformer>absent());
+            return convertToBuilderAndTransform(originalQuery, Optional.<HomogeneousQueryNodeTransformer>absent());
             /**
              * No transformer so should not be expected
              */
@@ -210,7 +211,7 @@ public class IntermediateQueryUtils {
      *
      */
     public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                        QueryNodeTransformer transformer)
+                                                                        HomogeneousQueryNodeTransformer transformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         return convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
     }
@@ -222,9 +223,9 @@ public class IntermediateQueryUtils {
      *
      */
     private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                        Optional<QueryNodeTransformer> optionalTransformer)
+                                                                        Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
 
         // Clone of the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
@@ -248,9 +249,9 @@ public class IntermediateQueryUtils {
                                                                        IntermediateQueryBuilder queryBuilder,
                                                                        final QueryNode originalParentNode,
                                                                        final QueryNode newParentNode,
-                                                                       Optional<QueryNodeTransformer> optionalTransformer)
+                                                                       Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        for(QueryNode originalChildNode : originalQuery.getCurrentSubNodesOf(originalParentNode)) {
+        for(QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
 
             // QueryNode are mutable
             QueryNode newChildNode;
@@ -283,8 +284,7 @@ public class IntermediateQueryUtils {
         DataAtom headAtom2 = root2.getProjectionAtom();
 
         if (!headAtom1.hasSamePredicateAndArity(headAtom2)) {
-            throw new QueryMergingException("Two definitions of different things: "
-                    + headAtom1 + " != " + headAtom2);
+            throw new QueryMergingException("Two definitions of different things: " + headAtom1 + " != " + headAtom2);
         }
 
         /**

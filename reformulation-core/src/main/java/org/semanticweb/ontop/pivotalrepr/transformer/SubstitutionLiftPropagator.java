@@ -3,6 +3,8 @@ package org.semanticweb.ontop.pivotalrepr.transformer;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.NonStandardNode;
+import org.semanticweb.ontop.pivotalrepr.NotNeededNodeException;
 import org.semanticweb.ontop.pivotalrepr.QueryNodeTransformationException;
 
 /**
@@ -18,8 +20,7 @@ public class SubstitutionLiftPropagator extends SubstitutionPropagator {
     }
 
     @Override
-    public ConstructionNode transform(ConstructionNode constructionNode)
-            throws QueryNodeTransformationException {
-        throw new QueryNodeTransformationException("The propagated substitution MUST NOT be applied to construction nodes");
+    public ConstructionNode transform(ConstructionNode constructionNode) {
+        throw new IllegalArgumentException("The propagated substitution MUST NOT be applied to construction nodes");
     }
 }

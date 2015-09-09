@@ -3,11 +3,12 @@ package org.semanticweb.ontop.executor.renaming;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.QueryNodeVisitorImpl;
 
 /**
  * TODO: explain
  */
-public class PredicateRenamingChecker implements QueryNodeVisitor  {
+public class PredicateRenamingChecker extends QueryNodeVisitorImpl {
 
     private final AtomPredicate forbiddenPredicate;
 

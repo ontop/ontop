@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
+import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import org.semanticweb.ontop.executor.join.JoinBooleanExpressionExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.model.DataAtom;
@@ -29,8 +30,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * Should not be expected (internal error).
      *
      */
-    protected static class InconsistentIntermediateQueryException extends RuntimeException {
-        protected InconsistentIntermediateQueryException(String message) {
+    public static class InconsistentIntermediateQueryException extends RuntimeException {
+        public InconsistentIntermediateQueryException(String message) {
             super(message);
         }
     }
@@ -65,14 +66,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     static {
         INTERNAL_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>of(
                 SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class,
-                InnerJoinOptimizationProposal.class, JoinBooleanExpressionExecutor.class);
+                InnerJoinOptimizationProposal.class, JoinBooleanExpressionExecutor.class,
+                ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class);
     }
 
 
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    protected IntermediateQueryImpl(QueryTreeComponent treeComponent) {
+    public IntermediateQueryImpl(QueryTreeComponent treeComponent) {
         this.treeComponent = treeComponent;
     }
 
@@ -95,7 +97,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+    public ImmutableList<QueryNode> getNodesInTopDownOrder() {
+        try {
+            return treeComponent.getNodesInTopDownOrder();
+        } catch (IllegalTreeException e) {
+            throw new InconsistentIntermediateQueryException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return treeComponent.getCurrentSubNodesOf(node);
     }
 
@@ -114,7 +125,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public ProposalResults applyProposal(QueryOptimizationProposal proposal)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         /**
          * It assumes that the concrete proposal classes DIRECTLY
@@ -182,7 +193,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public Optional<QueryNode> nextSibling(QueryNode node) {
+    public Optional<QueryNode> getNextSibling(QueryNode node) {
         try {
             return treeComponent.nextSibling(node);
         } catch (IllegalTreeException e) {
@@ -217,10 +228,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                             localDataNode.getAtom(), localVariables);
 
                 ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
-                treeComponent.replaceNode(localDataNode, subQueryRootNode);
+                ConstructionNode localSubTreeRootNode = subQueryRootNode.clone();
+                treeComponent.replaceNode(localDataNode, localSubTreeRootNode);
 
-                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode);
-            } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode, localSubTreeRootNode);
+            } catch (SubQueryUnificationTools.SubQueryUnificationException | IllegalTreeUpdateException e) {
                 throw new QueryMergingException(e.getMessage());
             }
         }

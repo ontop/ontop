@@ -9,5 +9,5 @@ public interface TableNode extends DataNode {
     TableNode clone();
 
     @Override
-    TableNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException;
+    TableNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 }

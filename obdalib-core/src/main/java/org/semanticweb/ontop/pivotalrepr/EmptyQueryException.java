@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.optimization;
+package org.semanticweb.ontop.pivotalrepr;
 
 /**
  * After optimization, the query becomes empty

@@ -3,7 +3,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
@@ -24,7 +23,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public LeftJoinNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public LeftJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

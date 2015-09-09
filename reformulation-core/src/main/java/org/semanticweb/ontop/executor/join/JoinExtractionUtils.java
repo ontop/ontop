@@ -75,7 +75,7 @@ public class JoinExtractionUtils {
             /**
              * Children: only considers the inner joins and the filter nodes.
              */
-            for (QueryNode child : query.getCurrentSubNodesOf(joinNode)) {
+            for (QueryNode child : query.getChildren(joinNode)) {
                 if ((child instanceof InnerJoinNode)
                         || (child instanceof FilterNode)) {
 
@@ -130,7 +130,7 @@ public class JoinExtractionUtils {
             /**
              * Children: only considers the inner joins and the filter nodes.
              */
-            for (QueryNode child : query.getCurrentSubNodesOf(joinNode)) {
+            for (QueryNode child : query.getChildren(joinNode)) {
                 if (child instanceof InnerJoinNode) {
                     // Continues exploring
                     joinNodesToExplore.add((InnerJoinNode)child);
@@ -165,7 +165,7 @@ public class JoinExtractionUtils {
              *  - Adds the others in the list
              *
              */
-            for (QueryNode child : query.getCurrentSubNodesOf(node)) {
+            for (QueryNode child : query.getChildren(node)) {
                 if ((child instanceof InnerJoinNode)
                         || (child instanceof FilterNode)) {
                     filterOrJoinNodesToExplore.add((JoinOrFilterNode)child);

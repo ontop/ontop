@@ -111,7 +111,7 @@ public class IntermediateQueryToDatalogTranslator {
 	
 		//Applying substitutions in the head.
 		ImmutableFunctionalTerm substitutedHead= root.getSubstitution().applyToFunctionalTerm(head);
-		List<QueryNode> listNodes=  te.getCurrentSubNodesOf(root);
+		List<QueryNode> listNodes=  te.getChildren(root);
 		
 		List<Function> atoms = new LinkedList<Function>();
 		
@@ -154,7 +154,7 @@ public class IntermediateQueryToDatalogTranslator {
 		} else if (node instanceof FilterNode) {
 			ImmutableBooleanExpression filter = ((FilterNode) node).getFilterCondition();
 			BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
-			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
+			List<QueryNode> listnode =  te.getChildren(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
 			body.add(mutFilter);
 			return body;
@@ -174,7 +174,7 @@ public class IntermediateQueryToDatalogTranslator {
 		} else  if (node instanceof InnerJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
-			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
+			List<QueryNode> listnode =  te.getChildren(node);
 			for (QueryNode childnode: listnode) {
 				List<Function> atomsList = getAtomFrom(te, childnode, rulesToDo);
 				atoms.addAll(atomsList);
@@ -193,7 +193,7 @@ public class IntermediateQueryToDatalogTranslator {
 			
 		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
-			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
+			List<QueryNode> listnode =  te.getChildren(node);
 		
 			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
 			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
@@ -213,7 +213,7 @@ public class IntermediateQueryToDatalogTranslator {
 
 		} else if (node instanceof UnionNode) {
 		
-			List<QueryNode> listnode =  te.getCurrentSubNodesOf(node);
+			List<QueryNode> listnode =  te.getChildren(node);
 			
 			for (QueryNode nod: listnode){
 				rulesToDo.add((ConstructionNode)nod);

@@ -11,6 +11,8 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter.InvalidDatalogProgramException;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
 import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
+import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -145,7 +147,7 @@ public class DatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = new JgraphtIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
 
         try {
             queryBuilder.init(rootNode);

@@ -56,6 +56,7 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatal
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
@@ -501,8 +502,8 @@ public class QuestStatement implements OBDAStatement {
 						unfolder.getExtensionalPredicates());
 				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
 
-				//BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
-				//intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+				BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
@@ -513,7 +514,7 @@ public class QuestStatement implements OBDAStatement {
 				
 				
 				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
-				
+
 				log.debug("New Datalog query: \n" + unfolding.toString());
 
 				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
@@ -522,6 +523,17 @@ public class QuestStatement implements OBDAStatement {
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
+			}
+			/**
+			 * No solution.
+			 */
+			catch (EmptyQueryException e) {
+
+				log.debug("Empty query --> no solution.");
+				/**
+				 * TODO: should we really return an empty datalog program?
+				 */
+				return ofac.getDatalogProgram();
 			}
 		}
 

@@ -1,15 +1,16 @@
-package org.semanticweb.ontop.pivotalrepr.impl;
+package org.semanticweb.ontop.pivotalrepr.impl.jgrapht;
 
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.JgraphtQueryTreeComponent.LabeledEdge;
+import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
+import org.semanticweb.ontop.pivotalrepr.impl.IntermediateQueryImpl;
 
 public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
-    private DirectedAcyclicGraph<QueryNode,LabeledEdge> queryDAG;
+    private DirectedAcyclicGraph<QueryNode,JgraphtQueryTreeComponent.LabeledEdge> queryDAG;
     private ConstructionNode rootConstructionNode;
     private boolean canEdit;
     private boolean hasBeenInitialized;
@@ -18,7 +19,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
      * TODO: construct with Guice?
      */
     public JgraphtIntermediateQueryBuilder() {
-        queryDAG = new DirectedAcyclicGraph<>(LabeledEdge.class);
+        queryDAG = new DirectedAcyclicGraph<>(JgraphtQueryTreeComponent.LabeledEdge.class);
         rootConstructionNode = null;
         canEdit = false;
         hasBeenInitialized = false;
@@ -66,7 +67,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
         }
         try {
             // child --> parent!!
-            LabeledEdge edge = new LabeledEdge(position);
+            JgraphtQueryTreeComponent.LabeledEdge edge = new JgraphtQueryTreeComponent.LabeledEdge(position);
             queryDAG.addDagEdge(childNode, parentNode, edge);
         } catch (DirectedAcyclicGraph.CycleFoundException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());

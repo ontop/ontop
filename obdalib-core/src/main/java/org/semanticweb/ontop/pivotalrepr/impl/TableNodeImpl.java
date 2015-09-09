@@ -1,10 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 public class TableNodeImpl extends DataNodeImpl implements TableNode {
     private static final String TABLE_NODE_STR = "TABLE";
@@ -24,7 +22,12 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     }
 
     @Override
-    public TableNode acceptNodeTransformer(QueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public TableNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return transformer.transform(this);
+    }
+
+    @Override
+    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 

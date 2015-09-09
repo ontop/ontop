@@ -9,10 +9,9 @@ import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
-import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
 
 import static org.semanticweb.ontop.executor.join.JoinExtractionUtils.*;
 
@@ -27,7 +26,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
     @Override
     public NodeCentricOptimizationResults apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
                                               QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         InnerJoinNode originalTopJoinNode = proposal.getTopJoinNode();
 
@@ -35,15 +34,25 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
          * Will remain the sames, whatever happens
          */
         Optional<QueryNode> optionalParent = query.getParent(originalTopJoinNode);
-        Optional<QueryNode> optionalNextSibling = query.nextSibling(originalTopJoinNode);
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(originalTopJoinNode);
 
+        /**
+         * Optimizes
+         */
         Optional<InnerJoinNode> optionalNewJoinNode = transformJoin(originalTopJoinNode, query, treeComponent);
 
         if (optionalNewJoinNode.isPresent()) {
             return new NodeCentricOptimizationResultsImpl(query, optionalNewJoinNode.get());
         }
         else {
-            return new NodeCentricOptimizationResultsImpl(query, optionalNextSibling, optionalParent);
+            ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
+                    optionalParent.get(), optionalNextSibling);
+
+            ReactToChildDeletionResults deletionResults = reactionProposal.castResults(query.applyProposal(reactionProposal));
+
+            return new NodeCentricOptimizationResultsImpl(deletionResults.getResultingQuery(),
+                    deletionResults.getOptionalNextSibling(),
+                    Optional.of(deletionResults.getClosestRemainingAncestor()));
         }
     }
 
@@ -71,15 +80,11 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
 
         InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
 
-        /**
-         * TODO: only if the filter condition are not violated!
-         */
         try {
             QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
             Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
-            treeComponent.addChild(parentNode, newJoinNode, optionalPosition);
+            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode, optionalPosition);
 
-            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode);
         } catch (IllegalTreeUpdateException | IllegalTreeException e) {
             throw new RuntimeException("Internal error: " + e.getMessage());
         }

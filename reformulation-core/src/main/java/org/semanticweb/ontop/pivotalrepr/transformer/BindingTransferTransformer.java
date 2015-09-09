@@ -7,10 +7,7 @@ import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.NonGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.FilterNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.GroupNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 
 /**
@@ -19,7 +16,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
  * TODO: propose an optimized version that "extracts" the relevant variables from the bindings.
  *
  */
-public class BindingTransferTransformer implements QueryNodeTransformer {
+public class BindingTransferTransformer extends HomogeneousQueryNodeTransformerImpl {
 
     private final ImmutableSubstitution<ImmutableTerm> transferredBindings;
 
@@ -65,7 +62,7 @@ public class BindingTransferTransformer implements QueryNodeTransformer {
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) throws QueryNodeTransformationException, NotNeededNodeException {
+    public GroupNode transform(GroupNode groupNode) throws NotNeededNodeException {
         ImmutableList.Builder<NonGroundTerm> groupingTermBuilder = ImmutableList.builder();
         for (NonGroundTerm groupingTerm : groupNode.getGroupingTerms()) {
             ImmutableTerm newTerm = transferredBindings.apply(groupingTerm);

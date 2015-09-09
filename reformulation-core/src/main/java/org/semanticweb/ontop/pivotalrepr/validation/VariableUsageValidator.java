@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.validation;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.QueryNodeVisitorImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 
 /**
@@ -16,7 +17,7 @@ public class VariableUsageValidator implements IntermediateQueryValidator {
         }
     }
 
-    protected static class VariableUsageVisitor implements QueryNodeVisitor {
+    protected static class VariableUsageVisitor extends QueryNodeVisitorImpl {
 
         private final IntermediateQuery query;
 

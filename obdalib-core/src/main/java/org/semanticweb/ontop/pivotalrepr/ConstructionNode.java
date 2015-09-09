@@ -30,7 +30,7 @@ public interface ConstructionNode extends QueryNode {
     ConstructionNode clone();
 
     @Override
-    ConstructionNode acceptNodeTransformer(QueryNodeTransformer transformer)
+    ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
 
     /**

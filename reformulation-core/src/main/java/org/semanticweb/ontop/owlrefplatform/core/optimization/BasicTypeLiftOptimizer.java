@@ -11,6 +11,7 @@ import org.semanticweb.ontop.model.VariableGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
@@ -41,12 +42,18 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * High-level method
      */
     @Override
-    public IntermediateQuery optimize(IntermediateQuery query) {
-        // TODO: see if we can prevent applying it twice.
-        return optimizeQuery(optimizeQuery(query));
+    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        /**
+         * TODO: determine and verify the conditions in which we can apply
+         * this optimization.
+         *
+         * Informally, this OK if all the tables (data?) nodes are "protected"
+         * by CONSTRUCTION nodes.
+         */
+        return optimizeQuery(query);
     }
 
-    private IntermediateQuery optimizeQuery(IntermediateQuery query) {
+    private IntermediateQuery optimizeQuery(IntermediateQuery query) throws EmptyQueryException {
         Tree<ConstructionNodeUpdate> initialConstructionTree = extractConstructionTree(query);
 
         VariableGenerator variableGenerator = new VariableGenerator(
@@ -323,7 +330,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      */
     private static IntermediateQuery applyProposal(IntermediateQuery query,
-                                                   Tree<ConstructionNodeUpdate> proposedConstructionTree) {
+                                                   Tree<ConstructionNodeUpdate> proposedConstructionTree) throws EmptyQueryException {
 
         ImmutableList<BindingTransfer> transfers = ImmutableList.copyOf(extractTransfers(proposedConstructionTree));
         ImmutableList<ConstructionNodeUpdate> nodeUpdates = ImmutableList.copyOf(proposedConstructionTree
