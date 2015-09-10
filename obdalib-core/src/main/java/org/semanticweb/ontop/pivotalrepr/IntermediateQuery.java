@@ -60,4 +60,10 @@ public interface IntermediateQuery {
      * TODO: find an exception to throw
      */
     void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
+
+    /**
+     *
+     * Returns itself if is a ConstructionNode or its first ancestor that is a construction node otherwise.
+     */
+    ConstructionNode getClosestConstructionNode(QueryNode node);
 }

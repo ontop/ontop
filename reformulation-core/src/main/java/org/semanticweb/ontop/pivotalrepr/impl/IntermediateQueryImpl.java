@@ -239,6 +239,21 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
     }
 
+    @Override
+    public ConstructionNode getClosestConstructionNode(QueryNode node) {
+        if (node instanceof ConstructionNode) {
+            return (ConstructionNode) node;
+        }
+
+        for (QueryNode ancestor : getAncestors(node)) {
+            if (ancestor instanceof ConstructionNode) {
+                return (ConstructionNode) ancestor;
+            }
+        }
+        throw new InconsistentIntermediateQueryException("The node " + node
+                + " has no ancestor that is a ConstructionNode");
+    }
+
     /**
      * Finds ordinary data nodes.
      *

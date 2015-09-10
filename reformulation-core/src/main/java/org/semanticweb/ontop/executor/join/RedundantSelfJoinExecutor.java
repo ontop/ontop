@@ -4,16 +4,20 @@ import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.model.DataAtom;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
+import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -21,9 +25,104 @@ import java.util.Set;
  *
  * Assumption: clean inner join structure (an inner join does not have another inner join or filter node as a child).
  *
+ * Naturally assumes that the data atoms are leafs.
+ *
  */
 public class RedundantSelfJoinExecutor implements InternalProposalExecutor<InnerJoinOptimizationProposal> {
 
+    protected static class PredicateLevelProposal {
+
+        private final ImmutableCollection<DataNode> keptDataNodes;
+        private final ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions;
+        private final ImmutableCollection<DataNode> removedDataNodes;
+
+        protected PredicateLevelProposal(ImmutableCollection<DataNode> keptDataNodes,
+                                         ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
+                                         ImmutableCollection<DataNode> removedDataNodes) {
+            this.keptDataNodes = keptDataNodes;
+            this.substitutions = substitutions;
+            this.removedDataNodes = removedDataNodes;
+        }
+
+        /**
+         * No redundancy
+         */
+        protected PredicateLevelProposal(ImmutableCollection<DataNode> initialDataNodes) {
+            this.keptDataNodes = initialDataNodes;
+            this.substitutions = ImmutableList.of();
+            this.removedDataNodes = ImmutableList.of();
+        }
+
+        /**
+         * Not unified
+         */
+        public ImmutableCollection<DataNode> getKeptDataNodes() {
+            return keptDataNodes;
+        }
+
+        public ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutions() {
+            return substitutions;
+        }
+
+        /**
+         * Not unified
+         */
+        public ImmutableCollection<DataNode> getRemovedDataNodes() {
+            return removedDataNodes;
+        }
+
+        public boolean shouldOptimize() {
+            return !removedDataNodes.isEmpty();
+        }
+    }
+
+    protected static class ConcreteProposal {
+
+        private final ImmutableCollection<DataNode> transformedDataNodes;
+        private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
+        private final ImmutableCollection<DataNode> removedDataNodes;
+
+        protected ConcreteProposal(ImmutableCollection<DataNode> transformedDataNodes,
+                                   Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
+                                   ImmutableCollection<DataNode> removedDataNodes) {
+            this.transformedDataNodes = transformedDataNodes;
+            this.optionalSubstitution = optionalSubstitution;
+            this.removedDataNodes = removedDataNodes;
+        }
+
+        public ImmutableCollection<DataNode> getTransformedDataNodes() {
+            return transformedDataNodes;
+        }
+
+        public ImmutableCollection<DataNode> getDataNodesToRemove() {
+            return removedDataNodes;
+        }
+
+        public Optional<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitution() {
+            return optionalSubstitution;
+        }
+
+        public boolean shouldOptimize() {
+            return !removedDataNodes.isEmpty();
+        }
+
+    }
+
+
+    /**
+     * TODO: thrown when the upper ConstructionNode would need to be updated.
+     * TODO: remove it
+     */
+    private final class UnsupportedUnificationException extends Exception {
+
+        private UnsupportedUnificationException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * TODO: explain
+     */
     private final class DataAtomClassification {
 
         private final ImmutableSet<DataNode> nodesToRemove;
@@ -54,98 +153,150 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
     }
 
     @Override
-    public NodeCentricOptimizationResults apply(final InnerJoinOptimizationProposal proposal,
+    public NodeCentricOptimizationResults apply(final InnerJoinOptimizationProposal highLevelProposal,
                                                 final IntermediateQuery query,
                                                 final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
 
-        ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(proposal.getTopJoinNode()));
+        InnerJoinNode topJoinNode = highLevelProposal.getTopJoinNode();
+
+        ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
+
+        // TODO: explain
+        ImmutableSet<VariableImpl> variablesToKeep = VariableCollector.collectVariables(
+                query.getClosestConstructionNode(topJoinNode));
 
         /**
          * Tries to optimize if there are data nodes
          */
         if (!initialMap.isEmpty()) {
 
-            ImmutableMultimap<AtomPredicate, DataNode> optimizedMap = optimize(initialMap);
+            ConcreteProposal concreteProposal = optimize(initialMap, variablesToKeep);
 
-            if (optimizedMap != initialMap) {
+            if (concreteProposal.shouldOptimize()) {
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                DataAtomClassification classification = classifyAtoms(initialMap, optimizedMap);
-                applyOptimization(treeComponent, proposal.getTopJoinNode(), classification);
+                applyOptimization(treeComponent, highLevelProposal.getTopJoinNode(), concreteProposal);
             }
         }
-        return new NodeCentricOptimizationResultsImpl(query, proposal.getTopJoinNode());
+        return new NodeCentricOptimizationResultsImpl(query, topJoinNode);
+    }
+
+    private ConcreteProposal optimize(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
+                                      ImmutableSet<VariableImpl> variablesToKeep) {
+
+        ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
+
+        for (AtomPredicate predicate : initialDataNodeMap.keySet()) {
+            ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
+            PredicateLevelProposal predicateProposal;
+            if (primaryKeys.containsKey(predicate)) {
+                predicateProposal = optimizePredicate(initialNodes, primaryKeys.get(predicate));
+            }
+            else {
+                predicateProposal = new PredicateLevelProposal(initialNodes);
+            }
+            proposalListBuilder.add(predicateProposal);
+        }
+
+        return createConcreteProposal(proposalListBuilder.build(), variablesToKeep);
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private PredicateLevelProposal optimizePredicate(ImmutableCollection<DataNode> dataNodes,
+                                                     ImmutableList<Integer> primaryKeyPositions) {
+        final ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap
+                = groupByPrimaryKeyArguments(dataNodes, primaryKeyPositions);
+
+        /**
+         * Not yet unified
+         */
+        ImmutableList.Builder<DataNode> keptDataNodeBuilder = ImmutableList.builder();
+        ImmutableList.Builder<DataNode> removedDataNodeBuilder = ImmutableList.builder();
+
+        /**
+         * TODO: explain
+         */
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionBuilder = ImmutableList.builder();
+
+        for (ImmutableList<VariableOrGroundTerm> argumentList : groupingMap.keySet()) {
+            ImmutableCollection<DataNode> redundantNodes = groupingMap.get(argumentList);
+            switch (redundantNodes.size()) {
+                case 0:
+                    // Should not happen
+                    break;
+                case 1:
+                    keptDataNodeBuilder.add(redundantNodes.iterator().next());
+                default:
+                    ImmutableSubstitution<VariableOrGroundTerm> unifier = unifyRedundantNodes(redundantNodes);
+                    if (!unifier.isEmpty()) {
+                        substitutionBuilder.add(unifier);
+                    }
+
+                    UnmodifiableIterator<DataNode> nodeIterator = redundantNodes.iterator();
+                    /**
+                     *Keeps only the first data node
+                     */
+                    keptDataNodeBuilder.add(nodeIterator.next());
+                    removedDataNodeBuilder.addAll(nodeIterator);
+            }
+        }
+        return new PredicateLevelProposal(keptDataNodeBuilder.build(), substitutionBuilder.build(),
+                removedDataNodeBuilder.build());
     }
 
     /**
      * TODO: explain
      */
-    private DataAtomClassification classifyAtoms(ImmutableMultimap<AtomPredicate, DataNode> initialMap,
-                                      ImmutableMultimap<AtomPredicate, DataNode> optimizedMap) {
-        Set<DataNode> nodesToRemove = new HashSet<>();
-        Set<DataNode> newNodes = new HashSet<>();
+    private static ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupByPrimaryKeyArguments(
+            ImmutableCollection<DataNode> dataNodes, ImmutableList<Integer> primaryKeyPositions) {
+        ImmutableMultimap.Builder<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMapBuilder = ImmutableMultimap.builder();
 
-        for (AtomPredicate predicate : initialMap.keySet()) {
-            ImmutableCollection<DataNode> initialAtoms = initialMap.get(predicate);
-            ImmutableCollection<DataNode> remainingAtoms = optimizedMap.get(predicate);
-
-            for (DataNode initialAtom : initialAtoms) {
-                if (!remainingAtoms.contains(initialAtom)) {
-                    nodesToRemove.add(initialAtom);
-                }
-            }
-            for (DataNode remainingAtom : remainingAtoms) {
-                if (!initialAtoms.contains(remainingAtom)) {
-                    newNodes.add(remainingAtom);
-                }
-            }
+        for (DataNode dataNode : dataNodes) {
+            groupingMapBuilder.put(extractPrimaryKeyArguments(dataNode.getAtom(), primaryKeyPositions), dataNode);
         }
-        return new DataAtomClassification(nodesToRemove, newNodes);
+        return groupingMapBuilder.build();
     }
 
-    private static void applyOptimization(QueryTreeComponent treeComponent, InnerJoinNode topJoinNode,
-                                          DataAtomClassification classification) {
-        for (DataNode nodeToRemove : classification.getNodesToRemove()) {
-            treeComponent.removeSubTree(nodeToRemove);
-        }
-        for (DataNode newNode : classification.getNewNodes()) {
-            try {
-                treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>absent(), false);
-            } catch (IllegalTreeUpdateException e) {
-                throw new RuntimeException("Unexpected: " + e.getMessage());
-            }
-        }
-    }
+    /**
+     * TODO: explain
+     */
+    private static ImmutableList<VariableOrGroundTerm> extractPrimaryKeyArguments(DataAtom atom,
+                                                                                  ImmutableList<Integer> primaryKeyPositions) {
+        ImmutableList.Builder<VariableOrGroundTerm> listBuilder = ImmutableList.builder();
+        int atomLength = atom.getImmutableTerms().size();
 
-
-    private ImmutableMultimap<AtomPredicate, DataNode> optimize(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap) {
-        ImmutableMultimap.Builder<AtomPredicate, DataNode> mapBuilder = ImmutableMultimap.builder();
-
-        boolean hasOptimize = false;
-
-        for (AtomPredicate predicate : initialDataNodeMap.keySet()) {
-            ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
-            ImmutableCollection<DataNode> newNodes;
-            if (primaryKeys.containsKey(predicate)) {
-                newNodes = optimizePredicate(predicate, initialNodes, primaryKeys.get(predicate));
-
-                if ((!hasOptimize) && (newNodes != initialNodes)) {
-                    hasOptimize = true;
-                }
+        for (Integer keyIndex : primaryKeyPositions) {
+            if (keyIndex > atomLength) {
+                // TODO: find another exception
+                throw new RuntimeException("The key index does not respect the arity of the atom " + atom);
             }
             else {
-                newNodes = initialNodes;
+                listBuilder.add(atom.getTerm(keyIndex - 1));
             }
-            mapBuilder.putAll(predicate, newNodes);
         }
-
-        return hasOptimize ? mapBuilder.build() : initialDataNodeMap;
+        return listBuilder.build();
     }
 
-    private static ImmutableCollection<DataNode> optimizePredicate(AtomPredicate predicate,
-                                                                   ImmutableCollection<DataNode> dataNodes,
-                                                                   ImmutableList<Integer> primaryKeyPositions) {
-        throw new RuntimeException("TODO: implement it");
+    private static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(ImmutableCollection<DataNode> redundantNodes) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    private ImmutableSubstitution<VariableOrGroundTerm> mergeSubstitutions(ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
+                                                                           ImmutableSet<VariableImpl> variablesToKeep)
+            throws UnsupportedUnificationException {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    private static ImmutableCollection<DataNode> renameDataAtoms(ImmutableList<DataNode> dataNodes,
+                                                                 ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    private ConcreteProposal createConcreteProposal(ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<VariableImpl> variablesToKeep) {
+        throw new RuntimeException("TODO: implement it");
     }
 
 
@@ -158,5 +309,23 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
             }
         }
         return mapBuilder.build();
+    }
+
+    /**
+     * Assumes that the data atoms are leafs
+     */
+    private static void applyOptimization(QueryTreeComponent treeComponent, InnerJoinNode topJoinNode,
+                                          ConcreteProposal proposal) {
+        for (DataNode nodeToRemove : proposal.getDataNodesToRemove()) {
+            treeComponent.removeSubTree(nodeToRemove);
+        }
+        throw new RuntimeException("TODO: continue");
+/*        for (DataNode newNode : proposal.getNewNodes()) {
+            try {
+                treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>absent(), false);
+            } catch (IllegalTreeUpdateException e) {
+                throw new RuntimeException("Unexpected: " + e.getMessage());
+            }
+        }*/
     }
 }
