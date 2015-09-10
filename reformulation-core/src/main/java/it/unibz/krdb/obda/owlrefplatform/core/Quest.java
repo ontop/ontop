@@ -20,7 +20,9 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+
 import com.google.common.collect.Lists;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -180,6 +182,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private boolean applyUserConstraints;
 
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	//private boolean applyExcludeFromTMappings;
+	
 	/***
 	 * General flags and fields
 	 */
@@ -205,6 +217,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean obtainFullMetadata = false;
 
     private boolean sqlGenerateReplace = true;
+
+	private boolean distinctResultSet = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -243,7 +257,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	// TODO Remove this
 	private static boolean timeoutSet = false;
-
 
     /***
 	 * Will prepare an instance of Quest in "classic ABox mode", that is, to
@@ -310,6 +323,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		loadOBDAModel(mappings);
 	}
 	
+	
+
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	public void setExcludeFromTMappings(TMappingExclusionConfig excludeFromTMappings){
+		assert(excludeFromTMappings != null);
+		this.excludeFromTMappings = excludeFromTMappings;
+	}
+
 	/**
 	 * Supply user constraints: that is primary and foreign keys not in the database
 	 * Can be useful for eliminating self-joins
@@ -452,7 +473,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
-
+		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
                 
 		if (!inmemory) {
@@ -752,11 +773,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					}
 				}		
 			}
-				
 
 
-			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, getUriMap());
 
+			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
 
 
@@ -778,7 +798,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				// Apply TMappings
-				unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				// Davide> Option to disable T-Mappings (TODO: Test)
+				//if( tMappings ){
+				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
+				//}
+
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());

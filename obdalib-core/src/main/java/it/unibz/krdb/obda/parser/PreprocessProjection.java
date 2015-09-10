@@ -99,21 +99,21 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             if (isSelectAll(expr)) {
 
 
-                    if(joinTable!=null){
-                        joinTable.accept(this);
+                if(joinTable!=null){
+                    joinTable.accept(this);
 
-                        columnNames.addAll(columns);
+                    columnNames.addAll(columns);
 
-                        columns.clear();
+                    columns.clear();
 
-                    }
+                }
 
-                    if(table!=null){
-                        table.accept(this);
+                if(table!=null){
+                    table.accept(this);
 
-                        columnNames.addAll(columns);
+                    columnNames.addAll(columns);
 
-                        columns.clear();
+                    columns.clear();
 
                 }
 
@@ -145,24 +145,35 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     if (aliasName != null) {
 
                         String aliasString = aliasName.getName();
+                        SelectExpressionItem columnAlias;
+                        if(ParsedSQLQuery.pQuotes.matcher(aliasString).matches()) {
+                            columnAlias = new SelectExpressionItem(new Column(tableName, aliasString));
+                        }
+                        else{
+                            columnAlias = new SelectExpressionItem(new Column(tableName, "\"" + aliasString + "\""));
+                        }
 
-                        SelectExpressionItem columnAlias = new SelectExpressionItem(new Column(tableName, aliasString));
                         //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase()))
                                 || variables.contains(fac.getVariable(columnAlias.toString())) || variables.contains(fac.getVariable(aliasString.toString().toLowerCase()))) {
 
-                                columnNames.add(columnAlias);
+                            columnNames.add(columnAlias);
 
                         }
 
                     } else { //when there are no alias add the columns that are used in the mappings
 
                         String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
-
-                            SelectExpressionItem column = new SelectExpressionItem(new Column(tableName, columnName));
+                        SelectExpressionItem column;
+                        if(ParsedSQLQuery.pQuotes.matcher(columnName).matches()) {
+                            column = new SelectExpressionItem(new Column(tableName, columnName));
+                        }
+                        else{
+                            column = new SelectExpressionItem(new Column(tableName, "\"" + columnName + "\""));
+                        }
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))
                                 || variables.contains(fac.getVariable(column.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
-                                columnNames.add(column);
+                            columnNames.add(column);
 
                         }
 
@@ -175,6 +186,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
 
         if(!subselect) {
+            if(!columnNames.isEmpty())
             plainSelect.setSelectItems(columnNames);
         }
         else{
@@ -185,7 +197,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
 
 
-}
+    }
 
     @Override
     public void visit(SetOperationList setOpList) {
@@ -277,30 +289,36 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
         DataDefinition tableDefinition = metadata.getDefinition(tableFullName);
 
-        if (tableDefinition == null) 
+        if (tableDefinition == null)
             throw new RuntimeException("Definition not found for table '" + table + "'.");
-   
+
         Table tableName;
         if (aliasSubselect != null) {
             tableName= new Table(aliasSubselect);
         }
         else if (table.getAlias() != null) { //use the alias if present
-        	tableName = new Table(table.getAlias().getName());
-        } 
+            tableName = new Table(table.getAlias().getName());
+        }
         else {
-        	tableName = table;
+            tableName = table;
         }
 
         for (Attribute att : tableDefinition.getAttributes()) {
             String columnFromMetadata = att.getName();
-            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
+            SelectExpressionItem columnName;
+            if(ParsedSQLQuery.pQuotes.matcher(columnFromMetadata).matches()){
+                columnName = new SelectExpressionItem(new Column(tableName,  columnFromMetadata ));
+            }
+            else {
+                columnName = new SelectExpressionItem(new Column(tableName, "\"" + columnFromMetadata + "\""));
+            }
             //construct a column as table.column
-            if (variables.contains(fac.getVariable(columnFromMetadata)) 
-            		|| variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
-                    || variables.contains(fac.getVariable(columnName.toString())) 
+            if (variables.contains(fac.getVariable(columnFromMetadata))
+                    || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
+                    || variables.contains(fac.getVariable(columnName.toString()))
                     || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
 
-                    columns.add(columnName);
+                columns.add(columnName);
 
             }
         }

@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
+
+import com.google.common.collect.Multimap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -11,6 +13,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -49,6 +52,16 @@ public class QuestUnfolder {
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private final TMappingExclusionConfig excludeFromTMappings;
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	//private boolean applyExcludeFromTMappings = false;
 
     private Set<Predicate> dataPropertiesAndClassesMapped = new HashSet<>();
     private Set<Predicate> objectPropertiesMapped = new HashSet<>();;
@@ -75,12 +88,44 @@ public class QuestUnfolder {
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
 		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 
+		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
+		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
+
+		this.excludeFromTMappings = TMappingExclusionConfig.empty();
+	}
+    
+	
+	/**
+	 * The extra parameter <b>excludeFromTMappings</b> defines a list
+	 * of predicates for which the T-Mappings procedure should be 
+	 * disabled.
+	 *  
+	 * @author Davide
+	 * @param mappings
+	 * @param metadata
+	 * @param analyzer
+	 * @param excludeFromTMappings
+	 */
+	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata, Connection localConnection, URI sourceId, TMappingExclusionConfig excludeFromTMappings)  throws Exception{
+		/** Substitute select * with column names **/
+		preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
+
+		/**
+		 * Split the mapping
+		 */
+		MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId);
+
+		/**
+		 * Expand the meta mapping
+		 */
+		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
+		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
-
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
-	}
 
+		this.excludeFromTMappings = excludeFromTMappings;
+	}
 
 
 	public int getRulesSize() {
@@ -106,7 +151,7 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 		
-		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
+		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
 //		for(CQIE rule : unfoldingProgram){
@@ -116,16 +161,25 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
 		// for eliminating redundancy from the unfolding program
-		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
+		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
+		// Davide> Here now I put another TMappingProcessor taking
+		//         also a list of Predicates as input, that represents
+		//         what needs to be excluded from the T-Mappings
+		//if( applyExcludeFromTMappings )
+			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full,  foreignKeyCQC, excludeFromTMappings);
+		//else
+		//	unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
-		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, foreignKeyCQC);
-
+		// Eliminating redundancy from the unfolding program
+		// TODO: move the foreign-key optimisation inside t-mapping generation 
+		//              -- at this point it has little effect
+		
 /*		
 		int s0 = unfoldingProgram.size();
 		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
@@ -274,7 +328,7 @@ public class QuestUnfolder {
 		
 
 	
-
+	
 	private static UriTemplateMatcher createURITemplateMatcher(List<CQIE> unfoldingProgram) {
 
 		HashSet<String> templateStrings = new HashSet<String>();
@@ -338,7 +392,7 @@ public class QuestUnfolder {
 
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
-		applyTMappings(reformulationReasoner, false, metadata);
+		applyTMappings(reformulationReasoner, false, metadata, TMappingExclusionConfig.empty());
 		
 		setupUnfolder(metadata);
 

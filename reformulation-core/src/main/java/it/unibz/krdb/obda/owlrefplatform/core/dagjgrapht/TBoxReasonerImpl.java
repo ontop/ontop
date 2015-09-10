@@ -395,10 +395,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 			if (namedRepresentative == null) {
 				DataRangeExpression first = equivalenceSet.iterator().next();
-				assert (first instanceof DataPropertyRangeExpression); 
+				assert (first instanceof DataPropertyRangeExpression);
 				DataPropertyRangeExpression firstp = (DataPropertyRangeExpression)first;
 				DataPropertyExpression prop = firstp.getProperty();
-				DataPropertyExpression propRep = dataPropertyDAG.getVertex(prop).getRepresentative();
+                Equivalences<DataPropertyExpression> vertex = dataPropertyDAG.getVertex(prop);
+                if (vertex == null){
+                    throw new IllegalStateException("Unknown data property: " + prop);
+                }
+                DataPropertyExpression propRep = vertex.getRepresentative();
 				representative = propRep.getRange();
 			}
 			else
