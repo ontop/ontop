@@ -233,4 +233,9 @@ public class Mapping2DatalogConverterTest extends TestCase {
                 ":S_{id} a :Student .");
     }
 
+	public void testAnalysis_25() throws Exception {
+		runAnalysis(
+				"select \"QINVESTIGACIONPUARTTMP0\".\"id\" \"t1_1\" from Student \"QINVESTIGACIONPUARTTMP0\"  where \"QINVESTIGACIONPUARTTMP0\".\"first_name\" IS NOT NULL ",
+				":S_{t1_1} a :Student .");
+	}
 }
