@@ -852,7 +852,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Escapes view names.
 	 */
 	private static String escapeName(String name) {
-		return name.replace('.', '_');
+		return name.replace('.', '_').replace(':', '_');
 	}
 
 	/***
