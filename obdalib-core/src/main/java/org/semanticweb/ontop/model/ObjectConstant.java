@@ -22,10 +22,4 @@ package org.semanticweb.ontop.model;
 
 public interface ObjectConstant extends Constant {
 	
-	/**
-	 * surrogate for getURI() for URIConstant and getName() for BNode
-	 * @return
-	 */
-	
-	public String getName();
 }

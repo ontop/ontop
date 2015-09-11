@@ -22,10 +22,7 @@ package org.semanticweb.ontop.protege4.gui.treemodels;
 
 import java.util.List;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.CQIEImpl;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
@@ -70,8 +67,8 @@ public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAx
 					return true;
 				}
 			}
-			if (term instanceof VariableImpl) {
-				VariableImpl variableTerm = (VariableImpl) term;
+			if (term instanceof Variable) {
+				Variable variableTerm = (Variable) term;
 				if (variableTerm.getName().indexOf(keyword) != -1) { // match found!
 					return true;
 				}

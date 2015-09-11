@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.validation;
 
 import com.google.common.collect.ImmutableSet;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryNodeVisitorImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
@@ -52,7 +52,7 @@ public class VariableUsageValidator implements IntermediateQueryValidator {
         @Override
         public void visit(ConstructionNode constructionNode) {
 
-            ImmutableSet<VariableImpl> variablesInSubTreeNodes = VariableCollector.collectVariables(
+            ImmutableSet<Variable> variablesInSubTreeNodes = VariableCollector.collectVariables(
                     query.getSubTreeNodesInTopDownOrder(constructionNode));
 
             // TODO: continue

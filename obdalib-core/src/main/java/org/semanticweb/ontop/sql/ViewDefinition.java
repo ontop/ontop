@@ -22,6 +22,9 @@ package org.semanticweb.ontop.sql;
 
 import org.semanticweb.ontop.sql.api.Attribute;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class ViewDefinition extends DataDefinition {
@@ -29,38 +32,16 @@ public class ViewDefinition extends DataDefinition {
 
 	private static final long serialVersionUID = 3312336193514797486L;
 
-	private String statement;
+	private final String statement;
 	
-	/*
-	 * TODO: Check if really needed
-	 */
-	public ViewDefinition() {
-		super();
-	}
-	
-	public ViewDefinition(String name) {
-		super(name);
+	public ViewDefinition(String name, String statement) {
+		this(name, statement, Collections.<Attribute>emptyList());
 	}
 
-    public ViewDefinition(String name, Map<Integer, Attribute> attributes, String statement) {
+    protected ViewDefinition(String name, String statement, List<Attribute> attributes) {
         super(name, attributes);
         this.statement = statement;
     }
-
-    @Override
-    public DataDefinition cloneDefinition() {
-        return new ViewDefinition(name, attributes, statement);
-    }
-
-
-    @Deprecated
-	public void copy(String statement) {
-		this.statement = statement;
-	}
-	
-	public void setSQL(String statement) {
-		this.statement = statement;
-	}
 
 	public String getStatement() {
 		return statement;
@@ -69,14 +50,14 @@ public class ViewDefinition extends DataDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(name);
+		bf.append(getName());
 		bf.append("[");
 		boolean comma = false;
-		for (Integer i : attributes.keySet()) {
-			if (comma) {
+		for (Attribute att : getAttributes()) {
+			if (comma) 
 				bf.append(",");
-			}
-			bf.append(attributes.get(i));
+			
+			bf.append(att);
 			comma = true;
 		}
 		bf.append("]");
@@ -84,4 +65,9 @@ public class ViewDefinition extends DataDefinition {
 		bf.append(String.format("   (%s)", statement));
 		return bf.toString();
 	}
+
+    @Override
+    public DataDefinition cloneDefinition() {
+        return new ViewDefinition(getName(), statement, getAttributes());
+    }
 }

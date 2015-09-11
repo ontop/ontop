@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
@@ -50,8 +49,8 @@ public class UnionLiftTest {
 
 
     public IntermediateQuery buildQuery1() throws Exception {
-		VariableImpl x = (VariableImpl) DATA_FACTORY.getVariable("x");
-		VariableImpl y = (VariableImpl) DATA_FACTORY.getVariable("y");
+		Variable x = (Variable) DATA_FACTORY.getVariable("x");
+		Variable y = (Variable) DATA_FACTORY.getVariable("y");
 
 
         /**
@@ -80,7 +79,7 @@ public class UnionLiftTest {
 		UnionNode unionAns2 = new UnionNodeImpl();
 		queryBuilder.addChild(topAns2Node, unionAns2);
 
-		VariableImpl a = (VariableImpl) DATA_FACTORY.getVariable("a");
+		Variable a = (Variable) DATA_FACTORY.getVariable("a");
 		ConstructionNode t1Ans2Node = new ConstructionNodeImpl(ans2Atom,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, a)),
 				NO_MODIFIER);
@@ -89,7 +88,7 @@ public class UnionLiftTest {
 		TableNode t1 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t1", 1), a));
 		queryBuilder.addChild(t1Ans2Node, t1);
 
-		VariableImpl b = (VariableImpl) DATA_FACTORY.getVariable("b");
+		Variable b = (Variable) DATA_FACTORY.getVariable("b");
 		ConstructionNode t2Ans2Node = new ConstructionNodeImpl(ans2Atom,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, b)),
 				NO_MODIFIER);
@@ -102,7 +101,7 @@ public class UnionLiftTest {
 		 * Ans 3
 		 */
 		DataAtom ans3Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans3", 1), x);
-		VariableImpl c = (VariableImpl) DATA_FACTORY.getVariable("c");
+		Variable c = (Variable) DATA_FACTORY.getVariable("c");
 		ConstructionNode ans3Node = new ConstructionNodeImpl(ans3Atom,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, c)), NO_MODIFIER);
 		queryBuilder.addChild(join1, ans3Node);
@@ -121,8 +120,8 @@ public class UnionLiftTest {
 		UnionNode unionAns4 = new UnionNodeImpl();
 		queryBuilder.addChild(topAns4Node, unionAns4);
 
-		VariableImpl d = (VariableImpl) DATA_FACTORY.getVariable("d");
-		VariableImpl e = (VariableImpl) DATA_FACTORY.getVariable("e");
+		Variable d = (Variable) DATA_FACTORY.getVariable("d");
+		Variable e = (Variable) DATA_FACTORY.getVariable("e");
 		ConstructionNode t4Ans4Node = new ConstructionNodeImpl(ans4Atom,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, d, y, e)),
 				NO_MODIFIER);
@@ -131,8 +130,8 @@ public class UnionLiftTest {
 		TableNode t4 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t4", 2), d, e));
 		queryBuilder.addChild(t4Ans4Node, t4);
 
-		VariableImpl f = (VariableImpl) DATA_FACTORY.getVariable("f");
-		VariableImpl g = (VariableImpl) DATA_FACTORY.getVariable("g");
+		Variable f = (Variable) DATA_FACTORY.getVariable("f");
+		Variable g = (Variable) DATA_FACTORY.getVariable("g");
 		ConstructionNode t5Ans4Node = new ConstructionNodeImpl(ans4Atom,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, f, y, g)),
 				NO_MODIFIER);

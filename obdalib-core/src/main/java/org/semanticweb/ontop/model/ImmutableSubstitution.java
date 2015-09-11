@@ -10,12 +10,12 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
  */
 public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyImmutableSubstitution {
 
-    ImmutableMap<VariableImpl, T> getImmutableMap();
+    ImmutableMap<Variable, T> getImmutableMap();
 
-    boolean isDefining(VariableImpl variable);
+    boolean isDefining(Variable variable);
 
     @Override
-    T get(VariableImpl variable);
+    T get(Variable variable);
 
    /**
     * Applies the substitution to an immutable term.
@@ -26,7 +26,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * This method can be applied to simple variables 
      * 
      */
-    ImmutableTerm applyToVariable(VariableImpl variable);
+    ImmutableTerm applyToVariable(Variable variable);
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 

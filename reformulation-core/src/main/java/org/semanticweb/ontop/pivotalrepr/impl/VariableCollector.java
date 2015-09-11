@@ -3,7 +3,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
@@ -14,17 +13,17 @@ import java.util.Set;
  */
 public class VariableCollector extends QueryNodeVisitorImpl {
 
-    private final ImmutableSet.Builder<VariableImpl> collectedVariableBuilder;
+    private final ImmutableSet.Builder<Variable> collectedVariableBuilder;
 
     private VariableCollector() {
         collectedVariableBuilder = ImmutableSet.builder();
     }
 
-    public static ImmutableSet<VariableImpl> collectVariables(IntermediateQuery query) {
+    public static ImmutableSet<Variable> collectVariables(IntermediateQuery query) {
         return collectVariables(query.getNodesInBottomUpOrder());
     }
 
-    public static ImmutableSet<VariableImpl> collectVariables(List<QueryNode> nodes) {
+    public static ImmutableSet<Variable> collectVariables(List<QueryNode> nodes) {
         VariableCollector collector = new VariableCollector();
 
         for (QueryNode node : nodes) {
@@ -33,7 +32,7 @@ public class VariableCollector extends QueryNodeVisitorImpl {
         return collector.collectedVariableBuilder.build();
     }
 
-    public static ImmutableSet<VariableImpl> collectVariables(QueryNode node) {
+    public static ImmutableSet<Variable> collectVariables(QueryNode node) {
         VariableCollector collector = new VariableCollector();
         node.acceptVisitor(collector);
         return collector.collectedVariableBuilder.build();
@@ -52,11 +51,11 @@ public class VariableCollector extends QueryNodeVisitorImpl {
     @Override
     public void visit(GroupNode groupNode) {
         for (NonGroundTerm term : groupNode.getGroupingTerms()) {
-            if (term instanceof VariableImpl) {
-                collectedVariableBuilder.add((VariableImpl)term);
+            if (term instanceof Variable) {
+                collectedVariableBuilder.add((Variable)term);
             }
             else {
-                collectedVariableBuilder.addAll((Set<VariableImpl>)(Set<?>)term.getReferencedVariables());
+                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm) term).getVariables());
             }
         }
     }
@@ -90,18 +89,22 @@ public class VariableCollector extends QueryNodeVisitorImpl {
 
     private void collectFromAtom(DataAtom atom) {
         for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
-            if (term instanceof VariableImpl)
-                collectedVariableBuilder.add((VariableImpl)term);
+            if (term instanceof Variable)
+                collectedVariableBuilder.add((Variable)term);
         }
     }
 
     private void collectFromSubstitution(ImmutableSubstitution<ImmutableTerm> substitution) {
-        ImmutableMap<VariableImpl, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
+        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
 
         collectedVariableBuilder.addAll(substitutionMap.keySet());
         for (ImmutableTerm term : substitutionMap.values()) {
-            // TODO: remove this cast!!!
-            collectedVariableBuilder.addAll((ImmutableSet<VariableImpl>)(ImmutableSet<?>)term.getReferencedVariables());
+            if (term instanceof Variable) {
+                collectedVariableBuilder.add((Variable)term);
+            }
+            else if (term instanceof ImmutableFunctionalTerm) {
+                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm)term).getVariables());
+            }
         }
     }
 }

@@ -28,7 +28,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -45,11 +44,8 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

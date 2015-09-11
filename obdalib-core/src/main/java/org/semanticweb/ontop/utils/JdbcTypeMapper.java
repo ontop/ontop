@@ -75,6 +75,8 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
 		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
+		datatypeMap.put(COL_TYPE.DATETIME_STAMP, Types.TIMESTAMP);
+        datatypeMap.put(COL_TYPE.DECIMAL, Types.DECIMAL);
 		// all other COL_TYPEs are mapped to Types.VARCHAR by default
 	}
 	

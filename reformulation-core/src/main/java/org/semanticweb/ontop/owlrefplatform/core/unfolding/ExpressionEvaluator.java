@@ -21,11 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -33,7 +29,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -119,19 +115,22 @@ public class ExpressionEvaluator {
 
 					if (leftOpIsNULL  && !rightOpIsNULL){
 
-						Set<Variable> varSet=  right.getReferencedVariables();
+						Set<Variable> varSet= new HashSet<>();
+                        TermUtils.addReferencedVariablesTo(varSet,right);
 
 						if (!varSet.isEmpty()){ 
-							VariableImpl var = (VariableImpl) varSet.iterator().next();
+							Variable var =  varSet.iterator().next();
 							Substitution mgu = new SubstitutionImpl(ImmutableMap.of(var, (Term) OBDAVocabulary.NULL));
 							SubstitutionUtilities.applySubstitution(q, mgu, false);
 						}
 					}else if (!leftOpIsNULL && rightOpIsNULL){
 
-						Set<Variable> varSet=  left.getReferencedVariables();
+						Set<Variable> varSet= new HashSet<>();
+                        TermUtils.addReferencedVariablesTo(varSet,left);
+
 
 						if (!varSet.isEmpty()){
-                            VariableImpl var = (VariableImpl) varSet.iterator().next();
+                            Variable var = varSet.iterator().next();
 							Substitution mgu = new SubstitutionImpl(ImmutableMap.of(var, (Term)OBDAVocabulary.NULL));
 							q.getBody().remove(atom);
 							q= SubstitutionUtilities.applySubstitution(q, mgu, false);
@@ -262,7 +261,7 @@ public class ExpressionEvaluator {
 			return evalNonBoolean(expr);
 		} else if (p instanceof NumericalOperationPredicate) {
 			return evalNumericalOperation(expr);
-		} else if (p instanceof DataTypePredicate) {
+		} else if (p instanceof DatatypePredicate) {
 			if (dtfac.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
@@ -418,8 +417,8 @@ public class ExpressionEvaluator {
 			}
 
 			return Optional.of(convertIntoImmutableBooleanExpression(
-					fac.getBooleanExpression((BooleanOperationPredicate) predicate,
-							evaluatedFunctionalTerm.getTerms())));
+                    fac.getBooleanExpression((BooleanOperationPredicate) predicate,
+                            evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm.equals(OBDAVocabulary.FALSE)) {
@@ -477,7 +476,7 @@ public class ExpressionEvaluator {
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
-			return fac.getBooleanConstant(predicate instanceof DataTypePredicate);
+			return fac.getBooleanConstant(predicate instanceof DatatypePredicate);
 		} 
 		else {
 			return term;
@@ -532,7 +531,7 @@ public class ExpressionEvaluator {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
-			if (predicate instanceof DataTypePredicate) {
+			if (predicate instanceof DatatypePredicate) {
 				if (dtfac.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return fac.getTypedTerm(
 							fac.getVariable(parameter.toString()), COL_TYPE.LITERAL);
@@ -544,7 +543,7 @@ public class ExpressionEvaluator {
 				else {
 					return fac.getTypedTerm(
 							fac.getFunctionCast(fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL).stringValue())), 
+									fac.getConstantLiteral(dtfac.getDatatypeURI(COL_TYPE.LITERAL).stringValue())),
 										COL_TYPE.LITERAL);
 				}
 			} 
@@ -573,7 +572,7 @@ public class ExpressionEvaluator {
 	
 	private Term getDatatype(Predicate predicate, Term lit)
 	{
-		if (predicate instanceof DataTypePredicate) {
+		if (predicate instanceof DatatypePredicate) {
 			return fac.getUriTemplateForDatatype(predicate.toString());
 		} 
 		else if (predicate instanceof BNodePredicate) {
@@ -583,12 +582,12 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (predicate instanceof AlgebraOperatorPredicate){
-			return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
 		else if (predicate instanceof OperationPredicate){
 			if (predicate instanceof BooleanOperationPredicate) {
 				//return boolean uri
-				return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+				return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 			}
 			else if (predicate instanceof NumericalOperationPredicate)
 			{
@@ -648,7 +647,7 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = dtfac.getDataType(constantValue);
+		Predicate.COL_TYPE type = dtfac.getDatatype(constantValue);
 		if (type != null) {
 			Predicate p = dtfac.getTypePredicate(type);
 			return isNumeric(p);
@@ -671,7 +670,7 @@ public class ExpressionEvaluator {
 		Function function = (Function) innerTerm;
 		Predicate predicate = function.getFunctionSymbol();
 
-		if (!(predicate instanceof DataTypePredicate)) {
+		if (!(predicate instanceof DatatypePredicate)) {
 			return null;
 		}
 
@@ -753,7 +752,6 @@ public class ExpressionEvaluator {
 			return term;
 		}
 	}
-
 
 	private Term evalRegex(Function term) {
 		Term innerTerm = term.getTerm(0);
@@ -859,7 +857,7 @@ public class ExpressionEvaluator {
 		if (term.getTerm(0) instanceof Function) {
 			Function t1 = (Function) term.getTerm(0);
 			Predicate p1 = t1.getFunctionSymbol();
-			if (!(p1 instanceof DataTypePredicate)) {
+			if (!(p1 instanceof DatatypePredicate)) {
 				teval1 = eval(term.getTerm(0));
 				if (teval1 == null) {
 					return OBDAVocabulary.FALSE;
@@ -878,7 +876,7 @@ public class ExpressionEvaluator {
 		if (term.getTerm(1) instanceof Function) {
 			Function t2 = (Function) term.getTerm(1);
 			Predicate p2 = t2.getFunctionSymbol();
-			if (!(p2 instanceof DataTypePredicate)) {
+			if (!(p2 instanceof DatatypePredicate)) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
 					return OBDAVocabulary.FALSE;
@@ -910,7 +908,7 @@ public class ExpressionEvaluator {
 			Function f1 = (Function) eval1;
 			Predicate pred1 = f1.getFunctionSymbol();
 			
-			if (pred1 instanceof DataTypePredicate) {
+			if (pred1 instanceof DatatypePredicate) {
 				if (pred1.getType(0) == COL_TYPE.UNSUPPORTED) {
 					throw new RuntimeException("Unsupported type: " + pred1);
 				}
@@ -1061,9 +1059,9 @@ public class ExpressionEvaluator {
 			} 
 			else {
 				Function result = null;
-				List<Function> temp = new ArrayList<Function>();
-				Set<VariableImpl> keys = theta.keySet();
-				for (VariableImpl var : keys) {
+				List<Function> temp = new ArrayList<>();
+				Set<Variable> keys = theta.getMap().keySet();
+				for (Variable var : keys) {
 					result = createEqNeqFilter(var, theta.get(var), isEqual);
 					temp.add(result);
 					if (temp.size() == 2) {

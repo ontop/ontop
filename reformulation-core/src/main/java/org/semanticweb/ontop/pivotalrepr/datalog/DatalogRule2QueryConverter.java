@@ -198,7 +198,7 @@ public class DatalogRule2QueryConverter {
             if (term instanceof NonGroundTerm) {
                 termBuilder.add((NonGroundTerm) term);
             }
-            else if (!term.getReferencedVariables().isEmpty()) {
+            else if ((term instanceof Function) && (!((Function)term).getVariables().isEmpty())) {
                 termBuilder.add(new NonGroundFunctionalTermImpl((Function)term));
             }
             else {

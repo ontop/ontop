@@ -16,7 +16,6 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Objec
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectPropertyAssertion;
 
 import java.io.File;
-import java.io.IOException;
 
 import junit.framework.TestCase;
 

@@ -59,10 +59,10 @@ public class TBoxTraversal {
 				}
 			}
 		}	
-		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRanges()) {
+		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
 			DataRangeExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRanges().getSub(nodes)) {
+			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRangeDAG().getSub(nodes)) {
 				DataRangeExpression descendant = descendants.getRepresentative();
 				listener.onInclusion(descendant, node);				
 			}

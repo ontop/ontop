@@ -1,10 +1,7 @@
 package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.GroundTerm;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 
 import java.util.List;
 
@@ -49,7 +46,7 @@ public class GroundTermTools {
             return true;
 
         if (term instanceof Function) {
-            return term.getReferencedVariables().isEmpty();
+            return ((Function)term).getVariables().isEmpty();
         }
 
         return false;

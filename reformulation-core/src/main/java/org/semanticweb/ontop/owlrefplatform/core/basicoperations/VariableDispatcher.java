@@ -3,7 +3,6 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.VariableGenerator;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +23,7 @@ public class VariableDispatcher {
     /**
      * Keeps track of allocated variables to not allocate them twice.
      */
-    private final Set<VariableImpl> allocatedVariables;
+    private final Set<Variable> allocatedVariables;
 
     /**
      * For a datalog rule
@@ -45,7 +44,7 @@ public class VariableDispatcher {
     /**
      * Always generates a different renaming for a given variable.
      */
-    public synchronized VariableImpl renameDataAtomVariable(VariableImpl previousVariable) {
+    public synchronized Variable renameDataAtomVariable(Variable previousVariable) {
         /**
          * Makes sure the variable is registered as "allocated". If was not contained, returns it.
          */
@@ -55,7 +54,7 @@ public class VariableDispatcher {
         /**
          * Otherwise, creates a new variable, registers and returns it.
          */
-        VariableImpl newVariable = variableGenerator.generateNewVariableFromVar(previousVariable);
+        Variable newVariable = variableGenerator.generateNewVariableFromVar(previousVariable);
         allocatedVariables.add(newVariable);
         return newVariable;
     }
@@ -63,10 +62,8 @@ public class VariableDispatcher {
     /**
      * Just a wrapper of VariableGenerator.generateNewVariable().
      */
-    public synchronized VariableImpl generateNewVariable() {
-        VariableImpl newVariable = variableGenerator.generateNewVariable();
-        allocatedVariables.add(newVariable);
-        return newVariable;
+    public synchronized Variable generateNewVariable() {
+        return variableGenerator.generateNewVariable();
     }
 
 }

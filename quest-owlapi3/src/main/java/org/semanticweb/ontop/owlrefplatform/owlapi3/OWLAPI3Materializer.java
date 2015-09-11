@@ -20,30 +20,46 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
+import java.util.Collection;
 import java.util.Iterator;
 
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
+import org.semanticweb.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 
-public class OWLAPI3Materializer {
+public class OWLAPI3Materializer implements AutoCloseable{
 
-	private final Iterator<Assertion> assertions;
-	private final QuestMaterializer materializer;
+	private Iterator<Assertion> assertions = null;
+	private QuestMaterializer materializer = null;
 	
-	public OWLAPI3Materializer(OBDAModel model) throws Exception {
-		 this(model, null);
+	public OWLAPI3Materializer(OBDAModel model, boolean doStreamResults) throws Exception {
+		 this(model, null, doStreamResults);
 	}
+
 	
-	public OWLAPI3Materializer(OBDAModel model, Ontology onto) throws Exception {
-		 materializer = new QuestMaterializer(model, onto);
+	public OWLAPI3Materializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+		 materializer = new QuestMaterializer(model, onto, doStreamResults);
 		 assertions = materializer.getAssertionIterator();
 	}
-	
-	public QuestOWLIndividualIterator getIterator() {
-		return new QuestOWLIndividualIterator(assertions);
+
+    /*
+     * only materialize the predicates in  `predicates`
+     */
+    public OWLAPI3Materializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
+        materializer = new QuestMaterializer(model, onto, predicates, doStreamResults);
+        assertions = materializer.getAssertionIterator();
+    }
+
+    public OWLAPI3Materializer(OBDAModel obdaModel, Ontology onto, Predicate predicate, boolean doStreamResults)  throws Exception{
+        this(obdaModel, onto, ImmutableSet.of(predicate), doStreamResults);
+    }
+
+    public QuestOWLIndividualAxiomIterator getIterator() {
+		return new QuestOWLIndividualAxiomIterator(assertions);
 	}
 	
 	public void disconnect() {
@@ -63,4 +79,9 @@ public class OWLAPI3Materializer {
 	public int getVocabularySize() {
 		return materializer.getVocabSize();
 	}
+
+    @Override
+    public void close() throws Exception {
+        disconnect();
+    }
 }

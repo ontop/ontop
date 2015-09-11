@@ -52,7 +52,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataPropertyDAG());
 		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClassDAG());
-		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRanges());
+		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRangeDAG());
 	}
 
 
@@ -89,7 +89,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	}
 	
 	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
 	}
 

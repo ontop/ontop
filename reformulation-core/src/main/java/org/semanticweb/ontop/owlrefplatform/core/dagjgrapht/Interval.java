@@ -24,16 +24,16 @@ package org.semanticweb.ontop.owlrefplatform.core.dagjgrapht;
 import java.io.Serializable;
 
 /**
- * Continues interval between 2 points
+ * Contiguous interval
  *
  * @author Sergejs Pugacs
  */
 public class Interval implements Comparable<Interval>, Serializable {
 
-
 	private static final long serialVersionUID = 3982860811012207357L;
-	final int start;
-	final int end;
+	
+	private final int start;
+	private final int end;
 
     public Interval(int start, int end) {
         this.start = start;
@@ -42,16 +42,11 @@ public class Interval implements Comparable<Interval>, Serializable {
 
     @Override
     public boolean equals(Object other) {
-
-        if (other == null)
-            return false;
-        if (other == this)
-            return true;
-        if (this.getClass() != other.getClass())
-            return false;
+        if (other instanceof Interval) {
         Interval otherInterval = (Interval) other;
-
-        return (this.start == otherInterval.start && this.end == otherInterval.end);
+        	return (this.start == otherInterval.start) && (this.end == otherInterval.end);
+        }
+        return false;
     }
 
     @Override
@@ -79,5 +74,4 @@ public class Interval implements Comparable<Interval>, Serializable {
     public int getEnd() {
         return end;
     }
-
 }

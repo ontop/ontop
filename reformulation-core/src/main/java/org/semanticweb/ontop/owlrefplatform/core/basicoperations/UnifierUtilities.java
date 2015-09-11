@@ -61,7 +61,10 @@ public class UnifierUtilities {
      */
     public static CQIE unify(CQIE q, int i, int j) {
 
-        Substitution mgu = getMGU(q.getBody().get(i), q.getBody().get(j));
+        Function atom1 = q.getBody().get(i);
+        Function atom2 = q.getBody().get(j);
+        
+        Substitution mgu = getMGU(atom1, atom2);
         if (mgu == null)
             return null;
 
@@ -69,19 +72,8 @@ public class UnifierUtilities {
         unifiedQ.getBody().remove(i);
         unifiedQ.getBody().remove(j - 1);
 
-        Function atom1 = q.getBody().get(i);
-        Function atom2 = q.getBody().get(j);
-        //Function newatom = unify((Function) atom1, (Function) atom2, mgu);
-
-        // take care of anonymous variables
         Function newatom = (Function) atom1.clone();
-        for (int ii = 0; ii < atom1.getTerms().size(); ii++) {
-            Term t1 = atom1.getTerms().get(ii);
-            if (t1 instanceof AnonymousVariable)
-                newatom.getTerms().set(ii, atom2.getTerms().get(ii));
-        }
         SubstitutionUtilities.applySubstitution(newatom, mgu);
-
         unifiedQ.getBody().add(i, newatom);
 
         return unifiedQ;

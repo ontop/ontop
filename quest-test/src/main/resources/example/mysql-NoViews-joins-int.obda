@@ -1,0 +1,60 @@
+[PrefixDeclaration]
+:		http://www.example.org/#
+
+[SourceDeclaration]
+sourceUri	viewTest
+connectionUrl	jdbc:mysql://vulcan/ontowis_100k
+username	test
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID2
+target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {Tab2.unique1Tab2}^^xsd:integer .
+source   Select Tab1.unique2Tab1, Tab2unique1Tab2 from Tab1  join Tab2  ON Tab1.unique2Tab1= Tab2.unique2Tab2
+
+mappingId	MAPPING-ID3
+target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/2Tab1>; <http://www.example.org/Tab3unique2Tab3> {Tab3.unique1Tab3}^^xsd:integer .
+source   Select Tab1.unique2Tab1, Tab3unique1Tab3 from Tab1, Tab2, Tab3  WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3
+
+mappingId	MAPPING-ID4
+target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/3Tab1>; <http://www.example.org/Tab4unique2Tab4> {Tab4.unique1Tab4}^^xsd:integer .
+source   Select Tab1.unique2Tab1, Tab4unique1Tab4 from Tab1, Tab2, Tab3, Tab4 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 AND Tab3.unique2Tab3= Tab4.unique2Tab4
+
+mappingId	MAPPING-ID5
+target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/Tab5unique2Tab5> {Tab5.unique1Tab5}^^xsd:integer .
+source   Select Tab1.unique2Tab1, Tab5unique1Tab5 from Tab1, Tab2, Tab3, Tab4, Tab5 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 AND Tab3.unique2Tab3= Tab4.unique2Tab4 AND Tab4.unique2Tab4= Tab5.unique2Tab5
+
+mappingId	MAPPING-ID6
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString2j> {Tab2.stringu1tab2}^^xsd:string .
+source   Select Tab1.unique2Tab1, Tab2.stringu1tab2 from Tab1, Tab2  WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 
+
+mappingId	MAPPING-ID7
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString22j> {Tab2.stringu2tab2}^^xsd:string .
+source    Select Tab1.unique2Tab1, Tab2.stringu2tab2 from Tab1, Tab2 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 
+
+mappingId	MAPPING-ID9
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString3j> {Tab3.stringu1tab3}^^xsd:string .
+source   Select Tab1.unique2Tab1, Tab3.stringu1tab3 from Tab1, Tab2, Tab3 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 
+
+mappingId	MAPPING-ID10
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString23j> {Tab3.stringu2tab3}^^xsd:string .
+source    Select Tab1.unique2Tab1, Tab3.stringu2tab3 from Tab1, Tab2, Tab3 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 
+
+mappingId	MAPPING-ID12
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString4j> {Tab4.stringu1tab4}^^xsd:string .
+source   Select Tab1.unique2Tab1, Tab4.stringu1tab4 from Tab1, Tab2, Tab3, Tab4 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 AND Tab3.unique2Tab3= Tab4.unique2Tab4 
+
+mappingId	MAPPING-ID13
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString24j> {Tab4.stringu2tab4}^^xsd:string .
+source    Select Tab1.unique2Tab1, Tab2.stringu2tab4 from Tab1, Tab2, Tab3, Tab4 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 AND Tab3.unique2Tab3= Tab4.unique2Tab4 
+
+mappingId	MAPPING-ID15
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString5j> {Tab5.stringu1tab5}^^xsd:string .
+source   Select Tab1.unique2Tab1, Tab5.stringu1tab5 from Tab1, Tab2, Tab3, Tab4, Tab5 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 AND Tab3.unique2Tab3= Tab4.unique2Tab4 AND Tab4.unique2Tab4= Tab5.unique2Tab5
+
+mappingId	MAPPING-ID16
+target     <http://www.example.org/{Tab1.unique2Tab1}>  <http://www.example.org/hasString25j> {Tab5.stringu2tab5}^^xsd:string .
+source    Select Tab1.unique2Tab1, Tab5.stringu2tab5 from Tab1, Tab2, Tab3, Tab4, Tab5 WHERE Tab1.unique2Tab1= Tab2.unique2Tab2 AND Tab2.unique2Tab2= Tab3.unique2Tab3 AND Tab3.unique2Tab3= Tab4.unique2Tab4 AND Tab4.unique2Tab4= Tab5.unique2Tab5
+
+]]

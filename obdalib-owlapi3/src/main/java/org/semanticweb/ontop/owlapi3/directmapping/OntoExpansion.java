@@ -21,7 +21,7 @@ package org.semanticweb.ontop.owlapi3.directmapping;
  */
 
 import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.DataDefinition;
+import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
@@ -39,11 +39,10 @@ public class OntoExpansion {
 
 	
 	public void enrichOntology(DBMetadata md, OWLOntology rootOntology) throws OWLOntologyStorageException{
-		for(int i=0;i<md.getTableList().size();i++){
-			OntoSchema os = new OntoSchema(md.getTableList().get(i));
+		for (TableDefinition td : md.getTables()) {
+			OntoSchema os = new OntoSchema(td);
 			os.setBaseURI(this.baseURI);
 			os.enrichOntology(rootOntology);
-			
 		}
 	}
 

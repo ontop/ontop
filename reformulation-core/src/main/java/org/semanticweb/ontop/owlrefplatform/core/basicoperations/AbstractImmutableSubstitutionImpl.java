@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 
@@ -30,8 +29,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         if (term instanceof Constant) {
             return term;
         }
-        else if (term instanceof VariableImpl) {
-            return applyToVariable((VariableImpl) term);
+        else if (term instanceof Variable) {
+            return applyToVariable((Variable) term);
         }
         else if (term instanceof ImmutableFunctionalTerm) {
             return applyToFunctionalTerm((ImmutableFunctionalTerm) term);
@@ -111,21 +110,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return (ImmutableSubstitution<ImmutableTerm>)this;
         }
 
-        Map<VariableImpl, ImmutableTerm> substitutionMap = new HashMap<>();
+        Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
 
         /**
          * For all variables in the domain of g
          */
 
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> gEntry :  g.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> gEntry :  g.getImmutableMap().entrySet()) {
             substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
         }
 
         /**
          * For the other variables (in the local domain but not in g)
          */
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
-            VariableImpl localVariable = localEntry.getKey();
+        for (Map.Entry<Variable, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
+            Variable localVariable = localEntry.getKey();
 
             if (substitutionMap.containsKey(localVariable))
                 continue;
@@ -142,12 +141,12 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
      *
      * TODO: explain
      */
-    protected Optional<ImmutableMap<VariableImpl, T>> computeUnionMap(ImmutableSubstitution<T> otherSubstitution) {
-        ImmutableMap.Builder<VariableImpl, T> mapBuilder = ImmutableMap.builder();
+    protected Optional<ImmutableMap<Variable, T>> computeUnionMap(ImmutableSubstitution<T> otherSubstitution) {
+        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
         mapBuilder.putAll(getImmutableMap());
 
-        ImmutableMap<VariableImpl, T> otherMap = otherSubstitution.getImmutableMap();
-        for(VariableImpl otherVariable : otherMap.keySet()) {
+        ImmutableMap<Variable, T> otherMap = otherSubstitution.getImmutableMap();
+        for(Variable otherVariable : otherMap.keySet()) {
 
             T otherTerm = otherMap.get(otherVariable);
 
@@ -171,7 +170,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         else if(isEmpty())
             return Optional.of(otherSubstitution);
 
-        Optional<ImmutableMap<VariableImpl, T>> optionalMap = computeUnionMap(otherSubstitution);
+        Optional<ImmutableMap<Variable, T>> optionalMap = computeUnionMap(otherSubstitution);
         if (optionalMap.isPresent()) {
             ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get());
             return Optional.of(unionSubstitution);
@@ -182,10 +181,10 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     @Override
     public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm>
                                                                           otherSubstitution) {
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> mapBuilder = ImmutableMap.builder();
 
-        ImmutableMap<VariableImpl, ? extends ImmutableTerm> otherSubstitutionMap = otherSubstitution.getImmutableMap();
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
+        ImmutableMap<Variable, ? extends ImmutableTerm> otherSubstitutionMap = otherSubstitution.getImmutableMap();
+        for (Map.Entry<Variable, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
             mapBuilder.put(otherEntry.getKey(), apply(otherEntry.getValue()));
         }
         return new ImmutableSubstitutionImpl<>(mapBuilder.build());

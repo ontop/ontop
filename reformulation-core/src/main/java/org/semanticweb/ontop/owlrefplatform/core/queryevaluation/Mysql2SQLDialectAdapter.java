@@ -23,6 +23,7 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
@@ -129,9 +130,12 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	 */
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+		if(quotes.matcher(pattern).matches() ) {
 		pattern = pattern.substring(1, pattern.length() - 1); // remove the
 		// enclosing
 		// quotes
+        }
 		String sql = columnname + " REGEXP ";
 		if (!caseinSensitive) 
 			sql += "BINARY ";
@@ -148,6 +152,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";
 	}
+
 	/***
 	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
 	 * The method will strip any fractional seconds found in the date time
@@ -156,9 +161,10 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 *
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');

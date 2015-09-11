@@ -1,15 +1,9 @@
+// $ANTLR 3.5.1 /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-06-11 17:24:01
 // $ANTLR 3.5.1 /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g 2014-11-19 19:58:47
 
 package org.semanticweb.ontop.parser;
 
-import java.util.List;
-import java.util.Vector;
-
-
 import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings("all")
 public class TurtleOBDALexer extends Lexer {
@@ -144,9 +138,9 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = T__77;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:44:7: ( 'a' )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:44:9: 'a'
-			{
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            {
 			match('a'); 
 			}
 
@@ -164,8 +158,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BASE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:612:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:612:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
 				input.consume();
@@ -215,9 +209,9 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:614:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:614:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
-			{
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            {
 			if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
 				input.consume();
 			}
@@ -282,9 +276,9 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = FALSE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:616:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:616:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
-			{
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:618:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            {
 			if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
 				input.consume();
 			}
@@ -2331,7 +2325,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:768:87: ECHAR
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:833:87: ECHAR
 					{
 					mECHAR(); 
 
@@ -3204,7 +3198,7 @@ public class TurtleOBDALexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "694:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? );";
+			return "786:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? );";
 		}
 	}
 

@@ -30,10 +30,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Interval;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -54,11 +51,10 @@ public class R_TBoxReasonerImpl extends TestCase {
 		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testIndexClasses));
-		Ontology onto = t.translate(owlonto);
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 /*		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getIntervals(ofac

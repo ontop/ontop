@@ -89,7 +89,6 @@ public class CQCUtilities {
 					if (query2 == query)
 						break;
 					if (containment.isContainedIn(query, query2)) {
-//						log.debug("REMOVE (SIGMA): " + result.get(i));
 						iterator.remove();
 						break;
 					}

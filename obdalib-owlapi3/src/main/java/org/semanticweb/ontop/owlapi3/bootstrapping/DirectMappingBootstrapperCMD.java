@@ -21,13 +21,16 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
  */
 
 import java.io.File;
-import java.net.URI;
 
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+/**
+ * @deprecated use {@code org.semanticweb.ontop.cli.Ontop}
+ */
+@Deprecated
 public class DirectMappingBootstrapperCMD {
 
 	/**

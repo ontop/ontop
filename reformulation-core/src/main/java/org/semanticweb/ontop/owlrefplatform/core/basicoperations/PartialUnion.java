@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.NonGroundFunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,8 +33,8 @@ public class PartialUnion<T extends ImmutableTerm> {
      *
      * MUST NOT BE SHARED to make this class immutable!
      */
-    private final Set<VariableImpl> conflictingVariables;
-    private final Map<VariableImpl, T> substitutionMap;
+    private final Set<Variable> conflictingVariables;
+    private final Map<Variable, T> substitutionMap;
     private final VariableGenerator variableGenerator;
 
     /**
@@ -50,7 +48,7 @@ public class PartialUnion<T extends ImmutableTerm> {
 
     private PartialUnion(ImmutableSubstitution<T> substitution1,
                         ImmutableSubstitution<T> substitution2,
-                        ImmutableSet<VariableImpl> alreadyConflictingVariables,
+                        ImmutableSet<Variable> alreadyConflictingVariables,
                         VariableGenerator variableGenerator) {
 
         substitutionMap = new HashMap<>();
@@ -66,10 +64,10 @@ public class PartialUnion<T extends ImmutableTerm> {
      *
      * Cannot be static because of the generics.
      */
-    private ImmutableMap<VariableImpl, T> replaceTargetVariables(ImmutableMap<VariableImpl, T> importedSubstitutionMap) {
-        ImmutableMap.Builder<VariableImpl, T> mapBuilder = ImmutableMap.builder();
+    private ImmutableMap<Variable, T> replaceTargetVariables(ImmutableMap<Variable, T> importedSubstitutionMap) {
+        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
 
-        for (Map.Entry<VariableImpl, T> entry : importedSubstitutionMap.entrySet()) {
+        for (Map.Entry<Variable, T> entry : importedSubstitutionMap.entrySet()) {
             mapBuilder.put(entry.getKey(), replaceVariablesInTerm(entry.getValue()));
         }
         return mapBuilder.build();
@@ -83,8 +81,8 @@ public class PartialUnion<T extends ImmutableTerm> {
      */
     private void loadOneSubstitutionEntries(ImmutableSubstitution<T> substitutionToLoad,
                                             ImmutableSubstitution<T> otherSubstitution, boolean replaceVariables) {
-        ImmutableMap<VariableImpl, T> substitutionMapToLoad = substitutionToLoad.getImmutableMap();
-        for(VariableImpl variable : substitutionMapToLoad.keySet()) {
+        ImmutableMap<Variable, T> substitutionMapToLoad = substitutionToLoad.getImmutableMap();
+        for(Variable variable : substitutionMapToLoad.keySet()) {
 
             if (conflictingVariables.contains(variable)) {
                 continue;
@@ -134,7 +132,7 @@ public class PartialUnion<T extends ImmutableTerm> {
         if (isGroundTerm(term)) {
             return term;
         }
-        else if (term instanceof VariableImpl) {
+        else if (term instanceof Variable) {
             return variableGenerator.generateNewVariable();
         }
         /**
@@ -165,7 +163,7 @@ public class PartialUnion<T extends ImmutableTerm> {
     }
 
 
-    public ImmutableSet<VariableImpl> getConflictingVariables() {
+    public ImmutableSet<Variable> getConflictingVariables() {
         return ImmutableSet.copyOf(conflictingVariables);
     }
 

@@ -2,6 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Substitution;
 
 public class CQContainmentCheckSyntactic implements CQContainmentCheck {
 
@@ -21,6 +22,12 @@ public class CQContainmentCheckSyntactic implements CQContainmentCheck {
 				return false;
 		
 		return true;
+	}
+
+	
+	@Override
+	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
+		throw new RuntimeException("Unimplemented method");
 	}
 
 }

@@ -107,7 +107,6 @@ public class UriTemplateMatcher {
 				 * we need to match x with the subjectURI
 				 */
 				functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
-
 			}
 			break;
 		}

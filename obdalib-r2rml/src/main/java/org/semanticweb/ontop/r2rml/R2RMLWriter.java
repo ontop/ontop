@@ -25,10 +25,12 @@ package org.semanticweb.ontop.r2rml;
  */
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
+import org.semanticweb.ontop.model.DatatypePredicate;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.r2rml.OBDAMappingTransformer;
+import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
@@ -41,7 +43,7 @@ import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
-import java.io.File;
+import java.io.*;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -142,26 +144,40 @@ public class R2RMLWriter {
 	 * from an rdf Model to a file
 	 * @param file the ttl file to write to
 	 */
-	public void write(File file)
-	{
+	public void write(File file) throws Exception {
 		try {
-			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
-			Collection<TriplesMap> coll = getTriplesMaps();
-			Model out = mm.exportMappings(coll, Model.class);			
-			FileOutputStream fos = new FileOutputStream(file);
-			Rio.write(out, fos, RDFFormat.TURTLE);
-			fos.close();
+            FileOutputStream fos = new FileOutputStream(file);
+			write(fos);
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
 	}
 	
 
+    /**
+     * the method to write the R2RML mappings
+     * from an rdf Model to a file
+     * @param os the output target
+     */
+    public void write(OutputStream os) throws Exception {
+        try {
+            R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+            Collection<TriplesMap> coll = getTriplesMaps();
+            Model out = mm.exportMappings(coll, Model.class);
+            Rio.write(out, os, RDFFormat.TURTLE);
+            os.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+			throw e;
+        }
+    }
 
 	
 	public static void main(String args[])
 	{
 		String file = "/Users/mindaugas/r2rml/test2.ttl";
+		try {
 		R2RMLReader reader = new R2RMLReader(file);
 		OWLOntology ontology = null;
 
@@ -171,7 +187,11 @@ public class R2RMLWriter {
 //		Iterator<Statement> st = g.iterator();
 //		while (st.hasNext())
 //			System.out.println(st.next());
-		writer.write(out);
-		
+
+			writer.write(out);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 }

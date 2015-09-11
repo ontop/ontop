@@ -25,7 +25,7 @@ import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
 
 import java.util.ArrayList;
@@ -114,7 +114,7 @@ public class AutomaticMGUTestDataGenerator {
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			SingletonSubstitution s = new SingletonSubstitution((VariableImpl)getTerm(elements[0]), getTerm(elements[1]));
+			SingletonSubstitution s = new SingletonSubstitution((Variable)getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;
@@ -171,8 +171,8 @@ public class AutomaticMGUTestDataGenerator {
 			return termFac.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
 			return termFac.getConstantURI(termstr.substring(1, termstr.length() - 1));
-		} else if (termstr.equals("#")) {
-			return termFac.getVariableNondistinguished();
+//		} else if (termstr.equals("#")) {
+//			return termFac.getVariableNondistinguished();
 		} else {
 			return termFac.getVariable(termstr);
 			/* variable */

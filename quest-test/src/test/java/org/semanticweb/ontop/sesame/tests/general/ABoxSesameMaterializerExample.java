@@ -44,6 +44,11 @@ public class ABoxSesameMaterializerExample {
 	final String inputFile = "src/main/resources/example/exampleBooks.obda";
 	final String outputFile = "src/main/resources/example/exampleBooks.n3";
 	
+	/**
+	 * TODO: try with result streaming
+	 */
+	private static boolean DO_STREAM_RESULTS = false;
+	
 	public void generateTriples() throws Exception {
 
 		/*
@@ -58,7 +63,7 @@ public class ABoxSesameMaterializerExample {
 		 * Start materializing data from database to triples.
 		 */
 
-		SesameMaterializer materializer = new SesameMaterializer(obdaModel);
+		SesameMaterializer materializer = new SesameMaterializer(obdaModel, DO_STREAM_RESULTS);
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);

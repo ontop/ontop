@@ -16,26 +16,26 @@ import java.util.Map;
 /**
  * Immutable { Variable --> Variable } substitution.
  */
-public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<VariableImpl> implements Var2VarSubstitution {
+public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<Variable> implements Var2VarSubstitution {
 
-    private final ImmutableMap<VariableImpl, VariableImpl> map;
+    private final ImmutableMap<Variable, Variable> map;
 
     /**
      * Regular constructor
      */
-    public Var2VarSubstitutionImpl(Map<VariableImpl, VariableImpl> substitutionMap) {
+    public Var2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
         this.map = ImmutableMap.copyOf(substitutionMap);
     }
 
     /**
      * Functional Java constructor
      */
-    public Var2VarSubstitutionImpl(TreeMap<VariableImpl, VariableImpl> substitutionMap) {
+    public Var2VarSubstitutionImpl(TreeMap<Variable, Variable> substitutionMap) {
         this.map = ImmutableMap.copyOf(substitutionMap.toMutableMap());
     }
 
     @Override
-    public VariableImpl applyToVariable(VariableImpl variable) {
+    public Variable applyToVariable(Variable variable) {
         if (map.containsKey(variable))
             return map.get(variable);
         return variable;
@@ -44,7 +44,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     public VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term) {
         if (term instanceof Variable) {
-            return applyToVariable((VariableImpl)term);
+            return applyToVariable((Variable)term);
         }
 
         return term;
@@ -52,8 +52,8 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
     @Override
     public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
-        if (term instanceof VariableImpl) {
-            return applyToVariable((VariableImpl) term);
+        if (term instanceof Variable) {
+            return applyToVariable((Variable) term);
         }
         /**
          * If not a variable, is a functional term.
@@ -67,20 +67,20 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         ImmutableList.Builder<OrderCondition> orderConditionBuilder = ImmutableList.builder();
 
         for (OrderCondition orderCondition : immutableQueryModifiers.getSortConditions()) {
-            VariableImpl newVariable = applyToVariable((VariableImpl) orderCondition.getVariable());
+            Variable newVariable = applyToVariable((Variable) orderCondition.getVariable());
             orderConditionBuilder.add(orderCondition.newVariable(newVariable));
         }
         return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());
     }
 
     @Override
-    public VariableImpl get(VariableImpl var) {
+    public Variable get(Variable var) {
         return map.get(var);
     }
 
     @Override
-    public ImmutableMap<VariableImpl, Term> getMap() {
-        return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>)map;
+    public ImmutableMap<Variable, Term> getMap() {
+        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>)map;
     }
 
     @Override
@@ -89,23 +89,17 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    @Deprecated
-    public ImmutableSet<VariableImpl> keySet() {
-        return map.keySet();
-    }
-
-    @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
 
     @Override
-    public ImmutableMap<VariableImpl, VariableImpl> getImmutableMap() {
+    public ImmutableMap<Variable, Variable> getImmutableMap() {
         return map;
     }
 
     @Override
-    public boolean isDefining(VariableImpl variable) {
+    public boolean isDefining(Variable variable) {
         return map.containsKey(variable);
     }
 

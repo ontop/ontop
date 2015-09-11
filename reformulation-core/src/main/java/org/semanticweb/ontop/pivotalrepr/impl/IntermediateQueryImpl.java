@@ -9,8 +9,7 @@ import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import org.semanticweb.ontop.executor.join.JoinBooleanExpressionExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.slf4j.Logger;
@@ -222,7 +221,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
         for (OrdinaryDataNode localDataNode : localDataNodes) {
             // TODO: make it be incremental
-            ImmutableSet<VariableImpl> localVariables = VariableCollector.collectVariables(this);
+            ImmutableSet<Variable> localVariables = VariableCollector.collectVariables(this);
 
             try {
                 IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,

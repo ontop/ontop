@@ -14,7 +14,4 @@ public interface ImmutableTerm extends Term {
      */
     @Override
     ImmutableTerm clone();
-
-    @Override
-    ImmutableSet<Variable> getReferencedVariables();
 }

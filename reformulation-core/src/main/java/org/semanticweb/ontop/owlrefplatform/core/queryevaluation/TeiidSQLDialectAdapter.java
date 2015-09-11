@@ -78,8 +78,9 @@ public class TeiidSQLDialectAdapter extends SQL99DialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
-		// TODO: check whether this inherided implementation is OK
+		// TODO: check whether this inherited implementation is OK
 		
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');

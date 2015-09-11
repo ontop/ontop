@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Scanner;
 
 import org.junit.After;
 import org.junit.Before;
@@ -75,6 +74,7 @@ public class H2ASKTest {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		sqlConnection.commit();

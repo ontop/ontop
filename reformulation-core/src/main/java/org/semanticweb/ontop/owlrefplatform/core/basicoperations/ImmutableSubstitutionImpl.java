@@ -5,34 +5,33 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Wrapper above a ImmutableMap<VariableImpl, ImmutableTerm> map.
+ * Wrapper above a ImmutableMap<Variable, ImmutableTerm> map.
  */
 public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends AbstractImmutableSubstitutionImpl<T> {
 
-    private final ImmutableMap<VariableImpl, T> map;
+    private final ImmutableMap<Variable, T> map;
 
-    public ImmutableSubstitutionImpl(ImmutableMap<VariableImpl, ? extends T> substitutionMap) {
-        this.map = (ImmutableMap<VariableImpl, T>) substitutionMap;
+    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap) {
+        this.map = (ImmutableMap<Variable, T>) substitutionMap;
     }
 
     @Override
-    public T get(VariableImpl var) {
+    public T get(Variable var) {
         return map.get(var);
     }
 
     @Override
-    public ImmutableMap<VariableImpl, T> getImmutableMap() {
+    public ImmutableMap<Variable, T> getImmutableMap() {
         return map;
     }
 
     @Override
-    public boolean isDefining(VariableImpl variable) {
+    public boolean isDefining(Variable variable) {
         return map.containsKey(variable);
     }
 
@@ -42,17 +41,12 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    public ImmutableSet<VariableImpl> keySet() {
-        return map.keySet();
+    public final ImmutableMap<Variable, Term> getMap() {
+        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) map;
     }
 
     @Override
-    public final ImmutableMap<VariableImpl, Term> getMap() {
-        return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>) map;
-    }
-
-    @Override
-    public ImmutableTerm applyToVariable(VariableImpl variable) {
+    public ImmutableTerm applyToVariable(Variable variable) {
         if (map.containsKey(variable))
             return map.get(variable);
         return variable;

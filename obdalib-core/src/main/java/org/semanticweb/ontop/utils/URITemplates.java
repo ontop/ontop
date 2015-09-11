@@ -27,8 +27,12 @@ import java.util.Iterator;
 import org.semanticweb.ontop.exception.InvalidPrefixWritingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.ValueConstant;
+import org.semanticweb.ontop.model.impl.TermUtils;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A utility class for URI templates
@@ -102,9 +106,11 @@ public class URITemplates {
 
 	
 	public static String getUriTemplateString(Function uriFunction) {
-		Term term = uriFunction.getTerm(0);
-		String template = term.toString();
-		Iterator<Variable> vars = uriFunction.getVariables().iterator();
+		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
+		String template = term.getValue();
+		List<Variable> varlist = new LinkedList<>();
+		TermUtils.addReferencedVariablesTo(varlist, uriFunction);
+		Iterator<Variable> vars = varlist.iterator();
 		String[] split = template.split("\\{\\}");
 		int i = 0;
 		template = "";
@@ -115,9 +121,9 @@ public class URITemplates {
 		//the number of place holdes should be equal to the number of variables.
 		if (split.length-i == 1){
 			template += split[i];
-			//we remove the quotes cos later the literal constructor adds them
-			template= template.substring(1, template.length()-1);
-		}else{
+		} else if(split.length == i){
+			// do nothing
+		} else{
 			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
 		}
 		

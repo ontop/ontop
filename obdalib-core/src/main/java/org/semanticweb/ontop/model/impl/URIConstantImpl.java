@@ -20,6 +20,10 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
+
+import java.util.Collections;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.URIConstant;
 import org.semanticweb.ontop.model.Variable;
@@ -70,16 +74,11 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public ImmutableSet<Variable> getReferencedVariables() {
-		return ImmutableSet.of();
-	}
-
-	@Override
 	public COL_TYPE getType() {
 		return COL_TYPE.OBJECT;
 	}
 
-	@Override
+
 	public String getName() {
 		return iristr;
 	}

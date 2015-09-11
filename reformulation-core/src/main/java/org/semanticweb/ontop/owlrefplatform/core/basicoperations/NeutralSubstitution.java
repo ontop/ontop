@@ -33,7 +33,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implements ImmutableSubstitution<ImmutableTerm> {
 
     @Override
-    public ImmutableTerm get(VariableImpl var) {
+    public ImmutableTerm get(Variable var) {
         return null;
     }
 
@@ -43,7 +43,7 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
-    public ImmutableTerm applyToVariable(VariableImpl variable) {
+    public ImmutableTerm applyToVariable(Variable variable) {
         return variable;
     }
 
@@ -74,34 +74,28 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
 
     @Override
     public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
-        ImmutableMap<VariableImpl, ImmutableTerm> map = ImmutableMap.copyOf(otherSubstitution.getImmutableMap());
+        ImmutableMap<Variable, ImmutableTerm> map = ImmutableMap.copyOf(otherSubstitution.getImmutableMap());
         return new ImmutableSubstitutionImpl<>(map);
     }
 
     @Override
-    public final ImmutableMap<VariableImpl, Term> getMap() {
-        return (ImmutableMap<VariableImpl, Term>)(ImmutableMap<VariableImpl, ?>) getImmutableMap();
+    public final ImmutableMap<Variable, Term> getMap() {
+        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) getImmutableMap();
     }
 
     @Override
-    public ImmutableMap<VariableImpl, ImmutableTerm> getImmutableMap() {
+    public ImmutableMap<Variable, ImmutableTerm> getImmutableMap() {
         return ImmutableMap.of();
     }
 
     @Override
-    public boolean isDefining(VariableImpl variable) {
+    public boolean isDefining(Variable variable) {
         return false;
     }
 
     @Override
     public boolean isEmpty() {
         return true;
-    }
-
-    @Override
-    @Deprecated
-    public ImmutableSet<VariableImpl> keySet() {
-        return ImmutableSet.of();
     }
 
     @Override
