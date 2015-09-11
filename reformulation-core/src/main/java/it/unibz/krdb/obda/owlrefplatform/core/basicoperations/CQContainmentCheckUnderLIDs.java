@@ -1,17 +1,26 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
@@ -163,42 +172,87 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return indexedQ1.computeHomomorphism(q2);
 	}	
 
-/*	
+	
 	public CQIE removeRedundantAtoms(CQIE query) {
-		List<Function> nonRedundantAtoms = new ArrayList<>(query.getBody().size());
+		List<Function> databaseAtoms = new ArrayList<>(query.getBody().size());
 		
-		Set<Variable> filterVariables = new HashSet<>();
+		Set<Term> groundTerms = new HashSet<>();
 		for (Function atom : query.getBody())
-			if (!atom.isDataFunction())
-				filterVariables.addAll(atom.getVariables());
-		
-		for (Function atom : query.getBody()) {
-			if (atom.isDataFunction()) {
-				boolean variableOccurrence = false;
-				for (Variable term : atom.getVariables()) 
-					if (filterVariables.contains(term)) {
-						variableOccurrence = true;
-						break;
-					}
-				if (variableOccurrence) {
-					nonRedundantAtoms.add(atom);
-					continue;
-				}
-					
-				CQIE clone = query.clone();
-				clone.getBody().remove(atom);
-				if (!isContainedIn(clone, query))
-					nonRedundantAtoms.add(atom);
-				else
-					System.err.println("CQC REMOVED ATOM: " + atom + " FROM " + query);
+			// non-database atom
+			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+				collectVariables(groundTerms, atom);
 			}
-			else
-				nonRedundantAtoms.add(atom);
-		}
+			else {
+				databaseAtoms.add(atom);
+			}
+				
+		if (databaseAtoms.size() != 2)
+			return query;
 		
-		return fac.getCQIE(query.getHead(), nonRedundantAtoms);
+		collectVariables(groundTerms, query.getHead());
+		
+		// ONE PARTICUALR CASE ONLY
+		CQIE db = fac.getCQIE(query.getHead(), databaseAtoms);
+		CQIE q0 = fac.getCQIE(query.getHead(), Collections.singletonList(databaseAtoms.get(0)));
+		CQIE q1 = fac.getCQIE(query.getHead(), Collections.singletonList(databaseAtoms.get(1)));
+		
+		if (!isContainedIn(q0, db)) {
+			// other atoms' variables
+			Set<Term> v1 = getVariables(databaseAtoms.get(1));
+			if (containsConstants(databaseAtoms.get(0))) {
+				//System.err.println("CONSTANTS: " + databaseAtoms.get(0) + " IN " + query);
+			}
+			else if (v1.containsAll(groundTerms)) {
+				//System.err.println("REDUNDANT: " + databaseAtoms.get(0) + " IN " + query);
+				query.getBody().remove(databaseAtoms.get(0));
+				return query;
+			}
+			//else
+			//	System.err.println("VARS PROB: " + databaseAtoms.get(0) + " IN " + query);
+		}
+		if (!isContainedIn(q1, db)) {
+			Set<Term> v1 = getVariables(databaseAtoms.get(0));
+			if (containsConstants(databaseAtoms.get(1))) {
+				//System.err.println("CONSTANTS: " + databaseAtoms.get(1) + " IN " + query);
+			}
+			else if (v1.containsAll(groundTerms)) {
+				//System.err.println("REDUNDANT: " + databaseAtoms.get(1) + " IN " + query);
+				query.getBody().remove(databaseAtoms.get(1));
+				return query;
+			}
+			//else
+			//	System.err.println("VARS PROB: " + databaseAtoms.get(1) + " IN " + query);
+		}
+		return query;
 	}
-*/
+
+	private static Set<Term> getVariables(Function atom) {
+		Set<Term> vars = new HashSet<>();
+		collectVariables(vars, atom);
+		return vars;
+	}
+
+	private static void collectVariables(Set<Term> vars, Function atom) {
+		Deque<Term> terms = new LinkedList<>(atom.getTerms());
+		while (!terms.isEmpty()) {
+			Term t = terms.pollFirst();
+			if (t instanceof Variable) 
+				vars.add(t);
+			else if (!(t instanceof Constant))
+				terms.addAll(((Function)t).getTerms());
+		}		
+	}
+	private static boolean containsConstants(Function atom) {
+		Deque<Term> terms = new LinkedList<>(atom.getTerms());
+		while (!terms.isEmpty()) {
+			Term t = terms.pollFirst();
+			if (t instanceof Constant)  
+				return true;
+			else if (!(t instanceof Variable))
+				terms.addAll(((Function)t).getTerms());
+		}		
+		return false;
+	}
 	
 	@Override
 	public String toString() {

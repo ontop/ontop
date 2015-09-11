@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:npd="http://sws.ifi.uio.no/data/npd-v2/"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:ptl="http://sws.ifi.uio.no/vocab/npd-v2-ptl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Equipment">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-facility</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Facility">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-facility</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FixedFacility">
+    <npdv:definition>A facility or installation permanently located on the field during the lifetime of the field. Production ships are covered by this definition if they are intended to be permanently placed on the field.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-facility</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Facility"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MoveableFacility">
+    <npdv:definition>A facility or installation not intended to be permanently located on the field during the lifetime of the field; for instance, a drilling platform or a well intervention device (see § 3 of the Directions for the Framework Provisions).  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/ </npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-facility</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Facility"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Pipeline">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Facility"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Rig">
+    <npdv:definition>A derrick, essential machinery and additional equipment used when drilling for oil or gas on land or from a drilling platform at sea.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-facility</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Equipment"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Riser">
+    <npdv:definition>A pipe that transports liquid up from the well to the production or drilling platform.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-facility</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Equipment"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TUFacility">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Facility"/>
+  </rdf:Description>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#definition"/>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFacility">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Facility"/>
+  </rdf:Description>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-facility">
+    <dc:source rdf:resource="http://www.npd.no/en/About-us/Information-services/Dictionary/"/>
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-db"/>
+  </owl:Ontology>
+</rdf:RDF>

@@ -706,8 +706,8 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			.put(OWL2Datatype.XSD_ANY_URI, 6) // 	xsd:anyURI
 			.put(OWL2Datatype.XSD_DATE_TIME, 7) // 	xsd:dateTime
 			.put(OWL2Datatype.XSD_DATE_TIME_STAMP, 7) // 	xsd:dateTimeStamp
-			.put(OWL2Datatype.XSD_INT, 8) // 	TEMPORARY FOR Q9 / FISHMARK
-			.put(OWL2Datatype.XSD_LONG, 9) // 	TEMPORARY FOR OntologyTypesTest
+			//.put(OWL2Datatype.XSD_INT, 8) // 	TEMPORARY FOR Q9 / FISHMARK
+			//.put(OWL2Datatype.XSD_LONG, 9) // 	TEMPORARY FOR OntologyTypesTest
 			.build();
 	
 	// these three maps order specify linear order in each of the groups
@@ -873,9 +873,9 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 				OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
 				
 				ClassExpression ce2 = getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
-				if ((ce2 instanceof DataSomeValuesFrom) && 
-						!((DataSomeValuesFrom)ce2).getDatatype().equals(DatatypeImpl.rdfsLiteral))
-					System.err.println("CI WITH QDD: " + ce1 + " <= " + ce2);
+				//if ((ce2 instanceof DataSomeValuesFrom) && 
+				//		!((DataSomeValuesFrom)ce2).getDatatype().equals(DatatypeImpl.rdfsLiteral))
+				//	System.err.println("CI WITH QDD: " + ce1 + " <= " + ce2);
 
 				dl_onto.addSubClassOfAxiom(ce1, ce2);
 			} 
@@ -933,6 +933,7 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 
 					existsSA = SA.getDomain();
 					entry.put(owlCE, existsSA);
+					//System.err.println("AUX:" + owlOPE + "." + owlCE);
 
 					if (owlCE instanceof OWLClass) {
 						ClassExpression A = getSubclassExpression(owlCE);
@@ -960,8 +961,8 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 		}
 		else {
 			Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
-			if (!datatype.equals(DatatypeImpl.rdfsLiteral))
-				System.err.println("QDD: " + owlDPE + "." + owlDR);
+			//if (!datatype.equals(DatatypeImpl.rdfsLiteral))
+			//	System.err.println("QDD: " + owlDPE + "." + owlDR);
 			
 			DataPropertyExpression dpe = helper.getPropertyExpression(owlDPE);			
 			return dpe.getDomainRestriction(datatype);

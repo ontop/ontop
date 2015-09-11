@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -73,8 +74,11 @@ public class OWLAPI3TranslatorUtility {
 		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(ontologies);
 		for (OWLOntology owl : ontologies) {
 			translator.setCurrentOWLOntology(owl);
-			for (OWLAxiom axiom : owl.getAxioms()) 
+			for (OWLAxiom axiom : owl.getAxioms())  {
+				//if (!(axiom.isAnnotationAxiom()) && !(axiom instanceof OWLDeclarationAxiom))
+				//	System.out.println(axiom);
 				axiom.accept(translator);
+			}
 		}
 		
 		log.debug("Ontology loaded: {}", translator.getOntology());

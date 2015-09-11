@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:npd="http://sws.ifi.uio.no/data/npd-v2/"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:ptl="http://sws.ifi.uio.no/vocab/npd-v2-ptl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#AreaFee">
+    <npdv:definition>An annual fee which the licensees on the Norwegian shelf pay the Government for each square kilometre of the acreage covered by a production licence. The fee is demanded pursuant to the provisions in §4-9, paragraph 2 of the Petroleum Act.   Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Award">
+    <npdv:definition>Companies that are approved as operators or licensees on the Norwegian shelf may apply to be awarded production licences. The awards take place through licensing rounds and annual allocations in predefined areas. The authorities decide which areas of the Norwegian shelf are to be opened for petroleum activity and which companies are to be awarded production licences.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BAA">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BAALicensee">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Licensee"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BAATransfer">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Company">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldLicensee">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Licensee"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldOperator">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Operator"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldOwner">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Owner"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Licensee">
+    <npdv:definition>A physical or legal person, or several such persons, who, under the terms of the Petroleum Act or earlier jurisdiction, has a licence to search for, recover, transport or utilise petroleum. If a licence is awarded to several such persons together the expression licensee can cover both the licensees combined and the individual participant.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Operator">
+    <npdv:definition>The agent who, on behalf of the licensee, is in charge of the day-to-day management of the petroleum activity.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Owner">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#PetroleumActivity">
+    <npdv:definition>All activity linked to subsea petroleum deposits, including investigation, exploratory drilling, recovery, transport, utilisation and termination, and also the planning of such activities, but not the transportation of petroleum in bulk by ship.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Plan">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#PlanForDevelopmentAndOperationOfPetroleumDeposits">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Plan"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#PlanForInstallationAndOperation">
+    <npdv:definition>PIO</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Plan"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicence">
+    <npdv:definition>This licence gives a monopoly to perform investigations, exploration drilling and recovery of petroleum deposits within the geographical area stated in the licence. The licensees become owners of the petroleum that is produced. A production licence may cover one or more blocks or parts of blocks and regulates the rights and obligations of the participant companies with respect to the Government. The document supplements the provisions of the Petroleum Act and states detailed terms for the individual licences. Exploration period: At the outset, the production licence is awarded for an initial period (exploration period) that may last up to 10 years. In this period, the licensees are obliged to carry out specific tasks, such as seismic surveying and/or exploration drilling. If these mandatory tasks are fulfilled within the exploration period, the licensees may, in principle, demand to retain up to half the area covered by the award for up to 30 years.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceLicensee">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Licensee"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceOperator">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Operator"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceStatus">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceTransfer">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceWorkObligation">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Royalty">
+    <npdv:definition>A fee payable to the Government, calculated on the basis of the volume and the value of produced petroleum, at the shipping point on the production site. The fee is demanded pursuant to § 4-9, paragraph 1 of the Petroleum Act.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TUFOperator">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Operator"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TUFOwner">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Owner"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TerminationPlan">
+    <npdv:definition>Plan to be presented to the authorities by the licensees before a production permit or a permit to install and operate installations for transport and utilisation of petroleum expires or is relinquished, or the use of an installation finally ceases. The plan must include proposals for continued production or shutdown of production and how installations are to be disposed of.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Plan"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Transfer">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#definition"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dependsOnTask"/>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#ProductionLicence">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#ProductionLicenceLicensee">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Licensee"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#ProductionLicenceNotification">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFLicensee">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Licensee"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFNotification">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-org</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-org">
+    <dc:source rdf:resource="http://www.npd.no/en/About-us/Information-services/Dictionary/"/>
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-db"/>
+  </owl:Ontology>
+</rdf:RDF>
