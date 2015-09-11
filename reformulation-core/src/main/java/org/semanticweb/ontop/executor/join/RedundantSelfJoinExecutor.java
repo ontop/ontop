@@ -3,14 +3,8 @@ package org.semanticweb.ontop.executor.join;
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
-import org.semanticweb.ontop.model.AtomPredicate;
-import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
-import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
@@ -163,7 +157,7 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
         // TODO: explain
-        ImmutableSet<VariableImpl> variablesToKeep = VariableCollector.collectVariables(
+        ImmutableSet<Variable> variablesToKeep = VariableCollector.collectVariables(
                 query.getClosestConstructionNode(topJoinNode));
 
         /**
@@ -182,7 +176,7 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
     }
 
     private ConcreteProposal optimize(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
-                                      ImmutableSet<VariableImpl> variablesToKeep) {
+                                      ImmutableSet<Variable> variablesToKeep) {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
@@ -285,7 +279,7 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
     }
 
     private ImmutableSubstitution<VariableOrGroundTerm> mergeSubstitutions(ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-                                                                           ImmutableSet<VariableImpl> variablesToKeep)
+                                                                           ImmutableSet<Variable> variablesToKeep)
             throws UnsupportedUnificationException {
         throw new RuntimeException("TODO: implement it");
     }
@@ -295,7 +289,7 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         throw new RuntimeException("TODO: implement it");
     }
 
-    private ConcreteProposal createConcreteProposal(ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<VariableImpl> variablesToKeep) {
+    private ConcreteProposal createConcreteProposal(ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<Variable> variablesToKeep) {
         throw new RuntimeException("TODO: implement it");
     }
 
