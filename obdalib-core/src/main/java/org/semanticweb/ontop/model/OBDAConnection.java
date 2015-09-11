@@ -20,7 +20,7 @@ package org.semanticweb.ontop.model;
  * #L%
  */
 
-public interface OBDAConnection {
+public interface OBDAConnection extends AutoCloseable {
 
 	public void close() throws OBDAException;
 

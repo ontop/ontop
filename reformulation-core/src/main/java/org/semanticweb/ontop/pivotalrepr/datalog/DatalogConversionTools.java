@@ -7,7 +7,6 @@ import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.DataNode;
@@ -49,7 +48,7 @@ public class DatalogConversionTools {
         AtomPredicate atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
 
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
 
         /**
          * Replaces all the terms by variables.
@@ -72,7 +71,7 @@ public class DatalogConversionTools {
              * (easier to merge than putting the ground term in the data atom).
              */
             else if (isGroundTerm(term)) {
-                VariableImpl newVariable = variableDispatcher.generateNewVariable();
+                Variable newVariable = variableDispatcher.generateNewVariable();
                 newArgument = newVariable;
                 allBindingBuilder.put(newVariable, castIntoGroundTerm(term));
             }
@@ -80,7 +79,7 @@ public class DatalogConversionTools {
              * Non-ground functional term
              */
             else {
-                VariableImpl newVariable = variableDispatcher.generateNewVariable();
+                Variable newVariable = variableDispatcher.generateNewVariable();
                 newArgument = newVariable;
                 allBindingBuilder.put(newVariable, convertIntoImmutableTerm(term));
             }

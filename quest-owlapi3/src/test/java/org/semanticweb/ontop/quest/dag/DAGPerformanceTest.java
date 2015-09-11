@@ -131,8 +131,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
-		Ontology o = t.translate(ont);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
@@ -222,8 +221,7 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
-		Ontology o = t.translate(ont);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
@@ -319,8 +317,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
-		Ontology o = t.translate(ont);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 

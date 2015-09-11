@@ -42,27 +42,27 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private DBMetadata md = new DBMetadata();
+	private DBMetadata md = new DBMetadata("dummy class");
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {
 		// Database schema
 		TableDefinition table1 = new TableDefinition("Student");
-		table1.setAttribute(1, new Attribute("id", Types.INTEGER, true, null));
-		table1.setAttribute(2, new Attribute("first_name", Types.VARCHAR, false, null));
-		table1.setAttribute(3, new Attribute("last_name", Types.VARCHAR, false, null));
-		table1.setAttribute(4, new Attribute("year", Types.INTEGER, false, null));
-		table1.setAttribute(5, new Attribute("nationality", Types.VARCHAR, false, null));
+		table1.addAttribute(new Attribute("id", Types.INTEGER, true, null));
+		table1.addAttribute(new Attribute("first_name", Types.VARCHAR, false, null));
+		table1.addAttribute(new Attribute("last_name", Types.VARCHAR, false, null));
+		table1.addAttribute(new Attribute("year", Types.INTEGER, false, null));
+		table1.addAttribute(new Attribute("nationality", Types.VARCHAR, false, null));
 		
 		TableDefinition table2 = new TableDefinition("Course");
-		table2.setAttribute(1, new Attribute("cid", Types.VARCHAR, true, null));
-		table2.setAttribute(2, new Attribute("title", Types.VARCHAR, false, null));
-		table2.setAttribute(3, new Attribute("credits", Types.INTEGER, false, null));
-		table2.setAttribute(4, new Attribute("description", Types.VARCHAR, false, null));
+		table2.addAttribute(new Attribute("cid", Types.VARCHAR, true, null));
+		table2.addAttribute(new Attribute("title", Types.VARCHAR, false, null));
+		table2.addAttribute(new Attribute("credits", Types.INTEGER, false, null));
+		table2.addAttribute(new Attribute("description", Types.VARCHAR, false, null));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.setAttribute(1, new Attribute("student_id", Types.INTEGER, true, null));
-		table3.setAttribute(2, new Attribute("course_id", Types.VARCHAR, true, null));
+		table3.addAttribute(new Attribute("student_id", Types.INTEGER, true, null));
+		table3.addAttribute(new Attribute("course_id", Types.VARCHAR, true, null));
 		
 		md.add(table1);
 		md.add(table2);
@@ -80,8 +80,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(md);
-		List<CQIE> dp = analyzer.constructDatalogProgram(mappingList);
+		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());
@@ -227,6 +226,12 @@ public class Mapping2DatalogConverterTest extends TestCase {
     public void testAnalysis_23() throws Exception{
         runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'",
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
+    public void testAnalysis_24() throws Exception {
+        runAnalysis(
+                "select id from (select id from Student) JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
+                ":S_{id} a :Student .");
     }
 
 }

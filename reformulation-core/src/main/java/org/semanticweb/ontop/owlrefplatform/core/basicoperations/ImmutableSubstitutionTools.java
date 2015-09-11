@@ -7,7 +7,6 @@ import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutabilityTools;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.Map;
 
@@ -31,12 +30,12 @@ public class ImmutableSubstitutionTools {
         if (substitution instanceof Var2VarSubstitution)
             return (Var2VarSubstitution) substitution;
 
-        ImmutableMap.Builder<VariableImpl, VariableImpl> substitutionMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, Variable> substitutionMapBuilder = ImmutableMap.builder();
 
-        for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
+        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
             Term target = entry.getValue();
-            if (target instanceof VariableImpl) {
-                substitutionMapBuilder.put(entry.getKey(), (VariableImpl) target);
+            if (target instanceof Variable) {
+                substitutionMapBuilder.put(entry.getKey(), (Variable) target);
             }
         }
         return new Var2VarSubstitutionImpl(substitutionMapBuilder.build());
@@ -50,10 +49,10 @@ public class ImmutableSubstitutionTools {
     public static P2<ImmutableSubstitution<NonFunctionalTerm>, ImmutableSubstitution<ImmutableFunctionalTerm>> splitFunctionFreeSubstitution(
             ImmutableSubstitution substitution) {
 
-        ImmutableMap.Builder<VariableImpl, NonFunctionalTerm> functionFreeMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<VariableImpl, ImmutableFunctionalTerm> otherMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, NonFunctionalTerm> functionFreeMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableFunctionalTerm> otherMapBuilder = ImmutableMap.builder();
 
-        for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
+        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
             Term target = entry.getValue();
             if (target instanceof NonFunctionalTerm) {
                 functionFreeMapBuilder.put(entry.getKey(), (NonFunctionalTerm) target);
@@ -79,8 +78,8 @@ public class ImmutableSubstitutionTools {
      * TODO: explain
      */
     public static ImmutableSubstitution<ImmutableTerm> convertSubstitution(Substitution substitution) {
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<VariableImpl, Term> entry : substitution.getMap().entrySet()) {
+        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
             ImmutableTerm immutableValue = ImmutabilityTools.convertIntoImmutableTerm(entry.getValue());
 
             substitutionMapBuilder.put(entry.getKey(), immutableValue);
@@ -104,11 +103,13 @@ public class ImmutableSubstitutionTools {
         /**
          * Variable
          */
-        if (sourceTerm instanceof VariableImpl) {
-            VariableImpl sourceVariable = (VariableImpl) sourceTerm;
+        if (sourceTerm instanceof Variable) {
+            Variable sourceVariable = (Variable) sourceTerm;
 
             // Constraint
-            if ((!sourceVariable.equals(targetTerm)) && targetTerm.getReferencedVariables().contains(sourceVariable)) {
+            if ((!sourceVariable.equals(targetTerm))
+                    && (targetTerm instanceof ImmutableFunctionalTerm)
+                    && ((ImmutableFunctionalTerm)targetTerm).getVariables().contains(sourceVariable)) {
                 return Optional.absent();
             }
 

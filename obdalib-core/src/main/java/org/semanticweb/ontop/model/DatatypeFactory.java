@@ -11,11 +11,11 @@ import java.util.List;
 public interface DatatypeFactory {
 
 	@Deprecated
-	public COL_TYPE getDataType(String uri);
+	public COL_TYPE getDatatype(String uri);
 	
-	public COL_TYPE getDataType(URI uri);
+	public COL_TYPE getDatatype(URI uri);
 	
-	public URI getDataTypeURI(COL_TYPE type);
+	public URI getDatatypeURI(COL_TYPE type);
 
 	
 	public Predicate getTypePredicate(COL_TYPE type);

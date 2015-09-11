@@ -43,7 +43,7 @@ import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 public class SesameBindingSet implements BindingSet {
 
 	private static final long serialVersionUID = -8455466574395305166L;
-	private QuestResultset set = null;
+	private TupleResultSet set = null;
 	private int count = 0;
 	private final Set<String> bindingnames;
 //	private List<String> signature;
@@ -53,7 +53,7 @@ public class SesameBindingSet implements BindingSet {
 	public SesameBindingSet(TupleResultSet set, Set<String> bindingnames) {
 		this.bindingnames = bindingnames;
 //		this.signature = signature;
-		this.set = (QuestResultset) set;
+		this.set = set;
 		this.count = bindingnames.size();
 		
 	}

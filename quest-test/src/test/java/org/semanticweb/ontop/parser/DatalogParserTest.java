@@ -9,9 +9,9 @@
 // * Licensed under the Apache License, Version 2.0 (the "License");
 // * you may not use this file except in compliance with the License.
 // * You may obtain a copy of the License at
-// * 
+// *
 // *      http://www.apache.org/licenses/LICENSE-2.0
-// * 
+// *
 // * Unless required by applicable law or agreed to in writing, software
 // * distributed under the License is distributed on an "AS IS" BASIS,
 // * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,20 +20,17 @@
 // * #L%
 // */
 //
+//
+//
 //import java.util.List;
 //
 //import junit.framework.TestCase;
 //
 //import org.antlr.runtime.RecognitionException;
-//import org.semanticweb.ontop.model.CQIE;
-//import org.semanticweb.ontop.model.DatalogProgram;
-//import org.semanticweb.ontop.model.Function;
-//import org.semanticweb.ontop.model.Term;
+//import org.semanticweb.ontop.model.*;
 //import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 //import org.semanticweb.ontop.model.impl.URIConstantImpl;
 //import org.semanticweb.ontop.model.impl.ValueConstantImpl;
-//import org.semanticweb.ontop.model.impl.VariableImpl;
-//import org.semanticweb.ontop.parser.DatalogProgramParser;
 //
 //public class DatalogParserTest extends TestCase {
 //
@@ -146,15 +143,15 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 2;
@@ -175,9 +172,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//---- Body atom #2
 //		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
@@ -191,9 +188,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //	}
 //
 //	/**
@@ -227,15 +224,15 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 2;
@@ -256,9 +253,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//---- Body atom #2
 //		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
@@ -272,9 +269,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //	}
 //
 //	/**
@@ -308,15 +305,15 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 2;
@@ -337,9 +334,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
@@ -371,9 +368,9 @@
 //
 //		Term objVarTerm = objVarTerms.get(0);
 //		assertTrue("Mismatch term type!",
-//				objVarTerm instanceof VariableImpl);
+//				objVarTerm instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)objVarTerm).getName(), "y");
+//				((Variable)objVarTerm).getName(), "y");
 //
 //		objVarTerm = objVarTerms.get(1);
 //		assertTrue("Mismatch term type!",
@@ -423,9 +420,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 1;
@@ -446,9 +443,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
@@ -474,9 +471,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 1;
@@ -497,9 +494,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
@@ -526,9 +523,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "z");
+//				((Variable)term).getName(), "z");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 1;
@@ -549,9 +546,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "z");
+//				((Variable)term).getName(), "z");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
@@ -610,9 +607,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 1;
@@ -633,9 +630,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
@@ -741,9 +738,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //	}
 //
 //	/**
@@ -777,9 +774,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 1;
@@ -819,15 +816,15 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 2;
@@ -848,9 +845,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//---- Body atom #2
 //		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
@@ -864,9 +861,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //	}
 //
 //	/**
@@ -900,15 +897,15 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 2;
@@ -929,9 +926,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//---- Body atom #2
 //		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
@@ -945,9 +942,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //	}
 //
 //	/**
@@ -998,9 +995,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//---- Body atom #2
 //		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
@@ -1014,9 +1011,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //	}
 //
 //	/**
@@ -1050,15 +1047,15 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		term = terms.get(1);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "y");
+//				((Variable)term).getName(), "y");
 //
 //		//-- The Body
 //		EXPECTED_BODY_SIZE = 2;
@@ -1079,9 +1076,9 @@
 //
 //		term = terms.get(0);
 //		assertTrue("Mismatch term type!",
-//				term instanceof VariableImpl);
+//				term instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)term).getName(), "x");
+//				((Variable)term).getName(), "x");
 //
 //		//---- Body atom #2
 //		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
@@ -1107,9 +1104,9 @@
 //
 //		Term objVarTerm = objVarTerms.get(0);
 //		assertTrue("Mismatch term type!",
-//				objVarTerm instanceof VariableImpl);
+//				objVarTerm instanceof Variable);
 //		assertEquals("Mismatch variable name!",
-//				((VariableImpl)objVarTerm).getName(), "y");
+//				((Variable)objVarTerm).getName(), "y");
 //
 //		objVarTerm = objVarTerms.get(1);
 //		assertTrue("Mismatch term type!",

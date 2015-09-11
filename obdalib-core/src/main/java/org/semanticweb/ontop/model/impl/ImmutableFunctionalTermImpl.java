@@ -84,11 +84,6 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
     }
 
     @Override
-    public ImmutableSet<Variable> getReferencedVariables() {
-        return ImmutableSet.copyOf(super.getReferencedVariables());
-    }
-
-    @Override
     public ImmutableFunctionalTerm clone() {
         return this;
     }

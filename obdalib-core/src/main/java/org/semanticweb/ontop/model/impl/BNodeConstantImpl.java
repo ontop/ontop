@@ -81,11 +81,6 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
-	public ImmutableSet<Variable> getReferencedVariables() {
-		return ImmutableSet.of();
-	}
-
-	@Override
 	public COL_TYPE getType() {
 		return COL_TYPE.BNODE;
 	}

@@ -23,35 +23,12 @@ package org.semanticweb.ontop.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.jsqlparser.expression.*;
 import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
 import org.semanticweb.ontop.sql.api.ProjectionJSQL;
 import org.semanticweb.ontop.sql.api.TableJSQL;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.JsonExpression;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.SignedExpression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
 import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
 import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
@@ -95,6 +72,9 @@ import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.WithItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
  * We remove the quotes for each column it they are present.
@@ -108,8 +88,8 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	ProjectionJSQL projection;
 	boolean bdistinctOn = false; // true when a SELECT distinct is present
 	boolean setProj = false; // true when we are using the method setProjection
-	boolean notSupported = false; 
-	boolean unquote=false; //remove quotes from columns 
+	boolean unsupported = false;
+
 	
 	
 	/**
@@ -119,10 +99,10 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * @throws JSQLParserException 
 	 */
 	
-	public ProjectionJSQL getProjection(Select select, boolean unquote) throws JSQLParserException {
+	public ProjectionJSQL getProjection(Select select, boolean deepParsing) throws JSQLParserException {
 		
 //		projections = new ArrayList<ProjectionJSQL>(); //used if we want to consider UNION
-		this.unquote=unquote;
+
 		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -131,7 +111,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		}
 		select.getSelectBody().accept(this);
 		
-		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
+		if(unsupported && deepParsing) // used to throw exception for the currently unsupported methods
 				throw new JSQLParserException("Query not yet supported");
 		
 		return projection;	
@@ -187,7 +167,13 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			
 			else{
 			plainSelect.getSelectItems().clear();
-			plainSelect.getSelectItems().addAll(projection.getColumnList());
+				List<SelectExpressionItem> columnList = projection.getColumnList();
+				if (!columnList.isEmpty()) {
+					plainSelect.getSelectItems().addAll(columnList);
+				}
+				else{
+					plainSelect.getSelectItems().add(new AllColumns());
+				}
 			}
 			
 			}
@@ -232,7 +218,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * it is not supported now */
 	@Override
 	public void visit(SetOperationList setOpList) { 
-		notSupported = true;
+		unsupported = true;
 		setOpList.getPlainSelects().get(0).accept(this);
 //		for (PlainSelect ps: setOpList.getPlainSelects())
 //		{
@@ -294,23 +280,42 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	/*
 	 * The system cannot support function currently (non-Javadoc)
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.Function)
+	 * @link ConferenceConcatMySQLTest
 	 */
 	@Override
 	public void visit(Function function) {
-		notSupported=true;
+		switch(function.getName().toLowerCase()){
+
+			case "regexp_like" :
+			case "regexp_replace" :
+			case "replace" :
+			case "concat" :
+
+				for(Expression ex :function.getParameters().getExpressions()) {
+					ex.accept(this);
+
+				}
+
+				break;
+
+			default:
+//				unsupported = true;
+
+				break;
+		}
 		
 	}
 
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
@@ -353,48 +358,48 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(StringValue stringValue) {
-		notSupported=true;
+
 		
 	}
 
 	@Override
 	public void visit(Addition addition) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(Division division) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(Multiplication multiplication) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(Subtraction subtraction) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(AndExpression andExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(OrExpression orExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
@@ -409,21 +414,21 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(GreaterThan greaterThan) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(GreaterThanEquals greaterThanEquals) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
@@ -451,35 +456,35 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(LikeExpression likeExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(MinorThan minorThan) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
@@ -491,11 +496,11 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Column tableColumn) {
 		String columnName= tableColumn.getColumnName();
-		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 				
 		Table table= tableColumn.getTable();
-		if(table.getName()!=null && unquote){
+		if(table.getName()!=null){
 			
 			TableJSQL fixTable = new TableJSQL(table); //create a tablejsql that recognized between quoted and unquoted tables
 			table.setAlias(fixTable.getAlias());
@@ -514,67 +519,66 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
-				notSupported = true;
+				unsupported = true;
 			} else {
 				subSelBody.accept(this);
 			}
 		} else
-			notSupported = true;
+			unsupported = true;
 
 	}
 
 	@Override
 	public void visit(CaseExpression caseExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(WhenClause whenClause) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(ExistsExpression existsExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(Concat concat) {
-		notSupported = true;
-		// TODO Auto-generated method stub
-		
+		visitBinaryExpression(concat);
+
 	}
 
 	@Override
 	public void visit(Matches matches) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
@@ -582,13 +586,13 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
 		// TODO Auto-generated method stub
-		notSupported = true;
+		unsupported = true;
 		
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
@@ -601,46 +605,46 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Modulo modulo) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(AnalyticExpression aexpr) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(ExtractExpression eexpr) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(IntervalExpression iexpr) {
-		notSupported = true;
+		unsupported = true;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
-		notSupported = true;
+		unsupported = true;
 		
 	}
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
-		notSupported = true;
+		unsupported = true;
 	}
 
 	@Override
 	public void visit(SignedExpression arg0) {
-		notSupported = true;
+		unsupported = true;
 		
 	}
 
@@ -656,6 +660,10 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		
 	}
 
+	public void visitBinaryExpression(BinaryExpression binaryExpression) {
+		binaryExpression.getLeftExpression().accept(this);
+		binaryExpression.getRightExpression().accept(this);
+	}
 	
 
 	

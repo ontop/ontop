@@ -41,7 +41,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	private Map<Predicate, List<CQIE>> predicateIndex = null;
 
-	protected OBDAQueryModifiers modifiers;
+	private OBDAQueryModifiers modifiers;
 
 	@Override
 	public DatalogProgram clone() {
@@ -152,11 +152,6 @@ public class DatalogProgramImpl implements DatalogProgram {
 		return modifiers;
 	}
 
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		this.modifiers = modifiers;
-	}
-	
 	@Override
 	public boolean hasModifiers() {
 		return modifiers.hasModifiers();

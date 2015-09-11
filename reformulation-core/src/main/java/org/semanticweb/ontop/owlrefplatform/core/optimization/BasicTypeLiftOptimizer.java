@@ -8,7 +8,6 @@ import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.VariableGenerator;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
@@ -391,9 +390,9 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     private static List<BindingTransfer> buildBindingTransfers(ConstructionNodeUpdate currentRoot,
                                                                Tree<ConstructionNodeUpdate> currentTree) {
         ImmutableList.Builder<BindingTransfer> transferBuilder = ImmutableList.builder();
-        ImmutableMap<VariableImpl, ImmutableTerm> newBindingMap = currentRoot.getNewBindings().getImmutableMap();
+        ImmutableMap<Variable, ImmutableTerm> newBindingMap = currentRoot.getNewBindings().getImmutableMap();
 
-        for (VariableImpl boundVariable : newBindingMap.keySet()) {
+        for (Variable boundVariable : newBindingMap.keySet()) {
             List<ConstructionNode> sources = findSources(boundVariable, currentTree);
 
             ImmutableSubstitution<ImmutableTerm> uniqueBinding = new ImmutableSubstitutionImpl<>(
@@ -409,7 +408,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     /**
      * TODO: explain
      */
-    private static List<ConstructionNode> findSources(final VariableImpl boundVariable,
+    private static List<ConstructionNode> findSources(final Variable boundVariable,
                                                       Tree<ConstructionNodeUpdate> currentTree) {
 
         ConstructionNode formerRootNode = currentTree.root().getFormerNode();

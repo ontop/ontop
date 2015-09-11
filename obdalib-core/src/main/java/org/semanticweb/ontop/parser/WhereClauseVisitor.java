@@ -103,7 +103,6 @@ public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, Fro
 	SelectionJSQL whereClause;
 	boolean unsupported =false;
 	boolean isSetting =false;
-	boolean unquote=false; //remove quotes if present from the columns
 	
 	/**
 	 * Give the WHERE clause of the select statement
@@ -111,11 +110,10 @@ public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, Fro
 	 * @return a SelectionJSQL
 	 * @throws JSQLParserException 
 	 */
-	public SelectionJSQL getWhereClause(Select select, boolean unquote) throws JSQLParserException
+	public SelectionJSQL getWhereClause(Select select, boolean deepParsing) throws JSQLParserException
 	{
 		
 //		selections= new ArrayList<SelectionJSQL>(); // use when we want to consider the UNION
-		this.unquote=unquote;
 		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -123,7 +121,7 @@ public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, Fro
 			}
 		}
 		select.getSelectBody().accept(this);
-		if(unsupported && unquote)
+		if(unsupported && deepParsing)
 				throw new JSQLParserException("Query not yet supported");
 		return whereClause;
 		
@@ -447,7 +445,7 @@ public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, Fro
 	@Override
 	public void visit(Column tableColumn) {
 		Table table= tableColumn.getTable();
-		if(table.getName()!=null && unquote ){
+		if(table.getName()!=null){
 			
 			TableJSQL fixTable = new TableJSQL(table);
 			table.setAlias(fixTable.getAlias());
@@ -456,7 +454,7 @@ public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, Fro
 		
 		}
 		String columnName= tableColumn.getColumnName();
-		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}

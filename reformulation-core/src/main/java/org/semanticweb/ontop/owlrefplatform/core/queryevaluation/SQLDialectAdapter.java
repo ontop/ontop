@@ -70,7 +70,6 @@ public interface SQLDialectAdapter {
 	 */
 	public String sqlCast(String value, int type);
 	
-
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
 	
 	public String getDummyTable();
@@ -81,18 +80,17 @@ public interface SQLDialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value);
 	
 	public String getSQLLexicalFormDatetime(String value);
-	
-	
 
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive);
+	public String getSQLLexicalFormDatetimeStamp(String v);
 
-	public String sqlGroupBy(List<Variable> groupby, String viewname);
 
 	/**
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
 	 */
 	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
 
+	public String sqlGroupBy(List<Variable> groupby, String viewname);
+    
 	/**
 	 * Returns an UNQUOTED view name.
 	 */

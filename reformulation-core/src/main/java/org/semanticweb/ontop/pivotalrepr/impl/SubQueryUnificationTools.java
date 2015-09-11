@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
@@ -52,16 +51,16 @@ public class SubQueryUnificationTools {
          * TODO: explain
          */
         protected AtomSubstitutionSplit(ImmutableSubstitution<VariableOrGroundTerm> atomSubstitution) {
-            ImmutableMap<VariableImpl, VariableOrGroundTerm> originalMap = atomSubstitution.getImmutableMap();
-            ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> constraintMapBuilder = ImmutableMap.builder();
-            Set<VariableImpl> originalVariablesToRename = new HashSet<>();
+            ImmutableMap<Variable, VariableOrGroundTerm> originalMap = atomSubstitution.getImmutableMap();
+            ImmutableMap.Builder<Variable, VariableOrGroundTerm> constraintMapBuilder = ImmutableMap.builder();
+            Set<Variable> originalVariablesToRename = new HashSet<>();
 
             /**
              * Extracts var-to-ground-term constraints and collects original variables that will be renamed
              */
-            for (Map.Entry<VariableImpl, VariableOrGroundTerm> entry : originalMap.entrySet()) {
+            for (Map.Entry<Variable, VariableOrGroundTerm> entry : originalMap.entrySet()) {
                 VariableOrGroundTerm targetTerm = entry.getValue();
-                VariableImpl originalVariable = entry.getKey();
+                Variable originalVariable = entry.getKey();
 
                 if (targetTerm instanceof GroundTerm) {
                     constraintMapBuilder.put(originalVariable, targetTerm);
@@ -74,7 +73,7 @@ public class SubQueryUnificationTools {
             /**
              * Extracts the injective renaming substitutions and some additional constraints.
              */
-            P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<VariableImpl, VariableOrGroundTerm>> extractedPair
+            P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<Variable, VariableOrGroundTerm>> extractedPair
                     = extractRenamingSubstitutions(originalMap, originalVariablesToRename);
             renamingSubstitutions = extractedPair._1();
             constraintMapBuilder.putAll(extractedPair._2());
@@ -122,7 +121,7 @@ public class SubQueryUnificationTools {
      */
     public static IntermediateQuery unifySubQuery(final IntermediateQuery originalSubQuery,
                                                   final DataAtom targetDataAtom,
-                                                  final ImmutableSet<VariableImpl> reservedVariables)
+                                                  final ImmutableSet<Variable> reservedVariables)
             throws SubQueryUnificationException {
 
         ConstructionNode originalRootNode = originalSubQuery.getRootConstructionNode();
@@ -243,23 +242,23 @@ public class SubQueryUnificationTools {
      *
      */
     private static InjectiveVar2VarSubstitution computeRenamingSubstitution(IntermediateQuery subQuery,
-                                                                            ImmutableSet<VariableImpl> reservedVariables) {
-        ImmutableSet<VariableImpl> subQueryVariables = VariableCollector.collectVariables(subQuery);
+                                                                            ImmutableSet<Variable> reservedVariables) {
+        ImmutableSet<Variable> subQueryVariables = VariableCollector.collectVariables(subQuery);
         ImmutableSet<Variable> allKnownVariables = ImmutableSet.<Variable>builder()
                 .addAll(reservedVariables)
                 .addAll(subQueryVariables)
                 .build();
         VariableGenerator variableGenerator = new VariableGenerator(allKnownVariables);
 
-        ImmutableMap.Builder<VariableImpl, VariableImpl> renamingBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, Variable> renamingBuilder = ImmutableMap.builder();
 
-        for (VariableImpl subQueryVariable : subQueryVariables) {
+        for (Variable subQueryVariable : subQueryVariables) {
             /**
              * If there is a conflict: creates a new variable and
              * adds an entry in the renaming substitution
              */
             if (reservedVariables.contains(subQueryVariable)) {
-                VariableImpl newVariable = variableGenerator.generateNewVariableFromVar(subQueryVariable);
+                Variable newVariable = variableGenerator.generateNewVariableFromVar(subQueryVariable);
                 renamingBuilder.put(subQueryVariable, newVariable);
             }
         }
@@ -321,14 +320,14 @@ public class SubQueryUnificationTools {
             ImmutableList<InjectiveVar2VarSubstitution> renamingSubstitutions,
             ImmutableSubstitution<ImmutableTerm> constraintUnifier,
             ImmutableSubstitution<ImmutableTerm> filteredConstraintSubstitution) {
-        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
 
         /**
          * Extracts renaming mappings that are not in the filtered constraint substitution
          */
         for(InjectiveVar2VarSubstitution renamingSubstitution : renamingSubstitutions) {
-            for (Map.Entry<VariableImpl, VariableImpl> entry : renamingSubstitution.getImmutableMap().entrySet()) {
-                VariableImpl varToRename = entry.getKey();
+            for (Map.Entry<Variable, Variable> entry : renamingSubstitution.getImmutableMap().entrySet()) {
+                Variable varToRename = entry.getKey();
 
                 if (!filteredConstraintSubstitution.isDefining(varToRename)) {
                     mapBuilder.put(varToRename, entry.getValue());
@@ -339,8 +338,8 @@ public class SubQueryUnificationTools {
         /**
          * Extracts the mappings of the unifier that are not in the filtered constraint substitution
          */
-        for (Map.Entry<VariableImpl, ImmutableTerm> entry : constraintUnifier.getImmutableMap().entrySet()) {
-            VariableImpl varToRename = entry.getKey();
+        for (Map.Entry<Variable, ImmutableTerm> entry : constraintUnifier.getImmutableMap().entrySet()) {
+            Variable varToRename = entry.getKey();
 
             if (!filteredConstraintSubstitution.isDefining(varToRename)) {
                 ImmutableTerm newTerm =  entry.getValue();
@@ -393,11 +392,11 @@ public class SubQueryUnificationTools {
         if (constraintsFromAtoms.isEmpty())
             return constraintUnifier;
 
-        ImmutableSet<VariableImpl> variablesToFilterOut = constraintsFromAtoms.getImmutableMap().keySet();
-        ImmutableMap<VariableImpl, ImmutableTerm> constraintMap = constraintUnifier.getImmutableMap();
+        ImmutableSet<Variable> variablesToFilterOut = constraintsFromAtoms.getImmutableMap().keySet();
+        ImmutableMap<Variable, ImmutableTerm> constraintMap = constraintUnifier.getImmutableMap();
 
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (VariableImpl variable : constraintMap.keySet()) {
+        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (Variable variable : constraintMap.keySet()) {
             if (!variablesToFilterOut.contains(variable)) {
                 substitutionMapBuilder.put(variable, constraintMap.get(variable));
             }
@@ -412,22 +411,22 @@ public class SubQueryUnificationTools {
      * TODO: Further explain
      *
      */
-    private static P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<VariableImpl, VariableOrGroundTerm>>
-                extractRenamingSubstitutions(ImmutableMap<VariableImpl, VariableOrGroundTerm> originalMap,
-                                             Set<VariableImpl> originalVariablesToRenameLater) {
+    private static P2<ImmutableList<InjectiveVar2VarSubstitution>, ImmutableMap<Variable, VariableOrGroundTerm>>
+                extractRenamingSubstitutions(ImmutableMap<Variable, VariableOrGroundTerm> originalMap,
+                                             Set<Variable> originalVariablesToRenameLater) {
 
-        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> additionalConstraintMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, VariableOrGroundTerm> additionalConstraintMapBuilder = ImmutableMap.builder();
 
         ImmutableList.Builder<InjectiveVar2VarSubstitution> renamingListBuilder = ImmutableList.builder();
 
         while (!originalVariablesToRenameLater.isEmpty()) {
-            Map<VariableImpl, VariableImpl> renamingMap = new HashMap<>();
+            Map<Variable, Variable> renamingMap = new HashMap<>();
 
-            Set<VariableImpl> originalVariablesToRenameNow = originalVariablesToRenameLater;
+            Set<Variable> originalVariablesToRenameNow = originalVariablesToRenameLater;
             originalVariablesToRenameLater = new HashSet<>();
 
-            for (VariableImpl originalVariable : originalVariablesToRenameNow) {
-                VariableImpl targetVariable = (VariableImpl) originalMap.get(originalVariable);
+            for (Variable originalVariable : originalVariablesToRenameNow) {
+                Variable targetVariable = (Variable) originalMap.get(originalVariable);
 
                 if (renamingMap.values().contains(targetVariable)) {
                     originalVariablesToRenameLater.add(originalVariable);
@@ -463,8 +462,8 @@ public class SubQueryUnificationTools {
                     + " have different predicates and/or arities");
         }
 
-        // ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
-        Map<VariableImpl, VariableOrGroundTerm> substitutionMap = new HashMap<>();
+        // ImmutableMap.Builder<Variable, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
+        Map<Variable, VariableOrGroundTerm> substitutionMap = new HashMap<>();
 
         ImmutableList<VariableOrGroundTerm> originalArgs = originalAtom.getVariablesOrGroundTerms();
         ImmutableList<VariableOrGroundTerm> newArgs = newAtom.getVariablesOrGroundTerms();
@@ -473,8 +472,8 @@ public class SubQueryUnificationTools {
             VariableOrGroundTerm originalArg = originalArgs.get(i);
             VariableOrGroundTerm newArg = newArgs.get(i);
 
-            if (originalArg instanceof VariableImpl) {
-                VariableImpl originalVar = (VariableImpl) originalArg;
+            if (originalArg instanceof Variable) {
+                Variable originalVar = (Variable) originalArg;
 
                 /**
                  * Normal case: new variable to variable-or-ground-term.
@@ -514,14 +513,14 @@ public class SubQueryUnificationTools {
 
     private static boolean haveDisjunctVariableSets(ConstructionNode constructionNode, DataAtom targetAtom) {
 
-        Set<VariableImpl> variableSet = new HashSet<>();
+        Set<Variable> variableSet = new HashSet<>();
 
         /**
          * First put the target variables
          */
         for (VariableOrGroundTerm term : targetAtom.getVariablesOrGroundTerms()) {
-            if (term instanceof VariableImpl)
-                variableSet.add((VariableImpl)term);
+            if (term instanceof Variable)
+                variableSet.add((Variable)term);
         }
 
 

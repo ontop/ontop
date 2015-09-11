@@ -17,6 +17,7 @@
 				<exclude>org.log4j*</exclude>
 				<exclude>org.slf4j*</exclude>
 				<exclude>ch.qos.logback*</exclude>
+                <exclude>*mysql*</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>

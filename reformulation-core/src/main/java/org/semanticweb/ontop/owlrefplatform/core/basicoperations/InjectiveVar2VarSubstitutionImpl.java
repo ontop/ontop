@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 
 import java.util.Map;
 
@@ -15,7 +15,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     /**
      * Regular constructor
      */
-    public InjectiveVar2VarSubstitutionImpl(Map<VariableImpl, VariableImpl> substitutionMap) {
+    public InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
         super(substitutionMap);
         isEmpty = substitutionMap.isEmpty();
 
@@ -23,7 +23,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
          * Injectivity constraint
          */
         if (!isEmpty) {
-            ImmutableSet<VariableImpl> valueSet = ImmutableSet.copyOf(substitutionMap.values());
+            ImmutableSet<Variable> valueSet = ImmutableSet.copyOf(substitutionMap.values());
             if (valueSet.size() < substitutionMap.keySet().size()) {
                 throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
             }
@@ -37,14 +37,14 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
             return (ImmutableSubstitution<ImmutableTerm>)substitutionToRename;
         }
 
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
 
         /**
          * Substitutes the keys and values of the substitution to rename.
          */
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
 
-            VariableImpl convertedVariable = applyToVariable(originalEntry.getKey());
+            Variable convertedVariable = applyToVariable(originalEntry.getKey());
             ImmutableTerm convertedTargetTerm = apply(originalEntry.getValue());
 
             // Safe because the local substitution is injective

@@ -42,6 +42,7 @@ import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -52,6 +53,12 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Properties;
+import java.util.Set;
 
 /***
  * A bean that holds all the data about a store, generates a store folder and
@@ -66,7 +73,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
+
+	private QuestConnection questConn;
+	private Quest questInstance;
+	
 	
 	private boolean isinitalized = false;
 
@@ -108,8 +118,13 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			modelIO.load(new File(obdaURI));
 		} else if (obdaURI.toString().endsWith(".ttl")) {
 			//read R2RML file
-			R2RMLReader reader = new R2RMLReader(new File(obdaURI));
-			obdaModel = reader.readModel(obdaURI);
+			R2RMLReader reader = null;
+			try {
+				reader = new R2RMLReader(new File(obdaURI));
+				obdaModel = reader.readModel(obdaURI);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return obdaModel;
 	}
@@ -240,7 +255,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
 		//compute closure first (owlontology might contain include other source declarations)
 		Set<OWLOntology> clousure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(clousure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(clousure);
 	}
 	
 	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
@@ -350,4 +365,15 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	public void close() {
 		questInstance.close();
 	}
+	
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+
+	@Override
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
+		return questInstance.getSemanticIndexRepository();
+	}
+	
 }

@@ -21,8 +21,7 @@ package org.semanticweb.ontop.owlapi3.directmapping;
  */
 
 
-import java.util.List;
-
+import java.util.Collection;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.owlapi.model.IRI;
@@ -40,7 +39,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 public class OntoSchema {
 	
 	private String tablename;
-	private List<Attribute> attrList;
+	private Collection<Attribute> attrList;
 	private String baseURI;
 	
 	//The template IRIs of class, datatype property and objecttype property
@@ -74,10 +73,8 @@ public class OntoSchema {
 	//Existing class/property (Class/Property sharing same name in database and ontology) won't be added
 	public void enrichOntology(OWLOntology rootOntology) throws OWLOntologyStorageException{
 		addClass(rootOntology);
-		for(int i=0;i<this.attrList.size();i++){
-			Attribute att = this.attrList.get(i);
+		for(Attribute att : attrList)
 			addProperty(rootOntology, att);
-		}
 	}
 	
 	

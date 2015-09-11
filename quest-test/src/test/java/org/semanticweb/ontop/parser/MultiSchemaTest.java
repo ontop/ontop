@@ -109,7 +109,6 @@ public class MultiSchemaTest extends TestCase {
 	
 	private void runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		StringBuilder bf = new StringBuilder(query);
 		try {
 			
 

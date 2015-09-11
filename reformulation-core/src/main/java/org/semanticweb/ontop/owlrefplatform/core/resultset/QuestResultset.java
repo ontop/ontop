@@ -33,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
@@ -46,7 +47,7 @@ import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 public class QuestResultset implements TupleResultSet {
 
-	private boolean isSemIndex = false;
+	//private boolean isSemIndex = false;
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
@@ -65,6 +66,7 @@ public class QuestResultset implements TupleResultSet {
 	private final String vendor;
 	private final boolean isOracle;
     private final boolean isMsSQL;
+	private final String version;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -81,11 +83,7 @@ public class QuestResultset implements TupleResultSet {
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
-		this.isSemIndex = st.getQuestInstance().isSemIdx();
-		if (isSemIndex) 
-			uriMap = st.getQuestInstance().getSemanticIndexRepository().getUriMap();
-		else
-			uriMap = null;
+		this.uriMap = st.questInstance.getUriMap();
 		this.signature = signature;
 		
 		columnMap = new HashMap<String, Integer>(signature.size() * 2);
@@ -99,9 +97,11 @@ public class QuestResultset implements TupleResultSet {
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
 
-			 vendor =  st.getQuestInstance().getMetaData().getDriverName();
-			 isOracle = vendor.contains("Oracle");
-             isMsSQL = vendor.contains("SQL Server");
+		DBMetadata metadata = st.questInstance.getMetaData();
+		vendor =  metadata.getDriverName();
+		isOracle = vendor.contains("Oracle");
+		version = metadata.getDriverVersion();
+		isMsSQL = vendor.contains("SQL Server");
 						
 
 
@@ -154,6 +154,20 @@ public class QuestResultset implements TupleResultSet {
 		}
 		return count;
 	}
+
+	public Object getRawObject(int column) throws OBDAException {
+
+		Object realValue;
+
+		try {
+			realValue = set.getObject(column);
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		}
+
+		return realValue;
+	}
+
 	/***
 	 * Returns the constant at column "column" recall that columns start at index 1.
 	 */
@@ -180,14 +194,14 @@ public class QuestResultset implements TupleResultSet {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
-					if (isSemIndex) {
+					if (uriMap != null) {
 						try {
 							Integer id = Integer.parseInt(realValue);
 							realValue = uriMap.getURI(id);
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
-							 * we leave realValue as is.
+							 * we leave realValue as it is.
 							 */
 						}
 					}
@@ -219,11 +233,7 @@ public class QuestResultset implements TupleResultSet {
 						}
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
-						if (value) {
-							result = fac.getConstantLiteral("true", COL_TYPE.BOOLEAN);
-						} else {
-							result = fac.getConstantLiteral("false", COL_TYPE.BOOLEAN);
-						}
+						result = fac.getBooleanConstant(value);
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation
@@ -243,7 +253,7 @@ public class QuestResultset implements TupleResultSet {
 
 
                         Timestamp value = set.getTimestamp(column);
-                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 
                     }
                     catch (Exception e){
@@ -251,12 +261,12 @@ public class QuestResultset implements TupleResultSet {
                         if (isMsSQL) {
                             String value = set.getString(column);
 
-                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+                            DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
                             java.util.Date date;
                             try {
                                 date = df.parse(value);
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
 
                             } catch (ParseException pe) {
 
@@ -266,10 +276,18 @@ public class QuestResultset implements TupleResultSet {
                             if (isOracle) {
 
                                 String value = set.getString(column);
-                                //TODO Oracle driver - this date format depends on the version of the driver
-                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
-//							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+                                //Oracle driver - this date format depends on the version of the driver
+								int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
+
+								DateFormat df;
+								if(versionInt >= 12) {
+									df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+								}
+								else {
+                                	df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+									}
                                 java.util.Date date;
+
                                 try {
                                     date = df.parse(value);
                                 } catch (ParseException pe) {
@@ -277,7 +295,7 @@ public class QuestResultset implements TupleResultSet {
                                 }
 
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
                             }
                             else{
                                 throw new RuntimeException(e);
@@ -287,7 +305,58 @@ public class QuestResultset implements TupleResultSet {
                         }
 
 
-                    } 
+                    }
+					 else if (type == COL_TYPE.DATETIME_STAMP) {
+
+						if (isOracle) {
+
+							/*
+							oracle has the type timestamptz. The format returned by getString is not a valid xml format
+							we need to transform it. We first take the information about the timezone value, that is lost
+							during the conversion in java.util.Date and then we proceed with the conversion.
+							*/
+
+							String value = set.getString(column);
+
+							int indexTimezone = value.lastIndexOf(" ");
+							String timezone = value.substring(indexTimezone+1);
+							String datetime = value.substring(0, indexTimezone);
+
+
+							//Oracle driver - this date format depends on the version of the driver
+							int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
+
+							DateFormat df;
+							if(versionInt >= 12) {
+								df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+							}
+							else {
+								df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+							}
+							java.util.Date date;
+							try {
+								date = df.parse(datetime);
+							} catch (ParseException pe) {
+								throw new RuntimeException(pe);
+							}
+
+							Timestamp ts = new Timestamp(date.getTime());
+
+							result = fac.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, type);
+
+
+						}
+
+						else {
+
+							String value = set.getString(column);
+
+
+
+							result = fac.getConstantLiteral(value.replaceFirst(" ", "T").replaceAll(" ", ""), type);
+						}
+
+					}
 					else if (type == COL_TYPE.DATE) {
 						if (!isOracle) {
 							Date value = set.getDate(column);
@@ -296,9 +365,8 @@ public class QuestResultset implements TupleResultSet {
 						else {
 							String value = set.getString(column);
 							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
-							java.util.Date date;
 							try {
-								date = df.parse(value);
+								java.util.Date date = df.parse(value);
 							} catch (ParseException e) {
 								throw new RuntimeException(e);
 							}

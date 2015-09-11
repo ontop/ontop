@@ -7,7 +7,6 @@ import org.semanticweb.ontop.executor.renaming.PredicateRenamingChecker;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -112,15 +111,15 @@ public class IntermediateQueryUtils {
      *
      */
     private static DataAtom createTopProjectionAtom(DataAtom firstRuleProjectionAtom) {
-        ImmutableList.Builder<VariableImpl> argBuilder = ImmutableList.builder();
+        ImmutableList.Builder<Variable> argBuilder = ImmutableList.builder();
 
         VariableDispatcher variableDispatcher = new VariableDispatcher();
         for (VariableOrGroundTerm argument : firstRuleProjectionAtom.getVariablesOrGroundTerms()) {
             /**
              * Variable: keeps it if not already used in the atom or rename it otherwise.
              */
-            if (argument instanceof VariableImpl) {
-                argBuilder.add(variableDispatcher.renameDataAtomVariable((VariableImpl) argument));
+            if (argument instanceof Variable) {
+                argBuilder.add(variableDispatcher.renameDataAtomVariable((Variable) argument));
             }
             /**
              * Ground term: create a new variable.

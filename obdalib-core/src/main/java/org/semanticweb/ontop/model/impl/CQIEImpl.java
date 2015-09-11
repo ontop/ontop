@@ -51,8 +51,6 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String COMMA = ",";
 	private static final String INV_IMPLIES = ":-";
 
-	private OBDAQueryModifiers modifiers = null;
-
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(Function head, List<Function> body) {		
 		// The syntax for CQ may contain no body, thus, this condition will
@@ -234,28 +232,20 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public OBDAQueryModifiers getQueryModifiers() {
-		return modifiers;
-	}
-
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		this.modifiers = modifiers;
-		listChanged();
+		return new MutableQueryModifiersImpl();
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Function atom : body)
-			for (Term t : atom.getTerms()) {
-				for (Variable v : t.getReferencedVariables())
-					vars.add(v);
+		for (Function atom : body) {
+			TermUtils.addReferencedVariablesTo(vars, atom);
 			}
 		return vars;
 	}
 
 	@Override
 	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
+		return false;
 	}
 }

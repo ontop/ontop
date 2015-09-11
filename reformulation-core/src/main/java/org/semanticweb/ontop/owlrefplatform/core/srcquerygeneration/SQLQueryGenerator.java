@@ -22,7 +22,6 @@ package org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
@@ -48,6 +47,7 @@ public interface SQLQueryGenerator extends Serializable {
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
 
+	public boolean hasDistinctResultSet() ;
 	
 
     public SQLQueryGenerator cloneGenerator();

@@ -10,6 +10,30 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 		return value ? 	"1" : "0";
 	}
 	
+	/**
+	 * same as PostgreSQL
+	 *
+	 */
+	@Override
+	public String sqlSlice(long limit, long offset) {
+		if (limit < 0 || limit == 0) {
+			if (offset < 0) {
+				// If both limit and offset is not specified.
+				return "LIMIT 0";
+			} else {
+				// if the limit is not specified
+				return String.format("LIMIT ALL\nOFFSET %d", offset);
+			}
+		} else {
+			if (offset < 0) {
+				// If the offset is not specified
+				return String.format("LIMIT %d\nOFFSET 0", limit);
+			} else {
+				return String.format("LIMIT %d\nOFFSET %d", limit, offset);
+			}
+		}
+	}
+	
 	/***
 	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
 	 * The method will strip any fractional seconds found in the date time
@@ -21,6 +45,7 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this inherited implementation is OK
 		
@@ -55,29 +80,5 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 		bf.append("'");		
 		return bf.toString();
 	}
-	
-    /**
-     * same as PostgreSQL
-     *
-     */
-    @Override
-    public String sqlSlice(long limit, long offset) {
-        if (limit < 0 || limit == 0) {
-            if (offset < 0) {
-                // If both limit and offset is not specified.
-                return "LIMIT 0";
-            } else {
-                // if the limit is not specified
-                return String.format("LIMIT ALL\nOFFSET %d", offset);
-            }
-        } else {
-            if (offset < 0) {
-                // If the offset is not specified
-                return String.format("LIMIT %d\nOFFSET 0", limit);
-            } else {
-                return String.format("LIMIT %d\nOFFSET %d", limit, offset);
-            }
-        }
-    }
 
 }

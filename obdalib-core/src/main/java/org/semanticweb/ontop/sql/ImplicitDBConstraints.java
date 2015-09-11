@@ -8,15 +8,10 @@ import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
 import org.semanticweb.ontop.sql.api.TableJSQL;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import net.sf.jsqlparser.schema.Table;
@@ -27,8 +22,13 @@ import org.slf4j.LoggerFactory;
 /**
  *
  *
- * Used for reading user-provided information about keys in views and materialized views. 
- * Necessary for better performance in cases where materialized views do a lot of work
+ * Used for reading user-provided information about keys in views and
+ * materialized views. Necessary for better performance in cases where
+ * materialized views do a lot of work
+ * 
+ * 
+ * Associated JUnit Tests @TestImplicitDBConstraints, @TestQuestImplicitDBConstraints
+ * 
  * 
  *  @author Dag Hovland
  *
@@ -40,7 +40,7 @@ public class ImplicitDBConstraints {
 	
 	
 	// The key is a table name, each element in the array list is a primary key, which is a list of the keys making up the key
-	HashMap<String, ArrayList<ArrayList<String>>> pKeys;
+	HashMap<String, ArrayList<ArrayList<String>>> uniqueFD;
 	// The key is a table name, and the values are all the foreign keys. The keys in the inner hash map are column names, while Reference object refers to a tabel
 	HashMap<String, ArrayList<HashMap<String, Reference>>> fKeys;
 	// Lists all tables referred to with a foreign key. Used to read metadata also from these 
@@ -51,17 +51,16 @@ public class ImplicitDBConstraints {
 	
 	/**
 	 * Reads colon separated pairs of view name and primary key
-	 * @param The name of the plain-text file with the fake keys
+	 * @param filename The name of the plain-text file with the fake keys
 	 * @throws IOException 
 	 */
 	public ImplicitDBConstraints(String filename) {
 		this(new File(filename));
 	}
-		
-		
+
 	/**
 	 * Reads colon separated pairs of view name and primary key
-	 * @param The plain-text file with the fake keys
+	 * @param file The plain-text file with functional dependencies
 	 * @throws IOException 
 	 */
 	public ImplicitDBConstraints(File file) {
@@ -69,14 +68,13 @@ public class ImplicitDBConstraints {
 			throw new IllegalArgumentException("File " + file + " does not exist");
 		}
 		this.file = file;
-		this.pKeys = new HashMap<String, ArrayList<ArrayList<String>>>();
+		this.uniqueFD = new HashMap<String, ArrayList<ArrayList<String>>>();
 		this.fKeys = new HashMap<String, ArrayList<HashMap<String, Reference>>>();
 		this.referredTables = new HashSet<String>();
 		this.parseConstraints();
 	}
 
-
-	private void parseConstraints(){
+	private final void parseConstraints() {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
@@ -87,10 +85,10 @@ public class ImplicitDBConstraints {
 					String tableName = parts[0];
 					String[] keyColumns = parts[1].split(",");
 					if(parts.length == 2) { // Primary key		
-						ArrayList<ArrayList<String>> pKeyList = pKeys.get(tableName);
+						ArrayList<ArrayList<String>> pKeyList = uniqueFD.get(tableName);
 						if (pKeyList == null){
 							pKeyList = new ArrayList<ArrayList<String>>();
-							pKeys.put(tableName, pKeyList);
+							uniqueFD.put(tableName, pKeyList);
 						}
 						ArrayList<String> pKey = new ArrayList<String>();
 						for(String pKeyCol : keyColumns){
@@ -145,9 +143,10 @@ public class ImplicitDBConstraints {
 	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
 	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
 	 */
-	public boolean tableIsInList(List<RelationJSQL> tables, String tableGivenName){
-		for(RelationJSQL table : tables){
-			if(table.getGivenName().equals(tableGivenName))
+	public static boolean tableIsInList(List<RelationJSQL> tables,
+			String tableGivenName) {
+		for (RelationJSQL table : tables) {
+			if (table.getGivenName().equals(tableGivenName))
 				return true;
 		}
 		return false;
@@ -183,22 +182,24 @@ public class ImplicitDBConstraints {
 	 * @param md
 	 */
 	public void addConstraints(DBMetadata md){
-		this.addPrimaryKeys(md);
+		this.addFunctionalDependency(md);
 		this.addForeignKeys(md);
 	}
 	
 	/**
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object
 	 */
-	public void addPrimaryKeys(DBMetadata md) {
-		for(String tableName : this.pKeys.keySet() ){
+	public void addFunctionalDependency(DBMetadata md) {
+		for(String tableName : this.uniqueFD.keySet() ){
 			DataDefinition td = md.getDefinition(tableName);
 			if(td != null && td instanceof TableDefinition){
-				ArrayList<ArrayList<String>> tablePKeys = this.pKeys.get(tableName);
-				if(tablePKeys.size() > 1)
-					log.warn("More than one primary key supplied for table " + tableName + ". Ontop supports only one, so the first is used.");
-				for (String keyColumn : tablePKeys.get(0)){
+				ArrayList<ArrayList<String>> tableFDs = this.uniqueFD.get(tableName);
+				//if(tableFDs.size() > 1)
+					//log.warn("More than one primary key supplied for table " + tableName + ". Ontop supports only one, so the first is used.");
+				for (ArrayList<String> listOfConstraints: tableFDs){
+					for (String keyColumn : listOfConstraints){
 					int key_pos = td.getAttributeKey(keyColumn);
+					
 					if(key_pos == -1){
 						System.out.println("Column '" + keyColumn + "' not found in table '" + td.getName() + "'");
 					} else {
@@ -208,10 +209,13 @@ public class ImplicitDBConstraints {
 						} else if (! attr.getName().equals(keyColumn)){
 							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						} else {		
-							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
+						//	td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
+							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), attr.getReference(), 0, attr.getSQLTypeName(),/*isUnique*/true));
 						}
 					}
 				}
+			}		
+					
 				md.add(td);
 			} else { // no table definition
 				log.warn("Error in user supplied primary key: No table definition found for " + tableName + ".");
@@ -264,7 +268,8 @@ public class ImplicitDBConstraints {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");
 						continue;
 					}
-					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey() , ref, attr.canNull() ? 1 : 0));
+					//String type = attr.getType();
+					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), ref, attr.canNull() ? 1 : 0, attr.getSQLTypeName(), attr.isUnique()));
 				}
 			}
 			md.add(td);

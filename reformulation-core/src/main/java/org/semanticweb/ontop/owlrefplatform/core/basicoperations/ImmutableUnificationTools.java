@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.*;
 
@@ -30,10 +29,10 @@ public class ImmutableUnificationTools {
      */
     private static class TermPair {
         private boolean canBeRemoved;
-        private VariableImpl leftVariable;
+        private Variable leftVariable;
         private ImmutableTerm rightTerm;
 
-        private TermPair(VariableImpl variable, ImmutableTerm rightTerm) {
+        private TermPair(Variable variable, ImmutableTerm rightTerm) {
             this.leftVariable = variable;
             this.rightTerm = rightTerm;
             this.canBeRemoved = false;
@@ -56,13 +55,13 @@ public class ImmutableUnificationTools {
             ImmutableTerm transformedLeftTerm = substitution.apply(leftVariable);
             ImmutableTerm transformedRightTerm = substitution.apply(rightTerm);
 
-            if (transformedLeftTerm instanceof VariableImpl) {
-                leftVariable = (VariableImpl) transformedLeftTerm;
+            if (transformedLeftTerm instanceof Variable) {
+                leftVariable = (Variable) transformedLeftTerm;
                 rightTerm = transformedRightTerm;
                 return ImmutableList.of();
             }
-            else if (transformedRightTerm instanceof VariableImpl) {
-                leftVariable = (VariableImpl) transformedRightTerm;
+            else if (transformedRightTerm instanceof Variable) {
+                leftVariable = (Variable) transformedRightTerm;
                 rightTerm = transformedLeftTerm;
                 return ImmutableList.of();
             }
@@ -95,7 +94,7 @@ public class ImmutableUnificationTools {
             return canBeRemoved;
         }
 
-        public VariableImpl getLeftVariable() {
+        public Variable getLeftVariable() {
             return leftVariable;
         }
 
@@ -131,12 +130,12 @@ public class ImmutableUnificationTools {
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
 
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution1.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution1.getImmutableMap().entrySet()) {
             firstArgListBuilder.add(entry.getKey());
             secondArgListBuilder.add(entry.getValue());
         }
 
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution2.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution2.getImmutableMap().entrySet()) {
             firstArgListBuilder.add(entry.getKey());
             secondArgListBuilder.add(entry.getValue());
         }
@@ -163,11 +162,12 @@ public class ImmutableUnificationTools {
         /**
          * Variable
          */
-        if (sourceTerm instanceof VariableImpl) {
-            VariableImpl sourceVariable = (VariableImpl) sourceTerm;
+        if (sourceTerm instanceof Variable) {
+            Variable sourceVariable = (Variable) sourceTerm;
 
             // Constraint
-            if ((!sourceVariable.equals(targetTerm)) && targetTerm.getReferencedVariables().contains(sourceVariable)) {
+            if ((targetTerm instanceof ImmutableFunctionalTerm)
+                    && ((ImmutableFunctionalTerm) targetTerm).getVariables().contains(sourceVariable)) {
                 return Optional.absent();
             }
 
@@ -180,11 +180,13 @@ public class ImmutableUnificationTools {
          * Functional term
          */
         else if (sourceTerm instanceof ImmutableFunctionalTerm) {
-            if (targetTerm instanceof VariableImpl) {
-                VariableImpl targetVariable = (VariableImpl) targetTerm;
+            ImmutableFunctionalTerm sourceFunctionalTerm = (ImmutableFunctionalTerm) sourceTerm;
+
+            if (targetTerm instanceof Variable) {
+                Variable targetVariable = (Variable) targetTerm;
 
                 // Constraint
-                if (sourceTerm.getReferencedVariables().contains(targetVariable)) {
+                if (sourceFunctionalTerm.getVariables().contains(targetVariable)) {
                     return Optional.absent();
                 }
                 else {
@@ -205,8 +207,8 @@ public class ImmutableUnificationTools {
          * Constant
          */
         else if(sourceTerm instanceof Constant) {
-            if (targetTerm instanceof VariableImpl) {
-                VariableImpl targetVariable = (VariableImpl) targetTerm;
+            if (targetTerm instanceof Variable) {
+                Variable targetVariable = (Variable) targetTerm;
                 ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
                         ImmutableMap.of(targetVariable, sourceTerm));
                 return Optional.of(substitution);
@@ -320,7 +322,7 @@ public class ImmutableUnificationTools {
 
     private static ImmutableList<TermPair> convertIntoPairs(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList.Builder<TermPair> listBuilder = ImmutableList.builder();
-        for (Map.Entry<VariableImpl, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
             listBuilder.add(new TermPair(entry.getKey(), entry.getValue()));
         }
         return listBuilder.build();
@@ -328,9 +330,9 @@ public class ImmutableUnificationTools {
 
     private static ImmutableSubstitution<ImmutableTerm> convertPairs2Substitution(List<TermPair> pairs)
             throws UnificationException {
-        Map<VariableImpl, ImmutableTerm> substitutionMap = new HashMap<>();
+        Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
         for(TermPair pair : pairs) {
-            VariableImpl leftVariable = pair.getLeftVariable();
+            Variable leftVariable = pair.getLeftVariable();
             ImmutableTerm rightTerm = pair.getRightTerm();
             if (!substitutionMap.containsKey(leftVariable)) {
                 substitutionMap.put(leftVariable, rightTerm);

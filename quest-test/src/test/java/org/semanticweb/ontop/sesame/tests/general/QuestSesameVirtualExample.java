@@ -26,11 +26,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.model.util.ModelUtil;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;

@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
@@ -99,11 +98,11 @@ public class ConstructionNodeTools {
          * TODO: explain why the composition is too rich
          */
         ImmutableSubstitution<ImmutableTerm> composedSubstitution = additionalBindingsSubstitution.composeWith(formerConstructionNode.getSubstitution());
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
 
-        ImmutableMap<VariableImpl, ImmutableTerm> compositionMap = composedSubstitution.getImmutableMap();
+        ImmutableMap<Variable, ImmutableTerm> compositionMap = composedSubstitution.getImmutableMap();
 
-        for(VariableImpl variable : compositionMap.keySet()) {
+        for(Variable variable : compositionMap.keySet()) {
             ImmutableTerm term = compositionMap.get(variable);
 
             /**
@@ -139,9 +138,9 @@ public class ConstructionNodeTools {
                                                          ImmutableSubstitution<ImmutableTerm> bindingsToRemove)
             throws InconsistentBindingException {
 
-        ImmutableSet<VariableImpl> variablesToRemove = extractVariablesToRemove(formerConstructionNode, bindingsToRemove);
+        ImmutableSet<Variable> variablesToRemove = extractVariablesToRemove(formerConstructionNode, bindingsToRemove);
 
-        ImmutableSet<VariableImpl> newVariablesToProject = extractVariablesToProject(variablesToRemove, bindingsToRemove);
+        ImmutableSet<Variable> newVariablesToProject = extractVariablesToProject(variablesToRemove, bindingsToRemove);
 
         NewSubstitutions newSubstitutions = computeSubstitutionToPropagateAndNewBindings(formerConstructionNode, bindingsToRemove,
                variablesToRemove, newVariablesToProject);
@@ -164,12 +163,12 @@ public class ConstructionNodeTools {
      * TODO: explain
      */
     private static ImmutableSubstitution<ImmutableTerm> computeNewBindingSubstitution(
-            ConstructionNode formerConstructionNode, ImmutableSet<VariableImpl> variablesToRemove,
+            ConstructionNode formerConstructionNode, ImmutableSet<Variable> variablesToRemove,
             ImmutableSubstitution<VariableOrGroundTerm> newBindings) {
-        ImmutableMap.Builder<VariableImpl, ImmutableTerm> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> mapBuilder = ImmutableMap.builder();
 
-        ImmutableMap<VariableImpl, ImmutableTerm> formerSubstitutionMap = formerConstructionNode.getDirectBindingSubstitution().getImmutableMap();
-        for (VariableImpl variable : formerSubstitutionMap.keySet()) {
+        ImmutableMap<Variable, ImmutableTerm> formerSubstitutionMap = formerConstructionNode.getDirectBindingSubstitution().getImmutableMap();
+        for (Variable variable : formerSubstitutionMap.keySet()) {
             if (!variablesToRemove.contains(variable)) {
                 mapBuilder.put(variable, formerSubstitutionMap.get(variable));
             }
@@ -185,14 +184,14 @@ public class ConstructionNodeTools {
      * TODO: explain
      */
     private static ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> computeBindingUnifiers(
-            ConstructionNode formerConstructionNode, ImmutableSet<VariableImpl> variablesToRemove,
+            ConstructionNode formerConstructionNode, ImmutableSet<Variable> variablesToRemove,
             ImmutableSubstitution<ImmutableTerm> bindingsToRemove) {
 
         ImmutableSubstitution<ImmutableTerm> formerSubstitution = formerConstructionNode.getDirectBindingSubstitution();
 
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionListBuilder = ImmutableList.builder();
 
-        for (VariableImpl variable : variablesToRemove) {
+        for (Variable variable : variablesToRemove) {
             ImmutableTerm formerTerm = formerSubstitution.get(variable);
             ImmutableTerm newTerm = bindingsToRemove.get(variable);
 
@@ -221,20 +220,20 @@ public class ConstructionNodeTools {
      */
     private static NewSubstitutions computeSubstitutionToPropagateAndNewBindings(
             ConstructionNode formerConstructionNode, ImmutableSubstitution<ImmutableTerm> bindingsToRemove,
-            ImmutableSet<VariableImpl> variablesToRemove, ImmutableSet<VariableImpl> newVariablesToProject) {
+            ImmutableSet<Variable> variablesToRemove, ImmutableSet<Variable> newVariablesToProject) {
 
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> bindingUnifiers = computeBindingUnifiers(
                 formerConstructionNode, variablesToRemove, bindingsToRemove);
 
-        Map<VariableImpl, VariableOrGroundTerm> substitutionMapToPropagate = new HashMap<>();
-        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> newBindingsMapBuilder = ImmutableMap.builder();
+        Map<Variable, VariableOrGroundTerm> substitutionMapToPropagate = new HashMap<>();
+        ImmutableMap.Builder<Variable, VariableOrGroundTerm> newBindingsMapBuilder = ImmutableMap.builder();
 
 
         for (ImmutableSubstitution<VariableOrGroundTerm> unifier : bindingUnifiers) {
-            ImmutableMap<VariableImpl, VariableOrGroundTerm> unificationMap = unifier.getImmutableMap();
+            ImmutableMap<Variable, VariableOrGroundTerm> unificationMap = unifier.getImmutableMap();
 
             if (!unifier.isEmpty()) {
-                for (VariableImpl replacedVariable : unificationMap.keySet()) {
+                for (Variable replacedVariable : unificationMap.keySet()) {
                     VariableOrGroundTerm targetTerm = unificationMap.get(replacedVariable);
 
                     /**
@@ -260,11 +259,11 @@ public class ConstructionNodeTools {
                              */
                             VariableOrGroundTerm otherTermToPropagate = substitutionMapToPropagate.get(replacedVariable);
                             if (!otherTermToPropagate.equals(targetTerm)) {
-                                if (targetTerm instanceof VariableImpl) {
+                                if (targetTerm instanceof Variable) {
                                     /**
                                      * Registers the equality to the new substitution.
                                      */
-                                    newBindingsMapBuilder.put((VariableImpl) targetTerm, otherTermToPropagate);
+                                    newBindingsMapBuilder.put((Variable) targetTerm, otherTermToPropagate);
                                 }
                                 else {
                                     throw new InconsistentBindingException("Should not find a ground term here: " + targetTerm);
@@ -287,21 +286,21 @@ public class ConstructionNodeTools {
      * TODO: explain
      *
      */
-    private static ImmutableSet<VariableImpl> extractVariablesToRemove(ConstructionNode formerConstructionNode,
+    private static ImmutableSet<Variable> extractVariablesToRemove(ConstructionNode formerConstructionNode,
                                                                        ImmutableSubstitution<ImmutableTerm> bindingsToRemove)
             throws InconsistentBindingException {
 
-        ImmutableSet<VariableImpl> allVariablesToRemove = bindingsToRemove.getImmutableMap().keySet();
+        ImmutableSet<Variable> allVariablesToRemove = bindingsToRemove.getImmutableMap().keySet();
 
         // Mutable
-        Set<VariableImpl> localVariablesToRemove = new HashSet<>(allVariablesToRemove);
+        Set<Variable> localVariablesToRemove = new HashSet<>(allVariablesToRemove);
         localVariablesToRemove.retainAll(formerConstructionNode.getSubstitution().getImmutableMap().keySet());
 
         /**
          * Checks that no projected but not-bound variable was proposed to be removed.
          */
         ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectionAtom().getVariables();
-        for (VariableImpl variable : allVariablesToRemove) {
+        for (Variable variable : allVariablesToRemove) {
             if ((!localVariablesToRemove.contains(variable)) && projectedVariables.contains(variable)) {
                 throw new InconsistentBindingException("The variable to remove " + variable + " is projected but" +
                         "not bound!");
@@ -315,15 +314,19 @@ public class ConstructionNodeTools {
      * Extracts the variables that MUST be projected (if not already).
      *
      */
-    private static ImmutableSet<VariableImpl> extractVariablesToProject(ImmutableSet<VariableImpl> variablesToRemove,
+    private static ImmutableSet<Variable> extractVariablesToProject(ImmutableSet<Variable> variablesToRemove,
                                                                         ImmutableSubstitution<ImmutableTerm> bindingsToRemove) {
 
-        Set<VariableImpl> variablesToProject = new HashSet<>();
+        Set<Variable> variablesToProject = new HashSet<>();
 
-        for (VariableImpl variableToRemove : variablesToRemove) {
+        for (Variable variableToRemove : variablesToRemove) {
             ImmutableTerm targetTerm = bindingsToRemove.get(variableToRemove);
-            // TODO: remove this cast in the future
-            variablesToProject.addAll((Collection<VariableImpl>)(Collection<?>)targetTerm.getReferencedVariables());
+            if (targetTerm instanceof Variable) {
+                variablesToProject.add((Variable)targetTerm);
+            }
+            else if (targetTerm instanceof ImmutableFunctionalTerm) {
+                variablesToProject.addAll(((ImmutableFunctionalTerm) targetTerm).getVariables());
+            }
         }
 
         return ImmutableSet.copyOf(variablesToProject);
@@ -345,12 +348,12 @@ public class ConstructionNodeTools {
      *
      * TODO: check if the use of a set for ordering is safe
      */
-    private static DataAtom computeNewDataAtom(DataAtom projectionAtom, ImmutableSet<VariableImpl> variablesToRemove,
-                                               ImmutableSet<VariableImpl> newVariablesToProject) {
+    private static DataAtom computeNewDataAtom(DataAtom projectionAtom, ImmutableSet<Variable> variablesToRemove,
+                                               ImmutableSet<Variable> newVariablesToProject) {
         // Mutable
         List<VariableOrGroundTerm> newArguments = new LinkedList<>(projectionAtom.getVariablesOrGroundTerms());
         newArguments.removeAll(variablesToRemove);
-        for (VariableImpl newVariable : newVariablesToProject) {
+        for (Variable newVariable : newVariablesToProject) {
             if (!newArguments.contains(newVariable)) {
                 newArguments.add(newVariable);
             }
@@ -360,8 +363,8 @@ public class ConstructionNodeTools {
 
     private static ImmutableSubstitution<VariableOrGroundTerm> convertToVarOrGroundTermSubstitution(
             ImmutableSubstitution<ImmutableTerm> substitution) throws SubstitutionConversionException {
-        ImmutableMap.Builder<VariableImpl, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
-        for (Map.Entry<VariableImpl, ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+        ImmutableMap.Builder<Variable, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
+        for (Map.Entry<Variable, ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
             ImmutableTerm rightTerm = entry.getValue();
             if (rightTerm instanceof VariableOrGroundTerm) {
                 mapBuilder.put(entry.getKey(), (VariableOrGroundTerm) rightTerm);

@@ -19,7 +19,7 @@ public interface LocallyImmutableSubstitution extends Substitution {
      * Please use use getImmutableMap instead
      */
     @Override
-    ImmutableMap<VariableImpl, Term> getMap();
+    ImmutableMap<Variable, Term> getMap();
 
     /**
      * Not supported (mutable operation)
@@ -48,9 +48,5 @@ public interface LocallyImmutableSubstitution extends Substitution {
     @Deprecated
     @Override
     boolean composeFunctions(Function term1, Function term2);
-
-    @Deprecated
-    @Override
-    ImmutableSet<VariableImpl> keySet();
 
 }

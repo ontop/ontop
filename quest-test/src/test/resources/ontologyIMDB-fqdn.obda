@@ -1,0 +1,28 @@
+[PrefixDeclaration]
+:		http://www.seriology.org/seriology#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	postgresDB
+connectionUrl	jdbc:postgresql://10.7.20.39/imdbobda
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+
+mappingId	Series + Series_Title + Production_Year (for Series)
+target		:series-{t.id} a :Series ; :Series_Title {t.title} ; :Production_Year {t.production_year} .
+source		SELECT t.id, t.title, t.production_year
+			FROM title t
+			WHERE t.kind_id = 2
+
+mappingId	hasSeason
+target		:series-{fid} :hasSeason :series-{fid}-season-{fseason_nr} .
+source		SELECT DISTINCT se.id AS fid, te.season_nr AS fseason_nr
+			FROM title se, title te
+			WHERE se.kind_id=2 AND se.id = te.episode_of_id AND te.season_nr IS NOT NULL
+]]

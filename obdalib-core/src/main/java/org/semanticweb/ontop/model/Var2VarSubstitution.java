@@ -7,10 +7,10 @@ import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 /**
  * Substitution where variables are only mapped to variables
  */
-public interface Var2VarSubstitution extends ImmutableSubstitution<VariableImpl> {
+public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
 
     @Override
-    VariableImpl applyToVariable(VariableImpl variable);
+    Variable applyToVariable(Variable variable);
 
     VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term);
 

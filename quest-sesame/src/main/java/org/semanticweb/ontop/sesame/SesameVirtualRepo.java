@@ -34,9 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.ontop.model.OBDAException;
@@ -222,5 +220,6 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public String getType() {
 		return QuestConstants.VIRTUAL;
 	}
+
 
 }

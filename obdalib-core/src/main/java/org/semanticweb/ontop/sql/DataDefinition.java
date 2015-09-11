@@ -24,68 +24,75 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.semanticweb.ontop.sql.api.Attribute;
 
 /**
  * TODO: see if we can make it immutable so that it can be shared between threads.
  */
+
 public abstract class DataDefinition implements Serializable {
 
 	private static final long serialVersionUID = 212770563440334334L;
 
-	protected String name;
+	private final String name;
+	private final List<Attribute> attributes;
 
-	protected Map<Integer, Attribute> attributes = new HashMap<Integer, Attribute>();
-
-	public DataDefinition() { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
-		// NO-OP
-	}
-	
-	public DataDefinition(String name) {
+	protected DataDefinition(String name, List<Attribute> attributes) {
 		this.name = name;
-	}
-
-    protected DataDefinition(String name, Map<Integer, Attribute> attributes) {
-        this.name = name;
-        this.attributes = new HashMap<>(attributes);
-    }
-
-    /**
-     * This method should be overwritten by subclasses
-     */
-    abstract public DataDefinition cloneDefinition();
-
-	public void setName(String name) { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
-		this.name = name;
+        this.attributes = new ArrayList<>(attributes);
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setAttribute(int pos, Attribute value) {
-		attributes.put(pos, value);
+	public void addAttribute(Attribute value) {
+		attributes.add(value);
 	}
 
+    /**
+     * This method should be overwritten by subclasses
+     */
+    abstract public DataDefinition cloneDefinition();
+
+	// TODO: remove from ImplicitDBConstraints
+	@Deprecated
+	public void setAttribute(int pos, Attribute value) {
+        // indexes start at 1
+        int index = pos - 1;
+        if (index >= attributes.size()) {
+            attributes.add(value);
+        }
+        else {
+            attributes.set(index, value);
+        }
+    }
 	public String getAttributeName(int pos) {
-		Attribute attribute = attributes.get(pos);
-		if (attribute == null)
+		if (attributes.size() < pos)
 			throw new IllegalArgumentException("No attribute at this position: " + pos + " " + attributes);
+        Attribute attribute = attributes.get(pos - 1);
 		return attribute.getName();
 	}
-
+	
+	/**
+	 * gets attribute with the specified position
+	 * 
+	 * @param pos is position <em>staring at 1</em>
+	 * @return attribute at the position
+	 */
+	
 	public Attribute getAttribute(int pos) {
-		Attribute attribute = attributes.get(pos);
+		// positions start at 1
+		Attribute attribute = attributes.get(pos - 1);
 		return attribute;
 	}
 
-	public ArrayList<Attribute> getAttributes() {
-		ArrayList<Attribute> list = new ArrayList<Attribute>();
-		for (Attribute value : attributes.values()) {
-			list.add(value);
-		}
-		return list;
+	public List<Attribute> getAttributes() {
+		return Collections.unmodifiableList(attributes);
 	}
 	
 	/**
@@ -95,36 +102,12 @@ public abstract class DataDefinition implements Serializable {
 	 * @return The key in the hashmap
 	 */
 	public int getAttributeKey(String attributeName) {
-        for (int idx : attributes.keySet()) {
-            if (attributes.get(idx).hasName(attributeName)) {
+		int idx = 1; // start at 1
+        for (Attribute att : attributes) {
+            if (att.getName().equals(attributeName)) 
                 return idx;
-            }
+            idx++;
         }
         return -1;
-    }
-	
-	/**
-	 * Returns the position of the attribute in the .values of the underlying hashmap (Or -1)
-	 * Note that this is not necessarily compatible with the argument {@link #getAttribute(int) getAttribute} and {@link #setAttribute(int, Attribute) setAttribute}
-	 * For that purpose, {@link #getAttributeKey(String) getAttributeKey} above should be used instead
-	 * 
-	 * 
-	 * @param attributeName The name of an attribute, correctly spelled and cased. 
-	 * @return If there is an attribute, return its position in the values() list, otherwise -1
-	 */
-	@Deprecated
-	public int getAttributePosition(String attributeName) {
-		int index = 0;
-		for (Attribute value : attributes.values()) {
-			if (value.hasName(attributeName)) {
-				return index;
-			}
-			index++;
-		}
-		return -1;
-	}
-
-	public int getNumOfAttributes() {
-		return attributes.size();
-	}
+    }	
 }

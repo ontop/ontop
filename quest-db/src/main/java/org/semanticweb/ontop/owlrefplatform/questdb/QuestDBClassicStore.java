@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
@@ -61,6 +62,7 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
@@ -88,6 +90,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Set<OWLOntology> closure;
 
+	private Quest questInstance;	
+	
 	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
 		this(name, tboxFile, null);
 	}
@@ -122,7 +126,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		}
 		closure = man.getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(closure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 	}
 
 
@@ -170,7 +174,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 			obdaModelForMaterialization.declareAll(tbox.getVocabulary());
 			
-			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
+			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 			int count = st.insertData(assertionIter, 5000, 500);
 			materializer.disconnect();
@@ -179,7 +183,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 //		st.createIndexes();
 		st.close();
 		if (!conn.getAutoCommit())
-		conn.commit();
+			conn.commit();
 		
 		questInstance.updateSemanticIndexMappings();
 
@@ -297,4 +301,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		}
 
 	}
+
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+
+	@Override
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
+		return questInstance.getSemanticIndexRepository();
+	}
+
 }

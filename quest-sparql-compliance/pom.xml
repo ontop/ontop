@@ -47,8 +47,8 @@
 			<artifactId>owlapi-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>

@@ -21,8 +21,6 @@ package org.semanticweb.ontop.sesame;
  */
 
 import java.util.Iterator;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import org.openrdf.model.Statement;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -38,7 +36,7 @@ import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
  * 
  */
 public class SesameStatementIterator implements Iterator<Statement> {
-	private Iterator<Assertion> iterator;	
+	private final Iterator<Assertion> iterator;	
 	
 
 	public SesameStatementIterator(Iterator<Assertion> it) {

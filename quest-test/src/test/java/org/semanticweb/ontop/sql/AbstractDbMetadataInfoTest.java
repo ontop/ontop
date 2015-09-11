@@ -38,8 +38,6 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
 	private DBMetadata metadata;
 	
-	private static Logger log = LoggerFactory.getLogger(AbstractDbMetadataInfoTest.class);
-	
 	@Override
 	public void setUp() {
 		

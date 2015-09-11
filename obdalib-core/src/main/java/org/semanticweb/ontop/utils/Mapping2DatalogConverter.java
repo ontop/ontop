@@ -32,13 +32,11 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.parser.SQLQueryParser;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
-import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
-import org.semanticweb.ontop.sql.api.RelationJSQL;
-import org.semanticweb.ontop.sql.api.SelectJSQL;
-import org.semanticweb.ontop.sql.api.SelectionJSQL;
+import org.semanticweb.ontop.sql.api.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -47,51 +45,28 @@ import java.util.Map;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class Mapping2DatalogConverter {
-
-	private DBMetadata dbMetadata;
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public Mapping2DatalogConverter(DBMetadata dbMetadata) {
-		this.dbMetadata = dbMetadata;
-	}
-
-	public List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
+	public static List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms, DBMetadata dbMetadata) {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		
@@ -111,15 +86,18 @@ public class Mapping2DatalogConverter {
 				ParsedSQLQuery parsedSQLQuery = sqlQueryParser.parseDeeply(sourceQuery.toString());
 
 				// Create a lookup table for variable swapping
-				LookupTable lookupTable = createLookupTable(parsedSQLQuery);
+				LookupTable lookupTable = createLookupTable(parsedSQLQuery, dbMetadata);
 
 
 				// Construct the body from the source query
 				List<Function> bodyAtoms = new ArrayList<>();
 
                 // For each table, creates an atom and adds it to the body
-                addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
+                addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable, dbMetadata);
 
+                // For each function application in the select clause, create an atom and add it to the body
+                addFunctionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
+                
                 // For each join condition, creates an atom and adds it to the body
                 addJoinConditionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
@@ -202,13 +180,47 @@ public class Mapping2DatalogConverter {
     }
 
     /**
+     * For each function application in the select clause, create an atom and add it to the body
+     * @param bodyAtoms
+     *  will be extended
+     * @param parsedSQLQuery
+     * @param lookupTable
+     * @author Dag Hovland
+     *
+     * @link ConferenceConcatMySQLTest
+     *
+     */
+    private static void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    	ProjectionJSQL proj = parsedSQLQuery.getProjection();
+    	List<SelectExpressionItem> selects = proj.getColumnList();
+    	for(SelectExpressionItem select : selects){
+    		Expression select_expr = select.getExpression();
+    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat || select_expr instanceof StringValue || select_expr instanceof Parenthesis ){
+    			Alias alias = select.getAlias();
+    			if(alias == null){
+    				throw new JSQLParserException("The expression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");
+    			}
+    			String alias_name = alias.getName();
+    			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
+    			Term atom = visitor.visitEx(select_expr);
+    			String var = lookupTable.lookup(alias_name);
+    			Term datalog_alias = fac.getVariable(var);
+    			Function equalityTerm = fac.getFunctionEQ(datalog_alias, atom);
+
+    			bodyAtoms.add(equalityTerm);
+    		}
+    	}
+    }
+
+    
+    /**
      * For each table, creates an atom and adds it to the body
      * @param bodyAtoms
      *  will be extended
      * @param parsedSQLQuery
      * @param lookupTable
      */
-    private void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
         List<RelationJSQL> tables = parsedSQLQuery.getTables();
 
@@ -217,7 +229,7 @@ public class Mapping2DatalogConverter {
             String tableName = table.getFullName();
 
             // Construct the predicate using the table name
-            int arity = dbMetadata.getDefinition(tableName).getNumOfAttributes();
+            int arity = dbMetadata.getDefinition(tableName).getAttributes().size();
             Predicate predicate = fac.getPredicate(tableName, arity);
 
             // Swap the column name with a new variable from the lookup table
@@ -281,8 +293,9 @@ public class Mapping2DatalogConverter {
      * Creates a lookupTable:
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
      * (2) Assigns new variables to them
+     * in case of two table with the same column, the first table column processed will be assigned
       */
-    private LookupTable createLookupTable(ParsedSQLQuery queryParsed) throws JSQLParserException {
+    private static LookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
 
 		List<RelationJSQL> tables = queryParsed.getTables();
@@ -303,14 +316,14 @@ public class Mapping2DatalogConverter {
                 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
             }
 
-            int size = tableDefinition.getNumOfAttributes();
+            int size = tableDefinition.getAttributes().size();
 
 			for (int i = 1; i <= size; i++) {
 				// assigned index number
 				int index = i + offset;
 				
 				// simple attribute name
-				String columnName = dbMetadata.getAttributeName(fullName, i);
+				String columnName = tableDefinition.getAttribute(i).getName();
 				
 				lookupTable.add(columnName, index);
 
@@ -390,6 +403,17 @@ public class Mapping2DatalogConverter {
 			}
 			offset += size;
 		}
+
+        for(String item:aliasMap.keySet()){
+            offset++;
+            String alias = aliasMap.get(item);
+            if(lookupTable.lookup(alias) == null){
+                lookupTable.add(item, offset);
+                lookupTable.add(alias, offset);
+            }
+        }
+
+
 		return lookupTable;
 	}
 
@@ -503,10 +527,10 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
-            net.sf.jsqlparser.expression.Function regex = expression;
-            if (regex.getName().toLowerCase().equals("regexp_like")) {
+            net.sf.jsqlparser.expression.Function func = expression;
+            if (func.getName().toLowerCase().equals("regexp_like")) {
 
-                List<Expression> expressions = regex.getParameters().getExpressions();
+                List<Expression> expressions = func.getParameters().getExpressions();
                 if (expressions.size() == 2 || expressions.size() == 3) {
 
                     Term t1; // first parameter is a source_string, generally a column
@@ -533,7 +557,77 @@ public class Mapping2DatalogConverter {
                         t3 = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
+                } else
+
+                throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
+            } else if (func.getName().toLowerCase().endsWith("replace")) {
+
+                List<Expression> expressions = expression.getParameters().getExpressions();
+                if (expressions.size() == 2 || expressions.size() == 3) {
+
+                    Term t1; // first parameter is a function expression
+                    Expression first = expressions.get(0);
+                    t1 = visitEx(first);
+
+                    if (t1 == null)
+                        throw new RuntimeException("Unable to find source expression: "
+                                + first);
+
+                    // second parameter is a string
+                    Term out_string;
+                    Expression second = expressions.get(1);
+
+                    out_string = visitEx(second);
+                    
+                    /*
+                     * Term t3 is optional: no string means delete occurrences of second param
+			         */
+                    Term in_string;
+                    if (expressions.size() == 3) {
+                        Expression third = expressions.get(2);
+                        in_string = visitEx(third);
+                    } else {
+                        in_string = fac.getConstantLiteral("");
+                    }
+                    result = fac.getFunctionReplace(t1, out_string, in_string);
+                } else
+
+                    throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+
+            }  else if (func.getName().toLowerCase().endsWith("concat")){
+
+                List<Expression> expressions = expression.getParameters().getExpressions();
+
+                int nParameters=expressions.size();
+                Function topConcat = null;
+
+
+                for (int i= 0; i<nParameters; i+=2) {
+
+                    Term first_string, second_string;
+
+                    if(topConcat == null){
+
+                        Expression first = expressions.get(i);
+                        first_string = visitEx(first);
+
+                        Expression second = expressions.get(i+1);
+                        second_string = visitEx(second);
+
+                        topConcat = fac.getFunctionConcat(first_string, second_string);
+                    }
+                    else{
+
+                        Expression second = expressions.get(i);
+                        second_string = visitEx(second);
+
+                        topConcat = fac.getFunctionConcat(topConcat, second_string);
+                    }
+
                 }
+
+                result = topConcat;
+
             } else {
                 throw new UnsupportedOperationException("Unsupported expression " + expression);
             }
@@ -742,9 +836,13 @@ public class Mapping2DatalogConverter {
                 // Constructs constant
                 // if the columns contains a boolean value
                 String columnName = expression.getColumnName();
-                if (columnName.toLowerCase().equals("true")
-                        || columnName.toLowerCase().equals("false")) {
-                    result = fac.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
+                // check whether it is an SQL boolean value
+                String lowerCase = columnName.toLowerCase();
+                if (lowerCase.equals("true")) {
+                    result = fac.getBooleanConstant(true);
+                }
+                else if (lowerCase.equals("false")) {
+                	result = fac.getBooleanConstant(false);
                 }
                 else
                     throw new RuntimeException(
@@ -786,7 +884,11 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(Concat concat) {
-            throw new UnsupportedOperationException();
+        	Expression left = concat.getLeftExpression();
+        	Expression right = concat.getRightExpression();
+        	Term l = visitEx(left);
+        	Term r = visitEx(right);
+        	result = fac.getFunction(OBDAVocabulary.CONCAT, l, r);
         }
 
         @Override

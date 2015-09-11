@@ -15,7 +15,7 @@ source		select id, decimal, numeric, bigint, int, smallint, tinyint, real, float
 
 mappingId	Character Types
 target		:character-{id} a :Row ; :hasChar {char} ; :hasVarChar {varchar} ; :hasNChar {nchar} ; :hasNCharVarying {nvarchar} ; :hasText {text} .
-source		select id, char, varchar, nchar, nvarchar, text, ntext from Character
+source		select id, char, varchar, nchar, nvarchar, text, ntext from "Character"
 
 mappingId	Date-Time Types
 target		:datetime-{id} a :Row ; :hasDate {date} ; :hasTime {time} ; :hasDateTime {datetime} ; :hasDateTime2 {datetime2}; :hasDateString {date}^^xsd:string ; :hasTimeString {time}^^xsd:string ; :hasDateTimeString {datetime}^^xsd:string ; :hasDateTime2String {datetime2}^^xsd:string .

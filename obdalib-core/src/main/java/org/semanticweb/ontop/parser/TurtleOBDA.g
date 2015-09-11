@@ -199,7 +199,7 @@ private String removeBrackets(String text) {
 	}
 	
 // Column placeholder pattern
-private static final String formatSpecifier = "\\{([\\w.]+)?\\}";
+private static final String formatSpecifier = "\\{([^\\}]+)?\\}";
 private static Pattern chPattern = Pattern.compile(formatSpecifier);
 
 private List<FormatString> parse(String text) {
@@ -242,6 +242,61 @@ private class ColumnString implements FormatString {
    @Override public String toString() { return s; }
 }
 
+	//this function distinguishes curly bracket with 
+	//back slash "\{" from curly bracket "{" 
+	private int getIndexOfCurlyB(String str){
+	   int i;
+	   int j;
+	   i = str.indexOf("{");
+	   j = str.indexOf("\\{");
+	      while((i-1 == j) &&(j != -1)){		
+		i = str.indexOf("{",i+1);
+		j = str.indexOf("\\{",j+1);		
+	      }	
+	  return i;
+	}
+	
+	//in case of concat this function parses the literal 
+	//and adds parsed constant literals and template literal to terms list
+	private ArrayList<Term> addToTermsList(String str){
+	   ArrayList<Term> terms = new ArrayList<Term>();
+	   int i,j;
+	   String st;
+	   str = str.substring(1, str.length()-1);
+	   while(str.contains("{")){
+	      i = getIndexOfCurlyB(str);
+	      if (i > 0){
+	    	 st = str.substring(0,i);
+	    	 st = st.replace("\\\\", "");
+	         terms.add(dfac.getConstantLiteral(st));
+	         str = str.substring(str.indexOf("{", i), str.length());
+	      }else if (i == 0){
+	         j = str.indexOf("}");
+	         terms.add(dfac.getVariable(str.substring(1,j)));
+	         str = str.substring(j+1,str.length());
+	      } else {
+	    	  break;
+	      }
+	   }
+	   if(!str.equals("")){
+	      str = str.replace("\\\\", "");
+	      terms.add(dfac.getConstantLiteral(str));
+	   }
+	   return terms;
+	}
+	
+	//this function returns nested concats 
+	//in case of more than two terms need to be concatted
+	private Function getNestedConcat(String str){
+	   ArrayList<Term> terms = new ArrayList<Term>();
+	   terms = addToTermsList(str);
+	   Function f = dfac.getFunctionConcat(terms.get(0),terms.get(1));
+           for(int j=2;j<terms.size();j++){
+              f = dfac.getFunctionConcat(f,terms.get(j));
+           }
+	   return f;
+	}
+
 /**
  * This methods construct an atom from a triple 
  * 
@@ -276,17 +331,31 @@ private class ColumnString implements FormatString {
 		        } else if( ! QueryUtils.isGrounded(pred) ){
 		             atom = dfac.getTripleAtom(subject, pred,  object);
 		        } else {
-		             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-		             Predicate predicate;
-		             if(pred instanceof Function){
-		                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-		                  predicate = dfac.getPredicate(pr.getValue(), 2);
-		             } else {
-		                  throw new IllegalArgumentException("predicate should be a URI Function");
-		             }
-		             atom = dfac.getFunction(predicate, subject, object);
-		       }
-		       return atom;
+                			             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+                			             Predicate predicate;
+                			             if(pred instanceof Function) {
+                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+                							 if (object instanceof Variable) {
+                								 predicate = dfac.getPredicate(pr.getValue(), 2);
+                							 } else {
+                								 if (object instanceof Function) {
+                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+                										 predicate = dfac.getObjectPropertyPredicate(pr.getValue());
+                									 } else {
+                										 predicate = dfac.getDataPropertyPredicate(pr.getValue());
+                									 }
+                								 }
+                									 else {
+                										 throw new IllegalArgumentException("parser cannot handle object " + object);
+                									 }
+                							 }
+                						 }else {
+                			                  throw new IllegalArgumentException("predicate should be a URI Function");
+                			             }
+                			             atom = dfac.getFunction(predicate, subject, object);
+                			       }
+                			       return atom;
 	  }
 
 
@@ -319,14 +388,14 @@ parse returns [CQIE value]
       List<Function> triples = $t1.value;
       $value = dfac.getCQIE(head, triples);
     }
-    (t2=triplesStatement)* EOF {
+      (t2=triplesStatement {
       List<Function> additionalTriples = $t2.value;
       if (additionalTriples != null) {
         // If there are additional triple statements then just add to the existing body
         List<Function> existingBody = $value.getBody();
         existingBody.addAll(additionalTriples);
       }
-    }
+    } )* EOF
   ;
 
 directiveStatement
@@ -481,7 +550,7 @@ typedLiteral returns [Function value]
     } else {
         throw new IllegalArgumentException("$resource.value should be an URI");
     }
-    Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
     if (type == null)  
  	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
     
@@ -515,42 +584,58 @@ term returns [Term value]
 
 literal returns [Term value]
   : stringLiteral (AT language)? {
-       ValueConstant constant = $stringLiteral.value;
        Term lang = $language.value;
-       if (lang != null) {
-	value = dfac.getTypedTerm(constant, lang);
-      } else {
-      	 value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
-      }
+       if (($stringLiteral.value) instanceof Function){
+          Function f = (Function)$stringLiteral.value;
+          if (lang != null){
+             value = dfac.getTypedTerm(f,lang);
+          }else{
+             value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
+          }       
+       }else{
+          ValueConstant constant = (ValueConstant)$stringLiteral.value;
+          if (lang != null) {
+	     value = dfac.getTypedTerm(constant, lang);
+          } else {
+      	     value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
+          }
+       }
     }
   | dataTypeString { $value = $dataTypeString.value; }
   | numericLiteral { $value = $numericLiteral.value; }
   | booleanLiteral { $value = $booleanLiteral.value; }
   ;
 
-stringLiteral returns [ValueConstant value]
+stringLiteral returns [Term value]
   : STRING_WITH_QUOTE_DOUBLE {
       String str = $STRING_WITH_QUOTE_DOUBLE.text;
-      $value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+      if (str.contains("{")){
+      	$value = getNestedConcat(str);
+      }else{
+      	$value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+      }
     }
   ;
 
 dataTypeString returns [Term value]
   :  stringLiteral REFERENCE resource {
-      ValueConstant constant = $stringLiteral.value;
-      String functionName = $resource.value.toString();
-      Predicate functionSymbol = null;
-      if ($resource.value instanceof Function){
-	 functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
-      }
-      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
-      if (type == null) {
+      if (($stringLiteral.value) instanceof Function){
+          Function f = (Function)$stringLiteral.value;
+          value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
+      }else{
+          ValueConstant constant = (ValueConstant)$stringLiteral.value;
+          String functionName = $resource.value.toString();
+          Predicate functionSymbol = null;
+          if ($resource.value instanceof Function){
+	    functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
+          }
+          Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
+          if (type == null) {
             throw new RuntimeException("Unsupported datatype: " + functionName);
+          }
+          $value = dfac.getTypedTerm(constant, type);
       }
-      $value = dfac.getTypedTerm(constant, type);
-
-    }
-  ;
+  };
 
 numericLiteral returns [ValueConstant value]
   : numericUnsigned { $value = $numericUnsigned.value; }

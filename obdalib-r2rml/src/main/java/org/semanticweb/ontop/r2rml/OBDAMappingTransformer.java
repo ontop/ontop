@@ -26,24 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.renderer.TargetQueryRenderer;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAQueryModifiers;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.SQLQueryImpl;
@@ -186,7 +176,7 @@ public class OBDAMappingTransformer {
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
 			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
 		
-			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+			if (  !predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ){
 				// The term is actually a SubjectMap (class)
 			//	statements.add(vf.createStatement(nod_subject, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));		
 				
@@ -235,7 +225,7 @@ public class OBDAMappingTransformer {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-					}else if (objectPred instanceof DataTypePredicate) {
+					}else if (objectPred instanceof DatatypePredicate) {
 						Term objectTerm = ((Function) object).getTerm(0);
 
 						if (objectTerm instanceof Variable) {
@@ -332,7 +322,7 @@ public class OBDAMappingTransformer {
 			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
             OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
-			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+			if (!predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ) {
 				// The term is actually a SubjectMap (class)
 				//add class declaration to subject Map node
 				sm.addClass(predUri);
@@ -427,6 +417,26 @@ public class OBDAMappingTransformer {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
 							obm = mfact.createObjectMap(TermMapType.CONSTANT_VALUED, vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+							
+						} else if(objectTerm instanceof Function){
+							
+							StringBuilder sb = new StringBuilder();
+							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
+							
+							if (functionSymbol instanceof StringOperationPredicate){ //concat
+								
+								List<Term> terms = ((Function)objectTerm).getTerms();
+								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
+								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
+								obm.setTermType(R2RMLVocabulary.literal);
+								
+								if(objectPred.getArity()==2){
+									Term langTerm = ((Function) object).getTerm(1);
+                                    if(langTerm instanceof Constant) {
+                                        obm.setLanguageTag(((Constant) langTerm).getValue());
+                                    }
+								}
+							}
 						}
 						
 					}

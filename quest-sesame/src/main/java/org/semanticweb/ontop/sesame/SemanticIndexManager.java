@@ -50,11 +50,11 @@ import java.sql.SQLException;
  */
 public class SemanticIndexManager {
 
-	Connection conn = null;
+	private final Connection conn;
 
-	private TBoxReasoner reasoner;
+	private final TBoxReasoner reasoner;
 
-	private RDBMSSIRepositoryManager dataRepository = null;
+	private final RDBMSSIRepositoryManager dataRepository;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -66,8 +66,8 @@ public class SemanticIndexManager {
 		// generate a new TBox with a simpler vocabulary
 		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
 			
-		dataRepository = new RDBMSSIRepositoryManager();
-		dataRepository.setTBox(reasoner);
+		dataRepository = new RDBMSSIRepositoryManager(reasoner);
+		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");
 	}
@@ -80,11 +80,19 @@ public class SemanticIndexManager {
 
 	public void setupRepository(boolean drop) throws SQLException {
 
-		dataRepository.createDBSchema(conn, drop);
-		dataRepository.insertMetadata(conn);
+		if (drop) {
+			log.debug("Droping existing tables");
+			try {
+				dataRepository.dropDBSchema(conn);
+			}
+			catch (SQLException e) {
+				log.debug(e.getMessage(), e);
+			}
+		}
+
+		dataRepository.createDBSchemaAndInsertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
-
 	}
 	
 	public void dropRepository() throws SQLException {
@@ -146,8 +154,6 @@ public class SemanticIndexManager {
 
 		Thread t2 = new Thread() {
 
-			int result;
-
 			@Override
 			public void run() {
 				try {
@@ -156,7 +162,7 @@ public class SemanticIndexManager {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				log.info("Loaded {} items into the DB.", result);
+				log.info("Loaded {} items into the DB.", val[0]);
 
 			}
 

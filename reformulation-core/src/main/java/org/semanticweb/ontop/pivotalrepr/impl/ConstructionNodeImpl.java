@@ -4,7 +4,6 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     public ConstructionNodeImpl(DataAtom dataAtom) {
         this.dataAtom = dataAtom;
-        this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<VariableImpl, ImmutableTerm>of());
+        this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
         this.optionalModifiers = Optional.absent();
     }
 

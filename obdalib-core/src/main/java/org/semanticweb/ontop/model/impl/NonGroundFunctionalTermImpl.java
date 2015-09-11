@@ -26,7 +26,7 @@ public class NonGroundFunctionalTermImpl extends ImmutableFunctionalTermImpl imp
     }
 
     private static void checkNonGroundTermConstraint(NonGroundFunctionalTerm term) throws IllegalArgumentException {
-        if (term.getReferencedVariables().isEmpty()) {
+        if (term.getVariables().isEmpty()) {
             throw new IllegalArgumentException("A NonGroundFunctionalTerm must contain at least one variable");
         }
     }

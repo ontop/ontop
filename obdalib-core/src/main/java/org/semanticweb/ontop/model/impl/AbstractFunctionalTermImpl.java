@@ -48,22 +48,11 @@ public abstract class AbstractFunctionalTermImpl implements Function {
 
     @Override
     public Set<Variable> getVariables() {
-        HashSet<Variable> variables = new LinkedHashSet<Variable>();
+        Set<Variable> variables = new HashSet<>();
         for (Term t : getTerms()) {
-            for (Variable v : t.getReferencedVariables())
-                variables.add(v);
+            TermUtils.addReferencedVariablesTo(variables, t);
         }
         return variables;
-    }
-
-    @Override
-    public Set<Variable> getReferencedVariables() {
-        Set<Variable> vars = new LinkedHashSet<Variable>();
-        for (Term t : getTerms()) {
-            for (Variable v : t.getReferencedVariables())
-                vars.add(v);
-        }
-        return vars;
     }
 
     @Override

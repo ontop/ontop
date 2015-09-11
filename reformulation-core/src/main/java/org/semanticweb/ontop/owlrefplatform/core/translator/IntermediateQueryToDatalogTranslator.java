@@ -61,11 +61,12 @@ public class IntermediateQueryToDatalogTranslator {
 		
 
 		
-		DatalogProgram dProgram = ofac.getDatalogProgram();
+
 		ConstructionNode root = te.getRootConstructionNode();
 		
 		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
-		
+
+        DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
 			QueryModifiers immutableQueryModifiers = optionalModifiers.get();
 
@@ -73,9 +74,11 @@ public class IntermediateQueryToDatalogTranslator {
 			OBDAQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
 			// TODO: support GROUP BY (distinct QueryNode)
 
-			dProgram.setQueryModifiers(mutableModifiers);
-			
+            dProgram = ofac.getDatalogProgram(mutableModifiers);
 		}
+        else {
+            dProgram = ofac.getDatalogProgram();
+        }
 		
 		
 	

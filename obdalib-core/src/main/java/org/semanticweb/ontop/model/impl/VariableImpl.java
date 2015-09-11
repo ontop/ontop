@@ -24,7 +24,7 @@ package org.semanticweb.ontop.model.impl;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 
-public class VariableImpl implements Variable, Comparable<VariableImpl> {
+public class VariableImpl implements Variable, Comparable<Variable> {
 
 	private static final long serialVersionUID = 5723075311798541659L;
 
@@ -72,12 +72,7 @@ public class VariableImpl implements Variable, Comparable<VariableImpl> {
 	}
 
 	@Override
-	public ImmutableSet<Variable> getReferencedVariables() {
-		return ImmutableSet.of((Variable)this);
-	}
-
-	@Override
-	public int compareTo(VariableImpl other) {
-		return other.identifier - identifier ;
+	public int compareTo(Variable other) {
+		return other.hashCode() - hashCode() ;
 	}
 }

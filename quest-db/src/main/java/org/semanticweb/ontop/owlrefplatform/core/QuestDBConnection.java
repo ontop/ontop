@@ -24,6 +24,8 @@ import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 
+import java.sql.Connection;
+
 public class QuestDBConnection implements OBDAConnection {
 
 	private final QuestConnection conn;
@@ -38,6 +40,10 @@ public class QuestDBConnection implements OBDAConnection {
 
 	}
 
+	public Connection getConnection() {
+		return conn.getConnection();
+	}
+	
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
 		return new QuestDBStatement(conn.createStatement());
