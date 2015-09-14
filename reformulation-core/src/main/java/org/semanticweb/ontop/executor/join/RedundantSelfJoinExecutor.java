@@ -4,15 +4,19 @@ import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
+import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-
-import java.util.Set;
 
 /**
  * TODO: explain
@@ -24,6 +28,9 @@ import java.util.Set;
  */
 public class RedundantSelfJoinExecutor implements InternalProposalExecutor<InnerJoinOptimizationProposal> {
 
+    /**
+     * TODO: explain
+     */
     protected static class PredicateLevelProposal {
 
         private final ImmutableCollection<DataNode> keptDataNodes;
@@ -64,28 +71,28 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         public ImmutableCollection<DataNode> getRemovedDataNodes() {
             return removedDataNodes;
         }
-
-        public boolean shouldOptimize() {
-            return !removedDataNodes.isEmpty();
-        }
     }
 
+
+    /**
+     * TODO: explain
+     */
     protected static class ConcreteProposal {
 
-        private final ImmutableCollection<DataNode> transformedDataNodes;
+        private final ImmutableCollection<DataNode> newDataNodes;
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
         private final ImmutableCollection<DataNode> removedDataNodes;
 
-        protected ConcreteProposal(ImmutableCollection<DataNode> transformedDataNodes,
+        protected ConcreteProposal(ImmutableCollection<DataNode> newDataNodes,
                                    Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
                                    ImmutableCollection<DataNode> removedDataNodes) {
-            this.transformedDataNodes = transformedDataNodes;
+            this.newDataNodes = newDataNodes;
             this.optionalSubstitution = optionalSubstitution;
             this.removedDataNodes = removedDataNodes;
         }
 
-        public ImmutableCollection<DataNode> getTransformedDataNodes() {
-            return transformedDataNodes;
+        public ImmutableCollection<DataNode> getNewDataNodes() {
+            return newDataNodes;
         }
 
         public ImmutableCollection<DataNode> getDataNodesToRemove() {
@@ -104,37 +111,13 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
 
 
     /**
-     * TODO: thrown when the upper ConstructionNode would need to be updated.
-     * TODO: remove it
-     */
-    private final class UnsupportedUnificationException extends Exception {
-
-        private UnsupportedUnificationException(String message) {
-            super(message);
-        }
-    }
-
-    /**
      * TODO: explain
+     *
+     * TODO: find valid cases
      */
-    private final class DataAtomClassification {
-
-        private final ImmutableSet<DataNode> nodesToRemove;
-        private final ImmutableSet<DataNode> newNodes;
-
-        private DataAtomClassification(Set<DataNode> nodesToRemove, Set<DataNode> newNodes) {
-            this.nodesToRemove = ImmutableSet.copyOf(nodesToRemove);
-            this.newNodes = ImmutableSet.copyOf(newNodes);
-        }
-
-        public ImmutableSet<DataNode> getNodesToRemove() {
-            return nodesToRemove;
-        }
-
-        public ImmutableSet<DataNode> getNewNodes() {
-            return newNodes;
-        }
+    private static final class AtomUnificationException extends Exception {
     }
+
 
 
     private final ImmutableMap<AtomPredicate, ImmutableList<Integer>> primaryKeys;
@@ -156,18 +139,20 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
-        // TODO: explain
-        ImmutableSet<Variable> variablesToKeep = VariableCollector.collectVariables(
-                query.getClosestConstructionNode(topJoinNode));
-
         /**
          * Tries to optimize if there are data nodes
          */
         if (!initialMap.isEmpty()) {
 
-            ConcreteProposal concreteProposal = optimize(initialMap, variablesToKeep);
+            // TODO: explain
+            ImmutableSet<Variable> variablesToKeep = VariableCollector.collectVariables(
+                    query.getClosestConstructionNode(topJoinNode));
 
-            if (concreteProposal.shouldOptimize()) {
+            Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep);
+
+            if (optionalConcreteProposal.isPresent()) {
+                ConcreteProposal concreteProposal = optionalConcreteProposal.get();
+
                 // SIDE-EFFECT on the tree component (and thus on the query)
                 applyOptimization(treeComponent, highLevelProposal.getTopJoinNode(), concreteProposal);
             }
@@ -175,8 +160,8 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         return new NodeCentricOptimizationResultsImpl(query, topJoinNode);
     }
 
-    private ConcreteProposal optimize(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
-                                      ImmutableSet<Variable> variablesToKeep) {
+    private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
+                                     ImmutableSet<Variable> variablesToKeep) {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
@@ -184,7 +169,15 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
             ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
             PredicateLevelProposal predicateProposal;
             if (primaryKeys.containsKey(predicate)) {
-                predicateProposal = optimizePredicate(initialNodes, primaryKeys.get(predicate));
+                try {
+                    predicateProposal = proposePerPredicate(initialNodes, primaryKeys.get(predicate));
+                }
+                /**
+                 * Fall back to the default predicate proposal: doing nothing
+                 */
+                catch (AtomUnificationException e) {
+                    predicateProposal = new PredicateLevelProposal(initialNodes);
+                }
             }
             else {
                 predicateProposal = new PredicateLevelProposal(initialNodes);
@@ -199,8 +192,8 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
      * TODO: explain
      *
      */
-    private PredicateLevelProposal optimizePredicate(ImmutableCollection<DataNode> dataNodes,
-                                                     ImmutableList<Integer> primaryKeyPositions) {
+    private PredicateLevelProposal proposePerPredicate(ImmutableCollection<DataNode> dataNodes,
+                                                       ImmutableList<Integer> primaryKeyPositions) throws AtomUnificationException {
         final ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap
                 = groupByPrimaryKeyArguments(dataNodes, primaryKeyPositions);
 
@@ -274,23 +267,152 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         return listBuilder.build();
     }
 
-    private static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(ImmutableCollection<DataNode> redundantNodes) {
-        throw new RuntimeException("TODO: implement it");
+    private Optional<ConcreteProposal> createConcreteProposal(ImmutableList<PredicateLevelProposal> predicateProposals,
+                                                              ImmutableSet<Variable> variablesToKeep) {
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
+        try {
+            optionalMergedSubstitution = mergeSubstitutions(predicateProposals, variablesToKeep);
+        } catch (AtomUnificationException e) {
+            return Optional.absent();
+        }
+
+        ImmutableSet.Builder<DataNode> removedDataNodeBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<DataNode> newDataNodeBuilder = ImmutableSet.builder();
+
+        for (PredicateLevelProposal predicateProposal : predicateProposals) {
+            if (optionalMergedSubstitution.isPresent()) {
+                ImmutableSubstitution<VariableOrGroundTerm> mergedSubstitution = optionalMergedSubstitution.get();
+
+                for (DataNode keptDataNode : predicateProposal.getKeptDataNodes()) {
+                    DataAtom previousDataAtom = keptDataNode.getAtom();
+                    DataAtom newDataAtom = mergedSubstitution.applyToDataAtom(previousDataAtom);
+
+                    /**
+                     * If new atom
+                     */
+                    if (!previousDataAtom.equals(newDataAtom)) {
+                        newDataNodeBuilder.add(createNewDataNode(keptDataNode, newDataAtom));
+                        removedDataNodeBuilder.add(keptDataNode);
+                    }
+                    /**
+                     * Otherwise, no need to updated the "previous" data node
+                     * (we keep it).
+                     */
+                }
+            }
+            removedDataNodeBuilder.addAll(predicateProposal.getRemovedDataNodes());
+        }
+
+
+        return Optional.of(new ConcreteProposal(newDataNodeBuilder.build(), optionalMergedSubstitution,
+                removedDataNodeBuilder.build()));
     }
 
-    private ImmutableSubstitution<VariableOrGroundTerm> mergeSubstitutions(ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-                                                                           ImmutableSet<Variable> variablesToKeep)
-            throws UnsupportedUnificationException {
-        throw new RuntimeException("TODO: implement it");
+    private Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
+            ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<Variable> variablesToTryToKeep)
+            throws AtomUnificationException {
+        ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions = extractSubstitutions(predicateProposals);
+
+        // Non-final
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution = Optional.absent();
+
+        for (ImmutableSubstitution<VariableOrGroundTerm> substitution : substitutions) {
+            if (!substitution.isEmpty()) {
+                if (optionalAccumulatedSubstitution.isPresent()) {
+                    Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMGUS = ImmutableUnificationTools.computeAtomMGUS(
+                            optionalAccumulatedSubstitution.get(), substitution);
+                    if (optionalMGUS.isPresent()) {
+                        optionalAccumulatedSubstitution = optionalMGUS;
+                    }
+                    else {
+                        // TODO: log a warning
+                        throw new AtomUnificationException();
+                    }
+                }
+                else {
+                    optionalAccumulatedSubstitution = Optional.of(substitution);
+                }
+            }
+        }
+
+        if (optionalAccumulatedSubstitution.isPresent()) {
+            return Optional.of(optionalAccumulatedSubstitution.get().orientate(variablesToTryToKeep));
+        }
+        return optionalAccumulatedSubstitution;
     }
 
-    private static ImmutableCollection<DataNode> renameDataAtoms(ImmutableList<DataNode> dataNodes,
-                                                                 ImmutableSubstitution<VariableOrGroundTerm> substitution) {
-        throw new RuntimeException("TODO: implement it");
+    private ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractSubstitutions(
+            ImmutableCollection<PredicateLevelProposal> predicateProposals) {
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionListBuilder = ImmutableList.builder();
+        for (PredicateLevelProposal proposal : predicateProposals) {
+            substitutionListBuilder.addAll(proposal.getSubstitutions());
+        }
+        return substitutionListBuilder.build();
     }
 
-    private ConcreteProposal createConcreteProposal(ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<Variable> variablesToKeep) {
-        throw new RuntimeException("TODO: implement it");
+
+    private static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
+            ImmutableCollection<DataNode> redundantNodes) throws AtomUnificationException {
+        // Non-final
+        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = new ImmutableSubstitutionImpl<>(
+                ImmutableMap.<Variable, VariableOrGroundTerm>of());
+
+        /**
+         * Should normally not be called in this case.
+         */
+        if (redundantNodes.size() < 2) {
+            // Empty substitution
+            return accumulatedSubstitution;
+        }
+
+        UnmodifiableIterator<DataNode> nodeIterator = redundantNodes.iterator();
+
+        // Non-final
+        DataAtom accumulatedAtom = nodeIterator.next().getAtom();
+        while (nodeIterator.hasNext()) {
+            DataAtom newAtom = nodeIterator.next().getAtom();
+            // May throw an exception
+            accumulatedSubstitution = updateSubstitution(accumulatedSubstitution, accumulatedAtom, newAtom);
+            accumulatedAtom = accumulatedSubstitution.applyToDataAtom(accumulatedAtom);
+        }
+        return accumulatedSubstitution;
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static ImmutableSubstitution<VariableOrGroundTerm> updateSubstitution(
+            final ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution,
+            final DataAtom accumulatedAtom,  final DataAtom newAtom) throws AtomUnificationException {
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution =
+                ImmutableUnificationTools.computeAtomMGU(accumulatedAtom, newAtom);
+
+        if (optionalSubstitution.isPresent()) {
+            if (accumulatedSubstitution.isEmpty()) {
+                return optionalSubstitution.get();
+            }
+            else {
+                Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution =
+                        ImmutableUnificationTools.computeAtomMGUS(accumulatedSubstitution, optionalSubstitution.get());
+                if (optionalAccumulatedSubstitution.isPresent()) {
+                    return optionalAccumulatedSubstitution.get();
+                }
+                /**
+                 * Cannot unify the two substitutions
+                 */
+                else {
+                    // TODO: log a warning
+                    throw new AtomUnificationException();
+                }
+            }
+        }
+        /**
+         * Cannot unify the two atoms
+         */
+        else {
+            // TODO: log a warning
+            throw new AtomUnificationException();
+        }
     }
 
 
@@ -305,6 +427,15 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         return mapBuilder.build();
     }
 
+    private DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
+        if (previousDataNode instanceof TableNode) {
+            return new TableNodeImpl(newDataAtom);
+        }
+        else {
+            throw new IllegalArgumentException("Unexpected type of data node: " + previousDataNode);
+        }
+    }
+
     /**
      * Assumes that the data atoms are leafs
      */
@@ -313,13 +444,21 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
         for (DataNode nodeToRemove : proposal.getDataNodesToRemove()) {
             treeComponent.removeSubTree(nodeToRemove);
         }
-        throw new RuntimeException("TODO: continue");
-/*        for (DataNode newNode : proposal.getNewNodes()) {
+        for (DataNode newNode : proposal.getNewDataNodes()) {
             try {
                 treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>absent(), false);
             } catch (IllegalTreeUpdateException e) {
                 throw new RuntimeException("Unexpected: " + e.getMessage());
             }
-        }*/
+        }
+
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution = proposal.getOptionalSubstitution();
+        if (optionalSubstitution.isPresent()) {
+            /**
+             * TODO: propagate the substitution
+             */
+            throw new RuntimeException("TODO: propagate the substitution to the upper construction node " +
+                    "and the surroundings");
+        }
     }
 }

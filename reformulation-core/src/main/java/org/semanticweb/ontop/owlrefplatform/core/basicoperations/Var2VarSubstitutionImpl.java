@@ -103,4 +103,8 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         return map.containsKey(variable);
     }
 
+    @Override
+    protected ImmutableSubstitution<Variable> constructNewSubstitution(ImmutableMap<Variable, Variable> map) {
+        return new Var2VarSubstitutionImpl(map);
+    }
 }

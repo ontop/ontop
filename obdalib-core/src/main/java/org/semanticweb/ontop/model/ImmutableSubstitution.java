@@ -2,6 +2,7 @@ package org.semanticweb.ontop.model;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
@@ -55,4 +56,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Applies the current substitution to the "target" part of another substitution
      */
     ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution);
+
+    /**
+     * Returns a similar substitution that avoids (if possible) to substitute certain variables.
+     */
+    ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
 }

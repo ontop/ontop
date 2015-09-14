@@ -198,4 +198,37 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return false;
     }
 
+    protected abstract ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map);
+
+    @Override
+    public ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep) {
+        if (variablesToTryToKeep.isEmpty() || isEmpty()) {
+            return this;
+        }
+
+        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
+        for (Variable replacedVariable : getImmutableMap().keySet()) {
+            T target = get(replacedVariable);
+            if ((target instanceof Variable) && (variablesToTryToKeep.contains(replacedVariable))) {
+                Variable targetVariable = (Variable) target;
+
+                /**
+                 * TODO: explain
+                 */
+                if (!variablesToTryToKeep.contains(targetVariable)) {
+                    // Inverses the variables
+                    // NB: now we know that T extends Variable
+                    mapBuilder.put(targetVariable, (T)replacedVariable);
+                    continue;
+                }
+            }
+            /**
+             * By default, keep the entry
+             */
+            mapBuilder.put(replacedVariable, target);
+        }
+
+        return constructNewSubstitution(mapBuilder.build());
+    }
+
 }

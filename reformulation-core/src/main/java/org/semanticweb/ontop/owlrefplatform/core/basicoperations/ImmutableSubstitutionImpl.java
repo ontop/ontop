@@ -56,4 +56,9 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
+
+    @Override
+    protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
+        return new ImmutableSubstitutionImpl<>(map);
+    }
 }

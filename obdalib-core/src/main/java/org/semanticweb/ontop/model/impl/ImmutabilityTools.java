@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.semanticweb.ontop.model.impl.GroundTermTools.castIntoGroundTerm;
+import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
+
 public class ImmutabilityTools {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
@@ -27,6 +30,18 @@ public class ImmutabilityTools {
          * Other terms (constant and variable) are immutable.
          */
         return (ImmutableTerm) term;
+    }
+
+    public static VariableOrGroundTerm convertIntoVariableOrGroundTerm(Term term) {
+        if (term instanceof Variable) {
+            return (Variable) term;
+        }
+        else if (isGroundTerm(term)) {
+            return castIntoGroundTerm(term);
+        }
+        else {
+            throw new IllegalArgumentException("Not a variable nor a ground term: " + term);
+        }
     }
 
     public static ImmutableBooleanExpression convertIntoImmutableBooleanExpression(BooleanExpression expression) {

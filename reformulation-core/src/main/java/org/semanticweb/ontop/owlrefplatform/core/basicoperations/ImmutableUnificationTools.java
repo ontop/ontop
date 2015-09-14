@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
+import org.semanticweb.ontop.model.impl.ImmutabilityTools;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.*;
@@ -121,6 +122,25 @@ public class ImmutableUnificationTools {
         return Optional.of(convertSubstitution(mutableSubstitution));
     }
 
+    public static Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
+        Substitution mutableSubstitution = UnifierUtilities.getMGU(atom1, atom2);
+
+        if (mutableSubstitution == null) {
+            return Optional.absent();
+        }
+
+        ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (Map.Entry<Variable, Term> entry : mutableSubstitution.getMap().entrySet()) {
+            VariableOrGroundTerm value = ImmutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
+
+            substitutionMapBuilder.put(entry.getKey(), value);
+        }
+
+        ImmutableSubstitution<VariableOrGroundTerm> immutableSubstitution = new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+        return Optional.of(immutableSubstitution);
+
+    }
+
     /**
      * Computes one Most General Unifier (MGU) of (two) substitutions.
      */
@@ -150,6 +170,19 @@ public class ImmutableUnificationTools {
         ImmutableFunctionalTerm functionalTerm2 = factory.getImmutableFunctionalTerm(predicate, secondArgList);
 
         return computeMGU(functionalTerm1, functionalTerm2);
+    }
+
+    public static Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGUS(
+            ImmutableSubstitution<VariableOrGroundTerm> substitution1,
+            ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
+        if (optionalMGUS.isPresent()) {
+            return Optional.of(ImmutableSubstitutionTools.convertIntoVariableOrGroundTermSubstitution(
+                    optionalMGUS.get()));
+        }
+        else {
+            return Optional.absent();
+        }
     }
 
 

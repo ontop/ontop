@@ -79,6 +79,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public ImmutableSubstitution<ImmutableTerm> orientate(ImmutableSet<Variable> variablesToTryToKeep) {
+        return this;
+    }
+
+    @Override
     public final ImmutableMap<Variable, Term> getMap() {
         return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) getImmutableMap();
     }
