@@ -4247,543 +4247,543 @@ target		npd:baa/{baaNpdidBsnsArrArea} a npdv:SeismicAreaBAA .
 source		SELECT baaNpdidBsnsArrArea FROM bsns_arr_area WHERE baaKind='SEISMIC AREA'
 
 mappingId	Mapping:NPD:Manual1
-target		<npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore}> npdv:wellboreFormationTD <npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}>.
+target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:wellboreFormationTD npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} .
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_exploration_all.wlbFormationAtTd=wellbore_formation_top.lsuName
 
 mappingId	Mapping:NPD:Manual2
-target		<npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore}> npdv:wellboreFormationHcLevel1 <npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}>.
+target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:wellboreFormationHcLevel1 npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} .
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_exploration_all.wlbFormationWithHc1=wellbore_formation_top.lsuName
 
 mappingId	Mapping:NPD:Manual3
-target		<npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore}> npdv:wellboreFormationHcLevel2 <npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}>.
+target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:wellboreFormationHcLevel2 npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} .
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_exploration_all.wlbFormationWithHc2=wellbore_formation_top.lsuName
 
 mappingId	Mapping:NPD:Manual4
-target		<npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore}> npdv:wellboreFormationHcLevel3 <npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}>.
+target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:wellboreFormationHcLevel3 npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} .
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_exploration_all.wlbFormationWithHc3=wellbore_formation_top.lsuName
 
 
 mappingId	Mapping:NPD:Manual5:1
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='CAMPANIAN'
 
 mappingId	Mapping:NPD:Manual5:2
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='CAMPANIAN'
 
 mappingId	Mapping:NPD:Manual5:3
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='CAMPANIAN'
 
 mappingId	Mapping:NPD:Manual5:4
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Campanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='CAMPANIAN'
 
 mappingId	Mapping:NPD:Manual5:5
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:6
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:7
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:8
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Carboniferous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:9
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:10
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:11
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:12
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:13
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='DANIAN'
 
 mappingId	Mapping:NPD:Manual5:14
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='DANIAN'
 
 mappingId	Mapping:NPD:Manual5:15
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='DANIAN'
 
 mappingId	Mapping:NPD:Manual5:16
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Danian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='DANIAN'
 
 mappingId	Mapping:NPD:Manual5:17
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='DEVONIAN'
 
 mappingId	Mapping:NPD:Manual5:18
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='DEVONIAN'
 
 mappingId	Mapping:NPD:Manual5:19
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='DEVONIAN'
 
 mappingId	Mapping:NPD:Manual5:20
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Devonian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='DEVONIAN'
 
 mappingId	Mapping:NPD:Manual5:21
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='EARLY CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:22
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='EARLY CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:23
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='EARLY CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:24
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Mississippian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='EARLY CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:25
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='EARLY CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:26
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='EARLY CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:27
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='EARLY CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:28
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='EARLY CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:29
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='EARLY JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:30
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='EARLY JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:31
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='EARLY JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:32
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='EARLY JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:33
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='EARLY PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:34
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='EARLY PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:35
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='EARLY PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:36
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Cisuralian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='EARLY PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:37
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='EARLY TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:38
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='EARLY TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:39
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='EARLY TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:40
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/LowerTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='EARLY TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:41
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='EOCENE'
 
 mappingId	Mapping:NPD:Manual5:42
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='EOCENE'
 
 mappingId	Mapping:NPD:Manual5:43
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='EOCENE'
 
 mappingId	Mapping:NPD:Manual5:44
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Eocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='EOCENE'
 
 mappingId	Mapping:NPD:Manual5:45
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:46
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:47
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:48
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Jurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:49
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:50
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:51
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:52
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pennsylvanian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE CARBONIFEROUS'
 
 mappingId	Mapping:NPD:Manual5:53
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:54
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:55
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:56
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperCretaceous>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE CRETACEOUS'
 
 mappingId	Mapping:NPD:Manual5:57
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:58
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:59
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:60
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:61
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:62
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:63
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:64
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Thanetian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:65
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:66
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:67
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:68
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Lopingian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:69
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:70
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:71
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:72
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Piacenzian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:73
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='LATE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:74
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='LATE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:75
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='LATE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:76
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/UpperTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='LATE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:77
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='MIDDLE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:78
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='MIDDLE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:79
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='MIDDLE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:80
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleJurassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='MIDDLE JURASSIC'
 
 mappingId	Mapping:NPD:Manual5:81
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='MIDDLE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:82
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='MIDDLE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:83
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='MIDDLE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:84
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/MiddleTriassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='MIDDLE TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:85
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='MIOCENE'
 
 mappingId	Mapping:NPD:Manual5:86
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='MIOCENE'
 
 mappingId	Mapping:NPD:Manual5:87
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='MIOCENE'
 
 mappingId	Mapping:NPD:Manual5:88
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Miocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='MIOCENE'
 
 mappingId	Mapping:NPD:Manual5:89
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='OLIGOCENE'
 
 mappingId	Mapping:NPD:Manual5:90
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='OLIGOCENE'
 
 mappingId	Mapping:NPD:Manual5:91
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='OLIGOCENE'
 
 mappingId	Mapping:NPD:Manual5:92
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Oligocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='OLIGOCENE'
 
 mappingId	Mapping:NPD:Manual5:93
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:94
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:95
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:96
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Paleocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='PALEOCENE'
 
 mappingId	Mapping:NPD:Manual5:97
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:98
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:99
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:100
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Permian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='PERMIAN'
 
 mappingId	Mapping:NPD:Manual5:101
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='PLEISTOCENE'
 
 mappingId	Mapping:NPD:Manual5:102
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='PLEISTOCENE'
 
 mappingId	Mapping:NPD:Manual5:103
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='PLEISTOCENE'
 
 mappingId	Mapping:NPD:Manual5:104
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pleistocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='PLEISTOCENE'
 
 mappingId	Mapping:NPD:Manual5:105
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:106
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:107
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:108
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Pliocene>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='PLIOCENE'
 
 mappingId	Mapping:NPD:Manual5:109
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='SILURIAN'
 
 mappingId	Mapping:NPD:Manual5:110
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='SILURIAN'
 
 mappingId	Mapping:NPD:Manual5:111
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='SILURIAN'
 
 mappingId	Mapping:NPD:Manual5:112
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Silurian>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='SILURIAN'
 
 mappingId	Mapping:NPD:Manual5:113
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeAtTd='TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:114
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc1='TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:115
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc2='TRIASSIC'
 
 mappingId	Mapping:NPD:Manual5:116
-target		<npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat}> npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
+target		npd:stratum/{wellbore_formation_top.lsuNpdidLithoStrat} npdv:geochronologicEra <http://resource.geosciml.org/classifier/ics/ischart/Triassic>.
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat FROM wellbore_formation_top, wellbore_exploration_all WHERE wellbore_formation_top.lsuName=wellbore_exploration_all.wlbFormationAtTd AND wellbore_exploration_all.wlbAgeWithHc3='TRIASSIC'
 
 mappingId	Mapping:NPD:Manual6:1
-target		<npd:field/{prfNpdidInformationCarrier}/production/{prfYear}> npdv:productionForField <npd:field/{prfNpdidInformationCarrier}>.
+target		npd:field/{prfNpdidInformationCarrier}/production/{prfYear} npdv:productionForField npd:field/{prfNpdidInformationCarrier}.
 source		SELECT prfNpdidInformationCarrier,prfYear FROM field_production_yearly WHERE prfNpdidInformationCarrier <> '44576'
 
 mappingId	Mapping:NPD:Manual6:2
-target		<npd:field/{prfNpdidInformationCarrier}/production/{prfYear}> npdv:productionForDiscovery <npd:discovery/{prfNpdidInformationCarrier}>.
+target		npd:field/{prfNpdidInformationCarrier}/production/{prfYear} npdv:productionForDiscovery npd:discovery/{prfNpdidInformationCarrier}.
 source		SELECT prfNpdidInformationCarrier,prfYear FROM field_production_yearly WHERE prfNpdidInformationCarrier='44576'
 
 mappingId	Mapping:NPD:Manual6:3
-target		<npd:field/{prfNpdidInformationCarrier}/production/{prfYear}/{prfMonth}>  npdv:productionForField <npd:field/{prfNpdidInformationCarrier}>.
+target		npd:field/{prfNpdidInformationCarrier}/production/{prfYear}/{prfMonth}  npdv:productionForField npd:field/{prfNpdidInformationCarrier}.
 source		SELECT prfNpdidInformationCarrier,prfYear,prfMonth FROM field_production_monthly WHERE prfNpdidInformationCarrier <> '44576'
 
 mappingId	Mapping:NPD:Manual6:4
-target		<npd:field/{prfNpdidInformationCarrier}/production/{prfYear}/{prfMonth}>  npdv:productionForDiscovery <npd:discovery/{prfNpdidInformationCarrier}>.
+target		npd:field/{prfNpdidInformationCarrier}/production/{prfYear}/{prfMonth}  npdv:productionForDiscovery npd:discovery/{prfNpdidInformationCarrier}.
 source		SELECT prfNpdidInformationCarrier,prfYear,prfMonth FROM field_production_monthly WHERE prfNpdidInformationCarrier='44576'
 
 mappingId	Mapping:NPD:Manual8:1
-target		<npd:licence/{prlNpdidLicence}/block/{blcName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}> npdv:isActive "true"^^rdfs:Literal .
+target		npd:licence/{prlNpdidLicence}/block/{blcName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:isActive "true"^^rdfs:Literal .
 source		SELECT prlNpdidLicence,blcName,prlAreaPolyPolyNo,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo FROM prlAreaSplitByBlock WHERE prlCurrentArea='ACTIVE'
 
 mappingId	Mapping:NPD:Manual8:2
-target		<npd:licence/{prlNpdidLicence}/block/{blcName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}> npdv:isActive "false"^^rdfs:Literal .
+target		npd:licence/{prlNpdidLicence}/block/{blcName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:isActive "false"^^rdfs:Literal .
 source		SELECT prlNpdidLicence,blcName,prlAreaPolyPolyNo,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo FROM prlAreaSplitByBlock WHERE prlCurrentArea='INACTIVE'
 
 mappingId	Mapping:NPD:Manual9:1
-target		<npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}>  npdv:isActive "true"^^rdfs:Literal .
+target		npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}  npdv:isActive "true"^^rdfs:Literal .
 source		SELECT prlArea_id,prlNpdidLicence,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo FROM prlArea  WHERE prlCurrentArea='ACTIVE'
 
 mappingId	Mapping:NPD:Manual9:2
-target		<npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}>  npdv:isActive "false"^^rdfs:Literal .
+target		npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}  npdv:isActive "false"^^rdfs:Literal .
 source		SELECT prlArea_id,prlNpdidLicence,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo FROM prlArea  WHERE prlCurrentArea='INACTIVE'
 
 mappingId	Mapping:NPD:Manual9:3
-target		<npd:licence/{prlNpdidLicence}> npdv:currentAreaSize {prlCurrentArea}^^xsd:decimal .
+target		npd:licence/{prlNpdidLicence} npdv:currentAreaSize {prlCurrentArea}^^xsd:decimal .
 source		SELECT prlNpdidLicence,prlCurrentArea FROM licence
 
 mappingId	Mapping:NPD:Manual10:1
-target		<npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}> npdv:coreIntervalBottom {wlbCoreIntervalBottom}^^xsd:decimal .
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coreIntervalBottom {wlbCoreIntervalBottom}^^xsd:decimal .
 source		SELECT wellbore_core_id,wlbNpdidWellbore,wlbCoreNumber,wlbCoreIntervalBottom FROM wellbore_core WHERE wlbCoreIntervalUom='[m   ]'
 
 mappingId	Mapping:NPD:Manual10:2
-target		<npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}> npdv:coreIntervalBottom {wlbCoreIntervalBottomFT}^^xsd:decimal .
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coreIntervalBottom {wlbCoreIntervalBottomFT}^^xsd:decimal .
 source		SELECT wellbore_core_id,wlbNpdidWellbore,wlbCoreNumber,wlbCoreIntervalBottom * 0.3048 AS wlbCoreIntervalBottomFT FROM wellbore_core WHERE wlbCoreIntervalUom='[ft  ]'
 
 mappingId	Mapping:NPD:Manual11:1
-target		<npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}> npdv:coreIntervalTop {wlbCoreIntervalTop}^^xsd:decimal .
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coreIntervalTop {wlbCoreIntervalTop}^^xsd:decimal .
 source		SELECT wellbore_core_id,wlbNpdidWellbore,wlbCoreNumber,wlbCoreIntervalTop FROM wellbore_core WHERE wlbCoreIntervalUom='[m   ]'
 
 mappingId	Mapping:NPD:Manual11:2
-target		<npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}> npdv:coreIntervalTop {wlbCoreIntervalTopFT}^^xsd:decimal .
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coreIntervalTop {wlbCoreIntervalTopFT}^^xsd:decimal .
 source		SELECT wellbore_core_id,wlbNpdidWellbore,wlbCoreNumber,wlbCoreIntervalTop * 0.3048 AS wlbCoreIntervalTopFT FROM wellbore_core WHERE wlbCoreIntervalUom='[ft  ]'
 
 mappingId	Mapping:NPD:Manual12
-target		<npd:wellbore/{wlbNpdidWellbore}/cores> npdv:member <npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}> .
+target		npd:wellbore/{wlbNpdidWellbore}/cores npdv:member npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} .
 source		SELECT wlbNpdidWellbore,wlbCoreNumber FROM wellbore_core
 
 mappingId	Mapping:NPD:Manual13
-target		<npd:licence/{A.prlNpdidLicence}/task/{A.prlTaskRefID}> npdv:dependsOnTask <npd:licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID}> .
+target		npd:licence/{A.prlNpdidLicence}/task/{A.prlTaskRefID} npdv:dependsOnTask npd:licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID} .
 source		SELECT prlNpdidLicence,prlTaskID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID
 ]]

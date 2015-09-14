@@ -172,6 +172,9 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return indexedQ1.computeHomomorphism(q2);
 	}	
 
+	static int redundantCounter = 0;
+	public static int twoAtomQs = 0;
+	public static int oneAtomQs = 0;
 	
 	public CQIE removeRedundantAtoms(CQIE query) {
 		List<Function> databaseAtoms = new ArrayList<>(query.getBody().size());
@@ -186,43 +189,51 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				databaseAtoms.add(atom);
 			}
 				
-		if (databaseAtoms.size() != 2)
+		if (databaseAtoms.size() != 2) {
+			oneAtomQs++;
 			return query;
+		}
 		
 		collectVariables(groundTerms, query.getHead());
 		
 		// ONE PARTICUALR CASE ONLY
 		CQIE db = fac.getCQIE(query.getHead(), databaseAtoms);
-		CQIE q0 = fac.getCQIE(query.getHead(), Collections.singletonList(databaseAtoms.get(0)));
-		CQIE q1 = fac.getCQIE(query.getHead(), Collections.singletonList(databaseAtoms.get(1)));
+		Function atomToRemove;
 		
+		atomToRemove = databaseAtoms.get(0);
+		CQIE q0 = fac.getCQIE(query.getHead(), Collections.singletonList(atomToRemove));
 		if (!isContainedIn(q0, db)) {
 			// other atoms' variables
 			Set<Term> v1 = getVariables(databaseAtoms.get(1));
-			if (containsConstants(databaseAtoms.get(0))) {
+			if (containsConstants(atomToRemove)) {
 				//System.err.println("CONSTANTS: " + databaseAtoms.get(0) + " IN " + query);
 			}
 			else if (v1.containsAll(groundTerms)) {
-				//System.err.println("REDUNDANT: " + databaseAtoms.get(0) + " IN " + query);
-				query.getBody().remove(databaseAtoms.get(0));
+				System.out.println("  REDUNDANT " + ++redundantCounter + ": " + atomToRemove + " IN " + query);
+				query.getBody().remove(atomToRemove);
+				oneAtomQs++;
 				return query;
 			}
 			//else
 			//	System.err.println("VARS PROB: " + databaseAtoms.get(0) + " IN " + query);
 		}
+		atomToRemove = databaseAtoms.get(1);
+		CQIE q1 = fac.getCQIE(query.getHead(), Collections.singletonList(atomToRemove));
 		if (!isContainedIn(q1, db)) {
 			Set<Term> v1 = getVariables(databaseAtoms.get(0));
-			if (containsConstants(databaseAtoms.get(1))) {
+			if (containsConstants(atomToRemove)) {
 				//System.err.println("CONSTANTS: " + databaseAtoms.get(1) + " IN " + query);
 			}
 			else if (v1.containsAll(groundTerms)) {
-				//System.err.println("REDUNDANT: " + databaseAtoms.get(1) + " IN " + query);
-				query.getBody().remove(databaseAtoms.get(1));
+				System.out.println("  REDUNDANT " + ++redundantCounter + ": " + atomToRemove + " IN " + query);
+				query.getBody().remove(atomToRemove);
+				oneAtomQs++;
 				return query;
 			}
 			//else
 			//	System.err.println("VARS PROB: " + databaseAtoms.get(1) + " IN " + query);
 		}
+		twoAtomQs++;
 		return query;
 	}
 

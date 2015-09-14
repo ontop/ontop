@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -51,6 +52,8 @@ import java.util.Set;
 public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+	private static final boolean noCQC = false;		
 
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final List<TMappingRule> rules = new LinkedList<>();
@@ -118,7 +121,6 @@ public class TMappingProcessor {
 				return;
 			}
 		
-			final boolean noCQC = false;		
 			if (noCQC) {
 				for (TMappingRule r : rules)
 					if (r.equals(newRule))
@@ -172,21 +174,41 @@ public class TMappingProcessor {
 						SubstitutionUtilities.applySubstitution(f, fromNewRule);
 
 					List<List<Function>> existingconditions = currentRule.getConditions();
+					List<List<Function>> filterAtoms = new ArrayList<>(existingconditions.size() + 1);
+					
 					for (List<Function> econd : existingconditions) {
+						boolean found2 = true;
+						for (Function ec : econd) 
+							if (!newconditions.contains(ec)) {
+								found2 = false;
+								break;
+							}
+						// if each of the existing conditions is found then the new condition is redundant
+						if (found2)
+							return;
+						
 						boolean found = true;
 						for (Function nc : newconditions)
 							if (!econd.contains(nc)) { 
 								found = false;
 								break;
 							}	
-						// if each of the new conditions is found among econd then the new map is redundant
-						if (found)
-							return;
+						// if each of the new conditions is found among econd then the old condition is redundant
+						if (found) {
+							//System.err.println(econd + " contains " + newconditions);
+						}
+						else
+							filterAtoms.add(TMappingRule.cloneList(econd));		
 					}
+
+					filterAtoms.add(newconditions);
+
+					
+					
 					
 	                mappingIterator.remove();
 	                
-					newRule = new TMappingRule(currentRule, newconditions);
+					newRule = new TMappingRule(currentRule, filterAtoms);
 
 					break;
 				}				
@@ -395,7 +417,19 @@ public class TMappingProcessor {
 			System.out.println("===CHECKING REDUNDANCY: " + cqc);
 		for (CQIE mapping : originalMappings) {	
 
-			mapping = cqc.removeRedundantAtoms(mapping);
+			if (!noCQC)
+				mapping = cqc.removeRedundantAtoms(mapping);
+			else {
+				int c = 0;
+				for (Function a : mapping.getBody()) 
+					if (!(a.getFunctionSymbol() instanceof BuiltinPredicate))
+						c++;
+				
+				if (c == 1)
+					CQContainmentCheckUnderLIDs.oneAtomQs++;
+				else if (c == 2)
+					CQContainmentCheckUnderLIDs.twoAtomQs++;
+			}	
 			
 			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
@@ -410,7 +444,7 @@ public class TMappingProcessor {
 			set.mergeMappingsWithCQC(rule);
 		}
 		if (printouts)
-			System.out.println("===END OF CHECKING REDUNDANCY");
+			System.out.println("===END OF CHECKING REDUNDANCY: " + CQContainmentCheckUnderLIDs.oneAtomQs + "/" + CQContainmentCheckUnderLIDs.twoAtomQs);
 		
 
 		/*
@@ -562,8 +596,12 @@ public class TMappingProcessor {
 						System.out.println("    " + r.asCQIE());
 				}
 			}
-			for (Integer idx: sorted) 
+			int total = 0;
+			for (Integer idx: sorted) {
 				System.out.println("   " + idx + ": " +  frequences.get(idx).size() + " " + frequences.get(idx));
+				total += frequences.get(idx).size();
+			}
+			System.out.println("NUMBER OF PREDICATES: " + total);
 		}
 				
 		return tmappingsProgram;

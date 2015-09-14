@@ -108,21 +108,18 @@ public class TMappingRule {
 		return atom;
 	}
 	
-	public TMappingRule(TMappingRule baseRule, List<Function> conditionsOR) {
+	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms) {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)baseRule.head.clone();
 
-		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size() + 1);
-		for (List<Function> baseList: baseRule.filterAtoms)
-			filterAtoms.add(cloneList(baseList));		
-		filterAtoms.add(conditionsOR);
-
+		this.filterAtoms = filterAtoms;
+		
 		this.stripped = fac.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
 	
-	public TMappingRule(Function head, TMappingRule baseRule) {
+	TMappingRule(Function head, TMappingRule baseRule) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));

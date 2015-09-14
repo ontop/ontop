@@ -1,0 +1,70 @@
+[PrefixDeclaration]
+:		http://uob.iodt.ibm.com/univ-bench-dl.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+benchmark-dl:	http://uob.iodt.ibm.com/univ-bench-dl.owl#
+
+[SourceDeclaration]
+sourceUri	uobm
+connectionUrl	jdbc:h2:mem:uobm
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Systems Staff Works For Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{staffType}{ssID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, ssID, staffType FROM SupportStaff WHERE staffType = 'SystemsStaff'
+
+mappingId	Clerical Staff Works For Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{staffType}{ssID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, ssID, staffType FROM SupportStaff WHERE staffType ='ClericalStaff'
+
+mappingId	Lecturer Works For Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{role}{lecturerID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, lecturerID, 'Lecturer' as role FROM Lecturers WHERE isWorking = 1
+
+mappingId	Assistant Professor Works For Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID, profType FROM Professors WHERE profType = 'AssistantProfessor' and isWorking = 1
+
+mappingId	Associate Professor Works For Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID, profType FROM Professors WHERE profType = 'AssociateProfessor' and isWorking = 1
+
+mappingId	Full Professor Works For Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID, profType FROM Professors WHERE profType = 'FullProfessor' and isWorking = 1
+
+mappingId	Lecturer
+target		<http://www.Department{deptID}.University{uniID}.edu/{role}{lecturerID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> .
+source		SELECT deptID, uniID, 'Lecturer' as role FROM Lecturers
+
+mappingId	Assistant Professor
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> .
+source		SELECT deptID, uniID, profID FROM Professors WHERE profType = 'AssistantProfessor'
+
+mappingId	Associate Professor
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID FROM Professors WHERE profType = 'AssociateProfessor'
+
+mappingId	Assistant Professor is Head of Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:isHeadOf <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID, profType FROM Professors WHERE profType = 'AssistantProfessor' and isHeadOfDep = 1
+
+mappingId	Associate Professor is Head of Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:isHeadOf <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID, profType FROM Professors WHERE profType = 'AssociateProfessor' and isHeadOfDep = 1
+
+mappingId	Full Professor is Head of Department
+target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:isHeadOf <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, profID, profType FROM Professors WHERE profType = 'FullProfessor' and isHeadOfDep = 1
+
+mappingId	Chair
+target		<http://www.Department{deptID}.University{uniID}.edu/{role}{chairID}> benchmark-dl:isHeadOf <http://www.Department{deptID}.University{uniID}.edu> . 
+source		SELECT deptID, uniID, chairID, 'Chair' as role FROM Chairs
+]]
+
