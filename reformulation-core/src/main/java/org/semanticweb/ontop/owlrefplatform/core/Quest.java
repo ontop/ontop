@@ -49,6 +49,8 @@ import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimiz
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
+import org.semanticweb.ontop.pivotalrepr.MetadataForQueryOptimization;
+import org.semanticweb.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -1029,4 +1031,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
     public SQLQueryGenerator cloneDataSourceQueryGenerator() {
         return datasourceQueryGenerator.cloneGenerator();
     }
+
+	/**
+	 * TODO: improve
+	 */
+	public MetadataForQueryOptimization getMetadataForQueryOptimization() {
+		return new MetadataForQueryOptimizationImpl(unfolder.getPrimaryKeys());
+	}
 }

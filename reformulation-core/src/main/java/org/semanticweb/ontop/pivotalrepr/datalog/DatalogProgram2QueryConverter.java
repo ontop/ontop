@@ -47,7 +47,8 @@ public class DatalogProgram2QueryConverter {
      * TODO: explain
      *
      */
-    public static IntermediateQuery convertDatalogProgram(DatalogProgram queryProgram,
+    public static IntermediateQuery convertDatalogProgram(MetadataForQueryOptimization metadata,
+                                                          DatalogProgram queryProgram,
                                                           Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException {
         List<CQIE> rules = queryProgram.getRules();
@@ -70,7 +71,7 @@ public class DatalogProgram2QueryConverter {
         /**
          * TODO: explain
          */
-        IntermediateQuery intermediateQuery = convertDatalogDefinitions(rootPredicate, ruleIndex, tablePredicates,
+        IntermediateQuery intermediateQuery = convertDatalogDefinitions(metadata, rootPredicate, ruleIndex, tablePredicates,
                 topQueryModifiers).get();
 
         /**
@@ -78,8 +79,8 @@ public class DatalogProgram2QueryConverter {
          */
         for (int i=1; i < topDownPredicates.size() ; i++) {
             Predicate datalogAtomPredicate  = topDownPredicates.get(i);
-            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex,
-                    tablePredicates, NO_QUERY_MODIFIER);
+            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
+                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
                 try {
                     intermediateQuery.mergeSubQuery(optionalSubQuery.get());
@@ -98,7 +99,8 @@ public class DatalogProgram2QueryConverter {
     /**
      * TODO: explain and comment
      */
-    private static Optional<IntermediateQuery> convertDatalogDefinitions(Predicate datalogAtomPredicate,
+    private static Optional<IntermediateQuery> convertDatalogDefinitions(MetadataForQueryOptimization metadata,
+                                                                         Predicate datalogAtomPredicate,
                                                                          Multimap<Predicate, CQIE> datalogRuleIndex,
                                                                          Collection<Predicate> tablePredicates,
                                                                          Optional<ImmutableQueryModifiers> optionalModifiers)
@@ -109,12 +111,13 @@ public class DatalogProgram2QueryConverter {
                 return Optional.absent();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(convertDatalogRule(definition, tablePredicates, optionalModifiers));
+                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
-                            convertDatalogRule(datalogAtomDefinition, tablePredicates, Optional.<ImmutableQueryModifiers>absent()));
+                            convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
+                                    Optional.<ImmutableQueryModifiers>absent()));
                 }
                 try {
                     return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);

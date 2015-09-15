@@ -498,7 +498,8 @@ public class QuestStatement implements OBDAStatement {
 
 		if (unfolding.getRules().size() > 0) {
 			try {
-				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(unfolding,
+				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
+						questInstance.getMetadataForQueryOptimization(), unfolding,
 						unfolder.getExtensionalPredicates());
 				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
 

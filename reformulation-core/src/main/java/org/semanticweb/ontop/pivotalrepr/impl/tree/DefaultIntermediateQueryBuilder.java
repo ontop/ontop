@@ -13,10 +13,12 @@ import org.semanticweb.ontop.pivotalrepr.impl.IntermediateQueryImpl;
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
+    private final MetadataForQueryOptimization metadata;
     private QueryTree tree;
     private boolean canEdit;
 
-    public DefaultIntermediateQueryBuilder() {
+    public DefaultIntermediateQueryBuilder(MetadataForQueryOptimization metadata) {
+        this.metadata = metadata;
         tree = null;
         canEdit = true;
     }
@@ -70,7 +72,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = new IntermediateQueryImpl(new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = new IntermediateQueryImpl(metadata, new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
     }

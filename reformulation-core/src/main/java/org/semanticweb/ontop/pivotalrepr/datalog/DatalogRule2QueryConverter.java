@@ -106,7 +106,8 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    public static IntermediateQuery convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates,
+    public static IntermediateQuery convertDatalogRule(MetadataForQueryOptimization metadata, CQIE datalogRule,
+                                                       Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
 
@@ -115,7 +116,7 @@ public class DatalogRule2QueryConverter {
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-        return createDefinition(rootNode, tablePredicates, atomClassification.dataAndCompositeAtoms,
+        return createDefinition(metadata, rootNode, tablePredicates, atomClassification.dataAndCompositeAtoms,
                 atomClassification.booleanAtoms, atomClassification.optionalGroupAtom);
     }
 
@@ -137,7 +138,8 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery createDefinition(ConstructionNode rootNode, Collection<Predicate> tablePredicates,
+    private static IntermediateQuery createDefinition(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+                                                      Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom)
             throws InvalidDatalogProgramException {
@@ -147,7 +149,7 @@ public class DatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
         try {
             queryBuilder.init(rootNode);

@@ -9,6 +9,8 @@ import org.semanticweb.ontop.pivotalrepr.proposal.*;
  */
 public interface IntermediateQuery {
 
+    MetadataForQueryOptimization getMetadata();
+
     ConstructionNode getRootConstructionNode();
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();

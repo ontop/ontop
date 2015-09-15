@@ -2,9 +2,12 @@ package org.semanticweb.ontop.owlrefplatform.core;
 
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.sf.jsqlparser.statement.select.Select;
+import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -56,7 +59,9 @@ public class QuestUnfolder {
 	
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
 	private final TMappingExclusionConfig excludeFromTMappings;
-	
+
+	private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys;
+
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
 	 *          those predicates should not be extended according to the 
@@ -159,10 +164,38 @@ public class QuestUnfolder {
 //			log.debug("{}", rule);
 //		}
 
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+
+		primaryKeys = convertPrimaryKeys(pkeys);
 	}
 
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
+	private static ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> convertPrimaryKeys(
+			Multimap<Predicate, List<Integer>> pkeys) {
+		Map<Predicate, AtomPredicate> predicateMap = new HashMap<>();
+
+		ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> multimapBuilder = ImmutableMultimap.builder();
+
+		for(Map.Entry<Predicate, List<Integer>> entry : pkeys.entries()) {
+			Predicate originalPredicate = entry.getKey();
+			AtomPredicate atomPredicate;
+			if (originalPredicate instanceof AtomPredicate) {
+				atomPredicate = (AtomPredicate) originalPredicate;
+			}
+			else if (predicateMap.containsKey(originalPredicate)) {
+				atomPredicate = predicateMap.get(originalPredicate);
+			}
+			else {
+				atomPredicate = new AtomPredicateImpl(originalPredicate);
+				predicateMap.put(originalPredicate, atomPredicate);
+			}
+
+			multimapBuilder.put(atomPredicate, ImmutableList.copyOf(entry.getValue()));
+		}
+		return multimapBuilder.build();
+	}
+
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata,
+							   TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
@@ -487,5 +520,9 @@ public class QuestUnfolder {
 
 	public UnfoldingMechanism getDatalogUnfolder(){
 		return unfolder;
+	}
+
+	public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getPrimaryKeys() {
+		return primaryKeys;
 	}
 }

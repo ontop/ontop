@@ -24,6 +24,7 @@ import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.Arg
 public class NodeDeletionTest {
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+    private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 
 
     @Test(expected = EmptyQueryException.class)
@@ -31,7 +32,7 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 1), x));
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -66,7 +67,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y));
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -113,7 +114,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y));
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -183,7 +184,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y));
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -248,7 +249,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y));
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);

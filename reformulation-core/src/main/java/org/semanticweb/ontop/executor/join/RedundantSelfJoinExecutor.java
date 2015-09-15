@@ -118,19 +118,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     private static final class AtomUnificationException extends Exception {
     }
 
-
-
-    private final ImmutableMap<AtomPredicate, ImmutableList<Integer>> primaryKeys;
-
-    /**
-     * TODO: find a way to get this information
-     */
-    public RedundantSelfJoinExecutor(ImmutableMap<AtomPredicate, ImmutableList<Integer>> primaryKeys) {
-        this.primaryKeys = primaryKeys;
-    }
-
     @Override
-    public NodeCentricOptimizationResults apply(final InnerJoinOptimizationProposal highLevelProposal,
+    public NodeCentricOptimizationResults<InnerJoinNode> apply(final InnerJoinOptimizationProposal highLevelProposal,
                                                 final IntermediateQuery query,
                                                 final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
@@ -148,7 +137,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
             ImmutableSet<Variable> variablesToKeep = VariableCollector.collectVariables(
                     query.getClosestConstructionNode(topJoinNode));
 
-            Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep);
+            Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
+                    query.getMetadata().getPrimaryKeys());
 
             if (optionalConcreteProposal.isPresent()) {
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
@@ -157,11 +147,12 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 applyOptimization(treeComponent, highLevelProposal.getFocusNode(), concreteProposal);
             }
         }
-        return new NodeCentricOptimizationResultsImpl(query, topJoinNode);
+        return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
     }
 
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
-                                     ImmutableSet<Variable> variablesToKeep) {
+                                               ImmutableSet<Variable> variablesToKeep,
+                                               ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys) {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
@@ -193,7 +184,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
      *
      */
     private PredicateLevelProposal proposePerPredicate(ImmutableCollection<DataNode> dataNodes,
-                                                       ImmutableList<Integer> primaryKeyPositions) throws AtomUnificationException {
+                                                       ImmutableCollection<ImmutableList<Integer>> primaryKeyPositions) throws AtomUnificationException {
         final ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap
                 = groupByPrimaryKeyArguments(dataNodes, primaryKeyPositions);
 
@@ -238,11 +229,13 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
      * TODO: explain
      */
     private static ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupByPrimaryKeyArguments(
-            ImmutableCollection<DataNode> dataNodes, ImmutableList<Integer> primaryKeyPositions) {
+            ImmutableCollection<DataNode> dataNodes, ImmutableCollection<ImmutableList<Integer>> collectionOfPrimaryKeyPositions) {
         ImmutableMultimap.Builder<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMapBuilder = ImmutableMultimap.builder();
 
-        for (DataNode dataNode : dataNodes) {
-            groupingMapBuilder.put(extractPrimaryKeyArguments(dataNode.getAtom(), primaryKeyPositions), dataNode);
+        for (ImmutableList<Integer> primaryKeyPositions : collectionOfPrimaryKeyPositions) {
+            for (DataNode dataNode : dataNodes) {
+                groupingMapBuilder.put(extractPrimaryKeyArguments(dataNode.getAtom(), primaryKeyPositions), dataNode);
+            }
         }
         return groupingMapBuilder.build();
     }

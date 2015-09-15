@@ -10,6 +10,7 @@ import org.semanticweb.ontop.pivotalrepr.impl.IntermediateQueryImpl;
 
 public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
+    private final MetadataForQueryOptimization metadata;
     private DirectedAcyclicGraph<QueryNode,JgraphtQueryTreeComponent.LabeledEdge> queryDAG;
     private ConstructionNode rootConstructionNode;
     private boolean canEdit;
@@ -18,7 +19,8 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     /**
      * TODO: construct with Guice?
      */
-    public JgraphtIntermediateQueryBuilder() {
+    public JgraphtIntermediateQueryBuilder(MetadataForQueryOptimization metadata) {
+        this.metadata =  metadata;
         queryDAG = new DirectedAcyclicGraph<>(JgraphtQueryTreeComponent.LabeledEdge.class);
         rootConstructionNode = null;
         canEdit = false;
@@ -92,7 +94,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
 
         IntermediateQuery query;
         try {
-            query = new IntermediateQueryImpl(new JgraphtQueryTreeComponent(queryDAG));
+            query = new IntermediateQueryImpl(metadata, new JgraphtQueryTreeComponent(queryDAG));
         } catch (IllegalTreeException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }

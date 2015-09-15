@@ -42,6 +42,7 @@ public class UnionLiftTest {
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 	private static final Optional<ImmutableBooleanExpression> NO_EXPRESSION = Optional.absent();
 	private static final Optional<ImmutableQueryModifiers> NO_MODIFIER = Optional.absent();
+	private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 
     private UnionNode unionAns2Node;
 
@@ -59,7 +60,7 @@ public class UnionLiftTest {
         DataAtom rootDataAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 2), x, y);
         ConstructionNode root = new ConstructionNodeImpl(rootDataAtom);
 
-		IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+		IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 		queryBuilder.init(root);
 
 

@@ -49,6 +49,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     private final QueryTreeComponent treeComponent;
 
+    private final MetadataForQueryOptimization metadata;
+
     /**
      * TODO: explain
      */
@@ -74,8 +76,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(QueryTreeComponent treeComponent) {
+    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, QueryTreeComponent treeComponent) {
+        this.metadata = metadata;
         this.treeComponent = treeComponent;
+    }
+
+    @Override
+    public MetadataForQueryOptimization getMetadata() {
+        return metadata;
     }
 
     @Override

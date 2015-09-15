@@ -11,7 +11,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
     public IntermediateQuery apply(UnionNode unionNode, QueryNode targetQueryNode, IntermediateQuery inputQuery) {
 
-        IntermediateQueryBuilder builder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder builder = new DefaultIntermediateQueryBuilder(inputQuery.getMetadata());
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {

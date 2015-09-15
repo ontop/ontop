@@ -62,7 +62,8 @@ public class IntermediateQueryUtils {
 
         for (IntermediateQuery originalDefinition : predicateDefinitions) {
             if (mergedDefinition == null) {
-                mergedDefinition = initMergedDefinition(headAtom, subQueryAtom, optionalTopModifiers);
+                mergedDefinition = initMergedDefinition(originalDefinition.getMetadata(), headAtom, subQueryAtom,
+                        optionalTopModifiers);
             } else {
                 mergedDefinition = prepareForMergingNewDefinition(mergedDefinition, subQueryAtom);
             }
@@ -135,14 +136,15 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery initMergedDefinition(DataAtom headAtom, DataAtom subQueryAtom,
+    private static IntermediateQuery initMergedDefinition(MetadataForQueryOptimization metadata,
+                                                          DataAtom headAtom, DataAtom subQueryAtom,
                                                           Optional<ImmutableQueryModifiers> optionalTopModifiers)
             throws QueryMergingException {
         ConstructionNode rootNode = new ConstructionNodeImpl(headAtom, new NeutralSubstitution(), optionalTopModifiers);
         UnionNode unionNode = new UnionNodeImpl();
         OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
         try {
             queryBuilder.init(rootNode);
             queryBuilder.addChild(rootNode, unionNode);
@@ -225,7 +227,7 @@ public class IntermediateQueryUtils {
     private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                         Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
 
         // Clone of the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();

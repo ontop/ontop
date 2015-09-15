@@ -140,7 +140,7 @@ public class SubQueryUnificationTools {
                 targetDataAtom);
 
         try {
-            IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder();
+            IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalSubQuery.getMetadata());
             queryBuilder.init(rootUnification.unifiedNode);
 
             /**
