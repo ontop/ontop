@@ -5,7 +5,6 @@ import com.google.common.collect.*;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
@@ -135,7 +134,7 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
                                                 final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
 
-        InnerJoinNode topJoinNode = highLevelProposal.getTopJoinNode();
+        InnerJoinNode topJoinNode = highLevelProposal.getFocusNode();
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
@@ -154,7 +153,7 @@ public class RedundantSelfJoinExecutor implements InternalProposalExecutor<Inner
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                applyOptimization(treeComponent, highLevelProposal.getTopJoinNode(), concreteProposal);
+                applyOptimization(treeComponent, highLevelProposal.getFocusNode(), concreteProposal);
             }
         }
         return new NodeCentricOptimizationResultsImpl(query, topJoinNode);

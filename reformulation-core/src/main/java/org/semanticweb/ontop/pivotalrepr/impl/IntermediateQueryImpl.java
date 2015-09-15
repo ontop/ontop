@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
-import org.semanticweb.ontop.executor.join.JoinBooleanExpressionExecutor;
+import org.semanticweb.ontop.executor.join.JoinInternalCompositeExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.Variable;
@@ -66,7 +66,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     static {
         INTERNAL_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>of(
                 SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class,
-                InnerJoinOptimizationProposal.class, JoinBooleanExpressionExecutor.class,
+                InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class,
                 ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class);
     }
 

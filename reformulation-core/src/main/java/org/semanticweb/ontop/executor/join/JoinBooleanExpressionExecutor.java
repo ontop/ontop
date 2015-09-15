@@ -28,7 +28,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
                                               QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-        InnerJoinNode originalTopJoinNode = proposal.getTopJoinNode();
+        InnerJoinNode originalTopJoinNode = proposal.getFocusNode();
 
         /**
          * Will remain the sames, whatever happens

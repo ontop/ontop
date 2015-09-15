@@ -13,7 +13,7 @@ public class InnerJoinOptimizationProposalImpl implements InnerJoinOptimizationP
     }
 
     @Override
-    public InnerJoinNode getTopJoinNode() {
+    public InnerJoinNode getFocusNode() {
         return topJoinNode;
     }
 
