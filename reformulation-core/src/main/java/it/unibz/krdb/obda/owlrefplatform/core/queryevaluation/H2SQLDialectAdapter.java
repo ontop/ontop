@@ -24,12 +24,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.util.regex.Pattern;
 
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
-	
+
 	@Override
-	public String uuid(){
+	public String strUuid(){
 		return "RANDOM_UUID()";
 	}
-	
+
+	@Override
 	public String strEncodeForUri(String str){
 	      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
 	            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
@@ -52,7 +53,12 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	            "'''', '%22'), " +
 	            "'/', '%2F')";
 	    }
-	
+
+	@Override
+	public String uuid(){
+		return "'urn:uuid:'||RANDOM_UUID()";
+	}
+
 	@Override
 	public String SHA256(String str){
 		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1)", str);

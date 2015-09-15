@@ -37,6 +37,8 @@ public interface SQLDialectAdapter {
 
 	public String uuid();
 
+	public String strUuid();
+
 	public String ceil();
 
 	public String round();
@@ -59,7 +61,9 @@ public interface SQLDialectAdapter {
 	
 	public String strAfter(String str, String after);
 	
-	public String strSubstr(String str, String start, String end); 
+	public String strSubstr(String str, String start, String end);
+
+	public String strSubstr(String str, String start);
 
 	public String strConcat(String[] strings);
 

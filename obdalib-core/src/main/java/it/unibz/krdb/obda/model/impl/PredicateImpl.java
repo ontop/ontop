@@ -144,4 +144,9 @@ public class PredicateImpl implements Predicate {
 		}
 		return false;
 	}
+
+	@Override
+	public boolean isDateTimePredicate() {
+		return this instanceof DateTimeOperationPredicate;
+	}
 }

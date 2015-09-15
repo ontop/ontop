@@ -834,20 +834,27 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				mainColumn = termStr;
 
-			} 
+			}
 			else if (function instanceof URITemplatePredicate) {
 				// New template based URI building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
-			} 
+			}
 			else if (function instanceof BNodePredicate) {
 				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
-			} 
-			else if (function instanceof StringOperationPredicate) {
+			}
+			else if (function instanceof StringOperationPredicate || function instanceof DateTimeOperationPredicate) {
 				// Functions returning string values
 				mainColumn = getSQLString(ov, index, false);
-			} 
+			}
+			else if (function instanceof NonBooleanOperationPredicate){
+			 	if (function.equals(OBDAVocabulary.UUID)) {
+				 mainColumn = sqladapter.uuid();
+				} else if (function.equals(OBDAVocabulary.STRUUID)) {
+				 mainColumn = sqladapter.strUuid();
+			 	}
+			}
 
             else if (function.isArithmeticPredicate()){
             	String expressionFormat = getNumericalOperatorString(function);
@@ -994,8 +1001,8 @@ public class SQLGenerator implements SQLQueryGenerator {
         COL_TYPE type;
 
         if (ht instanceof Function) {
-            Function ov = (Function) ht;
-            Predicate function = ov.getFunctionSymbol();
+			Function ov = (Function) ht;
+			Predicate function = ov.getFunctionSymbol();
 
 			/*
 			 * Adding the ColType column to the projection (used in the result
@@ -1005,57 +1012,80 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * type
 			 */
 
-            if (function instanceof URITemplatePredicate) {
-                type = COL_TYPE.OBJECT;
-            }
-            else if (function instanceof BNodePredicate) {
-                type = COL_TYPE.BNODE;
-            }
-            else if (function.isStringOperationPredicate()) {
+			if (function instanceof URITemplatePredicate || function.equals(OBDAVocabulary.UUID)) {
+				type = COL_TYPE.OBJECT;
+			} else if (function instanceof BNodePredicate) {
+				type = COL_TYPE.BNODE;
+			} else if (function.isStringOperationPredicate() || function instanceof NonBooleanOperationPredicate) {
 
 
-                if (function.equals(OBDAVocabulary.CONCAT)) {
+				if (function.equals(OBDAVocabulary.CONCAT)) {
 
-                    COL_TYPE type1, type2;
+					COL_TYPE type1, type2;
 
-                    type1 = getTypeColumn( ov.getTerm(0));
-                    type2 = getTypeColumn( ov.getTerm(1));
+					type1 = getTypeColumn(ov.getTerm(0));
+					type2 = getTypeColumn(ov.getTerm(1));
 
-                    if (type1.equals(type2) && (type1.equals(COL_TYPE.STRING)) ) {
+					if (type1.equals(type2) && (type1.equals(COL_TYPE.STRING))) {
 
-                        type =  type1; //only if both values are string return string
+						type = type1; //only if both values are string return string
 
-                    } else{
+					} else {
 
-                        type = COL_TYPE.LITERAL;
-                    }
+						type = COL_TYPE.LITERAL;
+					}
 
-                } else if (function.equals(OBDAVocabulary.REPLACE)){
-                    COL_TYPE type1;
-                    type1 = getTypeColumn( ov.getTerm(0));
+				} else if (function.equals(OBDAVocabulary.REPLACE)) {
+					COL_TYPE type1;
+					type1 = getTypeColumn(ov.getTerm(0));
 
-                    if(type1.equals(COL_TYPE.STRING)) {
-                        type = type1;
-                    }
-                    else{
-                        type = COL_TYPE.LITERAL;
-                    }
+					if (type1.equals(COL_TYPE.STRING)) {
+						type = type1;
+					} else {
+						type = COL_TYPE.LITERAL;
+					}
 
-                }
-                else {
+				} else if (function.equals(OBDAVocabulary.STRLEN)) {
 
-                    type = COL_TYPE.LITERAL;
-                }
+					type = COL_TYPE.INTEGER;
 
-            }
-            else if  (ov.isArithmeticFunction()) {
-                type = COL_TYPE.LITERAL;
-            }
-            else {
-                String functionString = function.toString();
-                type = dtfac.getDatatype(functionString);
-            }
-        }
+				} else {
+
+					type = COL_TYPE.LITERAL;
+				}
+
+			} else if (ov.isArithmeticFunction()) {
+
+				if (function.equals(OBDAVocabulary.ABS) || function.equals(OBDAVocabulary.ROUND) ||
+						function.equals(OBDAVocabulary.CEIL) || function.equals(OBDAVocabulary.FLOOR) ) {
+					type = getTypeColumn(ov.getTerm(0));
+
+				}else if (function.equals(OBDAVocabulary.RAND)){
+					type = COL_TYPE.DOUBLE;
+
+				} else {
+					type = COL_TYPE.LITERAL;
+				}
+			} else if (ov.isDateTimeFunction()) {
+
+				if (function.equals(OBDAVocabulary.MONTH) || function.equals(OBDAVocabulary.YEAR) ||
+						function.equals(OBDAVocabulary.DAY) || function.equals(OBDAVocabulary.MINUTES) || function.equals(OBDAVocabulary.HOURS)) {
+					type = COL_TYPE.INTEGER;
+
+				} else if (function.equals(OBDAVocabulary.NOW)) {
+					type = COL_TYPE.DATETIME;
+				} else if (function.equals(OBDAVocabulary.SECONDS)) {
+					type = COL_TYPE.DECIMAL;
+				}
+				else{
+					type = COL_TYPE.LITERAL;
+				}
+			} else {
+
+//                type = dtfac.getDatatype(functionString);
+				type = function.getType(0);
+			}
+		}
         else if (ht instanceof URIConstant) {
             type = COL_TYPE.OBJECT;
 		}
@@ -1500,6 +1530,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String result = sqladapter.dateDay(literal);
 				return result;
 
+			} else if (functionName.equals(OBDAVocabulary.NOW.getName())) {
+				return sqladapter.dateNow();
+
 			}  else if (functionName.equals(OBDAVocabulary.MONTH.getName())) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateMonth(literal);
@@ -1558,8 +1591,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}  else if (functionName.equals(OBDAVocabulary.SUBSTR.getName())) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String start = getSQLString(function.getTerm(1), index, false);
+				if(function.getTerms().size()==2){
+					return sqladapter.strSubstr(string, start);
+				}
+
 				String end = getSQLString(function.getTerm(2), index, false);
 				String result = sqladapter.strSubstr(string, start, end);
+
 				return result;
 			}
 
@@ -1705,10 +1743,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = sqladapter.round();
 		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
 			operator = RAND_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.UUID)) {
-			operator = sqladapter.uuid();
-		} else if (functionSymbol.equals(OBDAVocabulary.NOW)) {
-			operator = sqladapter.dateNow();			
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}

@@ -54,12 +54,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String SHA1(String str) {
-	  		return String.format("HASH(%s,'SH1')", str);
+	  		return String.format("HASH(%s, HASH_SH1)", str);
 	  	}
 	  
 	@Override
 	public String MD5(String str) {
-		return String.format("HASH(%s,'MD5')", str);
+		return String.format("HASH(%s,2)", str);
 	}
 
 	@Override
@@ -79,12 +79,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String strBefore(String str, String before) {
-		return String.format("NVL(SUBSTR(%s, 0, INSTR(%s,%s )-1), '\\u00A0') ", str,  str , before);
+		return String.format("NVL(SUBSTR(%s, 0, INSTR(%s,%s )-1), '') ", str,  str , before);
 	};
 
 	@Override
 	public String strAfter(String str, String after) {
-		return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s), SIGN(INSTR(%s,%s))*LENGTH(%s)), '\\u00A0')",
+		return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s), SIGN(INSTR(%s,%s))*LENGTH(%s)), '')",
 				str, str, after, after, str, after, str); //FIXME when no match found should return empty string
 	}
 //	"SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",

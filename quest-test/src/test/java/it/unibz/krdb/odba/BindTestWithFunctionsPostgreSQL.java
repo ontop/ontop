@@ -571,7 +571,35 @@ public class BindTestWithFunctionsPostgreSQL {
         expectedValues.add("\"1866\"");      
         expectedValues.add("\"1967\"");        
         checkReturnedValues(p, queryBind, expectedValues);
-    } 
+    }
+
+    @Test
+    public void testDay() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND (DAY(?year) AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"5\"");
+        expectedValues.add("\"8\"");
+        expectedValues.add("\"1\"");
+        expectedValues.add("\"5\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
 
         private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 

@@ -186,6 +186,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionUUID();
 
+	public Function getFunctionstrUUID();
+
 	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
@@ -195,6 +197,8 @@ public interface OBDADataFactory extends Serializable {
     public Function getFunctionLength(Term term1); 
     
 	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
+
+	public Function getFunctionSubstring(Term term1, Term term2);
 
 	public Function getFunctionUpper(Term term1);
 	

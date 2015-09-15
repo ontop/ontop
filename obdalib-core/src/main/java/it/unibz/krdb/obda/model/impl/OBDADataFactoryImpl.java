@@ -21,12 +21,10 @@ package it.unibz.krdb.obda.model.impl;
  */
 
 import com.google.common.base.Preconditions;
-
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
-
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -379,6 +377,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionUUID(){
 		return getFunction(OBDAVocabulary.UUID);
 		}
+
+	@Override
+	public Function getFunctionstrUUID(){
+		return getFunction(OBDAVocabulary.STRUUID);
+	}
 	@Override
 	public Function getFunctionNow(){
 		return getFunction(OBDAVocabulary.NOW);
@@ -529,6 +532,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
     public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
         return getFunction(OBDAVocabulary.SUBSTR, term1, term2, term3);
     } //added by Nika
+
+	@Override
+	public Function getFunctionSubstring(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.SUBSTR, term1, term2);
+	}
     
     @Override
     public Function getFunctionUpper(Term term) {

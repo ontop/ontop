@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -722,17 +721,32 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getSubstring(List<ValueExpr> args) {
-		if (args.size() != 3 && args.size() != 2){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");					
+		Term term = null;
+
+		switch (args.size()){
+			case 2 :
+				ValueExpr string = args.get(0);
+				ValueExpr start = args.get(1);
+				Term str = getExpression(string);
+				Term st = getExpression(start);
+				term  = ofac.getFunctionSubstring(str, st);
+				break;
+
+			case 3 :
+				string = args.get(0);
+				start = args.get(1);
+				ValueExpr end = args.get(2);
+				str = getExpression(string);
+				st = getExpression(start);
+				Term en = getExpression(end);
+				term = ofac.getFunctionSubstring(str, st, en);
+				break;
+			default:
+				throw new UnsupportedOperationException("Wrong number of arguments (found "
+						+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
+
 		}
-		ValueExpr string = args.get(0); 
-		ValueExpr start = args.get(1); 
-		ValueExpr end = args.get(2); 
-		Term str = getExpression(string);
-		Term st = getExpression(start);
-		Term en = getExpression(end);
-		Term term = ofac.getFunctionSubstring(str, st, en);
+
 		return term;
 	}
 	
@@ -884,6 +898,11 @@ public class SparqlAlgebraToDatalogTranslator {
 	private Term getUUID(List<ValueExpr> args) {	
 		Term term = ofac.getFunctionUUID();
 		return term;	
+	}
+
+	private Term getstrUUID(List<ValueExpr> args) {
+		Term term = ofac.getFunctionstrUUID();
+		return term;
 	}
 	
 	private Term getNow() {	
@@ -1106,6 +1125,9 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "UUID":
             	return getUUID(expr.getArgs());
+
+			case "STRUUID":
+				return getstrUUID(expr.getArgs());
                         
             case "MD5":
             	return getMD5(expr.getArgs()); 

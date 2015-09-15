@@ -120,12 +120,15 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
   	public String MD5(String str) {
       	throw new UnsupportedOperationException("MD5 is not supported in this dialect.");
   	}
-      
-    
+
+	@Override
+	public String strUuid() {
+		return "UUID()";
+	}
     
     @Override
 	public String uuid() {
-		return "UUID()";
+		return "'urn:uuid:'|| UUID()";
 	}
 
 	@Override
@@ -202,8 +205,13 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String strSubstr(String str, String start, String end) {
 		return String.format("SUBSTR(%s,%s,%s)", str, start, end);
-	} 
-	
+	}
+
+	@Override
+	public String strSubstr(String str, String start) {
+		return String.format("SUBSTR(%s,%s)", str, start);
+	}
+
 	@Override
 	public String strReplace(String str, char oldchar, char newchar) {
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);

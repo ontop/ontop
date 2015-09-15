@@ -20,11 +20,8 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.StringOperationPredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
 
 public class OBDAVocabulary {
 
@@ -57,10 +54,7 @@ public class OBDAVocabulary {
 			"floor", 1);
 	public static final Predicate RAND = new NumericalOperationPredicateImpl(
 			"RAND", 0);
-	public static final Predicate UUID = new NumericalOperationPredicateImpl(
-			"UUID", 0);
-	public static final Predicate NOW = new NumericalOperationPredicateImpl(
-			"NOW",0);
+
 
 	/* Boolean predicates */
 
@@ -95,12 +89,12 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate STR_STARTS = new BooleanOperationPredicateImpl(
 			"STRSTARTS", 2);
 	public static final BooleanOperationPredicate STR_ENDS = new BooleanOperationPredicateImpl(
-			"STR_ENDS", 2);
+			"STRENDS", 2);
 	public static final BooleanOperationPredicate CONTAINS = new BooleanOperationPredicateImpl(
 			"CONTAINS", 2);
 
 
-	/* String predicates */
+	/*SPARQL String predicates */
 
 	public static final StringOperationPredicate UCASE = new StringOperationPredicateImpl(
 			"UCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
@@ -132,6 +126,8 @@ public class OBDAVocabulary {
 
 	public static final StringOperationPredicate ENCODE_FOR_URI = new StringOperationPredicateImpl(
 			"ENCODE_FOR_URI", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+
+	/*Hash functions*/
 	
 	public static final StringOperationPredicate MD5 = new StringOperationPredicateImpl(
 			"MD5", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
@@ -144,29 +140,36 @@ public class OBDAVocabulary {
 	
 	public static final StringOperationPredicate SHA256 = new StringOperationPredicateImpl(
 			"SHA256", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
-	
-	public static final StringOperationPredicate YEAR = new StringOperationPredicateImpl(
+
+
+	/* SPARQL Functions on Dates and Times */
+
+	public static final DateTimeOperationPredicate NOW = new DateTimeOperationPredicateImpl(
+			"NOW", 0, null);
+
+	public static final DateTimeOperationPredicate YEAR = new DateTimeOperationPredicateImpl(
 			"YEAR", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-	public static final StringOperationPredicate DAY = new StringOperationPredicateImpl(
+	public static final DateTimeOperationPredicate DAY = new DateTimeOperationPredicateImpl(
 			"DAY", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-	public static final StringOperationPredicate MONTH = new StringOperationPredicateImpl(
+	public static final DateTimeOperationPredicate MONTH = new DateTimeOperationPredicateImpl(
 			"MONTH", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-	public static final StringOperationPredicate HOURS = new StringOperationPredicateImpl(
+	public static final DateTimeOperationPredicate HOURS = new DateTimeOperationPredicateImpl(
 			"HOURS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-	public static final StringOperationPredicate MINUTES = new StringOperationPredicateImpl(
+	public static final DateTimeOperationPredicate MINUTES = new DateTimeOperationPredicateImpl(
 			"MINUTES", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-	public static final StringOperationPredicate SECONDS = new StringOperationPredicateImpl(
+	public static final DateTimeOperationPredicate SECONDS = new DateTimeOperationPredicateImpl(
 			"SECONDS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-	public static final StringOperationPredicate TIMEZONE = new StringOperationPredicateImpl(
+	public static final DateTimeOperationPredicate TIMEZONE = new DateTimeOperationPredicateImpl(
 			"TIMEZONE", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+
 
 	/* Common namespaces and prefixes */
 
@@ -204,11 +207,15 @@ public class OBDAVocabulary {
 	/* SPARQL built-in functions */
 
 	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl(
-			"str");
+			"str", 1);
 	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl(
-			"datatype");
+			"datatype", 1);
 	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl(
-			"lang");
+			"lang" , 1 );
+	public static final Predicate UUID = new NonBooleanOperationPredicateImpl(
+			"UUID", 0);
+	public static final Predicate STRUUID = new NonBooleanOperationPredicateImpl(
+			"STRUUID", 0);
 
 	/* SPARQL built-in predicates */
 

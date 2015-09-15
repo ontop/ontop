@@ -9,9 +9,10 @@ package it.unibz.krdb.obda.model.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,18 +21,28 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
+import it.unibz.krdb.obda.model.DateTimeOperationPredicate;
+import it.unibz.krdb.obda.model.Predicate;
 
-public class NonBooleanOperationPredicateImpl extends PredicateImpl implements NonBooleanOperationPredicate {
+/**
+ * Made for sparql date time functions .
+ * See test {@link it.unibz.krdb.obda.reformulation.tests.BindTestWithFunctions}
+ * Created by Sarah on 14/09/15.
+ */
+public class DateTimeOperationPredicateImpl extends PredicateImpl implements DateTimeOperationPredicate {
 
-	private static final long serialVersionUID = 1L;
 
-	public NonBooleanOperationPredicateImpl(String name, int arity) {
-		super(name, arity, null);
-	}
+    private static final long serialVersionUID = 7629110140373921424L;
 
-	@Override
-	public NonBooleanOperationPredicateImpl clone() {
-		return this;
-	}
+    protected DateTimeOperationPredicateImpl(String name, int arity, Predicate.COL_TYPE[] types) {
+        super(name, arity, types);
+    }
+
+
+    @Override
+    public DateTimeOperationPredicate clone() {
+        return this;
+    }
+
+
 }

@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.model;
 
 /**
  * Made for string functions in the select part of the source sql of mappings. 
- * Presently only CONCAT and REPLACE
+ *
  *
  * See test {@link it.unibz.krdb.obda.reformulation.tests.ComplexSelectMappingVirtualABoxTest}
  * See test {@link it.unibz.krdb.obda.reformulation.tests.ComplexWhereMappingTest}
