@@ -17,7 +17,7 @@ import java.util.Queue;
 /**
  * TODO: explain
  */
-public class SubstitutionLiftProposalExecutor implements InternalProposalExecutor<SubstitutionLiftProposal> {
+public class SubstitutionLiftProposalExecutor implements InternalProposalExecutor<SubstitutionLiftProposal, ProposalResults> {
 
     @Override
     public ProposalResults apply(SubstitutionLiftProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent)

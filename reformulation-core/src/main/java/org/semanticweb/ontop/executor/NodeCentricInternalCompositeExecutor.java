@@ -1,36 +1,25 @@
 package org.semanticweb.ontop.executor;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.executor.join.JoinBooleanExpressionExecutor;
+import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 
 /**
  * TODO: explain
  */
-public abstract class NodeCentricInternalCompositeExecutor<P extends NodeCentricOptimizationProposal, N extends QueryNode>
-        extends InternalCompositeExecutor<P> {
+public abstract class NodeCentricInternalCompositeExecutor<N extends QueryNode, P extends NodeCentricOptimizationProposal<N>>
+        extends InternalCompositeExecutor<P, NodeCentricOptimizationResults<N>> implements NodeCentricInternalExecutor<N, P> {
+
     @Override
-    protected Optional<P> createNewProposal(ProposalResults results) {
-        if (!(results instanceof NodeCentricOptimizationResults)) {
-            throw new IllegalArgumentException("Unexpected type of results: " + results.getClass());
-        }
-
-        NodeCentricOptimizationResults nodeCentricResults = (NodeCentricOptimizationResults) results;
-
-        Optional<QueryNode> optionalNewNode = nodeCentricResults.getOptionalNewNode();
+    protected Optional<P> createNewProposal(NodeCentricOptimizationResults<N> results) {
+        Optional<N> optionalNewNode = results.getOptionalNewNode();
         if (optionalNewNode.isPresent()) {
-            try {
-                N newFocusNode = (N) optionalNewNode.get();
-                return createNewProposalFromFocusNode(newFocusNode);
-            }
-            /**
-             * Deals with the limits of Java generics...
-             */
-            catch (ClassCastException e) {
-               return Optional.absent();
-            }
+            return createNewProposalFromFocusNode(optionalNewNode.get());
         }
         else {
             return Optional.absent();
@@ -39,4 +28,7 @@ public abstract class NodeCentricInternalCompositeExecutor<P extends NodeCentric
     }
 
     protected abstract Optional<P> createNewProposalFromFocusNode(N focusNode);
+
+    @Override
+    protected abstract ImmutableList<NodeCentricInternalExecutor<N, P>> createExecutors();
 }

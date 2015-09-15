@@ -12,21 +12,22 @@ import java.util.Iterator;
 /**
  * TODO: explain
  */
-public abstract class InternalCompositeExecutor<T extends QueryOptimizationProposal> implements InternalProposalExecutor<T> {
+public abstract class InternalCompositeExecutor<P extends QueryOptimizationProposal, R extends ProposalResults>
+        implements InternalProposalExecutor<P, R> {
 
     @Override
-    public ProposalResults apply(final T initialProposal, IntermediateQuery query, final QueryTreeComponent treeComponent)
+    public R apply(final P initialProposal, IntermediateQuery query, final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-        ImmutableList<InternalProposalExecutor<T>> executors = createExecutors();
-        Iterator<InternalProposalExecutor<T>> executorIterator = executors.iterator();
+        ImmutableList<? extends InternalProposalExecutor<P, R>> executors = createExecutors();
+        Iterator<? extends InternalProposalExecutor<P, R>> executorIterator = executors.iterator();
 
         // Non-final
-        Optional<T> optionalProposal = Optional.of(initialProposal);
+        Optional<P> optionalProposal = Optional.of(initialProposal);
 
-        ProposalResults results;
+        R results;
         do {
-            InternalProposalExecutor<T> executor = executorIterator.next();
+            InternalProposalExecutor<P, R> executor = executorIterator.next();
 
             results = executor.apply(optionalProposal.get(), query, treeComponent);
             optionalProposal = createNewProposal(results);
@@ -37,9 +38,9 @@ public abstract class InternalCompositeExecutor<T extends QueryOptimizationPropo
         return results;
     }
 
-    protected abstract Optional<T> createNewProposal(ProposalResults results);
+    protected abstract Optional<P> createNewProposal(R results);
 
-    protected abstract ImmutableList<InternalProposalExecutor<T>> createExecutors();
+    protected abstract ImmutableList<? extends InternalProposalExecutor<P, R>> createExecutors();
 
 
 }

@@ -13,7 +13,8 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionResul
 /**
  * TODO: explain
  */
-public class ReactToChildDeletionExecutor implements InternalProposalExecutor<ReactToChildDeletionProposal> {
+public class ReactToChildDeletionExecutor implements InternalProposalExecutor<ReactToChildDeletionProposal,
+        ReactToChildDeletionResults> {
     @Override
     public ReactToChildDeletionResults apply(ReactToChildDeletionProposal proposal, IntermediateQuery query,
                                  QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {

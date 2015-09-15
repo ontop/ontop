@@ -3,6 +3,7 @@ package org.semanticweb.ontop.executor.join;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
+import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
@@ -18,13 +19,13 @@ import static org.semanticweb.ontop.executor.join.JoinExtractionUtils.*;
 /**
 * TODO: explain
 */
-public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<InnerJoinOptimizationProposal> {
+public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
 
     /**
      * Standard method (InternalProposalExecutor)
      */
     @Override
-    public NodeCentricOptimizationResults apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
+    public NodeCentricOptimizationResults<InnerJoinNode> apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
                                               QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
@@ -42,7 +43,7 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
         Optional<InnerJoinNode> optionalNewJoinNode = transformJoin(originalTopJoinNode, query, treeComponent);
 
         if (optionalNewJoinNode.isPresent()) {
-            return new NodeCentricOptimizationResultsImpl(query, optionalNewJoinNode.get());
+            return new NodeCentricOptimizationResultsImpl<>(query, optionalNewJoinNode.get());
         }
         else {
             ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
@@ -50,9 +51,8 @@ public class JoinBooleanExpressionExecutor implements InternalProposalExecutor<I
 
             ReactToChildDeletionResults deletionResults = reactionProposal.castResults(query.applyProposal(reactionProposal));
 
-            return new NodeCentricOptimizationResultsImpl(deletionResults.getResultingQuery(),
-                    deletionResults.getOptionalNextSibling(),
-                    Optional.of(deletionResults.getClosestRemainingAncestor()));
+            return new NodeCentricOptimizationResultsImpl<>(deletionResults.getResultingQuery(),
+                    deletionResults.getOptionalNextSibling(), Optional.of(deletionResults.getClosestRemainingAncestor()));
         }
     }
 

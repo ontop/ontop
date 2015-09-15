@@ -3,6 +3,7 @@ package org.semanticweb.ontop.executor.join;
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
+import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
@@ -25,7 +26,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationRe
  * Naturally assumes that the data atoms are leafs.
  *
  */
-public class RedundantSelfJoinExecutor implements InternalProposalExecutor<InnerJoinOptimizationProposal> {
+public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
 
     /**
      * TODO: explain

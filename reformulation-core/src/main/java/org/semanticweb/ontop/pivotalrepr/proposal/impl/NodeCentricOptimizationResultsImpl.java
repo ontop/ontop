@@ -5,15 +5,15 @@ import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 
-public class NodeCentricOptimizationResultsImpl extends ProposalResultsImpl
-        implements NodeCentricOptimizationResults {
+public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends ProposalResultsImpl
+        implements NodeCentricOptimizationResults<N> {
 
     private final Optional<QueryNode> optionalNextSibling;
-    private final Optional<QueryNode> optionalNewNode;
+    private final Optional<N> optionalNewNode;
     private final Optional<QueryNode> optionalClosestAncestor;
 
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
-                                              QueryNode newNode) {
+                                              N newNode) {
         super(query);
         this.optionalNextSibling = query.getNextSibling(newNode);
         this.optionalNewNode = Optional.of(newNode);
@@ -49,7 +49,7 @@ public class NodeCentricOptimizationResultsImpl extends ProposalResultsImpl
      * If absent, it means that the focus node has been deleted.
      */
     @Override
-    public Optional<QueryNode> getOptionalNewNode() {
+    public Optional<N> getOptionalNewNode() {
         return optionalNewNode;
     }
 

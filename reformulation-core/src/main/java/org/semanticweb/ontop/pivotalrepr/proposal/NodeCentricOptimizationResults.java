@@ -7,12 +7,12 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
 /**
  * TODO: explain
  */
-public interface NodeCentricOptimizationResults extends ProposalResults {
+public interface NodeCentricOptimizationResults<N extends QueryNode> extends ProposalResults {
 
     /**
      * TODO: explain
      */
-    Optional<QueryNode> getOptionalNewNode();
+    Optional<N> getOptionalNewNode();
 
     /**
      * TODO: explain

@@ -13,12 +13,13 @@ import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
  * InternalProposalExecutor are expected to manipulate directly a QueryTreeComponent
  *
  */
-public interface InternalProposalExecutor<T extends QueryOptimizationProposal> extends ProposalExecutor<T> {
+public interface InternalProposalExecutor<P extends QueryOptimizationProposal,
+        R extends ProposalResults> extends ProposalExecutor<P> {
 
     /**
      * TODO: explain
      */
-    public ProposalResults apply(T proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
+    public R apply(P proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
 }
