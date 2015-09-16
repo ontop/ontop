@@ -88,8 +88,6 @@ public class DirectMappingAxiom {
 		TableDefinition tableDef = ((TableDefinition) table);
 		Map<String, List<Attribute>> fks = tableDef.getForeignKeys();
 
-		Collection<Attribute> pks = tableDef.getPrimaryKey().getAttributes();
-		
 		String SQLStringTempl = new String("SELECT %s FROM %s WHERE %s");
 
 		String table = new String("\"" + this.table.getName() + "\"");
@@ -98,13 +96,19 @@ public class DirectMappingAxiom {
 		String Condition = "";
 		String tableRef = "";
 		
-		if (pks.size() > 0) {
-		for (Attribute pk : pks)
-			Column += Table + ".\"" + pk.getName() + "\" AS "+this.table.getName()+"_"+pk.getName()+", ";
-		} else {
-			for (Attribute att : tableDef.getAttributes()) {
-				String attrName = att.getName();
-				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
+		{
+			UniqueConstraint pk = tableDef.getPrimaryKey();
+			if (pk != null) {
+				for (Attribute att : pk.getAttributes()) {
+					String attrName = att.getName();
+					Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
+				}
+			} 
+			else {
+				for (Attribute att : tableDef.getAttributes()) {
+					String attrName = att.getName();
+					Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
+				}
 			}
 		}
 
