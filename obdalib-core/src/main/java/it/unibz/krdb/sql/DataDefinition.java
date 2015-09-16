@@ -25,6 +25,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+
 public abstract class DataDefinition implements Serializable {
 
 	private static final long serialVersionUID = 212770563440334334L;
@@ -32,6 +35,9 @@ public abstract class DataDefinition implements Serializable {
 	private final String name;
 	private final List<Attribute> attributes = new LinkedList<>();
 
+	private UniqueConstraint pk;
+	private LinkedList<UniqueConstraint> ucs = new LinkedList<>();
+		
 	protected DataDefinition(String name) {
 		this.name = name;
 	}
@@ -40,6 +46,24 @@ public abstract class DataDefinition implements Serializable {
 		return name;
 	}
 
+	
+	public void setPrimaryKey(ImmutableList<Attribute> attributes) {
+		pk = new UniqueConstraint(attributes);
+	}
+	
+	public UniqueConstraint getPrimaryKey() {
+		return pk;
+	}
+	
+	public void addUniqueConstraint(ImmutableList<Attribute> attributes) {
+		UniqueConstraint uc = new UniqueConstraint(attributes);
+		ucs.add(uc);
+	}
+	
+	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
+		return ImmutableList.copyOf(ucs);
+	}
+	
 	public void addAttribute(Attribute value) {
 		attributes.add(value);
 	}

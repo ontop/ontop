@@ -31,18 +31,8 @@ public class TableDefinition extends DataDefinition {
 
 	private static final long serialVersionUID = 1L;
 
-	private UniqueConstraint pk;
-	
 	public TableDefinition(String name) {
 		super(name);
-	}
-	
-	public void setPrimaryKey(ImmutableList<Attribute> attributes) {
-		pk = new UniqueConstraint(attributes);
-	}
-	
-	public UniqueConstraint getPrimaryKey() {
-		return pk;
 	}
 	
 	public Map<String, List<Attribute>> getForeignKeys() {
@@ -73,7 +63,7 @@ public class TableDefinition extends DataDefinition {
 				bf.append(",");
 			
 			bf.append(att);
-			if (att.isPrimaryKey()) 
+			if (getPrimaryKey() != null && getPrimaryKey().getAttributes().contains(att)) 
 				bf.append(":PK");
 			
 			Reference ref = att.getReference();

@@ -154,9 +154,9 @@ public class TestSesameImplicitDBConstraints {
 
 	private TableDefinition defTable(String name){
 		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = new Attribute("COL1", java.sql.Types.INTEGER, false, null, 0, null, false);
+		Attribute attribute = new Attribute("COL1", java.sql.Types.INTEGER, null, 0, null);
 		tableDefinition.addAttribute(attribute);
-		Attribute attribute2 = new Attribute("COL2", java.sql.Types.INTEGER, false, null, 0, null, false);
+		Attribute attribute2 = new Attribute("COL2", java.sql.Types.INTEGER, null, 0, null);
 		tableDefinition.addAttribute(attribute2);
 		return tableDefinition;
 	}

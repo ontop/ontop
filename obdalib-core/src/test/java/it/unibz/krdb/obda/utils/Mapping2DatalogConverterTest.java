@@ -35,6 +35,8 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
@@ -45,21 +47,24 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	public void setUp() {
 		// Database schema
 		TableDefinition table1 = new TableDefinition("Student");
-		table1.addAttribute(new Attribute("id", Types.INTEGER, true, null, 0, null, false));
-		table1.addAttribute(new Attribute("first_name", Types.VARCHAR, false, null, 0, null, false));
-		table1.addAttribute(new Attribute("last_name", Types.VARCHAR, false, null, 0, null, false));
-		table1.addAttribute(new Attribute("year", Types.INTEGER, false, null, 0, null, false));
-		table1.addAttribute(new Attribute("nationality", Types.VARCHAR, false, null, 0, null, false));
+		table1.addAttribute(new Attribute("id", Types.INTEGER, null, 0, null));
+		table1.addAttribute(new Attribute("first_name", Types.VARCHAR, null, 0, null));
+		table1.addAttribute(new Attribute("last_name", Types.VARCHAR, null, 0, null));
+		table1.addAttribute(new Attribute("year", Types.INTEGER, null, 0, null));
+		table1.addAttribute(new Attribute("nationality", Types.VARCHAR, null, 0, null));
+		table1.setPrimaryKey(ImmutableList.of(table1.getAttribute(1)));
 		
 		TableDefinition table2 = new TableDefinition("Course");
-		table2.addAttribute(new Attribute("cid", Types.VARCHAR, true, null, 0, null, false));
-		table2.addAttribute(new Attribute("title", Types.VARCHAR, false, null, 0, null, false));
-		table2.addAttribute(new Attribute("credits", Types.INTEGER, false, null, 0, null, false));
-		table2.addAttribute(new Attribute("description", Types.VARCHAR, false, null, 0, null, false));
+		table2.addAttribute(new Attribute("cid", Types.VARCHAR, null, 0, null));
+		table2.addAttribute(new Attribute("title", Types.VARCHAR, null, 0, null));
+		table2.addAttribute(new Attribute("credits", Types.INTEGER, null, 0, null));
+		table2.addAttribute(new Attribute("description", Types.VARCHAR, null, 0, null));
+		table2.setPrimaryKey(ImmutableList.of(table2.getAttribute(1)));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.addAttribute(new Attribute("student_id", Types.INTEGER, true, null, 0, null, false));
-		table3.addAttribute(new Attribute("course_id", Types.VARCHAR, true, null, 0, null, false));
+		table3.addAttribute(new Attribute("student_id", Types.INTEGER, null, 0, null));
+		table3.addAttribute(new Attribute("course_id", Types.VARCHAR, null, 0, null));
+		table3.setPrimaryKey(ImmutableList.of(table3.getAttribute(1), table3.getAttribute(2)));
 		
 		md.add(table1);
 		md.add(table2);

@@ -33,23 +33,22 @@ public class Attribute implements Serializable{
 	private final int canNull;
 	private final String typeName;
 	
-	private boolean bPrimaryKey;
+//	private boolean bPrimaryKey;
 	private Reference foreignKey;
 
-	private boolean unique;
+//	private boolean unique;
 
 	public Attribute(String name) {
-		this(name, 0, false, null, 0, null, false);
+		this(name, 0, null, 0, null);
 	}
 
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName, boolean unique) {
+	public Attribute(String name, int type, Reference foreignKey, int canNull, String typeName/*, boolean unique*/) {
 		this.name = name;
 		this.type = type;
-		this.bPrimaryKey = primaryKey;
 		this.foreignKey = foreignKey;
 		this.canNull = canNull;
 		this.typeName = typeName;
-        this.unique = unique;
+//        this.unique = unique;
 	}
 	
 	public String getName() {
@@ -58,10 +57,6 @@ public class Attribute implements Serializable{
 	
 	public int getType() {
 		return type;
-	}
-	
-	public boolean isPrimaryKey() {
-		return bPrimaryKey;
 	}
 	
 	public boolean canNull() {
@@ -90,7 +85,7 @@ public class Attribute implements Serializable{
 		return name + ":" + type;
 	}
 
-    public boolean isUnique() {
-        return unique;
-    }
+ //   public boolean isUnique() {
+ //       return unique;
+ //   }
 }

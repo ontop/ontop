@@ -267,29 +267,31 @@ public class DBMetadata implements Serializable {
 				if (pkeys.containsKey(newAtomPredicate))
 					continue;
 				
-				// TODO Check this: somehow the new atom name is "Join" instead
-				// of table name.
 				String newAtomName = newAtomPredicate.toString();
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					// primary keys
-					List<Integer> pkeyIdx = new LinkedList<>();
-					for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
-						Attribute column = def.getAttribute(columnidx);
-						if (column.isPrimaryKey()) 
-							pkeyIdx.add(columnidx);
-					}
-					if (!pkeyIdx.isEmpty()) {
+					UniqueConstraint pk = def.getPrimaryKey();
+					if (pk != null) {
+						List<Integer> pkeyIdx = new ArrayList<>(pk.getAttributes().size());
+						for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
+							Attribute column = def.getAttribute(columnidx);
+							if (pk.getAttributes().contains(column)) 
+								pkeyIdx.add(columnidx);
+						}
 						pkeys.put(newAtomPredicate, pkeyIdx);
 					}
 
                     // unique constraints
-                    for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
-                        Attribute column = def.getAttribute(columnidx);
-                        if (column.isUnique()) {
-                            pkeys.put(newAtomPredicate, ImmutableList.of(columnidx));
-                        }
-                    }
+					for (UniqueConstraint uc : def.getUniqueConstraints()) {
+						List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
+						for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
+							Attribute column = def.getAttribute(columnidx);
+							if (uc.getAttributes().contains(column)) 
+								pkeyIdx.add(columnidx);
+						}
+						pkeys.put(newAtomPredicate, pkeyIdx);
+					}
 				}
 			}
 		}

@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
 import it.unibz.krdb.obda.model.CQIE;
@@ -52,18 +53,20 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 	public void setUp() {
 		metadata = new DBMetadata(("dummy class"));
 		TableDefinition table = new TableDefinition("TABLE");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, null, 1, null, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, null, 1, null, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, null, 1, null, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, false, null, 1, null, true));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, null, 1, null));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, null, 1, null));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, null, 1, null));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, null, 1, null));
+		table.setPrimaryKey(ImmutableList.of(table.getAttribute(4)));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition("TABLE2");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, null, 0, null, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, null, 0, null, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, null, 0, null, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, true, null, 0, null, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, null, 0, null));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, null, 0, null));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, null, 0, null));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, null, 0, null));
+		table.setPrimaryKey(ImmutableList.of(table.getAttribute(1)));
 		metadata.add(table);
 
         unfoldingProgram = fac.getDatalogProgram();

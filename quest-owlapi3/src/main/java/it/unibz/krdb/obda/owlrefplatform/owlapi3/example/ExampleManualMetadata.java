@@ -80,14 +80,14 @@ private void setup()  throws Exception {
 private TableDefinition defMeasTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
 	Attribute attribute = null;
-	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null, 0, null, false);
+	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, null, 0, null);
 	//It starts from 1 !!!
 	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("value", java.sql.Types.NUMERIC, false, null, 0, null, false);
+	attribute = new Attribute("value", java.sql.Types.NUMERIC, null, 0, null);
 	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, false, null, 0, null, false);
+	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, null, 0, null);
 	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("sensor", java.sql.Types.VARCHAR, false, null, 0, null, false);
+	attribute = new Attribute("sensor", java.sql.Types.VARCHAR, null, 0, null);
 	tableDefinition.addAttribute(attribute);
 	return tableDefinition;
 }
@@ -96,11 +96,11 @@ private TableDefinition defMessTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
 	Attribute attribute = null;
 	//It starts from 1 !!!
-	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null, 0, null, false);
+	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, null, 0, null);
 	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("eventtext", java.sql.Types.VARCHAR, false, null, 0, null, false);
+	attribute = new Attribute("eventtext", java.sql.Types.VARCHAR, null, 0, null);
 	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, false, null, 0, null, false);
+	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, null, 0, null);
 	tableDefinition.addAttribute(attribute);
 	return tableDefinition;
 }
@@ -109,9 +109,9 @@ private TableDefinition defStaticTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
 	Attribute attribute = null;
 	//It starts from 1 !!!
-	attribute = new Attribute("domain", java.sql.Types.VARCHAR, false, null, 0, null, false);
+	attribute = new Attribute("domain", java.sql.Types.VARCHAR, null, 0, null);
 	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("range", java.sql.Types.VARCHAR, false, null, 0, null, false);
+	attribute = new Attribute("range", java.sql.Types.VARCHAR, null, 0, null);
 	tableDefinition.addAttribute(attribute);
 	return tableDefinition;
 }
