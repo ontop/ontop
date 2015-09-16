@@ -25,10 +25,10 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.Reference;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collection;

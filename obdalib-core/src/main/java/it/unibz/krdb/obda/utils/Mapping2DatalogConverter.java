@@ -345,7 +345,7 @@ public class Mapping2DatalogConverter {
 				}
 
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetadata.getFullQualifiedAttributeName(fullName, i);
+				String qualifiedColumnName = dbMetadata.getFullQualifiedAttributeName(fullName, null, i);
 
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();

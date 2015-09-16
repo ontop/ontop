@@ -20,8 +20,6 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.Attribute;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

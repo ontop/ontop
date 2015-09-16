@@ -5,8 +5,10 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -16,7 +18,14 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -35,6 +44,15 @@ public class PreProcessProjectionTest {
     @Before
     public void setUp() throws Exception {
 
+		// String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:stars";
+		String username = "sa";
+		String password = "";
+
+		Connection conn = DriverManager.getConnection(url, username, password);
+ 	
+    	execute(conn, "src/test/resources/mappingStars-create-h2.sql");
+    	
         fac = OBDADataFactoryImpl.getInstance();
 
         // Loading the OWL file
@@ -49,6 +67,32 @@ public class PreProcessProjectionTest {
 
     }
 
+	private static void execute(Connection conn, String filename) throws IOException, SQLException {		
+		
+		Statement st = conn.createStatement();
+		int i = 1;
+		
+		FileReader reader = new FileReader(filename);
+		
+		StringBuilder bf = new StringBuilder();
+		try (BufferedReader in = new BufferedReader(reader)) {
+			for (String line = in.readLine(); line != null; line = in.readLine()) {
+				bf.append(line + "\n");
+				if (line.startsWith("--")) {
+					System.out.println("EXECUTING " + i++ + ":\n" + bf.toString());
+					//try {
+						st.executeUpdate(bf.toString());
+						conn.commit();
+					//}
+					//catch (SQLException e) {
+					//	System.out.println(e);
+					//}
+					bf = new StringBuilder();
+				}
+			}
+		}
+	}
+  
     private int runTests(Properties p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
@@ -56,6 +100,8 @@ public class PreProcessProjectionTest {
         factory.setOBDAController(obdaModel);
 
         factory.setPreferenceHolder(p);
+		p.setProperty(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
+
 
         QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

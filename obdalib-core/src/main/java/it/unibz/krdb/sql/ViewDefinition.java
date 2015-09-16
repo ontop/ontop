@@ -1,8 +1,5 @@
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.sql.api.Attribute;
-
-import java.util.Map.Entry;
 
 /*
  * #%L

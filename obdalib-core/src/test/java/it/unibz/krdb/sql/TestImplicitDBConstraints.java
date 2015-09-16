@@ -1,7 +1,6 @@
 package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
-import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.util.ArrayList;
@@ -18,11 +17,11 @@ public class TestImplicitDBConstraints {
 	public void setupMetadata(){
 		this.md = new DBMetadata("dummy class");
 		TableDefinition td = new TableDefinition("TABLENAME");
-		td.addAttribute(new Attribute("KEYNAME")); // from 1
+		td.addAttribute(new Attribute("KEYNAME", 0, false, null, 0, null, false)); // from 1
 		md.add(td); 
 		TableDefinition td2 = new TableDefinition("TABLE2");
-		td2.addAttribute(new Attribute("KEY1"));  // from 1
-		td2.addAttribute(new Attribute("KEY2"));
+		td2.addAttribute(new Attribute("KEY1", 0, false, null, 0, null, false));  // from 1
+		td2.addAttribute(new Attribute("KEY2", 0, false, null, 0, null, false));
 		md.add(td2);
 	}
 	
@@ -70,8 +69,8 @@ public class TestImplicitDBConstraints {
 		uc.addForeignKeys(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(1);  // from 1
-		assertTrue(attr.isForeignKey());
 		Reference ref = attr.getReference();
+		assertTrue(ref != null);
 		assertTrue(ref.getTableReference().equals("TABLE2"));
 		assertTrue(ref.getColumnReference().equals("KEY1"));
 	}
@@ -82,8 +81,8 @@ public class TestImplicitDBConstraints {
 		uc.addConstraints(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(1);  // from 1
-		assertTrue(attr.isForeignKey());
 		Reference ref = attr.getReference();
+		assertTrue(ref != null);
 		assertTrue(ref.getTableReference().equals("TABLE2"));
 		assertTrue(ref.getColumnReference().equals("KEY1"));
 		assertTrue(attr.isUnique());

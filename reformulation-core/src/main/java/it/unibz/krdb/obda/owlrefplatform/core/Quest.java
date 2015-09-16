@@ -50,11 +50,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 

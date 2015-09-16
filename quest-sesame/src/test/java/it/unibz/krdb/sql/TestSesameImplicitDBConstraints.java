@@ -17,19 +17,20 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.File;
 import java.util.Scanner;
+
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import sesameWrapper.SesameVirtualRepo;
 /**
  * Tests that user-applied constraints can be provided through 
@@ -153,12 +154,10 @@ public class TestSesameImplicitDBConstraints {
 
 	private TableDefinition defTable(String name){
 		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = null;
-		//It starts from 1 !!!
-		attribute = new Attribute("COL1", java.sql.Types.INTEGER, false, null);
+		Attribute attribute = new Attribute("COL1", java.sql.Types.INTEGER, false, null, 0, null, false);
 		tableDefinition.addAttribute(attribute);
-		attribute = new Attribute("COL2", java.sql.Types.INTEGER, false, null);
-		tableDefinition.addAttribute(attribute);
+		Attribute attribute2 = new Attribute("COL2", java.sql.Types.INTEGER, false, null, 0, null, false);
+		tableDefinition.addAttribute(attribute2);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){

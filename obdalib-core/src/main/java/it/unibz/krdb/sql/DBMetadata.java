@@ -23,11 +23,11 @@ package it.unibz.krdb.sql;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
@@ -155,55 +155,20 @@ public class DBMetadata implements Serializable {
 	 */
 	public Collection<TableDefinition> getTables() {
 		List<TableDefinition> tableList = new ArrayList<>();
-		for (DataDefinition dd : getRelations()) {
+		for (DataDefinition dd : schema.values()) {
 			if (dd instanceof TableDefinition) 
 				tableList.add((TableDefinition) dd);
 		}
 		return tableList;
 	}
 
-	/**
-	 * Returns the attribute name based on the table/view name and its position
-	 * in the meta data.
-	 * 
-	 * @param tableName
-	 *            Can be a table name or a view name.
-	 * @param pos
-	 *            The index position.
-	 * @return
-	 */
-	private String getAttributeName(String tableName, int pos) {
-		DataDefinition dd = getDefinition(tableName);
-		if (dd == null) 
-			throw new RuntimeException("Unknown table definition: " + tableName);
-		
-		return dd.getAttribute(pos).getName();
-	}
-
-
-	/**
-	 * Returns the attribute full-qualified name using the table/view name:
-	 * [TABLE_NAME].[ATTRIBUTE_NAME]
-	 * 
-	 * @param name
-	 *            Can be a table name or a view name.
-	 * @param pos
-	 *            The index position.
-	 * @return
-	 */
-	public String getFullQualifiedAttributeName(String name, int pos) {
-
-		String value = String
-				.format("%s.%s", name, getAttributeName(name, pos));
-		return value;
-	}
 
 	/**
 	 * Returns the attribute full-qualified name using the table/view ALIAS
 	 * name. [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the
 	 * method will use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME].
 	 * 
-	 * @param name
+	 * @param table
 	 *            Can be a table name or a view name.
 	 * @param alias
 	 *            The table or view alias name.
@@ -211,12 +176,17 @@ public class DBMetadata implements Serializable {
 	 *            The index position.
 	 * @return
 	 */
-	public String getFullQualifiedAttributeName(String name, String alias,
-			int pos) {
+	public String getFullQualifiedAttributeName(String table, String alias, int pos) {		
+		DataDefinition dd = getDefinition(table);
+		if (dd == null) 
+			throw new RuntimeException("Unknown table definition: " + table);
+		
+		String attributeName = dd.getAttribute(pos).getName();
+		
 		if (alias != null && !alias.isEmpty()) {
-			return String.format("%s.%s", alias, getAttributeName(name, pos));
+			return String.format("%s.%s", alias, attributeName);
 		} else {
-			return getFullQualifiedAttributeName(name, pos);
+			return String.format("%s.%s", table, attributeName);
 		}
 	}
 

@@ -20,9 +20,9 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.sql.Connection;

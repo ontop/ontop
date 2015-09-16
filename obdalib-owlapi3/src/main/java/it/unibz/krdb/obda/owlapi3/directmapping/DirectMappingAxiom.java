@@ -24,11 +24,11 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.Reference;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.*;
 
@@ -197,8 +197,8 @@ public class DirectMappingAxiom {
 		// Object Atoms
 		// Foreign key reference
 		for (Attribute att : table.getAttributes()) {
-			if (att.isForeignKey()) {
-				Reference ref = att.getReference();
+			Reference ref = att.getReference();
+			if (ref != null) {
 				if (ref.getReferenceName().equals(fk)) {
 					String pkTableReference = ref.getTableReference();
 					TableDefinition tdRef = (TableDefinition) metadata

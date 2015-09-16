@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
-import it.unibz.krdb.sql.api.Attribute;
+
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -34,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import sesameWrapper.SesameVirtualRepo;
 
 import java.io.File;
@@ -118,9 +119,7 @@ public class OracleSesameLIMITTest  {
 
 	private TableDefinition defTable(String name){
 		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = null;
-		//It starts from 1 !!!
-		attribute = new Attribute("country_name", java.sql.Types.VARCHAR, false, null);
+		Attribute attribute = new Attribute("country_name", java.sql.Types.VARCHAR, false, null, 0, null, false);
 		tableDefinition.addAttribute(attribute);
 		return tableDefinition;
 	}

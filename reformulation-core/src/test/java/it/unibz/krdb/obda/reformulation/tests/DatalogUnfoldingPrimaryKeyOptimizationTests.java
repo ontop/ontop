@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 import com.google.common.collect.Multimap;
+
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -29,9 +30,9 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.sql.Types;
 import java.util.Collections;
@@ -53,18 +54,18 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	public void setUp() {
 		metadata = new DBMetadata("dummy class");
 		TableDefinition table = new TableDefinition("TABLE");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, null, 0, null, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, null, 0, null, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, null, 0, null, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, null, 0, null, false));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition("TABLE2");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, null, 0, null, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, null, 0, null, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, null, 0, null, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, null, 0, null, false));
 		metadata.add(table);
 
 		unfoldingProgram = fac.getDatalogProgram();

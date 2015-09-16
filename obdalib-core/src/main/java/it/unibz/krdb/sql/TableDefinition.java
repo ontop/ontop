@@ -20,13 +20,10 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.Attribute;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class TableDefinition extends DataDefinition {
 
@@ -48,8 +45,9 @@ public class TableDefinition extends DataDefinition {
 	public Map<String, List<Attribute>> getForeignKeys() {
 		Map<String, List<Attribute>> foreignKeys = new HashMap<>();
 		for (Attribute attr : getAttributes()) {
-			if (attr.isForeignKey()) {
-				String fkName = attr.getReference().getReferenceName();
+			Reference ref = attr.getReference();
+			if (ref != null) {
+				String fkName = ref.getReferenceName();
 				List<Attribute> fkAttributes = foreignKeys.get(fkName);
 				if (fkAttributes == null) {
 					fkAttributes = new ArrayList<>();
@@ -75,11 +73,12 @@ public class TableDefinition extends DataDefinition {
 			if (att.isPrimaryKey()) 
 				bf.append(":PK");
 			
-			if (att.isForeignKey()) {
+			Reference ref = att.getReference();
+			if (ref != null) {
 				bf.append(":FK:");
 				bf.append(String.format("%s(%s)", 
-						att.getReference().getTableReference(), 
-						att.getReference().getColumnReference()));
+						ref.getTableReference(), 
+						ref.getColumnReference()));
 			}
 			comma = true;
 		}

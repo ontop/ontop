@@ -26,9 +26,9 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 import junit.framework.TestCase;
 
 import java.sql.Types;
@@ -45,21 +45,21 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	public void setUp() {
 		// Database schema
 		TableDefinition table1 = new TableDefinition("Student");
-		table1.addAttribute(new Attribute("id", Types.INTEGER, true, null));
-		table1.addAttribute(new Attribute("first_name", Types.VARCHAR, false, null));
-		table1.addAttribute(new Attribute("last_name", Types.VARCHAR, false, null));
-		table1.addAttribute(new Attribute("year", Types.INTEGER, false, null));
-		table1.addAttribute(new Attribute("nationality", Types.VARCHAR, false, null));
+		table1.addAttribute(new Attribute("id", Types.INTEGER, true, null, 0, null, false));
+		table1.addAttribute(new Attribute("first_name", Types.VARCHAR, false, null, 0, null, false));
+		table1.addAttribute(new Attribute("last_name", Types.VARCHAR, false, null, 0, null, false));
+		table1.addAttribute(new Attribute("year", Types.INTEGER, false, null, 0, null, false));
+		table1.addAttribute(new Attribute("nationality", Types.VARCHAR, false, null, 0, null, false));
 		
 		TableDefinition table2 = new TableDefinition("Course");
-		table2.addAttribute(new Attribute("cid", Types.VARCHAR, true, null));
-		table2.addAttribute(new Attribute("title", Types.VARCHAR, false, null));
-		table2.addAttribute(new Attribute("credits", Types.INTEGER, false, null));
-		table2.addAttribute(new Attribute("description", Types.VARCHAR, false, null));
+		table2.addAttribute(new Attribute("cid", Types.VARCHAR, true, null, 0, null, false));
+		table2.addAttribute(new Attribute("title", Types.VARCHAR, false, null, 0, null, false));
+		table2.addAttribute(new Attribute("credits", Types.INTEGER, false, null, 0, null, false));
+		table2.addAttribute(new Attribute("description", Types.VARCHAR, false, null, 0, null, false));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.addAttribute(new Attribute("student_id", Types.INTEGER, true, null));
-		table3.addAttribute(new Attribute("course_id", Types.VARCHAR, true, null));
+		table3.addAttribute(new Attribute("student_id", Types.INTEGER, true, null, 0, null, false));
+		table3.addAttribute(new Attribute("course_id", Types.VARCHAR, true, null, 0, null, false));
 		
 		md.add(table1);
 		md.add(table2);

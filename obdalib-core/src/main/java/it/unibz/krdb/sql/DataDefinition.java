@@ -20,8 +20,6 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.Attribute;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;

@@ -23,7 +23,6 @@ package it.unibz.krdb.sql;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.sql.Connection;
@@ -489,7 +488,7 @@ public class JDBCConnectionManager {
 							final boolean isPrimaryKey = primaryKeys.contains(columnName);
 							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
-							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, null, false));
 						}
 						// Add this information to the DBMetadata
 						metadata.add(td);
@@ -620,7 +619,7 @@ public class JDBCConnectionManager {
 								dataType = 91;
 							}
 							
-							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, null, false));
 						}
 						// Add this information to the DBMetadata
 						metadata.add(td);

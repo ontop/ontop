@@ -51,12 +51,12 @@ import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.awt.Color;
 import java.awt.Component;

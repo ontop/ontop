@@ -27,9 +27,9 @@ import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

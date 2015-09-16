@@ -1,4 +1,4 @@
-package it.unibz.krdb.sql.api;
+package it.unibz.krdb.sql;
 
 /*
  * #%L
@@ -20,8 +20,6 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
-import it.unibz.krdb.sql.Reference;
-
 import java.io.Serializable;
 import java.sql.Types;
 
@@ -41,29 +39,9 @@ public class Attribute implements Serializable{
 	private boolean unique;
 
 	public Attribute(String name) {
-		this(name, 0, false, null, 0);
+		this(name, 0, false, null, 0, null, false);
 	}
 
-	/**
-	 * Use Attribute(String name, int type, boolean primaryKey, Reference foreignKey) instead.
-	 */
-	@Deprecated
-	public Attribute(String name, int type, boolean primaryKey, boolean foreignKey) {
-		this(name, type, primaryKey, null, 0);
-	}
-	
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey) {
-		this(name, type, primaryKey, foreignKey, 0);
-	}
-
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) {
-		this(name,type,primaryKey,foreignKey,canNull,null);		
-	}
-
-    public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName) {
-        this(name,type,primaryKey,foreignKey,canNull,typeName, false);
-    }
-	
 	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName, boolean unique) {
 		this.name = name;
 		this.type = type;
@@ -84,10 +62,6 @@ public class Attribute implements Serializable{
 	
 	public boolean isPrimaryKey() {
 		return bPrimaryKey;
-	}
-	
-	public boolean isForeignKey() {
-		return foreignKey != null;
 	}
 	
 	public boolean canNull() {

@@ -3,10 +3,10 @@
  */
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.schema.Table;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

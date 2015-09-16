@@ -21,8 +21,8 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  */
 
 
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.Collection;
 import java.util.List;
@@ -114,7 +114,7 @@ public class OntoSchema {
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
-		if(at.isForeignKey() && !existObjectProperty(rootOntology, at)){
+		if((at.getReference() != null) && !existObjectProperty(rootOntology, at)){
 			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newoproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
