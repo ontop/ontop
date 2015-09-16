@@ -53,19 +53,19 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 	public void setUp() {
 		metadata = new DBMetadata(("dummy class"));
 		TableDefinition table = new TableDefinition("TABLE");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, null, 1, null));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, null, 1, null));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, null, 1, null));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, null, 1, null));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, null, true, null));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, null, true, null));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, null, true, null));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, null, true, null));
 		table.setPrimaryKey(ImmutableList.of(table.getAttribute(4)));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition("TABLE2");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, null, 0, null));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, null, 0, null));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, null, 0, null));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, null, 0, null));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, null, false, null));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, null, false, null));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, null, false, null));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, null, false, null));
 		table.setPrimaryKey(ImmutableList.of(table.getAttribute(1)));
 		metadata.add(table);
 

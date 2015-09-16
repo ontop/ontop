@@ -209,7 +209,7 @@ public class ImplicitDBConstraints {
 							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						} else {		
 						//	td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
-							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.getReference(), 0, attr.getSQLTypeName())); // ,/*isUnique*/true
+							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.getReference(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
 							td.addUniqueConstraint(ImmutableList.of(td.getAttribute(key_pos)));
 						}
 					}
@@ -269,7 +269,7 @@ public class ImplicitDBConstraints {
 						continue;
 					}
 					//String type = attr.getType();
-					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), ref, attr.canNull() ? 1 : 0, attr.getSQLTypeName()));
+					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), ref, attr.canNull(), attr.getSQLTypeName()));
 				}
 			}
 			md.add(td);

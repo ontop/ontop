@@ -279,7 +279,7 @@ public class JDBCConnectionManager {
 						}
 						
 						td.addAttribute(new Attribute(columnName, dataType, reference,
-								isNullable, typeName));
+								isNullable != 0, typeName));
 						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
@@ -385,7 +385,7 @@ public class JDBCConnectionManager {
 					
 					//td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 					td.addAttribute(new Attribute(columnName, dataType, reference,
-							isNullable, typeName));
+							isNullable != 0, typeName));
 					
 					// Check if the columns are unique regardless their letter cases
 					if (!tableColumns.add(columnName.toLowerCase())) {
@@ -487,7 +487,7 @@ public class JDBCConnectionManager {
 							final int dataType = rsColumns.getInt("DATA_TYPE");
 							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
-							td.addAttribute(new Attribute(columnName, dataType, reference, isNullable, null));
+							td.addAttribute(new Attribute(columnName, dataType, reference, isNullable != 0, null));
 						}
 						final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
 						if (primaryKey != null)
@@ -533,7 +533,7 @@ public class JDBCConnectionManager {
 							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
 							td.addAttribute(new Attribute(columnName, dataType, reference,
-									isNullable, typeName));
+									isNullable != 0, typeName));
 						}
 						final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tblSchema, tblName, td);
 						if (primaryKey != null)
@@ -619,7 +619,7 @@ public class JDBCConnectionManager {
 								dataType = 91;
 							}
 							
-							td.addAttribute(new Attribute(columnName, dataType, reference, isNullable, null));
+							td.addAttribute(new Attribute(columnName, dataType, reference, isNullable != 0, null));
 						}
 						final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tableOwner, tblName, td);
 						if (primaryKey != null)
@@ -733,7 +733,7 @@ public class JDBCConnectionManager {
 						}
 						
 						td.addAttribute(new Attribute(columnName, dataType, reference,
-								isNullable, typeName/*, isUnique*/));
+								isNullable != 0, typeName/*, isUnique*/));
 					}
 					final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tableOwner, tblName, td);
 					if (primaryKey != null)

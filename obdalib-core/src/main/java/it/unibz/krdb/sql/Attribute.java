@@ -30,25 +30,21 @@ public class Attribute implements Serializable{
 	/** Fields */
 	private final String name;
 	private final int type;
-	private final int canNull;
+	private final boolean canNull;
 	private final String typeName;
 	
-//	private boolean bPrimaryKey;
 	private Reference foreignKey;
 
-//	private boolean unique;
-
 	public Attribute(String name) {
-		this(name, 0, null, 0, null);
+		this(name, 0, null, false, null);
 	}
 
-	public Attribute(String name, int type, Reference foreignKey, int canNull, String typeName/*, boolean unique*/) {
+	public Attribute(String name, int type, Reference foreignKey, boolean canNull, String typeName) {
 		this.name = name;
 		this.type = type;
 		this.foreignKey = foreignKey;
 		this.canNull = canNull;
 		this.typeName = typeName;
-//        this.unique = unique;
 	}
 	
 	public String getName() {
@@ -60,7 +56,7 @@ public class Attribute implements Serializable{
 	}
 	
 	public boolean canNull() {
-		return canNull == 1;
+		return canNull;
 	}
 	
 	public Reference getReference() {
@@ -84,8 +80,20 @@ public class Attribute implements Serializable{
 	public String toString() {
 		return name + ":" + type;
 	}
-
- //   public boolean isUnique() {
- //       return unique;
- //   }
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		
+		if (obj instanceof Attribute) 
+			return this.name.equals(((Attribute)obj).name);
+		
+		return false;
+	}
+	
+	@Override 
+	public int hashCode() {
+		return name.hashCode();
+	}
 }
