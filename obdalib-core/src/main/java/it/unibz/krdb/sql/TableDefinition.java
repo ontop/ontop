@@ -25,21 +25,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+
 public class TableDefinition extends DataDefinition {
 
 	private static final long serialVersionUID = 1L;
 
+	private UniqueConstraint pk;
+	
 	public TableDefinition(String name) {
 		super(name);
 	}
 	
-	public List<Attribute> getPrimaryKeys() {
-		List<Attribute> primaryKeys = new ArrayList<>();
-		for (Attribute attr : getAttributes()) {
-			if (attr.isPrimaryKey()) 
-				primaryKeys.add(attr);
-		}
-		return primaryKeys;
+	public void setPrimaryKey(ImmutableList<Attribute> attributes) {
+		pk = new UniqueConstraint(attributes);
+	}
+	
+	public UniqueConstraint getPrimaryKey() {
+		return pk;
 	}
 	
 	public Map<String, List<Attribute>> getForeignKeys() {

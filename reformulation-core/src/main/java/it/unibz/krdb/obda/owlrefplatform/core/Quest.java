@@ -55,6 +55,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 
@@ -706,9 +707,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				Collection<TableDefinition> table_list = metadata.getTables();
 				for(TableDefinition dd : table_list){
 					System.out.print("\n" + dd.getName() + ":");
-					for(Attribute attr : dd.getPrimaryKeys() ){
-						System.out.print(attr.getName() + ",");
-					}
+					UniqueConstraint pk = dd.getPrimaryKey();
+					if (pk != null)
+						for(Attribute attr : pk.getAttributes()) 
+							System.out.print(attr.getName() + ",");
 				}
 				// Prints all foreign keys
 				System.out.println("\n====== Foreign keys ==========");

@@ -29,6 +29,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.Reference;
 import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 
 import java.util.*;
 
@@ -87,7 +88,7 @@ public class DirectMappingAxiom {
 		TableDefinition tableDef = ((TableDefinition) table);
 		Map<String, List<Attribute>> fks = tableDef.getForeignKeys();
 
-		List<Attribute> pks = tableDef.getPrimaryKeys();
+		Collection<Attribute> pks = tableDef.getPrimaryKey().getAttributes();
 		
 		String SQLStringTempl = new String("SELECT %s FROM %s WHERE %s");
 
@@ -130,10 +131,10 @@ public class DirectMappingAxiom {
 		}
 		for (TableDefinition tdef : metadata.getTables()) {
 			if (tdef.getName().equals(tableRef)) {
-				int pknumber = tdef.getPrimaryKeys().size();
-				if (pknumber > 0) {
-					for (int i = 0; i < pknumber; i++) {
-						String pki = tdef.getPrimaryKeys().get(i).getName();
+				UniqueConstraint pk = tdef.getPrimaryKey();
+				if (pk != null) {
+					for (Attribute att : pk.getAttributes()) {
+						String pki = att.getName();
 						String refPki = "\"" + tableRef + "\".\"" + pki + "\"";
 						if (!Column.contains(refPki))
 							Column += ", " + refPki + " AS " + tableRef + "_" + pki;
@@ -265,14 +266,13 @@ public class DirectMappingAxiom {
 		String tableName = "";
 		if (ref)
 			tableName = percentEncode(td.getName()) + "_";
-
-		if (td.getPrimaryKeys().size() > 0) {
-			List<Term> terms = new ArrayList<Term>();
-			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
-					.size())));
-			for (int i = 0; i < td.getPrimaryKeys().size(); i++) {
-				terms.add(df.getVariable(tableName
-						+ td.getPrimaryKeys().get(i).getName()));
+		UniqueConstraint pk = td.getPrimaryKey();
+		
+		if (pk != null) {
+			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
+			terms.add(df.getConstantLiteral(subjectTemple(td)));
+			for (Attribute att : pk.getAttributes()) {
+				terms.add(df.getVariable(tableName + att.getName()));
 			}
 			return df.getUriTemplate(terms);
 
@@ -286,7 +286,7 @@ public class DirectMappingAxiom {
 	}
 
 	
-	private String subjectTemple(TableDefinition td, int numPK) {
+	private String subjectTemple(TableDefinition td) {
 		/*
 		 * It is hard to generate a uniform temple since the number of PK
 		 * differs For example, the subject uri temple with one pk should be
@@ -297,9 +297,9 @@ public class DirectMappingAxiom {
 		String temp = new String(baseuri);
 		temp += percentEncode(td.getName());
 		temp += "/";
-		for (int i = 0; i < numPK; i++) {
+		for (Attribute att : td.getPrimaryKey().getAttributes()) {
 			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
-			temp+=percentEncode(td.getPrimaryKeys().get(i).getName())+"={};";
+			temp+=percentEncode(att.getName())+"={};";
 
 		}
 		// remove the last "." which is not neccesary
