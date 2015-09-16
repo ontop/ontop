@@ -87,17 +87,14 @@ public class QuestOWLExample_OntowisTests {
 		Properties p = new Properties();
 		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
+		ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
+		p.put(QuestPreferences.DB_CONSTRAINTS, constr);
 		
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-		
-		/*
-		 * USR CONSTRAINTS !!!!
-		 */
-		ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-		factory.setImplicitDBConstraints(constr);
+
 		
 //		/*
 //		 * T-Mappings Handling!!
@@ -105,7 +102,7 @@ public class QuestOWLExample_OntowisTests {
 //		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.

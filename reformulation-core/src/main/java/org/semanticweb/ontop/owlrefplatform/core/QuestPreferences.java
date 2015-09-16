@@ -55,6 +55,8 @@ public class QuestPreferences extends OBDAProperties {
 
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
 
+	public static final String DB_CONSTRAINTS = "DB_CONSTRAINTS";
+
     //@Deprecated
 	//public static final String JDBC_URL = OBDAProperties.JDBC_URL;
     @Deprecated

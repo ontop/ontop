@@ -20,15 +20,7 @@ package org.semanticweb.ontop.protege4.core;
  * #L%
  */
 
-import org.semanticweb.ontop.exception.DuplicateMappingException;
-import org.semanticweb.ontop.exception.InvalidMappingException;
-import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
-
-
-import java.io.*;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
@@ -59,17 +51,6 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 	@Override
 	public OWLReasonerFactory getReasonerFactory() {
         return factory;
-	}
-
-	/**
-	 * Allows the user to supply database keys that are not in the database metadata
-	 * 
-	 * @param uc The user-supplied database constraints
-	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints uc) {
-		if(uc == null)
-			throw new NullPointerException();
-		factory.setImplicitDBConstraints(uc);
 	}
 
     /**

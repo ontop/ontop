@@ -36,7 +36,6 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.utils.VersionInfo;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
 import java.util.ArrayList;
@@ -171,19 +170,6 @@ public class QuestOWL extends OWLReasonerBase {
 	private QuestOWLConnection owlconn = null;
 
 	private OWLOntologyManager man;
-	
-	
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//
-	//  User Constraints are primary and foreign keys not in the database 
-	//  
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
-	
-	private ImplicitDBConstraints userConstraints = null;
-	
-	/* Used to signal whether to apply the user constraints above */
-	private boolean applyUserConstraints = false;
 
     private final QuestComponentFactory componentFactory;
 
@@ -221,27 +207,6 @@ public class QuestOWL extends OWLReasonerBase {
 		this.init(rootOntology, configuration);
 
 	}
-
-	/**
-	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
-	 * supplied 
-	 * @param userConstraints User-supplied primary and foreign keys
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			QuestPreferences preferences, ImplicitDBConstraints userConstraints, QuestComponentFactory componentFactory) {
-		super(rootOntology, configuration, bufferingMode);
-		
-		this.userConstraints = userConstraints;
-		assert(userConstraints != null);
-		this.applyUserConstraints = true;
-
-        this.obdaModel = obdaModel;
-        this.componentFactory = componentFactory;
-		this.preferences = preferences;
-		
-		this.init(rootOntology, configuration);
-	}
-	
 	
 	 /**
 	 * extract version from {@link org.semanticweb.ontop.utils.VersionInfo}, which is from the file {@code version.properties}
@@ -307,9 +272,6 @@ public class QuestOWL extends OWLReasonerBase {
 		// pm.reasonerTaskBusy();
 
         questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, null, preferences);
-
-		if(this.applyUserConstraints)
-			questInstance.setImplicitDBConstraints(userConstraints);
 				
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		

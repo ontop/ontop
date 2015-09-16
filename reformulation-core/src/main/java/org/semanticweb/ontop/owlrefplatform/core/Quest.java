@@ -120,6 +120,8 @@ public class Quest implements Serializable, IQuest {
 	/**
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
+	 *
+	 * Can be useful for eliminating self-joins
 	 */
 	private ImplicitDBConstraints userConstraints;
 
@@ -218,7 +220,7 @@ public class Quest implements Serializable, IQuest {
 	private Quest(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel mappings, @Assisted @Nullable DBMetadata metadata,
 				  @Assisted QuestPreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
-				  MappingVocabularyFixer mappingVocabularyFixer, QueryCache queryCache) throws DuplicateMappingException {
+				  MappingVocabularyFixer mappingVocabularyFixer, QueryCache queryCache, @Nullable ImplicitDBConstraints userConstraints) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 
@@ -229,6 +231,7 @@ public class Quest implements Serializable, IQuest {
 		this.queryCache = queryCache;
 
 		inputOntology = tbox;
+		this.userConstraints = userConstraints;
 
 		setPreferences(config);
 
@@ -247,19 +250,6 @@ public class Quest implements Serializable, IQuest {
 
 		loadOBDAModel(mappings);
 		this.metadata = metadata;
-	}
-
-	/**
-	 * Supply user constraints: that is primary and foreign keys not in the database
-	 * Can be useful for eliminating self-joins
-	 *
-	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
-	 * 						May be used by ontop to eliminate self-joins
-	 */
-	@Override
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
-		assert(userConstraints != null);
-		this.userConstraints = userConstraints;
 	}
 
 	public RDBMSSIRepositoryManager getDataRepository() {
