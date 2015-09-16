@@ -34,45 +34,34 @@ import it.unibz.krdb.sql.UniqueConstraint;
 import java.util.*;
 
 public class DirectMappingAxiom {
-	protected DBMetadata metadata;
-	protected DataDefinition table;
-	protected String SQLString;
-	protected String baseuri;
-	private OBDADataFactory df;
+	private final DBMetadata metadata;
+	private final DataDefinition table;
+	private String SQLString;
+	private final String baseuri;
+	private final OBDADataFactory df;
 	
-	public DirectMappingAxiom() {
-	}
-
 	public DirectMappingAxiom(String baseuri, DataDefinition dd,
-			DBMetadata obda_md, OBDADataFactory dfac) throws Exception {
+			DBMetadata obda_md, OBDADataFactory dfac) {
 		this.table = dd;
-		this.SQLString = new String();
+		this.SQLString = "";
 		this.metadata = obda_md;
 		this.df = dfac;
-		if (baseuri != null)
-			this.baseuri = baseuri;
-		else
-		{
-			throw new Exception("Base uri must be specified!");
-		}
+		if (baseuri == null)
+			throw new IllegalArgumentException("Base uri must be specified!");
+		
+		this.baseuri = baseuri;
 	}
 
-	public DirectMappingAxiom(DirectMappingAxiom dmab) {
-		this.table = dmab.table;
-		this.SQLString = new String(dmab.getSQL());
-		this.baseuri = new String(dmab.getbaseuri());
-	}
 
 	public String getSQL() {
-		String SQLStringTemple = new String("SELECT * FROM %s");
+		String SQLStringTemple = "SELECT * FROM %s";
 
-		SQLString = String.format(SQLStringTemple, "\"" + this.table.getName()
-				+ "\"");
-		return new String(SQLString);
+		SQLString = String.format(SQLStringTemple, "\"" + table.getName() + "\"");
+		return SQLString;
 	}
 
 	public Map<String, CQIE> getRefAxioms() {
-		HashMap<String, CQIE> refAxioms = new HashMap<String, CQIE>();
+		HashMap<String, CQIE> refAxioms = new HashMap<>();
 		Map<String, List<Attribute>> fks = ((TableDefinition) table)
 				.getForeignKeys();
 		if (fks.size() > 0) {
@@ -88,9 +77,9 @@ public class DirectMappingAxiom {
 		TableDefinition tableDef = ((TableDefinition) table);
 		Map<String, List<Attribute>> fks = tableDef.getForeignKeys();
 
-		String SQLStringTempl = new String("SELECT %s FROM %s WHERE %s");
+		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
 
-		String table = new String("\"" + this.table.getName() + "\"");
+		String table = "\"" + this.table.getName() + "\"";
 		String Table = table;
 		String Column = "";
 		String Condition = "";
@@ -98,17 +87,15 @@ public class DirectMappingAxiom {
 		
 		{
 			UniqueConstraint pk = tableDef.getPrimaryKey();
-			if (pk != null) {
-				for (Attribute att : pk.getAttributes()) {
-					String attrName = att.getName();
-					Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
-				}
-			} 
-			else {
-				for (Attribute att : tableDef.getAttributes()) {
-					String attrName = att.getName();
-					Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
-				}
+			List<Attribute> attributes;		
+			if (pk != null) 
+				attributes = pk.getAttributes();
+			else 
+				attributes = tableDef.getAttributes();
+
+			for (Attribute att : attributes) {
+				String attrName = att.getName();
+				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
 			}
 		}
 
@@ -233,8 +220,7 @@ public class DirectMappingAxiom {
 
 	// Generate an URI for class predicate from a string(name of table)
 	private String generateClassURI(String table) {
-		return new String(baseuri + table);
-
+		return baseuri + table;
 	}
 
 	/*
@@ -243,8 +229,7 @@ public class DirectMappingAxiom {
 	 * Mapping Definition
 	 */
 	private String generateDPURI(String table, String column) {
-		return new String(baseuri + percentEncode(table) + "#"
-				+ percentEncode(column));
+		return baseuri + percentEncode(table) + "#" + percentEncode(column);
 	}
 
 	// Generate an URI for object property from a string(name of column)
@@ -270,8 +255,8 @@ public class DirectMappingAxiom {
 		String tableName = "";
 		if (ref)
 			tableName = percentEncode(td.getName()) + "_";
-		UniqueConstraint pk = td.getPrimaryKey();
 		
+		UniqueConstraint pk = td.getPrimaryKey();	
 		if (pk != null) {
 			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
 			terms.add(df.getConstantLiteral(subjectTemple(td)));
@@ -298,27 +283,15 @@ public class DirectMappingAxiom {
 		 * more than one pk columns, there will be a ";" between column names
 		 */
 
-		String temp = new String(baseuri);
-		temp += percentEncode(td.getName());
-		temp += "/";
+		String temp = baseuri + percentEncode(td.getName()) + "/";
 		for (Attribute att : td.getPrimaryKey().getAttributes()) {
 			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
 			temp+=percentEncode(att.getName())+"={};";
-
 		}
 		// remove the last "." which is not neccesary
 		temp = temp.substring(0, temp.length() - 1);
 		// temp="\""+temp+"\"";
 		return temp;
-	}
-
-	public String getbaseuri() {
-		return baseuri;
-	}
-
-	public void setbaseuri(String uri) {
-		if (uri != null)
-			baseuri = new String(uri);
 	}
 
 	/*
@@ -347,7 +320,7 @@ public class DirectMappingAxiom {
 		pe = pe.replace("@", "%40");
 		pe = pe.replace("[", "%5B");
 		pe = pe.replace("]", "%5D");
-		return new String(pe);
+		return pe;
 	}
 
 }
