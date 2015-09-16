@@ -68,10 +68,10 @@ public class OntologyTypesTest{
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 	}
 
-	private void runTests(Properties p, String query, int numberResults) throws Exception {
+	private void runTests(Properties p, String query, int numberResults, String mappingFile) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
+		QuestOWLFactory factory = new QuestOWLFactory(new File(mappingFile), new QuestPreferences(p));
 
 		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -125,28 +125,28 @@ public class OntologyTypesTest{
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-		runTests(p, query1, 0);
+		runTests(p, query1, 0, obdaFile);
 //
 //        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query1b, 3);
+        runTests(p, query1b, 3, obdaFile);
 
 		//no value in the mapping
 		//xsd:string in the ontology
 		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-		runTests(p, query2, 3);
+		runTests(p, query2, 3, obdaFile);
 
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-		runTests(p, query3, 3);
+		runTests(p, query3, 3, obdaFile);
 
 		//no value in the ontology
 		//no value in the mapping
@@ -154,7 +154,7 @@ public class OntologyTypesTest{
 		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
 						"select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-		runTests(p, query4, 3);
+		runTests(p, query4, 3, obdaFile);
 
         // no value in the ontology
         //value in the mapping is xsd:long
@@ -162,7 +162,7 @@ public class OntologyTypesTest{
         String query5 = "PREFIX franz: <http://www.franz.com/>" +
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query5, 3);
+        runTests(p, query5, 3, obdaFile);
 
         // no value in the ontology
         //value in the mapping is xsd:positiveInteger
@@ -170,7 +170,7 @@ public class OntologyTypesTest{
         String query6 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-        runTests(p, query6, 3);
+        runTests(p, query6, 3, obdaFile);
 
 		
 	}
@@ -199,28 +199,28 @@ public class OntologyTypesTest{
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-        runTests(p, query1, 0);
+        runTests(p, query1, 0, r2rmlFile);
 //
 //        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query1b, 3);
+        runTests(p, query1b, 3, r2rmlFile);
 
         //no value in the mapping
         //xsd:string in the ontology
         String query2 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-        runTests(p, query2, 3);
+        runTests(p, query2, 3, r2rmlFile);
 
         //no value in the ontology
         //rdfs:Literal in the mapping
         String query3 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-        runTests(p, query3, 3);
+        runTests(p, query3, 3, r2rmlFile);
 
         //no value in the ontology
         //no value in the mapping
@@ -228,7 +228,7 @@ public class OntologyTypesTest{
         String query4 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-        runTests(p, query4, 3);
+        runTests(p, query4, 3, r2rmlFile);
 
         // no value in the ontology
         //value in the mapping is xsd:long
@@ -236,7 +236,7 @@ public class OntologyTypesTest{
         String query5 = "PREFIX franz: <http://www.franz.com/>" +
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query5, 3);
+        runTests(p, query5, 3, r2rmlFile);
 
         // no value in the ontology
         //value in the mapping is xsd:positiveInteger
@@ -244,7 +244,7 @@ public class OntologyTypesTest{
         String query6 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-        runTests(p, query6, 3);
+        runTests(p, query6, 3, r2rmlFile);
     }
 
 	@Test
