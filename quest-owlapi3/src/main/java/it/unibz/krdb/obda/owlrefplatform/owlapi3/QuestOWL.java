@@ -383,7 +383,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure, questInstance.getVocabulary());
 					EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
@@ -395,7 +395,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
+					obdaModelForMaterialization.getOntologyVocabulary().merge(translatedOntologyMerge.getVocabulary());
 					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
@@ -460,10 +460,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		log.debug("Load ontologies called. Translating ontologies.");
 
 		try {
-
-			OWLOntologyManager man = ontology.getOWLOntologyManager();
-			Set<OWLOntology> closure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
+			Ontology mergeOntology = OWLAPI3TranslatorUtility.translateImportsClosure(ontology);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;
@@ -625,7 +622,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			
 			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
-				Set<ClassExpression> disj = dda.getComponents();
+				Collection<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
 				ClassExpression s1 = classIterator.next();
 				ClassExpression s2 = classIterator.next();
@@ -646,7 +643,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			for(NaryAxiom<ObjectPropertyExpression> dda
 						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				Set<ObjectPropertyExpression> props = dda.getComponents();
+				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
 				ObjectPropertyExpression p1 = iterator.next();
 				ObjectPropertyExpression p2 = iterator.next();
@@ -666,7 +663,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			for(NaryAxiom<DataPropertyExpression> dda 
 						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				Set<DataPropertyExpression> props = dda.getComponents();
+				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
 				DataPropertyExpression p1 = iterator.next();
 				DataPropertyExpression p2 = iterator.next();
@@ -691,7 +688,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getPredicate().getName();
+			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -702,7 +699,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
-			String propFunc = pfa.getPredicate().getName();
+			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);

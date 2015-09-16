@@ -223,7 +223,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 
 	@Override
-	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
+	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, CQIE targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
 	}
 
@@ -233,12 +233,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery) {
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, CQIE targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, new SQLQueryImpl(sql), targetQuery);
 	}
 
 	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery) {
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, CQIE targetQuery) {
 		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}

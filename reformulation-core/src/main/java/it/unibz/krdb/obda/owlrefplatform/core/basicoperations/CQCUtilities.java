@@ -145,10 +145,44 @@ public class CQCUtilities {
 				Function nextAtom = result.getBody().get(j);
 				Substitution map = UnifierUtilities.getMGU(currentAtom, nextAtom);
 				if (map != null && map.isEmpty()) {
-					result = UnifierUtilities.unify(result, i, j);
+					result = unify(result, i, j);
 				}
 			}
 		}
 	}
+	
+    /**
+     * Unifies two atoms in a conjunctive query returning a new conjunctive
+     * query. To to this we calculate the MGU for atoms, duplicate the query q
+     * into q', remove i and j from q', apply the mgu to q', and
+     *
+     * @param q
+     * @param i
+     * @param j (j > i)
+     * @return null if the two atoms are not unifiable, else a new conjunctive
+     * query produced by the unification of j and i
+     * @throws Exception
+     */
+    private static CQIE unify(CQIE q, int i, int j) {
+
+        Function atom1 = q.getBody().get(i);
+        Function atom2 = q.getBody().get(j);
+        
+        Substitution mgu = UnifierUtilities.getMGU(atom1, atom2);
+        if (mgu == null)
+            return null;
+
+        CQIE unifiedQ = SubstitutionUtilities.applySubstitution(q, mgu);
+        unifiedQ.getBody().remove(i);
+        unifiedQ.getBody().remove(j - 1);
+
+        Function newatom = (Function) atom1.clone();
+        SubstitutionUtilities.applySubstitution(newatom, mgu);
+        unifiedQ.getBody().add(i, newatom);
+
+        return unifiedQ;
+    }
+
+	
 	
 }

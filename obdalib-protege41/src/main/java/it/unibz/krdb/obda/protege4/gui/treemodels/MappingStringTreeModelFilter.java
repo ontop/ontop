@@ -54,7 +54,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 			}
 
 			// Check in the Mapping Target Query
-			final CQIE headquery = (CQIEImpl) object.getTargetQuery();
+			final CQIE headquery = object.getTargetQuery();
 			final List<Function> atoms = headquery.getBody();
 			for (int i = 0; i < atoms.size(); i++) {
 				Function predicate = (Function) atoms.get(i);
@@ -65,7 +65,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 			}
 
 			// Check in the Mapping Source Query
-			final OBDASQLQuery query = (OBDASQLQuery) object.getSourceQuery();
+			final OBDASQLQuery query = object.getSourceQuery();
 			isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
 			if (isMatch) {
 				break; // end loop if a match is found!

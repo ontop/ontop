@@ -204,16 +204,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							OClass c = ofac.createClass(oc.getIRI().toString());
-							activeOBDAModel.declareClass(c);
-						} else if (entity instanceof OWLObjectProperty) {
+							activeOBDAModel.getOntologyVocabulary().createClass(oc.getIRI().toString());
+						} 
+						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
-							activeOBDAModel.declareObjectProperty(r);
-						} else if (entity instanceof OWLDataProperty) {
+							activeOBDAModel.getOntologyVocabulary().createObjectProperty(or.getIRI().toString());
+						} 
+						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
-							activeOBDAModel.declareDataProperty(p);
+							activeOBDAModel.getOntologyVocabulary().createDataProperty(op.getIRI().toString());
 						}
 					}
 
@@ -224,16 +223,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							OClass c = ofac.createClass(oc.getIRI().toString());
-							activeOBDAModel.unDeclareClass(c);
-						} else if (entity instanceof OWLObjectProperty) {
+							activeOBDAModel.getOntologyVocabulary().removeClass(oc.getIRI().toString());
+						} 
+						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
-							activeOBDAModel.unDeclareObjectProperty(r);
-						} else if (entity instanceof OWLDataProperty) {
+							activeOBDAModel.getOntologyVocabulary().removeObjectProperty(or.getIRI().toString());
+						} 
+						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
-							activeOBDAModel.unDeclareDataProperty(p);
+							activeOBDAModel.getOntologyVocabulary().removeDataProperty(op.getIRI().toString());
 						}
 					}
 				}
@@ -362,18 +360,14 @@ public class OBDAModelManager implements Disposable {
 		Set<OWLOntology> ontologies = mmgr.getOntologies();
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
-			for (OWLClass c : ontology.getClassesInSignature()) {
-				OClass pred = ofac.createClass(c.getIRI().toString());
-				activeOBDAModel.declareClass(pred);
-			}
-			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
-				activeOBDAModel.declareObjectProperty(pred);
-			}
-			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
-				activeOBDAModel.declareDataProperty(pred);
-			}
+			for (OWLClass c : ontology.getClassesInSignature()) 
+				activeOBDAModel.getOntologyVocabulary().createClass(c.getIRI().toString());
+			
+			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) 
+				activeOBDAModel.getOntologyVocabulary().createObjectProperty(r.getIRI().toString());
+			
+			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) 
+				activeOBDAModel.getOntologyVocabulary().createDataProperty(p.getIRI().toString());
 		}
 
 		// Setup the prefixes
@@ -542,9 +536,10 @@ public class OBDAModelManager implements Disposable {
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
-					OBDAModelValidator refactorer = new OBDAModelValidator(activeOBDAModel, activeOntology);
-					refactorer.run(); // adding type information to the mapping predicates.
-				} catch (Exception e) {
+					// adding type information to the mapping predicates
+					OBDAModelValidator.validate(activeOBDAModel);
+				} 
+				catch (Exception e) {
 					OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
 					DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
 					log.error(e.getMessage());

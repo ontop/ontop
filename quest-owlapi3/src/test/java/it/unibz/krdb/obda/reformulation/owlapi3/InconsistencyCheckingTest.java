@@ -89,7 +89,6 @@ public class InconsistencyCheckingTest extends TestCase{
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
 		questOWLFactory.setPreferenceHolder(p);

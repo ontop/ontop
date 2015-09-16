@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 
 public class SQLQueryImpl implements OBDASQLQuery {
@@ -54,15 +53,5 @@ public class SQLQueryImpl implements OBDASQLQuery {
 	@Override
 	public int hashCode() {
 		return this.toString().hashCode();
-	}
-
-	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return new OBDAQueryModifiers();
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return false;
 	}
 }

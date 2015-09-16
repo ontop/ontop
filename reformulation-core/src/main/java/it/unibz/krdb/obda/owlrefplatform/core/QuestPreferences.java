@@ -54,7 +54,7 @@ public class QuestPreferences extends Properties {
 
 	public static final String  REWRITE 	= "rewrite";
 	
-	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
+//	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 	
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
@@ -165,7 +165,7 @@ public class QuestPreferences extends Properties {
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
 		keys.add(OPTIMIZE_EQUIVALENCES);
-		keys.add(OPTIMIZE_TBOX_SIGMA);
+//		keys.add(OPTIMIZE_TBOX_SIGMA);
 //		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;

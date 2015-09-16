@@ -25,12 +25,12 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,52 +61,53 @@ public class MappingDataTypeRepair {
      * Private method that gets the datatypes already present in the ontology and stores them in a map
      * It will be used later in insertDataTyping
      */
-    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner){
+    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
 
-    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<Predicate, Datatype>();
+    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<>();
+        
+        // Traverse the graph searching for dataProperty
+		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
+			DataRangeExpression node = nodes.getRepresentative();
+			
+			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRangeDAG().getSub(nodes)) {
+				DataRangeExpression descendant = descendants.getRepresentative();
+				if (descendant != node)
+					onDataRangeInclusion(dataTypesMap, descendant, node);				
+			}
+			for (DataRangeExpression equivalent : nodes) {
+				if (equivalent != node) {
+					onDataRangeInclusion(dataTypesMap, node, equivalent);
+					onDataRangeInclusion(dataTypesMap, equivalent, node);
+				}
+			}
+		}	
     	
-        /*
-        Traverse the graph searching for dataProperty
-         */
-        TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
-
-            @Override
-            public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
-            }
-            @Override
-            public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
-            }
-            @Override
-            public void onInclusion(ClassExpression sub, ClassExpression sup) {
-            }
-
-            @Override
-            public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
-                //if sup is a datatype property  we store it in the map
-                //it means that sub is of datatype sup
-            	if (sup instanceof Datatype) {
-            		Datatype supDataType = (Datatype)sup;
-            		Predicate key;
-            		if (sub instanceof Datatype) {
-            			// datatype inclusion
-            			key = ((Datatype)sub).getPredicate();
-            		}
-            		else if (sub instanceof DataPropertyRangeExpression) {
-            			// range 
-            			key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
-            		}
-            		else
-            			return;
-            		
-        			if (dataTypesMap.containsKey(key))
-                        throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key) + " is redefined as " + supDataType + " in the ontology");
-        			dataTypesMap.put(key, supDataType);
-            	}
-            }
-        });
 		return dataTypesMap;
     }
 
+    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub, DataRangeExpression sup) {
+        //if sup is a datatype property  we store it in the map
+        //it means that sub is of datatype sup
+    	if (sup instanceof Datatype) {
+    		Datatype supDataType = (Datatype)sup;
+    		Predicate key;
+    		if (sub instanceof Datatype) {
+    			// datatype inclusion
+    			key = ((Datatype)sub).getPredicate();
+    		}
+    		else if (sub instanceof DataPropertyRangeExpression) {
+    			// range 
+    			key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
+    		}
+    		else
+    			return;
+    		
+			if (dataTypesMap.containsKey(key))
+                throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key) + " is redefined as " + supDataType + " in the ontology");
+			dataTypesMap.put(key, supDataType);
+    	}
+    }
+   
                 /**
                  * This method wraps the variable that holds data property values with a
                  * data type predicate. It will replace the variable with a new function
@@ -119,7 +120,7 @@ public class MappingDataTypeRepair {
                  * @throws OBDAException
                  */
 
-    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner) throws OBDAException {
+    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
 
 
         //get all the datatypes in the ontology
@@ -131,8 +132,6 @@ public class MappingDataTypeRepair {
             throw new OBDAException(pe);
         }
 
-
-		VocabularyValidator qvv = new VocabularyValidator(reasoner);
 
 		for (CQIE rule : mappingRules) {
             Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);

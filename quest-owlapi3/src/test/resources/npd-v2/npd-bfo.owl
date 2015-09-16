@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:diskosv="http://sws.ifi.uio.no/vocab/diskos#"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:ptl="http://sws.ifi.uio.no/vocab/npd-v2-ptl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:snap="http://www.ifomis.org/bfo/1.1/snap#"
+   xmlns:span="http://www.ifomis.org/bfo/1.1/span#"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <rdf:Description rdf:about="http://resource.geosciml.org/classifier/ics/ischart/GeochronologicEra">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ConnectedTemporalRegion"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Agent">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#DependentContinuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#AreaFee">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Award">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BAA">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BAATransfer">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Transfer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BlowOut">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#TemporalInstant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ContingentResources">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#MaterialEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Discovery">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Equipment">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Object"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Facility">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Field">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldInvestment">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldMonthlyProduction">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldStatus">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Quality"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldYearlyProduction">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Kick">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#Occurrent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#KickOffPoint">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#LithostratigraphicUnit">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Site"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#NCSMonthlyProduction">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#NCSYearlyProduction">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#OilEquivalents">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#ObjectAggregate"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Petroleum">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#ObjectAggregate"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#PetroleumActivity">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#PetroleumDeposit">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#ObjectAggregate"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Plan">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Play">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Site"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicence">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceStatus">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Quality"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceTransfer">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Transfer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceWorkObligation">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#Occurrent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Prospect">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Site"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Recovery">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Refining">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Reserve">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#ObjectAggregate"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Royalty">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurvey">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurveyProgress">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#Occurrent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Sidetrack">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Survey">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#Occurrent"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TerminationPoint">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Point"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Transfer">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/span#ProcessualEntity"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Well">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellHead">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellTarget">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellTrack">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCasingAndLeakoffTest">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCore">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Object"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCorePhoto">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Object"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCoreSet">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#ObjectAggregate"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreDocument">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreDrillStemTest">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreDrillingMudSample">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreOilSample">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellborePoint">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Point"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreStratum">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#Notification">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#ProductionLicence">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Agent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#ProductionLicenceNotification">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFNotification">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-bfo">
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd"/>
+    <owl:imports rdf:resource="http://www.ifomis.org/bfo/owl"/>
+  </owl:Ontology>
+  <rdf:Description rdf:about="http://www.opengis.net/ont/geosparql#SpatialObject">
+    <rdfs:subClassOf rdf:resource="http://www.ifomis.org/bfo/1.1/snap#Continuant"/>
+  </rdf:Description>
+</rdf:RDF>

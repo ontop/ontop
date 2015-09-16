@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
@@ -214,21 +213,11 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return new OBDAQueryModifiers();
-	}
-
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
 		for (Function atom : body) {
 			TermUtils.addReferencedVariablesTo(vars, atom);
 		}
 		return vars;
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return false;
 	}
 }

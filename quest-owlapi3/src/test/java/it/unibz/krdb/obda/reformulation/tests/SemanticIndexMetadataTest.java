@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -105,19 +106,21 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-			Ontology ont = ofac.createOntology();
-			ont.getVocabulary().createClass("A");
-			ont.getVocabulary().createObjectProperty("P");
-			ont.getVocabulary().createDataProperty("P");
-			ont.getVocabulary().createObjectProperty("Q");
-			ont.getVocabulary().createDataProperty("D");
-				
+			OntologyVocabulary vb = ofac.createVocabulary();
+						
+			vb.createClass("A");
+			vb.createObjectProperty("P");
+			vb.createDataProperty("P");
+			vb.createObjectProperty("Q");
+			vb.createDataProperty("D");
+
+			Ontology ont = ofac.createOntology(vb);
+			
 			Quest quest = new Quest(ont, p);
 			quest.setupRepository();
 			

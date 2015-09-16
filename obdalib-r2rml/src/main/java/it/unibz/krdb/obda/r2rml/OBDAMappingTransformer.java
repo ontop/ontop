@@ -72,7 +72,7 @@ public class OBDAMappingTransformer {
 	public List<Statement> getStatements(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
 		List<Statement> statements = new ArrayList<Statement>();
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		CQIE tquery = (CQIE) axiom.getTargetQuery();
+		CQIE tquery = axiom.getTargetQuery();
 		
 		String random_number = IDGenerator.getNextUniqueID("");
 		
@@ -88,7 +88,6 @@ public class OBDAMappingTransformer {
 		
 		//process source query
 		String sqlquery = squery.getSQLQuery();
-		OBDAQueryModifiers modifiers = squery.getQueryModifiers();
 		if (sqlquery.startsWith("SELECT * FROM") &&
 			 !sqlquery.contains("WHERE") && !sqlquery.contains(",")) {
 				//tableName -> need small parser
@@ -254,7 +253,7 @@ public class OBDAMappingTransformer {
 			PrefixManager prefixmng) {
 		
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		CQIE tquery = (CQIE) axiom.getTargetQuery();
+		CQIE tquery = axiom.getTargetQuery();
 		
 		String random_number = IDGenerator.getNextUniqueID("");
 		

@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -132,18 +133,20 @@ public class QuestMaterializer {
 
         //start a quest instance
 		if (ontology == null) {
-			ontology = ofac.createOntology();
+			OntologyVocabulary vb = ofac.createVocabulary();
 			
 			// TODO: use Vocabulary for OBDAModel as well
 			
-			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
+			for (OClass pred : model.getOntologyVocabulary().getClasses()) 
+				vb.createClass(pred.getName());				
 			
-			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
+			for (ObjectPropertyExpression prop : model.getOntologyVocabulary().getObjectProperties()) 
+				vb.createObjectProperty(prop.getName());
 
-			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
+			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
+				vb.createDataProperty(prop.getName());
+			
+			ontology = ofac.createOntology(vb);			
 		}
 		
 		
@@ -163,17 +166,17 @@ public class QuestMaterializer {
 
         //add all class/data/object predicates to vocabulary
         //add declared predicates in model
-        for (OClass cl : model.getDeclaredClasses()) {
+        for (OClass cl : model.getOntologyVocabulary().getClasses()) {
             Predicate p = cl.getPredicate();
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
-        for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
+        for (ObjectPropertyExpression prop : model.getOntologyVocabulary().getObjectProperties()) {
             Predicate p = prop.getPredicate();
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
-        for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
+        for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) {
             Predicate p = prop.getPredicate();
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
@@ -204,17 +207,10 @@ public class QuestMaterializer {
             for (URI uri : this.model.getMappings().keySet()){
                 for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
                 {
-                    if (axiom.getTargetQuery() instanceof CQIE)
-                    {
-                        CQIE rule = (CQIE)axiom.getTargetQuery();
-                        for (Function f: rule.getBody())
-                        {
-                            vocabulary.add(f.getFunctionSymbol());
-                        }
-                    }
-
+                    CQIE rule = axiom.getTargetQuery();
+                    for (Function f: rule.getBody())
+                        vocabulary.add(f.getFunctionSymbol());
                 }
-
             }
         }
 
@@ -230,7 +226,6 @@ public class QuestMaterializer {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		return p;
 	}
 

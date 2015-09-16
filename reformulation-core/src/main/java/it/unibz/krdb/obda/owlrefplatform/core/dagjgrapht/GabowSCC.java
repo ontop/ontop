@@ -25,14 +25,17 @@ import java.util.*;
 
 import org.jgrapht.*;
 
+import com.google.common.collect.ImmutableSet;
+
 
 /**
- * Allows obtaining the strongly connected components of a directed graph. 
+ * Allows obtaining the strongly connected components of a directed graph.
  *
- *The implemented algorithm follows Cheriyan-Mehlhorn/Gabow's algorithm
- *Presented in Path-based depth-first search for strong and biconnected components by Gabow (2000).
- *The running time is order of O(|V|+|E|)
-
+ * The implemented algorithm follows Cheriyan-Mehlhorn/Gabow's algorithm
+ * Presented in Path-based depth-first search for strong and biconnected components by Gabow (2000).
+ * The running time is order of O(|V|+|E|)
+ *
+ * TODO: replace by GabowStrongConnectivityInspector (from an updated JGraphT)
  *
  *
  */
@@ -172,7 +175,7 @@ public class GabowSCC<V, E>
              } 
          }
          
-         Set<V> L = new HashSet<V>(); 
+         ImmutableSet.Builder<V> L = new ImmutableSet.Builder<>(); 
          if (v.getNumber() == (B.getLast())) { 
         	 /* number vertices of the next strong component */
         	 B.removeLast(); 
@@ -183,7 +186,7 @@ public class GabowSCC<V, E>
                  L.add(r.getVertex()); 
                  r.setNumber(c);
              } 
-             stronglyConnectedSets.add(new Equivalences<V>(L)); 
+             stronglyConnectedSets.add(new Equivalences<V>(L.build())); 
          } 
     }
 
