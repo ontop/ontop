@@ -706,8 +706,8 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			.put(OWL2Datatype.XSD_ANY_URI, 6) // 	xsd:anyURI
 			.put(OWL2Datatype.XSD_DATE_TIME, 7) // 	xsd:dateTime
 			.put(OWL2Datatype.XSD_DATE_TIME_STAMP, 7) // 	xsd:dateTimeStamp
-			//.put(OWL2Datatype.XSD_INT, 8) // 	TEMPORARY FOR Q9 / FISHMARK
-			//.put(OWL2Datatype.XSD_LONG, 9) // 	TEMPORARY FOR OntologyTypesTest
+			.put(OWL2Datatype.XSD_INT, 8) // 	TEMPORARY FOR Q9 / FISHMARK
+			.put(OWL2Datatype.XSD_LONG, 9) // 	TEMPORARY FOR OntologyTypesTest
 			.build();
 	
 	// these three maps order specify linear order in each of the groups
