@@ -19,11 +19,11 @@ public class TestImplicitDBConstraints {
 	public void setupMetadata(){
 		this.md = new DBMetadata("dummy class");
 		TableDefinition td = new TableDefinition("TABLENAME");
-		td.addAttribute(new Attribute("KEYNAME", 0, null, false, null)); // from 1
+		td.addAttribute(new Attribute(td, "KEYNAME", 0, false, null)); // from 1
 		md.add(td); 
 		TableDefinition td2 = new TableDefinition("TABLE2");
-		td2.addAttribute(new Attribute("KEY1", 0, null, false, null));  // from 1
-		td2.addAttribute(new Attribute("KEY2", 0, null, false, null));
+		td2.addAttribute(new Attribute(td2, "KEY1", 0, false, null));  // from 1
+		td2.addAttribute(new Attribute(td2, "KEY2", 0, false, null));
 		md.add(td2);
 	}
 	
@@ -70,11 +70,10 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addForeignKeys(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
-		Attribute attr = dd.getAttribute(1);  // from 1
-		Reference ref = attr.getReference();
-		assertTrue(ref != null);
-		assertTrue(ref.getTableReference().equals("TABLE2"));
-		assertTrue(ref.getColumnReference().equals("KEY1"));
+		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
+		assertTrue(fk != null);
+		assertTrue(fk.getComponents().get(0).getReference().getTable().getName().equals("TABLE2"));
+		assertTrue(fk.getComponents().get(0).getReference().getName().equals("KEY1"));
 	}
 
 	@Test
@@ -82,14 +81,11 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
 		uc.addConstraints(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
-		Attribute attr = dd.getAttribute(1);  // from 1
-		Reference ref = attr.getReference();
-		assertTrue(ref != null);
-		assertTrue(ref.getTableReference().equals("TABLE2"));
-		assertTrue(ref.getColumnReference().equals("KEY1"));
-		System.out.println(dd.getUniqueConstraints().get(0).getAttributes());
-		System.out.println(ImmutableList.of(attr));
-		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
+		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
+		assertTrue(fk != null);
+		assertTrue(fk.getComponents().get(0).getReference().getTable().getName().equals("TABLE2"));
+		assertTrue(fk.getComponents().get(0).getReference().getName().equals("KEY1"));
+		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(dd.getAttribute(1)))); 
 	}
 
 	

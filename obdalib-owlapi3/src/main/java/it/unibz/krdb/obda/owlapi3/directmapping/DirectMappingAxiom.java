@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.Reference;
+import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 
@@ -62,20 +62,15 @@ public class DirectMappingAxiom {
 
 	public Map<String, CQIE> getRefAxioms() {
 		HashMap<String, CQIE> refAxioms = new HashMap<>();
-		Map<String, List<Attribute>> fks = ((TableDefinition) table)
-				.getForeignKeys();
-		if (fks.size() > 0) {
-			Set<String> keys = fks.keySet();
-			for (String key : keys) {
-				refAxioms.put(getRefSQL(key), getRefCQ(key));
-			}
+		List<ForeignKeyConstraint> fks = ((TableDefinition) table).getForeignKeys();
+		for (ForeignKeyConstraint fk : fks) {
+			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		}
 		return refAxioms;
 	}
 
-	private String getRefSQL(String key) {
+	private String getRefSQL(ForeignKeyConstraint fk) {
 		TableDefinition tableDef = ((TableDefinition) table);
-		Map<String, List<Attribute>> fks = tableDef.getForeignKeys();
 
 		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
 
@@ -100,25 +95,25 @@ public class DirectMappingAxiom {
 		}
 
 		// referring object
-		List<Attribute> attr = fks.get(key);
-		for (int i = 0; i < attr.size(); i++) {
-			Condition += table + ".\"" + attr.get(i).getName() + "\" = ";
+		int count = 0;
+		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
+			Condition += table + ".\"" + comp.getAttribute().getName() + "\" = ";
 
 			// get referenced object
-			Reference ref = attr.get(i).getReference();
-			tableRef = ref.getTableReference();
-			if (i == 0)
+			tableRef = comp.getReference().getTable().getName();
+			if (count == 0)
 				Table += ", \"" + tableRef + "\"";
-			String columnRef = ref.getColumnReference();
+			String columnRef = comp.getReference().getName();
 			Column += "\"" + tableRef + "\".\"" + columnRef + "\" AS "
 					+ tableRef + "_" + columnRef;
 
 			Condition += "\"" + tableRef + "\".\"" + columnRef + "\"";
 
-			if (i < attr.size() - 1) {
+			if (count < fk.getComponents().size() - 1) {
 				Column += ", ";
 				Condition += " AND ";
 			}
+			count++;
 		}
 		for (TableDefinition tdef : metadata.getTables()) {
 			if (tdef.getName().equals(tableRef)) {
@@ -181,41 +176,34 @@ public class DirectMappingAxiom {
 		return df.getCQIE(head, atoms);
 	}
 
-	private CQIE getRefCQ(String fk) {
+	private CQIE getRefCQ(ForeignKeyConstraint fk) {
 
 		Term sub = generateSubject((TableDefinition) table, true);
-		Function atom = null;
 
+		ForeignKeyConstraint.Component fkcomp = fk.getComponents().get(0);
+		
 		// Object Atoms
 		// Foreign key reference
-		for (Attribute att : table.getAttributes()) {
-			Reference ref = att.getReference();
-			if (ref != null) {
-				if (ref.getReferenceName().equals(fk)) {
-					String pkTableReference = ref.getTableReference();
-					TableDefinition tdRef = (TableDefinition) metadata
-							.getDefinition(pkTableReference);
-					Term obj = generateSubject(tdRef, true);
+		String pkTableReference = fkcomp.getReference().getTable().getName();
+		TableDefinition tdRef = (TableDefinition) metadata
+				.getDefinition(pkTableReference);
+		Term obj = generateSubject(tdRef, true);
 
-					String opURI = generateOPURI(table.getName(), att);
-					atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
+		String opURI = generateOPURI(table.getName(), fkcomp.getAttribute());
+		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
-					// construct the head
-					Set<Variable> headTermsSet = new HashSet<>();
-					TermUtils.addReferencedVariablesTo(headTermsSet, atom);
-					
-					List<Term> headTerms = new ArrayList<>();
-					headTerms.addAll(headTermsSet);
+		// construct the head
+		Set<Variable> headTermsSet = new HashSet<>();
+		TermUtils.addReferencedVariablesTo(headTermsSet, atom);
+		
+		List<Term> headTerms = new ArrayList<>();
+		headTerms.addAll(headTermsSet);
 
-					Predicate headPredicate = df.getPredicate(
-							"http://obda.inf.unibz.it/quest/vocabulary#q",
-							headTerms.size());
-					Function head = df.getFunction(headPredicate, headTerms);
-					return df.getCQIE(head, atom);
-				}
-			}
-		}
-		return null;
+		Predicate headPredicate = df.getPredicate(
+				"http://obda.inf.unibz.it/quest/vocabulary#q",
+				headTerms.size());
+		Function head = df.getFunction(headPredicate, headTerms);
+		return df.getCQIE(head, atom);
 	}
 
 	// Generate an URI for class predicate from a string(name of table)

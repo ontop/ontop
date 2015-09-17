@@ -248,7 +248,7 @@ public class SQLQueryParser {
 					columnName= columnName.substring(1, columnName.length()-1);
 				}
 
-                viewDefinition.addAttribute(new Attribute(columnName));
+                viewDefinition.addAttribute(new Attribute(viewDefinition, columnName, 0, false, null));
             }
         }
         else {
@@ -319,7 +319,8 @@ public class SQLQueryParser {
                         columnName = columnName.toLowerCase();
                 }
 
-                viewDefinition.addAttribute(new Attribute(columnName)); // the attribute index always start at 1
+                // the attribute index always start at 1
+                viewDefinition.addAttribute(new Attribute(viewDefinition, columnName, 0, false, null)); 
             }
         }
         

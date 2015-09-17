@@ -21,7 +21,6 @@ package it.unibz.krdb.sql;
  */
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;

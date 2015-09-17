@@ -119,7 +119,7 @@ public class OracleSesameLIMITTest  {
 
 	private TableDefinition defTable(String name){
 		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = new Attribute("country_name", java.sql.Types.VARCHAR, null, false, null);
+		Attribute attribute = new Attribute(tableDefinition, "country_name", java.sql.Types.VARCHAR, false, null);
 		tableDefinition.addAttribute(attribute);
 		return tableDefinition;
 	}

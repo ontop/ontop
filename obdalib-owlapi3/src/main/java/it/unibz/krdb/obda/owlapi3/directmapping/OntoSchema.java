@@ -114,12 +114,15 @@ public class OntoSchema {
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
+/*	
+ * 		ROMAN : NOT SURE HOW TO DO THAT	
 		if((at.getReference() != null) && !existObjectProperty(rootOntology, at)){
 			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newoproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
+*/		
 	}
 	
 	private boolean existDataProperty(OWLOntology rootOntology, Attribute at){

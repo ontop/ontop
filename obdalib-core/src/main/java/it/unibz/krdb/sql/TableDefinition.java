@@ -34,7 +34,7 @@ public class TableDefinition extends DataDefinition {
 	public TableDefinition(String name) {
 		super(name);
 	}
-	
+/*	
 	public Map<String, List<Attribute>> getForeignKeys() {
 		Map<String, List<Attribute>> foreignKeys = new HashMap<>();
 		for (Attribute attr : getAttributes()) {
@@ -51,7 +51,7 @@ public class TableDefinition extends DataDefinition {
 		}
 		return foreignKeys;
 	}
-	
+*/	
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
@@ -66,6 +66,7 @@ public class TableDefinition extends DataDefinition {
 			if (getPrimaryKey() != null && getPrimaryKey().getAttributes().contains(att)) 
 				bf.append(":PK");
 			
+			/*
 			Reference ref = att.getReference();
 			if (ref != null) {
 				bf.append(":FK:");
@@ -73,6 +74,7 @@ public class TableDefinition extends DataDefinition {
 						ref.getTableReference(), 
 						ref.getColumnReference()));
 			}
+			*/
 			comma = true;
 		}
 		bf.append("]");

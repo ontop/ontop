@@ -27,28 +27,27 @@ public class Attribute implements Serializable{
 	
 	private static final long serialVersionUID = -5780621780592347583L;
 	
-	/** Fields */
 	private final String name;
 	private final int type;
 	private final boolean canNull;
 	private final String typeName;
 	
-	private Reference foreignKey;
-
-	public Attribute(String name) {
-		this(name, 0, null, false, null);
-	}
-
-	public Attribute(String name, int type, Reference foreignKey, boolean canNull, String typeName) {
+	private final DataDefinition table;
+	
+	public Attribute(DataDefinition table, String name, int type, boolean canNull, String typeName) {
 		this.name = name;
 		this.type = type;
-		this.foreignKey = foreignKey;
 		this.canNull = canNull;
 		this.typeName = typeName;
+		this.table = table;
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public DataDefinition getTable() {
+		return table;
 	}
 	
 	public int getType() {
@@ -57,10 +56,6 @@ public class Attribute implements Serializable{
 	
 	public boolean canNull() {
 		return canNull;
-	}
-	
-	public Reference getReference() {
-		return foreignKey;
 	}
 	
 	/***
@@ -86,8 +81,10 @@ public class Attribute implements Serializable{
 		if (this == obj)
 			return true;
 		
-		if (obj instanceof Attribute) 
-			return this.name.equals(((Attribute)obj).name);
+		if (obj instanceof Attribute) {
+			Attribute other = (Attribute)obj;
+			return this.name.equals(other.name) && this.table.equals(other.table);
+		}
 		
 		return false;
 	}

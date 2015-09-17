@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.Reference;
+import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.TableDefinition;
 
 import java.util.ArrayList;
@@ -60,67 +60,58 @@ public class DBMetadataUtil {
 		int count = 0;
 		Collection<TableDefinition> tableDefs = metadata.getTables();
 		for (TableDefinition def : tableDefs) {
-			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
-			for (Entry<String, List<Attribute>> fks : foreignKeys.entrySet()) {
-				List<Attribute> fkAttributes = fks.getValue();
-				try {
-					TableDefinition def2 = null;
-					Map<Integer, Integer> positionMatch = new HashMap<>();
-					for (Attribute attr : fkAttributes) {
-						// Get current table and column (1)
-						String column1 = attr.getName();
-						
-						// Get referenced table and column (2)
-						Reference reference = attr.getReference();
-						String table2 = reference.getTableReference();
-						String column2 = reference.getColumnReference();				
-						
-						// Get table definition for referenced table
-						def2 = (TableDefinition) metadata.getDefinition(table2);
-						if (def2 == null) { // in case of broken FK
-							// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
-							//        (which can happen in the NEW abridged metadata)
-							throw new BrokenForeignKeyException(reference, "Missing table: " + table2);
-						}
-						// Get positions of referenced attribute
-						int pos1 = def.getAttributeKey(column1);
-						if (pos1 == -1) {
-							throw new BrokenForeignKeyException(reference, "Missing column: " + column1);
-						}
-						int pos2 = def2.getAttributeKey(column2);
-						if (pos2 == -1) {
-							throw new BrokenForeignKeyException(reference, "Missing column: " + column2);
-						}
-						positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
+			for (ForeignKeyConstraint fks : def.getForeignKeys()) {
+
+				TableDefinition def2 = null;
+				Map<Integer, Integer> positionMatch = new HashMap<>();
+				for (ForeignKeyConstraint.Component comp : fks.getComponents()) {
+					// Get current table and column (1)
+					String column1 = comp.getAttribute().getName();
+					
+					// Get referenced table and column (2)
+					String column2 = comp.getReference().getName();				
+					
+					// Get table definition for referenced table
+					def2 = (TableDefinition) comp.getReference().getTable();
+					if (def2 == null) { // in case of broken FK
+						// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
+						//        (which can happen in the NEW abridged metadata)
+						throw new RuntimeException("Missing table: " + fks);
 					}
-					// Construct CQIE
-					Predicate p1 = fac.getPredicate(def.getName(), def.getAttributes().size());					
-					List<Term> terms1 = new ArrayList<>(p1.getArity());
-					for (int i = 1; i <= p1.getArity(); i++) 
-						 terms1.add(fac.getVariable("t" + i));
-					
-					// Roman: important correction because table2 may not be in the same case 
-					// (e.g., it may be all upper-case)
-					Predicate p2 = fac.getPredicate(def2.getName(), def2.getAttributes().size());
-					List<Term> terms2 = new ArrayList<>(p2.getArity());
-					for (int i = 1; i <= p2.getArity(); i++) 
-						 terms2.add(fac.getVariable("p" + i));
-					
-					// do the swapping
-					for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
-						terms1.set(swap.getKey(), terms2.get(swap.getValue()));
-					
-					Function head = fac.getFunction(p2, terms2);
-					Function body = fac.getFunction(p1, terms1);
-					
-					dependencies.addRule(head, body);				
-					if (printouts)
-						System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
-				} 
-				catch (BrokenForeignKeyException e) {
-					// Log the warning message
-					log.warn(e.getMessage());
+					// Get positions of referenced attribute
+					int pos1 = def.getAttributeKey(column1);
+					if (pos1 == -1) {
+						throw new RuntimeException("Missing column: " + column1);
+					}
+					int pos2 = def2.getAttributeKey(column2);
+					if (pos2 == -1) {
+						throw new RuntimeException("Missing column: " + column2);
+					}
+					positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
 				}
+				// Construct CQIE
+				Predicate p1 = fac.getPredicate(def.getName(), def.getAttributes().size());					
+				List<Term> terms1 = new ArrayList<>(p1.getArity());
+				for (int i = 1; i <= p1.getArity(); i++) 
+					 terms1.add(fac.getVariable("t" + i));
+				
+				// Roman: important correction because table2 may not be in the same case 
+				// (e.g., it may be all upper-case)
+				Predicate p2 = fac.getPredicate(def2.getName(), def2.getAttributes().size());
+				List<Term> terms2 = new ArrayList<>(p2.getArity());
+				for (int i = 1; i <= p2.getArity(); i++) 
+					 terms2.add(fac.getVariable("p" + i));
+				
+				// do the swapping
+				for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
+					terms1.set(swap.getKey(), terms2.get(swap.getValue()));
+				
+				Function head = fac.getFunction(p2, terms2);
+				Function body = fac.getFunction(p1, terms1);
+				
+				dependencies.addRule(head, body);				
+				if (printouts)
+					System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
 			}
 		}		
 		if (printouts)

@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 
 public abstract class DataDefinition implements Serializable {
@@ -36,7 +35,8 @@ public abstract class DataDefinition implements Serializable {
 	private final List<Attribute> attributes = new LinkedList<>();
 
 	private UniqueConstraint pk;
-	private LinkedList<UniqueConstraint> ucs = new LinkedList<>();
+	private final LinkedList<UniqueConstraint> ucs = new LinkedList<>();
+	private final LinkedList<ForeignKeyConstraint> fks = new LinkedList<>();
 		
 	protected DataDefinition(String name) {
 		this.name = name;
@@ -64,17 +64,18 @@ public abstract class DataDefinition implements Serializable {
 		return ImmutableList.copyOf(ucs);
 	}
 	
+	public void addForeignKeyConstraint(ForeignKeyConstraint fk) {
+		fks.add(fk);
+	}
+	
+	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
+		return ImmutableList.copyOf(fks);
+	}
+	
 	public void addAttribute(Attribute value) {
 		attributes.add(value);
 	}
 
-	// TODO: remove from ImplicitDBConstraints
-	@Deprecated
-	public void setAttribute(int pos, Attribute value) {
-		// indexes start at 1
-		attributes.set(pos - 1, value);
-	}
-	
 	/**
 	 * gets attribute with the specified position
 	 * 
@@ -90,6 +91,11 @@ public abstract class DataDefinition implements Serializable {
 
 	public List<Attribute> getAttributes() {
 		return Collections.unmodifiableList(attributes);
+	}
+	
+	public Attribute getAttribute(String attributeName) {
+		int pos = getAttributeKey(attributeName);
+		return getAttribute(pos);
 	}
 	
 	/**

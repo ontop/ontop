@@ -63,9 +63,9 @@ public class JDBCConnectionManager {
 	 * Private constructor.
 	 */
 	private JDBCConnectionManager() {
-		connectionPool = new HashMap<OBDADataSource, Connection>();
+		connectionPool = new HashMap<>();
 
-		properties = new HashMap<String, Object>();
+		properties = new HashMap<>();
 		properties.put(JDBC_AUTOCOMMIT, false);
 		properties.put(JDBC_FETCHSIZE, 100);
 		properties.put(JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY);
@@ -191,7 +191,7 @@ public class JDBCConnectionManager {
 	 * @return The database meta data object.
 	 */
 	public static DBMetadata getMetaData(Connection conn) throws SQLException {
-		DBMetadata metadata = null;
+		DBMetadata metadata;
 		final DatabaseMetaData md = conn.getMetaData();
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			// If the database engine is Oracle
@@ -219,14 +219,11 @@ public class JDBCConnectionManager {
 	 *            The database id.
 	 * @return The database meta data object.
 	 */
-	public DBMetadata getMetaData(OBDADataSource sourceId, List<RelationJSQL> tables) throws SQLException {
-		Connection conn = getConnection(sourceId);
-		return getMetaData(conn, tables);
-	}
-	
+
 	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
 		if (tables == null || tables.isEmpty())
 			return getMetaData(conn);
+		
 		DBMetadata metadata = null;
 		final DatabaseMetaData md = conn.getMetaData();
 		if (md.getDatabaseProductName().contains("Oracle")) {
@@ -244,6 +241,20 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
+	
+	private static final class FKInfo {
+		String catalog;
+		String schema;
+		String name;
+		DataDefinition td;
+		
+		FKInfo(String catalog, String schema, String name, DataDefinition td) {
+			this.catalog = catalog;
+			this.schema = schema;
+			this.name = name;
+			this.td = td;
+		}
+	}
 
 	/**
 	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
@@ -252,13 +263,15 @@ public class JDBCConnectionManager {
 		DBMetadata metadata = new DBMetadata(md);
 
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
+			
+			List<FKInfo> fks = new LinkedList<>();
+			
 			while (rsTables.next()) {
 				Set<String> tableColumns = new HashSet<String>();
 
 				final String tblCatalog = rsTables.getString("TABLE_CAT");
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
-				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
 
@@ -269,7 +282,6 @@ public class JDBCConnectionManager {
 					while (rsColumns.next()) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						int dataType = rsColumns.getInt("DATA_TYPE");
-						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
 						
 						final String typeName = rsColumns.getString("TYPE_NAME");
@@ -278,23 +290,22 @@ public class JDBCConnectionManager {
 							dataType = -10000;
 						}
 						
-						td.addAttribute(new Attribute(columnName, dataType, reference,
-								isNullable != 0, typeName));
+						td.addAttribute(new Attribute(td, columnName, dataType, isNullable != 0, typeName));
 						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
 							throw new RuntimeException("The system cannot process duplicate table columns!");
 						}
 					}
-					final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
-					if (primaryKey != null)
-						td.setPrimaryKey(primaryKey);
-
-					final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName, primaryKey);
+					getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
+					final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName);
 					// Add this information to the DBMetadata
 					metadata.add(td);
+					fks.add(new FKInfo(null, null, tblName, td));
 				} 
 			}
+			for (FKInfo fki : fks)
+				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
 		return metadata;
 	}
@@ -311,6 +322,8 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables, int caseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+		
+		List<FKInfo> fks = new LinkedList<>();
 		
 		/**
 		 *  The sql to extract table names is now removed, since we instead use the
@@ -353,8 +366,6 @@ public class JDBCConnectionManager {
 				break;
 			}
 			
-			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
-
 			TableDefinition td = new TableDefinition(tableGivenName);
 
 			try (ResultSet rsColumns = md.getColumns(null, tableSchema, tblName, null)) {
@@ -371,7 +382,6 @@ public class JDBCConnectionManager {
 					
 					final String columnName = rsColumns.getString("COLUMN_NAME");
 					int dataType = rsColumns.getInt("DATA_TYPE");
-					final Reference reference = foreignKeys.get(columnName);
 					final int isNullable = rsColumns.getInt("NULLABLE");
 					/***
 					 * Fix for MySQL YEAR
@@ -383,9 +393,7 @@ public class JDBCConnectionManager {
 					}
 					
 					
-					//td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
-					td.addAttribute(new Attribute(columnName, dataType, reference,
-							isNullable != 0, typeName));
+					td.addAttribute(new Attribute(td, columnName, dataType, isNullable != 0, typeName));
 					
 					// Check if the columns are unique regardless their letter cases
 					if (!tableColumns.add(columnName.toLowerCase())) {
@@ -393,14 +401,14 @@ public class JDBCConnectionManager {
 						throw new RuntimeException("The system cannot process duplicate table columns!");
 					}
 				}
-				final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tableSchema, tblName, td);
-				if (primaryKey != null)
-					td.setPrimaryKey(primaryKey);
-				
-	            final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName, primaryKey);
+				getPrimaryKey(md, null, tableSchema, tblName, td);
+	            final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName);
 				// Add this information to the DBMetadata
 				metadata.add(td);
+				fks.add(new FKInfo(null, tableSchema, tblName, td));
 			} 
+			for (FKInfo fki : fks)
+				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		}
 		return metadata;
 	}
@@ -465,6 +473,7 @@ public class JDBCConnectionManager {
 	private static DBMetadata getSqlServerMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		try (Statement stmt = conn.createStatement()) {
+			List<FKInfo> fks = new LinkedList<>();
 			/* Obtain the statement object for query execution */
 
 			/* Obtain the relational objects (i.e., tables and views) */
@@ -478,25 +487,24 @@ public class JDBCConnectionManager {
 					final String tblCatalog = resultSet.getString("TABLE_CATALOG");
 					final String tblSchema = resultSet.getString("TABLE_SCHEMA");
 					final String tblName = resultSet.getString("TABLE_NAME");
-					final Map<String, Reference> foreignKeys = getForeignKey(md, tblCatalog, tblSchema, tblName);
 
 					TableDefinition td = new TableDefinition(tblName);
 					try (ResultSet rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null)) {
 						while (rsColumns.next()) {
 							final String columnName = rsColumns.getString("COLUMN_NAME");
 							final int dataType = rsColumns.getInt("DATA_TYPE");
-							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
-							td.addAttribute(new Attribute(columnName, dataType, reference, isNullable != 0, null));
+							td.addAttribute(new Attribute(td, columnName, dataType, isNullable != 0, null));
 						}
-						final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
-						if (primaryKey != null)
-							td.setPrimaryKey(primaryKey);
-										// Add this information to the DBMetadata
+						getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
+						// Add this information to the DBMetadata
 						metadata.add(td);
+						fks.add(new FKInfo(tblCatalog, tblSchema, tblName, td));
 					} 
 				}
 			}
+			for (FKInfo fki : fks)
+				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
 		return metadata;
 	}
@@ -508,7 +516,7 @@ public class JDBCConnectionManager {
 		DBMetadata metadata = new DBMetadata(md);
 		/* Obtain the statement object for query execution */
 		try (Statement stmt = conn.createStatement()) {
-			
+			List<FKInfo> fks = new LinkedList<>();
 			/* Obtain the relational objects (i.e., tables and views) */
 			final String tableSelectQuery = "SELECT TABSCHEMA, TABNAME " +
 					"FROM SYSCAT.TABLES " +
@@ -521,7 +529,6 @@ public class JDBCConnectionManager {
 				while (resultSet.next()) {
 					final String tblSchema = resultSet.getString("TABSCHEMA");
 					final String tblName = resultSet.getString("TABNAME");
-					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tblSchema, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
 					try (ResultSet rsColumns = md.getColumns(null, tblSchema, tblName, null)) {
@@ -530,21 +537,20 @@ public class JDBCConnectionManager {
 							final String columnName = rsColumns.getString("COLUMN_NAME");
 							final int dataType = rsColumns.getInt("DATA_TYPE");
 							final String typeName = rsColumns.getString("TYPE_NAME");
-							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
-							td.addAttribute(new Attribute(columnName, dataType, reference,
+							td.addAttribute(new Attribute(td, columnName, dataType,
 									isNullable != 0, typeName));
 						}
-						final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tblSchema, tblName, td);
-						if (primaryKey != null)
-							td.setPrimaryKey(primaryKey);
-						
-	                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName, primaryKey);
+						getPrimaryKey(md, null, tblSchema, tblName, td);	
+	                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName);
 						// Add this information to the DBMetadata
 						metadata.add(td);
+						fks.add(new FKInfo(null, tblSchema, tblName, td));
 					} 
 				}
 			}
+			for (FKInfo fki : fks)
+				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
 		return metadata;
 	}
@@ -557,6 +563,7 @@ public class JDBCConnectionManager {
 		
 		/* Obtain the statement object for query execution */
 		try (Statement stmt = conn.createStatement()) {
+			List<FKInfo> fks = new LinkedList<>();
 			
 			/* Obtain the table owner (i.e., schema name) */
 			String tableOwner = "SYSTEM"; // by default
@@ -587,7 +594,6 @@ public class JDBCConnectionManager {
 				while (resultSet.next()) {
 
 					final String tblName = resultSet.getString("object_name");
-					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 
 					TableDefinition td = new TableDefinition(tblName);
 					
@@ -607,7 +613,6 @@ public class JDBCConnectionManager {
 
 							//final boolean isUnique = uniqueAttributes.contains(columnName);
 
-							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
 
 							/***
@@ -619,18 +624,18 @@ public class JDBCConnectionManager {
 								dataType = 91;
 							}
 							
-							td.addAttribute(new Attribute(columnName, dataType, reference, isNullable != 0, null));
+							td.addAttribute(new Attribute(td, columnName, dataType, isNullable != 0, null));
 						}
-						final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tableOwner, tblName, td);
-						if (primaryKey != null)
-							td.setPrimaryKey(primaryKey);
-						
-	                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName, primaryKey);
+						getPrimaryKey(md, null, tableOwner, tblName, td);			
+	                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName);
 						// Add this information to the DBMetadata
 						metadata.add(td);
+						fks.add(new FKInfo(null, tableOwner, tblName, td));
 					} 
 				}
 			}
+			for (FKInfo fki : fks)
+				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
 		return metadata;
 	}
@@ -668,6 +673,9 @@ public class JDBCConnectionManager {
 			Iterator<RelationJSQL> table_iter = tables.iterator();
 			/* Obtain the column information for each relational object */
 			while (table_iter.hasNext()) {
+				List<FKInfo> fks = new LinkedList<>();
+				
+				
 				RelationJSQL table = table_iter.next();
 //				String tblName = resultSet.getString("object_name");
 //				tableOwner = resultSet.getString("owner_name");
@@ -693,8 +701,6 @@ public class JDBCConnectionManager {
 				else
 					tableOwner = loggedUser.toUpperCase();
 
-				final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
-				
 				TableDefinition td = new TableDefinition(tableGivenName);
 //				TableDefinition td = new TableDefinition(tblName);
 				try (ResultSet rsColumns = md.getColumns(null, tableOwner, tblName, null)) {
@@ -720,11 +726,10 @@ public class JDBCConnectionManager {
 						 * I tried oracle thin driver ojdbc16-11.2.0.3
 						 */
 						int dataType = rsColumns.getInt("DATA_TYPE");
-						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
 					    //final boolean isUnique = uniqueAttributes.contains(columnName);
 						/***
-						 * To fix bug in Oracle 11 and up driver retruning wrong datatype
+						 * To fix bug in Oracle 11 and up driver returning wrong datatype
 						 */
 						final String typeName = rsColumns.getString("TYPE_NAME");
 						
@@ -732,19 +737,19 @@ public class JDBCConnectionManager {
 							dataType = 91;
 						}
 						
-						td.addAttribute(new Attribute(columnName, dataType, reference,
+						td.addAttribute(new Attribute(td, columnName, dataType,
 								isNullable != 0, typeName/*, isUnique*/));
 					}
-					final ImmutableList<Attribute> primaryKey = getPrimaryKey(md, null, tableOwner, tblName, td);
-					if (primaryKey != null)
-						td.setPrimaryKey(primaryKey);
-					
-					final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName, primaryKey);
+					getPrimaryKey(md, null, tableOwner, tblName, td);					
+					final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName);
 					
 					// Add this information to the DBMetadata
 					metadata.add(td);
 					//metadata.add(tblName,tableOwner);
+					fks.add(new FKInfo(null, tableOwner, tblName, td));
 				} 
+				for (FKInfo fki : fks)
+					getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 			}
 		} 
 		return metadata;
@@ -755,7 +760,7 @@ public class JDBCConnectionManager {
 	
 
 	/* Retrieves the primary key(s) from a table */
-	private static ImmutableList<Attribute> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table, TableDefinition td) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table, TableDefinition td) throws SQLException {
 		ImmutableList.Builder<Attribute> pk = ImmutableList.builder();
 		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table)) {
 			while (rsPrimaryKeys.next()) {
@@ -768,9 +773,8 @@ public class JDBCConnectionManager {
 			}
 		} 
 		ImmutableList<Attribute> pkattr = pk.build();
-		if (pkattr.isEmpty())
-			return null;
-		return pkattr;
+		if (!pkattr.isEmpty())
+			td.setPrimaryKey(pkattr);
 	}
 	
 	/**
@@ -782,14 +786,13 @@ public class JDBCConnectionManager {
 	 * @return
 	 * @throws SQLException 
 	 */
-	private static Set<String> getUniqueAttributes(DatabaseMetaData md,	String tblCatalog, String tblSchema, String tblName, ImmutableList<Attribute> pk) throws SQLException {
+	private static Set<String> getUniqueAttributes(DatabaseMetaData md,	String tblCatalog, String tblSchema, String tblName) throws SQLException {
 
 		Set<String> uniqueSet  = new HashSet<String>();
-		ResultSet rsUnique = null;
 
-		try {
+		try (ResultSet rsUnique= md.getIndexInfo(tblCatalog, tblSchema, tblName, true	, true)) {
 			/*extracting unique */
-			rsUnique= md.getIndexInfo(tblCatalog, tblSchema, tblName, true	, true);
+			;
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
 				String nonUnique = rsUnique.getString("NON_UNIQUE");
@@ -804,33 +807,40 @@ public class JDBCConnectionManager {
 					}
 				}
 			}
-			
-		/*closing result sets */
-		} finally {
-			if (rsUnique != null) {
-				rsUnique.close();
-			}
 		}
 		
-		/*Adding keys and Unique*/
-		
+		/*Adding keys and Unique*/		
 		return uniqueSet;
 	}
 	
 	/* Retrieves the foreign key(s) from a table */
-	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
-		Map<String, Reference> fk = new HashMap<String, Reference>();
+	private static void getForeignKeys(DatabaseMetaData md, String tblCatalog, String schema, String table, DataDefinition tbl, DBMetadata metadata) throws SQLException {
 		try (ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table)) {
-			;
+			ForeignKeyConstraint.Builder builder = null;
+			String currentName = "";
 			while (rsForeignKeys.next()) {
-				String fkName = rsForeignKeys.getString("FK_NAME");
+				String name = rsForeignKeys.getString("FK_NAME");
+				if (!currentName.equals(name)) {
+					if (builder != null) 
+						tbl.addForeignKeyConstraint(builder.build());
+					
+					builder = new ForeignKeyConstraint.Builder(name);
+					currentName = name;
+				}
 				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
 				String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
-				fk.put(colName, new Reference(fkName, pkTableName, pkColumnName));
+				DataDefinition ref = metadata.getDefinition(pkTableName);
+				if (ref != null)
+					builder.add(tbl.getAttribute(colName), ref.getAttribute(pkColumnName));
+				else {
+					System.err.println("Cannot find table: " + pkTableName + " for " + name);
+					builder = null;
+				}
 			}
+			if (builder != null)
+				tbl.addForeignKeyConstraint(builder.build());
 		} 
-		return fk;
 	}
 
 	/**

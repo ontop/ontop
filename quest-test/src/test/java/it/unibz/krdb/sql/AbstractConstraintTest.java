@@ -84,7 +84,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		
 		Collection<TableDefinition> tables = metadata.getTables();
 		for (TableDefinition t : tables) {
-			Map<String, List<Attribute>> fk =  t.getForeignKeys();
+			List<ForeignKeyConstraint> fk =  t.getForeignKeys();
 			if (checkName(t, TB_BOOK)) {
 				assertEquals(0, fk.size());
 			} else if (checkName(t, TB_BOOKWRITER)) {

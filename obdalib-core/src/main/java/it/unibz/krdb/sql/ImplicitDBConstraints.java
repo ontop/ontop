@@ -38,6 +38,25 @@ public class ImplicitDBConstraints {
 	private static Logger log = LoggerFactory.getLogger(ImplicitDBConstraints.class);
 	
 	
+	private static final class Reference {
+		final String fkName, fkTable, fkColumn;
+		
+		Reference(String fkName, String fkTable, String fkColumn) {
+			this.fkName = fkName;
+			this.fkTable = fkTable;
+			this.fkColumn = fkColumn;
+		}
+
+		public String getColumnReference() {
+			return fkColumn;
+		}
+
+		public String getTableReference() {
+			return fkTable;
+		}
+		
+	}
+	
 	// The key is a table name, each element in the array list is a primary key, which is a list of the keys making up the key
 	HashMap<String, ArrayList<ArrayList<String>>> uniqueFD;
 	// The key is a table name, and the values are all the foreign keys. The keys in the inner hash map are column names, while Reference object refers to a tabel
@@ -67,9 +86,9 @@ public class ImplicitDBConstraints {
 			throw new IllegalArgumentException("File " + file + " does not exist");
 		}
 		this.file = file;
-		this.uniqueFD = new HashMap<String, ArrayList<ArrayList<String>>>();
-		this.fKeys = new HashMap<String, ArrayList<HashMap<String, Reference>>>();
-		this.referredTables = new HashSet<String>();
+		this.uniqueFD = new HashMap<>();
+		this.fKeys = new HashMap<>();
+		this.referredTables = new HashSet<>();
 		this.parseConstraints();
 	}
 
@@ -208,8 +227,8 @@ public class ImplicitDBConstraints {
 						} else if (! attr.getName().equals(keyColumn)){
 							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						} else {		
-						//	td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
-							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.getReference(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
+							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
+							// ROMAN (17 Aug 2015): do we really change it into NON NULL?
 							td.addUniqueConstraint(ImmutableList.of(td.getAttribute(key_pos)));
 						}
 					}
@@ -252,10 +271,10 @@ public class ImplicitDBConstraints {
 						log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						continue;
 					}
-					if(attr.getReference() != null){
-						log.warn("Manually supplied foreign key ignored since existing in metadata foreign key for '" + td.getName() + "':'" + attr.getName() + "'");
-						continue;
-					}
+					//if(attr.getReference() != null){
+					//	log.warn("Manually supplied foreign key ignored since existing in metadata foreign key for '" + td.getName() + "':'" + attr.getName() + "'");
+					//	continue;
+					//}
 					Reference ref = fKey.get(keyColumn);
 					String fkTable = ref.getTableReference();
 					DataDefinition fktd = md.getDefinition(fkTable);
@@ -268,8 +287,9 @@ public class ImplicitDBConstraints {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");
 						continue;
 					}
-					//String type = attr.getType();
-					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), ref, attr.canNull(), attr.getSQLTypeName()));
+					
+					td.addForeignKeyConstraint(new ForeignKeyConstraint.Builder("_FK_" + tableName + "_" + keyColumn)
+											.add(attr, fktd.getAttribute(fkColumn)).build());
 				}
 			}
 			md.add(td);

@@ -52,6 +52,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
@@ -716,13 +717,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				System.out.println("\n====== Foreign keys ==========");
 				for(TableDefinition dd : table_list){
 					System.out.print("\n" + dd.getName() + ":");
-					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-					for(String fkName : fkeys.keySet() ){
-							System.out.print("(" + fkName + ":");
-							for(Attribute attr : fkeys.get(fkName)){
-								System.out.print(attr.getName() + ",");
-							}
-							System.out.print("),");
+					List<ForeignKeyConstraint> fkeys = dd.getForeignKeys();
+					for (ForeignKeyConstraint fk : fkeys) {
+						System.out.print("(" + fk.getName() + ":");
+						for (ForeignKeyConstraint.Component attr : fk.getComponents()){
+							System.out.print(attr.getAttribute().getName() + ",");
+						}
+						System.out.print("),");
 					}
 				}		
 			}
