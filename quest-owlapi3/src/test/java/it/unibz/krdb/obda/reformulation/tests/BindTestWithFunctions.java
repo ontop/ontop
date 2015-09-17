@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -41,10 +42,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -924,7 +925,19 @@ public class BindTestWithFunctions {
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
+            String value = "Jan 31 2013 9:32AM";
 
+            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+            java.util.Date date;
+            try {
+                date = df.parse(value);
+                Timestamp ts = new Timestamp(date.getTime());
+                System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+
+            } catch (ParseException pe) {
+
+                throw new RuntimeException(pe);
+            }
 
             int i = 0;
             List<String> returnedValues = new ArrayList<>();

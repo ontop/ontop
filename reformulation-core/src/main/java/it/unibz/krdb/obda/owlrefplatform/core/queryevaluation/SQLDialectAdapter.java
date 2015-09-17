@@ -136,6 +136,5 @@ public interface SQLDialectAdapter {
 
 	public String dateMonth(String date);
 
-
-
+	public String rand();
 }

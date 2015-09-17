@@ -54,12 +54,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String SHA1(String str) {
-	  		return String.format("HASH(%s, HASH_SH1)", str);
+	  		return String.format("dbms_crypto.HASH(%s, dbms_crypto.HASH_SH1)", str);
 	  	}
 	  
 	@Override
 	public String MD5(String str) {
-		return String.format("HASH(%s,2)", str);
+		return String.format("dbms_crypto.HASH(%s,2)", str);
 	}
 
 	@Override
@@ -132,6 +132,32 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
         }
         return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
     }
+
+	@Override
+	public String dateNow() {
+		return "CURRENT_TIMESTAMP";
+
+	}
+
+	@Override
+	public String strUuid() {
+		return "sys_guid()";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'|| sys_guid()";
+	}
+
+	@Override
+	public String rand() {
+		return "dbms_random.random";
+	}
+
+	@Override
+	public String dateTimezone(String str) {
+		return String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str);
+	}
 
 	@Override
 	public String getDummyTable() {

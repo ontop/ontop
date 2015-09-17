@@ -69,10 +69,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String MULTIPLY_OPERATOR = "%s * %s";
 	
 	private static final String ABS_OPERATOR = "ABS(%s)";
-	private static final String CEIL_OPERATOR = "CEIL(%s)";
+
 	private static final String FLOOR_OPERATOR = "FLOOR(%s)";
-	private static final String ROUND_OPERATOR = "ROUND(%s)";
-	private static final String RAND_OPERATOR = "RAND()";
+
 
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
@@ -1742,7 +1741,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.ROUND)) {
 			operator = sqladapter.round();
 		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
-			operator = RAND_OPERATOR;
+			operator = sqladapter.rand();
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}

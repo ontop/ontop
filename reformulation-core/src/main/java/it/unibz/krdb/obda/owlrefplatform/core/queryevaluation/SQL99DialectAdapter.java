@@ -84,8 +84,13 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
   	public String dateMonth(String str) {
     	return String.format("EXTRACT(MONTH FROM %s)",str);
   	}
-    
-    @Override
+
+	@Override
+	public String rand() {
+		return "RAND()";
+	}
+
+	@Override
   	public String dateMinutes(String str) {
     	return String.format("EXTRACT(MINUTE FROM %s)",str);
   	}
