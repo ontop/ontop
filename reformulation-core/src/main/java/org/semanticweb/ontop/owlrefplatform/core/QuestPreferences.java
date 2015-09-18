@@ -47,6 +47,7 @@ public class QuestPreferences extends OBDAProperties {
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
 
     public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
+	public static final String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
 
     public static final String  REWRITE 	= "rewrite";
 	
@@ -56,6 +57,7 @@ public class QuestPreferences extends OBDAProperties {
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
 
 	public static final String DB_CONSTRAINTS = "DB_CONSTRAINTS";
+	public static final String TMAPPING_EXCLUSION = "TMAPPING_EXCLUSION";
 
     //@Deprecated
 	//public static final String JDBC_URL = OBDAProperties.JDBC_URL;

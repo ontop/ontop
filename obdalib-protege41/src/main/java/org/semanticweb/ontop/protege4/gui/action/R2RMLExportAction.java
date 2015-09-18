@@ -78,17 +78,22 @@ public class R2RMLExportAction extends ProtegeAction {
 
                 final JFileChooser fc = new JFileChooser();
                 fc.setSelectedFile(new File(sourceID + "-mappings.ttl"));
-                fc.showSaveDialog(workspace);
+                int approve = fc.showSaveDialog(workspace);
+
+                if(approve == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
 
 
 				R2RMLWriter writer = new R2RMLWriter(obdaModel.getCurrentImmutableOBDAModel(), sourceID,
 						modelManager.getActiveOntology());
                 writer.write(file);
+                    JOptionPane.showMessageDialog(workspace, "R2rml Export completed.");
+                }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "An error occured. For more info, see the logs.");
-            log.error("Error during r2rml export. \n"+ex.getMessage()+"\n"+ex.getLocalizedMessage());
+            JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+            log.error("Error during r2rml export. \n");
+            ex.printStackTrace();
         }
 
 	}

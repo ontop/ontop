@@ -20,13 +20,13 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
 
 public interface SQLDialectAdapter {
@@ -53,6 +53,8 @@ public interface SQLDialectAdapter {
 
 	public String sqlQuote(String name);
 
+	public String getClosingQuote();
+
 	public String sqlSlice(long limit, long offset);
 
 	public String sqlOrderBy(List<OrderCondition> conditions, String viewname);
@@ -68,7 +70,6 @@ public interface SQLDialectAdapter {
 	 */
 	public String sqlCast(String value, int type);
 	
-
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
 	
 	public String getDummyTable();
@@ -79,11 +80,19 @@ public interface SQLDialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value);
 	
 	public String getSQLLexicalFormDatetime(String value);
-	
-	
 
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive);
+	public String getSQLLexicalFormDatetimeStamp(String v);
+
+
+	/**
+	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
+	 */
+	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
 
 	public String sqlGroupBy(List<Variable> groupby, String viewname);
-
+    
+	/**
+	 * Returns an UNQUOTED view name.
+	 */
+	String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames);
 }

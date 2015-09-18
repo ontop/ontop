@@ -21,7 +21,7 @@ import java.util.List;
 public interface IQuestStatement extends OBDAStatement {
     IQuest getQuestInstance();
 
-    String getRewriting(ParsedQuery query, List<String> signature) throws OBDAException;
+    String getRewriting(ParsedQuery query) throws OBDAException;
 
     TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException;
 
@@ -50,17 +50,4 @@ public interface IQuestStatement extends OBDAStatement {
      * Not always supported (for instance, write mode is not yet supported for the virtual mode).
      */
     int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException;
-
-    /***
-     * Inserts a stream of ABox assertions into the repository.
-     *
-     * @param data
-
-     *            Indicates if indexes (if any) should be dropped before
-     *            inserting the tuples and recreated afterwards. Note, if no
-     *            index existed before the insert no drop will be done and no
-     *            new index will be created.
-     *
-     */
-    public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException;
 }

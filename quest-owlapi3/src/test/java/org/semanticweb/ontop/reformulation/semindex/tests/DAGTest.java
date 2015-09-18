@@ -53,7 +53,7 @@ public class DAGTest extends TestCase {
 			for(ClassExpression c: node)
 				classes.add(c);
 		}
-		for(Equivalences<DataRangeExpression> node : reasoner.getDataRanges()) {
+		for(Equivalences<DataRangeExpression> node : reasoner.getDataRangeDAG()) {
 			for(DataRangeExpression c: node)
 				classes.add(c);
 		}

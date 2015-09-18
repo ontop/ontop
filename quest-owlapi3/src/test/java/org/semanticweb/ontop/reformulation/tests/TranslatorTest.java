@@ -31,7 +31,6 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.TestCase;
 

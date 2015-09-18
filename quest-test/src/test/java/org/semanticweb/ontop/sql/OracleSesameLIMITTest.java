@@ -45,6 +45,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
+import static org.junit.Assert.assertTrue;
 
 /***
  * Tests that the SPARQL LIMIT statement is correctly translated to WHERE ROWNUM <= x in oracle
@@ -126,14 +129,14 @@ public class OracleSesameLIMITTest  {
 		Attribute attribute = null;
 		//It starts from 1 !!!
 		attribute = new Attribute("country_name", java.sql.Types.VARCHAR, false, null);
-		tableDefinition.setAttribute(1, attribute);
+		tableDefinition.addAttribute(attribute);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = new DBMetadata();
+		DBMetadata dbMetadata = new DBMetadata(driver_class);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.setDriverName(driver_class);
+		dbMetadata.add(new TableDefinition("dual"));
 		return dbMetadata;
 	}
 

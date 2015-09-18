@@ -232,10 +232,9 @@ public class DirectMappingEngine {
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
 
 
-		List<TableDefinition> tables = metadata.getTableList();
+		Collection<TableDefinition> tables = metadata.getTables();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<>();
-		for (int i = 0; i < tables.size(); i++) {
-			TableDefinition td = tables.get(i);
+		for (TableDefinition td : tables) {
             mappingAxioms.addAll(getMapping(td, metadata, baseuri));
 		}
 

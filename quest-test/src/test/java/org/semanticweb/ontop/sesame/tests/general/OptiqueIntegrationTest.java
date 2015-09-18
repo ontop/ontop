@@ -10,7 +10,6 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.QueryLanguage;

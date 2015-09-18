@@ -23,8 +23,8 @@ public class InteractiveExample {
 	 * Please use the pre-bundled H2 server from the above link
 	 * 
 	 */
-	final String owlfile = "src/main/resources/example/npd-v2-ql_a.owl";
-	final String obdafile = "src/main/resources/example/npd-v2-ql_a.obda";
+	final String owlfile = "src/main/resources/example/npd_no_spatial_db2.owl";
+	final String obdafile = "src/main/resources/example/npd_no_spatial_db2.obda";
 	
 	// Exclude from T-Mappings
 	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";

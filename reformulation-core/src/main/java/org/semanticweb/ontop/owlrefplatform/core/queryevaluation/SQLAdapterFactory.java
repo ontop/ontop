@@ -25,8 +25,6 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
@@ -34,34 +32,35 @@ public class SQLAdapterFactory {
 	public static SQLDialectAdapter getSQLDialectAdapter(String driverURI, QuestPreferences preferences) {
 
 		switch (driverURI) {
-        case "org.postgresql.Driver":
-			return new PostgreSQLDialectAdapter();
-        case "com.mysql.jdbc.Driver":
-			return new Mysql2SQLDialectAdapter();
-        case "org.h2.Driver":
-			return new H2SQLDialectAdapter();
-        case "com.ibm.db2.jcc.DB2Driver":
-			return new DB2SQLDialectAdapter();
-        case "oracle.jdbc.driver.OracleDriver":
-        case "oracle.jdbc.OracleDriver":
-			return new OracleSQLDialectAdapter();
-        case "org.teiid.jdbc.TeiidDriver":
-			return new TeiidSQLDialectAdapter();
-        case "com.microsoft.sqlserver.jdbc.SQLServerDriver":
-			return new SQLServerSQLDialectAdapter();
-        case "org.hsqldb.jdbc.JDBCDriver":
-			return new HSQLSQLDialectAdapter();
-        case "madgik.adp.federatedjdbc.AdpDriver":
-			return new AdpSQLDialectAdapter();
-        default:
-			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
-			log.warn("WARNING: Contact the authors for further support.");
-            String adapterClassName = preferences.getProperty(SQLDialectAdapter.class.getCanonicalName());
-            try {
-                Class adapterClass = Class.forName(adapterClassName);
-                return (SQLDialectAdapter) adapterClass.getConstructor().newInstance();
-            } catch (Exception e) {
-             throw new RuntimeException("Impossible to initialize the SQL adapter: " + e.getMessage());
+			case "org.postgresql.Driver":
+				return new PostgreSQLDialectAdapter();
+			case "com.mysql.jdbc.Driver":
+				return new Mysql2SQLDialectAdapter();
+			case "org.h2.Driver":
+				return new H2SQLDialectAdapter();
+			case "org.hsqldb.jdbc.JDBCDriver":
+				return new HSQLSQLDialectAdapter();
+			case "com.ibm.db2.jcc.DB2Driver":
+				return new DB2SQLDialectAdapter();
+			case "oracle.jdbc.driver.OracleDriver":
+			case "oracle.jdbc.OracleDriver":
+				return new OracleSQLDialectAdapter();
+			case "org.teiid.jdbc.TeiidDriver":
+				return new TeiidSQLDialectAdapter();
+			case "net.sourceforge.jtds.jdbc.Driver":
+			case "com.microsoft.sqlserver.jdbc.SQLServerDriver":
+				return new SQLServerSQLDialectAdapter();
+			case "madgik.adp.federatedjdbc.AdpDriver":
+				return new AdpSQLDialectAdapter();
+			default:
+				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
+				log.warn("WARNING: Contact the authors for further support.");
+				String adapterClassName = preferences.getProperty(SQLDialectAdapter.class.getCanonicalName());
+				try {
+					Class adapterClass = Class.forName(adapterClassName);
+					return (SQLDialectAdapter) adapterClass.getConstructor().newInstance();
+				} catch (Exception e) {
+				 throw new RuntimeException("Impossible to initialize the SQL adapter: " + e.getMessage());
             }
 		}
 	}

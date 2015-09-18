@@ -769,7 +769,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			DBMetadata md = man.getMetaData(selectedSource);
-			for (DataDefinition relation : md.getRelationList()) {
+			for (DataDefinition relation : md.getRelations()) {
 				relationList.addElement(relation);
 			}
 		} catch (SQLException e) {

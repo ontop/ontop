@@ -148,7 +148,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		setupListeners();
 		
 		// Setting up actions for all the buttons of this view.
-		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Integer>("Counting tuples...", QueryInterfaceView.this) {
+		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Long>("Counting tuples...", QueryInterfaceView.this) {
 			@Override
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
@@ -158,13 +158,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				return -1;
 			}
 			@Override
-			public void handleResult(Integer result){
+			public void handleResult(Long result){
 				updateTablePanelStatus(result);	
 			}
 
 
 			@Override
-			public Integer executeQuery(QuestOWLStatement st, String query) throws OWLException {
+			public Long executeQuery(QuestOWLStatement st, String query) throws OWLException {
 				return st.getTupleCount(query);
 			}
 
@@ -359,8 +359,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	
 	private class QueryStatusUpdater implements Runnable{
-		int result;
-		QueryStatusUpdater(int result){
+		long result;
+		QueryStatusUpdater(long result){
 			this.result = result;
 		}
 		
@@ -368,7 +368,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			queryEditorPanel.updateStatus(result);
 		}
 	}
-	protected void updateTablePanelStatus(int result) {
+	protected void updateTablePanelStatus(Long result) {
 		if (result != -1) {
 			Runnable status_updater = new QueryStatusUpdater(result);
 			SwingUtilities.invokeLater(status_updater);

@@ -253,4 +253,42 @@ public class OntologyTypesStockexchangeTest {
     }
 
 
+    @Test //a quoted datatype is treated as a literal
+    public void testDatatype() throws Exception {
+
+        Properties p = new Properties();
+        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }";
+
+        runTests(p, query1, 1 );
+    }
+
+    @Test //a quoted datatype is treated as a literal
+    public void testQuotedDatatype() throws Exception {
+
+        Properties p = new Properties();
+        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\" . }";
+
+        runTests(p, query1, 0 );
+    }
+
+    @Test //a quoted datatype is treated as a literal
+    public void testDatatypeTimezone() throws Exception {
+
+        Properties p = new Properties();
+        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00+06:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }";
+
+        runTests(p, query1, 1 );
+    }
 }

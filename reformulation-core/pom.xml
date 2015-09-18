@@ -55,11 +55,6 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
-		</dependency> 
-
- 		<dependency>
-  			<groupId>net.sf.jgrapht</groupId>
-  			<artifactId>jgrapht</artifactId>
 		</dependency>
 		
 		<dependency>
@@ -68,12 +63,11 @@
 		</dependency>
 			
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<scope>test</scope>		
 			<type>jar</type>
 		</dependency>
-		
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>

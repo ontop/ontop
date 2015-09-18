@@ -20,13 +20,7 @@ package org.semanticweb.ontop.partialEvaluation.test;
  * #L%
  */
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
@@ -82,12 +76,12 @@ public class ThetaApplicationTest extends TestCase {
 		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
-		VariableImpl t7 = (VariableImpl)termFactory.getVariable("x");
+		Variable t7 = termFactory.getVariable("x");
 		Term t6 = termFactory.getVariable("t");
-		VariableImpl t8 = (VariableImpl)termFactory.getVariable("z");
+		Variable t8 = termFactory.getVariable("z");
 		Term t9 = termFactory.getConstantLiteral("elf");
 		Term t10 = termFactory.getVariable("x");
-		VariableImpl t11 = (VariableImpl)termFactory.getVariable("y");
+		Variable t11 = termFactory.getVariable("y");
 		Term t12 = termFactory.getVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);
@@ -105,13 +99,12 @@ public class ThetaApplicationTest extends TestCase {
         SingletonSubstitution s2 = new SingletonSubstitution(t8, t9);
         SingletonSubstitution s3 = new SingletonSubstitution(t11, otx);
 
-        Map<VariableImpl, Term> entries = new HashMap<>();
+        Map<Variable, Term> entries = new HashMap<>();
 		entries.put(s1.getVariable(), s1.getTerm());
 		entries.put(s2.getVariable(), s2.getTerm());
 		entries.put(s3.getVariable(), s3.getTerm());
         Substitution mgu = new SubstitutionImpl(entries);
 
-		UnifierUtilities unifier = new UnifierUtilities();
 		CQIE newquery = SubstitutionUtilities.applySubstitution(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
@@ -121,11 +114,11 @@ public class ThetaApplicationTest extends TestCase {
 		List<Term> terms = a.getTerms();
 		assertEquals(5, terms.size());
 
-		VariableImpl term1 = (VariableImpl) terms.get(0);
-		FunctionalTermImpl term2 = (FunctionalTermImpl) terms.get(1);
+		Variable term1 = (Variable) terms.get(0);
+		Function term2 = (Function) terms.get(1);
 		ValueConstant term3 = (ValueConstant) terms.get(2);
-		FunctionalTermImpl term4 = (FunctionalTermImpl) terms.get(3);
-		FunctionalTermImpl term5 = (FunctionalTermImpl) terms.get(4);
+		Function term4 = (Function) terms.get(3);
+		Function term5 = (Function) terms.get(4);
 
 		assertEquals("t", term1.getName());
 		assertEquals("elf", term3.getValue());

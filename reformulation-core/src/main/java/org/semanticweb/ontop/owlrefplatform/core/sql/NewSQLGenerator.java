@@ -12,7 +12,6 @@ import java.util.Set;
 
 import org.semanticweb.ontop.mapping.QueryUtils;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -143,7 +142,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		temp.put(OBDAVocabulary.XSD_DECIMAL_URI, new Integer(5));
 		temp.put(OBDAVocabulary.XSD_INTEGER_URI, new Integer(4));
 		temp.put(OBDAVocabulary.RDFS_LITERAL_URI, new Integer(3));
-		temp.put(OBDAVocabulary.QUEST_BNODE, new Integer(2));
+		//temp.put(OBDAVocabulary.QUEST_BNODE, new Integer(2));
      	temp.put(OBDAVocabulary.QUEST_URI, new Integer(1));
      	temp.put(OBDAVocabulary.NULL.toString(), new Integer(0));
 		
@@ -295,6 +294,14 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		}
 	}
 
+	/**
+	 * TODO: implement it seriously
+	 */
+	@Override
+	public boolean hasDistinctResultSet() {
+		return false;
+	}
+
 	//TODO: should it be a method of DatalogProgram?
 	private DatalogProgram normalizeProgram(DatalogProgram program) {
 		Set<CQIE> normalizedRules = new HashSet<>();
@@ -303,14 +310,15 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		}
 		//TODO: need a method that would return a new DatalogProgram from rules and modifiers
 		//OBDADataFactoryImpl.getInstance().getDatalogProgram(normalizedRules);
-		DatalogProgram normalizedProgram = OBDADataFactoryImpl.getInstance().getDatalogProgram(normalizedRules);
-		normalizedProgram.setQueryModifiers(program.getQueryModifiers().clone());
+		DatalogProgram normalizedProgram = OBDADataFactoryImpl.getInstance().getDatalogProgram(
+				program.getQueryModifiers().clone(),normalizedRules);
 		return normalizedProgram;
 	}
 
 	private CQIE normalizeRule(CQIE rule) {
-		CQIE normalizedRule = DatalogNormalizer.foldJoinTrees(rule, true);
-		DatalogNormalizer.pullUpNestedReferences(normalizedRule, false);
+		CQIE normalizedRule = rule.clone();
+		DatalogNormalizer.foldJoinTrees(normalizedRule);
+		DatalogNormalizer.pullUpNestedReferences(normalizedRule);
 		DatalogNormalizer.addMinimalEqualityToLeftJoin(normalizedRule);
 		return normalizedRule;
 	}
@@ -727,7 +735,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 				if (subTerm instanceof Function) {
 					Function compositeSubTerm = (Function) subTerm;
 
-					type = dtfac.getDataType(compositeSubTerm.getFunctionSymbol().toString());
+					type = dtfac.getDatatype(compositeSubTerm.getFunctionSymbol().toString());
 				}
 
 				/**
@@ -752,7 +760,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 					type = COL_TYPE.BNODE;
 				}
 				else {
-					type = dtfac.getDataType(mainFunctionSymbol.toString());
+					type = dtfac.getDatatype(mainFunctionSymbol.toString());
 				}
 		}
 
@@ -879,10 +887,10 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	
 			// Similar to what is done in #getConditionString()
 			if (atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI) ||
-				atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_BNODE)) {
+				atom.getFunctionSymbol() instanceof BNodePredicate) {
 				mainColumn = getTemplateAsString(atom, index);			
 			} 			
-			else if (atom.getFunctionSymbol() instanceof DataTypePredicate) {
+			else if (atom.getFunctionSymbol() instanceof DatatypePredicate) {
 				mainColumn = getDataTypeConditionString(atom, index);
 			}			
 			else if (atom.getFunctionSymbol().isAggregationPredicate()) {
@@ -1108,7 +1116,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		Predicate predicate = atom.getFunctionSymbol();
 		if (predicate instanceof BooleanOperationPredicate
 				|| predicate instanceof NumericalOperationPredicate
-				|| predicate instanceof DataTypePredicate) {
+				|| predicate instanceof DatatypePredicate) {
 			// These don't participate in the FROM clause
 			return "";
 		} 
@@ -1183,7 +1191,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			Function atom = (Function) term;
 			Predicate typePred = atom.getFunctionSymbol();
 
-			if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
+			if (typePred instanceof BNodePredicate) {
 				ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 			} 
 			else if (typePred.getName().equals(OBDAVocabulary.QUEST_URI)) {
@@ -1803,7 +1811,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	private boolean isStringColType(String table, String col) {
-		List<TableDefinition> tables = metadata.getTableList();
+		Collection<TableDefinition> tables = metadata.getTables();
 		for (TableDefinition tabledef : tables) {
 			
 			if (tabledef.getName().equals(table)) {

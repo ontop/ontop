@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Substitution;
 
 public interface CQContainmentCheck {
 
@@ -14,5 +15,7 @@ public interface CQContainmentCheck {
 	*/
 	
 	boolean isContainedIn(CQIE cq1, CQIE cq2);
+	
+	Substitution computeHomomorphsim(CQIE q1, CQIE q2);
 	
 }

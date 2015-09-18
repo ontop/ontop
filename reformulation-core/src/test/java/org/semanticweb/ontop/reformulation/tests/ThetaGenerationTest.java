@@ -30,9 +30,10 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.model.Substitution;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -46,15 +47,14 @@ public class ThetaGenerationTest extends TestCase {
 	OBDADataFactory termFactory =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
-	//IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private Vector<SingletonSubstitution> getMGUAsVector(Substitution mgu) {
 		Vector<SingletonSubstitution> computedmgu = new Vector<>();
 		if (mgu == null) {
 			computedmgu = null;
 		} else {
-			for (VariableImpl var : mgu.keySet()) {
-				computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
+			for (Map.Entry<Variable,Term> m : mgu.getMap().entrySet()) {
+				computedmgu.add(new SingletonSubstitution(m.getKey(), m.getValue()));
 			}
 		}
 		return computedmgu;
@@ -366,7 +366,7 @@ public class ThetaGenerationTest extends TestCase {
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
-		FunctionalTermImpl term = (FunctionalTermImpl) sub.getTerm();
+		Function term = (Function) sub.getTerm();
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 
@@ -383,7 +383,7 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
 		Predicate fs1 = predFactory.getPredicate("p", vars1.size());
-		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.getFunction(fs1, vars1);
+		Function ot1 = termFactory.getFunction(fs1, vars1);
 		Term t2 = termFactory.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
@@ -670,7 +670,7 @@ public class ThetaGenerationTest extends TestCase {
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
-		FunctionalTermImpl term = (FunctionalTermImpl) sub.getTerm();
+		Function term = (Function) sub.getTerm();
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 
@@ -899,11 +899,12 @@ public class ThetaGenerationTest extends TestCase {
 	}
 
 	//A(#),A(#)
-	public void test_32(){
+	// ROMAN: removed the test which does not make any sense without anonymous variables
+	public void non_test_32(){
 
 		try {
-			Term t1 = termFactory.getVariableNondistinguished();
-			Term t2 = termFactory.getVariableNondistinguished();
+			Term t1 = termFactory.getVariable("w1");
+			Term t2 = termFactory.getVariable("w2");
 
 			Predicate pred1 = predFactory.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -924,12 +925,13 @@ public class ThetaGenerationTest extends TestCase {
 
 	}
 
-	//A(x),A(#)
-	public void test_33(){
+	//A(x),A(#) 
+	// ROMAN: removed the test which does not make any sense without anonymous variables
+	public void non_test_33(){
 
 		try {
 			Term t1 = termFactory.getVariable("x");
-			Term t2 = termFactory.getVariableNondistinguished();
+			Term t2 = termFactory.getVariable("w1");
 
 			Predicate pred1 = predFactory.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();

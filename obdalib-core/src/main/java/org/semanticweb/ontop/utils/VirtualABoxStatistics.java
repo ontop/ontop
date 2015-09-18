@@ -205,7 +205,8 @@ public class VirtualABoxStatistics {
 		final String originalSql = query.toString();
 		
 		String sql = originalSql.toLowerCase(); // make it lower case to help identify a string.
-		int start = sql.indexOf("from");
+        String fromStr = " from "; //spaces are added to the begining and the end of 'from' word. Because there could be any field that includes from string in mapping.
+		int start = sql.indexOf(fromStr);
 		int end = sql.length();
 		
 		return originalSql.substring(start, end);

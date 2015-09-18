@@ -32,7 +32,7 @@ import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.OBDADataSourceFromConfigExtractor;
-import org.semanticweb.ontop.owlrefplatform.core.IQuestConnection;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
@@ -42,10 +42,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlapi3.directmapping.DirectMappingEngine;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
@@ -67,7 +64,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
+	private IQuest questInstance;
+	
 	
 	private boolean isinitalized = false;
 	
@@ -82,6 +80,11 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	public QuestDBVirtualStore(String name, QuestPreferences pref) throws Exception {
 		// direct mapping : no tbox, no obda file, repo in-mem h2
 		this(name, null, null, pref);
+	}
+
+	@Override
+	public QuestPreferences getPreferences() {
+		return questInstance.getPreferences();
 	}
 
 	/**
@@ -217,7 +220,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
 		//compute closure first (owlontology might contain include other source declarations)
 		Set<OWLOntology> closure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(closure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 	}
 	
 	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata,
@@ -297,11 +300,13 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
-			questConn = questInstance.getConnection();
+			return questInstance.getConnection();
 		} catch (OBDAException e) {
+			// TODO: throw a proper exception
 			e.printStackTrace();
+			// UGLY!
+			return null;
 		}
-		return questConn;
 	}
 
 	/**

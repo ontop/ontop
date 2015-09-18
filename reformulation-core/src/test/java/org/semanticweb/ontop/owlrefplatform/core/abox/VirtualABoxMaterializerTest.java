@@ -79,11 +79,11 @@ public class VirtualABoxMaterializerTest extends TestCase {
                         new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
                         nativeQLFactory.create(new HashMap<String, String>()));
 
-                /*
-                 * Setting the database;
-                 */
+		/*
+		 * Setting the database;
+		 */
 
-                QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
                 List<Assertion> assertions = materializer.getAssertionList();
                 for (Assertion a : assertions) {
@@ -122,6 +122,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -172,7 +173,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappings, prefixManager);
 
         //TODO: remove this dangerous cast
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		assertEquals(0, assertions.size());
@@ -209,14 +210,15 @@ public class VirtualABoxMaterializerTest extends TestCase {
             Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
             Statement st = conn.createStatement();
 
-            FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
-            BufferedReader in = new BufferedReader(reader);
-            StringBuilder bf = new StringBuilder();
-            String line = in.readLine();
-            while (line != null) {
-                bf.append(line);
-                line = in.readLine();
-            }
+		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+		in.close();
 
             st.executeUpdate(bf.toString());
             conn.commit();
@@ -272,7 +274,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
             PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
             OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
-            QuestMaterializer materializer = new QuestMaterializer(model);
+            QuestMaterializer materializer = new QuestMaterializer(model, false);
 
             List<Assertion> assertions = materializer.getAssertionList();
 
@@ -319,6 +321,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -380,7 +383,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
         OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -424,6 +427,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -450,7 +454,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
         OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -494,6 +498,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -557,7 +562,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
         OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 	
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -601,6 +606,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -663,7 +669,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
         OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		int count = materializer.getTripleCount();

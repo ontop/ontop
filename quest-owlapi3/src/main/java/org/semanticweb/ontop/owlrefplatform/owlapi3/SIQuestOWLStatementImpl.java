@@ -24,10 +24,4 @@ public class SIQuestOWLStatementImpl extends QuestOWLStatement implements SIQues
     public void dropIndexes() throws OBDAException {
         st.dropIndexes();
     }
-
-    @Override
-    public void analyze() throws OBDAException {
-        st.analyze();
-
-    }
 }

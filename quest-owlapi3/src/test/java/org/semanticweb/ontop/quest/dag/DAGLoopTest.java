@@ -27,6 +27,7 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
@@ -51,13 +52,10 @@ public class DAGLoopTest {
 	@Before
 	public void setUp() throws Exception {
 		
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto;
-
-			owlonto = man.loadOntologyFromOntologyDocument(new File("src/test/resources/test/dag/final_project_original.owl"));
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File("src/test/resources/test/dag/final_project_original.owl"));
 		
-		onto = t.translate(owlonto);
+		onto = OWLAPI3TranslatorUtility.translate(owlonto);
 
 	}
 
@@ -67,8 +65,7 @@ public class DAGLoopTest {
 	public void testLoop() throws Exception {
 		
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 
 		
 	}

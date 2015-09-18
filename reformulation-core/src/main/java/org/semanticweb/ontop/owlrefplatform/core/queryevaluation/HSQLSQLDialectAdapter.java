@@ -1,9 +1,29 @@
 package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import java.sql.Types;
 import java.util.List;
+import java.util.regex.Pattern;
+import org.semanticweb.ontop.model.OrderCondition;
 
 public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 
@@ -31,11 +51,6 @@ public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 		return null;
 	}
 
-	@Override
-	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String strreplace(String str, int start, int end, String with) {
@@ -133,9 +148,12 @@ public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-		// enclosing
-		// quotes
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
@@ -172,6 +190,7 @@ public class HSQLSQLDialectAdapter extends SQL99DialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this inherited implementation is OK
 

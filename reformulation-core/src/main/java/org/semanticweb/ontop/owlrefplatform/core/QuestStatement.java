@@ -21,11 +21,11 @@ package org.semanticweb.ontop.owlrefplatform.core;
  */
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -34,22 +34,29 @@ import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.execution.TargetQueryExecutionException;
+import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
+import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
-import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +101,6 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	private DatalogProgram programAfterUnfolding;
 
-	private final SparqlAlgebraToDatalogTranslator translator;
-
 	/**
 	 * Index function symbols (predicate) that have multiple types.
 	 * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
@@ -115,8 +120,6 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	protected QuestStatement(IQuest questinstance, OBDAConnection conn) {
 		this.questInstance = questinstance;
-		this.translator = new SparqlAlgebraToDatalogTranslator(this.questInstance.getUriTemplateMatcher());
-
 		this.conn = conn;
 		this.queryGenerator = questinstance.cloneIfNecessaryNativeQueryGenerator();
 		this.queryCache = questinstance.getQueryCache();
@@ -127,11 +130,6 @@ public abstract class QuestStatement implements IQuestStatement {
 		return questInstance;
 	}
 
-	@Override
-	public OBDAConnection getConnection() throws OBDAException {
-		return conn;
-	}
-
 	/**
 	 * TODO: implement it
 	 * @return
@@ -140,10 +138,6 @@ public abstract class QuestStatement implements IQuestStatement {
 	@Override
 	public TupleResultSet getResultSet() throws OBDAException {
 		return null;
-	}
-
-	protected SparqlAlgebraToDatalogTranslator getTranslator() {
-		return translator;
 	}
 
 	/**
@@ -201,7 +195,7 @@ public abstract class QuestStatement implements IQuestStatement {
 		@Override
 		public void run() {
 
-			log.debug("Executing query: \n{}", sparqlQuery);
+			log.debug("Executing SPARQL query: \n{}", sparqlQuery);
 			try {
 
 				/**
@@ -303,7 +297,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			pq = qp.parseQuery(strquery, null);
 		} catch (MalformedQueryException e1) {
 			e1.printStackTrace();
-		}
+		} 
 		// encoding ofquery type into numbers
 		if (SPARQLQueryUtility.isSelectQuery(pq)) {
 			parsedQ = pq;
@@ -326,7 +320,7 @@ public abstract class QuestStatement implements IQuestStatement {
 				e.printStackTrace();
 				constructTemplate = null;
 			}
-
+			
 			// Here we replace CONSTRUCT query with SELECT query
 			String selectSparqlQuery = SPARQLQueryUtility.getSelectFromConstruct(strquery);
 			ResultSet resultSet = executeInThread(selectSparqlQuery, QueryType.CONSTRUCT, constructTemplate);
@@ -431,42 +425,32 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * (i.e., renaming atoms that use predicates that have been replaced by a
 	 * canonical one.
 	 *
-	 * @param pq
-	 * @param signature
-	 * @return
 	 */
-
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
+	
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
 		DatalogProgram program = null;
-
 		try {
-			if (questInstance.isSemIdx()) {
-				translator.setSemanticIndexUriRef(questInstance.getSemanticIndexRepository().getUriMap());
-			}
-			program = translator.translate(pq, signature);
+			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
+			program = translator.translate(pq);
 
-			log.debug("Translated query: \n{}", program);
+			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
-
-			/**
-			 * TODO: Why only for the SI???
-			 */
-			if (questInstance.isSemIdx()==true){
-				multiTypedFunctionSymbolIndex = questInstance.copyMultiTypedFunctionSymbolIndex();
-			}
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules(), HashMultimap.<Predicate, List<Integer>>create());
+			
+			multiTypedFunctionSymbolIndex = questInstance.copyMultiTypedFunctionSymbolIndex();
 
 			//Flattening !!
-			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, multiTypedFunctionSymbolIndex);
+			program = unfolder.unfold(program, OBDAVocabulary.QUEST_QUERY,QuestConstants.BUP,false, multiTypedFunctionSymbolIndex);
 
 
+			log.debug("Flattened program: \n{}", program);
 		} catch (Exception e) {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-
+		
 			throw e;
-
+			
 		}
 		log.debug("Replacing equivalences...");
 		program = questInstance.getVocabularyValidator().replaceEquivalences(program);
@@ -482,32 +466,106 @@ public abstract class QuestStatement implements IQuestStatement {
 
 		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.getQuestUnfolder().getDatalogUnfolder();
 
+
+//		if (query.getRules().size() > 0) {
+//			try {
+//				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(query,
+//						unfolder.getExtensionalPredicates());
+//				log.debug("Initial intermediate query: \n" + intermediateQuery.toString());
+//			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+//				throw new OBDAException(e.getLocalizedMessage());
+//			}
+//		}
+
+
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
 				multiTypedFunctionSymbolIndex);
 
-		log.debug("Partial evaluation: \n{}", unfolding);
+		log.debug("Data atoms evaluated: \n{}", unfolding);
 
 		//removeNonAnswerQueries(unfolding);
 
 		//log.debug("After target rules removed: \n{}", unfolding);
 
-		ExpressionEvaluator evaluator = new ExpressionEvaluator();
-		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
+		ExpressionEvaluator evaluator = questInstance.getExpressionEvaluator();
 		evaluator.evaluateExpressions(unfolding);
+		
+		/*
+			UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
+			for (CQIE cq : unfolding.getRules())
+				ucq.add(cq);
+			
+			List<CQIE> rules = new ArrayList<>(unfolding.getRules());
+			unfolding.removeRules(rules); 
+			
+			for (CQIE cq : ucq.asCQIE()) {
+				unfolding.appendRule(cq);
+			}
+			log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+		 
+		 */
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 
 		// PUSH TYPE HERE
-		log.debug("Pushing types...");
-		unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbolIndex);
+		//log.debug("Pushing types...");
+		//unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
+		if (unfolding.getRules().size() > 0) {
+			try {
+				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
+						questInstance.getMetadataForQueryOptimization(), unfolding,
+						unfolder.getExtensionalPredicates());
+				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
+
+				// BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				// intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+
+				log.debug("New lifted query: \n" + intermediateQuery.toString());
+
+
+				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+				
+				
+				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+
+				log.debug("New Datalog query: \n" + unfolding.toString());
+
+				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
+				log.debug("New flattened Datalog query: \n" + unfolding.toString());
+
+				
+			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+				throw new OBDAException(e.getLocalizedMessage());
+			}
+			/**
+			 * No solution.
+			 */
+			catch (EmptyQueryException e) {
+
+				log.debug("Empty query --> no solution.");
+				/**
+				 * TODO: should we really return an empty datalog program?
+				 */
+				return ofac.getDatalogProgram();
+			}
+		}
 
 		log.debug("Pulling out equalities...");
-		for (CQIE rule: unfolding.getRules()){
-			DatalogNormalizer.pullOutEqualities(rule);
-			//System.out.println(rule);
+
+		//TODO: use Guice instead
+		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
+		List<CQIE> normalizedRules = new ArrayList<>();
+		for (CQIE rule: unfolding.getRules()) {
+			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
 		}
+
+		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
+		unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
 
 		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 
@@ -515,52 +573,20 @@ public abstract class QuestStatement implements IQuestStatement {
 	}
 
 	/**
-	 * Tests if the conditions are met to push types into the Datalog program.
-	 * If it ok, pushes them.
-	 *
-	 * @param datalogProgram
-	 * @param unfolder
-	 * @return the updated Datalog program
+	 * Lift types of the Datalog program.
+	 * Returns a new one.
 	 */
-	private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder,
-									 Multimap<Predicate,Integer> multiTypedFunctionSymbolMap) {
-		boolean canPush = true;
+	private DatalogProgram liftTypes(DatalogProgram datalogProgram,
+									 Multimap<Predicate, Integer> multiTypedFunctionSymbolMap) {
 
-		/**
-		 * Disables type pushing if a functionSymbol of the Datalog program is known as
-		 * being multi-typed.
-		 *
-		 * TODO: explain what we mean by multi-typed .
-		 * Happens for instance with URI templates.
-		 *
-		 * TODO: See if this protection is still needed for the new TypeLift.
-		 *
-		 * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
-		 */
-		if (!multiTypedFunctionSymbolMap.isEmpty()) {
-			DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
+		List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
-			for (Predicate functionSymbol : multiTypedFunctionSymbolMap.keys()) {
-				if (dependencyGraph.getRuleIndex().containsKey(functionSymbol)) {
-					canPush = false;
-					log.debug(String.format("The Datalog program is using at least one multi-typed function symbol" +
-							" (%s) so type pushing is disabled.", functionSymbol.getName()));
-					break;
-				}
-			}
-		}
-
-		if (canPush) {
-			List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
-
-			OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-			//TODO: can we avoid using this intermediate variable???
-			//datalogProgram.removeAllRules();
-			datalogProgram = ofac.getDatalogProgram();
-			datalogProgram.appendRule(newTypedRules);
-			datalogProgram.setQueryModifiers(queryModifiers);
-			log.debug("Types Pushed: \n{}",datalogProgram);
-		}
+		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
+		//TODO: can we avoid using this intermediate variable???
+		//datalogProgram.removeAllRules();
+		datalogProgram = ofac.getDatalogProgram(queryModifiers);
+		datalogProgram.appendRule(newTypedRules);
+		log.debug("Types Pushed: \n{}",datalogProgram);
 
 		return datalogProgram;
 	}
@@ -641,16 +667,22 @@ public abstract class QuestStatement implements IQuestStatement {
 			throw new OBDAException(e);
 		}
 
+		SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
+
 		// Obtain the query signature
 		ImmutableList<String> signatureContainer = translator.getSignature(query);
 
 
+		//SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
+		//List<String> signatureContainer = translator.getSignature(query);
+		
+		
 		// Translate the SPARQL algebra to datalog program
-		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
-
+		DatalogProgram initialProgram = translateAndPreProcess(query/*, signatureContainer*/);
+		
 		// Perform the query rewriting
-		DatalogProgram programAfterRewriting = questInstance.getRewriter().rewrite(initialProgram);
-
+		DatalogProgram programAfterRewriting = questInstance.getRewriting(initialProgram);
+		
 		// Translate the output datalog program back to SPARQL string
 		// TODO Re-enable the prefix manager using Sesame prefix manager
 //		PrefixManager prefixManager = new SparqlPrefixManager(query.getPrefixMapping());
@@ -662,12 +694,12 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewriting(ParsedQuery query, List<String> signature) throws OBDAException {
+	public String getRewriting(ParsedQuery query) throws OBDAException {
 		// TODO FIX to limit to SPARQL input and output
 
-		DatalogProgram program = translateAndPreProcess(query, signature);
+		DatalogProgram program = translateAndPreProcess(query);
 
-		DatalogProgram rewriting = questInstance.getRewriter().rewrite(program);
+		DatalogProgram rewriting = questInstance.getRewriting(program);
 		return DatalogProgramRenderer.encode(rewriting);
 	}
 
@@ -714,16 +746,17 @@ public abstract class QuestStatement implements IQuestStatement {
 			queryIsParsed = false;
 		}
 
+		SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
 		ImmutableList<String> signatureContainer = translator.getSignature(sparqlTree);
 
 
-		DatalogProgram program = translateAndPreProcess(sparqlTree, signatureContainer);
+		DatalogProgram program = translateAndPreProcess(sparqlTree);
 		try {
 			// log.debug("Input query:\n{}", sparqlQuery);
 
 			for (CQIE q : program.getRules()) {
 				// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
-				DatalogNormalizer.unfoldJoinTrees(q, false);
+				DatalogNormalizer.unfoldJoinTrees(q);
 			}
 
 			log.debug("Normalized program: \n{}", program);
@@ -737,14 +770,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			log.debug("Start the rewriting process...");
 
 			final long startTime0 = System.currentTimeMillis();
-
-			// Query optimization w.r.t Sigma rules
-			for (CQIE cq : program.getRules())
-				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), questInstance.getDataDependencies());
-			programAfterRewriting = questInstance.getRewriter().rewrite(program);
-			for (CQIE cq : program.getRules())
-				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), questInstance.getDataDependencies());
-
+			programAfterRewriting = questInstance.getRewriting(program);
 			rewritingTime = System.currentTimeMillis() - startTime0;
 
 
@@ -753,7 +779,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			unfoldingTime = System.currentTimeMillis() - startTime;
 
 
-			targetQuery = generateTargetQuery(programAfterUnfolding, ImmutableList.copyOf(signatureContainer), constructTemplate);
+			targetQuery = generateTargetQuery(programAfterUnfolding, signatureContainer, constructTemplate);
 			queryCache.cacheTargetQuery(sparqlQuery, targetQuery);
 		}
 		catch (Exception e1) {
@@ -785,7 +811,7 @@ public abstract class QuestStatement implements IQuestStatement {
 	public boolean isCanceled(){
 		return canceled;
 	}
-
+	
 	@Override
 	public int executeUpdate(String query) throws OBDAException {
 		// TODO Auto-generated method stub

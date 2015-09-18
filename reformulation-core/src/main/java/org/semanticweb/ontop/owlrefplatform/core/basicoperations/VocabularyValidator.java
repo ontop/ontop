@@ -97,8 +97,7 @@ public class VocabularyValidator {
 	 */
 	public DatalogProgram replaceEquivalences(DatalogProgram queries) {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		DatalogProgram newprogram = fac.getDatalogProgram();
-		newprogram.setQueryModifiers(queries.getQueryModifiers());
+		DatalogProgram newprogram = fac.getDatalogProgram(queries.getQueryModifiers());
 		for (CQIE query : queries.getRules()) {
 			newprogram.appendRule(replaceEquivalences(query.clone(), true));
 		}
@@ -131,9 +130,9 @@ public class VocabularyValidator {
 				if (atom.isBooleanFunction())
 					continue;
 
-				T newatom = (T)getNormal(atom);
+				T newAtom = (T)getNormal(atom);
 
-				body.set(i, newatom);
+				body.set(i, newAtom);
 			}
 		}
 	}

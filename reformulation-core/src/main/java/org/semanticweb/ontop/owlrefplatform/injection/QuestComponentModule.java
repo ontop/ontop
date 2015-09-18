@@ -8,6 +8,7 @@ import org.semanticweb.ontop.owlrefplatform.core.DBConnector;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.QueryCache;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -32,6 +33,7 @@ public class QuestComponentModule extends OBDAAbstractModule {
         configurePreferences();
 
         bindImplicitDBConstraints();
+        bindTMappingExclusionConfig();
 
         Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(IQuest.class,
                         NativeQueryGenerator.class, DBConnector.class),
@@ -47,5 +49,14 @@ public class QuestComponentModule extends OBDAAbstractModule {
             bind(ImplicitDBConstraints.class).toProvider(Providers.<ImplicitDBConstraints>of(null));
         else
             bind(ImplicitDBConstraints.class).toInstance(dbContraints);
+    }
+
+    private void bindTMappingExclusionConfig() {
+        TMappingExclusionConfig tMappingExclusionConfig = (TMappingExclusionConfig) getPreferences().get(
+                QuestPreferences.TMAPPING_EXCLUSION);
+        if (tMappingExclusionConfig == null) {
+            tMappingExclusionConfig = TMappingExclusionConfig.empty();
+        }
+        bind(TMappingExclusionConfig.class).toInstance(tMappingExclusionConfig);
     }
 }

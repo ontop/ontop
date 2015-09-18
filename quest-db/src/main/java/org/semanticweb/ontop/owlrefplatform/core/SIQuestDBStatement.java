@@ -18,6 +18,4 @@ public interface SIQuestDBStatement extends IQuestDBStatement {
     void dropRepository() throws OBDAException;
 
     void createDB() throws OBDAException;
-
-    void analyze() throws OBDAException;
 }

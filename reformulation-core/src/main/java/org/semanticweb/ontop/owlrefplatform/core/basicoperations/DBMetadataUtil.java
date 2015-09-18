@@ -21,8 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,8 +46,6 @@ public class DBMetadataUtil {
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
 	
-	private static final String variableSuffix = "_4022013_";
-	
 	/*
 	 * generate CQIE rules from foreign key info of db metadata
 	 * TABLE1.COL1 references TABLE2.COL2 as foreign key then 
@@ -56,7 +54,7 @@ public class DBMetadataUtil {
 	public static LinearInclusionDependencies generateFKRules(DBMetadata metadata) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 		
-		List<TableDefinition> tableDefs = metadata.getTableList();
+		Collection<TableDefinition> tableDefs = metadata.getTables();
 		for (TableDefinition def : tableDefs) {
 			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
 			for (Entry<String, List<Attribute>> fks : foreignKeys.entrySet()) {
@@ -66,7 +64,7 @@ public class DBMetadataUtil {
 					String table1 = def.getName();
 					String table2 = "";
 					TableDefinition def2 = null;
-					Map<Integer, Integer> positionMatch = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> positionMatch = new HashMap<>();
 					for (Attribute attr : fkAttributes) {
 						// Get current table and column (1)
 						String column1 = attr.getName();
@@ -84,29 +82,28 @@ public class DBMetadataUtil {
 							throw new BrokenForeignKeyException(reference, "Missing table: " + table2);
 						}
 						// Get positions of referenced attribute
-						int pos1 = def.getAttributePosition(column1);
+						int pos1 = def.getAttributeKey(column1);
 						if (pos1 == -1) {
 							throw new BrokenForeignKeyException(reference, "Missing column: " + column1);
 						}
-						int pos2 = def2.getAttributePosition(column2);
+						int pos2 = def2.getAttributeKey(column2);
 						if (pos2 == -1) {
 							throw new BrokenForeignKeyException(reference, "Missing column: " + column2);
 						}
-						positionMatch.put(pos1, pos2);
+						positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
 					}
 					// Construct CQIE
-					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());					
-					List<Term> terms1 = new ArrayList<Term>(def.getNumOfAttributes());
-					for (int i=0; i < def.getNumOfAttributes(); i++) {
-						 terms1.add(fac.getVariable("t" + variableSuffix + (i+1)));
-					}
+					Predicate p1 = fac.getPredicate(table1, def.getAttributes().size());					
+					List<Term> terms1 = new ArrayList<>(p1.getArity());
+					for (int i = 1; i <= p1.getArity(); i++) 
+						 terms1.add(fac.getVariable("t" + i));
 					
-					Predicate p2 = fac.getPredicate(table2, def2.getNumOfAttributes());
-					List<Term> terms2 = new ArrayList<Term>(def2.getNumOfAttributes());
-					for (int i=0; i < def2.getNumOfAttributes(); i++) {
-						 terms2.add(fac.getVariable("p" + variableSuffix + (i+1)));
-					}
-					// Do the swapping
+					Predicate p2 = fac.getPredicate(table2, def2.getAttributes().size());
+					List<Term> terms2 = new ArrayList<>(p2.getArity());
+					for (int i = 1; i <= p2.getArity(); i++) 
+						 terms2.add(fac.getVariable("p" + i));
+					
+					// do the swapping
 					for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
 						terms1.set(swap.getKey(), terms2.get(swap.getValue()));
 					

@@ -24,15 +24,42 @@ import java.sql.Types;
 
 public class TeiidSQLDialectAdapter extends SQL99DialectAdapter {
 
+	/**
+	 * TODO: Find other deviations from the default implementation.
+	 */
 	@Override
 	public String sqlCast(String value, int type) {
-		String strType = null;
-		if (type == Types.VARCHAR) {
-			strType = "VARCHAR";
-		} else {
-			throw new RuntimeException("Unsupported SQL type");
+		String strType;
+
+		switch (type) {
+			case Types.VARCHAR:
+				strType = "VARCHAR";
+				break;
+			default:
+				return super.sqlCast(value, type);
+
 		}
 		return "CAST(" + value + " AS " + strType + ")";
+	}
+
+	/**
+	 * See https://docs.jboss.org/teiid/7.7.0.Final/reference/en-US/html/sql_clauses.html#limit_clause
+	 */
+	@Override
+	public String sqlSlice(long limit, long offset) {
+		if ((limit < 0) && (offset < 0)) {
+			return "";
+		}
+		else if ((limit >= 0) && (offset >= 0)) {
+			return String.format("LIMIT %d, %d", offset, limit);
+		}
+		else if (offset < 0) {
+			return String.format("LIMIT %d", limit);
+		}
+		// Else -> (limit < 0)
+		else {
+			return String.format("OFFSET %d ROWS", offset);
+		}
 	}
 	
 	@Override 
@@ -51,8 +78,9 @@ public class TeiidSQLDialectAdapter extends SQL99DialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
-		// TODO: check whether this inherided implementation is OK
+		// TODO: check whether this inherited implementation is OK
 		
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');

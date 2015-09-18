@@ -64,7 +64,7 @@ public class TestSesameTimeout {
 			sqlFile.close();
 			
 			s.execute(text);
-			for(int i = 1; i <= 100; i++){
+			for(int i = 1; i <= 10000; i++){
 				s.execute("INSERT INTO TABLE1 VALUES (" + i + "," + i + ");");
 			}
 

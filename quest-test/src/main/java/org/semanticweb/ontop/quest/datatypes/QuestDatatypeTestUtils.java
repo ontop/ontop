@@ -51,7 +51,6 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
-import org.openrdf.rio.turtle.TurtleParser;
 import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.ontop.quest.scenarios.ScenarioManifestTestUtils;
 import org.slf4j.Logger;

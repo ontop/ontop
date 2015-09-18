@@ -22,12 +22,18 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.Set;
 
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
+
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
 	@Override
 	public String strconcat(String[] strings) {
@@ -49,14 +55,19 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String strreplace(String str, char oldchar, char newchar) {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
 	}
 
 	@Override
 	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
+		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 
 	@Override
@@ -103,9 +114,31 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
+	public String getClosingQuote() {
+		return "\"";
+	}
+
+	/**
+	 * There is no standard for this part.
+	 *
+	 * Arbitrary default implementation proposed
+	 * (may not work with many DB engines).
+	 */
+	@Override
 	public String sqlSlice(long limit, long offset) {
-		// TODO Auto-generated method stub
-		return null;
+		if ((limit < 0) && (offset < 0)) {
+			return "";
+		}
+		else if ((limit >= 0) && (offset >= 0)) {
+			return String.format("LIMIT %d, %d", offset, limit);
+		}
+		else if (offset < 0) {
+			return String.format("LIMIT %d", limit);
+		}
+		// Else -> (limit < 0)
+		else {
+			return String.format("OFFSET %d", offset);
+		}
 	}
 
 	@Override
@@ -222,18 +255,18 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 		default:
 			throw new RuntimeException("Unsupported SQL type");
-
 		}
-
-
 		return "CAST(" + value + " AS " + strType + ")";
 	}
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
@@ -241,12 +274,25 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		}
 		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
+    
+	@Override
+	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
+		return sqlQuote(buildDefaultName("", signatureVariableName, proposedSuffix));
+	}
 
 	@Override
-	public String sqlRegex(String columnname, String pattern,
-			boolean caseinSensitive) {
-		// TODO Auto-generated method stub
-		return null;
+	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
+		return buildDefaultName(prefix, tableName, suffix);
+	}
+
+	/**
+	 * Concatenates the strings.
+	 * Default way to name a variable or a view.
+	 *
+	 * Returns an UNQUOTED string.
+	 */
+	protected final String buildDefaultName(String prefix, String intermediateName, String suffix) {
+		return prefix + intermediateName + suffix;
 	}
 	
 	@Override
@@ -273,10 +319,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
+	 *
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this implementation inherited from JDBCUtility is correct
 		
@@ -312,5 +357,42 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		
 		return bf.toString();
 	}
-	
+
+	@Override
+	public String getSQLLexicalFormDatetimeStamp(String v) {
+		// TODO: check whether this implementation inherited from JDBCUtility is correct
+
+		String datetime = v.replace('T', ' ');
+		int dotlocation = datetime.indexOf('.');
+		int zlocation = datetime.indexOf('Z');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+		int pluslocation = datetime.indexOf('+');
+		StringBuilder bf = new StringBuilder(datetime);
+		if (zlocation != -1) {
+			/*
+			 * replacing Z by +00:00
+			 */
+			bf.replace(zlocation, bf.length(), "+00:00");
+		}
+
+		if (dotlocation != -1) {
+			/*
+			 * Stripping the string from the presicion that is not supported by
+			 * SQL timestamps.
+			 */
+			// TODO we need to check which databases support fractional
+			// sections (e.g., oracle,db2, postgres)
+			// so that when supported, we use it.
+			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
+			if (endlocation == -1) {
+				endlocation = datetime.length();
+			}
+			bf.replace(dotlocation, endlocation, "");
+		}
+		bf.insert(0, "'");
+		bf.append("'");
+
+		return bf.toString();
+	}
+
 }

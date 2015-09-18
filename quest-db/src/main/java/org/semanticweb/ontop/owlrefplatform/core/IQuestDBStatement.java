@@ -33,11 +33,6 @@ public interface IQuestDBStatement extends OBDAStatement {
     /**
      * May not be supported (if read-only)
      */
-    int add(Assertion data) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
     int add(Iterator<Assertion> data) throws OBDAException;
 
     /**
@@ -53,25 +48,10 @@ public interface IQuestDBStatement extends OBDAStatement {
     /**
      * May not be supported (if read-only)
      */
-    int add(URI rdffile, int commit, int batch) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
     int addWithTempFile(URI rdffile) throws OBDAException;
 
     /**
      * May not be supported (if read-only)
      */
     int addFromOBDA(URI obdaFile) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int addFromOBDA(URI obdaFile, int commitrate, int batchinserts) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int addFromOBDAWithTempFile(URI obdaFile) throws OBDAException;
 }

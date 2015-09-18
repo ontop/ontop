@@ -21,29 +21,18 @@ package org.semanticweb.ontop.model.impl;
  */
 
 
-
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
@@ -55,12 +44,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
 	private DatatypeFactoryImpl datatypes = null;
-	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper();
+	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
 	
 
 	private static int counter = 0;
 	
-	protected OBDADataFactoryImpl() {
+	private OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
 
@@ -176,21 +165,86 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Variable getVariable(String name) {
 		return new VariableImpl(name);
 	}
-	
-
-	@Override
-	public Variable getVariableNondistinguished() {
-		return new AnonymousVariable();
-	}
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getBooleanExpression((BooleanOperationPredicate)functor, arguments);
+		}
+
+		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
+	}
+
+	@Override
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments) {
+		return new BooleanExpressionImpl(functor, arguments);
 	}
 	
 	@Override
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments) {
+		return new BooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments) {
+		return new ImmutableBooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+																	ImmutableList<ImmutableTerm> arguments) {
+		return new ImmutableBooleanExpressionImpl(functor, arguments);
+	}
+
+	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getBooleanExpression((BooleanOperationPredicate) functor, arguments);
+		}
+
+		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		}
+
+		// Default constructor
+		return new ImmutableFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		if (functor instanceof BooleanOperationPredicate) {
+			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		}
+
+		// Default constructor
+		return new ImmutableFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+		return new NonGroundFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+		return new NonGroundFunctionalTermImpl(functor, terms);
+	}
+
+	@Override
+	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms) {
+		return new DataAtomImpl(predicate, terms);
+	}
+
+	@Override
+	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
+		return new DataAtomImpl(predicate, terms);
 	}
 
 	@Override
@@ -221,9 +275,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.getQueryModifiers().copy(modifiers);
+		return p;
+	}
+	@Override
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
+		return p;
+	}
+	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.appendRule(rules);
+		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
 
@@ -247,12 +314,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
-
-	
-	
-	
-	
-	
 
 	
 	@Override
@@ -285,43 +346,70 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.EQ, firstTerm, secondTerm);
+	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GTE, firstTerm, secondTerm);
+	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GT, firstTerm, secondTerm);
+	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LTE, firstTerm, secondTerm);
+	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LT, firstTerm, secondTerm);
+	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.NEQ, firstTerm, secondTerm);
+	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionNOT(Term term) {
-		return getFunction(OBDAVocabulary.NOT, term);
+	public BooleanExpression getFunctionNOT(Term term) {
+		return getBooleanExpression(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public Function getFunctionAND(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.AND, term1, term2);
+	public BooleanExpression getFunctionAND(Term term1, Term term2) {
+		checkInnerBooleanExpressionTerm(term1);
+		checkInnerBooleanExpressionTerm(term2);
+
+		return getBooleanExpression(OBDAVocabulary.AND, term1, term2);
+	}
+
+	private static void checkInnerBooleanExpressionTerm(Term term) {
+		if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+
+			if (functionalTerm.isBooleanFunction()) {
+				return;
+			}
+
+			String functionSymbol = functionalTerm.getFunctionSymbol().getName();
+			if (functionSymbol.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+				return;
+			}
+		}
+		else if (term.equals(OBDAVocabulary.FALSE)
+				|| term.equals(OBDAVocabulary.TRUE)) {
+			return;
+		} else if (term instanceof Variable) {
+			return;
+		}
+
+		// Illegal argument given to the caller of this
+		throw new IllegalArgumentException(term + " is not a boolean expression");
 	}
 
 //	@Override
@@ -345,8 +433,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public Function getFunctionOR(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.OR, term1, term2);
+	public BooleanExpression getFunctionOR(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.OR, term1, term2);
 	}
 
 	
@@ -371,29 +459,34 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public Function getFunctionIsNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NULL, term);
+	public BooleanExpression getFunctionIsNull(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_NULL, term);
 	}
 
 	@Override
-	public Function getFunctionIsNotNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NOT_NULL, term);
+	public BooleanExpression getFunctionIsNotNull(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_NOT_NULL, term);
 	}
 
 
 	@Override
-	public Function getLANGMATCHESFunction(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
+	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
 
 	@Override
-	public Function getFunctionLike(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LIKE, term1, term2);
+	public BooleanExpression getFunctionLike(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_LIKE, term1, term2);
 	}
 	
 	@Override
-	public Function getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3 );
+	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
+	}
+	
+	@Override
+	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3);
 	}
 	
 	@Override
@@ -416,6 +509,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
 	}
 
+    @Override
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+    }
+
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
@@ -426,13 +524,19 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, 
 			String password, String driverclass) {
 		URI id = URI.create(UUID.randomUUID().toString());
-		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
+        return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
 	}
 
 	@Override
 	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, 
 			String username, String password, String driverclass) {
-		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
+        Preconditions.checkNotNull(sourceuri, "sourceuri is null");
+        Preconditions.checkNotNull(jdbcurl, "jdbcurl is null");
+        Preconditions.checkNotNull(password, "password is null");
+        Preconditions.checkNotNull(username, "username is null");
+        Preconditions.checkNotNull(driverclass, "driverclass is null");
+
+        DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
@@ -447,20 +551,102 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionIsTrue(Term term) {
-		return getFunction(OBDAVocabulary.IS_TRUE, term);
+	public BooleanExpression getFunctionIsTrue(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_TRUE, term);
 	}
 
 	@Override
 	public Function getSPARQLJoin(Term t1, Term t2) {
-		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
+        return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
+	@Override
+	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2, joinCondition);
+	}
+
+	@Override
+	public Function getSPARQLJoin(List<Function> atoms, Function filter) {
+		
+
+		int size = atoms.size();
+		
+		if (size>1){
+			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin((List<Function>) atoms.subList(1, size)), filter);
+			return join;
+
+		}else{
+			return atoms.get(0);
+		}
+	
+	}
+
+	
+	
+	
+	
+	
+	@Override
+	public Function getSPARQLJoin(List<Function> atoms) {
+		
+		int size = atoms.size();
+		
+		if (size>1){
+			List<Function> remainingAtoms = (List<Function>) atoms.subList(1, size);
+			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin(remainingAtoms)  );
+			return join;
+
+		}else{
+			return atoms.get(0);
+		}
+	
+		
+	}	
+	
+	
+	
+
+	
+	
+	@Override
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter){
+		
+		atoms2.add(filter);
+		
+		return  getSPARQLLeftJoin(atoms,atoms2);
+		
+	}
+
+	@Override
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2){
+
+		List<Term> termList= new LinkedList<Term>();
+		atoms.addAll(atoms2);
+		
+		for (Function f: atoms){
+			termList.add(f);
+		}
+		
+		Function function = getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, termList );
+		return  function;
+		
+	}
+
+
+
+	
+	
 	@Override
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {
 		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}
 
+	@Override
+	public Function getSPARQLLeftJoin(Function t1, Function t2, Function filter) {
+		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2, filter);
+	}
+
+	
 	@Override
 	public ValueConstant getBooleanConstant(boolean value) {
 		return value ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE;
@@ -468,8 +654,85 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTripleAtom(Term subject, Term predicate, Term object) {
-		return getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, predicate, object);
+		return getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
 	}
 
+	private int suffix = 0;
 	
+	/***
+	 * Replaces each variable 'v' in the query for a new variable constructed
+	 * using the name of the original variable plus the counter. For example
+	 * 
+	 * <pre>
+	 * q(x) :- C(x)
+	 * 
+	 * results in
+	 * 
+	 * q(x_1) :- C(x_1)
+	 * 
+	 * if counter = 1.
+	 * </pre>
+	 * 
+	 * <p>
+	 * This method can be used to generate "fresh" rules from a datalog program
+	 * so that it can be used during a resolution step.
+	 * 
+	 * @param rule
+	 * @param suffix
+	 *            The integer that will be apended to every variable name
+	 * @return
+	 */
+	@Override
+	public CQIE getFreshCQIECopy(CQIE rule) {
+		
+		int suff = ++suffix;
+		
+		// This method doesn't support nested functional terms
+		CQIE freshRule = rule.clone();
+		Function head = freshRule.getHead();
+		List<Term> headTerms = head.getTerms();
+		for (int i = 0; i < headTerms.size(); i++) {
+			Term term = headTerms.get(i);
+			Term newTerm = getFreshTerm(term, suff);
+			headTerms.set(i, newTerm);
+		}
+
+		List<Function> body = freshRule.getBody();
+		for (Function atom : body) {
+			List<Term> atomTerms = atom.getTerms();
+			for (int i = 0; i < atomTerms.size(); i++) {
+				Term term = atomTerms.get(i);
+				Term newTerm = getFreshTerm(term, suff);
+				atomTerms.set(i, newTerm);
+			}
+		}
+		return freshRule;
+	}
+
+	private Term getFreshTerm(Term term, int suff) {
+		Term newTerm;
+		if (term instanceof Variable) {
+			Variable variable = (Variable) term;
+			newTerm = getVariable(variable.getName() + "_" + suff);
+		} 
+		else if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+			List<Term> innerTerms = functionalTerm.getTerms();
+			List<Term> newInnerTerms = new LinkedList<>();
+			for (int j = 0; j < innerTerms.size(); j++) {
+				Term innerTerm = innerTerms.get(j);
+				newInnerTerms.add(getFreshTerm(innerTerm, suff));
+			}
+			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
+			Function newFunctionalTerm = getFunction(newFunctionSymbol, newInnerTerms);
+			newTerm = newFunctionalTerm;
+		} 
+		else if (term instanceof Constant) {
+			newTerm = term.clone();
+		} 
+		else {
+			throw new RuntimeException("Unsupported term: " + term);
+		}
+		return newTerm;
+	}
 }

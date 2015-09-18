@@ -4,14 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.NumericalOperationPredicate;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.sql.DBMetadata;
 
@@ -102,7 +95,7 @@ public abstract class AbstractQueryGenerator {
 			return getSTRConditionString(atom, index);
 		}
 		else if (atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI) ||
-				atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_BNODE)) {
+				atom.getFunctionSymbol() instanceof BNodePredicate) {
 			return getTemplateAsString(atom, index);
 		}
 		else {

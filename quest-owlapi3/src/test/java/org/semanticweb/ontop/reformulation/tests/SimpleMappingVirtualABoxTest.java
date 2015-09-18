@@ -93,6 +93,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -123,6 +124,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		st.close();
@@ -141,7 +143,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		QuestOWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
-		StringBuilder bf = new StringBuilder(query);
 		try {
 			
 			/*
@@ -169,14 +170,14 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			throw e;
 		} finally {
 			try {
-
-			} catch (Exception e) {
 				st.close();
+			} catch (Exception e) {
 				throw e;
-			}
+			} finally {
 			conn.close();
 			reasoner.dispose();
 		}
+	}
 	}
 
 	public void testViEqSig() throws Exception {

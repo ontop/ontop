@@ -59,22 +59,22 @@ import org.slf4j.LoggerFactory;
  */
 public class MetaMappingExpander {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	private Connection connection;
-	private SQLQueryParser translator;
-	private List<OBDAMappingAxiom> expandedMappings;
-	private OBDADataFactory dfac;
+	private final Connection connection;
+	private final SQLQueryParser translator;
+	private final List<OBDAMappingAxiom> expandedMappings;
+	private final OBDADataFactory dfac;
 
 	/**
-	 * TODO
+	 *
 	 * 
-	 * @param connection
+	 * @param connection a JDBC connection
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
 		translator = new SQLQueryParser();
-		expandedMappings = new ArrayList<>();
+		expandedMappings = new ArrayList<OBDAMappingAxiom>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}
 
@@ -175,21 +175,19 @@ public class MetaMappingExpander {
 				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
 				
 				
-				Statement st;
-				
-					st = connection.createStatement();
-					ResultSet rs = st.executeQuery(distinctParamsSQL);
-					while(rs.next()){
-						ArrayList<String> params = new ArrayList<String>(varsInTemplate.size());
-						for(int i = 1 ; i <= varsInTemplate.size(); i++){
-							 params.add(rs.getString(i));
+				try(Statement st = connection.createStatement()) {
+					try(ResultSet rs = st.executeQuery(distinctParamsSQL)) {
+						while (rs.next()) {
+							ArrayList<String> params = new ArrayList<>(varsInTemplate.size());
+							for (int i = 1; i <= varsInTemplate.size(); i++) {
+								params.add(rs.getString(i));
+							}
+							paramsForClassTemplate.add(params);
 						}
-						paramsForClassTemplate.add(params);
-						
 					}
-				
-				
-				List<SelectExpressionItem>  columnsForValues = new ArrayList<SelectExpressionItem>(columnList);
+				}
+
+				List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
 				
 				String id = mapping.getId();
@@ -453,8 +451,14 @@ public class MetaMappingExpander {
 	}
 
 	/**
-	 * This method expands the input mappings, which may include meta mappings, to the concrete mappings
-	 *
+	 * this method expands the input mappings, which may include meta mappings, to the concrete mappings
+	 * 
+	 * @param obdaModel
+	 * 		the container for the list of mappings, which may include meta mappings
+	 * @param sourceURI
+	 * @return
+	 * 		expanded normal mappings
+	 * @throws Exception 
 	 */
 	public OBDAModel expand(OBDAModel obdaModel, URI sourceURI) throws OBDAException {
 		try {
@@ -470,9 +474,8 @@ public class MetaMappingExpander {
 		} catch (DuplicateMappingException e) {
 			throw new OBDAException(e);
 		}
+		
 	}
-	
-	
 	
 	
 

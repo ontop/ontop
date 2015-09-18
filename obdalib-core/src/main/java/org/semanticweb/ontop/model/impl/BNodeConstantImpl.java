@@ -20,14 +20,7 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-
-
-import java.util.Collections;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.BNode;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
@@ -85,11 +78,6 @@ public class BNodeConstantImpl implements BNode {
 	@Override
 	public String toString() {
 		return name;
-	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		return Collections.emptySet();
 	}
 
 	@Override

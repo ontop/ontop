@@ -23,8 +23,11 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
 
 import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
-import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
-import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.ResultSet;
+import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
@@ -35,6 +38,7 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.utils.VersionInfo;
 
 
@@ -117,9 +121,9 @@ import org.slf4j.LoggerFactory;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL extends OWLReasonerBase {
+public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
-    // //////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////////////////////
 	//
 	// From Structural Reasoner (to be removed later)
 	//
@@ -172,7 +176,6 @@ public class QuestOWL extends OWLReasonerBase {
 	private OWLOntologyManager man;
 
     private final QuestComponentFactory componentFactory;
-
 	
 	/**
 	 * Initialization code which is called from both of the two constructors.
@@ -237,6 +240,11 @@ public class QuestOWL extends OWLReasonerBase {
 		
 		prepareReasoner();
 		
+	}
+
+	@Deprecated // used in one test only
+	public IQuest getQuestInstance() {
+		return questInstance;
 	}
 
 	public void setPreferences(QuestPreferences preferences) {
@@ -309,7 +317,7 @@ public class QuestOWL extends OWLReasonerBase {
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
 					
-					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
+					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();
@@ -371,13 +379,11 @@ public class QuestOWL extends OWLReasonerBase {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
 		try {
 
 			OWLOntologyManager man = ontology.getOWLOntologyManager();
 			Set<OWLOntology> closure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = translator.mergeTranslateOntologies(closure);
+			Ontology mergeOntology = OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;
@@ -537,7 +543,7 @@ public class QuestOWL extends OWLReasonerBase {
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {		
+			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
 				Set<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
@@ -557,7 +563,7 @@ public class QuestOWL extends OWLReasonerBase {
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			for(NaryAxiom<ObjectPropertyExpression> dda 
+			for(NaryAxiom<ObjectPropertyExpression> dda
 						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
 				Set<ObjectPropertyExpression> props = dda.getComponents();
@@ -1121,6 +1127,11 @@ public class QuestOWL extends OWLReasonerBase {
 		for (int i = 0; i < level; i++) {
 			System.out.print("    ");
 		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		dispose();
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

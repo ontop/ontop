@@ -23,21 +23,11 @@ package org.semanticweb.ontop.r2rml;
  * @author timea bagosi
  * Class responsible to write an r2rml turtle file given an obda model
  */
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.exception.DuplicateMappingException;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OBDACoreModule;
-import org.semanticweb.ontop.injection.OBDAProperties;
+
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.util.*;
 
@@ -128,17 +118,31 @@ public class R2RMLWriter {
 	 * from an rdf Model to a file
 	 * @param file the ttl file to write to
 	 */
-	public void write(File file)
-	{
+	public void write(File file) throws Exception {
+		try {
+            FileOutputStream fos = new FileOutputStream(file);
+			write(fos);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	/**
+	 * the method to write the R2RML mappings
+	 * from an rdf Model to a file
+	 * @param os the output target
+	 */
+	public void write(OutputStream os) throws Exception {
 		try {
 			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
 			Collection<TriplesMap> coll = getTriplesMaps();
-			Model out = mm.exportMappings(coll, Model.class);			
-			FileOutputStream fos = new FileOutputStream(file);
-			Rio.write(out, fos, RDFFormat.TURTLE);
-			fos.close();
+			Model out = mm.exportMappings(coll, Model.class);
+			Rio.write(out, os, RDFFormat.TURTLE);
+			os.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
 	}
 }

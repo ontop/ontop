@@ -3,7 +3,7 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
 import java.util.List;
 
 import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
+import org.semanticweb.ontop.model.OrderCondition;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.ViewDefinition;
@@ -36,7 +36,7 @@ public class QueryInfo {
 	public QueryInfo(DatalogProgram query) {
 		this.isDistinct = hasSelectDistinctStatement(query);
 		this.isOrderBy = hasOrderByClause(query);
-		this.viewMetadata = new DBMetadata();
+		this.viewMetadata = new DBMetadata("dummy class");
 	}
 
 	private QueryInfo(boolean isDistinct, boolean isOrderBy, DBMetadata metadata) {

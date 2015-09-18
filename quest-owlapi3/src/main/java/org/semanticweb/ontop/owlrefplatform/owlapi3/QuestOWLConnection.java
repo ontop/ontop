@@ -25,6 +25,8 @@ import org.semanticweb.ontop.owlrefplatform.core.IQuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.owlapi.model.OWLException;
 
+import java.sql.Connection;
+
 /***
  * Handler for a connection. Note that as with JDBC, executing queries in
  * parallels over a single connection is inefficient, since JDBC drivers will
@@ -34,7 +36,7 @@ import org.semanticweb.owlapi.model.OWLException;
  * parallel with good performance (as with JDBC).
  * 
  * <p>
- * Besides parallel connections, at the moment, the class is not very usefull,
+ * Besides parallel connections, at the moment, the class is not very useful,
  * it will be when transactions and updates are implemented. Or when we allow
  * the user to setup the kind of statement that he wants to use.
  * 
@@ -48,14 +50,14 @@ import org.semanticweb.owlapi.model.OWLException;
  * @see QuestOWL
  * @see QuestStatement
  */
-public class QuestOWLConnection {
+public class QuestOWLConnection implements AutoCloseable {
 
 	private final IQuestConnection conn;
 
 	public QuestOWLConnection(IQuestConnection conn) {
 		this.conn = conn;
 	}
-
+	
 	/***
 	 * Releases the connection object
 	 * 
@@ -65,8 +67,7 @@ public class QuestOWLConnection {
 		try {
 			conn.close();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
 
 	}
@@ -78,8 +79,7 @@ public class QuestOWLConnection {
 		try {
 			return new QuestOWLStatement(conn.createStatement(), this);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
 	}
 
@@ -99,28 +99,23 @@ public class QuestOWLConnection {
 		try {
 			conn.close();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
-
 	}
 
 	public void setAutoCommit(boolean autocommit) throws OWLException {
 		try {
 			conn.setAutoCommit(autocommit);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
-
 	}
 
 	public boolean getAutoCommit() throws OWLException {
 		try {
 			return conn.getAutoCommit();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e);
 		}
 	}
 
@@ -128,8 +123,7 @@ public class QuestOWLConnection {
 		try {
 			return conn.isClosed();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e);
 		}
 	}
 
@@ -137,8 +131,7 @@ public class QuestOWLConnection {
 		try {
 			return conn.isReadOnly();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e);
 		}
 	}
 
@@ -146,10 +139,8 @@ public class QuestOWLConnection {
 		try {
 			conn.rollBack();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
-
 	}
 
 }

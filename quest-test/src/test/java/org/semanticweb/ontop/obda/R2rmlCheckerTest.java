@@ -28,6 +28,7 @@ import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.OClass;
@@ -124,6 +125,18 @@ public class R2rmlCheckerTest {
 			assertTrue(false);
 		}
 
+	}
+	
+	@Test 
+	public void testMappings() throws Exception {
+		for (CQIE q : reasonerOBDA.getQuestInstance().getQuestUnfolder().getRules()) {
+			if (!reasonerR2rml.getQuestInstance().getQuestUnfolder().getRules().contains(q))
+				System.out.println("NOT IN R2RML: " + q);
+		}
+		for (CQIE q : reasonerR2rml.getQuestInstance().getQuestUnfolder().getRules()) {
+			if (!reasonerOBDA.getQuestInstance().getQuestUnfolder().getRules().contains(q))
+				System.out.println("NOT IN OBDA: " + q);
+		}
 	}
 
 	/**

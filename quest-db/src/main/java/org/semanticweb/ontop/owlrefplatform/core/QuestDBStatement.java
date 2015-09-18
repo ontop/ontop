@@ -22,11 +22,9 @@ package org.semanticweb.ontop.owlrefplatform.core;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -36,11 +34,9 @@ import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
-import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -58,37 +54,26 @@ import org.slf4j.LoggerFactory;
 public class QuestDBStatement implements OBDAStatement {
 
 	private final IQuestStatement st;
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+	private final Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
-	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	private transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
 	public QuestDBStatement(IQuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
         this.nativeQLFactory = nativeQLFactory;
 		this.st = st;
 	}
 
-	public int add(Assertion data) throws OBDAException {
-		return st.insertData(Collections.singleton(data).iterator(), false, -1, -1);
-	}
-
 	public int add(Iterator<Assertion> data) throws OBDAException {
-		return st.insertData(data, false, -1, -1);
+		return st.insertData(data, -1, -1);
 	}
-
-	/***
-	 * As before, but using recreateIndexes = false.
-	 */
+	
 	public int add(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
-		return st.insertData(data, false, commit, batch);
+		return st.insertData(data, commit, batch);
 	}
 
 	public int add(URI rdffile) throws OBDAException {
 		return load(rdffile, false, -1, -1);
-	}
-
-	public int add(URI rdffile, int commit, int batch) throws OBDAException {
-		return load(rdffile, false, commit, batch);
 	}
 
 	public int addWithTempFile(URI rdffile) throws OBDAException {
@@ -97,14 +82,6 @@ public class QuestDBStatement implements OBDAStatement {
 
 	public int addFromOBDA(URI obdaFile) throws OBDAException {
 		return loadOBDAModel(obdaFile, false, -1, -1);
-	}
-
-	public int addFromOBDA(URI obdaFile, int commitrate, int batchinserts) throws OBDAException {
-		return loadOBDAModel(obdaFile, false, commitrate, batchinserts);
-	}
-
-	public int addFromOBDAWithTempFile(URI obdaFile) throws OBDAException {
-		return loadOBDAModel(obdaFile, true, -1, -1);
 	}
 
 	/* Move to query time ? */
@@ -120,19 +97,19 @@ public class QuestDBStatement implements OBDAStatement {
 			if (ext.toLowerCase().equals(".owl")) {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
-
-				EquivalentTriplePredicateIterator aBoxNormalIter =
-						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos),
+				
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
 								questInstance.getReasoner());
-
-				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
-			}
-			else if (ext.toLowerCase().equals(".nt")) {
+				
+				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+			} 
+			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
-				EquivalentTriplePredicateIterator aBoxNormalIter =
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
 						new EquivalentTriplePredicateIterator(it, questInstance.getReasoner());
-
-				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
+				
+				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -151,9 +128,9 @@ public class QuestDBStatement implements OBDAStatement {
             MappingParser parser = nativeQLFactory.create(new File(uri));
             OBDAModel obdaModel = parser.getOBDAModel();
 
-			materializer = new QuestMaterializer(obdaModel);
+			materializer = new QuestMaterializer(obdaModel, false);
 			assertionIter =  materializer.getAssertionIterator();
-			int result = st.insertData(assertionIter, useFile, commit, batch);
+			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
 			return result;
 
 		} catch (Exception e) {
@@ -188,11 +165,6 @@ public class QuestDBStatement implements OBDAStatement {
 	@Override
 	public int executeUpdate(String query) throws OBDAException {
 		return st.executeUpdate(query);
-	}
-
-	@Override
-	public OBDAConnection getConnection() throws OBDAException {
-		return st.getConnection();
 	}
 
 	@Override
@@ -275,9 +247,8 @@ public class QuestDBStatement implements OBDAStatement {
 			throw new OBDAException(e);
 		}
 
-		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
-		
-		ImmutableList<String> signatureContainer = tr.getSignature(pq);
-		return st.getRewriting(pq, signatureContainer);
+		// SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
+		//ImmutableList<String> signatureContainer = tr.getSignature(pq);
+		return st.getRewriting(pq/*, signatureContainer*/);
 	}
 }

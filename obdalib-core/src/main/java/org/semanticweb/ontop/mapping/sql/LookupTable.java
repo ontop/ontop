@@ -20,11 +20,7 @@ package org.semanticweb.ontop.mapping.sql;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A utility class to map database column names to new variables. The map
@@ -242,7 +238,7 @@ public class LookupTable {
 				if (!identical(insertedEntry, index)) {
 					// Add the entry to unsafe entries list if the new entry is ambiguous.
 					unsafeEntries.add(insertedEntry);
-					var2NumMap.remove(insertedEntry);
+//					var2NumMap.remove(insertedEntry);
 				}
 			}
 		}

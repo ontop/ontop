@@ -32,6 +32,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.*;
 
@@ -60,7 +61,10 @@ public class UnifierUtilities {
      */
     public static CQIE unify(CQIE q, int i, int j) {
 
-        Substitution mgu = getMGU(q.getBody().get(i), q.getBody().get(j));
+        Function atom1 = q.getBody().get(i);
+        Function atom2 = q.getBody().get(j);
+        
+        Substitution mgu = getMGU(atom1, atom2);
         if (mgu == null)
             return null;
 
@@ -68,19 +72,8 @@ public class UnifierUtilities {
         unifiedQ.getBody().remove(i);
         unifiedQ.getBody().remove(j - 1);
 
-        Function atom1 = q.getBody().get(i);
-        Function atom2 = q.getBody().get(j);
-        //Function newatom = unify((Function) atom1, (Function) atom2, mgu);
-
-        // take care of anonymous variables
         Function newatom = (Function) atom1.clone();
-        for (int ii = 0; ii < atom1.getTerms().size(); ii++) {
-            Term t1 = atom1.getTerms().get(ii);
-            if (t1 instanceof AnonymousVariable)
-                newatom.getTerms().set(ii, atom2.getTerms().get(ii));
-        }
         SubstitutionUtilities.applySubstitution(newatom, mgu);
-
         unifiedQ.getBody().add(i, newatom);
 
         return unifiedQ;
@@ -100,74 +93,9 @@ public class UnifierUtilities {
      * @return the substitution corresponding to this unification.
      */
     public static Substitution getMGU(Function first, Function second) {
-
-        // Basic case: if predicates are different or their arity is different,
-        // then no unifier
-        if ((first.getArity() != second.getArity()
-                || !first.getFunctionSymbol().equals(second.getFunctionSymbol()))) {
-            return null;
-        }
-
-        Function firstAtom = (Function) first.clone();
-        Function secondAtom = (Function) second.clone();
-
-        int arity = first.getArity();
-        Substitution mgu = new SubstitutionImpl();
-
-        // Computing the disagreement set
-        for (int termidx = 0; termidx < arity; termidx++) {
-
-            // Checking if there are already substitutions calculated for the
-            // current terms. If there are any, then we have to take the
-            // substituted terms instead of the original ones.
-
-            Term term1 = firstAtom.getTerm(termidx);
-            Term term2 = secondAtom.getTerm(termidx);
-
-            boolean changed = false;
-
-            // We have two cases, unifying 'simple' terms, and unifying function terms.
-            if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
-
-                if (!mgu.compose(term1, term2))
-                    return null;
-
-                changed = true;
-            } else {
-
-                // if both of them are function terms then we need to do some
-                // check in the inner terms
-
-                Function fterm1 = (Function) term1;
-                Function fterm2 = (Function) term2;
-
-                if ((fterm1.getTerms().size() != fterm2.getTerms().size()) ||
-                        !fterm1.getFunctionSymbol().equals(fterm2.getFunctionSymbol())) {
-                    return null;
-                }
-
-                int innerarity = fterm1.getTerms().size();
-                for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
-
-                    if (!mgu.compose(fterm1.getTerm(innertermidx), fterm2.getTerm(innertermidx)))
-                        return null;
-
-                    changed = true;
-
-                    // Applying the newly computed substitution to the 'replacement' of
-                    // the existing substitutions
-                    SubstitutionUtilities.applySubstitution(fterm1, mgu, innertermidx + 1);
-                    SubstitutionUtilities.applySubstitution(fterm2, mgu, innertermidx + 1);
-                }
-            }
-            if (changed) {
-
-                // Applying the newly computed substitution to the 'replacement' of
-                // the existing substitutions
-                SubstitutionUtilities.applySubstitution(firstAtom, mgu, termidx + 1);
-                SubstitutionUtilities.applySubstitution(secondAtom, mgu, termidx + 1);
-            }
-        }
-        return mgu;
+        SubstitutionImpl mgu = new SubstitutionImpl();
+        if (mgu.composeFunctions(first, second))
+            return mgu;
+        return null;
     }
 }

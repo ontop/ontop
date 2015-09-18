@@ -44,9 +44,4 @@ public class SIQuestDBStatementImpl extends QuestDBStatement implements SIQuestD
     public void createDB() throws OBDAException {
         st.createDB();
     }
-
-    @Override
-    public void analyze() throws OBDAException {
-        st.analyze();
-    }
 }

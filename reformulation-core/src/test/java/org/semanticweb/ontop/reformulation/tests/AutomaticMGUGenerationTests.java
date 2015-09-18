@@ -21,17 +21,15 @@ package org.semanticweb.ontop.reformulation.tests;
  */
 
 import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -99,7 +97,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (VariableImpl var : mgu.keySet()) {
+				for (Variable var : mgu.getMap().keySet()) {
 					computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
 				}
 			}
@@ -117,6 +115,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			casecounter += 1;
 			testcase = in.readLine();
 		}
+		in.close();
 		log.info("Suceffully executed {} test cases for MGU computation");
 	}
 

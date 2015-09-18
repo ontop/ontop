@@ -66,11 +66,6 @@ public class QuestOWLExample {
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), preference);
 		QuestOWL reasoner = questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
-		/*
-		 * Prepare the data connection for querying.
-		 */
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
 
 		/*
 		 * Get the book information that is stored in the database
@@ -82,7 +77,13 @@ public class QuestOWLExample {
 				"		 ?y a :Author; :name ?author. \n" +
 				"		 ?z a :Edition; :editionNumber ?edition }";
 
-		try {
+		try (/*
+		 	 * Prepare the data connection for querying.
+		 	 */
+			 QuestOWLConnection conn = reasoner.getConnection();
+			 QuestOWLStatement st = conn.createStatement() )
+		{
+
             long t1 = System.currentTimeMillis();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 			int columnSize = rs.getColumnCount();
@@ -116,16 +117,6 @@ public class QuestOWLExample {
             System.out.println((t2-t1) + "ms");
 			
 		} finally {
-			
-			/*
-			 * Close connection and resources
-			 */
-			if (st != null && !st.isClosed()) {
-				st.close();
-			}
-			if (conn != null && !conn.isClosed()) {
-				conn.close();
-			}
 			reasoner.dispose();
 		}
 	}

@@ -21,13 +21,13 @@ package org.semanticweb.ontop.parser;
  */
 
 
-
-
 import java.util.HashMap;
 
 /** 
  * Class to create an Alias Map for the select statement
  */
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
 import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -80,17 +80,6 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectItemVisitor;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.SubSelect;
-import net.sf.jsqlparser.statement.select.WithItem;
 
 /**
  * 
@@ -99,10 +88,10 @@ import net.sf.jsqlparser.statement.select.WithItem;
  * Remove quotes when present.
  */
 
-public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
+public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromItemVisitor, ExpressionVisitor{
 
 	HashMap<String,String> aliasMap;
-	boolean unquote; //remove quotes from columns
+
 	
 	/**
 	 * Return a map between the column in the select statement and its alias.
@@ -110,9 +99,8 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	 * @return alias map
 	 */
 	
-	public HashMap<String,String> getAliasMap(Select select, boolean unquote) {
-		
-		this.unquote= unquote;
+	public HashMap<String,String> getAliasMap(Select select, boolean deepParsing) {
+
 		aliasMap = new HashMap<String, String>();
 		
 		if (select.getWithItemsList() != null) {
@@ -133,12 +121,26 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	
 	@Override
 	public void visit(PlainSelect plainSelect) {
+        plainSelect.getFromItem().accept(this);
+
+        if (plainSelect.getJoins() != null) {
+            for (Join join : plainSelect.getJoins()) {
+                join.getRightItem().accept(this);
+            }
+        }
+        if (plainSelect.getWhere() != null) {
+            plainSelect.getWhere().accept(this);
+        }
 		
 		for (SelectItem item : plainSelect.getSelectItems())
 		{
 			item.accept(this);
 		}
-	}
+
+
+
+
+    }
 
 	@Override
 	public void visit(AllColumns columns) {
@@ -163,8 +165,10 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
-			if(unquote && ParsedSQLQuery.pQuotes.matcher(alias).matches()){
-				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
+			if(ParsedSQLQuery.pQuotes.matcher(alias).matches()){
+				String unquotedAlias =  alias.substring(1, alias.length() - 1);
+				aliasMap.put(e.toString().toLowerCase(), unquotedAlias );
+				selectExpr.getAlias().setName(unquotedAlias);
 			}
 			else
 				aliasMap.put(e.toString().toLowerCase(), alias);
@@ -356,13 +360,34 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		
 	}
 
-	@Override
+
+    @Override
+    public void visit(Table tableName) {
+
+    }
+
+    @Override
 	public void visit(SubSelect subSelect) {
-		// TODO Auto-generated method stub
+        subSelect.getSelectBody().accept(this);
 		
 	}
 
-	@Override
+    @Override
+    public void visit(SubJoin subjoin) {
+
+    }
+
+    @Override
+    public void visit(LateralSubSelect lateralSubSelect) {
+
+    }
+
+    @Override
+    public void visit(ValuesList valuesList) {
+
+    }
+
+    @Override
 	public void visit(CaseExpression caseExpression) {
 		// TODO Auto-generated method stub
 		

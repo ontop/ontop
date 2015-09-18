@@ -138,7 +138,7 @@ public class QuestOWLMaterializerTest extends TestCase {
         MappingParser mappingParser = factory.create(new FileReader(f));
         OBDAModel model = mappingParser.getOBDAModel();
 
-			QuestMaterializer mat = new QuestMaterializer(model, prefs);
+			QuestMaterializer mat = new QuestMaterializer(model, prefs, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
@@ -176,7 +176,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());
 			
-			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
+			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;

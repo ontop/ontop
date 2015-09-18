@@ -82,7 +82,7 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
 
-public class RepositoryConnection implements org.openrdf.repository.RepositoryConnection {
+public class RepositoryConnection implements org.openrdf.repository.RepositoryConnection, AutoCloseable {
 
 	private SesameAbstractRepo repository;
 	private QuestDBConnection questConn;

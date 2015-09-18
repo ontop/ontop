@@ -127,7 +127,6 @@ public class QuestConnection implements IQuestConnection {
 			throw obdaException;
 		}
 	}
-
 		
 	@Override
 	public void commit() throws OBDAException {
@@ -180,7 +179,7 @@ public class QuestConnection implements IQuestConnection {
 		/**
 		 * Write is currently supported by the classic mode.
 		 */
-		if (!this.questinstance.isSemIdx())
+		if (!this.questinstance.getOptionalSemanticIndexRepository().isPresent())
 			return true;
 		try {
 			return conn.isReadOnly();
@@ -201,4 +200,5 @@ public class QuestConnection implements IQuestConnection {
 			throw obdaException;
 		}
 	}
+
 }

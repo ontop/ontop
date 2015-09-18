@@ -43,18 +43,6 @@ import org.semanticweb.ontop.model.Predicate;
 public interface UnfoldingMechanism extends Serializable {
 
 	/**
-	 * unfolds the the given datalog program
-	 * 
-	 * @param query
-	 *            the query
-	 * @return the unfolded query
-	 * @throws Exception
-	 */
-	@Deprecated
-	public DatalogProgram unfold(DatalogProgram query, String targetPredicate)
-			throws OBDAException;
-
-	/**
 	 * unfolds the the given datalog program applying partial evaluation. It will do the partial evaluation following 
 	 * a specified strategy, for instance, bottom up or top down. The parameter includeMappings tells you if the unfolder should take the mappings
 	 * into account, or just work with the query

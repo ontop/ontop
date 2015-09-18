@@ -68,6 +68,7 @@ public class H2ASKTest {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		sqlConnection.commit();

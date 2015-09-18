@@ -105,7 +105,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 	
 	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
 	}
 
@@ -330,7 +330,6 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	public void convertIntoChainDAG() {
 
 		Collection<ClassExpression> nodes = new HashSet<ClassExpression>(classGraph.vertexSet());
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<ClassExpression> processedNodes = new HashSet<ClassExpression>();
 		for (ClassExpression node : nodes) {
 			if ((!(node instanceof ObjectSomeValuesFrom) /*&& !(node instanceof DataSomeValuesFrom)*/)

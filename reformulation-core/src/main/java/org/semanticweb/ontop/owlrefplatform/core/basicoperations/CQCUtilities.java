@@ -21,11 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheck;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckSyntactic;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import org.semanticweb.ontop.model.Substitution;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
 
@@ -93,7 +89,6 @@ public class CQCUtilities {
 					if (query2 == query)
 						break;
 					if (containment.isContainedIn(query, query2)) {
-//						log.debug("REMOVE (SIGMA): " + result.get(i));
 						iterator.remove();
 						break;
 					}

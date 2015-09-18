@@ -28,12 +28,12 @@ import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.model.CQIE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 public class TurtleSyntaxParserTest extends TestCase {
 
@@ -194,6 +194,41 @@ public class TurtleSyntaxParserTest extends TestCase {
 		final boolean result = parse("ex:Person/{id}/ ex:hasFather ex:Person/123/ .");
 		assertTrue(result);
 	}
+	
+	//multiple triples with different subjects
+	public void test_9_1(){
+		final boolean result = compareCQIE(":S_{id} a :Student ; :fname {first_name} ; :hasCourse :C_{course_id}  .\n" +
+				":C_{course_id} a :Course ; :hasProfessor :P_{id} . \n" +
+				":P_{id} a :Professor ; :teaches :C_{course_id} .\n" +
+				"{first_name} a :Name . ", 8);
+		assertTrue(result);
+
+	}
+
+
+	public void test_9_2(){
+		final boolean result = compareCQIE("{idEmigrante} a  :E21_Person ; :P131_is_identified_by {nome} ; :P11i_participated_in {numCM} .\n" +
+				"{nome} a :E82_Actor_Appellation ; :P3_has_note {nome}^^xsd:string .\n" +
+				"{numCM} a :E9_Move .", 6);
+		assertTrue(result);
+
+	}
+
+	private boolean compareCQIE(String input, int countBody) {
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		CQIE mapping;
+		try {
+			mapping = parser.parse(input);
+		} catch (TargetQueryParserException e) {
+			log.debug(e.getMessage());
+			return false;
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+			return false;
+		}
+		return mapping.getBody().size()==countBody;
+	}
+	
 	
 	private boolean parse(String input) {;
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());

@@ -42,8 +42,6 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 
 public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery {
 	
-	private static final long serialVersionUID = 1L;
-
 	private String baseURI;
 
 	public SesameGraphQuery(String queryString, String baseURI,

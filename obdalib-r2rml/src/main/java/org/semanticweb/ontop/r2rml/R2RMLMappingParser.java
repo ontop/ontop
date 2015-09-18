@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openrdf.model.Model;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParseException;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -112,7 +114,11 @@ public class R2RMLMappingParser implements MappingParser {
 
         R2RMLManager r2rmlManager;
         if (mappingFile != null)
-            r2rmlManager = new R2RMLManager(mappingFile);
+            try {
+                r2rmlManager = new R2RMLManager(mappingFile);
+            } catch (RDFParseException | RDFHandlerException e) {
+                throw new InvalidDataSourceException(e.getMessage());
+            }
         else if (mappingGraph != null)
             r2rmlManager = new R2RMLManager(mappingGraph);
         else

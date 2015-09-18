@@ -27,17 +27,7 @@ import java.util.Map;
 
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatatypeFactory;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -110,6 +100,35 @@ public class TargetQueryRenderer {
 	private static String getAbbreviatedName(String uri, PrefixManager pm, boolean insideQuotes) {
 		return pm.getShortForm(uri, insideQuotes);
 	}
+	
+	private static String appendTerms(Term term){
+        if (term instanceof Constant){
+        	String st = ((Constant) term).getValue();
+        	if (st.contains("{")){
+        		st = st.replace("{", "\\{");
+        		st = st.replace("}", "\\}");
+        	}
+            return st;
+        }else{
+            return "{"+((Variable) term).getName()+"}";
+        }
+    }
+
+    //Appends nested concats
+	public static void getNestedConcats(StringBuilder stb, Term term1, Term term2){
+		if (term1 instanceof Function){
+			Function f = (Function) term1;
+			getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
+			}else{
+				stb.append(appendTerms(term1));
+				}
+			 if (term2 instanceof Function){
+				 Function f = (Function) term2;
+				 getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
+			 }else{
+				 stb.append(appendTerms(term2));
+			 }
+    }
 
 	/**
 	 * Prints the text representation of different terms.
@@ -120,7 +139,7 @@ public class TargetQueryRenderer {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
-			if (functionSymbol instanceof DataTypePredicate) {
+			if (functionSymbol instanceof DatatypePredicate) {
 				// if the function symbol is a data type predicate
 				if (dtfac.isLiteral(functionSymbol)) {
 					// if it is rdfs:Literal
@@ -177,6 +196,12 @@ public class TargetQueryRenderer {
 					sb.append(">");
 				}		
 				}
+			} else if (functionSymbol instanceof StringOperationPredicate) { //Concat
+				List<Term> terms = function.getTerms();
+				sb.append("\"");
+				getNestedConcats(sb, terms.get(0),terms.get(1));
+				sb.append("\"");
+				//sb.append("^^rdfs:Literal");
 			} else { // for any ordinary function symbol
 				sb.append(fname);
 				sb.append("(");

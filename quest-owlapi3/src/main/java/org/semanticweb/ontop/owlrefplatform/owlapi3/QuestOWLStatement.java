@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
@@ -50,7 +49,6 @@ import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.IQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -79,7 +77,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 // DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
 //public class QuestOWLStatement implements IQuestOWLStatement {
-public class QuestOWLStatement {
+public class QuestOWLStatement implements AutoCloseable {
 	private IQuestStatement st;
 	private QuestOWLConnection conn;
 
@@ -96,6 +94,7 @@ public class QuestOWLStatement {
 		}
 	}
 
+	@Override
 	public void close() throws OWLException {
 		try {
 			st.close();
@@ -139,11 +138,6 @@ public class QuestOWLStatement {
 		}
 	}
 
-	public int insertData(File owlFile, int commitSize, int batchsize) throws Exception {
-		int ins = insertData(owlFile, commitSize, batchsize, null);
-		return ins;
-	}
-
 	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
 
 		Iterator<Assertion> aBoxIter = null;
@@ -160,7 +154,8 @@ public class QuestOWLStatement {
 			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 
 			return st.insertData(aBoxIter, commitSize, batchsize);
-		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
+		} 
+		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
 			RDFParser rdfParser = null;
 
@@ -358,7 +353,7 @@ public class QuestOWLStatement {
 		}
 	}
 
-	public int getTupleCount(String query) throws OWLException {
+	public long getTupleCount(String query) throws OWLException {
 		try {
 			return st.getTupleCount(query);
 		} catch (Exception e) {
@@ -372,10 +367,11 @@ public class QuestOWLStatement {
 			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
             IQuest questInstance = st.getQuestInstance();
-			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
-
-			ImmutableList<String> signatureContainer = tr.getSignature(pq);
-			return st.getRewriting(pq, signatureContainer);
+			
+			//SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
+			//ImmutableList<String> signatureContainer = tr.getSignature(pq);
+			
+			return st.getRewriting(pq/*, signatureContainer*/);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
@@ -414,6 +410,8 @@ public class QuestOWLStatement {
 		}
 		return axiomList;
 	}
+
+
 	
 	// Davide> Benchmarking
 	public long getUnfoldingTime(){
@@ -423,12 +421,13 @@ public class QuestOWLStatement {
 	public long getRewritingTime(){
 		return st.getRewritingTime();
 	}
-
+	
 	public int getUCQSizeAfterUnfolding(){
 		return st.getUCQSizeAfterUnfolding();
 	}
-
+	
 	public int getUCQSizeAfterRewriting(){
 		return st.getUCQSizeAfterRewriting();
 	}
+
 }

@@ -43,6 +43,7 @@ public interface NativeQueryGenerator extends Serializable {
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
 
+	public boolean hasDistinctResultSet() ;
     /**
      * If the generator is immutable, the generator
      * can return itself instead of a clone.

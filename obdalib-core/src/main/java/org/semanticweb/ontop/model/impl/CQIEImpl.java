@@ -27,11 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDAQueryModifiers;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.utils.EventGeneratingLinkedList;
 import org.semanticweb.ontop.utils.EventGeneratingList;
 import org.semanticweb.ontop.utils.ListListener;
@@ -55,8 +51,6 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String COMMA = ",";
 	private static final String INV_IMPLIES = ":-";
 
-	private OBDAQueryModifiers modifiers = null;
-
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(Function head, List<Function> body) {		
 		// The syntax for CQ may contain no body, thus, this condition will
@@ -74,11 +68,21 @@ public class CQIEImpl implements CQIE, ListListener {
 		// will check whether we can look for the head terms or not.
 		if (head != null) {
 			this.head = head;
-			EventGeneratingList<Term> headterms = (EventGeneratingList<Term>) head.getTerms();
-			headterms.addListener(this);
+			subscribeHeadTerms(head);
 		}
 	}
 	
+	private void subscribeHeadTerms(Function head) {
+		if (head instanceof ListenableFunction) {
+			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
+			headterms.addListener(this);
+		}
+		else if (!(head instanceof ImmutableFunctionalTerm)) {
+			throw new RuntimeException("Unknown type of function: not listenable nor immutable:  "
+					+ head);
+		}
+	}
+
 	// TODO Remove isBoolean from the signature and from any method
 		protected CQIEImpl(Function head, Function[] body) {
 			
@@ -99,8 +103,7 @@ public class CQIEImpl implements CQIE, ListListener {
 			// will check whether we can look for the head terms or not.
 			if (head != null) {
 				this.head = head;
-				EventGeneratingList<Term> headterms = (EventGeneratingList<Term>) head.getTerms();
-				headterms.addListener(this);
+				subscribeHeadTerms(head);
 			}
 		}
 		
@@ -114,10 +117,15 @@ public class CQIEImpl implements CQIE, ListListener {
 			if (!(o instanceof Function)) {
 				continue;
 			}
-			Function f = (Function) o;
-			EventGeneratingList<Term> list = (EventGeneratingList<Term>) f.getTerms();
-			list.addListener(this);
-			registerListeners(list);
+			else if (o instanceof ListenableFunction) {
+				ListenableFunction f = (ListenableFunction) o;
+				EventGeneratingList<Term> list = f.getTerms();
+				list.addListener(this);
+				registerListeners(list);
+			}
+			else if (!(o instanceof ImmutableFunctionalTerm)) {
+				throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  " + o);
+			}
 		}
 	}
 
@@ -132,15 +140,22 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void updateHead(Function head) {
 		this.head = head;
 
-		EventGeneratingList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
-		headterms.removeListener(this);
-		headterms.addListener(this);
-		listChanged();
+		if (head instanceof ListenableFunction) {
+			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
+			headterms.removeListener(this);
+			headterms.addListener(this);
+			listChanged();
+		}
+		else if (!(head instanceof ImmutableFunctionalTerm)) {
+			throw new RuntimeException("Unknown type of function: not listenable nor immutable:  "
+					+ head);
+		}
 	}
 
 	public void updateBody(List<Function> body) {
 		this.body.clear();
 		this.body.addAll(body);
+		// TODO: what about listeners?
 		listChanged();
 	}
 
@@ -194,7 +209,7 @@ public class CQIEImpl implements CQIE, ListListener {
 		
 		CQIEImpl newquery = new CQIEImpl(copyHead, copyBody);
 		newquery.rehash = this.rehash;
-		newquery.string = this.string;
+		newquery.string = null;
 		newquery.hash = this.hash;
 
 		return newquery;
@@ -217,28 +232,20 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public OBDAQueryModifiers getQueryModifiers() {
-		return modifiers;
-	}
-
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		this.modifiers = modifiers;
-		listChanged();
+		return new MutableQueryModifiersImpl();
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Function atom : body)
-			for (Term t : atom.getTerms()) {
-				for (Variable v : t.getReferencedVariables())
-					vars.add(v);
+		for (Function atom : body) {
+			TermUtils.addReferencedVariablesTo(vars, atom);
 			}
 		return vars;
 	}
 
 	@Override
 	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
+		return false;
 	}
 }

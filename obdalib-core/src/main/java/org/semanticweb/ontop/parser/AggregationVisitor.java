@@ -71,18 +71,15 @@ import net.sf.jsqlparser.statement.select.WithItem;
 public class AggregationVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor {
 
 	AggregationJSQL aggregation= new AggregationJSQL();
-	boolean unquote=false;
 	
 	/**
-	 * Return a {@link AggregationSQL} containing GROUP BY statement
+	 * Return a {@link AggregationJSQL} containing GROUP BY statement
 	 * @param select 
 	 * @return
 	 */
-	public AggregationJSQL getAggregation(Select select, boolean unquote){
+	public AggregationJSQL getAggregation(Select select, boolean deepParsing){
 		
 		
-		this.unquote=unquote;
-	
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
@@ -106,14 +103,10 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 		
 		if(plainSelect.getGroupByColumnReferences()!=null){
 			
-			if(unquote){
 				for(Expression express: plainSelect.getGroupByColumnReferences() ){
 					express.accept(this);
 				}
-			}
-			else
 			
-			aggregation.addAll(plainSelect.getGroupByColumnReferences());
 		}
 	}
 
@@ -333,7 +326,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 	@Override
 	public void visit(Column tableColumn) {
 		Table table= tableColumn.getTable();
-		if(table.getName()!=null && unquote ){
+		if(table.getName()!=null){
 			
 			TableJSQL fixTable = new TableJSQL(table);
 			table.setAlias(fixTable.getAlias());
@@ -342,7 +335,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 		
 		}
 		String columnName= tableColumn.getColumnName();
-		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}

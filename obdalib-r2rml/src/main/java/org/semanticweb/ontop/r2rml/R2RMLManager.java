@@ -26,9 +26,8 @@ package org.semanticweb.ontop.r2rml;
  */
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,9 +40,7 @@ import com.google.common.collect.ImmutableList;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
+import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 
 import eu.optique.api.mapping.Join;
@@ -62,6 +59,7 @@ import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.TermUtils;
 
 public class R2RMLManager {
 	
@@ -73,7 +71,7 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file) {
+	public R2RMLManager(String file) throws RDFParseException, IOException, RDFHandlerException {
 		this(new File(file));
 	}
 	
@@ -81,8 +79,8 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file) {
-		try {
+	public R2RMLManager(File file) throws IOException, RDFParseException, RDFHandlerException {
+
 			myModel = new LinkedHashModel();			
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
@@ -91,9 +89,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			r2rmlParser = new R2RMLParser();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 	
 	/**
@@ -235,9 +231,9 @@ public class R2RMLManager {
 	 * @return
 	 */
 	private Function getHeadAtom(List<Function> body) {
-		Set<Variable> vars = new HashSet<Variable>();
+		Set<Variable> vars = new HashSet<>();
 		for (Function bodyAtom : body) {
-			 vars.addAll(bodyAtom.getReferencedVariables());
+			TermUtils.addReferencedVariablesTo(vars, bodyAtom);
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
@@ -275,16 +271,14 @@ public class R2RMLManager {
 			//get object atom
 			Term objectAtom = r2rmlParser.getObjectAtom(pom);
 			
-		
-			
 			if (objectAtom == null) {
 				// skip, object is a join
 				continue;
 			}
 			
 			// construct the atom, add it to the body
-			List<Term> terms = new ArrayList<Term>();
-			terms.add(subjectAtom);
+			//List<Term> terms = new ArrayList<Term>();
+			//terms.add(subjectAtom);
 			
 			
 			for (Predicate bodyPred : bodyPredicates) {
@@ -294,39 +288,40 @@ public class R2RMLManager {
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
 					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
 					// if object is a predicate
-					if (objectAtom.getReferencedVariables().isEmpty()) { 	
+					Set<Variable> vars = new HashSet<>();
+					TermUtils.addReferencedVariablesTo(vars, objectAtom);
+					if (vars.isEmpty()) { 	
 						Function funcObjectAtom = (Function) objectAtom;
 						Term term0 = funcObjectAtom.getTerm(0);
-						if(term0 instanceof Function){
+						if (term0 instanceof Function) {
 							Function constPred = (Function) term0;
 							Predicate newpred = constPred.getFunctionSymbol();
-							Function newAtom = fac.getFunction(newpred, subjectAtom);
-							body.add(newAtom);
+							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(bodyAtom);
 						}
 						else if (term0 instanceof ValueConstant) {							
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = fac.getPredicate(predName, 1);
-							Function newAtom = fac.getFunction(newpred, subjectAtom);
-							body.add(newAtom);
+							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(bodyAtom);
 						} 
-						else {
+						else 
 							throw new IllegalStateException();
-						}
 					}
-					else{ // if object is a variable
+					else { // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
-						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-						terms.add(rdftype);
-						terms.add(objectAtom);
-						body.add(fac.getFunction(newpred, terms));
+						//terms.add(rdftype);
+						//terms.add(objectAtom);
+						Function bodyAtom = fac.getTripleAtom(subjectAtom, rdftype, objectAtom);
+						body.add(bodyAtom); // fac.getFunction(newpred, terms)
 					}
 				} 
 				else {
 					// create predicate(subject, object) and add it to the body
-					terms.add(objectAtom);
-					Function bodyAtom = fac.getFunction(bodyPred, terms);
+					Function bodyAtom = fac.getFunction(bodyPred, subjectAtom, objectAtom);
 					body.add(bodyAtom);
 				}
 			}
@@ -334,10 +329,11 @@ public class R2RMLManager {
 			//treat predicates that contain a variable (column or template declarations)
 			for (Function predFunction : bodyURIPredicates) {
 				//create triple(subj, predURIFunction, objAtom) terms
-				Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-				terms.add(predFunction);
-				terms.add(objectAtom);
-				body.add(fac.getFunction(newpred, terms));
+				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+				//terms.add(predFunction);
+				//terms.add(objectAtom);
+				Function bodyAtom = fac.getTripleAtom(subjectAtom, predFunction, objectAtom);
+				body.add(bodyAtom);   // objectAtom
 			}
 		}
 		return body;

@@ -1,20 +1,19 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
+import org.semanticweb.ontop.pivotalrepr.MetadataForQueryOptimization;
 import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
-
-import java.sql.Connection;
 
 /**
  * Automatically extracted.
@@ -24,8 +23,6 @@ import java.sql.Connection;
 public interface IQuest extends RepositoryChangedListener {
 
     VocabularyValidator getVocabularyValidator();
-
-    QueryRewriter getRewriter();
 
     NativeQueryGenerator cloneIfNecessaryNativeQueryGenerator();
 
@@ -50,21 +47,23 @@ public interface IQuest extends RepositoryChangedListener {
 
     IQuestConnection getConnection() throws OBDAException;
 
-    UriTemplateMatcher getUriTemplateMatcher();
-
-    DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException;
-
     void repositoryChanged();
-
-    boolean isSemIdx();
 
 	TBoxReasoner getReasoner();
 
-    RDBMSSIRepositoryManager getSemanticIndexRepository();
+    SemanticIndexURIMap getUriMap();
+
+    Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository();
 
     DBMetadata getMetaData();
 
-    LinearInclusionDependencies getDataDependencies();
-
     QueryCache getQueryCache();
+
+    MetadataForQueryOptimization getMetadataForQueryOptimization();
+
+    DatalogProgram getRewriting(DatalogProgram initialProgram) throws OBDAException;
+
+    ExpressionEvaluator getExpressionEvaluator();
+
+    SparqlAlgebraToDatalogTranslator getSparqlAlgebraToDatalogTranslator();
 }

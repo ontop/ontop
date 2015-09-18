@@ -35,10 +35,6 @@ public interface IQuestOWLStatement {
 
 	int executeUpdate(String query) throws OWLException;
 
-	int insertData(File owlFile, int commitSize, int batchsize) throws Exception;
-
-	int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception;
-
 	QuestOWLConnection getConnection() throws OWLException;
 
 	int getFetchSize() throws OWLException;
@@ -59,7 +55,7 @@ public interface IQuestOWLStatement {
 
 	void setQueryTimeout(int seconds) throws Exception;
 
-	int getTupleCount(String query) throws OWLException;
+	long getTupleCount(String query) throws OWLException;
 
 	String getRewriting(String query) throws OWLException;
 

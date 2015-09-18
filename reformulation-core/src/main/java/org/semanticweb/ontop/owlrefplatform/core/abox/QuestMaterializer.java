@@ -66,12 +66,18 @@ public class QuestMaterializer {
 	private IQuest questInstance;
 	private Ontology ontology;
 	
+	/**
+	 * Puts the JDBC connection in streaming mode.
+	 */
+	private final boolean doStreamResults;
+	
 	private final Set<Predicate> vocabulary;
 
 	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static int FETCH_SIZE = 50000;
 
 	/***
 	 * 
@@ -79,17 +85,21 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model) throws Exception {
-		this(model, null, getDefaultPreferences());
+	public QuestMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
+		this(model, null, null, getDefaultPreferences(), doStreamResults);
 	}
 	
-	public QuestMaterializer(OBDAModel model, QuestPreferences pref) throws Exception {
-		this(model, null, pref);
+	public QuestMaterializer(OBDAModel model, QuestPreferences pref, boolean doStreamResults) throws Exception {
+		this(model, null, null, pref, doStreamResults);
 		
 	}
+		
+	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+		this(model, onto, null, getDefaultPreferences(), doStreamResults);
+	}
 	
-	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
-		this(model, onto, getDefaultPreferences());
+    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
+        this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
 	}
 	
 	/***
@@ -98,18 +108,56 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences,
+							 boolean doStreamResults) throws Exception {
+		this.doStreamResults = doStreamResults;
 		this.model = model;
 		this.ontology = onto;
-		this.vocabulary = new HashSet<>();
 
-        Injector injector = Guice.createInjector(new OBDACoreModule(preferences),
-                new QuestComponentModule(preferences));
-        questComponentFactory = injector.getInstance(QuestComponentFactory.class);
+        if(predicates != null && !predicates.isEmpty()){
+            this.vocabulary = new HashSet<>(predicates);
+        } else {
+           this.vocabulary = extractVocabulary(model, onto);
+        }
+
+		Injector injector = Guice.createInjector(new OBDACoreModule(preferences),
+				new QuestComponentModule(preferences));
+		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 		
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
 		
+		//start a quest instance
+		if (ontology == null) {
+			ontology = ofac.createOntology();
+			
+			// TODO: use Vocabulary for OBDAModel as well
+			
+			for (OClass pred : model.getDeclaredClasses()) 
+				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
+			
+			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
+				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
+
+			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
+				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
+		}
+
+
+		//preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+		questInstance = questComponentFactory.create(ontology, this.model, null, preferences);
+
+		questInstance.setupRepository();
+	}
+
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
+		this(model, onto, null, prefs, doStreamResults);
+	}
+
+	private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
+		Set<Predicate> vocabulary = new HashSet<Predicate>();
+
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
 		for (OClass cl : model.getDeclaredClasses()) {
@@ -130,7 +178,7 @@ public class QuestMaterializer {
 		if (onto != null) {
 			//from ontology
 			for (OClass cl : onto.getVocabulary().getClasses()) {
-				Predicate p = cl.getPredicate(); 
+				Predicate p = cl.getPredicate();
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
@@ -147,7 +195,7 @@ public class QuestMaterializer {
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-		} 
+		}
 		else {
 			//from mapping undeclared predicates (can happen)
 			for (URI uri : this.model.getMappings().keySet()){
@@ -161,33 +209,13 @@ public class QuestMaterializer {
 							vocabulary.add(f.getFunctionSymbol());
 						}
 					}
-					
+
 				}
-			
+
 			}
 		}
-		//start a quest instance
-		if (ontology == null) {
-			ontology = ofac.createOntology();
-			
-			// TODO: use Vocabulary for OBDAModel as well
-			
-			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
-			
-			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
 
-			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
-		}
-		
-		
-		//preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
-		questInstance = questComponentFactory.create(ontology, this.model, null, preferences);
-					
-		questInstance.setupRepository();
+		return vocabulary;
 	}
 	
 
@@ -267,10 +295,21 @@ public class QuestMaterializer {
 				throws SQLException {
 			try{
 				questConn = questInstance.getNonPoolConnection();
+
+				if (doStreamResults) {
+					// Autocommit must be OFF (needed for autocommit)
+					questConn.setAutoCommit(false);
+				}
+
 				vocabularyIterator = vocabIter;
 				//execute first query to start the process
 				counter = 0;
 				stm = questConn.createStatement();
+
+				if (doStreamResults) {
+					// Fetch 50 000 lines at the same time
+					stm.setFetchSize(FETCH_SIZE);
+				}
 				if (!vocabularyIterator.hasNext())
 					throw new NullPointerException("Vocabulary is empty!");
 				while (results == null) {
@@ -321,6 +360,9 @@ public class QuestMaterializer {
 
 						//execute next query
 						stm = questConn.createStatement();
+						if (doStreamResults) {
+							stm.setFetchSize(FETCH_SIZE);
+						}
 						Predicate next = vocabularyIterator.next();
 						String query = getQuery(next);
 						ResultSet execute = stm.execute(query);
@@ -338,6 +380,8 @@ public class QuestMaterializer {
 			}
 			} catch(Exception e)
 			{e.printStackTrace();}
+
+
 			return hasNext;
 		}
 

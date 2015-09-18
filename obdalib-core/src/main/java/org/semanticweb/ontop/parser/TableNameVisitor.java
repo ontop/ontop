@@ -99,6 +99,9 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.ValuesList;
 import net.sf.jsqlparser.statement.select.WithItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Find all used tables within an select statement.
  */
@@ -158,6 +161,28 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(PlainSelect plainSelect) {
 		plainSelect.getFromItem().accept(this);
+
+        /** 
+         * When the mapping contains a DISTINCT we interpret it as
+         * a HINT to create a subview. 
+         *
+         * Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE
+         * for obtaining this behavior. 
+         */
+        if (plainSelect.getDistinct() != null) {
+            unsupported = true;
+        }
+
+        /** 
+         * When the mapping contains a DISTINCT we interpret it as  
+         * a HINT to create a subview. 
+         *
+         *  Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE
+         * for obtaining this behavior. 
+         */
+        if (plainSelect.getDistinct() != null) {
+            unsupported = true;
+        }
 
 		if (plainSelect.getJoins() != null) {
 			for (Join join : plainSelect.getJoins()) {
@@ -245,15 +270,28 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(Function function) {
-		if(function.getName().toLowerCase().equals("regexp_like") ) {
-			for(Expression ex :function.getParameters().getExpressions()){
-				ex.accept(this);
-				
-			}
-		}
-		else{
-		    unsupported = true;
-		}
+        switch(function.getName().toLowerCase()){
+
+            case "regexp_like" :
+            case "regexp_replace" :
+            case "replace" :
+            case "concat" :
+
+                for(Expression ex :function.getParameters().getExpressions()) {
+                    ex.accept(this);
+
+                }
+
+                break;
+
+            default:
+                unsupported = true;
+
+                break;
+        }
+
+
+
 	}
 
 	@Override

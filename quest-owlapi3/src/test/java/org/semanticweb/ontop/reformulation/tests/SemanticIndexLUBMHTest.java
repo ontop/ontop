@@ -26,8 +26,6 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.io.QueryIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
@@ -46,13 +44,12 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexLUBMHTest extends TestCase {
 
-	String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
+	private final String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexLUBMHTest() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
@@ -174,6 +171,9 @@ public class SemanticIndexLUBMHTest extends TestCase {
 //		log.debug("File 24. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 		
+		// V1
+		// quest.getQuestInstance().getOptionalSemanticIndexRepository().createIndexes(qconn.getConnection());
+		// END V1
 		st.createIndexes();
 		end = System.nanoTime();
 		double insert_time = (end - start) / 1000000;
@@ -214,5 +214,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 			log.debug("Data insertion time: {} ms", insert_time);
 			log.debug("Query execution time: {} ms", time);
 		}
+		st.close();
+		quest.dispose();
 	}
 }

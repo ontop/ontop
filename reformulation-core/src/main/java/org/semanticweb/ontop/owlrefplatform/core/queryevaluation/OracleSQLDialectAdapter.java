@@ -21,12 +21,23 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
  */
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
+	public static final int NAME_MAX_LENGTH = 30;
+	/**
+	 * If the name (of a variable/view) needs to be shortcut, length of the number
+	 * introduced.
+	 */
+	public static final int NAME_NUMBER_LENGTH = 3;
+
 	private static Map<Integer, String> SqlDatatypes;
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 	static {
 		SqlDatatypes = new HashMap<>();
 		SqlDatatypes.put(Types.DECIMAL, "NUMBER");
@@ -72,9 +83,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		String flags = "";
 		if(caseinSensitive)
 			flags += "i";
@@ -88,6 +102,18 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		String sql = " REGEXP_LIKE " + "( " + columnname + " , '" + pattern + "' , '" + flags  + "' )";
 		return sql;
 	}
+
+    @Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
 
 	@Override
 	public String getDummyTable() {
@@ -106,10 +132,8 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');
@@ -154,5 +178,62 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 			
 		return bf.toString();
 	}
-	
+
+
+	@Override
+	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
+		return nameViewOrVariable("", signatureVariableName, suffix, sqlVariableNames, true);
+	}
+
+	@Override
+	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
+		return nameViewOrVariable(prefix, tableName, suffix, viewNames, false);
+	}
+
+	/**
+	 * Makes sure the view or variable name never exceeds the max length supported by Oracle.
+	 *
+	 * Strategy: shortens the intermediateName and introduces a number to avoid conflict with
+	 * similar names.
+	 */
+	private String nameViewOrVariable(final String prefix,
+									  final String intermediateName,
+									  final String suffix,
+									  final Collection<String> alreadyDefinedNames,
+									  boolean putQuote) {
+		int borderLength = prefix.length() + suffix.length();
+		int signatureVarLength = intermediateName.length();
+
+		if (borderLength >= (NAME_MAX_LENGTH - NAME_NUMBER_LENGTH))  {
+			throw new IllegalArgumentException("The prefix and the suffix are too long (their accumulated length must " +
+					"be less than " + (NAME_MAX_LENGTH - NAME_NUMBER_LENGTH) + ")");
+		}
+
+		/**
+		 * If the length limit is not reached, processes as usual.
+		 */
+		if (signatureVarLength + borderLength <= NAME_MAX_LENGTH) {
+			String unquotedName = buildDefaultName(prefix, intermediateName, suffix);
+			String name = putQuote ? sqlQuote(unquotedName) : unquotedName;
+			return name;
+		}
+
+		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - borderLength
+				- NAME_NUMBER_LENGTH);
+
+		/**
+		 * Naive implementation
+		 */
+		for (int i = 0; i < Math.pow(10, NAME_NUMBER_LENGTH); i++) {
+			String unquotedVarName = buildDefaultName(prefix, shortenIntermediateNamePrefix + i, suffix);
+			String mainVarName = putQuote ? sqlQuote(unquotedVarName) : unquotedVarName;
+			if (!alreadyDefinedNames.contains(mainVarName)) {
+				return mainVarName;
+			}
+		}
+
+		// TODO: find a better exception
+		throw new RuntimeException("Impossible to create a new variable/view " + prefix + shortenIntermediateNamePrefix
+				+ "???" + suffix + " : already " + Math.pow(10, NAME_NUMBER_LENGTH) + " of them.");
+	}
 }

@@ -20,12 +20,11 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 
-public class VariableImpl implements Variable {
+public class VariableImpl implements Variable, Comparable<Variable> {
 
 	private static final long serialVersionUID = 5723075311798541659L;
 
@@ -73,7 +72,7 @@ public class VariableImpl implements Variable {
 	}
 
 	@Override
-	public Set<Variable> getReferencedVariables() {
-		return Collections.<Variable>singleton(this);
+	public int compareTo(Variable other) {
+		return other.hashCode() - hashCode() ;
 	}
 }

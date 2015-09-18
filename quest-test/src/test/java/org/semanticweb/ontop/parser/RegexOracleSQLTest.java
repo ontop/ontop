@@ -93,7 +93,6 @@ public class RegexOracleSQLTest {
 	
 	private int runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		StringBuilder bf = new StringBuilder(query);
 		
 		int results=0;
 		try {

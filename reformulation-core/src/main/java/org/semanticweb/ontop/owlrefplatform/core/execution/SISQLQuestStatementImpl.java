@@ -1,9 +1,9 @@
 package org.semanticweb.ontop.owlrefplatform.core.execution;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
-import org.semanticweb.ontop.owlrefplatform.core.IQuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.SQLQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
@@ -11,7 +11,6 @@ import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,8 +28,11 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
     public SISQLQuestStatementImpl(IQuest questInstance, QuestConnection questConnection, Statement sqlStatement) {
         super(questInstance, questConnection, sqlStatement);
         sqlConnection = questConnection.getSQLConnection();
-        siRepository = questInstance.getSemanticIndexRepository();
-        if (siRepository == null) {
+        Optional<RDBMSSIRepositoryManager> optionalSIRepository = questInstance.getOptionalSemanticIndexRepository();
+        if (optionalSIRepository.isPresent()) {
+            siRepository = optionalSIRepository.get();
+        }
+        else {
             throw new IllegalArgumentException(getClass().getCanonicalName() + " requires the quest instance to have a Semantic Index repository.");
         }
     }
@@ -70,16 +72,7 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      */
     public void createDB() throws OBDAException {
         try {
-            siRepository.createDBSchema(sqlConnection, false);
-            siRepository.insertMetadata(sqlConnection);
-        } catch (SQLException e) {
-            throw new OBDAException(e);
-        }
-    }
-
-    public void analyze() throws OBDAException {
-        try {
-            siRepository.collectStatistics(sqlConnection);
+            siRepository.createDBSchemaAndInsertMetadata(sqlConnection);
         } catch (SQLException e) {
             throw new OBDAException(e);
         }
@@ -96,47 +89,42 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      *            new index will be created.
      *
      */
-    public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException {
+    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
         int result = -1;
 
         EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, getQuestInstance().getReasoner());
 
-        if (!useFile) {
+        //if (!useFile) {
 
             try {
                 result = siRepository.insertData(sqlConnection, newData, commit, batch);
             } catch (SQLException e) {
                 throw new OBDAException(e);
             }
-        } else {
-            try {
-                // File temporalFile = new File("quest-copy.tmp");
-                // FileOutputStream os = new FileOutputStream(temporalFile);
-                result = (int) siRepository.loadWithFile(sqlConnection, newData);
-                // os.close();
-
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            } catch (SQLException e) {
-                throw new OBDAException(e);
-            }
-        }
+//        } else {
+//            try {
+//                // File temporalFile = new File("quest-copy.tmp");
+//                // FileOutputStream os = new FileOutputStream(temporalFile);
+//                // ROMAN: this called DOES NOTHING
+//                result = (int) siRepository.loadWithFile(sqlConnection, newData);
+//                // os.close();
+//
+//            } catch (IOException e) {
+//                log.error(e.getMessage());
+//            } catch (SQLException e) {
+//                throw new OBDAException(e);
+//            }
+//        }
 
         try {
             getQuestInstance().updateSemanticIndexMappings();
-            getTranslator().setTemplateMatcher(getQuestInstance().getUriTemplateMatcher());
+            // Removed in V1
+            //getTranslator().setTemplateMatcher(getQuestInstance().getUriTemplateMatcher());
 
         } catch (Exception e) {
             log.error("Error updating semantic index mappings after insert.", e);
         }
 
         return result;
-    }
-
-    /***
-     * As before, but using recreateIndexes = false.
-     */
-    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
-        return insertData(data, false, commit, batch);
     }
 }

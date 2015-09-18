@@ -24,6 +24,8 @@ import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 
+import java.sql.Connection;
+
 /**
  * High-level OBDAConnection used by Sesame.
  */

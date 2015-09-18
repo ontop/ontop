@@ -204,12 +204,4 @@ public class SQLQuestStatement extends QuestStatement {
     public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
         throw new OBDAException("Data insertion not supported by default.");
     }
-
-    /**
-     * Not implemented by default (in the virtual mode)
-     */
-    @Override
-    public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException {
-        throw new OBDAException("Data insertion not supported by default.");
-    }
 }
