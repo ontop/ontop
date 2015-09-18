@@ -242,13 +242,13 @@ public class JDBCConnectionManager {
 		return metadata;
 	}
 	
-	private static final class FKInfo {
+	private static final class FullyQualifiedDD {
 		String catalog;
 		String schema;
 		String name;
 		DataDefinition td;
 		
-		FKInfo(String catalog, String schema, String name, DataDefinition td) {
+		FullyQualifiedDD(String catalog, String schema, String name, DataDefinition td) {
 			this.catalog = catalog;
 			this.schema = schema;
 			this.name = name;
@@ -261,11 +261,9 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
-
-		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
-			
-			List<FKInfo> fks = new LinkedList<>();
-			
+		List<FullyQualifiedDD> fks = new LinkedList<>();
+		
+		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
 				Set<String> tableColumns = new HashSet<String>();
 
@@ -297,16 +295,15 @@ public class JDBCConnectionManager {
 							throw new RuntimeException("The system cannot process duplicate table columns!");
 						}
 					}
-					getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
-					final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName);
+					getPrimaryKey(md, new FullyQualifiedDD(tblCatalog, tblSchema, tblName, td));
+					getUniqueAttributes(md, new FullyQualifiedDD(null, tblSchema, tblName, td));
 					// Add this information to the DBMetadata
 					metadata.add(td);
-					fks.add(new FKInfo(null, null, tblName, td));
+					fks.add(new FullyQualifiedDD(null, null, tblName, td));
 				} 
 			}
-			for (FKInfo fki : fks)
-				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
+		getForeignKeys0(md, fks, metadata);
 		return metadata;
 	}
 
@@ -322,8 +319,7 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables, int caseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
-		
-		List<FKInfo> fks = new LinkedList<>();
+		List<FullyQualifiedDD> fks = new LinkedList<>();
 		
 		/**
 		 *  The sql to extract table names is now removed, since we instead use the
@@ -401,15 +397,15 @@ public class JDBCConnectionManager {
 						throw new RuntimeException("The system cannot process duplicate table columns!");
 					}
 				}
-				getPrimaryKey(md, null, tableSchema, tblName, td);
-	            final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName);
+				FullyQualifiedDD fki = new FullyQualifiedDD(null, tableSchema, tblName, td);
+				getPrimaryKey(md, fki);
+	            getUniqueAttributes(md, fki);
 				// Add this information to the DBMetadata
 				metadata.add(td);
-				fks.add(new FKInfo(null, tableSchema, tblName, td));
+				fks.add(fki);
 			} 
-			for (FKInfo fki : fks)
-				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		}
+		getForeignKeys0(md, fks, metadata);
 		return metadata;
 	}
 
@@ -472,8 +468,8 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getSqlServerMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+		List<FullyQualifiedDD> fks = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
-			List<FKInfo> fks = new LinkedList<>();
 			/* Obtain the statement object for query execution */
 
 			/* Obtain the relational objects (i.e., tables and views) */
@@ -496,16 +492,16 @@ public class JDBCConnectionManager {
 							final int isNullable = rsColumns.getInt("NULLABLE");
 							td.addAttribute(new Attribute(td, columnName, dataType, isNullable != 0, null));
 						}
-						getPrimaryKey(md, tblCatalog, tblSchema, tblName, td);
-						// Add this information to the DBMetadata
+						FullyQualifiedDD fki = new FullyQualifiedDD(tblCatalog, tblSchema, tblName, td);
+						getPrimaryKey(md, fki);
 						metadata.add(td);
-						fks.add(new FKInfo(tblCatalog, tblSchema, tblName, td));
+						// UNIQUE CONSTRAINTS MISSING
+						fks.add(fki);
 					} 
 				}
 			}
-			for (FKInfo fki : fks)
-				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
+		getForeignKeys0(md, fks, metadata);
 		return metadata;
 	}
 
@@ -514,9 +510,9 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getDB2MetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+		List<FullyQualifiedDD> fks = new LinkedList<>();
 		/* Obtain the statement object for query execution */
 		try (Statement stmt = conn.createStatement()) {
-			List<FKInfo> fks = new LinkedList<>();
 			/* Obtain the relational objects (i.e., tables and views) */
 			final String tableSelectQuery = "SELECT TABSCHEMA, TABNAME " +
 					"FROM SYSCAT.TABLES " +
@@ -541,17 +537,17 @@ public class JDBCConnectionManager {
 							td.addAttribute(new Attribute(td, columnName, dataType,
 									isNullable != 0, typeName));
 						}
-						getPrimaryKey(md, null, tblSchema, tblName, td);	
-	                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName);
+						FullyQualifiedDD fki = new FullyQualifiedDD(null, tblSchema, tblName, td);
+						getPrimaryKey(md, fki);	
+	                    getUniqueAttributes(md, fki);
 						// Add this information to the DBMetadata
 						metadata.add(td);
-						fks.add(new FKInfo(null, tblSchema, tblName, td));
+						fks.add(fki);
 					} 
 				}
 			}
-			for (FKInfo fki : fks)
-				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
+		getForeignKeys0(md, fks, metadata);
 		return metadata;
 	}
 	
@@ -560,10 +556,10 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+		List<FullyQualifiedDD> fks = new LinkedList<>();
 		
 		/* Obtain the statement object for query execution */
 		try (Statement stmt = conn.createStatement()) {
-			List<FKInfo> fks = new LinkedList<>();
 			
 			/* Obtain the table owner (i.e., schema name) */
 			String tableOwner = "SYSTEM"; // by default
@@ -626,17 +622,17 @@ public class JDBCConnectionManager {
 							
 							td.addAttribute(new Attribute(td, columnName, dataType, isNullable != 0, null));
 						}
-						getPrimaryKey(md, null, tableOwner, tblName, td);			
-	                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName);
+						FullyQualifiedDD fki = new FullyQualifiedDD(null, tableOwner, tblName, td);
+						getPrimaryKey(md, fki);			
+	                    getUniqueAttributes(md, fki);
 						// Add this information to the DBMetadata
 						metadata.add(td);
-						fks.add(new FKInfo(null, tableOwner, tblName, td));
+						fks.add(fki);
 					} 
 				}
 			}
-			for (FKInfo fki : fks)
-				getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 		} 
+		getForeignKeys0(md, fks, metadata);
 		return metadata;
 	}
 	
@@ -653,6 +649,7 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+		List<FullyQualifiedDD> fks = new LinkedList<>();
 		
 		/* Obtain the statement object for query execution */
 		try (Statement stmt = conn.createStatement()) {
@@ -673,7 +670,6 @@ public class JDBCConnectionManager {
 			Iterator<RelationJSQL> table_iter = tables.iterator();
 			/* Obtain the column information for each relational object */
 			while (table_iter.hasNext()) {
-				List<FKInfo> fks = new LinkedList<>();
 				
 				
 				RelationJSQL table = table_iter.next();
@@ -740,18 +736,16 @@ public class JDBCConnectionManager {
 						td.addAttribute(new Attribute(td, columnName, dataType,
 								isNullable != 0, typeName/*, isUnique*/));
 					}
-					getPrimaryKey(md, null, tableOwner, tblName, td);					
-					final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName);
-					
+					FullyQualifiedDD fki = new FullyQualifiedDD(null, tableOwner, tblName, td);
+					getPrimaryKey(md, fki);					
+					getUniqueAttributes(md, fki);		
 					// Add this information to the DBMetadata
 					metadata.add(td);
-					//metadata.add(tblName,tableOwner);
-					fks.add(new FKInfo(null, tableOwner, tblName, td));
+					fks.add(fki);
 				} 
-				for (FKInfo fki : fks)
-					getForeignKeys(md, fki.catalog, fki.schema, fki.name, fki.td, metadata);
 			}
 		} 
+		getForeignKeys0(md, fks, metadata);
 		return metadata;
 	}
 	
@@ -760,21 +754,21 @@ public class JDBCConnectionManager {
 	
 
 	/* Retrieves the primary key(s) from a table */
-	private static void getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table, TableDefinition td) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, FullyQualifiedDD fki) throws SQLException {
 		ImmutableList.Builder<Attribute> pk = ImmutableList.builder();
-		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table)) {
+		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(fki.catalog, fki.schema, fki.name)) {
 			while (rsPrimaryKeys.next()) {
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
 				String pkName = rsPrimaryKeys.getString("PK_NAME");
 				if (pkName != null) {
-					int idx = td.getAttributeKey(colName);
-					pk.add(td.getAttribute(idx));
+					int idx = fki.td.getAttributeKey(colName);
+					pk.add(fki.td.getAttribute(idx));
 				}
 			}
 		} 
 		ImmutableList<Attribute> pkattr = pk.build();
 		if (!pkattr.isEmpty())
-			td.setPrimaryKey(pkattr);
+			fki.td.setPrimaryKey(pkattr);
 	}
 	
 	/**
@@ -786,13 +780,12 @@ public class JDBCConnectionManager {
 	 * @return
 	 * @throws SQLException 
 	 */
-	private static Set<String> getUniqueAttributes(DatabaseMetaData md,	String tblCatalog, String tblSchema, String tblName) throws SQLException {
+	private static void getUniqueAttributes(DatabaseMetaData md, FullyQualifiedDD fki) throws SQLException {
 
-		Set<String> uniqueSet  = new HashSet<String>();
+		Set<String> uniqueSet  = new HashSet<>();
 
-		try (ResultSet rsUnique= md.getIndexInfo(tblCatalog, tblSchema, tblName, true	, true)) {
-			/*extracting unique */
-			;
+		// extracting unique 
+		try (ResultSet rsUnique= md.getIndexInfo(fki.catalog, fki.schema, fki.name, true, true)) {
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
 				String nonUnique = rsUnique.getString("NON_UNIQUE");
@@ -809,38 +802,39 @@ public class JDBCConnectionManager {
 			}
 		}
 		
-		/*Adding keys and Unique*/		
-		return uniqueSet;
+		// Adding keys and Unique	
 	}
 	
 	/* Retrieves the foreign key(s) from a table */
-	private static void getForeignKeys(DatabaseMetaData md, String tblCatalog, String schema, String table, DataDefinition tbl, DBMetadata metadata) throws SQLException {
-		try (ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table)) {
-			ForeignKeyConstraint.Builder builder = null;
-			String currentName = "";
-			while (rsForeignKeys.next()) {
-				String name = rsForeignKeys.getString("FK_NAME");
-				if (!currentName.equals(name)) {
-					if (builder != null) 
-						tbl.addForeignKeyConstraint(builder.build());
-					
-					builder = new ForeignKeyConstraint.Builder(name);
-					currentName = name;
+	private static void getForeignKeys0(DatabaseMetaData md, List<FullyQualifiedDD> fks, DBMetadata metadata) throws SQLException {
+		for (FullyQualifiedDD fki : fks) {
+			try (ResultSet rsForeignKeys = md.getImportedKeys(fki.catalog, fki.schema, fki.name)) {
+				ForeignKeyConstraint.Builder builder = null;
+				String currentName = "";
+				while (rsForeignKeys.next()) {
+					String name = rsForeignKeys.getString("FK_NAME");
+					if (!currentName.equals(name)) {
+						if (builder != null) 
+							fki.td.addForeignKeyConstraint(builder.build());
+						
+						builder = new ForeignKeyConstraint.Builder(name);
+						currentName = name;
+					}
+					String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
+					String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
+					String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
+					DataDefinition ref = metadata.getDefinition(pkTableName);
+					if (ref != null)
+						builder.add(fki.td.getAttribute(colName), ref.getAttribute(pkColumnName));
+					else {
+						System.err.println("Cannot find table: " + pkTableName + " for " + name);
+						builder = null;
+					}
 				}
-				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
-				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-				String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
-				DataDefinition ref = metadata.getDefinition(pkTableName);
-				if (ref != null)
-					builder.add(tbl.getAttribute(colName), ref.getAttribute(pkColumnName));
-				else {
-					System.err.println("Cannot find table: " + pkTableName + " for " + name);
-					builder = null;
-				}
-			}
-			if (builder != null)
-				tbl.addForeignKeyConstraint(builder.build());
-		} 
+				if (builder != null)
+					fki.td.addForeignKeyConstraint(builder.build());
+			} 
+		}
 	}
 
 	/**
