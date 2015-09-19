@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 
 import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.RelationDefinition;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +53,7 @@ public class OntoSchema {
 	public OntoSchema(){
 	}
 	
-	public OntoSchema(DatabaseRelationDefinition dd){
+	public OntoSchema(RelationDefinition dd){
 		this.tablename=dd.getName();
 		this.attrList=dd.getAttributes();
 		

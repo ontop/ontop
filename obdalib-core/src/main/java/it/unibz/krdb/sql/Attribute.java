@@ -30,9 +30,9 @@ public class Attribute {
 	private final String typeName;
 	private final boolean canNull;
 	
-	private final DatabaseRelationDefinition table;
+	private final RelationDefinition table;
 	
-	Attribute(DatabaseRelationDefinition relation, int index, String name, int type, String typeName, boolean canNull) {
+	Attribute(RelationDefinition relation, int index, String name, int type, String typeName, boolean canNull) {
 		this.table = relation;
 		this.index = index;
 		this.name = name;
@@ -45,7 +45,7 @@ public class Attribute {
 		return name;
 	}
 	
-	public DatabaseRelationDefinition getRelation() {
+	public RelationDefinition getRelation() {
 		return table;
 	}
 	

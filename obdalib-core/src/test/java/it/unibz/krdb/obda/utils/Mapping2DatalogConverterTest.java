@@ -28,19 +28,19 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
 
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 
 public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private DBMetadata md = new DBMetadata("dummy class");
+	private DBMetadata md = new DBMetadata("dummy class", null, null);
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {
@@ -51,19 +51,19 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		table1.addAttribute("last_name", Types.VARCHAR, null, false);
 		table1.addAttribute("year", Types.INTEGER, null, false);
 		table1.addAttribute("nationality", Types.VARCHAR, null, false);
-		table1.setPrimaryKey(ImmutableList.of(table1.getAttribute("id")));
+		table1.setPrimaryKey(UniqueConstraint.of(table1.getAttribute("id")));
 		
 		TableDefinition table2 = new TableDefinition("Course");
 		table2.addAttribute("cid", Types.VARCHAR, null, false);
 		table2.addAttribute("title", Types.VARCHAR, null, false);
 		table2.addAttribute("credits", Types.INTEGER, null, false);
 		table2.addAttribute("description", Types.VARCHAR, null, false);
-		table2.setPrimaryKey(ImmutableList.of(table2.getAttribute("cid")));
+		table2.setPrimaryKey(UniqueConstraint.of(table2.getAttribute("cid")));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
 		table3.addAttribute("student_id", Types.INTEGER, null, false);
 		table3.addAttribute("course_id", Types.VARCHAR, null, false);
-		table3.setPrimaryKey(ImmutableList.of(table3.getAttribute("student_id"), table3.getAttribute("course_id")));
+		table3.setPrimaryKey(UniqueConstraint.of(table3.getAttribute("student_id"), table3.getAttribute("course_id")));
 		
 		md.add(table1);
 		md.add(table2);

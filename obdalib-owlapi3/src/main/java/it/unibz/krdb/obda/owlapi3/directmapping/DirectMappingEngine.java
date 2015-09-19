@@ -35,7 +35,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 
@@ -253,7 +253,7 @@ public class DirectMappingEngine {
 	 *  @return a List of OBDAMappingAxiom-s
 	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DatabaseRelationDefinition table, DBMetadata metadata, String baseUri) throws Exception {
+	public List<OBDAMappingAxiom> getMapping(RelationDefinition table, DBMetadata metadata, String baseUri) throws Exception {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 		DirectMappingAxiom dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);

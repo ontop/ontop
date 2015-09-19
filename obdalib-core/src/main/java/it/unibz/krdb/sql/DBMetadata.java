@@ -20,17 +20,8 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Predicate;
-
 import java.io.Serializable;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -38,27 +29,13 @@ public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private final Map<String, DatabaseRelationDefinition> schema = new HashMap<>();
+	private final Map<String, RelationDefinition> schema = new HashMap<>();
 
 	private final String driverName;
-	private String driverVersion;
-	private String databaseProductName;
+	private final String driverVersion;
+	private final String databaseProductName;
 
-	private boolean storesLowerCaseIdentifiers = false;
-	private boolean storesLowerCaseQuotedIdentifiers = false;
-	private boolean storesMixedCaseQuotedIdentifiers = false;
-	private boolean storesMixedCaseIdentifiers = true;
-	private boolean storesUpperCaseQuotedIdentifiers = false;
-	private boolean storesUpperCaseIdentifiers = false;
-	
-	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");;
-
-	/**
-	 * Constructs a blank metadata. Use only for testing purpose.
-	 */
-	public DBMetadata(String driverName) {
-		this.driverName = driverName;
-	}
+	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
 
 	/**
 	 * Constructs an initial metadata with some general information about the
@@ -68,26 +45,11 @@ public class DBMetadata implements Serializable {
 	 * @param md
 	 *            The database metadata.
 	 */
-	public DBMetadata(DatabaseMetaData md) {
-		
-		try {
-			driverName = md.getDriverName();
-			driverVersion = md.getDriverVersion();
-			databaseProductName = md.getDatabaseProductName();
-			
-			storesLowerCaseIdentifiers = md.storesLowerCaseIdentifiers();
-			storesLowerCaseQuotedIdentifiers = md.storesLowerCaseQuotedIdentifiers();
 
-			storesMixedCaseIdentifiers = md.storesMixedCaseIdentifiers();
-			storesMixedCaseQuotedIdentifiers = md.storesMixedCaseQuotedIdentifiers();
-			
-			storesUpperCaseIdentifiers = md.storesUpperCaseIdentifiers();
-			storesUpperCaseQuotedIdentifiers = md.storesUpperCaseQuotedIdentifiers();
-		} 
-		catch (SQLException e) {
-			throw new RuntimeException(
-					"Failed on importing database metadata!\n" + e.getMessage());
-		}
+	public DBMetadata(String driverName, String driverVersion, String databaseProductName) {
+		this.driverName = driverName;
+		this.driverVersion = driverVersion;
+		this.databaseProductName = databaseProductName;
 	}
 
 	/**
@@ -99,7 +61,7 @@ public class DBMetadata implements Serializable {
 	 *            The data definition. It can be a {@link TableDefinition} or a
 	 *            {@link ViewDefinition} object.
 	 */
-	public void add(DatabaseRelationDefinition value) {
+	public void add(RelationDefinition value) {
 		String name = value.getName();
 		// name without quotes
 		if (pQuotes.matcher(name).matches())
@@ -130,8 +92,8 @@ public class DBMetadata implements Serializable {
 	 * @param name
 	 *            The string name.
 	 */
-	public DatabaseRelationDefinition getDefinition(String name) {
-		DatabaseRelationDefinition def = schema.get(name);
+	public RelationDefinition getDefinition(String name) {
+		RelationDefinition def = schema.get(name);
 		if (def == null)
 			def = schema.get(name.toLowerCase());
 		if (def == null)
@@ -145,7 +107,7 @@ public class DBMetadata implements Serializable {
 	 * Retrieves the relation list (table and view definition) form the
 	 * metadata.
 	 */
-	public Collection<DatabaseRelationDefinition> getRelations() {
+	public Collection<RelationDefinition> getRelations() {
 		return Collections.unmodifiableCollection(schema.values());
 	}
 
@@ -154,7 +116,7 @@ public class DBMetadata implements Serializable {
 	 */
 	public Collection<TableDefinition> getTables() {
 		List<TableDefinition> tableList = new ArrayList<>();
-		for (DatabaseRelationDefinition dd : schema.values()) {
+		for (RelationDefinition dd : schema.values()) {
 			if (dd instanceof TableDefinition) 
 				tableList.add((TableDefinition) dd);
 		}
@@ -176,7 +138,7 @@ public class DBMetadata implements Serializable {
 	 * @return
 	 */
 	public String getFullQualifiedAttributeName(String table, String alias, int pos) {		
-		DatabaseRelationDefinition dd = getDefinition(table);
+		RelationDefinition dd = getDefinition(table);
 		if (dd == null) 
 			throw new RuntimeException("Unknown table definition: " + table);
 		
@@ -201,30 +163,6 @@ public class DBMetadata implements Serializable {
 		return databaseProductName;
 	}
 
-	public boolean getStoresLowerCaseIdentifiers() {
-		return storesLowerCaseIdentifiers;
-	}
-
-	public boolean getStoresLowerCaseQuotedIdentifiers() {
-		return storesLowerCaseQuotedIdentifiers;
-	}
-
-	public boolean getStoresMixedCaseQuotedIdentifiers() {
-		return storesMixedCaseQuotedIdentifiers;
-	}
-
-	public boolean getStoresMixedCaseIdentifiers() {
-		return storesMixedCaseIdentifiers;
-	}
-
-	public boolean getStoresUpperCaseQuotedIdentifiers() {
-		return storesUpperCaseQuotedIdentifiers;
-	}
-
-	public boolean getStoresUpperCaseIdentifiers() {
-		return storesUpperCaseIdentifiers;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
@@ -236,64 +174,4 @@ public class DBMetadata implements Serializable {
 		}
 		return bf.toString();
 	}
-
-	/***
-	 * Generates a map for each predicate in the body of the rules in 'program'
-	 * that contains the Primary Key data for the predicates obtained from the
-	 * info in the metadata.
-     *
-     * It also returns the columns with unique constraints
-     *
-     * For instance, Given the table definition
-     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
-     *
-     * The methods will return the following Multimap:
-     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
-     *
-	 * 
-	 * @param metadata
-	 * @param program
-	 */
-	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
-			List<CQIE> program) {
-		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
-		for (CQIE mapping : program) {
-			for (Function newatom : mapping.getBody()) {
-				Predicate newAtomPredicate = newatom.getFunctionSymbol();
-				if (newAtomPredicate instanceof BooleanOperationPredicate) 
-					continue;
-				
-				if (pkeys.containsKey(newAtomPredicate))
-					continue;
-				
-				String newAtomName = newAtomPredicate.toString();
-				DatabaseRelationDefinition def = metadata.getDefinition(newAtomName);
-				if (def != null) {
-					// primary keys
-					UniqueConstraint pk = def.getPrimaryKey();
-					if (pk != null) {
-						List<Integer> pkeyIdx = new ArrayList<>(pk.getAttributes().size());
-						for (Attribute att : def.getAttributes()) {
-							if (pk.getAttributes().contains(att)) 
-								pkeyIdx.add(att.getIndex());
-						}
-						pkeys.put(newAtomPredicate, pkeyIdx);
-					}
-
-                    // unique constraints
-					for (UniqueConstraint uc : def.getUniqueConstraints()) {
-						List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
-						for (Attribute att : def.getAttributes()) {
-							if (uc.getAttributes().contains(att)) 
-								pkeyIdx.add(att.getIndex());
-						}
-						pkeys.put(newAtomPredicate, pkeyIdx);
-					}
-				}
-			}
-		}
-		return pkeys;
-	}
-
-
 }

@@ -17,7 +17,7 @@ public class TestImplicitDBConstraints {
 	
 	@Before
 	public void setupMetadata(){
-		this.md = new DBMetadata("dummy class");
+		this.md = new DBMetadata("dummy class", null, null);
 		TableDefinition td = new TableDefinition("TABLENAME");
 		td.addAttribute("KEYNAME", 0, null, false); // from 1
 		md.add(td); 
@@ -51,7 +51,7 @@ public class TestImplicitDBConstraints {
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addFunctionalDependency(this.md);
-		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
+		RelationDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute("KEYNAME");	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
 	}
@@ -69,7 +69,7 @@ public class TestImplicitDBConstraints {
 	public void testAddForeignKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addForeignKeys(this.md);
-		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
+		RelationDefinition dd = this.md.getDefinition("TABLENAME");
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
 		assertTrue(fk.getComponents().get(0).getReference().getRelation().getName().equals("TABLE2"));
@@ -80,7 +80,7 @@ public class TestImplicitDBConstraints {
 	public void testAddKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
 		uc.addConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
+		RelationDefinition dd = this.md.getDefinition("TABLENAME");
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
 		assertTrue(fk.getComponents().get(0).getReference().getRelation().getName().equals("TABLE2"));

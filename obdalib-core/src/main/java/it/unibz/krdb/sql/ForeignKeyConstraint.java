@@ -58,7 +58,7 @@ public class ForeignKeyConstraint {
 	public static final class Builder {
 		private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
 		private final String name;
-		private final DatabaseRelationDefinition relation, referencedRelation;
+		private final RelationDefinition relation, referencedRelation;
 		
 		/**
 		 * creates a FK builder 
@@ -67,7 +67,7 @@ public class ForeignKeyConstraint {
 		 * @param referencedRelation
 		 */
 		
-		public Builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+		public Builder(String name, RelationDefinition relation, RelationDefinition referencedRelation) {
 			this.name = name;
 			this.relation = relation;
 			this.referencedRelation = referencedRelation;
@@ -96,7 +96,7 @@ public class ForeignKeyConstraint {
 	
 	private final ImmutableList<Component> components;
 	private final String name;
-	private final DatabaseRelationDefinition referencedRelation;
+	private final RelationDefinition referencedRelation;
 	
 	private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
 		if (components.isEmpty())
@@ -115,7 +115,7 @@ public class ForeignKeyConstraint {
 		return components;
 	}
 	
-	public DatabaseRelationDefinition getReferencedRelation() {
+	public RelationDefinition getReferencedRelation() {
 		return referencedRelation;
 	}
 }

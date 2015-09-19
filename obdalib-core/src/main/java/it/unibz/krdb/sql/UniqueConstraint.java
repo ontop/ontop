@@ -36,15 +36,69 @@ import com.google.common.collect.ImmutableList;
 
 public class UniqueConstraint {
 
-	private ImmutableList<Attribute> attributes;
+	public static final class Builder {
+		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
+		private final String name;
+		private final RelationDefinition relation;
+		
+		/**
+		 * creates a UK builder 
+		 * @param name of the UK constraint
+		 * @param relation 
+		 */
+		
+		public Builder(String name, RelationDefinition relation) {
+			this.name = name;
+			this.relation = relation;
+		}
+		
+		public Builder add(Attribute attribute) {
+			if (relation != attribute.getRelation())
+				throw new IllegalArgumentException("Unique Key requires the same table in all attributes: " + name);
+			
+			builder.add(attribute);
+			return this;
+		}
+		
+		public UniqueConstraint build() {
+			ImmutableList<Attribute> attributes = builder.build();
+			if (attributes.isEmpty())
+				return null;
+			return new UniqueConstraint(name, builder.build());
+		}
+	}
 	
-	public UniqueConstraint(ImmutableList<Attribute> attributes) {
+	public static UniqueConstraint of(Attribute att) {
+		UniqueConstraint.Builder builder = 
+				new UniqueConstraint.Builder("PK_" + att.getRelation().getName(), att.getRelation());
+		builder.add(att);
+		return builder.build();
+	}
+
+	public static UniqueConstraint of(Attribute att, Attribute att2) {
+		UniqueConstraint.Builder builder = 
+				new UniqueConstraint.Builder("PK_" + att.getRelation().getName(), att.getRelation());
+		builder.add(att).add(att2);
+		return builder.build();
+	}
+	
+	public static Builder builder(String name, RelationDefinition relation) {
+		return new Builder(name, relation);
+	}
+	
+	private final String name;
+	private final ImmutableList<Attribute> attributes;
+	
+	private UniqueConstraint(String name, ImmutableList<Attribute> attributes) {
+		this.name = name;
 		this.attributes = attributes;
-		if (attributes.isEmpty())
-			throw new IllegalArgumentException("Empty UNIQUE constraint");
 	}
 	
 	public ImmutableList<Attribute> getAttributes() {
 		return attributes;
+	}
+	
+	public String getName() {
+		return name;
 	}
 }

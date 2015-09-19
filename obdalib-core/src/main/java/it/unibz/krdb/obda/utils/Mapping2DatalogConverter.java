@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.api.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -295,7 +295,7 @@ public class Mapping2DatalogConverter {
 			String tableName = table.getTableName();
 			String fullName = table.getFullName();
 			String tableGivenName = table.getGivenName();
-			DatabaseRelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
+			RelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
 
             if (tableDefinition == null) {
                 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");

@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import it.unibz.krdb.obda.model.*;
@@ -21,7 +22,10 @@ import it.unibz.krdb.obda.parser.PreprocessProjection;
 import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
@@ -140,17 +144,76 @@ public class QuestUnfolder {
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
-		
-		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
-//		for(CQIE rule : unfoldingProgram){
-//			log.debug("{}", rule);
-//		}
-
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
+		
+		unfolder = createDatalogUnfolder(unfoldingProgram, metadata);	
 	}
 
+	public static DatalogUnfolder createDatalogUnfolder(List<CQIE> unfoldingProgram, DBMetadata metadata) {
+		Multimap<Predicate, List<Integer>> pkeys = extractPKs(metadata, unfoldingProgram);
+		return new DatalogUnfolder(unfoldingProgram, pkeys);	
+	}
+	
+	/***
+	 * Generates a map for each predicate in the body of the rules in 'program'
+	 * that contains the Primary Key data for the predicates obtained from the
+	 * info in the metadata.
+     *
+     * It also returns the columns with unique constraints
+     *
+     * For instance, Given the table definition
+     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
+     *
+     * The methods will return the following Multimap:
+     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
+     *
+	 * 
+	 * @param metadata
+	 * @param program
+	 */
+	private static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
+			List<CQIE> program) {
+		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
+		for (CQIE mapping : program) {
+			for (Function newatom : mapping.getBody()) {
+				Predicate newAtomPredicate = newatom.getFunctionSymbol();
+				if (newAtomPredicate instanceof BooleanOperationPredicate) 
+					continue;
+				
+				if (pkeys.containsKey(newAtomPredicate))
+					continue;
+				
+				String newAtomName = newAtomPredicate.toString();
+				RelationDefinition def = metadata.getDefinition(newAtomName);
+				if (def != null) {
+					// primary keys
+					UniqueConstraint pk = def.getPrimaryKey();
+					if (pk != null) {
+						List<Integer> pkeyIdx = new ArrayList<>(pk.getAttributes().size());
+						for (Attribute att : def.getAttributes()) {
+							if (pk.getAttributes().contains(att)) 
+								pkeyIdx.add(att.getIndex());
+						}
+						pkeys.put(newAtomPredicate, pkeyIdx);
+					}
+
+                    // unique constraints
+					for (UniqueConstraint uc : def.getUniqueConstraints()) {
+						List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
+						for (Attribute att : def.getAttributes()) {
+							if (uc.getAttributes().contains(att)) 
+								pkeyIdx.add(att.getIndex());
+						}
+						pkeys.put(newAtomPredicate, pkeyIdx);
+					}
+				}
+			}
+		}
+		return pkeys;
+	}
+	
+	
 	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();

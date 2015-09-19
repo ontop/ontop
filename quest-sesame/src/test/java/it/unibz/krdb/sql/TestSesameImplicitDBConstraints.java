@@ -157,7 +157,7 @@ public class TestSesameImplicitDBConstraints {
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver");
+		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver", null, null);
 		dbMetadata.add(defTable("TABLE1"));
 		dbMetadata.add(defTable("TABLE2"));
 		dbMetadata.add(defTable("TABLE3"));

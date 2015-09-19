@@ -20,6 +20,7 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ import com.google.common.collect.ImmutableList;
  *
  */
 
-public abstract class DatabaseRelationDefinition {
+public abstract class RelationDefinition {
 
 	private final String givenName;
 
@@ -44,14 +45,14 @@ public abstract class DatabaseRelationDefinition {
 	private final String schemaName;
 	private final String tableName;
 	
-	private final List<Attribute> attributes = new LinkedList<>();
+	private final List<Attribute> attributes = new ArrayList<>();
 	private final Map<String, Attribute> attributeMap = new HashMap<>();
 
 	private UniqueConstraint pk;
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 		
-	protected DatabaseRelationDefinition(String catalogName, String schemaName, String tableName, String name) {
+	protected RelationDefinition(String catalogName, String schemaName, String tableName, String name) {
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
@@ -74,16 +75,15 @@ public abstract class DatabaseRelationDefinition {
 		return tableName;
 	}
 	
-	public void setPrimaryKey(ImmutableList<Attribute> attributes) {
-		pk = new UniqueConstraint(attributes);
+	public void setPrimaryKey(UniqueConstraint uc) {
+		pk = uc;
 	}
 	
 	public UniqueConstraint getPrimaryKey() {
 		return pk;
 	}
 	
-	public void addUniqueConstraint(ImmutableList<Attribute> attributes) {
-		UniqueConstraint uc = new UniqueConstraint(attributes);
+	public void addUniqueConstraint(UniqueConstraint uc) {
 		ucs.add(uc);
 	}
 	

@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.RelationDefinition;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -305,7 +305,7 @@ public class MappingDataTypeRepair {
 
 		Predicate functionSymbol = atom.getFunctionSymbol();
 		String tableName = functionSymbol.toString();
-		DatabaseRelationDefinition tableMetadata = metadata.getDefinition(tableName);
+		RelationDefinition tableMetadata = metadata.getDefinition(tableName);
 
 		Attribute attribute = tableMetadata.getAttribute(pos);
 

@@ -30,9 +30,11 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
 
 import java.sql.Types;
@@ -50,13 +52,13 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata(("dummy class"));
+		metadata = new DBMetadata("dummy class", null, null);
 		TableDefinition table = new TableDefinition("TABLE");
 		table.addAttribute("col1", Types.INTEGER, null, true);
 		table.addAttribute("col2", Types.INTEGER, null, true);
 		table.addAttribute("col3", Types.INTEGER, null, true);
 		table.addAttribute("col4", Types.INTEGER, null, true);
-		table.setPrimaryKey(ImmutableList.of(table.getAttribute("col4")));
+		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute("col4")));
 		metadata.add(table);
 		
 		
@@ -65,7 +67,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		table.addAttribute("col2", Types.INTEGER, null, false);
 		table.addAttribute("col3", Types.INTEGER, null, false);
 		table.addAttribute("col4", Types.INTEGER, null, false);
-		table.setPrimaryKey(ImmutableList.of(table.getAttribute("col1")));
+		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute("col1")));
 		metadata.add(table);
 
         unfoldingProgram = fac.getDatalogProgram();
@@ -150,8 +152,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
-		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
+		DatalogUnfolder unfolder = QuestUnfolder.createDatalogUnfolder(unfoldingProgram.getRules(), metadata);
 
         // q(m, n, p) :-  id(m, p), id1(n, p)
 		LinkedList<Term> headterms = new LinkedList<Term>();

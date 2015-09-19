@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
@@ -35,12 +35,12 @@ import java.util.*;
 
 public class DirectMappingAxiom {
 	private final DBMetadata metadata;
-	private final DatabaseRelationDefinition table;
+	private final RelationDefinition table;
 	private String SQLString;
 	private final String baseuri;
 	private final OBDADataFactory df;
 	
-	public DirectMappingAxiom(String baseuri, DatabaseRelationDefinition dd,
+	public DirectMappingAxiom(String baseuri, RelationDefinition dd,
 			DBMetadata obda_md, OBDADataFactory dfac) {
 		this.table = dd;
 		this.SQLString = "";

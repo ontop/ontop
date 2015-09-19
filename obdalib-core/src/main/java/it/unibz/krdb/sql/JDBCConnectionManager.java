@@ -37,8 +37,6 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-
 public class JDBCConnectionManager {
 
 	public static final String JDBC_AUTOCOMMIT = "autocommit";
@@ -193,7 +191,7 @@ public class JDBCConnectionManager {
 
 	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
 		final DatabaseMetaData md = conn.getMetaData();
-		List<DatabaseRelationDefinition> tableList;
+		List<RelationDefinition> tableList;
 		
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			if (tables == null || tables.isEmpty())
@@ -253,8 +251,8 @@ public class JDBCConnectionManager {
 	/**
 	 * Retrieve the table and view list for most database engines, e.g., MySQL and PostgreSQL
 	 */
-	private static List<DatabaseRelationDefinition> getTableListDefault(DatabaseMetaData md) throws SQLException {
-		List<DatabaseRelationDefinition> tables = new LinkedList<>();
+	private static List<RelationDefinition> getTableListDefault(DatabaseMetaData md) throws SQLException {
+		List<RelationDefinition> tables = new LinkedList<>();
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
 				final String tblCatalog = rsTables.getString("TABLE_CAT");
@@ -272,9 +270,9 @@ public class JDBCConnectionManager {
 	/**
 	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
 	 */
-	private static List<DatabaseRelationDefinition> getTableListDefault(List<RelationJSQL> tables) throws SQLException {
+	private static List<RelationDefinition> getTableListDefault(List<RelationJSQL> tables) throws SQLException {
 
-		List<DatabaseRelationDefinition> fks = new LinkedList<>();
+		List<RelationDefinition> fks = new LinkedList<>();
 		for (RelationJSQL table : tables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
@@ -288,9 +286,9 @@ public class JDBCConnectionManager {
 		return fks;
 	}
 
-	private static List<DatabaseRelationDefinition> getTableListLowerCase(List<RelationJSQL> tables) throws SQLException {
+	private static List<RelationDefinition> getTableListLowerCase(List<RelationJSQL> tables) throws SQLException {
 
-		List<DatabaseRelationDefinition> fks = new LinkedList<>();
+		List<RelationDefinition> fks = new LinkedList<>();
 		for (RelationJSQL table : tables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
@@ -308,9 +306,9 @@ public class JDBCConnectionManager {
 		}
 		return fks;
 	}
-	private static List<DatabaseRelationDefinition> getTableListUpperCase(List<RelationJSQL> tables) throws SQLException {
+	private static List<RelationDefinition> getTableListUpperCase(List<RelationJSQL> tables) throws SQLException {
 
-		List<DatabaseRelationDefinition> fks = new LinkedList<>();
+		List<RelationDefinition> fks = new LinkedList<>();
 		for (RelationJSQL table : tables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
@@ -338,8 +336,8 @@ public class JDBCConnectionManager {
 	/**
 	 * Retrieve metadata for SQL Server database engine
 	 */
-	private static List<DatabaseRelationDefinition> getTableListSQLServer(Connection conn) throws SQLException {
-		List<DatabaseRelationDefinition> tables = new LinkedList<>();
+	private static List<RelationDefinition> getTableListSQLServer(Connection conn) throws SQLException {
+		List<RelationDefinition> tables = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
 			// Obtain the relational objects (i.e., tables and views) */
 			try (ResultSet resultSet = stmt.executeQuery(tableSelectQuerySQLServer)) {
@@ -364,9 +362,9 @@ public class JDBCConnectionManager {
 	/**
 	 * Retrieve metadata for DB2 database engine
 	 */
-	private static List<DatabaseRelationDefinition> getTableListDB2(Connection conn) throws SQLException {
+	private static List<RelationDefinition> getTableListDB2(Connection conn) throws SQLException {
 
-		List<DatabaseRelationDefinition> tables = new LinkedList<>();
+		List<RelationDefinition> tables = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
 			// Obtain the relational objects (i.e., tables and views) */
 			try (ResultSet resultSet = stmt.executeQuery(tableSelectQueryDB2)) {
@@ -399,9 +397,9 @@ public class JDBCConnectionManager {
 	/**
 	 * Retrieve metadata for Oracle database engine
 	 */
-	private static List<DatabaseRelationDefinition> getTableListOracle(String defaultTableOwner, Connection conn) throws SQLException {
+	private static List<RelationDefinition> getTableListOracle(String defaultTableOwner, Connection conn) throws SQLException {
 		
-		List<DatabaseRelationDefinition> fks = new LinkedList<>();
+		List<RelationDefinition> fks = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
 			// Obtain the relational objects (i.e., tables and views) */
 			try (ResultSet resultSet = stmt.executeQuery(tableSelectQueryOracle)) {
@@ -417,9 +415,9 @@ public class JDBCConnectionManager {
 	/**
 	 * Retrieve metadata for Oracle database engine
 	 */
-	private static  List<DatabaseRelationDefinition> getTableListOracle(String defaultTableOwner, List<RelationJSQL> tables) throws SQLException {
+	private static  List<RelationDefinition> getTableListOracle(String defaultTableOwner, List<RelationJSQL> tables) throws SQLException {
 		
-		List<DatabaseRelationDefinition> fks = new LinkedList<>();
+		List<RelationDefinition> fks = new LinkedList<>();
 		
 		// The tables contains all tables which occur in the sql source queries
 		// Note that different spellings (casing, quotation marks, optional schema prefix) 
@@ -503,21 +501,22 @@ public class JDBCConnectionManager {
 			return dataType;
 		}};
 	
-	private static DBMetadata getMetadata(DatabaseMetaData md, List<DatabaseRelationDefinition> tables, DatatypeNormalizer dt) throws SQLException {
-		DBMetadata metadata = new DBMetadata(md);
-		for (DatabaseRelationDefinition table : tables) {
+	private static DBMetadata getMetadata(DatabaseMetaData md, List<RelationDefinition> tables, DatatypeNormalizer dt) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName());
+		
+		for (RelationDefinition table : tables) {
 			getTableColumns(md, table, dt);
 			getPrimaryKey(md, table);
 			getUniqueAttributes(md, table);
 			metadata.add(table);
 		}	
-		for (DatabaseRelationDefinition table : tables) 
+		for (RelationDefinition table : tables) 
 			getForeignKeys(md, table, metadata);
 		return metadata;
 	}
 	
 	
-	private static void getTableColumns(DatabaseMetaData md, DatabaseRelationDefinition table, DatatypeNormalizer dt) throws SQLException {
+	private static void getTableColumns(DatabaseMetaData md, RelationDefinition table, DatatypeNormalizer dt) throws SQLException {
 		// needed for checking uniqueness of lower-case versions of columns names
 		//  (only in getOtherMetadata)
 		//Set<String> tableColumns = new HashSet<>();
@@ -585,8 +584,8 @@ public class JDBCConnectionManager {
 	 * Retrieves the primary key for the table 
 	 * 
 	 */
-	private static void getPrimaryKey(DatabaseMetaData md, DatabaseRelationDefinition table) throws SQLException {
-		ImmutableList.Builder<Attribute> pk = ImmutableList.builder();
+	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table) throws SQLException {
+		UniqueConstraint.Builder pk = UniqueConstraint.builder("PK_" + table.getName(), table);
 		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getName())) {
 			while (rsPrimaryKeys.next()) {
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
@@ -595,9 +594,7 @@ public class JDBCConnectionManager {
 					pk.add(table.getAttribute(colName));
 			}
 		} 
-		ImmutableList<Attribute> pkattr = pk.build();
-		if (!pkattr.isEmpty())
-			table.setPrimaryKey(pkattr);
+		table.setPrimaryKey(pk.build());
 	}
 	
 	/**
@@ -606,7 +603,7 @@ public class JDBCConnectionManager {
 	 * @return
 	 * @throws SQLException 
 	 */
-	private static void getUniqueAttributes(DatabaseMetaData md, DatabaseRelationDefinition table) throws SQLException {
+	private static void getUniqueAttributes(DatabaseMetaData md, RelationDefinition table) throws SQLException {
 
 		Set<String> uniqueSet  = new HashSet<>();
 
@@ -635,14 +632,14 @@ public class JDBCConnectionManager {
 	 * Retrieves the foreign keys for the table 
 	 * 
 	 */
-	private static void getForeignKeys(DatabaseMetaData md, DatabaseRelationDefinition table, DBMetadata metadata) throws SQLException {
+	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata) throws SQLException {
 		
 		try (ResultSet rsForeignKeys = md.getImportedKeys(table.getCatalog(), table.getSchema(), table.getTableName())) {
 			ForeignKeyConstraint.Builder builder = null;
 			String currentName = "";
 			while (rsForeignKeys.next()) {
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-				DatabaseRelationDefinition ref = metadata.getDefinition(pkTableName);
+				RelationDefinition ref = metadata.getDefinition(pkTableName);
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {
 					if (builder != null) 

@@ -10,8 +10,6 @@ import net.sf.jsqlparser.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,19 +37,18 @@ public class ImplicitDBConstraints {
 	
 	
 	private static final class Reference {
-		final String fkName, fkTable, fkColumn;
+		final String fkTable, fkColumn;
 		
-		Reference(String fkName, String fkTable, String fkColumn) {
-			this.fkName = fkName;
+		Reference(String fkTable, String fkColumn) {
 			this.fkTable = fkTable;
 			this.fkColumn = fkColumn;
 		}
 
-		public String getColumnReference() {
+		String getColumnReference() {
 			return fkColumn;
 		}
 
-		public String getTableReference() {
+		String getTableReference() {
 			return fkTable;
 		}
 		
@@ -134,7 +131,7 @@ public class ImplicitDBConstraints {
 							String keyColumn = keyColumns[i];
 							String fkColumn = fkColumnS[i];
 							
-							Reference ref = new Reference(fkName, fkTable, fkColumn);
+							Reference ref = new Reference(fkTable, fkColumn);
 							fKey.put(keyColumn, ref);
 						}
 						tableFKeys.add(fKey);
@@ -209,7 +206,7 @@ public class ImplicitDBConstraints {
 	 */
 	public void addFunctionalDependency(DBMetadata md) {
 		for (String tableName : this.uniqueFD.keySet()) {
-			DatabaseRelationDefinition td = md.getDefinition(tableName);
+			RelationDefinition td = md.getDefinition(tableName);
 			if (td != null && td instanceof TableDefinition) {
 				ArrayList<ArrayList<String>> tableFDs = this.uniqueFD.get(tableName);
 				for (ArrayList<String> listOfConstraints: tableFDs) {
@@ -221,7 +218,7 @@ public class ImplicitDBConstraints {
 					else {		
 						//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
 						// ROMAN (17 Aug 2015): do we really change it into NON NULL?
-						td.addUniqueConstraint(ImmutableList.of(attr));
+						td.addUniqueConstraint(UniqueConstraint.of(attr));
 						}
 					}
 				}							
@@ -240,7 +237,7 @@ public class ImplicitDBConstraints {
 	 */
 	public void addForeignKeys(DBMetadata md) {
 		for(String tableName : this.fKeys.keySet() ){
-			DatabaseRelationDefinition td = md.getDefinition(tableName);
+			RelationDefinition td = md.getDefinition(tableName);
 			if(td == null || ! (td instanceof TableDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
 				continue;
@@ -255,7 +252,7 @@ public class ImplicitDBConstraints {
 					}
 					Reference ref = fKey.get(keyColumn);
 					String fkTable = ref.getTableReference();
-					DatabaseRelationDefinition fktd = md.getDefinition(fkTable);
+					RelationDefinition fktd = md.getDefinition(fkTable);
 					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
 						continue;

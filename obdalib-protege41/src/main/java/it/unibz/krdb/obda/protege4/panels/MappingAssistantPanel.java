@@ -53,7 +53,7 @@ import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
@@ -402,7 +402,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		txtQueryEditor.setText(EMPTY_TEXT); // clear the text editor
 		JComboBox cb = (JComboBox) evt.getSource();
 		if (cb.getSelectedIndex() != -1) {
-			DatabaseRelationDefinition dd = (DatabaseRelationDefinition) cb.getSelectedItem();
+			RelationDefinition dd = (RelationDefinition) cb.getSelectedItem();
 			if (dd != null) {
 				String sql = generateSQLString(dd);
 				txtQueryEditor.setText(sql);
@@ -707,7 +707,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		predicateSubjectMap = null;
 	}
 
-	private String generateSQLString(DatabaseRelationDefinition table) {
+	private String generateSQLString(RelationDefinition table) {
 		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
@@ -771,12 +771,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void addDatabaseTableToDataSetComboBox() {
-		DefaultComboBoxModel<DatabaseRelationDefinition> relationList = new DefaultComboBoxModel<>();
+		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			Connection conn = man.getConnection(selectedSource);
 			DBMetadata md = JDBCConnectionManager.getMetaData(conn, null);
-			for (DatabaseRelationDefinition relation : md.getRelations()) {
+			for (RelationDefinition relation : md.getRelations()) {
 				relationList.addElement(relation);
 			}
 		} 
