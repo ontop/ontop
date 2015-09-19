@@ -27,25 +27,53 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+/**
+ * Basis of the representation for relational tables and views
+ * 
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public abstract class DataDefinition implements Serializable {
 
 	private static final long serialVersionUID = 212770563440334334L;
 
-	private final String name;
+	private final String givenName;
+
+	private final String catalogName;
+	private final String schemaName;
+	private final String tableName;
+	
 	private final List<Attribute> attributes = new LinkedList<>();
 
+	
 	private UniqueConstraint pk;
-	private final LinkedList<UniqueConstraint> ucs = new LinkedList<>();
-	private final LinkedList<ForeignKeyConstraint> fks = new LinkedList<>();
+	private final List<UniqueConstraint> ucs = new LinkedList<>();
+	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 		
-	protected DataDefinition(String name) {
-		this.name = name;
+	protected DataDefinition(String catalogName, String schemaName, String tableName, String name) {
+		this.catalogName = catalogName;
+		this.schemaName = schemaName;
+		this.tableName = tableName;
+		this.givenName = name;
 	}
 
 	public String getName() {
-		return name;
+		return givenName;
 	}
 
+	public String getCatalog() {
+		return catalogName;
+	}
+	
+	public String getSchema() {
+		return schemaName;
+	}
+	
+	public String getTableName() {
+		return tableName;
+	}
 	
 	public void setPrimaryKey(ImmutableList<Attribute> attributes) {
 		pk = new UniqueConstraint(attributes);

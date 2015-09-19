@@ -27,8 +27,8 @@ public class ViewDefinition extends DataDefinition {
 
 	private final String statement;
 	
-	public ViewDefinition(String name, String statement) {
-		super(name);
+	public ViewDefinition(String catalogName, String schemaName, String tableName, String name, String statement) {
+		super(catalogName, schemaName, tableName, name);
 		this.statement = statement;
 	}
 

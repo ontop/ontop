@@ -49,12 +49,12 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	@Override
 	public void setUp() {
-
 		try {
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = JDBCConnectionManager.getMetaData(conn);
-		} catch (SQLException e) { 
+			metadata = JDBCConnectionManager.getMetaData(conn, null);
+		} 
+		catch (SQLException e) { 
 			e.printStackTrace();
 		}
 	}

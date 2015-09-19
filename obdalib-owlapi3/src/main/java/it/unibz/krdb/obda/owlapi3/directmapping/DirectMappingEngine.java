@@ -40,6 +40,7 @@ import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 
 import java.net.URI;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,8 +130,8 @@ public class DirectMappingEngine {
 		//For each data source, enrich into the ontology
 		if (metadata == null) {
 			for (int i = 0; i < sourcelist.size(); i++) {
-				oe.enrichOntology(conMan.getMetaData(sourcelist.get(i)),
-						ontology);
+				Connection conn = conMan.getConnection(sourcelist.get(i));		
+				oe.enrichOntology(JDBCConnectionManager.getMetaData(conn, null), ontology);
 			}
 		} else
 			oe.enrichOntology(this.metadata, ontology);
@@ -208,9 +209,12 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
+	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception {		
 		model.addSource(source);
-		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
+		Connection conn = conMan.getConnection(source);		
+		// this operation is EXPENSIVE
+		DBMetadata metadata = JDBCConnectionManager.getMetaData(conn, null);
+		insertMapping(metadata, model,source.getSourceID());
 	}
 	
 	
@@ -236,19 +240,6 @@ public class DirectMappingEngine {
 				}
 			}
 		}
-	}
-	
-	/***
-	 * generate a mapping axiom from a table of some database
-	 * 
-	 * @param table : the datadefinition from which mappings are extraced
-	 * @param source : datasource that the table may refer to, such as foreign keys
-	 * 
-	 *  @return a List of OBDAMappingAxiom-s
-	 * @throws Exception 
-	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
-		return getMapping(table,conMan.getMetaData(source),baseuri);
 	}
 	
 

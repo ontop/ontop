@@ -45,12 +45,6 @@ public class JDBCConnectionManager {
 	public static final String JDBC_FETCHSIZE = "fetchsize";
 	public static final String JDBC_RESULTSETTYPE = "resultsettype";
 	public static final String JDBC_RESULTSETCONCUR = "resultsetconcur";
-
-	// These are used by getOtherMetadata to signal whether the
-	// unquoted table names should be put in lower (Postgres), upper (db2) or no change(mysql)
-	private static final int JDBC_ORIGINALCASE = 0;
-	private static final int JDBC_LOWERCASE = 1;
-	private static final int JDBC_UPPERCASE = 2;
 	
 	private static JDBCConnectionManager instance = null;
 
@@ -169,336 +163,309 @@ public class JDBCConnectionManager {
 		return !conn.isClosed();
 	}
 
+	
 	/**
-	 * Retrieves the database meta data about the table schema given a
-	 * particular data source id.
+	 * Removes all the connections in the connection pool.
 	 * 
-	 * @param sourceId
-	 *            The database id.
-	 * @return The database meta data object.
+	 * @throws SQLException
 	 */
-	public DBMetadata getMetaData(OBDADataSource sourceId) throws SQLException {
-		Connection conn = getConnection(sourceId);
-		return getMetaData(conn);
-	}
-
-	/**
-	 * Retrieves the database meta data about the table schema given a
-	 * particular data source id.
-	 * 
-	 * @param sourceId
-	 *            The database id.
-	 * @return The database meta data object.
-	 */
-	public static DBMetadata getMetaData(Connection conn) throws SQLException {
-		DBMetadata metadata;
-		final DatabaseMetaData md = conn.getMetaData();
-		if (md.getDatabaseProductName().contains("Oracle")) {
-			// If the database engine is Oracle
-			metadata = getOracleMetaData(md, conn);
-		} else if (md.getDatabaseProductName().contains("DB2")) {
-			// If the database engine is IBM DB2
-			metadata = getDB2MetaData(md, conn);
-		} else if (md.getDatabaseProductName().contains("SQL Server")) {
-			// If the database engine is SQL Server
-			metadata = getSqlServerMetaData(md, conn);
-		} else {
-			// For other database engines
-			metadata = getOtherMetaData(md);
+	public void dispose() throws SQLException {
+		Set<OBDADataSource> keys = connectionPool.keySet();
+		for (OBDADataSource sourceId : keys) {
+			try {
+				closeConnection(sourceId);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
 		}
-		return metadata;
 	}
 	
-	
+		
 	/**
-	 *  Retrieves the database meta data about the table schema given a
-	 * particular data source id.
-	 * This method is used when the table names are taken from the mappings.
+	 * Retrieves the database metadata (table schema and database constraints) 
 	 * 
-	 * @param sourceId
-	 *            The database id.
-	 * @return The database meta data object.
+	 * This method either uses the given list of tables or 
+	 *    if it is null then it retrives all the complete list of tables from 
+	 *    the connection metadata
+	 * 
+	 * @return The database metadata object.
 	 */
 
 	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
-		if (tables == null || tables.isEmpty())
-			return getMetaData(conn);
-		
-		DBMetadata metadata = null;
 		final DatabaseMetaData md = conn.getMetaData();
+		List<DataDefinition> tableList;
+		
 		if (md.getDatabaseProductName().contains("Oracle")) {
-			// If the database engine is Oracle
-			metadata = getOracleMetaData(md, conn, tables);
-		} else if (md.getDatabaseProductName().contains("DB2")|| md.getDatabaseProductName().contains("H2")) {
-			// If the database engine is IBM DB2
-			metadata = getOtherMetaData(md, conn, tables, JDBC_UPPERCASE);
-		}  else if (md.getDatabaseProductName().contains("PostgreSQL")) {
-			// Postgres treats unquoted identifiers as lowercase
-			metadata = getOtherMetaData(md, conn, tables, JDBC_LOWERCASE);
-		} else {
-			// For other database engines, i.e. mysql
-			metadata = getOtherMetaData(md, conn, tables, JDBC_ORIGINALCASE);
+			if (tables == null || tables.isEmpty())
+				tableList = getTableListOracle(getOracleDefaultOwner(conn), tables);
+			else
+				tableList = getTableListOracle(getOracleDefaultOwner(conn), conn);
+			
+			return getMetadata(md, tableList, OracleTypeFixer);
+		} 
+		else if (md.getDatabaseProductName().contains("DB2")) {
+			if (tables == null || tables.isEmpty()) {
+				tableList = getTableListDB2(conn);
+				return getMetadata(md, tableList, DefaultTypeFixer);
+			}
+			else {
+				tableList = getTableListUpperCase(tables);
+				return getMetadata(md, tableList, MySQLTypeFixer); // why MySQLTypeFixer?
+			}
+		}  
+		else if (md.getDatabaseProductName().contains("H2")) {
+			if (tables == null || tables.isEmpty()) 
+				tableList = getTableListDefault(md);
+			else 
+				tableList = getTableListUpperCase(tables);
+			
+			return getMetadata(md, tableList, MySQLTypeFixer);
 		}
-		return metadata;
+		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
+			// Postgres treats unquoted identifiers as lowercase
+			if (tables == null || tables.isEmpty()) 
+				tableList = getTableListDefault(md);
+			else 
+				tableList = getTableListLowerCase(tables);
+			
+			return getMetadata(md, tableList, MySQLTypeFixer);
+		} 
+		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
+			// UNIQUE CONSTRAINTS WERE MISSING in the special procedure
+			if (tables == null || tables.isEmpty()) 
+				tableList = getTableListSQLServer(conn);
+			else
+				tableList = getTableListDefault(tables);
+				
+			return  getMetadata(md, tableList, DefaultTypeFixer);
+ 		} 
+		else {
+			// For other database engines, i.e. MySQL
+			if (tables == null || tables.isEmpty()) 
+				tableList = getTableListDefault(md);
+			else
+				tableList = getTableListDefault(tables);
+			
+			return getMetadata(md, tableList, MySQLTypeFixer);
+		}
 	}
 	
-	private static final class FullyQualifiedDD {
-		String catalog;
-		String schema;
-		String name;
-		DataDefinition td;
-		
-		FullyQualifiedDD(String catalog, String schema, String name, String givenName) {
-			this.catalog = catalog;
-			this.schema = schema;
-			this.name = name;
-			this.td = new TableDefinition(givenName);
-		}
-	}
-
 	/**
-	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
+	 * Retrieve the table and view list for most database engines, e.g., MySQL and PostgreSQL
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
-		List<FullyQualifiedDD> fks = new LinkedList<>();
+	private static List<DataDefinition> getTableListDefault(DatabaseMetaData md) throws SQLException {
+		List<DataDefinition> tables = new LinkedList<>();
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
 				final String tblCatalog = rsTables.getString("TABLE_CAT");
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
 
-				fks.add(new FullyQualifiedDD(tblCatalog, tblSchema, tblName, tblName));
+				tables.add(new TableDefinition(tblCatalog, tblSchema, tblName, tblName));
 				// new FullyQualifiedDD(null, null, tblName, fki.td));
 				// was null for catalog and null for schema (for FKs only)
 			}
 		} 
-		return getMetadata(md, fks, MySQLTypeFixer);
+		return tables;
 	}
 
 	/**
 	 * Retrieve metadata for most of the database engine, e.g., MySQL and PostgreSQL
-	 * 
-	 * Only retrieves metadata for the tables listed
-	 * 
-	 * Future plan to retrieve all tables when this list is empty?
-	 * 
-	 * @param tables 
-	 * @param lowerCaseId: Decides whether casing of unquoted object identifiers should be changed
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables, int caseIds) throws SQLException {
-		List<FullyQualifiedDD> fks = new LinkedList<>();
-		
-		/**
-		 *  The sql to extract table names is now removed, since we instead use the
-		 *  table names from the source sql of the mappings, given as the parameter tables
-		 */
+	private static List<DataDefinition> getTableListDefault(List<RelationJSQL> tables) throws SQLException {
 
-		Iterator<RelationJSQL> table_iter = tables.iterator();
-		/* Obtain the column information for each relational object */
-		while (table_iter.hasNext()) {
-			
-			RelationJSQL table = table_iter.next();
-			String tblName = table.getTableName(); 
-			
-			log.debug("get metadata for " + tblName);
-			
-			/**
-			 * tableGivenName is exactly the name the user provided, including schema prefix if that was
-			 * provided, otherwise without.
-			 */
+		List<DataDefinition> fks = new LinkedList<>();
+		for (RelationJSQL table : tables) {
+			// tableGivenName is exactly the name the user provided, 
+			// including schema prefix if that was provided, otherwise without.
 			String tableGivenName = table.getGivenName();
-			String tableSchema;
-			if( table.getSchema()!=null)
-				tableSchema = table.getSchema();
-			else
-				tableSchema = null;
 
-			switch(caseIds){
-			case JDBC_LOWERCASE:
-				if(!table.isTableQuoted())
-				tblName = tblName.toLowerCase();
-				if(tableSchema != null && !table.isSchemaQuoted())
-					tableSchema = tableSchema.toLowerCase();
-				break;
-			case JDBC_UPPERCASE: 
-				if(!table.isTableQuoted())
-				tblName = tblName.toUpperCase();
-				if(tableSchema != null && !table.isSchemaQuoted())
-					tableSchema = tableSchema.toUpperCase();
-				break;
-			}
-			
-			fks.add(new FullyQualifiedDD(null, tableSchema, tblName, tableGivenName));
+			String tblName = table.getTableName(); 
+			String tableSchema = table.getSchema();
+
+			fks.add(new TableDefinition(null, tableSchema, tblName, tableGivenName));
 		}
-		return getMetadata(md, fks, MySQLTypeFixer);
+		return fks;
 	}
 
+	private static List<DataDefinition> getTableListLowerCase(List<RelationJSQL> tables) throws SQLException {
+
+		List<DataDefinition> fks = new LinkedList<>();
+		for (RelationJSQL table : tables) {
+			// tableGivenName is exactly the name the user provided, 
+			// including schema prefix if that was provided, otherwise without.
+			String tableGivenName = table.getGivenName();
+			
+			String tblName = table.getTableName(); 
+			if(!table.isTableQuoted())
+				tblName = tblName.toLowerCase();
+			
+			String tableSchema = table.getSchema();
+			if(tableSchema != null && !table.isSchemaQuoted())
+				tableSchema = tableSchema.toLowerCase();
+			
+			fks.add(new TableDefinition(null, tableSchema, tblName, tableGivenName));
+		}
+		return fks;
+	}
+	private static List<DataDefinition> getTableListUpperCase(List<RelationJSQL> tables) throws SQLException {
+
+		List<DataDefinition> fks = new LinkedList<>();
+		for (RelationJSQL table : tables) {
+			// tableGivenName is exactly the name the user provided, 
+			// including schema prefix if that was provided, otherwise without.
+			String tableGivenName = table.getGivenName();
+
+			String tblName = table.getTableName(); 
+			if(!table.isTableQuoted())
+				tblName = tblName.toUpperCase();
+			
+			String tableSchema = table.getSchema();
+			if(tableSchema != null && !table.isSchemaQuoted())
+				tableSchema = tableSchema.toUpperCase();
+			
+			fks.add(new TableDefinition(null, tableSchema, tblName, tableGivenName));
+		}
+		return fks;
+	}
 	
 	
+
+	private static final String tableSelectQuerySQLServer = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
+			"FROM INFORMATION_SCHEMA.TABLES " +
+			"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
 	
 	/**
 	 * Retrieve metadata for SQL Server database engine
 	 */
-	private static DBMetadata getSqlServerMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
-		List<FullyQualifiedDD> fks = new LinkedList<>();
+	private static List<DataDefinition> getTableListSQLServer(Connection conn) throws SQLException {
+		List<DataDefinition> tables = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
-			/* Obtain the statement object for query execution */
-
-			/* Obtain the relational objects (i.e., tables and views) */
-			final String tableSelectQuery = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
-					"FROM INFORMATION_SCHEMA.TABLES " +
-					"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
-			try (ResultSet resultSet = stmt.executeQuery(tableSelectQuery)) {
-
-				/* Obtain the column information for each relational object */
+			// Obtain the relational objects (i.e., tables and views) */
+			try (ResultSet resultSet = stmt.executeQuery(tableSelectQuerySQLServer)) {
 				while (resultSet.next()) {
 					final String tblCatalog = resultSet.getString("TABLE_CATALOG");
 					final String tblSchema = resultSet.getString("TABLE_SCHEMA");
 					final String tblName = resultSet.getString("TABLE_NAME");
-
-					fks.add(new FullyQualifiedDD(tblCatalog, tblSchema, tblName, tblName));
+					tables.add(new TableDefinition(tblCatalog, tblSchema, tblName, tblName));
 				}
 			}
 		} 
-		// UNIQUE CONSTRAINTS WERE MISSING
-		return getMetadata(md, fks, DefaultTypeFixer);
+		return tables;
 	}
 
+	
+	private static final String tableSelectQueryDB2 = "SELECT TABSCHEMA, TABNAME " +
+			"FROM SYSCAT.TABLES " +
+			"WHERE OWNERTYPE='U' " +
+			"	AND (TYPE='T' OR TYPE='V') " +
+			"	AND TBSPACEID IN (SELECT TBSPACEID FROM SYSCAT.TABLESPACES WHERE TBSPACE LIKE 'USERSPACE%')";
+	
 	/**
 	 * Retrieve metadata for DB2 database engine
 	 */
-	private static DBMetadata getDB2MetaData(DatabaseMetaData md, Connection conn) throws SQLException {
+	private static List<DataDefinition> getTableListDB2(Connection conn) throws SQLException {
 
-		List<FullyQualifiedDD> fks = new LinkedList<>();
-		/* Obtain the statement object for query execution */
+		List<DataDefinition> tables = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
-			/* Obtain the relational objects (i.e., tables and views) */
-			final String tableSelectQuery = "SELECT TABSCHEMA, TABNAME " +
-					"FROM SYSCAT.TABLES " +
-					"WHERE OWNERTYPE='U' " +
-					"	AND (TYPE='T' OR TYPE='V') " +
-					"	AND TBSPACEID IN (SELECT TBSPACEID FROM SYSCAT.TABLESPACES WHERE TBSPACE LIKE 'USERSPACE%')";
-			
-			try (ResultSet resultSet = stmt.executeQuery(tableSelectQuery)) {
+			// Obtain the relational objects (i.e., tables and views) */
+			try (ResultSet resultSet = stmt.executeQuery(tableSelectQueryDB2)) {
 				while (resultSet.next()) {
 					final String tblSchema = resultSet.getString("TABSCHEMA");
 					final String tblName = resultSet.getString("TABNAME");
-					
-					fks.add(new FullyQualifiedDD(null, tblSchema, tblName, tblName));
+					tables.add(new TableDefinition(null, tblSchema, tblName, tblName));
 				}
 			}
 		} 
-		return getMetadata(md, fks, DefaultTypeFixer);
+		return tables; 
 	}
+
+	
+	private static final String tableSelectQueryOracle = "SELECT object_name FROM ( " +
+			"SELECT table_name as object_name FROM user_tables WHERE " +
+			"NOT table_name LIKE 'MVIEW$_%' AND " +
+			"NOT table_name LIKE 'LOGMNR_%' AND " +
+			"NOT table_name LIKE 'AQ$_%' AND " +
+			"NOT table_name LIKE 'DEF$_%' AND " +
+			"NOT table_name LIKE 'REPCAT$_%' AND " +
+			"NOT table_name LIKE 'LOGSTDBY$%' AND " +
+			"NOT table_name LIKE 'OL$%' " +
+			"UNION " +
+			"SELECT view_name as object_name FROM user_views WHERE " +
+			"NOT view_name LIKE 'MVIEW_%' AND " +
+			"NOT view_name LIKE 'LOGMNR_%' AND " +
+			"NOT view_name LIKE 'AQ$_%')";
 	
 	/**
 	 * Retrieve metadata for Oracle database engine
 	 */
-	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
-		List<FullyQualifiedDD> fks = new LinkedList<>();
+	private static List<DataDefinition> getTableListOracle(String defaultTableOwner, Connection conn) throws SQLException {
 		
-		/* Obtain the statement object for query execution */
+		List<DataDefinition> fks = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
-			
-			/* Obtain the table owner (i.e., schema name) */
-			String tableOwner = "SYSTEM"; // by default
-			try (ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
-				if (resultSet.next()) {
-					tableOwner = resultSet.getString("user");
-				}
-			}
-			
-			/* Obtain the relational objects (i.e., tables and views) */
-			final String tableSelectQuery = "SELECT object_name FROM ( " +
-					"SELECT table_name as object_name FROM user_tables WHERE " +
-					"NOT table_name LIKE 'MVIEW$_%' AND " +
-					"NOT table_name LIKE 'LOGMNR_%' AND " +
-					"NOT table_name LIKE 'AQ$_%' AND " +
-					"NOT table_name LIKE 'DEF$_%' AND " +
-					"NOT table_name LIKE 'REPCAT$_%' AND " +
-					"NOT table_name LIKE 'LOGSTDBY$%' AND " +
-					"NOT table_name LIKE 'OL$%' " +
-					"UNION " +
-					"SELECT view_name as object_name FROM user_views WHERE " +
-					"NOT view_name LIKE 'MVIEW_%' AND " +
-					"NOT view_name LIKE 'LOGMNR_%' AND " +
-					"NOT view_name LIKE 'AQ$_%')";
-			
-			try (ResultSet resultSet = stmt.executeQuery(tableSelectQuery)) {
+			// Obtain the relational objects (i.e., tables and views) */
+			try (ResultSet resultSet = stmt.executeQuery(tableSelectQueryOracle)) {
 				while (resultSet.next()) {
 					final String tblName = resultSet.getString("object_name");
-					fks.add(new FullyQualifiedDD(null, tableOwner, tblName, tblName));
+					fks.add(new TableDefinition(null, defaultTableOwner, tblName, tblName));
 				}
 			}
-		} 
-		return getMetadata(md, fks, OracleTypeFixer);
+		}
+		return fks; 
+	}
+	
+	/**
+	 * Retrieve metadata for Oracle database engine
+	 */
+	private static  List<DataDefinition> getTableListOracle(String defaultTableOwner, List<RelationJSQL> tables) throws SQLException {
+		
+		List<DataDefinition> fks = new LinkedList<>();
+		
+		// The tables contains all tables which occur in the sql source queries
+		// Note that different spellings (casing, quotation marks, optional schema prefix) 
+		// may lead to the same table occurring several times 
+		for (RelationJSQL table : tables) {
+			// givenTableName is exactly the name the user provided, 
+			// including schema prefix if that was provided, otherwise without.
+			String tableGivenName = table.getGivenName();
+			
+			// If there is a schema prefix, this must be the tableOwner argument to the 
+			// jdbc methods below. Otherwise, we use the logged in user. I guess null would
+			// also have worked in the latter case.
+			String tableOwner;
+			if (table.getSchema() != null) {
+				tableOwner = table.getSchema();
+				if (!table.isSchemaQuoted())
+					tableOwner = tableOwner.toUpperCase();
+			}
+			else
+				tableOwner = defaultTableOwner.toUpperCase();
+
+			String tblName = table.getTableName();
+			if (!table.isTableQuoted())
+				tblName = tblName.toUpperCase();
+			
+			fks.add(new TableDefinition(null, tableOwner, tblName, tableGivenName));
+		}
+		return fks;
 	}
 	
 	
 	
-	/**
-	 * Retrieve metadata for Oracle database engine
-	 * 
-	 * Currently only retrieves metadata for the tables listed
-	 * 
-	 * Future plan to retrieve all tables when this list is empty?
-	 * 
-	 * @param tables 
-	 */
-	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables) throws SQLException {
-		List<FullyQualifiedDD> fks = new LinkedList<>();
-		
-		/* Obtain the statement object for query execution */
+	
+	private static String getOracleDefaultOwner(Connection conn) throws SQLException {
+		// Obtain the table owner (i.e., schema name) 
+		String loggedUser = "SYSTEM"; // by default
 		try (Statement stmt = conn.createStatement()) {
-			
-			/* Obtain the table owner (i.e., schema name) */
-			String loggedUser = "SYSTEM"; // by default
 			try (ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
 				if (resultSet.next()) {
 					loggedUser = resultSet.getString("user");
 				}
 			}
-			
-			/**
-			 * The tables contains all tables which occur in the sql source queries
-			 * Note that different spellings (casing, quotation marks, optional schema prefix) 
-			 * may lead to the same table occurring several times 
-			 */
-			Iterator<RelationJSQL> table_iter = tables.iterator();
-			/* Obtain the column information for each relational object */
-			while (table_iter.hasNext()) {
-				
-				
-				RelationJSQL table = table_iter.next();
-//				String tblName = resultSet.getString("object_name");
-//				tableOwner = resultSet.getString("owner_name");
-				String tblName = table.getTableName();
-				if(!table.isTableQuoted())
-					tblName = tblName.toUpperCase();
-				/**
-				 * givenTableName is exactly the name the user provided, including schema prefix if that was
-				 * provided, otherwise without.
-				 */
-				String tableGivenName = table.getGivenName();
-				/**
-				 * If there is a schema prefix, this must be the tableOwner argument to the 
-				 * jdbc methods below. Otherwise, we use the logged in user. I guess null would
-				 * also have worked in the latter case.
-				 */
-				String tableOwner;
-				if( table.getSchema()!=null){
-					tableOwner = table.getSchema();
-					if(!table.isSchemaQuoted())
-						tableOwner = tableOwner.toUpperCase();
-				}
-				else
-					tableOwner = loggedUser.toUpperCase();
-
-				fks.add(new FullyQualifiedDD(null, tableOwner, tblName, tableGivenName));
-			}
-		} 
-		return getMetadata(md, fks, OracleTypeFixer);
+		}
+		return loggedUser;
 	}
+		
 	
 	private interface DatatypeNormalizer {
 		int getCorrectedDatatype(int dataType, String typeName);
@@ -536,43 +503,42 @@ public class JDBCConnectionManager {
 			return dataType;
 		}};
 	
-	private static DBMetadata getMetadata(DatabaseMetaData md, List<FullyQualifiedDD> fks, DatatypeNormalizer dt) throws SQLException {
+	private static DBMetadata getMetadata(DatabaseMetaData md, List<DataDefinition> tables, DatatypeNormalizer dt) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
-		getTableDefiniton(md, fks, dt, metadata);
-		getForeignKeys0(md, fks, metadata);
+		for (DataDefinition table : tables) {
+			getTableColumns(md, table, dt);
+			getPrimaryKey(md, table);
+			getUniqueAttributes(md, table);
+			metadata.add(table);
+		}	
+		for (DataDefinition table : tables) 
+			getForeignKeys(md, table, metadata);
 		return metadata;
 	}
 	
 	
-	private static void getTableDefiniton(DatabaseMetaData md, List<FullyQualifiedDD> fks, DatatypeNormalizer dt, DBMetadata metadata) throws SQLException {
-		for (FullyQualifiedDD fki : fks) {
-			
-			// needed for checking uniqueness of lower-case versions of columns names
-			//  (only in getOtherMetadata)
-			//Set<String> tableColumns = new HashSet<>();
-			
-			try (ResultSet rsColumns = md.getColumns(fki.catalog, fki.schema, fki.name, null)) {
-				//if (rsColumns == null) 
-				//	return;			
-				while (rsColumns.next()) {
-					final String columnName = rsColumns.getString("COLUMN_NAME");
-					// columnNoNulls, columnNullable, columnNullableUnknown 
-					final boolean isNullable = rsColumns.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
-					
-					final String typeName = rsColumns.getString("TYPE_NAME");
-					final int dataType = dt.getCorrectedDatatype(rsColumns.getInt("DATA_TYPE"), typeName);
-					
-					fki.td.addAttribute(new Attribute(fki.td, columnName, dataType, isNullable, typeName));
-					// Check if the columns are unique regardless their letter cases
-					//if (!tableColumns.add(columnName.toLowerCase())) {
-					//	throw new RuntimeException("The system cannot process duplicate table columns!");
-					//}
-				}
+	private static void getTableColumns(DatabaseMetaData md, DataDefinition table, DatatypeNormalizer dt) throws SQLException {
+		// needed for checking uniqueness of lower-case versions of columns names
+		//  (only in getOtherMetadata)
+		//Set<String> tableColumns = new HashSet<>();
+		
+		try (ResultSet rsColumns = md.getColumns(table.getCatalog(), table.getSchema(), table.getTableName(), null)) {
+			//if (rsColumns == null) 
+			//	return;			
+			while (rsColumns.next()) {
+				final String columnName = rsColumns.getString("COLUMN_NAME");
+				// columnNoNulls, columnNullable, columnNullableUnknown 
+				final boolean isNullable = rsColumns.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
+				
+				final String typeName = rsColumns.getString("TYPE_NAME");
+				final int dataType = dt.getCorrectedDatatype(rsColumns.getInt("DATA_TYPE"), typeName);
+				
+				table.addAttribute(new Attribute(table, columnName, dataType, isNullable, typeName));
+				// Check if the columns are unique regardless their letter cases
+				//if (!tableColumns.add(columnName.toLowerCase())) {
+				//	throw new RuntimeException("The system cannot process duplicate table columns!");
+				//}
 			}
-			getPrimaryKey(md, fki);
-			getUniqueAttributes(md, fki);
-
-			metadata.add(fki.td);
 		}
 	}
 	
@@ -619,21 +585,21 @@ public class JDBCConnectionManager {
 	 * Retrieves the primary key for the table 
 	 * 
 	 */
-	private static void getPrimaryKey(DatabaseMetaData md, FullyQualifiedDD fki) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, DataDefinition table) throws SQLException {
 		ImmutableList.Builder<Attribute> pk = ImmutableList.builder();
-		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(fki.catalog, fki.schema, fki.name)) {
+		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getName())) {
 			while (rsPrimaryKeys.next()) {
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
 				String pkName = rsPrimaryKeys.getString("PK_NAME");
 				if (pkName != null) {
-					int idx = fki.td.getAttributeKey(colName);
-					pk.add(fki.td.getAttribute(idx));
+					int idx = table.getAttributeKey(colName);
+					pk.add(table.getAttribute(idx));
 				}
 			}
 		} 
 		ImmutableList<Attribute> pkattr = pk.build();
 		if (!pkattr.isEmpty())
-			fki.td.setPrimaryKey(pkattr);
+			table.setPrimaryKey(pkattr);
 	}
 	
 	/**
@@ -642,12 +608,12 @@ public class JDBCConnectionManager {
 	 * @return
 	 * @throws SQLException 
 	 */
-	private static void getUniqueAttributes(DatabaseMetaData md, FullyQualifiedDD fki) throws SQLException {
+	private static void getUniqueAttributes(DatabaseMetaData md, DataDefinition table) throws SQLException {
 
 		Set<String> uniqueSet  = new HashSet<>();
 
 		// extracting unique 
-		try (ResultSet rsUnique= md.getIndexInfo(fki.catalog, fki.schema, fki.name, true, true)) {
+		try (ResultSet rsUnique= md.getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), true, true)) {
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
 				String nonUnique = rsUnique.getString("NON_UNIQUE");
@@ -671,50 +637,33 @@ public class JDBCConnectionManager {
 	 * Retrieves the foreign keys for the table 
 	 * 
 	 */
-	private static void getForeignKeys0(DatabaseMetaData md, List<FullyQualifiedDD> fks, DBMetadata metadata) throws SQLException {
-		for (FullyQualifiedDD fki : fks) {
-			try (ResultSet rsForeignKeys = md.getImportedKeys(fki.catalog, fki.schema, fki.name)) {
-				ForeignKeyConstraint.Builder builder = null;
-				String currentName = "";
-				while (rsForeignKeys.next()) {
-					String name = rsForeignKeys.getString("FK_NAME");
-					if (!currentName.equals(name)) {
-						if (builder != null) 
-							fki.td.addForeignKeyConstraint(builder.build());
-						
-						builder = new ForeignKeyConstraint.Builder(name);
-						currentName = name;
-					}
-					String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
-					String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-					String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
-					DataDefinition ref = metadata.getDefinition(pkTableName);
-					if (ref != null)
-						builder.add(fki.td.getAttribute(colName), ref.getAttribute(pkColumnName));
-					else {
-						System.err.println("Cannot find table: " + pkTableName + " for " + name);
-						builder = null;
-					}
+	private static void getForeignKeys(DatabaseMetaData md, DataDefinition table, DBMetadata metadata) throws SQLException {
+		
+		try (ResultSet rsForeignKeys = md.getImportedKeys(table.getCatalog(), table.getSchema(), table.getTableName())) {
+			ForeignKeyConstraint.Builder builder = null;
+			String currentName = "";
+			while (rsForeignKeys.next()) {
+				String name = rsForeignKeys.getString("FK_NAME");
+				if (!currentName.equals(name)) {
+					if (builder != null) 
+						table.addForeignKeyConstraint(builder.build());
+					
+					builder = new ForeignKeyConstraint.Builder(name);
+					currentName = name;
 				}
-				if (builder != null)
-					fki.td.addForeignKeyConstraint(builder.build());
-			} 
-		}
-	}
-
-	/**
-	 * Removes all the connections in the connection pool.
-	 * 
-	 * @throws SQLException
-	 */
-	public void dispose() throws SQLException {
-		Set<OBDADataSource> keys = connectionPool.keySet();
-		for (OBDADataSource sourceId : keys) {
-			try {
-				closeConnection(sourceId);
-			} catch (Exception e) {
-				log.error(e.getMessage());
+				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
+				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
+				String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
+				DataDefinition ref = metadata.getDefinition(pkTableName);
+				if (ref != null)
+					builder.add(table.getAttribute(colName), ref.getAttribute(pkColumnName));
+				else {
+					System.err.println("Cannot find table: " + pkTableName + " for " + name);
+					builder = null;
+				}
 			}
-		}
+			if (builder != null)
+				table.addForeignKeyConstraint(builder.build());
+		} 
 	}
 }

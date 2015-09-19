@@ -40,12 +40,10 @@ public abstract class AbstractDBMetadata
 	
 	protected DBMetadata getMetadata() throws Exception 
 	{
-		DBMetadata metadata = null;
-
-			Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
-					source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-			metadata = JDBCConnectionManager.getMetaData(conn);
-		
+		Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
+				source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), 
+				source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+		DBMetadata metadata =  JDBCConnectionManager.getMetaData(conn, null);
 
 		return metadata;
 	}

@@ -668,15 +668,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (metadata == null) {
 				// if we have to parse the full metadata or just the table list in the mappings
 				if (obtainFullMetadata) {
-					metadata = JDBCConnectionManager.getMetaData(localConnection);
-				} else {
+					metadata = JDBCConnectionManager.getMetaData(localConnection, null);
+				} 
+				else {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
 					
 					// Parse mappings. Just to get the table names in use
 					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 							
-					try{
+					try {
 						List<RelationJSQL> realTables = mParser.getRealTables();
 						
 						if (applyUserConstraints) {
@@ -685,13 +686,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						}
 
 						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
-					}catch (JSQLParserException e){
-						System.out.println("Error obtaining the tables"+ e);
-					}catch( SQLException e ){
-						System.out.println("Error obtaining the Metadata"+ e);
-					
 					}
-					
+					catch (JSQLParserException e) {
+						System.out.println("Error obtaining the tables" + e);
+					}
+					catch (SQLException e) {
+						System.out.println("Error obtaining the metadata " + e);
+					}
 				}
 			}
 			

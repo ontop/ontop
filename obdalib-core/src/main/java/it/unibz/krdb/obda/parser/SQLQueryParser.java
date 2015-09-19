@@ -232,7 +232,7 @@ public class SQLQueryParser {
             supported = false;
         }
 
-        ViewDefinition viewDefinition = new ViewDefinition(viewName, query);
+        ViewDefinition viewDefinition = new ViewDefinition(null, null, viewName, viewName, query);
        
         if (supported) {
             List<String> columns = queryParser.getColumns();

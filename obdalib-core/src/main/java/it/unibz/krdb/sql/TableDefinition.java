@@ -20,38 +20,21 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.collect.ImmutableList;
 
 public class TableDefinition extends DataDefinition {
 
 	private static final long serialVersionUID = 1L;
 
+	// TESTS ONLY
+	@Deprecated 
 	public TableDefinition(String name) {
-		super(name);
+		super(null, null, name, name);
 	}
-/*	
-	public Map<String, List<Attribute>> getForeignKeys() {
-		Map<String, List<Attribute>> foreignKeys = new HashMap<>();
-		for (Attribute attr : getAttributes()) {
-			Reference ref = attr.getReference();
-			if (ref != null) {
-				String fkName = ref.getReferenceName();
-				List<Attribute> fkAttributes = foreignKeys.get(fkName);
-				if (fkAttributes == null) {
-					fkAttributes = new ArrayList<>();
-					foreignKeys.put(fkName, fkAttributes);
-				}
-				fkAttributes.add(attr);
-			}
-		}
-		return foreignKeys;
+	
+	public TableDefinition(String catalogName, String schemaName, String tableName, String name) {
+		super(catalogName, schemaName, tableName, name);
 	}
-*/	
+
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();

@@ -771,14 +771,16 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void addDatabaseTableToDataSetComboBox() {
-		DefaultComboBoxModel relationList = new DefaultComboBoxModel();
+		DefaultComboBoxModel<DataDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-			DBMetadata md = man.getMetaData(selectedSource);
+			Connection conn = man.getConnection(selectedSource);
+			DBMetadata md = JDBCConnectionManager.getMetaData(conn, null);
 			for (DataDefinition relation : md.getRelations()) {
 				relationList.addElement(relation);
 			}
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e) {
 			// NO-OP
 		}
 		cboDataSet.setModel(relationList);
