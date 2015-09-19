@@ -35,7 +35,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -1573,7 +1573,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Map<Function, String> viewNames = new HashMap<>();
 		Map<Function, String> tableNames = new HashMap<>();
-		Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
+		Map<Function, DatabaseRelationDefinition> dataDefinitions = new HashMap<>();
 		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
@@ -1620,7 +1620,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
 			String tableName = tablePredicate.toString();
-			DataDefinition def = metadata.getDefinition(tableName);
+			DatabaseRelationDefinition def = metadata.getDefinition(tableName);
 			if (def == null) {
 				/*
 				 * There is no definition for this atom, its not a database
@@ -1638,7 +1638,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		private void indexVariables(Function atom) {
-			DataDefinition def = dataDefinitions.get(atom);
+			DatabaseRelationDefinition def = dataDefinitions.get(atom);
 			String viewName = viewNames.get(atom);
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
@@ -1672,7 +1672,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * Generates the view definition, i.e., "tablename viewname".
 		 */
 		public String getViewDefinition(Function atom) {
-			DataDefinition def = dataDefinitions.get(atom);
+			DatabaseRelationDefinition def = dataDefinitions.get(atom);
 			if (def instanceof TableDefinition) {
 				return sqladapter.sqlTableName(tableNames.get(atom), viewNames.get(atom));
 			} else if (def instanceof ViewDefinition) {
@@ -1687,7 +1687,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		public String getColumnReference(Function atom, int column) {
 			String viewName = getView(atom);
-			DataDefinition def = dataDefinitions.get(atom);
+			DatabaseRelationDefinition def = dataDefinitions.get(atom);
 			String columnname = def.getAttribute(column + 1).getName(); // indexes from 1
 			return sqladapter.sqlQualifiedColumn(viewName, columnname);
 		}

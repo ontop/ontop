@@ -20,7 +20,6 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,16 +27,14 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Basis of the representation for relational tables and views
- * 
+ * Basis of the representation for information on relational tables and views
+ * (attributes and integrity constraints: primary keys, unique keys and foreign keys)
  * 
  * @author Roman Kontchakov
  *
  */
 
-public abstract class DataDefinition implements Serializable {
-
-	private static final long serialVersionUID = 212770563440334334L;
+public abstract class DatabaseRelationDefinition {
 
 	private final String givenName;
 
@@ -47,12 +44,11 @@ public abstract class DataDefinition implements Serializable {
 	
 	private final List<Attribute> attributes = new LinkedList<>();
 
-	
 	private UniqueConstraint pk;
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 		
-	protected DataDefinition(String catalogName, String schemaName, String tableName, String name) {
+	protected DatabaseRelationDefinition(String catalogName, String schemaName, String tableName, String name) {
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
@@ -100,8 +96,8 @@ public abstract class DataDefinition implements Serializable {
 		return ImmutableList.copyOf(fks);
 	}
 	
-	public void addAttribute(Attribute value) {
-		attributes.add(value);
+	public void addAttribute(String name, int type, String typeName, boolean canNull) {
+		attributes.add(new Attribute(this, name, type, typeName, canNull));
 	}
 
 	/**

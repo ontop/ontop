@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
-import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 import junit.framework.TestCase;
@@ -47,23 +46,23 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	public void setUp() {
 		// Database schema
 		TableDefinition table1 = new TableDefinition("Student");
-		table1.addAttribute(new Attribute(table1, "id", Types.INTEGER, false, null));
-		table1.addAttribute(new Attribute(table1, "first_name", Types.VARCHAR, false, null));
-		table1.addAttribute(new Attribute(table1, "last_name", Types.VARCHAR, false, null));
-		table1.addAttribute(new Attribute(table1, "year", Types.INTEGER, false, null));
-		table1.addAttribute(new Attribute(table1, "nationality", Types.VARCHAR, false, null));
+		table1.addAttribute("id", Types.INTEGER, null, false);
+		table1.addAttribute("first_name", Types.VARCHAR, null, false);
+		table1.addAttribute("last_name", Types.VARCHAR, null, false);
+		table1.addAttribute("year", Types.INTEGER, null, false);
+		table1.addAttribute("nationality", Types.VARCHAR, null, false);
 		table1.setPrimaryKey(ImmutableList.of(table1.getAttribute(1)));
 		
 		TableDefinition table2 = new TableDefinition("Course");
-		table2.addAttribute(new Attribute(table2, "cid", Types.VARCHAR, false, null));
-		table2.addAttribute(new Attribute(table2, "title", Types.VARCHAR, false, null));
-		table2.addAttribute(new Attribute(table2, "credits", Types.INTEGER, false, null));
-		table2.addAttribute(new Attribute(table2, "description", Types.VARCHAR, false, null));
+		table2.addAttribute("cid", Types.VARCHAR, null, false);
+		table2.addAttribute("title", Types.VARCHAR, null, false);
+		table2.addAttribute("credits", Types.INTEGER, null, false);
+		table2.addAttribute("description", Types.VARCHAR, null, false);
 		table2.setPrimaryKey(ImmutableList.of(table2.getAttribute(1)));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.addAttribute(new Attribute(table3, "student_id", Types.INTEGER, false, null));
-		table3.addAttribute(new Attribute(table3, "course_id", Types.VARCHAR, false, null));
+		table3.addAttribute("student_id", Types.INTEGER, null, false);
+		table3.addAttribute("course_id", Types.VARCHAR, null, false);
 		table3.setPrimaryKey(ImmutableList.of(table3.getAttribute(1), table3.getAttribute(2)));
 		
 		md.add(table1);

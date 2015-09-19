@@ -11,7 +11,6 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -19,12 +18,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 
 import java.io.File;
-import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -79,40 +76,25 @@ private void setup()  throws Exception {
 
 private TableDefinition defMeasTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
-	Attribute attribute = null;
-	attribute = new Attribute(tableDefinition, "timestamp", java.sql.Types.TIMESTAMP, false, null);
-	//It starts from 1 !!!
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute(tableDefinition, "value", java.sql.Types.NUMERIC, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute(tableDefinition, "assembly", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute(tableDefinition, "sensor", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
+	tableDefinition.addAttribute( "timestamp", java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute("value", java.sql.Types.NUMERIC, null, false);
+	tableDefinition.addAttribute("assembly", java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute("sensor", java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 
 private TableDefinition defMessTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
-	Attribute attribute = null;
-	//It starts from 1 !!!
-	attribute = new Attribute(tableDefinition, "timestamp", java.sql.Types.TIMESTAMP, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute(tableDefinition, "eventtext", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute(tableDefinition, "assembly", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
+	tableDefinition.addAttribute("timestamp", java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute("eventtext", java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute("assembly", java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 
 private TableDefinition defStaticTable(String name){
 	TableDefinition tableDefinition = new TableDefinition(name);
-	Attribute attribute = null;
-	//It starts from 1 !!!
-	attribute = new Attribute(tableDefinition, "domain", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute(tableDefinition, "range", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
+	tableDefinition.addAttribute("domain", java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute("range", java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 private DBMetadata getMeta(){

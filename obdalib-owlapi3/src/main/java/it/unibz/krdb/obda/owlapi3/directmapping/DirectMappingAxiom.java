@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
@@ -35,12 +35,12 @@ import java.util.*;
 
 public class DirectMappingAxiom {
 	private final DBMetadata metadata;
-	private final DataDefinition table;
+	private final DatabaseRelationDefinition table;
 	private String SQLString;
 	private final String baseuri;
 	private final OBDADataFactory df;
 	
-	public DirectMappingAxiom(String baseuri, DataDefinition dd,
+	public DirectMappingAxiom(String baseuri, DatabaseRelationDefinition dd,
 			DBMetadata obda_md, OBDADataFactory dfac) {
 		this.table = dd;
 		this.SQLString = "";
@@ -100,7 +100,7 @@ public class DirectMappingAxiom {
 			Condition += table + ".\"" + comp.getAttribute().getName() + "\" = ";
 
 			// get referenced object
-			tableRef = comp.getReference().getTable().getName();
+			tableRef = comp.getReference().getRelation().getName();
 			if (count == 0)
 				Table += ", \"" + tableRef + "\"";
 			String columnRef = comp.getReference().getName();
@@ -184,7 +184,7 @@ public class DirectMappingAxiom {
 		
 		// Object Atoms
 		// Foreign key reference
-		String pkTableReference = fkcomp.getReference().getTable().getName();
+		String pkTableReference = fkcomp.getReference().getRelation().getName();
 		TableDefinition tdRef = (TableDefinition) metadata
 				.getDefinition(pkTableReference);
 		Term obj = generateSubject(tdRef, true);

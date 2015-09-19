@@ -19,11 +19,11 @@ public class TestImplicitDBConstraints {
 	public void setupMetadata(){
 		this.md = new DBMetadata("dummy class");
 		TableDefinition td = new TableDefinition("TABLENAME");
-		td.addAttribute(new Attribute(td, "KEYNAME", 0, false, null)); // from 1
+		td.addAttribute("KEYNAME", 0, null, false); // from 1
 		md.add(td); 
 		TableDefinition td2 = new TableDefinition("TABLE2");
-		td2.addAttribute(new Attribute(td2, "KEY1", 0, false, null));  // from 1
-		td2.addAttribute(new Attribute(td2, "KEY2", 0, false, null));
+		td2.addAttribute("KEY1", 0, null, false);  // from 1
+		td2.addAttribute("KEY2", 0, null, false);
 		md.add(td2);
 	}
 	
@@ -51,7 +51,7 @@ public class TestImplicitDBConstraints {
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addFunctionalDependency(this.md);
-		DataDefinition dd = this.md.getDefinition("TABLENAME");
+		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(1);	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
 	}
@@ -69,10 +69,10 @@ public class TestImplicitDBConstraints {
 	public void testAddForeignKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addForeignKeys(this.md);
-		DataDefinition dd = this.md.getDefinition("TABLENAME");
+		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
-		assertTrue(fk.getComponents().get(0).getReference().getTable().getName().equals("TABLE2"));
+		assertTrue(fk.getComponents().get(0).getReference().getRelation().getName().equals("TABLE2"));
 		assertTrue(fk.getComponents().get(0).getReference().getName().equals("KEY1"));
 	}
 
@@ -80,10 +80,10 @@ public class TestImplicitDBConstraints {
 	public void testAddKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
 		uc.addConstraints(this.md);
-		DataDefinition dd = this.md.getDefinition("TABLENAME");
+		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
-		assertTrue(fk.getComponents().get(0).getReference().getTable().getName().equals("TABLE2"));
+		assertTrue(fk.getComponents().get(0).getReference().getRelation().getName().equals("TABLE2"));
 		assertTrue(fk.getComponents().get(0).getReference().getName().equals("KEY1"));
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(dd.getAttribute(1)))); 
 	}

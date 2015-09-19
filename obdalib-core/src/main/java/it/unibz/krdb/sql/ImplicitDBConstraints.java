@@ -209,7 +209,7 @@ public class ImplicitDBConstraints {
 	 */
 	public void addFunctionalDependency(DBMetadata md) {
 		for(String tableName : this.uniqueFD.keySet() ){
-			DataDefinition td = md.getDefinition(tableName);
+			DatabaseRelationDefinition td = md.getDefinition(tableName);
 			if(td != null && td instanceof TableDefinition){
 				ArrayList<ArrayList<String>> tableFDs = this.uniqueFD.get(tableName);
 				//if(tableFDs.size() > 1)
@@ -249,7 +249,7 @@ public class ImplicitDBConstraints {
 	 */
 	public void addForeignKeys(DBMetadata md) {
 		for(String tableName : this.fKeys.keySet() ){
-			DataDefinition td = md.getDefinition(tableName);
+			DatabaseRelationDefinition td = md.getDefinition(tableName);
 			if(td == null || ! (td instanceof TableDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
 				continue;
@@ -277,7 +277,7 @@ public class ImplicitDBConstraints {
 					//}
 					Reference ref = fKey.get(keyColumn);
 					String fkTable = ref.getTableReference();
-					DataDefinition fktd = md.getDefinition(fkTable);
+					DatabaseRelationDefinition fktd = md.getDefinition(fkTable);
 					if(fktd == null){
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
 						continue;

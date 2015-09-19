@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -248,7 +247,7 @@ public class SQLQueryParser {
 					columnName= columnName.substring(1, columnName.length()-1);
 				}
 
-                viewDefinition.addAttribute(new Attribute(viewDefinition, columnName, 0, false, null));
+                viewDefinition.addAttribute(columnName, 0, null, false);
             }
         }
         else {
@@ -320,7 +319,7 @@ public class SQLQueryParser {
                 }
 
                 // the attribute index always start at 1
-                viewDefinition.addAttribute(new Attribute(viewDefinition, columnName, 0, false, null)); 
+                viewDefinition.addAttribute(columnName, 0, null, false); 
             }
         }
         

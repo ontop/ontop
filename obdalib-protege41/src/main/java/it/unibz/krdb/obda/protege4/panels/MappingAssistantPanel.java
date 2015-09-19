@@ -53,7 +53,7 @@ import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
@@ -402,7 +402,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		txtQueryEditor.setText(EMPTY_TEXT); // clear the text editor
 		JComboBox cb = (JComboBox) evt.getSource();
 		if (cb.getSelectedIndex() != -1) {
-			DataDefinition dd = (DataDefinition) cb.getSelectedItem();
+			DatabaseRelationDefinition dd = (DatabaseRelationDefinition) cb.getSelectedItem();
 			if (dd != null) {
 				String sql = generateSQLString(dd);
 				txtQueryEditor.setText(sql);
@@ -707,7 +707,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		predicateSubjectMap = null;
 	}
 
-	private String generateSQLString(DataDefinition table) {
+	private String generateSQLString(DatabaseRelationDefinition table) {
 		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
@@ -771,12 +771,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void addDatabaseTableToDataSetComboBox() {
-		DefaultComboBoxModel<DataDefinition> relationList = new DefaultComboBoxModel<>();
+		DefaultComboBoxModel<DatabaseRelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			Connection conn = man.getConnection(selectedSource);
 			DBMetadata md = JDBCConnectionManager.getMetaData(conn, null);
-			for (DataDefinition relation : md.getRelations()) {
+			for (DatabaseRelationDefinition relation : md.getRelations()) {
 				relationList.addElement(relation);
 			}
 		} 

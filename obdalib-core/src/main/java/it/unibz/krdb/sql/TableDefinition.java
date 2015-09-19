@@ -21,7 +21,7 @@ package it.unibz.krdb.sql;
  */
 
 
-public class TableDefinition extends DataDefinition {
+public class TableDefinition extends DatabaseRelationDefinition {
 
 	private static final long serialVersionUID = 1L;
 

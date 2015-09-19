@@ -38,7 +38,7 @@ public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private final Map<String, DataDefinition> schema = new HashMap<>();
+	private final Map<String, DatabaseRelationDefinition> schema = new HashMap<>();
 
 	private final String driverName;
 	private String driverVersion;
@@ -99,7 +99,7 @@ public class DBMetadata implements Serializable {
 	 *            The data definition. It can be a {@link TableDefinition} or a
 	 *            {@link ViewDefinition} object.
 	 */
-	public void add(DataDefinition value) {
+	public void add(DatabaseRelationDefinition value) {
 		String name = value.getName();
 		// name without quotes
 		if (pQuotes.matcher(name).matches())
@@ -130,8 +130,8 @@ public class DBMetadata implements Serializable {
 	 * @param name
 	 *            The string name.
 	 */
-	public DataDefinition getDefinition(String name) {
-		DataDefinition def = schema.get(name);
+	public DatabaseRelationDefinition getDefinition(String name) {
+		DatabaseRelationDefinition def = schema.get(name);
 		if (def == null)
 			def = schema.get(name.toLowerCase());
 		if (def == null)
@@ -145,7 +145,7 @@ public class DBMetadata implements Serializable {
 	 * Retrieves the relation list (table and view definition) form the
 	 * metadata.
 	 */
-	public Collection<DataDefinition> getRelations() {
+	public Collection<DatabaseRelationDefinition> getRelations() {
 		return Collections.unmodifiableCollection(schema.values());
 	}
 
@@ -154,7 +154,7 @@ public class DBMetadata implements Serializable {
 	 */
 	public Collection<TableDefinition> getTables() {
 		List<TableDefinition> tableList = new ArrayList<>();
-		for (DataDefinition dd : schema.values()) {
+		for (DatabaseRelationDefinition dd : schema.values()) {
 			if (dd instanceof TableDefinition) 
 				tableList.add((TableDefinition) dd);
 		}
@@ -176,7 +176,7 @@ public class DBMetadata implements Serializable {
 	 * @return
 	 */
 	public String getFullQualifiedAttributeName(String table, String alias, int pos) {		
-		DataDefinition dd = getDefinition(table);
+		DatabaseRelationDefinition dd = getDefinition(table);
 		if (dd == null) 
 			throw new RuntimeException("Unknown table definition: " + table);
 		
@@ -267,7 +267,7 @@ public class DBMetadata implements Serializable {
 					continue;
 				
 				String newAtomName = newAtomPredicate.toString();
-				DataDefinition def = metadata.getDefinition(newAtomName);
+				DatabaseRelationDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					// primary keys
 					UniqueConstraint pk = def.getPrimaryKey();

@@ -72,7 +72,7 @@ public class DBMetadataUtil {
 					String column2 = comp.getReference().getName();				
 					
 					// Get table definition for referenced table
-					def2 = (TableDefinition) comp.getReference().getTable();
+					def2 = (TableDefinition) comp.getReference().getRelation();
 					if (def2 == null) { // in case of broken FK
 						// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
 						//        (which can happen in the NEW abridged metadata)

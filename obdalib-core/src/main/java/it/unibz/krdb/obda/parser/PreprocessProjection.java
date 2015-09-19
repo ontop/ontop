@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
@@ -287,7 +287,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         if (ParsedSQLQuery.pQuotes.matcher(tableFullName).matches()) {
             tableFullName = tableFullName.substring(1, tableFullName.length()-1);
         }
-        DataDefinition tableDefinition = metadata.getDefinition(tableFullName);
+        DatabaseRelationDefinition tableDefinition = metadata.getDefinition(tableFullName);
 
         if (tableDefinition == null)
             throw new RuntimeException("Definition not found for table '" + table + "'.");

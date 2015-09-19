@@ -20,33 +20,30 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import java.io.Serializable;
 import java.sql.Types;
 
-public class Attribute implements Serializable{
-	
-	private static final long serialVersionUID = -5780621780592347583L;
+public class Attribute {
 	
 	private final String name;
 	private final int type;
-	private final boolean canNull;
 	private final String typeName;
+	private final boolean canNull;
 	
-	private final DataDefinition table;
+	private final DatabaseRelationDefinition table;
 	
-	public Attribute(DataDefinition table, String name, int type, boolean canNull, String typeName) {
+	Attribute(DatabaseRelationDefinition relation, String name, int type, String typeName, boolean canNull) {
+		this.table = relation;
 		this.name = name;
 		this.type = type;
-		this.canNull = canNull;
 		this.typeName = typeName;
-		this.table = table;
+		this.canNull = canNull;
 	}
 	
 	public String getName() {
 		return name;
 	}
 	
-	public DataDefinition getTable() {
+	public DatabaseRelationDefinition getRelation() {
 		return table;
 	}
 	
@@ -73,7 +70,7 @@ public class Attribute implements Serializable{
 	
 	@Override
 	public String toString() {
-		return name + ":" + type;
+		return name + ": " + type;
 	}
 	
 	@Override

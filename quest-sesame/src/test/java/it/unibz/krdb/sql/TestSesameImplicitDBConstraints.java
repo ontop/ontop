@@ -9,7 +9,6 @@ package it.unibz.krdb.sql;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
@@ -53,7 +52,6 @@ public class TestSesameImplicitDBConstraints {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 	private QuestDBStatement qst = null;
 
 	/*
@@ -154,10 +152,8 @@ public class TestSesameImplicitDBConstraints {
 
 	private TableDefinition defTable(String name){
 		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = new Attribute(tableDefinition, "COL1", java.sql.Types.INTEGER, false, null);
-		tableDefinition.addAttribute(attribute);
-		Attribute attribute2 = new Attribute(tableDefinition, "COL2", java.sql.Types.INTEGER, false, null);
-		tableDefinition.addAttribute(attribute2);
+		tableDefinition.addAttribute("COL1", java.sql.Types.INTEGER, null, false);
+		tableDefinition.addAttribute("COL2", java.sql.Types.INTEGER, null, false);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){
