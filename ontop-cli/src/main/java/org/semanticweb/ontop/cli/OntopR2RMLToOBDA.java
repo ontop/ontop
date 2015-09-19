@@ -4,15 +4,18 @@ import com.google.common.base.Strings;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.r2rml.R2RMLReader;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 
 import java.io.File;
-import java.net.URI;
+import java.util.Properties;
 
 @Command(name = "to-obda",
         description = "Convert R2RML format to ontop native mapping format (.obda)")
@@ -34,25 +37,30 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         }
 
         File out = new File(outputMappingFile);
-
-        URI obdaURI = new File(inputMappingFile).toURI();
         try {
-        R2RMLReader reader = new R2RMLReader(inputMappingFile);
+            String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
+            String username = "username";
+            String password = "password";
+            String driverclass = "com.mysql.jdbc.Driver";
 
-        String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
-        String username = "username";
-        String password = "password";
-        String driverclass = "com.mysql.jdbc.Driver";
+            Properties p = new Properties();
+            p.setProperty(QuestPreferences.JDBC_URL, jdbcurl);
+            p.setProperty(QuestPreferences.DB_USER, username);
+            p.setProperty(QuestPreferences.DB_PASSWORD, password);
+            p.setProperty(QuestPreferences.JDBC_DRIVER, driverclass);
 
-        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-        String sourceUrl = obdaURI.toString();
-        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-                username, password, driverclass);
-        OBDAModel model = reader.readModel(dataSource);
+            QuestPreferences preferences = new R2RMLQuestPreferences(p);
 
-        ModelIOManager modelIO = new ModelIOManager(model);
+            Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
 
-            modelIO.save(out);
+            NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+            MappingParser mappingParser = factory.create(new File(inputMappingFile));
+
+            OBDAModel model = mappingParser.getOBDAModel();
+
+            OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(model);
+            mappingSerializer.save(out);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

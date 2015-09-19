@@ -1,9 +1,5 @@
 package org.semanticweb.ontop.cli;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,15 +27,13 @@ public class SimpleMaterializerTest {
     // TODO We need to extend this test to import the contents of the mappings
     // into OWL and repeat everything taking form OWL
 
-    private OBDADataFactory fac;
     private Connection conn;
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
+    private Logger log = LoggerFactory.getLogger(this.getClass());
     private OWLOntology ontology;
 
     final String owlfile = "src/test/resources/test/simplemapping.owl";
-    final String obdafile = "src/test/resources/test/simplemapping.obda";
+    // final String obdafile = "src/test/resources/test/simplemapping.obda";
 
     @Before
     public void setUp() throws Exception {
@@ -50,8 +44,6 @@ public class SimpleMaterializerTest {
         String url = "jdbc:h2:mem:materialization_test";
         String username = "sa";
         String password = "";
-
-        fac = OBDADataFactoryImpl.getInstance();
 
         conn = DriverManager.getConnection(url, username, password);
         Statement st = conn.createStatement();
@@ -71,13 +63,6 @@ public class SimpleMaterializerTest {
         // Loading the OWL file
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
-
     }
 
     @After

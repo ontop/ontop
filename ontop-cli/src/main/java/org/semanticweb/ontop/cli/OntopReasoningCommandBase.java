@@ -4,22 +4,26 @@ package org.semanticweb.ontop.cli;
 import com.google.common.base.Preconditions;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
+import java.util.Properties;
 import java.util.Set;
 
 public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRelatedCommand {
@@ -73,46 +77,35 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         return newOntology;
     }
 
-    protected OBDAModel loadMappingFile(String mappingFile) throws InvalidPredicateDeclarationException, IOException, InvalidMappingException {
-        OBDAModel obdaModel;
+    protected OBDAModel loadMappingFile(String mappingFile) throws InvalidPredicateDeclarationException, IOException,
+            InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
+
+        QuestPreferences preferences = createPreferences(mappingFile);
+        return loadModel(mappingFile, preferences);
+    }
+
+    protected QuestPreferences createPreferences(String mappingFile) {
         if(mappingFile.endsWith(".obda")){
-            obdaModel = loadOBDA(mappingFile);
-        } else {
-            obdaModel = loadR2RML(mappingFile, jdbcUrl, jdbcUserName, jdbcPassword, jdbcDriverClass);
+            return new QuestPreferences();
         }
-        return obdaModel;
+        else {
+            Properties p = new Properties();
+            p.setProperty(QuestPreferences.JDBC_URL, jdbcUrl);
+            p.setProperty(QuestPreferences.DB_USER, jdbcUserName);
+            p.setProperty(QuestPreferences.DB_PASSWORD, jdbcPassword);
+            p.setProperty(QuestPreferences.JDBC_DRIVER, jdbcDriverClass);
+
+            return new R2RMLQuestPreferences(p);
+        }
     }
 
-    private OBDAModel loadOBDA(String obdaFile) throws InvalidMappingException, IOException, InvalidPredicateDeclarationException {
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdaFile);
-        return obdaModel;
-    }
+    private OBDAModel loadModel(String mappingFile, QuestPreferences preferences)
+            throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+        Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
 
-    private OBDAModel loadR2RML(String r2rmlFile, String jdbcUrl, String username, String password, String driverClass) {
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+        MappingParser mappingParser = factory.create(new File(mappingFile));
 
-        Preconditions.checkNotNull(jdbcUrl, "jdbcUrl is null");
-        Preconditions.checkNotNull(password, "password is null");
-        Preconditions.checkNotNull(username, "username is null");
-        Preconditions.checkNotNull(driverClass, "driverClass is null");
-
-        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-
-        URI obdaURI = new File(r2rmlFile).toURI();
-
-        String sourceUrl = obdaURI.toString();
-        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcUrl,
-                username, password, driverClass);
-
-        R2RMLReader reader = null;
-        try {
-            reader = new R2RMLReader(r2rmlFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return reader.readModel(dataSource);
+        return mappingParser.getOBDAModel();
     }
 }

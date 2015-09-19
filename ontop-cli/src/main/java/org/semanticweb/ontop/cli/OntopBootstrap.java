@@ -3,13 +3,21 @@ package org.semanticweb.ontop.cli;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
-import org.semanticweb.ontop.io.ModelIOManager;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
+import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
+import java.util.Properties;
 
 @Command(name = "bootstrap",
         description = "Bootstrap ontology and mapping from the database")
@@ -29,12 +37,19 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
                 if (owlFile != null) {
                     File owl = new File(owlFile);
                     File obda = new File(mappingFile);
+
+                    QuestPreferences preferences = getPreferences();
+                    Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
+
                     DirectMappingBootstrapper dm = new DirectMappingBootstrapper(
-                            baseUri, jdbcUrl, jdbcUserName, jdbcPassword, jdbcDriverClass);
+                            baseUri, jdbcUrl, jdbcUserName, jdbcPassword, jdbcDriverClass,
+                            injector.getInstance(NativeQueryLanguageComponentFactory.class),
+                            injector.getInstance(OBDAFactoryWithException.class));
+
                     OBDAModel model = dm.getModel();
                     OWLOntology onto = dm.getOntology();
-                    ModelIOManager mng = new ModelIOManager(model);
-                    mng.save(obda);
+                    OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(model);
+                    mappingSerializer.save(obda);
                     onto.getOWLOntologyManager().saveOntology(onto,
                             new FileDocumentTarget(owl));
                 } else {
@@ -48,5 +63,20 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
             e.printStackTrace();
         }
 
+    }
+
+    private QuestPreferences getPreferences() {
+        if (mappingFile.endsWith(".obda")){
+            return new QuestPreferences();
+        }
+        else {
+            Properties p = new Properties();
+            p.setProperty(QuestPreferences.JDBC_URL, jdbcUrl);
+            p.setProperty(QuestPreferences.DB_USER, jdbcUserName);
+            p.setProperty(QuestPreferences.DB_PASSWORD, jdbcPassword);
+            p.setProperty(QuestPreferences.JDBC_DRIVER, jdbcDriverClass);
+
+            return new R2RMLQuestPreferences(p);
+        }
     }
 }

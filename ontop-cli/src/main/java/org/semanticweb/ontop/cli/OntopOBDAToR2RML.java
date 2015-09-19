@@ -1,15 +1,21 @@
 package org.semanticweb.ontop.cli;
 
 import com.google.common.base.Strings;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.r2rml.R2RMLWriter;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -48,23 +54,26 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         File out = new File(outputMappingFile);
         URI obdaURI = new File(inputMappingFile).toURI();
-        // create model
-        OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 
+        QuestPreferences preferences = new QuestPreferences();
+        Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
-        // obda mapping
-        ModelIOManager modelIO = new ModelIOManager(model);
+        MappingParser mappingParser = factory.create(new File(obdaURI));
 
+        OBDAModel model;
         /**
          * load the mapping in native Ontop syntax
          */
         try {
-            modelIO.load(new File(obdaURI));
-        } catch (IOException | InvalidMappingException e) {
+            model = mappingParser.getOBDAModel();
+        } catch (IOException | InvalidMappingException | DuplicateMappingException | InvalidDataSourceException e) {
             e.printStackTrace();
+            System.exit(1);
+            return;
         }
 
-        URI srcURI = model.getSources().get(0).getSourceID();
+        URI srcURI = model.getSources().iterator().next().getSourceID();
 
         OWLOntology ontology = null;
         if (owlFile != null) {

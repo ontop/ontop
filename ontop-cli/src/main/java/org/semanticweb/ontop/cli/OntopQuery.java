@@ -25,17 +25,10 @@ import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
 import com.google.common.base.Joiner;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -165,24 +158,13 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
     public QuestOWLFactory createQueryOWLFactory(String mappingFile) throws Exception {
 
-        OBDAModel obdaModel = loadMappingFile(mappingFile);
-
-		/*
-		 * Preparing the configuration for the new Quest instance, we need to
-		 * make sure it will be setup for "virtual ABox mode"
-		 */
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
 		/*
 		 * Creating the instance of the reasoner using the factory. Remember
 		 * that the RDBMS that contains the data must be already running and
 		 * accepting connections. The HelloWorld and Books tutorials at our wiki
 		 * show you how to do this.
 		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(p);
+        QuestOWLFactory factory = new QuestOWLFactory(new File(mappingFile), createPreferences(mappingFile));
 
         return factory;
     }
