@@ -591,10 +591,8 @@ public class JDBCConnectionManager {
 			while (rsPrimaryKeys.next()) {
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
 				String pkName = rsPrimaryKeys.getString("PK_NAME");
-				if (pkName != null) {
-					int idx = table.getAttributeKey(colName);
-					pk.add(table.getAttribute(idx));
-				}
+				if (pkName != null) 
+					pk.add(table.getAttribute(colName));
 			}
 		} 
 		ImmutableList<Attribute> pkattr = pk.build();
@@ -643,18 +641,18 @@ public class JDBCConnectionManager {
 			ForeignKeyConstraint.Builder builder = null;
 			String currentName = "";
 			while (rsForeignKeys.next()) {
+				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
+				DatabaseRelationDefinition ref = metadata.getDefinition(pkTableName);
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {
 					if (builder != null) 
 						table.addForeignKeyConstraint(builder.build());
 					
-					builder = new ForeignKeyConstraint.Builder(name);
+					builder = new ForeignKeyConstraint.Builder(name, table, ref);
 					currentName = name;
 				}
 				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
-				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
 				String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
-				DatabaseRelationDefinition ref = metadata.getDefinition(pkTableName);
 				if (ref != null)
 					builder.add(table.getAttribute(colName), ref.getAttribute(pkColumnName));
 				else {

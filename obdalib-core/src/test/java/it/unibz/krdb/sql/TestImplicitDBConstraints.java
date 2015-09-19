@@ -52,7 +52,7 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addFunctionalDependency(this.md);
 		DatabaseRelationDefinition dd = this.md.getDefinition("TABLENAME");
-		Attribute attr = dd.getAttribute(1);	
+		Attribute attr = dd.getAttribute("KEYNAME");	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
 	}
 
@@ -85,7 +85,7 @@ public class TestImplicitDBConstraints {
 		assertTrue(fk != null);
 		assertTrue(fk.getComponents().get(0).getReference().getRelation().getName().equals("TABLE2"));
 		assertTrue(fk.getComponents().get(0).getReference().getName().equals("KEY1"));
-		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(dd.getAttribute(1)))); 
+		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(dd.getAttribute("KEYNAME")))); 
 	}
 
 	

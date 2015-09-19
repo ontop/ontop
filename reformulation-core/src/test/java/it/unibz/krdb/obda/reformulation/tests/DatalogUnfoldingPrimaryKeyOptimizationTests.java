@@ -57,7 +57,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		table.addAttribute("col2", Types.INTEGER, null, false);
 		table.addAttribute("col3", Types.INTEGER, null, false);
 		table.addAttribute("col4", Types.INTEGER, null, false);
-		table.setPrimaryKey(ImmutableList.of(table.getAttribute(1)));
+		table.setPrimaryKey(ImmutableList.of(table.getAttribute("col1")));
 		metadata.add(table);
 		
 		
@@ -66,7 +66,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		table.addAttribute("col2", Types.INTEGER, null, false);
 		table.addAttribute("col3", Types.INTEGER, null, false);
 		table.addAttribute("col4", Types.INTEGER, null, false);
-		table.setPrimaryKey(ImmutableList.of(table.getAttribute(1)));
+		table.setPrimaryKey(ImmutableList.of(table.getAttribute("col1")));
 		metadata.add(table);
 
 		unfoldingProgram = fac.getDatalogProgram();

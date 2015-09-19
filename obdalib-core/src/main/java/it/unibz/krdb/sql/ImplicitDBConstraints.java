@@ -208,35 +208,26 @@ public class ImplicitDBConstraints {
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object
 	 */
 	public void addFunctionalDependency(DBMetadata md) {
-		for(String tableName : this.uniqueFD.keySet() ){
+		for (String tableName : this.uniqueFD.keySet()) {
 			DatabaseRelationDefinition td = md.getDefinition(tableName);
-			if(td != null && td instanceof TableDefinition){
+			if (td != null && td instanceof TableDefinition) {
 				ArrayList<ArrayList<String>> tableFDs = this.uniqueFD.get(tableName);
-				//if(tableFDs.size() > 1)
-					//log.warn("More than one primary key supplied for table " + tableName + ". Ontop supports only one, so the first is used.");
-				for (ArrayList<String> listOfConstraints: tableFDs){
-					for (String keyColumn : listOfConstraints){
-					int key_pos = td.getAttributeKey(keyColumn);
-					
-					if(key_pos == -1){
+				for (ArrayList<String> listOfConstraints: tableFDs) {
+					for (String keyColumn : listOfConstraints) {
+					Attribute attr = td.getAttribute(keyColumn);
+					if (attr == null) {
 						System.out.println("Column '" + keyColumn + "' not found in table '" + td.getName() + "'");
-					} else {
-						Attribute attr = td.getAttribute(key_pos);
-						if(attr == null){
-							log.warn("Error getting attribute " + keyColumn + " from table " + tableName + ". Seems position " + key_pos);
-						} else if (! attr.getName().equals(keyColumn)){
-							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
-						} else {		
-							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
-							// ROMAN (17 Aug 2015): do we really change it into NON NULL?
-							td.addUniqueConstraint(ImmutableList.of(td.getAttribute(key_pos)));
+					} 
+					else {		
+						//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
+						// ROMAN (17 Aug 2015): do we really change it into NON NULL?
+						td.addUniqueConstraint(ImmutableList.of(attr));
 						}
 					}
-				}
-			}		
-					
+				}							
 				md.add(td);
-			} else { // no table definition
+			} 
+			else { // no table definition
 				log.warn("Error in user supplied primary key: No table definition found for " + tableName + ".");
 			}
 		}
@@ -257,39 +248,28 @@ public class ImplicitDBConstraints {
 			ArrayList<HashMap<String, Reference>> tableFKeys = this.fKeys.get(tableName);
 			for(HashMap<String, Reference> fKey : tableFKeys){
 				for (String keyColumn : fKey.keySet()){
-					int key_pos = td.getAttributeKey(keyColumn);
-					if(key_pos == -1){
-						log.warn("Column '" + keyColumn + "' not found in table '" + td.getName() + "'");
-						continue;
-					}
-					Attribute attr = td.getAttribute(key_pos);
+					Attribute attr = td.getAttribute(keyColumn);
 					if(attr == null){
-						log.warn("Error getting attribute " + keyColumn + " from table " + tableName + ". Seems position " + key_pos);
+						log.warn("Error getting attribute " + keyColumn + " from table " + tableName);
 						continue;
 					}
-					if (! attr.getName().equals(keyColumn)){
-						log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
-						continue;
-					}
-					//if(attr.getReference() != null){
-					//	log.warn("Manually supplied foreign key ignored since existing in metadata foreign key for '" + td.getName() + "':'" + attr.getName() + "'");
-					//	continue;
-					//}
 					Reference ref = fKey.get(keyColumn);
 					String fkTable = ref.getTableReference();
 					DatabaseRelationDefinition fktd = md.getDefinition(fkTable);
-					if(fktd == null){
+					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
 						continue;
 					}
 					String fkColumn = ref.getColumnReference();
-					if(fktd.getAttributeKey(fkColumn) == -1){
+					Attribute fkAttr = fktd.getAttribute(fkColumn);
+					if (fkAttr == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");
 						continue;
 					}
 					
-					td.addForeignKeyConstraint(new ForeignKeyConstraint.Builder("_FK_" + tableName + "_" + keyColumn)
-											.add(attr, fktd.getAttribute(fkColumn)).build());
+					td.addForeignKeyConstraint(
+							new ForeignKeyConstraint.Builder("_FK_" + tableName + "_" + keyColumn ,td, fktd)
+											.add(attr, fkAttr).build());
 				}
 			}
 			md.add(td);

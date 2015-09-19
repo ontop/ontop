@@ -273,10 +273,9 @@ public class DBMetadata implements Serializable {
 					UniqueConstraint pk = def.getPrimaryKey();
 					if (pk != null) {
 						List<Integer> pkeyIdx = new ArrayList<>(pk.getAttributes().size());
-						for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
-							Attribute column = def.getAttribute(columnidx);
-							if (pk.getAttributes().contains(column)) 
-								pkeyIdx.add(columnidx);
+						for (Attribute att : def.getAttributes()) {
+							if (pk.getAttributes().contains(att)) 
+								pkeyIdx.add(att.getIndex());
 						}
 						pkeys.put(newAtomPredicate, pkeyIdx);
 					}
@@ -284,10 +283,9 @@ public class DBMetadata implements Serializable {
                     // unique constraints
 					for (UniqueConstraint uc : def.getUniqueConstraints()) {
 						List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
-						for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
-							Attribute column = def.getAttribute(columnidx);
-							if (uc.getAttributes().contains(column)) 
-								pkeyIdx.add(columnidx);
+						for (Attribute att : def.getAttributes()) {
+							if (uc.getAttributes().contains(att)) 
+								pkeyIdx.add(att.getIndex());
 						}
 						pkeys.put(newAtomPredicate, pkeyIdx);
 					}

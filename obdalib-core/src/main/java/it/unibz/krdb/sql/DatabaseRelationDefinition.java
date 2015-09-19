@@ -21,8 +21,10 @@ package it.unibz.krdb.sql;
  */
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 
@@ -43,6 +45,7 @@ public abstract class DatabaseRelationDefinition {
 	private final String tableName;
 	
 	private final List<Attribute> attributes = new LinkedList<>();
+	private final Map<String, Attribute> attributeMap = new HashMap<>();
 
 	private UniqueConstraint pk;
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
@@ -97,19 +100,23 @@ public abstract class DatabaseRelationDefinition {
 	}
 	
 	public void addAttribute(String name, int type, String typeName, boolean canNull) {
-		attributes.add(new Attribute(this, name, type, typeName, canNull));
+		Attribute att = new Attribute(this, attributes.size() + 1, name, type, typeName, canNull);
+		Attribute prev = attributeMap.put(att.getName(), att);
+		if (prev != null) 
+			throw new IllegalArgumentException("Duplicate attribute names");
+		
+		attributes.add(att);
 	}
 
 	/**
 	 * gets attribute with the specified position
 	 * 
-	 * @param pos is position <em>staring at 1</em>
+	 * @param index is position <em>staring at 1</em>
 	 * @return attribute at the position
 	 */
-	
-	public Attribute getAttribute(int pos) {
+	public Attribute getAttribute(int index) {
 		// positions start at 1
-		Attribute attribute = attributes.get(pos - 1);
+		Attribute attribute = attributes.get(index - 1);
 		return attribute;
 	}
 
@@ -118,23 +125,6 @@ public abstract class DatabaseRelationDefinition {
 	}
 	
 	public Attribute getAttribute(String attributeName) {
-		int pos = getAttributeKey(attributeName);
-		return getAttribute(pos);
+		return attributeMap.get(attributeName);
 	}
-	
-	/**
-	 * Used to get the key of an attribute, so it can be get or set with the {@link #getAttribute(int) getAttribute} or {@link #setAttribute(int, Attribute) setAttribute}
-	 * 
-	 * @param The name of an attribute, correctly spelled and cased.
-	 * @return The key in the hashmap
-	 */
-	public int getAttributeKey(String attributeName) {
-		int idx = 1; // start at 1
-        for (Attribute att : attributes) {
-            if (att.getName().equals(attributeName)) 
-                return idx;
-            idx++;
-        }
-        return -1;
-    }	
 }

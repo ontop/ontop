@@ -25,14 +25,16 @@ import java.sql.Types;
 public class Attribute {
 	
 	private final String name;
+	private final int index;
 	private final int type;
 	private final String typeName;
 	private final boolean canNull;
 	
 	private final DatabaseRelationDefinition table;
 	
-	Attribute(DatabaseRelationDefinition relation, String name, int type, String typeName, boolean canNull) {
+	Attribute(DatabaseRelationDefinition relation, int index, String name, int type, String typeName, boolean canNull) {
 		this.table = relation;
+		this.index = index;
 		this.name = name;
 		this.type = type;
 		this.typeName = typeName;
@@ -45,6 +47,10 @@ public class Attribute {
 	
 	public DatabaseRelationDefinition getRelation() {
 		return table;
+	}
+	
+	public int getIndex() {
+		return index;
 	}
 	
 	public int getType() {
@@ -80,7 +86,8 @@ public class Attribute {
 		
 		if (obj instanceof Attribute) {
 			Attribute other = (Attribute)obj;
-			return this.name.equals(other.name) && this.table.equals(other.table);
+			//                                 the same reference(!) for the table
+			return this.name.equals(other.name) && (this.table == other.table);  
 		}
 		
 		return false;

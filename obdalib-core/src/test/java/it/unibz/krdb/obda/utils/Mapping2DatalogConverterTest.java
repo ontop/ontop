@@ -51,19 +51,19 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		table1.addAttribute("last_name", Types.VARCHAR, null, false);
 		table1.addAttribute("year", Types.INTEGER, null, false);
 		table1.addAttribute("nationality", Types.VARCHAR, null, false);
-		table1.setPrimaryKey(ImmutableList.of(table1.getAttribute(1)));
+		table1.setPrimaryKey(ImmutableList.of(table1.getAttribute("id")));
 		
 		TableDefinition table2 = new TableDefinition("Course");
 		table2.addAttribute("cid", Types.VARCHAR, null, false);
 		table2.addAttribute("title", Types.VARCHAR, null, false);
 		table2.addAttribute("credits", Types.INTEGER, null, false);
 		table2.addAttribute("description", Types.VARCHAR, null, false);
-		table2.setPrimaryKey(ImmutableList.of(table2.getAttribute(1)));
+		table2.setPrimaryKey(ImmutableList.of(table2.getAttribute("cid")));
 		
 		TableDefinition table3 = new TableDefinition("Enrollment");
 		table3.addAttribute("student_id", Types.INTEGER, null, false);
 		table3.addAttribute("course_id", Types.VARCHAR, null, false);
-		table3.setPrimaryKey(ImmutableList.of(table3.getAttribute(1), table3.getAttribute(2)));
+		table3.setPrimaryKey(ImmutableList.of(table3.getAttribute("student_id"), table3.getAttribute("course_id")));
 		
 		md.add(table1);
 		md.add(table2);

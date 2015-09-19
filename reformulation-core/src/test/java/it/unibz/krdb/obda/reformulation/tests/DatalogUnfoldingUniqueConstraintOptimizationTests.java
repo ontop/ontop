@@ -56,7 +56,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		table.addAttribute("col2", Types.INTEGER, null, true);
 		table.addAttribute("col3", Types.INTEGER, null, true);
 		table.addAttribute("col4", Types.INTEGER, null, true);
-		table.setPrimaryKey(ImmutableList.of(table.getAttribute(4)));
+		table.setPrimaryKey(ImmutableList.of(table.getAttribute("col4")));
 		metadata.add(table);
 		
 		
@@ -65,7 +65,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		table.addAttribute("col2", Types.INTEGER, null, false);
 		table.addAttribute("col3", Types.INTEGER, null, false);
 		table.addAttribute("col4", Types.INTEGER, null, false);
-		table.setPrimaryKey(ImmutableList.of(table.getAttribute(1)));
+		table.setPrimaryKey(ImmutableList.of(table.getAttribute("col1")));
 		metadata.add(table);
 
         unfoldingProgram = fac.getDatalogProgram();

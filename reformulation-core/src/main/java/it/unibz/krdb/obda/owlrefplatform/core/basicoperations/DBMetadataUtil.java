@@ -62,31 +62,19 @@ public class DBMetadataUtil {
 		for (TableDefinition def : tableDefs) {
 			for (ForeignKeyConstraint fks : def.getForeignKeys()) {
 
-				TableDefinition def2 = null;
+				TableDefinition def2 = (TableDefinition) fks.getReferencedRelation();
+
 				Map<Integer, Integer> positionMatch = new HashMap<>();
 				for (ForeignKeyConstraint.Component comp : fks.getComponents()) {
 					// Get current table and column (1)
-					String column1 = comp.getAttribute().getName();
+					Attribute att1 = comp.getAttribute();
 					
 					// Get referenced table and column (2)
-					String column2 = comp.getReference().getName();				
+					Attribute att2 = comp.getReference();				
 					
-					// Get table definition for referenced table
-					def2 = (TableDefinition) comp.getReference().getRelation();
-					if (def2 == null) { // in case of broken FK
-						// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
-						//        (which can happen in the NEW abridged metadata)
-						throw new RuntimeException("Missing table: " + fks);
-					}
 					// Get positions of referenced attribute
-					int pos1 = def.getAttributeKey(column1);
-					if (pos1 == -1) {
-						throw new RuntimeException("Missing column: " + column1);
-					}
-					int pos2 = def2.getAttributeKey(column2);
-					if (pos2 == -1) {
-						throw new RuntimeException("Missing column: " + column2);
-					}
+					int pos1 = att1.getIndex();
+					int pos2 = att2.getIndex();
 					positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
 				}
 				// Construct CQIE
