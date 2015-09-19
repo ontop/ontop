@@ -39,11 +39,8 @@ public class DBMetadata implements Serializable {
 
 	/**
 	 * Constructs an initial metadata with some general information about the
-	 * database, e.g., the driver name, the database name and several rules on
-	 * storing the identifier.
+	 * database, e.g., the driver name, the database engine name.
 	 * 
-	 * @param md
-	 *            The database metadata.
 	 */
 
 	public DBMetadata(String driverName, String driverVersion, String databaseProductName) {
@@ -98,8 +95,6 @@ public class DBMetadata implements Serializable {
 			def = schema.get(name.toLowerCase());
 		if (def == null)
 			def = schema.get(name.toUpperCase());
-		// if (def == null)
-		// def = schema.get(name.substring(1, name.length()-1));
 		return def;
 	}
 
@@ -124,32 +119,6 @@ public class DBMetadata implements Serializable {
 	}
 
 
-	/**
-	 * Returns the attribute full-qualified name using the table/view ALIAS
-	 * name. [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the
-	 * method will use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME].
-	 * 
-	 * @param table
-	 *            Can be a table name or a view name.
-	 * @param alias
-	 *            The table or view alias name.
-	 * @param pos
-	 *            The index position.
-	 * @return
-	 */
-	public String getFullQualifiedAttributeName(String table, String alias, int pos) {		
-		RelationDefinition dd = getDefinition(table);
-		if (dd == null) 
-			throw new RuntimeException("Unknown table definition: " + table);
-		
-		String attributeName = dd.getAttribute(pos).getName();
-		
-		if (alias != null && !alias.isEmpty()) {
-			return String.format("%s.%s", alias, attributeName);
-		} else {
-			return String.format("%s.%s", table, attributeName);
-		}
-	}
 
 	public String getDriverName() {
 		return driverName;

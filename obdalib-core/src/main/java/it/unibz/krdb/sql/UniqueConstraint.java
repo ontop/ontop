@@ -38,7 +38,6 @@ public class UniqueConstraint {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
-		private final String name;
 		private final RelationDefinition relation;
 		
 		/**
@@ -47,20 +46,19 @@ public class UniqueConstraint {
 		 * @param relation 
 		 */
 		
-		public Builder(String name, RelationDefinition relation) {
-			this.name = name;
+		public Builder(RelationDefinition relation) {
 			this.relation = relation;
 		}
 		
 		public Builder add(Attribute attribute) {
 			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("Unique Key requires the same table in all attributes: " + name);
+				throw new IllegalArgumentException("Unique Key requires the same table in all attributes: " + relation + " " + attribute);
 			
 			builder.add(attribute);
 			return this;
 		}
 		
-		public UniqueConstraint build() {
+		public UniqueConstraint build(String name) {
 			ImmutableList<Attribute> attributes = builder.build();
 			if (attributes.isEmpty())
 				return null;
@@ -69,21 +67,19 @@ public class UniqueConstraint {
 	}
 	
 	public static UniqueConstraint of(Attribute att) {
-		UniqueConstraint.Builder builder = 
-				new UniqueConstraint.Builder("PK_" + att.getRelation().getName(), att.getRelation());
+		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
 		builder.add(att);
-		return builder.build();
+		return builder.build("PK_" + att.getRelation().getName());
 	}
 
 	public static UniqueConstraint of(Attribute att, Attribute att2) {
-		UniqueConstraint.Builder builder = 
-				new UniqueConstraint.Builder("PK_" + att.getRelation().getName(), att.getRelation());
+		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
 		builder.add(att).add(att2);
-		return builder.build();
+		return builder.build("PK_" + att.getRelation().getName());
 	}
 	
-	public static Builder builder(String name, RelationDefinition relation) {
-		return new Builder(name, relation);
+	public static Builder builder(RelationDefinition relation) {
+		return new Builder(relation);
 	}
 	
 	private final String name;

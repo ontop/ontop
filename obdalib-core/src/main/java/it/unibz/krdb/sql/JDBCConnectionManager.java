@@ -585,16 +585,16 @@ public class JDBCConnectionManager {
 	 * 
 	 */
 	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table) throws SQLException {
-		UniqueConstraint.Builder pk = UniqueConstraint.builder("PK_" + table.getName(), table);
+		UniqueConstraint.Builder pk = UniqueConstraint.builder(table);
+		String pkName = "";
 		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getName())) {
 			while (rsPrimaryKeys.next()) {
+				pkName = rsPrimaryKeys.getString("PK_NAME");
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
-				String pkName = rsPrimaryKeys.getString("PK_NAME");
-				if (pkName != null) 
-					pk.add(table.getAttribute(colName));
+				pk.add(table.getAttribute(colName));
 			}
 		} 
-		table.setPrimaryKey(pk.build());
+		table.setPrimaryKey(pk.build(pkName));
 	}
 	
 	/**
@@ -643,9 +643,9 @@ public class JDBCConnectionManager {
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {
 					if (builder != null) 
-						table.addForeignKeyConstraint(builder.build());
+						table.addForeignKeyConstraint(builder.build(currentName));
 					
-					builder = new ForeignKeyConstraint.Builder(name, table, ref);
+					builder = new ForeignKeyConstraint.Builder(table, ref);
 					currentName = name;
 				}
 				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
@@ -658,7 +658,7 @@ public class JDBCConnectionManager {
 				}
 			}
 			if (builder != null)
-				table.addForeignKeyConstraint(builder.build());
+				table.addForeignKeyConstraint(builder.build(currentName));
 		} 
 	}
 }

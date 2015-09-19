@@ -214,14 +214,14 @@ public class Mapping2DatalogConverter {
             String tableName = table.getFullName();
 
             // Construct the predicate using the table name
-            int arity = dbMetadata.getDefinition(tableName).getAttributes().size();
+            final RelationDefinition td = dbMetadata.getDefinition(tableName);
+            int arity = td.getAttributes().size();
             Predicate predicate = fac.getPredicate(tableName, arity);
 
             // Swap the column name with a new variable from the lookup table
             List<Term> terms = new ArrayList<>();
             for (int i = 1; i <= arity; i++) {
-                String columnName = dbMetadata
-                        .getFullQualifiedAttributeName(tableName,
+                String columnName = getFullQualifiedAttributeName(td, tableName,
                                 table.getAlias(), i);
                 String termName = lookupTable.lookup(columnName);
                 if (termName == null) {
@@ -293,9 +293,9 @@ public class Mapping2DatalogConverter {
 		for (RelationJSQL table : tables) {
 			
 			String tableName = table.getTableName();
-			String fullName = table.getFullName();
+			final String fullName = table.getFullName();
 			String tableGivenName = table.getGivenName();
-			RelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
+			final RelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
 
             if (tableDefinition == null) {
                 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
@@ -345,7 +345,7 @@ public class Mapping2DatalogConverter {
 				}
 
 				// full qualified attribute name
-				String qualifiedColumnName = dbMetadata.getFullQualifiedAttributeName(fullName, null, i);
+				String qualifiedColumnName = getFullQualifiedAttributeName(tableDefinition, fullName, null, i);
 
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
@@ -359,8 +359,7 @@ public class Mapping2DatalogConverter {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias != null) {
-					String qualifiedColumnAlias = dbMetadata
-							.getFullQualifiedAttributeName(fullName,
+					String qualifiedColumnAlias = getFullQualifiedAttributeName(tableDefinition, fullName,
                                     tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
 					String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
@@ -401,6 +400,30 @@ public class Mapping2DatalogConverter {
 
 		return lookupTable;
 	}
+    
+	/**
+	 * Returns the attribute full-qualified name using the table/view ALIAS
+	 * name. [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the
+	 * method will use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME].
+	 * 
+	 * @param table
+	 *            Can be a table name or a view name.
+	 * @param alias
+	 *            The table or view alias name.
+	 * @param pos
+	 *            The index position.
+	 * @return
+	 */
+	private static String getFullQualifiedAttributeName(RelationDefinition dd, String table, String alias, int pos) {		
+		String attributeName = dd.getAttribute(pos).getName();
+		
+		if (alias != null && !alias.isEmpty()) {
+			return String.format("%s.%s", alias, attributeName);
+		} else {
+			return String.format("%s.%s", table, attributeName);
+		}
+	}
+  
 
     /**
      * This visitor class converts the SQL Expression to a Function

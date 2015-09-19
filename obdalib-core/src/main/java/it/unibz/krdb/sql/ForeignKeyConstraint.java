@@ -57,7 +57,6 @@ public class ForeignKeyConstraint {
 	
 	public static final class Builder {
 		private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
-		private final String name;
 		private final RelationDefinition relation, referencedRelation;
 		
 		/**
@@ -67,31 +66,30 @@ public class ForeignKeyConstraint {
 		 * @param referencedRelation
 		 */
 		
-		public Builder(String name, RelationDefinition relation, RelationDefinition referencedRelation) {
-			this.name = name;
+		public Builder(RelationDefinition relation, RelationDefinition referencedRelation) {
 			this.relation = relation;
 			this.referencedRelation = referencedRelation;
 		}
 		
 		public Builder add(Attribute attribute, Attribute reference) {
 			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + name);
+				throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation);
 			
 			if (referencedRelation != reference.getRelation())
-				throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: " + name);
+				throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: "  + relation + " -> " + referencedRelation);
 			
 			builder.add(new Component(attribute, reference));
 			return this;
 		}
 		
-		public ForeignKeyConstraint build() {
+		public ForeignKeyConstraint build(String name) {
 			return new ForeignKeyConstraint(name, builder.build());
 		}
 	}
 	
 	public static ForeignKeyConstraint of(String name, Attribute attribute, Attribute reference) {
-		return new Builder(name,attribute.getRelation(), reference.getRelation())
-						.add(attribute, reference).build();
+		return new Builder(attribute.getRelation(), reference.getRelation())
+						.add(attribute, reference).build(name);
 	}
 	
 	private final ImmutableList<Component> components;

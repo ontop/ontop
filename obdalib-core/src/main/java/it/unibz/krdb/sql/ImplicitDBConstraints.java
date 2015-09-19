@@ -265,8 +265,8 @@ public class ImplicitDBConstraints {
 					}
 					
 					td.addForeignKeyConstraint(
-							new ForeignKeyConstraint.Builder("_FK_" + tableName + "_" + keyColumn ,td, fktd)
-											.add(attr, fkAttr).build());
+							new ForeignKeyConstraint.Builder(td, fktd).add(attr, fkAttr)
+									.build("_FK_" + tableName + "_" + keyColumn));
 				}
 			}
 			md.add(td);
