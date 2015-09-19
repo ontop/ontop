@@ -50,7 +50,7 @@ public class TestImplicitDBConstraints {
 	@Test
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
-		uc.addFunctionalDependency(this.md);
+		uc.addFunctionalDependencies(this.md);
 		RelationDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute("KEYNAME");	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 

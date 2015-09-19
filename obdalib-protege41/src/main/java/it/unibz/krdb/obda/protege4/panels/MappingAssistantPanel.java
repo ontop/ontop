@@ -53,6 +53,7 @@ import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
@@ -775,7 +776,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			Connection conn = man.getConnection(selectedSource);
-			DBMetadata md = JDBCConnectionManager.getMetaData(conn, null);
+			DBMetadata md = DBMetadataExtractor.getMetaData(conn, null);
 			for (RelationDefinition relation : md.getRelations()) {
 				relationList.addElement(relation);
 			}

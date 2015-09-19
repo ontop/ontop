@@ -52,6 +52,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -668,7 +669,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (metadata == null) {
 				// if we have to parse the full metadata or just the table list in the mappings
 				if (obtainFullMetadata) {
-					metadata = JDBCConnectionManager.getMetaData(localConnection, null);
+					metadata = DBMetadataExtractor.getMetaData(localConnection, null);
 				} 
 				else {
 					// This is the NEW way of obtaining part of the metadata
@@ -685,7 +686,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 							userConstraints.addReferredTables(realTables);
 						}
 
-						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
+						metadata = DBMetadataExtractor.getMetaData(localConnection, realTables);
 					}
 					catch (JSQLParserException e) {
 						System.out.println("Error obtaining the tables" + e);

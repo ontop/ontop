@@ -35,6 +35,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
@@ -131,7 +132,7 @@ public class DirectMappingEngine {
 		if (metadata == null) {
 			for (int i = 0; i < sourcelist.size(); i++) {
 				Connection conn = conMan.getConnection(sourcelist.get(i));		
-				oe.enrichOntology(JDBCConnectionManager.getMetaData(conn, null), ontology);
+				oe.enrichOntology(DBMetadataExtractor.getMetaData(conn, null), ontology);
 			}
 		} else
 			oe.enrichOntology(this.metadata, ontology);
@@ -213,7 +214,7 @@ public class DirectMappingEngine {
 		model.addSource(source);
 		Connection conn = conMan.getConnection(source);		
 		// this operation is EXPENSIVE
-		DBMetadata metadata = JDBCConnectionManager.getMetaData(conn, null);
+		DBMetadata metadata = DBMetadataExtractor.getMetaData(conn, null);
 		insertMapping(metadata, model,source.getSourceID());
 	}
 	

@@ -60,8 +60,8 @@ public class ForeignKeyConstraint {
 		private final RelationDefinition relation, referencedRelation;
 		
 		/**
-		 * creates a FK builder 
-		 * @param name of the FK constraint
+		 * creates a FOREIGN KEY builder 
+		 * 
 		 * @param relation 
 		 * @param referencedRelation
 		 */
@@ -71,19 +71,38 @@ public class ForeignKeyConstraint {
 			this.referencedRelation = referencedRelation;
 		}
 		
-		public Builder add(Attribute attribute, Attribute reference) {
+		/**
+		 * adds a pair (attribute, referenced attribute) to the FK constraint
+		 * 
+		 * @param attribute
+		 * @param referencedAttribute
+		 * @return
+		 */
+		
+		public Builder add(Attribute attribute, Attribute referencedAttribute) {
 			if (relation != attribute.getRelation())
 				throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation);
 			
-			if (referencedRelation != reference.getRelation())
+			if (referencedRelation != referencedAttribute.getRelation())
 				throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: "  + relation + " -> " + referencedRelation);
 			
-			builder.add(new Component(attribute, reference));
+			builder.add(new Component(attribute, referencedAttribute));
 			return this;
 		}
+
+		/**
+		 * builds a FOREIGN KEY constraint
+		 * 
+		 * @param name
+		 * @return null if the list of components is empty
+		 */
 		
 		public ForeignKeyConstraint build(String name) {
-			return new ForeignKeyConstraint(name, builder.build());
+			ImmutableList<Component> components = builder.build();
+			if (components.isEmpty())
+				return null;
+			
+			return new ForeignKeyConstraint(name, components);
 		}
 	}
 	
@@ -92,14 +111,18 @@ public class ForeignKeyConstraint {
 						.add(attribute, reference).build(name);
 	}
 	
-	private final ImmutableList<Component> components;
 	private final String name;
+	private final ImmutableList<Component> components;
 	private final RelationDefinition referencedRelation;
 	
+	/**
+	 * private constructor (use Builder instead)
+	 * 
+	 * @param name
+	 * @param components
+	 */
+	
 	private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
-		if (components.isEmpty())
-			throw new IllegalArgumentException("Empty list of components is not allowed in Foreign Key constraints");
-		
 		this.name = name;
 		this.components = components;
 		this.referencedRelation = components.get(0).getReference().getRelation();

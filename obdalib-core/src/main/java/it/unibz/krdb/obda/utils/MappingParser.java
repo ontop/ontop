@@ -22,8 +22,6 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
 

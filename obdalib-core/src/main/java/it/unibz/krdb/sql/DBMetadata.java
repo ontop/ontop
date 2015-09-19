@@ -21,7 +21,6 @@ package it.unibz.krdb.sql;
  */
 
 import java.io.Serializable;
-
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -35,6 +34,7 @@ public class DBMetadata implements Serializable {
 	private final String driverVersion;
 	private final String databaseProductName;
 
+	// ROMAN (19 Aug 2015): this pQuotes does not consider ' (unlike ParsedSQLQuery.pQuotes). WHY?
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
 
 	/**
@@ -54,34 +54,37 @@ public class DBMetadata implements Serializable {
 	 * inserted without quotes so it can be used for the mapping, while the
 	 * value that is used also for the generated SQL conserves the quotes
 	 * 
-	 * @param value
+	 * @param td
 	 *            The data definition. It can be a {@link TableDefinition} or a
 	 *            {@link ViewDefinition} object.
 	 */
-	public void add(RelationDefinition value) {
-		String name = value.getName();
+	public void add(RelationDefinition td) {
+		String name = td.getName();
 		// name without quotes
 		if (pQuotes.matcher(name).matches())
-			schema.put(name.substring(1, name.length() - 1), value);
+			schema.put(name.substring(1, name.length() - 1), td);
 
 		else {
 			String[] names = name.split("\\."); // consider the case of
 												// schema.table
 			if (names.length == 2) {
-				String schemaName = names[0];
-				String tableName = names[1];
-				if (pQuotes.matcher(schemaName).matches())
-					schemaName = schemaName.substring(1,
-							schemaName.length() - 1);
-				if (pQuotes.matcher(tableName).matches())
-					tableName = tableName.substring(1, tableName.length() - 1);
-				schema.put(schemaName + "." + tableName, value);
-			} else
-				schema.put(name, value);
+				String schemaName = unquote(names[0]);
+				String tableName = unquote(names[1]);
+				schema.put(schemaName + "." + tableName, td);
+			} 
+			else
+				schema.put(name, td);
 		}
-
 	}
 
+	// ROMAN (19 Aug 2015): Use TableJSQL.unquote(String) instead?
+	private static String unquote(String name) {
+		if (pQuotes.matcher(name).matches()) {
+			return name.substring(1, name.length() - 1);
+		}
+		return name;
+	}
+	
 	/**
 	 * Retrieves the data definition object based on its name. The
 	 * <name>name</name> can be either a table name or a view name.
@@ -110,7 +113,7 @@ public class DBMetadata implements Serializable {
 	 * Retrieves the table list form the metadata.
 	 */
 	public Collection<TableDefinition> getTables() {
-		List<TableDefinition> tableList = new ArrayList<>();
+		List<TableDefinition> tableList = new ArrayList<>(schema.size());
 		for (RelationDefinition dd : schema.values()) {
 			if (dd instanceof TableDefinition) 
 				tableList.add((TableDefinition) dd);

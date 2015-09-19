@@ -41,14 +41,21 @@ public class UniqueConstraint {
 		private final RelationDefinition relation;
 		
 		/**
-		 * creates a UK builder 
-		 * @param name of the UK constraint
+		 * creates a UNIQUE constraint builder 
+		 * 
 		 * @param relation 
 		 */
 		
 		public Builder(RelationDefinition relation) {
 			this.relation = relation;
 		}
+		
+		/**
+		 * adds an attribute to the UNIQUE constraint
+		 * 
+		 * @param attribute
+		 * @return
+		 */
 		
 		public Builder add(Attribute attribute) {
 			if (relation != attribute.getRelation())
@@ -57,6 +64,13 @@ public class UniqueConstraint {
 			builder.add(attribute);
 			return this;
 		}
+
+		/**
+		 * builds a UNIQUE constraint (this includes PRIMARY KEY)
+		 * 
+		 * @param name
+		 * @return null if the list of attributes is empty
+		 */
 		
 		public UniqueConstraint build(String name) {
 			ImmutableList<Attribute> attributes = builder.build();
@@ -68,14 +82,12 @@ public class UniqueConstraint {
 	
 	public static UniqueConstraint of(Attribute att) {
 		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
-		builder.add(att);
-		return builder.build("PK_" + att.getRelation().getName());
+		return builder.add(att).build("PK_" + att.getRelation().getName());
 	}
 
 	public static UniqueConstraint of(Attribute att, Attribute att2) {
 		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
-		builder.add(att).add(att2);
-		return builder.build("PK_" + att.getRelation().getName());
+		return builder.add(att).add(att2).build("PK_" + att.getRelation().getName());
 	}
 	
 	public static Builder builder(RelationDefinition relation) {
@@ -85,16 +97,23 @@ public class UniqueConstraint {
 	private final String name;
 	private final ImmutableList<Attribute> attributes;
 	
+	/**
+	 * private constructor (use Builder instead)
+	 * 
+	 * @param name
+	 * @param attributes
+	 */
+	
 	private UniqueConstraint(String name, ImmutableList<Attribute> attributes) {
 		this.name = name;
 		this.attributes = attributes;
 	}
 	
-	public ImmutableList<Attribute> getAttributes() {
-		return attributes;
-	}
-	
 	public String getName() {
 		return name;
+	}
+
+	public ImmutableList<Attribute> getAttributes() {
+		return attributes;
 	}
 }
