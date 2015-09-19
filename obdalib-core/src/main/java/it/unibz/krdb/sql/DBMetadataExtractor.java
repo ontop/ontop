@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,9 +67,9 @@ public class DBMetadataExtractor {
 		if (md.getDatabaseProductName().contains("Oracle")) {
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (tables == null || tables.isEmpty())
-				tableList = getTableListOracle(defaultSchema, tables);
-			else
 				tableList = getTableListOracle(defaultSchema, conn);
+			else
+				tableList = getTableListUpperCase(defaultSchema, tables);
 			
 			dt = OracleTypeFixer;
 		} 
@@ -78,7 +79,7 @@ public class DBMetadataExtractor {
 				dt = DefaultTypeFixer;
 			}
 			else {
-				tableList = getTableListUpperCase(tables);
+				tableList = getTableListUpperCase(null, tables);
 				dt = MySQLTypeFixer; // why MySQLTypeFixer?
 			}
 		}  
@@ -86,12 +87,12 @@ public class DBMetadataExtractor {
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableListUpperCase(tables);
+				tableList = getTableListUpperCase(null, tables);
 			
 			dt = MySQLTypeFixer;
 		}
 		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
-			// Postgres treats unquoted identifiers as lowercase
+			// Postgres treats unquoted identifiers as lower-case
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
@@ -100,7 +101,6 @@ public class DBMetadataExtractor {
 			dt = MySQLTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
-			// UNIQUE CONSTRAINTS WERE MISSING in the special procedure
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableListSQLServer(conn);
 			else
@@ -193,9 +193,12 @@ public class DBMetadataExtractor {
 		}
 		return fks;
 	}
-	private static List<RelationDefinition> getTableListUpperCase(List<RelationJSQL> tables) throws SQLException {
+	private static List<RelationDefinition> getTableListUpperCase(String defaultTableSchema, List<RelationJSQL> tables) throws SQLException {
 
 		List<RelationDefinition> fks = new LinkedList<>();
+		// The tables contains all tables which occur in the sql source queries
+		// Note that different spellings (casing, quotation marks, optional schema prefix) 
+		// may lead to the same table occurring several times 		
 		for (RelationJSQL table : tables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
@@ -206,14 +209,17 @@ public class DBMetadataExtractor {
 				tblName = tblName.toUpperCase();
 			
 			String tableSchema = table.getSchema();
-			if (tableSchema != null && !table.isSchemaQuoted())
-				tableSchema = tableSchema.toUpperCase();
+			if (tableSchema != null) {
+				if (!table.isSchemaQuoted())
+					tableSchema = tableSchema.toUpperCase();
+			}
+			else
+				tableSchema = defaultTableSchema;
 			
 			fks.add(new TableDefinition(null, tableSchema, tblName, tableGivenName));
 		}
 		return fks;
 	}
-	
 	
 
 	private static final String tableSelectQuerySQLServer = 
@@ -303,48 +309,13 @@ public class DBMetadataExtractor {
 		return fks; 
 	}
 	
-	/**
-	 * Retrieve metadata for Oracle database engine
-	 */
-	private static  List<RelationDefinition> getTableListOracle(String defaultTableOwner, List<RelationJSQL> tables) throws SQLException {
-		
-		List<RelationDefinition> fks = new LinkedList<>();
-		
-		// The tables contains all tables which occur in the sql source queries
-		// Note that different spellings (casing, quotation marks, optional schema prefix) 
-		// may lead to the same table occurring several times 
-		for (RelationJSQL table : tables) {
-			// givenTableName is exactly the name the user provided, 
-			// including schema prefix if that was provided, otherwise without.
-			String tableGivenName = table.getGivenName();
-			
-			// If there is a schema prefix, this must be the tableOwner argument to the 
-			// jdbc methods below. Otherwise, we use the logged in user. I guess null would
-			// also have worked in the latter case.
-			String tableOwner;
-			if (table.getSchema() != null) {
-				tableOwner = table.getSchema();
-				if (!table.isSchemaQuoted())
-					tableOwner = tableOwner.toUpperCase();
-			}
-			else
-				tableOwner = defaultTableOwner.toUpperCase();
-
-			String tblName = table.getTableName();
-			if (!table.isTableQuoted())
-				tblName = tblName.toUpperCase();
-			
-			fks.add(new TableDefinition(null, tableOwner, tblName, tableGivenName));
-		}
-		return fks;
-	}
 	
 	
 	
 	
 	private static String getOracleDefaultOwner(Connection conn) throws SQLException {
 		// Obtain the table owner (i.e., schema name) 
-		String loggedUser = "SYSTEM"; // by default
+		String loggedUser = "SYSTEM"; // default value
 		try (Statement stmt = conn.createStatement()) {
 			try (ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
 				if (resultSet.next()) {
@@ -352,7 +323,7 @@ public class DBMetadataExtractor {
 				}
 			}
 		}
-		return loggedUser;
+		return loggedUser.toUpperCase();
 	}
 		
 	
@@ -369,8 +340,9 @@ public class DBMetadataExtractor {
 	private static DatatypeNormalizer MySQLTypeFixer = new DatatypeNormalizer() {
 		@Override
 		public int getCorrectedDatatype(int dataType, String typeName) {					
-			// Fix for MySQL YEAR
-			if (dataType == 91 && typeName.equals("YEAR")) 
+			// Fix for MySQL YEAR (see Table 5.2 at 
+			//        http://dev.mysql.com/doc/connector-j/en/connector-j-reference-type-conversions.html)
+			if (dataType ==  Types.DATE && typeName.equals("YEAR")) 
 				return -10000;
 			return dataType;
 		}};	
@@ -386,9 +358,12 @@ public class DBMetadataExtractor {
 			// parsing errors. To avoid this bug manually type the column in the
 			// mapping. This may be a problem of the driver, try with other version
 			// I tried oracle thin driver ojdbc16-11.2.0.3
+			//
+			// ROMAN (19 Aug 2015): see 
+			//    http://www.oracle.com/technetwork/database/enterprise-edition/jdbc-faq-090281.html#08_01
 			
-			if (dataType == 93 && typeName.equals("DATE")) 
-				dataType = 91;
+			if (dataType == Types.TIMESTAMP && typeName.equals("DATE")) 
+				dataType = Types.DATE;
 			return dataType;
 		}};
 	
