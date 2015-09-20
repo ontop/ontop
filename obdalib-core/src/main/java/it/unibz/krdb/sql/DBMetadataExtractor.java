@@ -108,6 +108,8 @@ import org.slf4j.LoggerFactory;
 
 public class DBMetadataExtractor {
 
+	private static final boolean printouts = false;
+	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 	
 	/**
@@ -121,6 +123,10 @@ public class DBMetadataExtractor {
 	 */
 
 	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
+		
+		if (printouts)
+			System.err.println("GETTING METADATA WITH " + conn + " ON " + tables);
+		
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationDefinition> tableList;
 		DatatypeNormalizer dt;
@@ -187,6 +193,8 @@ public class DBMetadataExtractor {
 			getPrimaryKey(md, table);
 			getUniqueAttributes(md, table);
 			metadata.add(table);
+			if (printouts)
+				System.out.println(table.getCatalog() + "." + table.getSchema() + "." + table.getTableName() + ": " + table);
 		}	
 		// FKs are processed separately because they are not local 
 		// (refer to two relations), which requires all relations 
@@ -194,8 +202,7 @@ public class DBMetadataExtractor {
 		for (RelationDefinition table : tableList) 
 			getForeignKeys(md, table, metadata);
 		
-		return metadata;
-		
+		return metadata;	
 	}
 	
 	
@@ -522,7 +529,7 @@ public class DBMetadataExtractor {
 	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table) throws SQLException {
 		UniqueConstraint.Builder pk = UniqueConstraint.builder(table);
 		String pkName = "";
-		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getName())) {
+		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getTableName())) {
 			while (rsPrimaryKeys.next()) {
 				pkName = rsPrimaryKeys.getString("PK_NAME");
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");

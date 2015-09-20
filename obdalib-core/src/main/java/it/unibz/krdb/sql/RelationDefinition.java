@@ -52,13 +52,14 @@ public abstract class RelationDefinition {
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 		
-	protected RelationDefinition(String catalogName, String schemaName, String tableName, String name) {
+	protected RelationDefinition(String catalogName, String schemaName, String tableName, String givenName) {
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
-		this.givenName = name;
+		this.givenName = givenName;
 	}
 
+	@Deprecated
 	public String getName() {
 		return givenName;
 	}

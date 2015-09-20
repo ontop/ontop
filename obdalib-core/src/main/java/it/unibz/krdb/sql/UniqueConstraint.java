@@ -82,12 +82,12 @@ public class UniqueConstraint {
 	
 	public static UniqueConstraint of(Attribute att) {
 		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
-		return builder.add(att).build("PK_" + att.getRelation().getName());
+		return builder.add(att).build("PK_" + att.getRelation().getTableName());
 	}
 
 	public static UniqueConstraint of(Attribute att, Attribute att2) {
 		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
-		return builder.add(att).add(att2).build("PK_" + att.getRelation().getName());
+		return builder.add(att).add(att2).build("PK_" + att.getRelation().getTableName());
 	}
 	
 	public static Builder builder(RelationDefinition relation) {
