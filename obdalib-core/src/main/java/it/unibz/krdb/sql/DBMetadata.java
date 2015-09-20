@@ -102,6 +102,26 @@ public class DBMetadata implements Serializable {
 	}
 
 	/**
+	 * Retrieves the data definition object based on its name. The
+	 * <name>name</name> can be either a table name or a view name.
+	 * 
+	 * @param name
+	 *            The string name.
+	 */
+	public RelationDefinition getDefinition(String schemaName, String name) {
+		// ROMAN (20 Sep 2015): this is just a hack to deal with two different schemas
+		if (schemaName != null)
+			name = schemaName + "." + name;
+		
+		RelationDefinition def = schema.get(name);
+		if (def == null)
+			def = schema.get(name.toLowerCase());
+		if (def == null)
+			def = schema.get(name.toUpperCase());
+		return def;
+	}
+	
+	/**
 	 * Retrieves the relation list (table and view definition) form the
 	 * metadata.
 	 */

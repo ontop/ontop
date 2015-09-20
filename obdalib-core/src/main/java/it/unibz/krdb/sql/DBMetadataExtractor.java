@@ -580,8 +580,9 @@ public class DBMetadataExtractor {
 			ForeignKeyConstraint.Builder builder = null;
 			String currentName = "";
 			while (rsForeignKeys.next()) {
+				String pkSchemaName = rsForeignKeys.getString("PKTABLE_SCHEM");
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-				RelationDefinition ref = metadata.getDefinition(pkTableName);
+				RelationDefinition ref = metadata.getDefinition(pkSchemaName, pkTableName);
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {
 					if (builder != null) 

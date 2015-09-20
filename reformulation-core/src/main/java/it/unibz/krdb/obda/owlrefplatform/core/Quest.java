@@ -712,19 +712,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					System.out.print("\n" + dd.getSchema() + "." + dd.getTableName() + ":");
 					UniqueConstraint pk = dd.getPrimaryKey();
 					if (pk != null)
-						for(Attribute attr : pk.getAttributes()) 
+						for (Attribute attr : pk.getAttributes()) 
 							System.out.print(attr.getName() + ",");
 				}
 				// Prints all foreign keys
 				System.out.println("\n====== Foreign keys ==========");
 				for(TableDefinition dd : table_list){
-					System.out.print("\n" + dd.getSchema() + "." + dd.getTableName() + ":");
 					List<ForeignKeyConstraint> fkeys = dd.getForeignKeys();
 					for (ForeignKeyConstraint fk : fkeys) {
-						System.out.print("(" + fk.getName() + ":");
-						for (ForeignKeyConstraint.Component attr : fk.getComponents()){
-							System.out.print(attr.getAttribute().getName() + ",");
-						}
+						System.out.print("\n" + dd.getSchema() + "." + dd.getTableName() + "->" + 
+									fk.getReferencedRelation().getSchema() + "." + fk.getReferencedRelation().getTableName() + 
+									": " + fk.getName() + "(");
+						for (ForeignKeyConstraint.Component attr : fk.getComponents()) 
+							System.out.print(attr.getAttribute().getName() + "->" + attr.getReference().getName() + ",");
+					
 						System.out.print("),");
 					}
 				}		
