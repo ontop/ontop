@@ -25,7 +25,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -69,8 +68,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 				Collection<Attribute> pk = pkc.getAttributes();
 				if (checkName(t, TB_BOOK)) {
 					assertEquals(1, pk.size());
-				} else if (checkName(t, TB_BOOKWRITER)) {
-					assertEquals(0, pk.size());
+				//} else if (checkName(t, TB_BOOKWRITER)) {
+				//	assertEquals(0, pk.size());
 				} else if (checkName(t, TB_EDITION)) {
 					assertEquals(1, pk.size());
 				} else if (checkName(t, TB_WRITER)) {
@@ -78,6 +77,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 				}
 				writeLog(t.getName(), pk);
 			}
+			else
+				assertTrue(checkName(t, TB_BOOKWRITER));
 		}
 		log.info("\n");
 	}
