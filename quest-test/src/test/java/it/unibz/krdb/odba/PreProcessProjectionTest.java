@@ -51,7 +51,7 @@ public class PreProcessProjectionTest {
 
 		Connection conn = DriverManager.getConnection(url, username, password);
  	
-    	execute(conn, "src/test/resources/mappingStars-create-h2.sql");
+    	//execute(conn, "src/test/resources/mappingStars-create-h2.sql");
     	
         fac = OBDADataFactoryImpl.getInstance();
 

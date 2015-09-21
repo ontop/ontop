@@ -567,7 +567,7 @@ public class DBMetadataExtractor {
 			}
 		}
 		
-		// Adding keys and Unique	
+		// ROMAN (20 Sep 2015): this is unfinished 
 	}
 	
 	/** 
