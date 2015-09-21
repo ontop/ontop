@@ -69,7 +69,7 @@ public class MappingSplitter {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					
 					CQIE newTargetQuery = dfac.getCQIE(head, bodyAtom);
-					OBDARDBMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(newId, sourceQuery, newTargetQuery);
+					OBDAMappingAxiom newMapping = dfac.getMappingAxiom(newId, sourceQuery, newTargetQuery);
 					newMappings.add(newMapping);
 				}
 			}

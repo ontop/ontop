@@ -183,7 +183,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 			} //end for
 			
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
 		}
 //		log.debug("Repair done. Returning {} mappings", result.size());
 		return ImmutableList.copyOf(result);

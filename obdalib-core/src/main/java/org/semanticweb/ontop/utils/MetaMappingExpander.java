@@ -194,7 +194,7 @@ public class MetaMappingExpander {
 				
 				for(List<String> params : paramsForClassTemplate) {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
-					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
+					OBDAMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
 							bodyAtom, sourceQueryParsed, columnsForTemplate,
 							columnsForValues, params, arity);
 										
@@ -243,7 +243,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * @throws JSQLParserException 
 	 */
-	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
+	private OBDAMappingAxiom instantiateMapping(String id, CQIE targetQuery,
 			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
@@ -322,7 +322,7 @@ public class MetaMappingExpander {
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
-		OBDARDBMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, newTargetQuery);
+		OBDAMappingAxiom newMapping = dfac.getMappingAxiom(id, newSourceQuery, newTargetQuery);
 		return newMapping;
 	}
 

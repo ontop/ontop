@@ -908,7 +908,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				OBDAMappingAxiom basicmapping = dfac.getMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -947,7 +947,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				OBDAMappingAxiom basicmapping = dfac.getMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);			
 			}
 		}
@@ -979,7 +979,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				OBDAMappingAxiom basicmapping = dfac.getMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1008,7 +1008,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				}
 
 				// Replacing the old mappings 
-				OBDAMappingAxiom mergedMapping = dfac.getRDBMSMappingAxiom(newSQL.toString(), targetQuery);
+				OBDAMappingAxiom mergedMapping = dfac.getMappingAxiom(newSQL.toString(), targetQuery);
 				currentMappings.clear();
 				currentMappings.add(mergedMapping);
 			}

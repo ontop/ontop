@@ -324,11 +324,9 @@ public interface OBDADataFactory extends Serializable {
 	 */
 //	public Variable getVariableNondistinguished();
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
+	public OBDAMappingAxiom getMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery);
-
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery);
+	public OBDAMappingAxiom getMappingAxiom(OBDAQuery sourceQuery, OBDAQuery targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
 

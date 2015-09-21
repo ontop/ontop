@@ -230,12 +230,12 @@ public class SQLMappingParserUsingOwlTest {
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
         // Add some mappings
         try {
-            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getRDBMSMappingAxiom(mappings[0][0],
-                    mappings[0][1], parser.parse(mappings[0][2]))));
-            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getRDBMSMappingAxiom(mappings[1][0],
-                    mappings[1][1], parser.parse(mappings[1][2]))));
-            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getRDBMSMappingAxiom(mappings[2][0],
-                    mappings[2][1], parser.parse(mappings[2][2]))));
+            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getMappingAxiom(mappings[0][0],
+                    dfac.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2]))));
+            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getMappingAxiom(mappings[1][0],
+                    dfac.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2]))));
+            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getMappingAxiom(mappings[2][0],
+                    dfac.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2]))));
         } catch (Exception e) {
             // NO-OP
         }
@@ -246,12 +246,12 @@ public class SQLMappingParserUsingOwlTest {
             Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex, URI sourceId) {
         // Add some mappings
         try {
-            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getRDBMSMappingAxiom(mappings[3][0],
-                    mappings[3][1], parser.parse(mappings[3][2]))));
-            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getRDBMSMappingAxiom(mappings[4][0],
-                    mappings[4][1], parser.parse(mappings[4][2]))));
-            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getRDBMSMappingAxiom(mappings[5][0],
-                    mappings[5][1], parser.parse(mappings[5][2]))));
+            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getMappingAxiom(mappings[3][0],
+                    dfac.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2]))));
+            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getMappingAxiom(mappings[4][0],
+                    dfac.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2]))));
+            mappingIndex.put(sourceId, ImmutableList.<OBDAMappingAxiom>of(dfac.getMappingAxiom(mappings[5][0],
+                    dfac.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2]))));
         } catch (Exception e) {
             // NO-OP
         }

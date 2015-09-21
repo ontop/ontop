@@ -27,7 +27,6 @@ package org.semanticweb.ontop.r2rml;
 
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,7 +157,7 @@ public class R2RMLManager {
 		List<Function> body = getMappingTripleAtoms(tm);
 		Function head = getHeadAtom(body);
 		CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), sourceQuery, targetQuery);
+		OBDAMappingAxiom mapping = fac.getMappingAxiom("mapping-" + tm.hashCode(), fac.getSQLQuery(sourceQuery), targetQuery);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -216,7 +215,8 @@ public class R2RMLManager {
 			}
 			//finally, create mapping and add it to the list
             //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-            OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), sourceQuery, targetQuery);
+            OBDAMappingAxiom mapping = fac.getMappingAxiom("mapping-join-" + robm.hashCode(),
+					fac.getSQLQuery(sourceQuery), targetQuery);
             System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}

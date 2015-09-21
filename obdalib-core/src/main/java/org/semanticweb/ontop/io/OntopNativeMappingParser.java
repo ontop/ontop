@@ -434,7 +434,8 @@ public class OntopNativeMappingParser implements MappingParser {
 
     private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, CQIE targetQuery,
                                                        List<OBDAMappingAxiom> currentSourceMappings) {
-        OBDAMappingAxiom mapping = DATA_FACTORY.getRDBMSMappingAxiom(mappingId, sourceQuery, targetQuery);
+        OBDAMappingAxiom mapping = DATA_FACTORY.getMappingAxiom(mappingId, DATA_FACTORY.getSQLQuery(sourceQuery),
+                targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

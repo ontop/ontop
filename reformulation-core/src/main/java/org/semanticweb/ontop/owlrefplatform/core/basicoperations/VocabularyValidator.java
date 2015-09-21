@@ -197,7 +197,7 @@ public class VocabularyValidator {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			
 			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
+			result.add(dfac.getMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
 
 		}
 		return ImmutableList.copyOf(result);

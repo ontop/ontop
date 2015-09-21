@@ -209,7 +209,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					OBDASQLQuery body = dataFactory.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
-					OBDARDBMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
+					OBDAMappingAxiom newmapping = dataFactory.getMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
 					System.out.println(newmapping.toString()+" \n");
 
 					if (mapping == null) {
