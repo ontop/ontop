@@ -25,155 +25,94 @@ import net.sf.jsqlparser.schema.Table;
 
 import java.io.Serializable;
 
+/**
+ * Class TableJSQL used to store the information about the tables. 
+ * We distinguish between givenName and Name.
+ * Since with Name we don't want to consider columns.
+ */
+
 public class TableJSQL implements Serializable{
 	
 	private static final long serialVersionUID = 7031993308873750327L;
-	/**
-	 * Class TableJSQL used to store the information about the tables. We distinguish between givenName and Name.
-	 * Since with Name we don't want to consider columns.
-	 */
 	
-	private String schema;
-	private String tableName;
-	private Alias alias;
-	
-	
-	
-	/*
-	 * These  fields are to handle quoted names in multischema.
-	 * givenSchema and givenName are the names with quotes, upper case,
-	 * that is, exactly as given by the user. 
-	 * quotedTable and quotedSchema are boolean value to identify when quotes have been removed.
-	 */
-	
-	private String givenSchema;
-	private String givenName;
-	private boolean quotedTable, quotedSchema;
-	
+	public static final class Identifier {
 
-	public TableJSQL(String name) {
-		this("", name);
-	}
+		// These  fields are to handle quoted names in multischema.
+		// givenSchema and givenName are the names with quotes, upper case,
+		// that is, exactly as given by the user. 
+		// quotedTable and quotedSchema are boolean value to identify when quotes have been removed.
+		private final String givenName;
+		private final String name;
+		private final boolean quoted;
 	
-	public TableJSQL(String schema, String name) {
-		this(schema, name, name);
-	}
-
-	/*
-	 * This constructor is used when we take the table names from the mappings.
-	 * 
-	 */
-	public TableJSQL(String schema, String tableName, String givenName) {
-			setSchema(schema);
-			setGivenSchema(schema);
-			setTableName(tableName);
-			setGivenName(givenName);
-			
+		private Identifier(String name, String givenName) {
+			if (name != null && ParsedSQLQuery.pQuotes.matcher(name).matches()) {
+	            this.name = name.substring(1, name.length() - 1);
+	            this.quoted = true;
+	        }
+			else {
+				this.name = name;
+				this.quoted = false;
+			}
+				
+			this.givenName = givenName;
 		}
+		
+		public boolean isQuoted() {
+			return quoted;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public String getGivenName() {
+			return givenName;
+		}
+	};
 	
-	public TableJSQL(Table table){
-		setSchema(table.getSchemaName());
-		setGivenSchema(table.getSchemaName());
-		setTableName(table.getName());
-		setGivenName(table.getFullyQualifiedName());
-		setAlias(table.getAlias());
+	private final Identifier schema, table;
+	private final Alias alias;
+	
+	/**
+	 * This constructor is used when we take the table names from the mappings.
+	 */
+	public TableJSQL(String schemaName, String tableName, String givenName) {
+		this.schema = new Identifier(schemaName, schemaName);
+		this.table = new Identifier(tableName, givenName);
+		this.alias = null;
+	}
+	
+	public TableJSQL(Table table) {
+		this.schema = new Identifier(table.getSchemaName(), table.getSchemaName());
+		this.table = new Identifier(table.getName(), table.getFullyQualifiedName());
+		Alias a = table.getAlias();
+		if (a != null) {
+			String name = a.getName();
+			// unquote the alias name AND MODIFY IT (ROMAN 22 Sep 2015)
+			if (ParsedSQLQuery.pQuotes.matcher(name).matches()) {
+				a.setName(name.substring(1, name.length() - 1));
+			}
+		}
+		this.alias = a;		
 	}
 
-	/**
-	 * @param givenName The table name exactly as it appears in the source sql query of the mapping, possibly with prefix and quotes
-	 */
-	public void setGivenName(String givenName) {
-		this.givenName = givenName;
-	}
 	
-	public void setSchema(String schema) {
-		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches()) {
-            this.schema = schema.substring(1, schema.length() - 1);
-            quotedSchema = true;
-        }
-		else
-			this.schema = schema;
-	}
-	
-	public String getSchema() {
+	public Identifier getSchema() {
 		return schema;
 	}
-	
-	/**
-	 * @param givenSchema The schema name exactly as it appears in the source sql query of the mapping, possibly with prefix and quotes
-	 */
-	
-	public void setGivenSchema(String givenSchema) {
-		this.givenSchema = givenSchema;
-		
-	}
-	
-	public String getGivenSchema() {
-		return givenSchema;
-		
-	}
-	/**
-	 * The table name (without prefix and without quotation marks)
-	* @param tableName 
-	*/
-	public void setTableName(String tableName) {
-		if(ParsedSQLQuery.pQuotes.matcher(tableName).matches())
-		{
-			this.tableName = tableName.substring(1, tableName.length()-1);
-			quotedTable = true;
-		}
-		else			
-			this.tableName = tableName;
-	}
-	
-	/**
-	 * @return The table name exactly as it appears in the source sql query of the mapping, 
-	 * possibly with prefix and quotes
-	 */
-	public String getGivenName() {
-		return givenName;
+
+	public Identifier getTable() {
+		return table;
 	}
 
-	public String getTableName() {
-		return tableName;
-	}
-
-	/**
-	 * The alias given to the table
-	 * See test  QuotedAliasTableTest
-	 * @param alias
-	 */
-	public void setAlias(Alias alias) {
-		if (alias == null) {
-			return;
-		}
-		alias.setName(unquote(alias.getName()));
-		this.alias = alias;
-	}
-	
 	public Alias getAlias() {
 		return alias;
 	}
 	
-	/**
-	 * 
-	 * @return true if the original name of the table is quoted
-	 */
-	public boolean isTableQuoted() {
-		return quotedTable;
-	}
-	/**
-	 * 
-	 * @return true if the original name of the schema is quoted
-	 */
-	public boolean isSchemaQuoted() {
-		return quotedSchema;
-	}
-
 	@Override
 	public String toString() {
-
-		return givenName;
+		return table.givenName;
 	}
 
 	/**
@@ -181,25 +120,13 @@ public class TableJSQL implements Serializable{
 	 * Needed to remove duplicates from the list of tables
 	 */
 	@Override
-	public boolean equals(Object t){
-		if(t instanceof TableJSQL){
+	public boolean equals(Object t) {
+		if (t instanceof TableJSQL) {
 			TableJSQL tp = (TableJSQL) t;
-			return this.givenName.equals(tp.getGivenName())
-					&& ((this.alias == null && tp.getAlias() == null)
-							|| this.alias.equals(tp.getAlias())
-							);
+			return this.table.givenName.equals(tp.table.givenName)
+					&& ((this.alias == tp.alias)
+							|| ((this.alias != null) && this.alias.equals(tp.alias)));
 		}
 		return false;
 	}
-
-	/**
-	 * Idempotent method.
-	 */
-	public static String unquote(String name) {
-		if(ParsedSQLQuery.pQuotes.matcher(name).matches()) {
-			return name.substring(1, name.length()-1);
-		}
-		return name;
-	}
-	
 }

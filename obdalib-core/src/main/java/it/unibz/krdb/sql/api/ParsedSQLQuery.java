@@ -56,7 +56,7 @@ public class ParsedSQLQuery implements Serializable {
 
 	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 	
-	private List<RelationJSQL> tables;
+	private List<TableJSQL> tables;
 	private List<SelectJSQL> subSelects;
 	private Map<String, String> aliasMap;
 	private List<Expression> joins;
@@ -170,7 +170,7 @@ public class ParsedSQLQuery implements Serializable {
 	/**
 	 * Returns all the tables in this query.
 	 */
-	public List<RelationJSQL> getTables() throws JSQLParserException {
+	public List<TableJSQL> getTables() throws JSQLParserException {
 
 		if (tables == null) {
 			TableNameVisitor visitor = new TableNameVisitor();

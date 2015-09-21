@@ -1,7 +1,7 @@
 package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
-import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableList;
 public class TestImplicitDBConstraints {
 
 	DBMetadata md;
-	ArrayList<RelationJSQL> tables;
+	ArrayList<TableJSQL> tables;
 	
 	@Before
 	public void setupMetadata(){

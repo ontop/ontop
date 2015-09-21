@@ -22,10 +22,9 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.DBMetadata.TableIdNormalizer;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public class SQLQueryParser {
 
 	private final DBMetadata dbMetaData;
-	private final String database;
 	
 	private static int id_counter;
 	
@@ -51,26 +49,11 @@ public class SQLQueryParser {
 	
 	// ONLY FOR DEEP PARSING
 	public SQLQueryParser(DBMetadata dbMetaData) {
-		database = dbMetaData.getDriverName();
  		this.dbMetaData = dbMetaData;
 	}
-	
-	/*
-	 * This constructor is used when the tables names and schemas are taken from the mappings
-	 * in MappingParser
-	 */
-	
-	
-	// ONLY FOR SHALLOW PARSING
-	public SQLQueryParser(Connection conn) throws SQLException {
-		database = conn.getMetaData().getDriverName();
-		dbMetaData = null;
-	}
-	
-	
+		
 	// ONLY FOR SHALLOW PARSING
 	public SQLQueryParser() {
-		database = null;
 		dbMetaData = null;
 	}
 	
@@ -121,21 +104,25 @@ public class SQLQueryParser {
 			queryParser = new ParsedSQLQuery(query, deeply);
 		} 
 		catch (JSQLParserException e) {
-			if(e.getCause() instanceof ParseException)
+			if (e.getCause() instanceof ParseException)
 				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
 			errors = true;
 		}
 		
 		if (queryParser == null || (errors && deeply)) {
-			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
+			log.warn("The following query couldn't be parsed. " +
+					"This means Quest will need to use nested subqueries (views) to use this mappings. " +
+					"This is not good for SQL performance, specially in MySQL. " + 
+					"Try to simplify your query to allow Quest to parse it. " + 
+					"If you think this query is already simple and should be parsed by Quest, " +
+					"please contact the authors. \nQuery: '{}'", query);
 			
 			String viewName = String.format("view_%s", id_counter++);
 			
-			if (database != null) {
-				ViewDefinition vd = createViewDefinition(viewName, query);
-			
-				if (dbMetaData != null)
-					dbMetaData.add(vd);
+			// ONLY IN DEEP PARSING
+			if (dbMetaData != null) {
+				ViewDefinition vd = createViewDefinition(viewName, query, dbMetaData.getTableIdNormalizer());
+				dbMetaData.add(vd);
 			}
 			
 			queryParser = createViewParsed(viewName, query);	
@@ -182,14 +169,7 @@ public class SQLQueryParser {
 	}
 	
 	
-	private ViewDefinition createViewDefinition(String viewName, String query) {
-
-        //TODO: we could use the sql adapter, but it's in the package reformulation-core
-        boolean uppercase = false;
-        if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
-            // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
-            uppercase = true;
-        }
+	private ViewDefinition createViewDefinition(String viewName, String query, TableIdNormalizer tableIdNormalizer) {
 
         ParsedSQLQuery queryParser = null;
         boolean supported = true;
@@ -206,7 +186,7 @@ public class SQLQueryParser {
             List<String> columns = queryParser.getColumns();
             for (String columnName : columns) {
                 if (!ParsedSQLQuery.pQuotes.matcher(columnName).matches()) { //if it is not quoted, change it in uppercase when needed
-                	columnName = getIdNormalForm(uppercase, columnName);
+                    columnName = tableIdNormalizer.getCanonicalFormOfIdentifier(columnName, false);
                 }
 				else { // if quoted remove the quotes
 					columnName = columnName.substring(1, columnName.length() - 1);
@@ -248,12 +228,12 @@ public class SQLQueryParser {
                 if (columnName.contains(" "))
                     columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
                 
-    			/*
-    			 * Remove any identifier quotes
-    			 * Example:
-    			 * 		INPUT: "table"."column"
-    			 * 		OUTPUT: table.column
-    			 */
+    			
+    			// Remove any identifier quotes
+    			// Example:
+    			// 		INPUT: "table"."column"
+    			// 		OUTPUT: table.column
+    			// ROMAN (21 Aug 2015): what about "table".column? is it a quoted column name?
     			boolean quoted = false;
                 Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
                 Matcher matcher = pattern.matcher(columnName);
@@ -261,35 +241,19 @@ public class SQLQueryParser {
                     columnName = columnName.replaceAll("[\\[\\]\"`]", "");
                     quoted = true;
                 }
-			
 
-    			/*
-    			 * Get only the short name if the column name uses qualified name.
-    			 * Example:
-    			 * 		INPUT: table.column
-    			 * 		OUTPUT: column
-    			 */
-                
+    			// Get only the short name if the column name uses qualified name.
+    			// Example: table.column -> column
                 if (columnName.contains(".")) {
                     columnName = columnName.substring(columnName.lastIndexOf(".") + 1); // get only the name
                 }
 
-                if (!quoted) 
-                	columnName = getIdNormalForm(uppercase, columnName);
+                columnName = tableIdNormalizer.getCanonicalFormOfIdentifier(columnName, quoted);
 
-                // the attribute index always start at 1
                 viewDefinition.addAttribute(columnName, 0, null, false); 
             }
         }
         
         return viewDefinition;
 	}
-
-	private static String getIdNormalForm(boolean uppercase, String id) {
-        if (uppercase)
-            return id.toUpperCase();
-        else
-           return id.toLowerCase();
-	}
-	
 }

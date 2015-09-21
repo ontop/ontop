@@ -22,7 +22,7 @@ package it.unibz.krdb.sql;
 
 
 import it.unibz.krdb.sql.DBMetadata.TableIdNormalizer;
-import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -123,7 +123,7 @@ public class DBMetadataExtractor {
 	 * @return The database metadata object.
 	 */
 
-	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
+	public static DBMetadata getMetaData(Connection conn, List<TableJSQL> tables) throws SQLException {
 		
 		if (printouts)
 			System.err.println("GETTING METADATA WITH " + conn + " ON " + tables);
@@ -156,7 +156,7 @@ public class DBMetadataExtractor {
 				dt = MySQLTypeFixer; // why MySQLTypeFixer?
 			}
 		}  
-		else if (md.getDatabaseProductName().contains("H2")) {
+		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
 			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 				
 			if (tables == null || tables.isEmpty()) 
@@ -187,6 +187,7 @@ public class DBMetadataExtractor {
 				
 			dt = DefaultTypeFixer;
  		} 
+		
 		else {
 			idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
@@ -198,6 +199,14 @@ public class DBMetadataExtractor {
 			
 			dt = MySQLTypeFixer;
 		}
+		/*
+        boolean uppercase = false;
+        if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
+            // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
+            uppercase = true;
+        }
+		*/
+		
 		
 		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idNormalizer);
 		
@@ -224,22 +233,22 @@ public class DBMetadataExtractor {
 	 * Retrieve the normalized list of tables from a given list of RelationJSQL
 	 */
 
-	private static List<RelationDefinition> getTableList(String defaultTableSchema, List<RelationJSQL> tables, TableIdNormalizer idNormalizer) throws SQLException {
+	private static List<RelationDefinition> getTableList(String defaultTableSchema, List<TableJSQL> tables, TableIdNormalizer idNormalizer) throws SQLException {
 
 		List<RelationDefinition> fks = new LinkedList<>();
 		// The tables contains all tables which occur in the sql source queries
 		// Note that different spellings (casing, quotation marks, optional schema prefix) 
 		// may lead to the same table occurring several times 		
-		for (RelationJSQL table : tables) {
+		for (TableJSQL table : tables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
-			String tableGivenName = table.getGivenName();
+			String tableGivenName = table.getTable().getGivenName();
 
-			String tblName = idNormalizer.getCanonicalFormOfIdentifier(table.getTableName(), table.isTableQuoted());
+			String tblName = idNormalizer.getCanonicalFormOfIdentifier(table.getTable().getName(), table.getTable().isQuoted());
 
 			String tableSchema;
-			if (table.getSchema() != null) 
-				tableSchema = idNormalizer.getCanonicalFormOfIdentifier(table.getSchema(), table.isSchemaQuoted());
+			if (table.getSchema().getName() != null) 
+				tableSchema = idNormalizer.getCanonicalFormOfIdentifier(table.getSchema().getName(), table.getSchema().isQuoted());
 			else
 				tableSchema = defaultTableSchema;
 			

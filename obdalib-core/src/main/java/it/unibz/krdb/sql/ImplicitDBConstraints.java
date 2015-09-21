@@ -3,7 +3,6 @@
  */
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.schema.Table;
 
@@ -148,9 +147,9 @@ public class ImplicitDBConstraints {
 	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
 	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
 	 */
-	public static boolean tableIsInList(List<RelationJSQL> tables, String tableGivenName) {
-		for (RelationJSQL table : tables) {
-			if (table.getGivenName().equals(tableGivenName))
+	public static boolean tableIsInList(List<TableJSQL> tables, String tableGivenName) {
+		for (TableJSQL table : tables) {
+			if (table.getTable().getGivenName().equals(tableGivenName))
 				return true;
 		}
 		return false;
@@ -162,7 +161,7 @@ public class ImplicitDBConstraints {
 	 * @param tables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public void addReferredTables(List<RelationJSQL> tables){
+	public void addReferredTables(List<TableJSQL> tables){
 		for(String tableGivenName : this.referredTables){
 			if(!tableIsInList(tables, tableGivenName)){
 				String[] tablenames = tableGivenName.split("\\.");
@@ -177,7 +176,7 @@ public class ImplicitDBConstraints {
 					log.warn("Too many dots in table name " + tableGivenName + " in user-supplied constraints");
 					continue;
 				}
-				tables.add(new RelationJSQL(new TableJSQL(newTable)));
+				tables.add(new TableJSQL(newTable));
 			}
 		}
 	}

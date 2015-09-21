@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -46,11 +46,11 @@ public class MappingParser {
 	private List<OBDAMappingAxiom> mappingList;
 	private SQLQueryParser sqlQueryParser;
 	private List<ParsedMapping> parsedMappings;
-	private List<RelationJSQL> realTables; // Tables that are not view definitions
+	private List<TableJSQL> realTables; // Tables that are not view definitions
 	
 	public MappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappingList = mappingAxioms;
-		this.sqlQueryParser = new SQLQueryParser(conn);
+		this.sqlQueryParser = new SQLQueryParser(/*conn*/); // ROMAN (21 Sep 2015): shallow parsing anyway
 		this.parsedMappings = this.parseMappings();
 	}
 
@@ -63,9 +63,9 @@ public class MappingParser {
 	 * @return The tables (same as getTables)
 	 * @throws JSQLParserException 
 	 */
-	public List<RelationJSQL> getRealTables() throws JSQLParserException{
+	public List<TableJSQL> getRealTables() throws JSQLParserException{
 		if(this.realTables == null){
-			List<RelationJSQL> _realTables = this.getTables();
+			List<TableJSQL> _realTables = this.getTables();
 //			List<RelationJSQL> removeThese = new ArrayList<>();
 //			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
 //				for(RelationJSQL rel : _realTables){
@@ -92,12 +92,12 @@ public class MappingParser {
 		return parsedMappings;
 	}
 	
-	public List<RelationJSQL> getTables() throws JSQLParserException{
-		List<RelationJSQL> tables = new ArrayList<>();
+	public List<TableJSQL> getTables() throws JSQLParserException{
+		List<TableJSQL> tables = new ArrayList<>();
 		for(ParsedMapping pm : parsedMappings){
 			ParsedSQLQuery query = pm.getSourceQueryParsed();
-			List<RelationJSQL> queryTables = query.getTables();
-			for(RelationJSQL table : queryTables){
+			List<TableJSQL> queryTables = query.getTables();
+			for(TableJSQL table : queryTables){
 				if (!(tables.contains(table))){
 					tables.add(table);
 				}

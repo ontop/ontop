@@ -58,7 +58,7 @@ import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
-import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -679,7 +679,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 							
 					try {
-						List<RelationJSQL> realTables = mParser.getRealTables();
+						List<TableJSQL> realTables = mParser.getRealTables();
 						
 						if (applyUserConstraints) {
 							// Add the tables referred to by user-supplied foreign keys

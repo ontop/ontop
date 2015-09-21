@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -44,7 +43,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
-	private ArrayList<RelationJSQL> tables;
+	private ArrayList<TableJSQL> tables;
 
 	/**
 	 * There are special names, that are not table names but are parsed as
@@ -63,7 +62,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * @param deepParsing
 	 * @return
 	 */
-	public List<RelationJSQL> getTables(Select select, boolean deepParsing) throws JSQLParserException {
+	public List<TableJSQL> getTables(Select select, boolean deepParsing) throws JSQLParserException {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -129,7 +128,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	
 	@Override
 	public void visit(Table tableName) {
-		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
+		TableJSQL relation = new TableJSQL(tableName);
 		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
 			tables.add(relation);
 		}
@@ -436,8 +435,8 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	}
 
 	private void init() {
-		otherItemNames = new ArrayList<String>();
-		tables = new ArrayList<RelationJSQL>();
+		otherItemNames = new ArrayList<>();
+		tables = new ArrayList<>();
 
 	}
 

@@ -207,11 +207,11 @@ public class Mapping2DatalogConverter {
      */
     private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
-        List<RelationJSQL> tables = parsedSQLQuery.getTables();
+        List<TableJSQL> tables = parsedSQLQuery.getTables();
 
-        for (RelationJSQL table : tables) {
+        for (TableJSQL table : tables) {
             // Construct the URI from the table name
-            String tableName = table.getFullName();
+            String tableName = getFullTableName(table);
 
             // Construct the predicate using the table name
             final RelationDefinition td = dbMetadata.getDefinition(tableName);
@@ -221,8 +221,12 @@ public class Mapping2DatalogConverter {
             // Swap the column name with a new variable from the lookup table
             List<Term> terms = new ArrayList<>();
             for (int i = 1; i <= arity; i++) {
+            	Alias as = table.getAlias();
+            	String alias = null;
+            	if (as != null)
+            		alias = as.getName();
                 String columnName = getFullQualifiedAttributeName(td, tableName,
-                                table.getAlias(), i);
+                                alias, i);
                 String termName = lookupTable.lookup(columnName);
                 if (termName == null) {
                     throw new IllegalStateException("Column '" + columnName
@@ -283,18 +287,18 @@ public class Mapping2DatalogConverter {
     private static LookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
 
-		List<RelationJSQL> tables = queryParsed.getTables();
+		List<TableJSQL> tables = queryParsed.getTables();
 
 		// Collect all known column aliases
 		Map<String, String> aliasMap = queryParsed.getAliasMap();
 		
 		int offset = 0; // the index offset
 
-		for (RelationJSQL table : tables) {
+		for (TableJSQL table : tables) {
 			
-			String tableName = table.getTableName();
-			final String fullName = table.getFullName();
-			String tableGivenName = table.getGivenName();
+			final String tableName = table.getTable().getName();
+			final String fullName = getFullTableName(table);
+			final String tableGivenName = table.getTable().getGivenName();
 			final RelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
 
             if (tableDefinition == null) {
@@ -357,12 +361,12 @@ public class Mapping2DatalogConverter {
 				}
 
 				// full qualified attribute name using table alias
-				String tableAlias = table.getAlias();
+				Alias tableAlias = table.getAlias();
 				if (tableAlias != null) {
 					String qualifiedColumnAlias = getFullQualifiedAttributeName(tableDefinition, fullName,
-                                    tableAlias, i);
+                                    tableAlias.getName(), i);
 					lookupTable.add(qualifiedColumnAlias, index);
-					String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
+					String aliasColumnName = tableAlias.getName().toLowerCase() + "." + lowercaseColumn;
 
                     // register the alias name, if any
                     if (aliasMap.containsKey(aliasColumnName)) {
@@ -400,6 +404,13 @@ public class Mapping2DatalogConverter {
 
 		return lookupTable;
 	}
+    
+    private static String getFullTableName(TableJSQL table) {
+   		if (table.getSchema().getName() != null)
+			return table.getSchema().getName() + "." + table.getTable().getName();
+		else 
+			return table.getTable().getName();
+   }
     
 	/**
 	 * Returns the attribute full-qualified name using the table/view ALIAS

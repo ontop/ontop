@@ -485,8 +485,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			
 			TableJSQL fixTable = new TableJSQL(table);
 			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTableName());
-			table.setSchemaName(fixTable.getSchema());
+			table.setName(fixTable.getTable().getName());
+			table.setSchemaName(fixTable.getSchema().getName());
 		
 		}
 		String columnName= col.getColumnName();

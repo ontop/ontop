@@ -465,8 +465,8 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			
 			TableJSQL fixTable = new TableJSQL(table); //create a tablejsql that recognized between quoted and unquoted tables
 			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTableName());
-			table.setSchemaName(fixTable.getSchema());
+			table.setName(fixTable.getTable().getName());
+			table.setSchemaName(fixTable.getSchema().getName());
 		
 		}
 		

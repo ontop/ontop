@@ -450,9 +450,8 @@ public class WhereClauseVisitor implements SelectVisitor, ExpressionVisitor, Fro
 			
 			TableJSQL fixTable = new TableJSQL(table);
 			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTableName());
-			table.setSchemaName(fixTable.getSchema());
-		
+			table.setName(fixTable.getTable().getName());
+			table.setSchemaName(fixTable.getSchema().getName());	
 		}
 		String columnName= tableColumn.getColumnName();
 		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
