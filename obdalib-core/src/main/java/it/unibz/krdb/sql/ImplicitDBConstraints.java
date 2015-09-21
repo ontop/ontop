@@ -162,7 +162,7 @@ public class ImplicitDBConstraints {
 	 * @param tables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public List<RelationJSQL> addReferredTables(List<RelationJSQL> tables){
+	public void addReferredTables(List<RelationJSQL> tables){
 		for(String tableGivenName : this.referredTables){
 			if(!tableIsInList(tables, tableGivenName)){
 				String[] tablenames = tableGivenName.split("\\.");
@@ -180,7 +180,6 @@ public class ImplicitDBConstraints {
 				tables.add(new RelationJSQL(new TableJSQL(newTable)));
 			}
 		}
-		return tables;
 	}
 
 	/**

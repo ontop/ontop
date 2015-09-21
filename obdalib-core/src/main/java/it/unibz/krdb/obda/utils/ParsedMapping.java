@@ -37,8 +37,8 @@ import it.unibz.krdb.sql.api.ParsedSQLQuery;
  */
 public class ParsedMapping {
 
-	ParsedSQLQuery sourceQueryParsed;
-	OBDAMappingAxiom axiom;
+	private final ParsedSQLQuery sourceQueryParsed;
+	private final OBDAMappingAxiom axiom;
 	
 	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryParser translator){
 		this.axiom = axiom;

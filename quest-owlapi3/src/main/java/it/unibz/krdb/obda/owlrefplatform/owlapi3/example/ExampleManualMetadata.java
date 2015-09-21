@@ -98,7 +98,7 @@ private TableDefinition defStaticTable(String name){
 	return tableDefinition;
 }
 private DBMetadata getMeta(){
-	DBMetadata dbMetadata = new DBMetadata("dummy class", null, null);
+	DBMetadata dbMetadata = new DBMetadata("dummy class", null, null, DBMetadata.IdentityIdNormalizer);
 	dbMetadata.add(defMeasTable("burner"));
 	dbMetadata.add(defMessTable("events"));
 	dbMetadata.add(defStaticTable("a_static"));

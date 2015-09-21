@@ -82,7 +82,7 @@ public class MetaMappingExpander {
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
 		translator = new SQLQueryParser();
-		expandedMappings = new ArrayList<OBDAMappingAxiom>();
+		expandedMappings = new ArrayList<>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}
 

@@ -120,7 +120,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 	
 
 	/*
-	 * visit Plainselect, search for the SelectExpressionItems
+	 * visit PlainSelect, search for the SelectExpressionItems
 	 * Stored in ProjectionSQL 
 	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
 	 */

@@ -48,13 +48,14 @@ public class ParsedSQLQuery implements Serializable {
 
 	private static final long serialVersionUID = -4590590361733833782L;
 
-	private String query;
-	private Statement stm;
-	boolean deepParsing = false; // used to remove all quotes from the query
+	private final String query;
+	private final Statement stm;
+	private final boolean deepParsing; // used to remove all quotes from the query
 
 	private Select selectQuery; // the parsed query
 
 	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+	
 	private List<RelationJSQL> tables;
 	private List<SelectJSQL> subSelects;
 	private Map<String, String> aliasMap;
@@ -160,38 +161,6 @@ public class ParsedSQLQuery implements Serializable {
 
 	}
 
-	/**
-	 * Unquote the query and throw errors for unsupported values
-	 * 
-	 * @throws JSQLParserException
-	 */
-	public void deepParsing() throws JSQLParserException {
-		this.deepParsing = true;
-
-		tables = getTables();
-		whereClause = getWhereClause();
-		projection = getProjection();
-		joins = getJoinConditions();
-		aliasMap = getAliasMap();
-		groupByClause = getGroupByClause();
-
-	}
-
-	/**
-	 * Unquote the query
-	 *
-	 * @throws JSQLParserException
-	 */
-
-    public void unquote() throws JSQLParserException {
-		tables = getTables();
-		whereClause = getWhereClause();
-		projection = getProjection();
-		joins = getJoinConditions();
-		aliasMap = getAliasMap();
-		groupByClause = getGroupByClause();
-
-    }
 
 	@Override
 	public String toString() {
@@ -279,7 +248,6 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 	public List<String> getColumns() {
 		ColumnsVisitor visitor = new ColumnsVisitor();
-
 		return visitor.getColumns(selectQuery);
 	}
 

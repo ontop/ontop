@@ -21,6 +21,7 @@ package it.unibz.krdb.sql;
 */
 
 
+import it.unibz.krdb.sql.DBMetadata.TableIdNormalizer;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.sql.Connection;
@@ -130,62 +131,75 @@ public class DBMetadataExtractor {
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationDefinition> tableList;
 		DatatypeNormalizer dt;
+		TableIdNormalizer idNormalizer;
 		
 		if (md.getDatabaseProductName().contains("Oracle")) {
+			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+			
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (tables == null || tables.isEmpty())
 				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema));
 			else
-				tableList = getTableList(defaultSchema, tables, UpperCaseIdNormalizer);
+				tableList = getTableList(defaultSchema, tables, idNormalizer);
 			
 			dt = OracleTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("DB2")) {
+			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+					
 			if (tables == null || tables.isEmpty()) {
 				tableList = getTableList(conn, DB2RelationListProvider);
 				dt = DefaultTypeFixer;
 			}
 			else {
-				tableList = getTableList(null, tables, UpperCaseIdNormalizer);
+				tableList = getTableList(null, tables, idNormalizer);
 				dt = MySQLTypeFixer; // why MySQLTypeFixer?
 			}
 		}  
 		else if (md.getDatabaseProductName().contains("H2")) {
+			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+				
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, tables, UpperCaseIdNormalizer);
+				tableList = getTableList(null, tables, idNormalizer);
 			
 			dt = MySQLTypeFixer;
 		}
 		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
+			idNormalizer = DBMetadata.LowerCaseIdNormalizer;
+					
 			// Postgres treats unquoted identifiers as lower-case
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, tables, LowerCaseIdNormalizer);
+				tableList = getTableList(null, tables, idNormalizer);
 			
 			dt = MySQLTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
+			idNormalizer = DBMetadata.IdentityIdNormalizer;
+					
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableList(conn, MSSQLServerRelationListProvider);
 			else
-				tableList = getTableList(null, tables, IdentityIdNormalizer);
+				tableList = getTableList(null, tables, idNormalizer);
 				
 			dt = DefaultTypeFixer;
  		} 
 		else {
+			idNormalizer = DBMetadata.IdentityIdNormalizer;
+					
 			// For other database engines, i.e. MySQL
 			if (tables == null || tables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else
-				tableList = getTableList(null, tables, IdentityIdNormalizer);
+				tableList = getTableList(null, tables, idNormalizer);
 			
 			dt = MySQLTypeFixer;
 		}
 		
-		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName());
+		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idNormalizer);
 		
 		for (RelationDefinition table : tableList) {
 			// ROMAN (20 Sep 2015): careful with duplicates
@@ -287,39 +301,6 @@ public class DBMetadataExtractor {
 		return loggedUser.toUpperCase();
 	}
 	
-	/**
-	 * A method for getting the canonical form of identifiers 
-	 * (upper-case, as in SQL standard, or lower-case as in PostgreSQL)
-	 */
-	
-	private interface TableIdNormalizer {
-		String getCanonicalFormOfIdentifier(String id, boolean quoted);
-	}
-	
-	private static final TableIdNormalizer UpperCaseIdNormalizer = new TableIdNormalizer() {
-		@Override
-		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
-			if (!quoted)
-				return id.toUpperCase();
-			return id;
-		}
-	};
-
-	private static final TableIdNormalizer LowerCaseIdNormalizer = new TableIdNormalizer() {
-		@Override
-		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
-			if (!quoted)
-				return id.toLowerCase();
-			return id;
-		}
-	};
-
-	private static final TableIdNormalizer IdentityIdNormalizer = new TableIdNormalizer() {
-		@Override
-		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
-			return id;
-		}
-	};
 
 	
 	private interface RelationListProvider {
@@ -462,16 +443,20 @@ public class DBMetadataExtractor {
 		//  (only in getOtherMetadata)
 		//Set<String> tableColumns = new HashSet<>();
 		
-		try (ResultSet rsColumns = md.getColumns(table.getCatalog(), table.getSchema(), table.getTableName(), null)) {
+		try (ResultSet rs = md.getColumns(table.getCatalog(), table.getSchema(), table.getTableName(), null)) {
 			//if (rsColumns == null) 
 			//	return;			
-			while (rsColumns.next()) {
-				String columnName = rsColumns.getString("COLUMN_NAME");
+			while (rs.next()) {
+				if (printouts)
+					System.out.println(rs.getString("TABLE_CAT") + "." + rs.getString("TABLE_SCHEM") + "." + 
+								rs.getString("TABLE_NAME") + "." + rs.getString("COLUMN_NAME"));
+				// ROMAN (21 Sep 2015): very careful with columns of the same name in tables in different schemas
+				String columnName = rs.getString("COLUMN_NAME");
 				// columnNoNulls, columnNullable, columnNullableUnknown 
-				boolean isNullable = rsColumns.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
+				boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
 				
-				String typeName = rsColumns.getString("TYPE_NAME");
-				int dataType = dt.getCorrectedDatatype(rsColumns.getInt("DATA_TYPE"), typeName);
+				String typeName = rs.getString("TYPE_NAME");
+				int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
 				
 				table.addAttribute(columnName, dataType, typeName, isNullable);
 				// Check if the columns are unique regardless their letter cases

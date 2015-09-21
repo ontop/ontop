@@ -41,23 +41,18 @@ import org.slf4j.LoggerFactory;
 
 public class SQLQueryParser {
 
-	private DBMetadata dbMetaData;
-	private Connection connection;
-	private String database;
-	
-	//This field will contain all the target SQL from the 
-	//mappings that could not be parsed by the parser.
-//	private ArrayList<ViewDefinition> viewDefinitions;
+	private final DBMetadata dbMetaData;
+	private final String database;
 	
 	private static int id_counter;
 	
 	private static Logger log = LoggerFactory.getLogger(SQLQueryParser.class);
 	
+	
+	// ONLY FOR DEEP PARSING
 	public SQLQueryParser(DBMetadata dbMetaData) {
-		connection=null;
-		database=dbMetaData.getDriverName();
+		database = dbMetaData.getDriverName();
  		this.dbMetaData = dbMetaData;
-		id_counter = 0;		
 	}
 	
 	/*
@@ -65,30 +60,20 @@ public class SQLQueryParser {
 	 * in MappingParser
 	 */
 	
+	
+	// ONLY FOR SHALLOW PARSING
 	public SQLQueryParser(Connection conn) throws SQLException {
-		connection=conn;
-		database=connection.getMetaData().getDriverName();
-//		this.viewDefinitions = new ArrayList<ViewDefinition>();
-		this.dbMetaData = null;
-		id_counter = 0;		
+		database = conn.getMetaData().getDriverName();
+		dbMetaData = null;
 	}
 	
+	
+	// ONLY FOR SHALLOW PARSING
 	public SQLQueryParser() {
-		database=null;
-		connection=null;
-//		this.viewDefinitions = new ArrayList<ViewDefinition>();
-		this.dbMetaData = null;
-		id_counter = 0;		
+		database = null;
+		dbMetaData = null;
 	}
 	
-	/*
-	 *  Returns all the target SQL from the 
-	 *  mappings that could not be parsed by the parser.
-	 */
-//	public ArrayList<ViewDefinition> getViewDefinitions(){
-//		return this.viewDefinitions;
-//	}
-
 	/**
 	 * Called from ParsedMapping. Returns the query, even if there were 
 	 * parsing errors.
@@ -96,7 +81,7 @@ public class SQLQueryParser {
 	 * @param query The sql query to be parsed
 	 * @return A VisitedQuery (possible with null values)
 	 */
-	public ParsedSQLQuery parseShallowly(String query){
+	public ParsedSQLQuery parseShallowly(String query) {
 		return parse(query, false);
 	}
 	
@@ -128,51 +113,36 @@ public class SQLQueryParser {
      *               </ul>
      * @return
      */
-    private ParsedSQLQuery parse(String query, boolean deeply){
-		boolean errors=false;
+    private ParsedSQLQuery parse(String query, boolean deeply) {
+		boolean errors = false;
 		ParsedSQLQuery queryParser = null;
 		
-		
 		try {
-		/*
-		 * 
-		 */
-			queryParser = new ParsedSQLQuery(query,deeply);
-			
-		} catch (JSQLParserException e) 
-		{
+			queryParser = new ParsedSQLQuery(query, deeply);
+		} 
+		catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)
 				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
-			errors=true;
-			
+			errors = true;
 		}
 		
-		if (queryParser == null || (errors && deeply) )
-		{
+		if (queryParser == null || (errors && deeply)) {
 			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
-			queryParser = createView(query);
+			
+			String viewName = String.format("view_%s", id_counter++);
+			
+			if (database != null) {
+				ViewDefinition vd = createViewDefinition(viewName, query);
+			
+				if (dbMetaData != null)
+					dbMetaData.add(vd);
+			}
+			
+			queryParser = createViewParsed(viewName, query);	
 		}
 		return queryParser;
-		
-		
 	}
 
-	private ParsedSQLQuery createView(String query){
-		
-		String viewName = String.format("view_%s", id_counter++);
-		
-		if(database!=null){
-		ViewDefinition vd = createViewDefinition(viewName, query);
-		
-		if(dbMetaData != null)
-			dbMetaData.add(vd);
-//		else
-//			viewDefinitions.add(vd);
-		}
-		
-		ParsedSQLQuery vt = createViewParsed(viewName, query);
-		return vt;
-	}
 	
 	
 	/*
@@ -187,8 +157,8 @@ public class SQLQueryParser {
 		
 		PlainSelect body = new PlainSelect();
 		
-		//create SELECT *
-		ArrayList<SelectItem> list = new ArrayList<SelectItem>();
+		// create SELECT *
+		List<SelectItem> list = new ArrayList<>(1);
 		list.add(new AllColumns());
 		body.setSelectItems(list); 
 		
@@ -196,14 +166,14 @@ public class SQLQueryParser {
 		Table viewTable = new Table(null, viewName);
 		body.setFromItem(viewTable);
 		
-		Select select= new Select();
+		Select select = new Select();
 		select.setSelectBody(body);
 		
 		ParsedSQLQuery queryParsed = null;
 		try {
-			queryParsed = new ParsedSQLQuery(select,false);
-			
-		} catch (JSQLParserException e) {
+			queryParsed = new ParsedSQLQuery(select, false);
+		} 
+		catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)
 				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
 		}
@@ -214,18 +184,17 @@ public class SQLQueryParser {
 	
 	private ViewDefinition createViewDefinition(String viewName, String query) {
 
-        ParsedSQLQuery queryParser = null;
-        boolean supported = true;
-        boolean uppercase = false;
-
         //TODO: we could use the sql adapter, but it's in the package reformulation-core
+        boolean uppercase = false;
         if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
             // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
             uppercase = true;
         }
 
+        ParsedSQLQuery queryParser = null;
+        boolean supported = true;
         try {
-            queryParser = new ParsedSQLQuery(query,false);
+            queryParser = new ParsedSQLQuery(query, false);
         } 
         catch (JSQLParserException e) {
             supported = false;
@@ -237,23 +206,17 @@ public class SQLQueryParser {
             List<String> columns = queryParser.getColumns();
             for (String columnName : columns) {
                 if (!ParsedSQLQuery.pQuotes.matcher(columnName).matches()) { //if it is not quoted, change it in uppercase when needed
-
-                    if (uppercase)
-                        columnName = columnName.toUpperCase();
-                    else
-                      columnName = columnName.toLowerCase();
+                	columnName = getIdNormalForm(uppercase, columnName);
                 }
 				else { // if quoted remove the quotes
-					columnName= columnName.substring(1, columnName.length()-1);
+					columnName = columnName.substring(1, columnName.length() - 1);
 				}
 
                 viewDefinition.addAttribute(columnName, 0, null, false);
             }
         }
         else {
-            int start = 6; // the keyword 'select'
-			boolean quoted;
-
+            int start = "select".length(); 
             int end = query.toLowerCase().indexOf("from");
 
             if (end == -1) {
@@ -268,7 +231,6 @@ public class SQLQueryParser {
 
 
             for (String col : columns) {
-                quoted = false;
                 String columnName = col.trim();
 			
     			/*
@@ -292,6 +254,7 @@ public class SQLQueryParser {
     			 * 		INPUT: "table"."column"
     			 * 		OUTPUT: table.column
     			 */
+    			boolean quoted = false;
                 Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
                 Matcher matcher = pattern.matcher(columnName);
                 if (matcher.find()) {
@@ -308,15 +271,11 @@ public class SQLQueryParser {
     			 */
                 
                 if (columnName.contains(".")) {
-                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1, columnName.length()); // get only the name
+                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1); // get only the name
                 }
 
-                if (!quoted) {
-                    if (uppercase)
-                        columnName = columnName.toUpperCase();
-                    else
-                        columnName = columnName.toLowerCase();
-                }
+                if (!quoted) 
+                	columnName = getIdNormalForm(uppercase, columnName);
 
                 // the attribute index always start at 1
                 viewDefinition.addAttribute(columnName, 0, null, false); 
@@ -326,4 +285,11 @@ public class SQLQueryParser {
         return viewDefinition;
 	}
 
+	private static String getIdNormalForm(boolean uppercase, String id) {
+        if (uppercase)
+            return id.toUpperCase();
+        else
+           return id.toLowerCase();
+	}
+	
 }

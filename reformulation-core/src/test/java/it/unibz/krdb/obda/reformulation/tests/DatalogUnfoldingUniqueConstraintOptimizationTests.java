@@ -52,7 +52,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata("dummy class", null, null);
+		metadata = new DBMetadata("dummy class", null, null, DBMetadata.IdentityIdNormalizer);
 		TableDefinition table = new TableDefinition("TABLE");
 		table.addAttribute("col1", Types.INTEGER, null, true);
 		table.addAttribute("col2", Types.INTEGER, null, true);

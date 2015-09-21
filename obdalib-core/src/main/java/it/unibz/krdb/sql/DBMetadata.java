@@ -33,8 +33,9 @@ public class DBMetadata implements Serializable {
 	private final String driverName;
 	private final String driverVersion;
 	private final String databaseProductName;
+	private final TableIdNormalizer tableIdNormalizer;
 
-	// ROMAN (19 Aug 2015): this pQuotes does not consider ' (unlike ParsedSQLQuery.pQuotes). WHY?
+	// ROMAN (19 Sep 2015): this pQuotes does not consider ' (unlike ParsedSQLQuery.pQuotes). WHY?
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
 
 	/**
@@ -43,12 +44,49 @@ public class DBMetadata implements Serializable {
 	 * 
 	 */
 
-	public DBMetadata(String driverName, String driverVersion, String databaseProductName) {
+	public DBMetadata(String driverName, String driverVersion, String databaseProductName, TableIdNormalizer tableIdNormalizer) {
 		this.driverName = driverName;
 		this.driverVersion = driverVersion;
 		this.databaseProductName = databaseProductName;
+		this.tableIdNormalizer = tableIdNormalizer;
 	}
 
+	/**
+	 * A method for getting the canonical form of identifiers 
+	 * (upper-case, as in SQL standard, or lower-case as in PostgreSQL)
+	 */
+	
+	public interface TableIdNormalizer {
+		String getCanonicalFormOfIdentifier(String id, boolean quoted);
+	}
+	
+	public static final TableIdNormalizer UpperCaseIdNormalizer = new TableIdNormalizer() {
+		@Override
+		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
+			if (!quoted)
+				return id.toUpperCase();
+			return id;
+		}
+	};
+
+	public static final TableIdNormalizer LowerCaseIdNormalizer = new TableIdNormalizer() {
+		@Override
+		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
+			if (!quoted)
+				return id.toLowerCase();
+			return id;
+		}
+	};
+
+	public static final TableIdNormalizer IdentityIdNormalizer = new TableIdNormalizer() {
+		@Override
+		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
+			return id;
+		}
+	};
+	
+	
+	
 	/**
 	 * Inserts a new data definition to this meta data object. The name is
 	 * inserted without quotes so it can be used for the mapping, while the
@@ -77,7 +115,7 @@ public class DBMetadata implements Serializable {
 		}
 	}
 
-	// ROMAN (19 Aug 2015): Use TableJSQL.unquote(String) instead?
+	// ROMAN (19 Sep 2015): Use TableJSQL.unquote(String) instead?
 	private static String unquote(String name) {
 		if (pQuotes.matcher(name).matches()) {
 			return name.substring(1, name.length() - 1);
@@ -155,6 +193,10 @@ public class DBMetadata implements Serializable {
 		return databaseProductName;
 	}
 
+	public TableIdNormalizer getTableIdNormalizer() {
+		return tableIdNormalizer;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
