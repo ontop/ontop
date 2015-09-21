@@ -45,6 +45,11 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	  	}
 
 	@Override
+	public String dateNow() {
+		return "CURRENT_TIMESTAMP";
+	}
+
+	@Override
 	public String dateYear(String str) {
 		return String.format("YEAR ( %s)",str);
 	}
@@ -56,7 +61,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String dateHours(String str) {
-		return String.format("HOUR ( %s)",str);
+		return String.format("DATEPART(HOUR , %s)",str);
 	}
 
 	@Override
@@ -66,12 +71,17 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String dateMinutes(String str) {
-		return String.format("MINUTE (%s)",str);
+		return String.format("DATEPART( MINUTE, %s)",str);
 	}
 
 	@Override
 	public String dateSeconds(String str) {
-		return String.format("SECOND (%s)",str);
+		return String.format("DATEPART(SECOND, %s)",str);
+	}
+
+	@Override
+	public String dateTimezone(String str) {
+		return String.format("DATEPART(TZ, %s)",str);
 	}
 
 	@Override
@@ -117,6 +127,12 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+	public String strSubstr(String str, String start) {
+		return String.format("SUBSTRING(%s,%s,LEN(%s) )", str, start, str);
+	}
+
+
+	@Override
 	public String strLength(String str) {
 		return String.format("LEN(%s)", str);
 	}
@@ -138,7 +154,17 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		sql.append(")");
 		return sql.toString();
 	}
-	
+
+	@Override
+	public String strUuid() {
+		return "NEWID()";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'+ CONVERT (VARCHAR(255),NEWID())";
+	}
+
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {

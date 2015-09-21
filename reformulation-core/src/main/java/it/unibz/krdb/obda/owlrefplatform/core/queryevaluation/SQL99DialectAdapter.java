@@ -130,8 +130,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String strUuid() {
 		return "UUID()";
 	}
-    
-    @Override
+
+	@Override
 	public String uuid() {
 		return "'urn:uuid:'|| UUID()";
 	}

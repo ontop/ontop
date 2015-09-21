@@ -83,6 +83,28 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+	public String dateNow() {
+		return "CURRENT TIMESTAMP";
+
+	}
+
+//	@Override
+//	public String strUuid() {
+//		return "TRIM(CHAR(HEX(GENERATE_UNIQUE())))";
+//	}
+//
+//	@Override
+//	//similar to UUID
+//	public String uuid() {
+//		return "'urn:uuid:'|| TRIM(CHAR(HEX(GENERATE_UNIQUE())))";
+//	}
+
+	@Override //maybe support from version 10 up
+	public String dateTimezone(String str) {
+		return String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str);
+	}
+
+	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
 		if (type == Types.VARCHAR) {

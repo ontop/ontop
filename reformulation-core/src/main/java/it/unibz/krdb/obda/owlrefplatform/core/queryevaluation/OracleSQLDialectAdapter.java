@@ -141,12 +141,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String strUuid() {
-		return "sys_guid()";
+		return "regexp_replace(rawtohex(sys_guid()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')";
 	}
 
 	@Override
 	public String uuid() {
-		return "'urn:uuid:'|| sys_guid()";
+		return "'urn:uuid:'|| regexp_replace(rawtohex(sys_guid()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')";
 	}
 
 	@Override

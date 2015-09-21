@@ -619,7 +619,7 @@ public class BindTestWithFunctionsOracle {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"6\"^^xsd:integer");
         expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"7\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
         checkReturnedValues(p, queryBind, expectedValues);
     }
@@ -647,7 +647,7 @@ public class BindTestWithFunctionsOracle {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"2014\"^^xsd:integer");
         expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"1866\"^^xsd:integer");
+        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"1967\"^^xsd:integer");
         checkReturnedValues(p, queryBind, expectedValues);
     }
@@ -675,7 +675,7 @@ public class BindTestWithFunctionsOracle {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"5\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
-        expectedValues.add("\"1\"^^xsd:integer");
+        expectedValues.add("\"21\"^^xsd:integer");
         expectedValues.add("\"5\"^^xsd:integer");
         checkReturnedValues(p, queryBind, expectedValues);
     }
@@ -702,9 +702,9 @@ public class BindTestWithFunctionsOracle {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"47\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
+        expectedValues.add("\"30\"^^xsd:integer");
+        expectedValues.add("\"23\"^^xsd:integer");
+        expectedValues.add("\"50\"^^xsd:integer");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -729,10 +729,10 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"18\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
+        expectedValues.add("\"10\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
+        expectedValues.add("\"6\"^^xsd:integer");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -759,7 +759,7 @@ public class BindTestWithFunctionsOracle {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"52\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"6\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
     }

@@ -62,8 +62,13 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String dateTimezone(String str){
-    	return String.format("EXTRACT(TIMEZONE_ABBR, %s)", str);
+    	return String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str);
     }
+
+	@Override
+	public String dateNow(){
+		return "NOW()";
+	}
     
 	@Override
 	public String sqlSlice(long limit, long offset) {
@@ -84,7 +89,22 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
+	@Override //trick to support uuid
+	public String strUuid() {
+		return "md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'|| md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String rand() {
+		return "RANDOM()";
+	}
+
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
