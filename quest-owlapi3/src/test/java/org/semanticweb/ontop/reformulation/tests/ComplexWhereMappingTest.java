@@ -115,16 +115,10 @@ public class ComplexWhereMappingTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p, boolean isVirtualMode) throws Exception {
+	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory;
-		if (isVirtualMode) {
-			factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-		}
-		else {
-			factory = new QuestOWLFactory(new QuestPreferences(p));
-		}
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
 
 		QuestOWL reasoner = factory.createReasoner(ontology);
 
@@ -166,22 +160,19 @@ public class ComplexWhereMappingTest extends TestCase {
 		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		runTests(p, true);
+		runTests(p);
 	}
 
-	/**
-	 * TODO: check if it makes sense (obtain from mappings in classic mode?)
-	 */
-//	public void testClassicEqSig() throws Exception {
-//
-//		Properties p = new Properties();
-//		p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-//		//Benjamin: Obtain from mappings in the classic mode???
-//		p.put(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-//
-//		runTests(p, false);
-//	}
+
+	public void testClassicEqSig() throws Exception {
+
+		Properties p = new Properties();
+		p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.put(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+
+		runTests(p);
+	}
 
 }

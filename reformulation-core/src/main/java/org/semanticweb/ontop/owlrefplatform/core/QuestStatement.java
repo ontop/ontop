@@ -249,31 +249,31 @@ public abstract class QuestStatement implements IQuestStatement {
 	/**
 	 * TODO: describe
 	 */
-	protected abstract ResultSet executeSelectQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException;
+	protected abstract TupleResultSet executeSelectQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract ResultSet executeBooleanQuery(TargetQuery targetQuery) throws TargetQueryExecutionException;
+	protected abstract TupleResultSet executeBooleanQuery(TargetQuery targetQuery) throws TargetQueryExecutionException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected ResultSet executeDescribeQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
+	protected GraphResultSet executeDescribeQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
 		return executeGraphQuery(targetQuery, true);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected ResultSet executeConstructQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
+	protected GraphResultSet executeConstructQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
 		return executeGraphQuery(targetQuery, false);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract ResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws TargetQueryExecutionException, OBDAException;
+	protected abstract GraphResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws TargetQueryExecutionException, OBDAException;
 
 	/**
 	 * Cancel the processing of the target query.

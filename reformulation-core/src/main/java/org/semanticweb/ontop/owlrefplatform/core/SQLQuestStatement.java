@@ -1,15 +1,13 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
-import org.semanticweb.ontop.model.OBDAConnection;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.ResultSet;
-import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.execution.TargetQueryExecutionException;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -150,7 +148,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected ResultSet executeBooleanQuery(TargetQuery targetQuery) throws TargetQueryExecutionException {
+    protected TupleResultSet executeBooleanQuery(TargetQuery targetQuery) throws TargetQueryExecutionException {
         String sqlQuery = targetQuery.getNativeQueryString();
         if (sqlQuery.equals("")) {
             return new BooleanOWLOBDARefResultSet(false, this);
@@ -165,7 +163,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected ResultSet executeSelectQuery(TargetQuery targetQuery) throws OBDAException {
+    protected TupleResultSet executeSelectQuery(TargetQuery targetQuery) throws OBDAException {
         String sqlQuery = targetQuery.getNativeQueryString();
         if (sqlQuery.equals("") ) {
             return new EmptyQueryResultSet(targetQuery.getSignature(), this);
@@ -179,18 +177,23 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected ResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws  OBDAException {
+    protected GraphResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws  OBDAException {
         String sqlQuery = targetQuery.getNativeQueryString();
+        SesameConstructTemplate constructTemplate = targetQuery.getConstructTemplate();
+        TupleResultSet tuples;
+
         if (sqlQuery.equals("") ) {
-            return new EmptyQueryResultSet(targetQuery.getSignature(), this);
+            tuples = new EmptyQueryResultSet(targetQuery.getSignature(), this);
         }
-        try {
-            java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            TupleResultSet tuples = new QuestResultset(set, targetQuery.getSignature(), this);
-            return new QuestGraphResultSet(tuples, targetQuery.getConstructTemplate(), collectResults);
-        } catch (SQLException e) {
-            throw new TargetQueryExecutionException(e.getMessage());
+        else {
+            try {
+                java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
+                tuples = new QuestResultset(set, targetQuery.getSignature(), this);
+            } catch (SQLException e) {
+                throw new TargetQueryExecutionException(e.getMessage());
+            }
         }
+        return new QuestGraphResultSet(tuples, constructTemplate, collectResults);
     }
 
     protected Statement getSQLStatement() {
