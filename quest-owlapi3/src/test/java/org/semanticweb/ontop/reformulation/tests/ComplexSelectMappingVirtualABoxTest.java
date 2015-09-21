@@ -164,7 +164,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		    	num_joins +=1;
 		    }
 //		    System.out.println(sql);
-			assertEquals(1, num_joins);
+			assertEquals("Self-join detected in: \n" + sql, 1, num_joins);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
