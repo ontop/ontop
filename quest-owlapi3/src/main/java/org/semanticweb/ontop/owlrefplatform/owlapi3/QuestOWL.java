@@ -279,7 +279,14 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-        questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, null, preferences);
+		/**
+		 * The Quest instance must have access to the obda model ONLY in the virtual mode.
+		 *
+		 * In classic mode, the (optional) obda model is only used for materializing the Abox
+		 * from the mappings and the DB.
+		 */
+		OBDAModel runtimeObdaModel = unfoldingMode.equals(QuestConstants.VIRTUAL) ? obdaModel : null;
+		questInstance = componentFactory.create(translatedOntologyMerge, runtimeObdaModel, null, preferences);
 				
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
@@ -314,9 +321,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
 
-					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+					//OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+					OBDAModel obdaModelForMaterialization = obdaModel.clone();
 					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
-					
+
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);

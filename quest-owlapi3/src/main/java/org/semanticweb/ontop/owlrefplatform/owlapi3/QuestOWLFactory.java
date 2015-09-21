@@ -227,8 +227,11 @@ public class QuestOWLFactory implements OWLReasonerFactory {
             // TODO: find a better exception
             throw new RuntimeException(errorMessage);
         }
-        else if (obdaModel != null && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-            String errorMessage = "You have specified mappings, but they are useless for the 'Classic ABox' mode. " +
+        else if (obdaModel != null
+                && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)
+                && (!preferences.get(QuestPreferences.OBTAIN_FROM_MAPPINGS).equals("true"))) {
+            String errorMessage = "You have specified mappings in the 'Classic ABox' mode " +
+                    "but you did not set the OBTAIN_FROM_MAPPINGS to true. They are thus useless. " +
             "If you want to work in 'Virtual ABox' mode', you have to set the ABox mode to: '"
             + QuestConstants.VIRTUAL + "'";
             log.error(errorMessage);

@@ -176,7 +176,17 @@ public class OBDAModelImpl implements OBDAModel {
         return new OBDAModelImpl(dataSources, newMappings, prefixManager, declaredClasses, declaredObjectProperties, declaredDataProperties);
     }
 
-	@Override
+    @Override
+    public OBDAModel clone() {
+        try {
+            return new OBDAModelImpl(dataSources, mappingIndexByDataSource, prefixManager, declaredClasses,
+                    declaredObjectProperties, declaredDataProperties);
+        } catch (DuplicateMappingException e) {
+            throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
+        }
+    }
+
+    @Override
 	public PrefixManager getPrefixManager() {
 		return prefixManager;
 	}

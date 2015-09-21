@@ -110,6 +110,11 @@ public interface OBDAModel {
                               Set<DataPropertyExpression> declaredDataProperties) throws DuplicateMappingException;
 
     /**
+     * TODO: remove it when OBDA models will be FULLY immutable.
+     */
+    public OBDAModel clone();
+
+    /**
      * Returns the set of all sources defined in this OBDA model. This set
      * is immutable.
      */

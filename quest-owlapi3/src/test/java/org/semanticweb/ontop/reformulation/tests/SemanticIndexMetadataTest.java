@@ -33,7 +33,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 
 	private static final String testCase = "twr-predicate";
 	private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
-	private static final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
+	//private static final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
 
 
 	@Override
@@ -110,7 +110,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			ont.getVocabulary().createObjectProperty("Q");
 			ont.getVocabulary().createDataProperty("D");
 
-			QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
+			QuestOWLFactory factory = new QuestOWLFactory(new QuestPreferences(p));
 			QuestOWL reasoner = factory.createReasoner(ontology);
 			
 			RDBMSSIRepositoryManager si = reasoner.getQuestInstance().getOptionalSemanticIndexRepository().get();
