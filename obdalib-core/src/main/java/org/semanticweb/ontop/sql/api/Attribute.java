@@ -25,6 +25,8 @@ import java.sql.Types;
 
 import org.semanticweb.ontop.sql.Reference;
 
+import javax.annotation.Nullable;
+
 public class Attribute implements Serializable{
 	
 	private static final long serialVersionUID = -5780621780592347583L;
@@ -44,6 +46,10 @@ public class Attribute implements Serializable{
 		this(name, 0, false, null, 0);
 	}
 
+	public Attribute(String name, int type, boolean isPrimaryKey) {
+		this(name, type, isPrimaryKey, null, 0);
+	}
+
 	/**
 	 * Use Attribute(String name, int type, boolean primaryKey, Reference foreignKey) instead.
 	 */
@@ -52,19 +58,19 @@ public class Attribute implements Serializable{
 		this(name, type, primaryKey, null, 0);
 	}
 	
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey) {
+	public Attribute(String name, int type, boolean primaryKey, @Nullable Reference foreignKey) {
 		this(name, type, primaryKey, foreignKey, 0);
 	}
 
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) {
+	public Attribute(String name, int type, boolean primaryKey, @Nullable Reference foreignKey, int canNull) {
 		this(name,type,primaryKey,foreignKey,canNull,null);		
 	}
 	
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName) {
+	public Attribute(String name, int type, boolean primaryKey, @Nullable Reference foreignKey, int canNull, @Nullable String typeName) {
         this(name,type,primaryKey,foreignKey,canNull,typeName, false);
     }
 	
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName, boolean unique) {
+	public Attribute(String name, int type, boolean primaryKey, @Nullable Reference foreignKey, int canNull, @Nullable String typeName, boolean unique) {
 		this.name = name;
 		this.type = type;
 		this.bPrimaryKey = primaryKey;
@@ -94,7 +100,7 @@ public class Attribute implements Serializable{
 		return canNull == 1;
 	}
 	
-	public Reference getReference() {
+	public @Nullable Reference getReference() {
 		return foreignKey;
 	}
 	
@@ -107,7 +113,7 @@ public class Attribute implements Serializable{
 	 * 
 	 * @return
 	 */
-	public String getSQLTypeName() {
+	public @Nullable String getSQLTypeName() {
 		return typeName;
 	}
 

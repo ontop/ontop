@@ -1,19 +1,14 @@
 package org.semanticweb.ontop.injection;
 
-import com.google.common.collect.ImmutableList;
 import org.openrdf.model.Model;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 
 import java.io.File;
 import java.io.Reader;
-import java.net.URI;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Factory following the Guice AssistedInject pattern.
