@@ -40,11 +40,6 @@ public interface DBConnector {
     OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException;
 
     /**
-     * Prepares the DB according to the mappings.
-     */
-    void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws OBDAException;
-
-    /**
      * Gets a direct QuestConnection.
      */
     IQuestConnection getNonPoolConnection() throws OBDAException;
