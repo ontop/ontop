@@ -189,7 +189,7 @@ public class ParsedSQLQuery implements Serializable {
 	}
 
 	/**
-	 * Get the object construction for the SELECT clause.
+	 * Get the object construction for the SELECT clause (CHANGES TABLE AND COLUMN NAMES).
 	 * 
 	 * @throws JSQLParserException
 	 */
@@ -203,13 +203,13 @@ public class ParsedSQLQuery implements Serializable {
 	}
 
 	/**
-	 * Get the list of columns do not remove quotes
+	 * Get the list of columns (RO)
 	 * 
 	 * @return
 	 */
 	public List<String> getColumns() {
-		ColumnsVisitor visitor = new ColumnsVisitor();
-		return visitor.getColumns(selectQuery);
+		ColumnsVisitor visitor = new ColumnsVisitor(selectQuery);
+		return visitor.getColumns();
 	}
 
 	/**

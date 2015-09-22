@@ -23,105 +23,47 @@ package it.unibz.krdb.obda.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.JsonExpression;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.SignedExpression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.WhenClause;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.Distinct;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectItemVisitor;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.SubSelect;
-import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.*;
 
 /**
  * Visitor to retrieve the list of columns of the given select statement. (SELECT... FROM).
  *
  */
 
-public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
+public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor {
 	
-	ArrayList<String> columns; //create a list of projections if we want to consider union 
+	private final List<String> columns = new ArrayList<>(); //create a list of projections if we want to consider union 
 
-	
-	
 	/**
-	 * Return the list of columns with the expressions between SELECT and FROM, considering also the case of UNION
+	 * Return the list of columns with the expressions between SELECT and FROM, 
+	 * considering also the case of UNION
+	 * 
 	 * @param select parsed statement
 	 * @return
 	 */
 	
-	public List<String> getColumns(Select select) {
-		
-		columns = new ArrayList<String> ();
-		
+	public ColumnsVisitor(Select select) {	
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
 			}
 		}
 		select.getSelectBody().accept(this);
+	}
 		
-		
+	public List<String> getColumns() {
 		return columns;	
-		
 	}
 	
 
 	/*
 	 * visit PlainSelect, search for the SelectExpressionItems
-	 * Stored in ProjectionSQL 
 	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
 	 */
 	
@@ -132,32 +74,17 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		select distinct on, select all 
 		*/
 		
-		Distinct distinct= plainSelect.getDistinct();
+		Distinct distinct = plainSelect.getDistinct();
 		
-		if(distinct!=null) // for SELECT DISTINCT [ON (...)]
-			{
-			
-			if(distinct.getOnSelectItems()!=null){
-											
-				
-			for(SelectItem item : distinct.getOnSelectItems())
-			{
-				item.accept(this);
+		if (distinct != null) { // for SELECT DISTINCT [ON (...)]
+			if (distinct.getOnSelectItems() != null) {
+				for(SelectItem item : distinct.getOnSelectItems())
+					item.accept(this);
 			}
-				
-			}
-			
-				
 		}
-		
 		
 		for (SelectItem item : plainSelect.getSelectItems())
-		{
 			item.accept(this);
-		}
-		
-		
-		
 	}
 
 	/* visit also the Operation as UNION*/
@@ -176,7 +103,6 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 	@Override
 	public void visit(WithItem withItem) {
 		withItem.getSelectBody().accept(this);
-		
 	}
 	
 	/*
@@ -207,14 +133,26 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		/*
 		 * Here we found a column
 		 */
-		if(selectExpr.getAlias()!=null) {
-			this.columns.add(selectExpr.getAlias().getName());
+		if (selectExpr.getAlias() != null) {
+			columns.add(selectExpr.getAlias().getName());
 		}
-		else{
+		else {
 			selectExpr.getExpression().accept(this);
 		}
 	}
+	
+	/*
+	 * Visit the column 
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+	 */
+	@Override
+	public void visit(Column tableColumn) {
+		columns.add(tableColumn.getColumnName());
+	}
+	
 
+	
+	
 	@Override
 	public void visit(NullValue nullValue) {
 		// TODO Auto-generated method stub
@@ -378,17 +316,6 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		
 	}
 
-	/*
-	 * Visit the column 
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
-	 */
-	@Override
-	public void visit(Column tableColumn) {
-		columns.add(tableColumn.getColumnName());
-		
-				
-		
-	}
 
 	@Override
 	public void visit(SubSelect subSelect) {

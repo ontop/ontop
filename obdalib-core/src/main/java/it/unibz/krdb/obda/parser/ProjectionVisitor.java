@@ -36,17 +36,18 @@ import java.util.List;
 
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
- * We remove the quotes for each column it they are present.
+ * CHANGES TABLE AND COLUMN NAMES
+ *
  * Since the current release does not support Function, we throw a ParserException, when a function is present
  *
  */
 
 public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
 	
-	ProjectionJSQL projection;
-	boolean bdistinctOn = false; // true when a SELECT distinct is present
-	boolean setProj = false; // true when we are using the method setProjection
-	boolean unsupported = false;
+	private ProjectionJSQL projection;
+	private boolean bdistinctOn = false; // true when a SELECT distinct is present
+	private boolean setProj = false; // true when we are using the method setProjection
+	private boolean unsupported = false;
 
 	
 	
@@ -59,18 +60,14 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	
 	public ProjectionJSQL getProjection(Select select, boolean deepParsing) throws JSQLParserException {
 		
-//		projections = new ArrayList<ProjectionJSQL>(); //used if we want to consider UNION
-
-		
 		if (select.getWithItemsList() != null) {
-			for (WithItem withItem : select.getWithItemsList()) {
+			for (WithItem withItem : select.getWithItemsList()) 
 				withItem.accept(this);
-			}
 		}
 		select.getSelectBody().accept(this);
 		
-		if(unsupported && deepParsing) // used to throw exception for the currently unsupported methods
-				throw new JSQLParserException("Query not yet supported");
+		if (unsupported && deepParsing) // used to throw exception for the currently unsupported methods
+				throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
 		
 		return projection;	
 		
@@ -82,17 +79,14 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * @param proj anew projection expression between SELECT and FROM
 	 */
 	public void setProjection(Select select, ProjectionJSQL proj) {
-		
-		
-		setProj= true;
-		projection=proj;
+		setProj = true;
+		projection = proj;
 		
 		select.getSelectBody().accept(this);
-		
 	}
 
 	/*
-	 * visit Plainselect, search for the SelectExpressionItems
+	 * visit PlainSelect, search for the SelectExpressionItems
 	 * Stored in ProjectionSQL 
 	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
 	 */
@@ -103,73 +97,60 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		 * We first check if we are setting a new projection for SELECT clause, 
 		 * we distinguish between select, select distinct and select distinct on 
 		 */
-		if(setProj){
+		if (setProj) {
 			
-			if(projection.getType().equals("select distinct on")){
+			if (projection.getType().equals("select distinct on")) {
 				Distinct distinct = new Distinct();
-				List<SelectItem> distinctList= new ArrayList<SelectItem>();
+				List<SelectItem> distinctList = new ArrayList<SelectItem>();
 				
-				for(SelectExpressionItem seItem :projection.getColumnList()){
+				for(SelectExpressionItem seItem :projection.getColumnList()) 
 					distinctList.add(seItem);
-				}
+				
 				distinct.setOnSelectItems(distinctList);
 				plainSelect.setDistinct(distinct);
 			}
-			
-			else if(projection.getType().equals("select distinct")){
+			else if(projection.getType().equals("select distinct")) {
 				Distinct distinct = new Distinct();
 				plainSelect.setDistinct(distinct);
 				plainSelect.getSelectItems().clear();
 				plainSelect.getSelectItems().addAll(projection.getColumnList());
 			}
-			
-			else{
-			plainSelect.getSelectItems().clear();
+			else {
+				plainSelect.getSelectItems().clear();
 				List<SelectExpressionItem> columnList = projection.getColumnList();
 				if (!columnList.isEmpty()) {
 					plainSelect.getSelectItems().addAll(columnList);
 				}
-				else{
+				else {
 					plainSelect.getSelectItems().add(new AllColumns());
 				}
-			}
-			
-			}
-		
+			}	
+		}
 		else{ /*
 		working with getProjection we visit the SelectItems and distinguish between select distinct,
 		select distinct on, select all 
 		*/
-		projection= new ProjectionJSQL();
-		Distinct distinct= plainSelect.getDistinct();
+			projection = new ProjectionJSQL();
+			Distinct distinct= plainSelect.getDistinct();
 		
-		if(distinct!=null) // for SELECT DISTINCT [ON (...)]
-			{
-			
-			if(distinct.getOnSelectItems()!=null){
+			if (distinct != null) { // for SELECT DISTINCT [ON (...)]			
 				
-				bdistinctOn=true;
+				if (distinct.getOnSelectItems() != null) {
+					bdistinctOn = true;
 				
-				
-			for(SelectItem item : distinct.getOnSelectItems())
-			{
+					for (SelectItem item : distinct.getOnSelectItems()) 
+						item.accept(this);
+					
+					bdistinctOn = false;
+				}
+				else
+					projection.setType(ProjectionJSQL.SELECT_DISTINCT);	
+			}
+		
+			for (SelectItem item : plainSelect.getSelectItems()) {
 				item.accept(this);
 			}
-				bdistinctOn=false;
-			}
-			else
-			projection.setType(ProjectionJSQL.SELECT_DISTINCT);
-				
 		}
-		
-		
-		for (SelectItem item : plainSelect.getSelectItems())
-		{
-			item.accept(this);
-		}
-		
-		}
-		
 	}
 
 	/* visit also the Operation as UNION
@@ -178,11 +159,6 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	public void visit(SetOperationList setOpList) { 
 		unsupported = true;
 		setOpList.getPlainSelects().get(0).accept(this);
-//		for (PlainSelect ps: setOpList.getPlainSelects())
-//		{
-//			ps.accept(this);
-//		}
-		
 	}
 
 	/* 
@@ -192,7 +168,6 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(WithItem withItem) {
 		withItem.getSelectBody().accept(this);
-		
 	}
 	
 	/*
@@ -202,7 +177,6 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(AllColumns allColumns) {
 		projection.add(allColumns);
-		
 	}
 
 	/*
@@ -212,8 +186,6 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(AllTableColumns allTableColumns) {	
 		projection.add(allTableColumns);
-		
-		
 	}
 
 	/*
@@ -222,17 +194,13 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-	 projection.add(selectExpr, bdistinctOn);
-	 selectExpr.getExpression().accept(this);
-	
-	 
-		
+		projection.add(selectExpr, bdistinctOn);
+		selectExpr.getExpression().accept(this);
 	}
 
 	@Override
 	public void visit(NullValue nullValue) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	/*
@@ -242,23 +210,17 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(Function function) {
-		switch(function.getName().toLowerCase()){
-
+		switch(function.getName().toLowerCase()) {
 			case "regexp_like" :
 			case "regexp_replace" :
 			case "replace" :
 			case "concat" :
-
-				for(Expression ex :function.getParameters().getExpressions()) {
+				for(Expression ex :function.getParameters().getExpressions()) 
 					ex.accept(this);
-
-				}
-
 				break;
 
 			default:
 //				unsupported = true;
-
 				break;
 		}
 		
@@ -453,6 +415,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(Column tableColumn) {
+		// CHANGES TABLE AND COLUMN NAMES
 		TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 
@@ -608,8 +571,4 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		binaryExpression.getLeftExpression().accept(this);
 		binaryExpression.getRightExpression().accept(this);
 	}
-	
-
-	
-
 }
