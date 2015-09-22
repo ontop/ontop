@@ -20,9 +20,12 @@ public class TestDatabaseIdentifiers {
 			System.out.println("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
 			System.out.println("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
 			System.out.println("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
+			System.out.println("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
 			System.out.println("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
 			System.out.println("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
 			System.out.println("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
+			System.out.println("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
+			System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
 		}
 		catch (Exception e) {
 		}	
