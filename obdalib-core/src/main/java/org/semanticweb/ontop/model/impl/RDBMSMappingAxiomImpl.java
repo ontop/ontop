@@ -22,21 +22,33 @@ package org.semanticweb.ontop.model.impl;
 
 import java.security.InvalidParameterException;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
 import org.semanticweb.ontop.model.OBDASQLQuery;
+import org.semanticweb.ontop.utils.IDGenerator;
 
 public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDARDBMappingAxiom {
 
 	private static final long serialVersionUID = 5793656631843898419L;
 	
 	private OBDASQLQuery sourceQuery = null;
-	private CQIEImpl targetQuery = null;
+	private CQIE targetQuery = null;
 
-	protected RDBMSMappingAxiomImpl(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
+	@AssistedInject
+	protected RDBMSMappingAxiomImpl(@Assisted String id, @Assisted("sourceQuery") OBDAQuery sourceQuery,
+									@Assisted("targetQuery") OBDAQuery targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
+	}
+
+	@AssistedInject
+	private RDBMSMappingAxiomImpl(@Assisted("sourceQuery") OBDAQuery sourceQuery,
+								  @Assisted("targetQuery") OBDAQuery targetQuery) {
+		this(new String(IDGenerator.getNextUniqueID("MAPID-")), sourceQuery, targetQuery);
 	}
 
 	@Override
@@ -61,7 +73,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public CQIEImpl getTargetQuery() {
+	public CQIE getTargetQuery() {
 		return targetQuery;
 	}
 

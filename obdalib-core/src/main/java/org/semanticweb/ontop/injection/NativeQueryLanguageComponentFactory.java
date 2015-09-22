@@ -1,9 +1,12 @@
 package org.semanticweb.ontop.injection;
 
+import com.google.inject.assistedinject.Assisted;
 import org.openrdf.model.Model;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 
 import java.io.File;
@@ -39,4 +42,10 @@ public interface NativeQueryLanguageComponentFactory {
     public PrefixManager create(Map<String, String> prefixToURIMap);
 
     public DBMetadataExtractor create();
+
+    public OBDAMappingAxiom create(String id, @Assisted("sourceQuery") OBDAQuery sourceQuery,
+                                   @Assisted("targetQuery") OBDAQuery targetQuery);
+
+    public OBDAMappingAxiom create(@Assisted("sourceQuery") OBDAQuery sourceQuery,
+                                   @Assisted("targetQuery") OBDAQuery targetQuery);
 }

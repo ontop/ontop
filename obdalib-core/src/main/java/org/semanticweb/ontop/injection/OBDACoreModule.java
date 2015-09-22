@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 
@@ -21,7 +22,8 @@ public class OBDACoreModule extends OBDAAbstractModule {
                         OBDAModel.class,
                         MappingParser.class,
                         PrefixManager.class,
-                        DBMetadataExtractor.class),
+                        DBMetadataExtractor.class,
+                        OBDAMappingAxiom.class),
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
 
