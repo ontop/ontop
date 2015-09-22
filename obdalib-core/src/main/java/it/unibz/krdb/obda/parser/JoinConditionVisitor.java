@@ -479,20 +479,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
 	 */
 	@Override
-	public void visit(Column col) {
-		Table table= col.getTable();
-		if(table.getName()!=null){
-			
-			TableJSQL fixTable = new TableJSQL(table);
-			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTable().getName());
-			table.setSchemaName(fixTable.getSchema().getName());
-		
-		}
-		String columnName= col.getColumnName();
-		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
-			col.setColumnName(columnName.substring(1, columnName.length()-1));
-		
+	public void visit(Column tableColumn) {
+		TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 	
 	/*

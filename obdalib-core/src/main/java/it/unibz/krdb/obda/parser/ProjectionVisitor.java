@@ -456,21 +456,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		String columnName= tableColumn.getColumnName();
-		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
-			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
-				
-		Table table= tableColumn.getTable();
-		if(table.getName()!=null){
-			
-			TableJSQL fixTable = new TableJSQL(table); //create a tablejsql that recognized between quoted and unquoted tables
-			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTable().getName());
-			table.setSchemaName(fixTable.getSchema().getName());
-		
-		}
-		
-		
+		TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 
 	@Override

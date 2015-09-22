@@ -347,19 +347,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(Column tableColumn) {
-		Table table= tableColumn.getTable();
-		if(table.getName()!=null){
-			
-			TableJSQL fixTable = new TableJSQL(table);
-			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTable().getName());
-			table.setSchemaName(fixTable.getSchema().getName());
-		
-		}
-		String columnName = tableColumn.getColumnName();
-		if (ParsedSQLQuery.pQuotes.matcher(columnName).matches())
-			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
-		
+		TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 
 	@Override

@@ -21,6 +21,7 @@ package it.unibz.krdb.sql.api;
  */
 
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
 import java.io.Serializable;
@@ -83,6 +84,7 @@ public class TableJSQL implements Serializable{
 		this.alias = null;
 	}
 	
+	@Deprecated
 	public TableJSQL(Table table) {
 		this.schema = new Identifier(table.getSchemaName(), table.getSchemaName());
 		this.table = new Identifier(table.getName(), table.getFullyQualifiedName());
@@ -97,6 +99,21 @@ public class TableJSQL implements Serializable{
 		this.alias = a;		
 	}
 
+	
+	public static void unquoteColumnAndTableName(Column tableColumn) {
+		String columnName = tableColumn.getColumnName();
+		if (ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+			tableColumn.setColumnName(columnName.substring(1, columnName.length() - 1));
+		
+		Table table = tableColumn.getTable();
+		if (table != null) {
+			TableJSQL fixTable = new TableJSQL(table);
+			table.setAlias(fixTable.getAlias());
+			table.setName(fixTable.getTable().getName());
+			table.setSchemaName(fixTable.getSchema().getName());		
+		}
+	}
+	
 	
 	public Identifier getSchema() {
 		return schema;
