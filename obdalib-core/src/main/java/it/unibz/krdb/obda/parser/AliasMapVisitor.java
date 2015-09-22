@@ -44,7 +44,7 @@ import java.util.Map;
  * Remove quotes when present.
  */
 
-public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromItemVisitor, ExpressionVisitor {
+public class AliasMapVisitor {
 
 	private final Map<String,String> aliasMap = new HashMap<>();
 	
@@ -52,11 +52,11 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
-				withItem.accept(this);
+				withItem.accept(selectVisitor);
 			}
 		}
 		
-		select.getSelectBody().accept(this);
+		select.getSelectBody().accept(selectVisitor);
 	}
 	
 	/**
@@ -69,119 +69,152 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 		return aliasMap;
 	}
 	
-	/*
-	 * visit PlainSelect, search for the content in select
-	 * Stored in AggregationJSQL. 
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
-	 */
 	
-	@Override
-	public void visit(PlainSelect plainSelect) {
-        plainSelect.getFromItem().accept(this);
-
-        if (plainSelect.getJoins() != null) {
-            for (Join join : plainSelect.getJoins()) {
-                join.getRightItem().accept(this);
-            }
-        }
-        if (plainSelect.getWhere() != null) {
-            plainSelect.getWhere().accept(this);
-        }
+	private SelectVisitor selectVisitor = new SelectVisitor() {
+		/*
+		 * visit PlainSelect, search for the content in select
+		 * Stored in AggregationJSQL. 
+		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+		 */
 		
-		for (SelectItem item : plainSelect.getSelectItems()) {
-			item.accept(this);
+		@Override
+		public void visit(PlainSelect plainSelect) {
+	        plainSelect.getFromItem().accept(fromItemVisitor);
+
+	        if (plainSelect.getJoins() != null) {
+	            for (Join join : plainSelect.getJoins()) {
+	                join.getRightItem().accept(fromItemVisitor);
+	            }
+	        }
+	        if (plainSelect.getWhere() != null) {
+	            plainSelect.getWhere().accept(expressionVisitor);
+	        }
+			
+			for (SelectItem item : plainSelect.getSelectItems()) {
+				item.accept(selectItemVisitor);
+			}
+	    }
+		
+		@Override
+		public void visit(SetOperationList arg0) {
+			// we are not considering UNION case
 		}
-    }
 
-	@Override
-	public void visit(AllColumns columns) {
-		//we are not interested in allcolumns (SELECT *) since it does not have aliases	
-	}
-
-	@Override
-	public void visit(AllTableColumns tableColumns) {
-		//we are not interested in alltablecolumns (SELECT table.*) since it does not have aliases
-	}
+		@Override
+		public void visit(WithItem arg0) {
+			// we are not considering withItem case
+		}
+	};
 	
-	/*
-	 *visit SelectExpressionItem that contains the expression and its alias as in SELECT expr1 AS EXPR
-	 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.SelectExpressionItem)
-	 */
+	private SelectItemVisitor selectItemVisitor = new SelectItemVisitor() {
 
-	@Override
-	public void visit(SelectExpressionItem selectExpr) {
-		Alias alias = selectExpr.getAlias();
-		if (alias  != null) {
-			Expression e = selectExpr.getExpression();
-			e.accept(this);
-			//remove alias quotes if present
-			TableJSQL.unQuoteAlias(alias);
-			aliasMap.put(e.toString().toLowerCase(), alias.getName());
+		@Override
+		public void visit(AllColumns columns) {
+			//we are not interested in allcolumns (SELECT *) since it does not have aliases	
 		}
-	}
-	@Override
-	public void visit(SetOperationList arg0) {
-		// we are not considering UNION case
-	}
 
-	@Override
-	public void visit(WithItem arg0) {
-		// we are not considering withItem case
+		@Override
+		public void visit(AllTableColumns tableColumns) {
+			//we are not interested in alltablecolumns (SELECT table.*) since it does not have aliases
+		}
 		
-	}
+		/*
+		 *visit SelectExpressionItem that contains the expression and its alias as in SELECT expr1 AS EXPR
+		 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.SelectExpressionItem)
+		 */
 
+		@Override
+		public void visit(SelectExpressionItem selectExpr) {
+			Alias alias = selectExpr.getAlias();
+			if (alias  != null) {
+				Expression e = selectExpr.getExpression();
+				e.accept(expressionVisitor);
+				//remove alias quotes if present
+				TableJSQL.unQuoteAlias(alias);
+				aliasMap.put(e.toString().toLowerCase(), alias.getName());
+			}
+		}
+	
+	};
+	
+	FromItemVisitor fromItemVisitor = new FromItemVisitor() {
+	    @Override
+	    public void visit(Table tableName) {
+
+	    }
+
+	    @Override
+	    public void visit(SubJoin subjoin) {
+
+	    }
+
+	    @Override
+	    public void visit(LateralSubSelect lateralSubSelect) {
+
+	    }
+
+	    @Override
+	    public void visit(ValuesList valuesList) {
+
+	    }
+	    @Override
+		public void visit(SubSelect subSelect) {
+	        subSelect.getSelectBody().accept(selectVisitor);
+		}
+	};
+    
+	private ExpressionVisitor expressionVisitor = new ExpressionVisitor() {
+	
+	    @Override
+		public void visit(SubSelect subSelect) {
+	        subSelect.getSelectBody().accept(selectVisitor);
+		}
+
+		/*
+		 * We do not modify the column we are only interested if the alias is present. 
+		 * Each alias has a distinct column (non-Javadoc)
+		 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+		 */
+		@Override
+		public void visit(Column tableColumn) {
+			
+		}
+
+		
 	@Override
 	public void visit(NullValue nullValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(DoubleValue doubleValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(LongValue longValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(DateValue dateValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(TimeValue timeValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(TimestampValue timestampValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -192,8 +225,6 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 
 	@Override
 	public void visit(StringValue stringValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -292,40 +323,6 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 		
 	}
 
-	/*
-	 * We do not modify the column we are only interested if the alias is present. Each alias has a distinct column (non-Javadoc)
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
-	 */
-	@Override
-	public void visit(Column tableColumn) {
-		
-	}
-
-    @Override
-    public void visit(Table tableName) {
-
-    }
-
-    @Override
-	public void visit(SubSelect subSelect) {
-        subSelect.getSelectBody().accept(this);
-		
-	}
-
-    @Override
-    public void visit(SubJoin subjoin) {
-
-    }
-
-    @Override
-    public void visit(LateralSubSelect lateralSubSelect) {
-
-    }
-
-    @Override
-    public void visit(ValuesList valuesList) {
-
-    }
 
     @Override
 	public void visit(CaseExpression caseExpression) {
@@ -446,5 +443,5 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 		// TODO Auto-generated method stub
 		
 	}
-
+	};
 }

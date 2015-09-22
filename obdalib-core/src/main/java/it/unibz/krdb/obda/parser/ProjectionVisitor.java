@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
@@ -30,7 +29,6 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ import java.util.List;
 
 public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
 	
-//	ArrayList<ProjectionJSQL> projections; //create a list of projections if we want to consider union 
 	ProjectionJSQL projection;
 	boolean bdistinctOn = false; // true when a SELECT distinct is present
 	boolean setProj = false; // true when we are using the method setProjection

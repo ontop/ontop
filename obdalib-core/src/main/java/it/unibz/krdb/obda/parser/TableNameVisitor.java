@@ -296,7 +296,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 		visitBinaryExpression(subtraction);
 	}
 
-	public void visitBinaryExpression(BinaryExpression binaryExpression) {
+	private void visitBinaryExpression(BinaryExpression binaryExpression) {
 		binaryExpression.getLeftExpression().accept(this);
 		binaryExpression.getRightExpression().accept(this);
 	}
