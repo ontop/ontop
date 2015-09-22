@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.openrdf.model.Model;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAQuery;
@@ -44,8 +45,8 @@ public interface NativeQueryLanguageComponentFactory {
     public DBMetadataExtractor create();
 
     public OBDAMappingAxiom create(String id, @Assisted("sourceQuery") OBDAQuery sourceQuery,
-                                   @Assisted("targetQuery") OBDAQuery targetQuery);
+                                   @Assisted("targetQuery") CQIE targetQuery);
 
     public OBDAMappingAxiom create(@Assisted("sourceQuery") OBDAQuery sourceQuery,
-                                   @Assisted("targetQuery") OBDAQuery targetQuery);
+                                   @Assisted("targetQuery") CQIE targetQuery);
 }

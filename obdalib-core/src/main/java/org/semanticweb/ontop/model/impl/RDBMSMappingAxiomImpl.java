@@ -39,7 +39,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 
 	@AssistedInject
 	protected RDBMSMappingAxiomImpl(@Assisted String id, @Assisted("sourceQuery") OBDAQuery sourceQuery,
-									@Assisted("targetQuery") OBDAQuery targetQuery) {
+									@Assisted("targetQuery") CQIE targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
@@ -47,8 +47,8 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 
 	@AssistedInject
 	private RDBMSMappingAxiomImpl(@Assisted("sourceQuery") OBDAQuery sourceQuery,
-								  @Assisted("targetQuery") OBDAQuery targetQuery) {
-		this(new String(IDGenerator.getNextUniqueID("MAPID-")), sourceQuery, targetQuery);
+								  @Assisted("targetQuery") CQIE targetQuery) {
+		this(IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 	}
 
 	@Override
@@ -60,11 +60,8 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public void setTargetQuery(OBDAQuery query) {
-		if (!(query instanceof CQIEImpl)) {
-			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a OntologyQuery as target query");
-		}
-		this.targetQuery = (CQIEImpl) query;
+	public void setTargetQuery(CQIE query) {
+		this.targetQuery = query;
 	}
 
 	@Override

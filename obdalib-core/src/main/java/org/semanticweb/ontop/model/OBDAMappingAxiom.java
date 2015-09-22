@@ -28,11 +28,11 @@ public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
 	public OBDAQuery getSourceQuery();
 
-	public void setTargetQuery(OBDAQuery query);
+	public void setTargetQuery(CQIE query);
 
-	public OBDAQuery getTargetQuery();
+	public CQIE getTargetQuery();
 
-	public Object clone();
+	public OBDAMappingAxiom clone();
 
 	public void setId(String id);
 

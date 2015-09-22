@@ -512,7 +512,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			
 			// Prepare the mapping target
 			predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			OBDAQuery target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			CQIE target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 			
 			// Create the mapping axiom
 			OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(dfac.getSQLQuery(source), target);
