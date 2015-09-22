@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.ParsedSQLQuery;
+import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -31,6 +31,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class to create an Alias Map for the select statement
@@ -43,21 +44,12 @@ import java.util.HashMap;
  * Remove quotes when present.
  */
 
-public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromItemVisitor, ExpressionVisitor{
+public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromItemVisitor, ExpressionVisitor {
 
-	HashMap<String,String> aliasMap;
-
+	private final Map<String,String> aliasMap = new HashMap<>();
 	
-	/**
-	 * Return a map between the column in the select statement and its alias.
-	 * @param select parsed query 
-	 * @return alias map
-	 */
-	
-	public HashMap<String,String> getAliasMap(Select select, boolean deepParsing) {
+	public AliasMapVisitor(Select select) {
 
-		aliasMap = new HashMap<String, String>();
-		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
@@ -65,11 +57,20 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 		}
 		
 		select.getSelectBody().accept(this);
+	}
+	
+	/**
+	 * Return a map between the column in the select statement and its alias.
+	 * @param select parsed query 
+	 * @return alias map
+	 */
+	
+	public Map<String,String> getAliasMap() {
 		return aliasMap;
 	}
 	
 	/*
-	 * visit Plainselect, search for the content in select
+	 * visit PlainSelect, search for the content in select
 	 * Stored in AggregationJSQL. 
 	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
 	 */
@@ -87,20 +88,14 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
             plainSelect.getWhere().accept(this);
         }
 		
-		for (SelectItem item : plainSelect.getSelectItems())
-		{
+		for (SelectItem item : plainSelect.getSelectItems()) {
 			item.accept(this);
 		}
-
-
-
-
     }
 
 	@Override
 	public void visit(AllColumns columns) {
-		//we are not interested in allcolumns (SELECT *) since it does not have aliases
-		
+		//we are not interested in allcolumns (SELECT *) since it does not have aliases	
 	}
 
 	@Override
@@ -115,24 +110,18 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		if ( selectExpr.getAlias() != null) {
-			String alias = selectExpr.getAlias().getName();
+		Alias alias = selectExpr.getAlias();
+		if (alias  != null) {
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
-			if(ParsedSQLQuery.pQuotes.matcher(alias).matches()){
-				String unquotedAlias =  alias.substring(1, alias.length() - 1);
-				aliasMap.put(e.toString().toLowerCase(), unquotedAlias );
-				selectExpr.getAlias().setName(unquotedAlias);
-			}
-			else
-				aliasMap.put(e.toString().toLowerCase(), alias);
+			TableJSQL.unQuoteAlias(alias);
+			aliasMap.put(e.toString().toLowerCase(), alias.getName());
 		}
 	}
 	@Override
 	public void visit(SetOperationList arg0) {
 		// we are not considering UNION case
-		
 	}
 
 	@Override

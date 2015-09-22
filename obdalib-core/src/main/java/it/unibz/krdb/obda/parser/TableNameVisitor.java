@@ -96,14 +96,10 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	public void visit(PlainSelect plainSelect) {
 		plainSelect.getFromItem().accept(this);
 
-        /** 
-         * When the mapping contains a DISTINCT we interpret it as  
-         * a HINT to create a subview. 
-         *
-         *  Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE
-         * for obtaining this behavior. 
-         */
-        if (plainSelect.getDistinct() != null) {
+		// When the mapping contains a DISTINCT we interpret it as a HINT to create a subview.
+		// Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE 
+		// for obtaining this behavior.
+		if (plainSelect.getDistinct() != null) {
             unsupported = true;
         }
 
@@ -144,10 +140,11 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 			
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
-				unsupported = true;
-			
-		} else
+				unsupported = true;	
+		} 
+		else
 			unsupported = true;
+		
 		subSelect.getSelectBody().accept(this);
 	}
 

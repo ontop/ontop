@@ -145,14 +145,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     if (aliasName != null) {
 
                         String aliasString = aliasName.getName();
-                        SelectExpressionItem columnAlias;
-                        if(ParsedSQLQuery.pQuotes.matcher(aliasString).matches()) {
-                            columnAlias = new SelectExpressionItem(new Column(tableName, aliasString));
-                        }
-                        else{
-                            columnAlias = new SelectExpressionItem(new Column(tableName, "\"" + aliasString + "\""));
-                        }
-
+                        SelectExpressionItem columnAlias = newSelectExpressionItem(tableName, aliasString);
                         //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase()))
                                 || variables.contains(fac.getVariable(columnAlias.toString())) || variables.contains(fac.getVariable(aliasString.toString().toLowerCase()))) {
@@ -164,13 +157,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     } else { //when there are no alias add the columns that are used in the mappings
 
                         String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
-                        SelectExpressionItem column;
-                        if(ParsedSQLQuery.pQuotes.matcher(columnName).matches()) {
-                            column = new SelectExpressionItem(new Column(tableName, columnName));
-                        }
-                        else{
-                            column = new SelectExpressionItem(new Column(tableName, "\"" + columnName + "\""));
-                        }
+                        SelectExpressionItem column = newSelectExpressionItem(tableName, columnName);
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))
                                 || variables.contains(fac.getVariable(column.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
                             columnNames.add(column);
@@ -282,7 +269,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
      */
     private void obtainColumnsFromMetadata(Table table) {
 
-
+    	// ROMAN (22 Sep 2015): I'm TOTALLY unsure whether one should unqoute the FULLY QULAIFIED NAME
         String tableFullName= table.getFullyQualifiedName();
         if (ParsedSQLQuery.pQuotes.matcher(tableFullName).matches()) {
             tableFullName = tableFullName.substring(1, tableFullName.length()-1);
@@ -305,13 +292,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         for (Attribute att : tableDefinition.getAttributes()) {
             String columnFromMetadata = att.getName();
-            SelectExpressionItem columnName;
-            if(ParsedSQLQuery.pQuotes.matcher(columnFromMetadata).matches()){
-                columnName = new SelectExpressionItem(new Column(tableName,  columnFromMetadata ));
-            }
-            else {
-                columnName = new SelectExpressionItem(new Column(tableName, "\"" + columnFromMetadata + "\""));
-            }
+            SelectExpressionItem columnName = newSelectExpressionItem(tableName,  columnFromMetadata);
             //construct a column as table.column
             if (variables.contains(fac.getVariable(columnFromMetadata))
                     || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
@@ -325,7 +306,12 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
     }
 
 
-
+    private static SelectExpressionItem newSelectExpressionItem(Table tableName, String columnFromMetadata) {
+        if(ParsedSQLQuery.pQuotes.matcher(columnFromMetadata).matches())
+            return new SelectExpressionItem(new Column(tableName,  columnFromMetadata ));
+        else 
+            return new SelectExpressionItem(new Column(tableName, "\"" + columnFromMetadata + "\""));
+    }
 
 
 

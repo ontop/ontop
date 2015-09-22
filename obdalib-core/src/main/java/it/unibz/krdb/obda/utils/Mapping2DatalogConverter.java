@@ -298,7 +298,7 @@ public class Mapping2DatalogConverter {
 			
 			final String tableName = table.getTable().getName();
 			final String fullName = getFullTableName(table);
-			final String tableGivenName = table.getTable().getGivenName();
+			final String tableGivenName = table.getTableGivenName();
 			final RelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
 
             if (tableDefinition == null) {

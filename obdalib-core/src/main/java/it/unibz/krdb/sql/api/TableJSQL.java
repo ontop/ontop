@@ -42,11 +42,10 @@ public class TableJSQL implements Serializable{
 		// givenSchema and givenName are the names with quotes, upper case,
 		// that is, exactly as given by the user. 
 		// quotedTable and quotedSchema are boolean value to identify when quotes have been removed.
-		private final String givenName;
 		private final String name;
 		private final boolean quoted;
 	
-		private Identifier(String name, String givenName) {
+		private Identifier(String name) {
 			if (name != null && ParsedSQLQuery.pQuotes.matcher(name).matches()) {
 	            this.name = name.substring(1, name.length() - 1);
 	            this.quoted = true;
@@ -55,8 +54,6 @@ public class TableJSQL implements Serializable{
 				this.name = name;
 				this.quoted = false;
 			}
-				
-			this.givenName = givenName;
 		}
 		
 		public boolean isQuoted() {
@@ -66,35 +63,35 @@ public class TableJSQL implements Serializable{
 		public String getName() {
 			return name;
 		}
-		
-		public String getGivenName() {
-			return givenName;
-		}
 	};
 	
 	private final Identifier schema, table;
 	private final Alias alias;
-	
+	private final String tableGivenName;
 	
 	public TableJSQL(String schemaName, String tableName, Alias a) {
-		this.schema = new Identifier(schemaName, schemaName);
+		this.schema = new Identifier(schemaName);
+		this.table = new Identifier(tableName);
 		// table FQN is optional schema and "." followed by table name 
-		this.table = new Identifier(tableName, (schemaName == null) ? tableName : schemaName + "." + tableName); 
-		if (a != null) {
-			String name = a.getName();
-			// unquote the alias name AND MODIFY IT (ROMAN 22 Sep 2015)
-			if (ParsedSQLQuery.pQuotes.matcher(name).matches()) {
-				a.setName(name.substring(1, name.length() - 1));
-			}
-		}
+		this.tableGivenName =  (schemaName == null) ? tableName : schemaName + "." + tableName;
 		this.alias = a;		
+		if (alias != null) 
+			unQuoteAlias(alias);
 	}
 
+	public String getTableGivenName() {
+		return tableGivenName;
+	}
+	
+	/**
+	 * unquote both the column and table names (including the schema and alias)
+	 * and STORE them back
+	 * 
+	 * @param tableColumn
+	 */
 	
 	public static void unquoteColumnAndTableName(Column tableColumn) {
-		String columnName = tableColumn.getColumnName();
-		if (ParsedSQLQuery.pQuotes.matcher(columnName).matches())
-			tableColumn.setColumnName(columnName.substring(1, columnName.length() - 1));
+		unquoteColumnName(tableColumn);
 		
 		Table table = tableColumn.getTable();
 		if (table != null) {
@@ -105,6 +102,35 @@ public class TableJSQL implements Serializable{
 		}
 	}
 	
+	/**
+	 * unquote the column name and STORE the unquoted name back
+	 * 
+	 * @param column
+	 * @return
+	 */
+	
+	public static String unquoteColumnName(Column column) {
+		String columnName = column.getColumnName();
+		
+		if (ParsedSQLQuery.pQuotes.matcher(columnName).matches()) {
+			columnName = columnName.substring(1, columnName.length() - 1);
+			column.setColumnName(columnName);
+		}
+		return columnName;
+	}
+
+	/**
+	 * unquote the alias name and STORE the unqouted name back
+	 * 
+	 * @param a
+	 */
+	
+	public static void unQuoteAlias(Alias a) {
+		String name = a.getName();
+		if (ParsedSQLQuery.pQuotes.matcher(name).matches()) {
+			a.setName(name.substring(1, name.length() - 1));
+		}
+	}
 	
 	public Identifier getSchema() {
 		return schema;
@@ -120,7 +146,7 @@ public class TableJSQL implements Serializable{
 	
 	@Override
 	public String toString() {
-		return table.givenName;
+		return tableGivenName;
 	}
 
 	/**
@@ -131,7 +157,7 @@ public class TableJSQL implements Serializable{
 	public boolean equals(Object t) {
 		if (t instanceof TableJSQL) {
 			TableJSQL tp = (TableJSQL) t;
-			return this.table.givenName.equals(tp.table.givenName)
+			return this.tableGivenName.equals(tp.tableGivenName)
 					&& ((this.alias == tp.alias)
 							|| ((this.alias != null) && this.alias.equals(tp.alias)));
 		}

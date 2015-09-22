@@ -73,8 +73,10 @@ public class ImplicitDBConstraints {
 	}
 
 	/**
-	 * Reads colon separated pairs of view name and primary key
+	 * Reads colon-separated pairs of view name and primary key
+	 * 
 	 * @param file The plain-text file with functional dependencies
+	 * 
 	 * @throws IOException 
 	 */
 	public ImplicitDBConstraints(File file) {
@@ -112,7 +114,7 @@ public class ImplicitDBConstraints {
 							tableFKeys = new ArrayList<>();
 							fKeys.put(tableName, tableFKeys);
 						}
-						Map<String, Reference> fKey = new HashMap<String, Reference>();
+						Map<String, Reference> fKey = new HashMap<>();
 						String fkName = keyColumns[0] + fkTable;
 						for (int i = 0; i < fkColumnS.length; i++){
 							String keyColumn = keyColumns[i];
@@ -148,7 +150,7 @@ public class ImplicitDBConstraints {
 	 */
 	private static boolean tableIsInList(List<TableJSQL> tables, String tableGivenName) {
 		for (TableJSQL table : tables) {
-			if (table.getTable().getGivenName().equals(tableGivenName))
+			if (table.getTableGivenName().equals(tableGivenName))
 				return true;
 		}
 		return false;

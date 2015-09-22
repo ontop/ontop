@@ -242,7 +242,7 @@ public class DBMetadataExtractor {
 		for (TableJSQL table : tables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
-			String tableGivenName = table.getTable().getGivenName();
+			String tableGivenName = table.getTableGivenName();
 
 			String tblName = idNormalizer.getCanonicalFormOfIdentifier(table.getTable().getName(), table.getTable().isQuoted());
 

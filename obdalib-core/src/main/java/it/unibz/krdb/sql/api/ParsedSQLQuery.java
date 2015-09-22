@@ -49,7 +49,6 @@ public class ParsedSQLQuery implements Serializable {
 	private static final long serialVersionUID = -4590590361733833782L;
 
 	private final String query;
-	private final Statement stm;
 	private final boolean deepParsing; // used to remove all quotes from the query
 
 	private Select selectQuery; // the parsed query
@@ -79,40 +78,11 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 
 
-	public ParsedSQLQuery(String queryString, boolean deepParsing)
-			throws JSQLParserException {
-
-		/**
-		 * pattern used to remove quotes from the beginning and the end of
-		 * columns
-		 */
-
+	public ParsedSQLQuery(String queryString, boolean deepParsing) throws JSQLParserException {
 		query = queryString;
-
 		this.deepParsing = deepParsing;
-
-		stm = CCJSqlParserUtil.parse(query);
-
-		if (stm instanceof Select) {
-			selectQuery = (Select) stm;
-
-			// getting the values we also eliminate or handle the quotes if
-			// deepParsing is set to true
-			if (deepParsing) {
-				tables = getTables();
-				whereClause = getWhereClause();
-				projection = getProjection();
-				joins = getJoinConditions();
-				aliasMap = getAliasMap();
-				groupByClause = getGroupByClause();
-			}
-
-		}
-		// catch exception about wrong inserted columns
-		else
-			throw new JSQLParserException(
-					"The inserted query is not a SELECT statement");
-
+		Statement stm = CCJSqlParserUtil.parse(query);
+		init(stm);
 	}
 
 	/**
@@ -125,24 +95,18 @@ public class ParsedSQLQuery implements Serializable {
 	 *            for unsupported query in the mapping
 	 * @throws JSQLParserException
 	 */
-	public ParsedSQLQuery(Statement statement, boolean deepParsing)
-			throws JSQLParserException {
-
-//		pQuotes = Pattern.compile("[\"`\\[].*[\"`\\]]");
-
+	public ParsedSQLQuery(Statement statement, boolean deepParsing) throws JSQLParserException {
 		query = statement.toString();
-
-		stm = statement;
-
 		this.deepParsing = deepParsing;
+		init(statement);
+	}
 
+	private final void init(Statement stm) throws JSQLParserException {
 		if (stm instanceof Select) {
 			selectQuery = (Select) stm;
 
-			/**
-			 * Getting the values we also eliminate or handle the quotes if
-			 * deepParsing is set to true and we throw errors for unsupported values
-			 */
+			// Getting the values we also eliminate or handle the quotes if
+			// deepParsing is set to true and we throw errors for unsupported values
 
 			if (deepParsing) {
 				tables = getTables();
@@ -152,15 +116,11 @@ public class ParsedSQLQuery implements Serializable {
 				aliasMap = getAliasMap();
 				groupByClause = getGroupByClause();
 			}
-
 		}
 		// catch exception about wrong inserted columns
 		else
-			throw new JSQLParserException(
-					"The inserted query is not a SELECT statement");
-
+			throw new JSQLParserException("The inserted query is not a SELECT statement");
 	}
-
 
 	@Override
 	public String toString() {
@@ -185,8 +145,8 @@ public class ParsedSQLQuery implements Serializable {
 	public List<SelectJSQL> getSubSelects() {
 
 		if (subSelects == null) {
-			SubSelectVisitor visitor = new SubSelectVisitor();
-			subSelects = visitor.getSubSelects(selectQuery, deepParsing);
+			SubSelectVisitor visitor = new SubSelectVisitor(selectQuery);
+			subSelects = visitor.getSubSelects();
 		}
 		return subSelects;
 	}
@@ -196,8 +156,8 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 	public Map<String, String> getAliasMap() {
 		if (aliasMap == null) {
-			AliasMapVisitor visitor = new AliasMapVisitor();
-			aliasMap = visitor.getAliasMap(selectQuery, deepParsing);
+			AliasMapVisitor visitor = new AliasMapVisitor(selectQuery);
+			aliasMap = visitor.getAliasMap();
 		}
 		return aliasMap;
 	}

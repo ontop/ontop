@@ -101,9 +101,18 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
-	private List<SelectJSQL> subSelects;
+	private final List<SelectJSQL> subSelects = new ArrayList<>();
 
 
+	public SubSelectVisitor(Select select) {
+ 		if (select.getWithItemsList() != null) {
+			for (WithItem withItem : select.getWithItemsList()) {
+				withItem.accept(this);
+			}
+		}
+		select.getSelectBody().accept(this);
+	}
+	
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
@@ -111,15 +120,7 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * @param deepParsing
 	 * @return
 	 */
-	public List<SelectJSQL> getSubSelects(Select select, boolean deepParsing) {
-		init();
- 		if (select.getWithItemsList() != null) {
-			for (WithItem withItem : select.getWithItemsList()) {
-				withItem.accept(this);
-			}
-		}
-		select.getSelectBody().accept(this);
-
+	public List<SelectJSQL> getSubSelects() {
 		return subSelects;
 	}
 	
@@ -411,12 +412,6 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(ValuesList valuesList) {
-	}
-
-	private void init() {
-		
-		subSelects = new ArrayList<SelectJSQL>();
-
 	}
 
 	@Override

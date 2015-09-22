@@ -101,8 +101,8 @@ import net.sf.jsqlparser.statement.select.WithItem;
 
 public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, FromItemVisitor {
 	
-	ArrayList<Expression> joinConditions;
-	boolean notSupported = false;
+	private List<Expression> joinConditions;
+	private boolean notSupported = false;
 
 	
 	/**
@@ -112,7 +112,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 * @param select statement with the parsed query
 	 * @return a list of string containing the join conditions
 	 */
-	public ArrayList<Expression> getJoinConditions(Select select, boolean deepParsing)  throws JSQLParserException {
+	public List<Expression> getJoinConditions(Select select, boolean deepParsing)  throws JSQLParserException {
 
 		joinConditions = new ArrayList<Expression>();
 		select.getSelectBody().accept(this);
@@ -142,13 +142,8 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			if (join.getUsingColumns()!=null) // JOIN USING column
 				for (Column column : join.getUsingColumns())
 				{
-					String columnName= column.getColumnName();
+					String columnName = TableJSQL.unquoteColumnName(column);
 					
-					if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
-					{
-						columnName=columnName.substring(1, columnName.length()-1);
-						column.setColumnName(columnName);
-					}
 					if (fromItem instanceof Table && join.getRightItem() instanceof Table) {
 						Table table1 = (Table)fromItem;
 						BinaryExpression bexpr = new EqualsTo();

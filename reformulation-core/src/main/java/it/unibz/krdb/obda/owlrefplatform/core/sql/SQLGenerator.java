@@ -1256,7 +1256,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return false;
 	}
 
-	private String trim(String string) {
+	private static String trim(String string) {
 		while (ParsedSQLQuery.pQuotes.matcher(string).matches()) {
 			string = string.substring(1, string.length() - 1);
 		}
