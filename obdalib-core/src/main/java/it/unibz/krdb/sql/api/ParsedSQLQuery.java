@@ -249,7 +249,7 @@ public class ParsedSQLQuery implements Serializable {
 		return groupByClause;
 	}
 
-	public Statement getStatement() {
+	public Select getStatement() {
 		return selectQuery;
 	}
 

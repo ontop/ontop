@@ -130,7 +130,7 @@ public class DBMetadataExtractor {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationDefinition> tableList;
-		DatatypeNormalizer dt;
+		DatatypeNormalizer dt = DefaultTypeFixer;
 		TableIdNormalizer idNormalizer;
 		
 		if (md.getDatabaseProductName().contains("Oracle")) {
@@ -147,14 +147,10 @@ public class DBMetadataExtractor {
 		else if (md.getDatabaseProductName().contains("DB2")) {
 			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 					
-			if (tables == null || tables.isEmpty()) {
+			if (tables == null || tables.isEmpty()) 
 				tableList = getTableList(conn, DB2RelationListProvider);
-				dt = DefaultTypeFixer;
-			}
-			else {
+			else 
 				tableList = getTableList(null, tables, idNormalizer);
-				dt = MySQLTypeFixer; // why MySQLTypeFixer?
-			}
 		}  
 		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
 			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
@@ -163,8 +159,6 @@ public class DBMetadataExtractor {
 				tableList = getTableListDefault(md);
 			else 
 				tableList = getTableList(null, tables, idNormalizer);
-			
-			dt = MySQLTypeFixer;
 		}
 		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
 			idNormalizer = DBMetadata.LowerCaseIdNormalizer;
@@ -174,8 +168,6 @@ public class DBMetadataExtractor {
 				tableList = getTableListDefault(md);
 			else 
 				tableList = getTableList(null, tables, idNormalizer);
-			
-			dt = MySQLTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
 			idNormalizer = DBMetadata.IdentityIdNormalizer;
@@ -184,10 +176,7 @@ public class DBMetadataExtractor {
 				tableList = getTableList(conn, MSSQLServerRelationListProvider);
 			else
 				tableList = getTableList(null, tables, idNormalizer);
-				
-			dt = DefaultTypeFixer;
  		} 
-		
 		else {
 			idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
@@ -199,14 +188,6 @@ public class DBMetadataExtractor {
 			
 			dt = MySQLTypeFixer;
 		}
-		/*
-        boolean uppercase = false;
-        if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
-            // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
-            uppercase = true;
-        }
-		*/
-		
 		
 		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idNormalizer);
 		
