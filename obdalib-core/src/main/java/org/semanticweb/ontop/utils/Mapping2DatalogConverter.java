@@ -21,6 +21,8 @@ package org.semanticweb.ontop.utils;
  */
 
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import org.semanticweb.ontop.mapping.sql.LookupTable;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
@@ -61,14 +63,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Mapping2DatalogConverter {
+public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+    private final DBMetadata dbMetadata;
+
+    @AssistedInject
+    private Mapping2DatalogConverter(@Assisted DBMetadata dbMetadata) {
+        this.dbMetadata = dbMetadata;
+    }
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public static List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms, DBMetadata dbMetadata) {
+	public List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		

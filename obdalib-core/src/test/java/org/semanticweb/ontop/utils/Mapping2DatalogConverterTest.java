@@ -92,8 +92,9 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		OBDAMappingAxiom mappingAxiom = factory.create(ofac.getSQLQuery(source), target);
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
-		
-		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
+
+		IMapping2DatalogConverter mapping2DatalogConverter = factory.create(md);
+		List<CQIE> dp = mapping2DatalogConverter.constructDatalogProgram(mappingList);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

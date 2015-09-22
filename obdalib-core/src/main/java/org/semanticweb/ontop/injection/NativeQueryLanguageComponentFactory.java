@@ -9,6 +9,8 @@ import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
+import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.utils.IMapping2DatalogConverter;
 
 import java.io.File;
 import java.io.Reader;
@@ -49,4 +51,6 @@ public interface NativeQueryLanguageComponentFactory {
 
     public OBDAMappingAxiom create(@Assisted("sourceQuery") OBDAQuery sourceQuery,
                                    @Assisted("targetQuery") CQIE targetQuery);
+
+    public IMapping2DatalogConverter create(DBMetadata metadata);
 }

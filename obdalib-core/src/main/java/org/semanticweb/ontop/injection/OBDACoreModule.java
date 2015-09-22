@@ -7,6 +7,7 @@ import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
+import org.semanticweb.ontop.utils.IMapping2DatalogConverter;
 
 public class OBDACoreModule extends OBDAAbstractModule {
 
@@ -23,7 +24,9 @@ public class OBDACoreModule extends OBDAAbstractModule {
                         MappingParser.class,
                         PrefixManager.class,
                         DBMetadataExtractor.class,
-                        OBDAMappingAxiom.class),
+                        OBDAMappingAxiom.class,
+                        IMapping2DatalogConverter.class
+                        ),
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
 

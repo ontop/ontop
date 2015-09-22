@@ -29,6 +29,7 @@ import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.semanticweb.ontop.parser.PreprocessProjection;
 import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.utils.IMapping2DatalogConverter;
 import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,9 @@ public class QuestUnfolder {
 		unfoldingOBDAModel = dbConnector.expandMetaMappings(unfoldingOBDAModel, sourceId);
 
 		ImmutableList<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
-		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
+
+		IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
+		unfoldingProgram = mapping2DatalogConverter.constructDatalogProgram(mappings);
 	}
 
 
@@ -386,7 +389,8 @@ public class QuestUnfolder {
 	
 	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, DBMetadata metadata) throws OBDAException {
 
-		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
+		IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
+		unfoldingProgram = mapping2DatalogConverter.constructDatalogProgram(mappings);
 		
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
