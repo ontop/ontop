@@ -38,7 +38,6 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
-import it.unibz.krdb.sql.api.SelectionJSQL;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -273,7 +272,7 @@ public class MetaMappingExpander {
 		/*
 		 * new Selection 
 		 */
-		SelectionJSQL selection = null;
+		Expression selection = null;
 		try {
 			selection = sourceParsedQuery.getWhereClause();
 			
@@ -281,33 +280,27 @@ public class MetaMappingExpander {
 			
 			e1.printStackTrace();
 		}
-		SelectionJSQL newSelection = new SelectionJSQL();
-		
-		if(selection != null)
-			newSelection.addCondition(selection.getRawConditions());
+		Expression newSelection = selection;
 	
 		
-			int j=0;
-			for(SelectExpressionItem column : columnsForTemplate){
-				
-				Expression columnRefExpression = column.getExpression();
-				
-				StringValue clsStringValue = new StringValue("'"+params.get(j)+"'");
-				
-				//we are considering only equivalences
-				BinaryExpression condition = new EqualsTo();
-				condition.setLeftExpression(columnRefExpression);
-				condition.setRightExpression(clsStringValue);
-				
-
-				if(newSelection.getRawConditions()!=null){
-					BinaryExpression andOperator = new AndExpression(newSelection.getRawConditions(), condition);
-					newSelection.addCondition(andOperator);
-				}
-				else
-				newSelection.addCondition(condition);
-				j++;	
-			}
+		int j = 0;
+		for(SelectExpressionItem column : columnsForTemplate){
+			
+			Expression columnRefExpression = column.getExpression();
+			
+			StringValue clsStringValue = new StringValue("'"+params.get(j)+"'");
+			
+			//we are considering only equivalences
+			BinaryExpression condition = new EqualsTo();
+			condition.setLeftExpression(columnRefExpression);
+			condition.setRightExpression(clsStringValue);
+			
+			if (newSelection != null) 
+				newSelection = new AndExpression(newSelection, condition);
+			else
+				newSelection = condition;
+			j++;	
+		}
 			
 			
 		
@@ -322,11 +315,9 @@ public class MetaMappingExpander {
 		 * we create a new statement with the changed projection and selection
 		 */
 		
-		ParsedSQLQuery newSourceParsedQuery = null;
-
-			newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(),false);
-			newSourceParsedQuery.setProjection(newProjection);
-			newSourceParsedQuery.setWhereClause(newSelection);
+		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(),false);
+		newSourceParsedQuery.setProjection(newProjection);
+		newSourceParsedQuery.setWhereClause(newSelection);
 		
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();

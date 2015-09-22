@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 public class SQLQueryParser {
 
+	public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
+
 	private final DBMetadata dbMetaData;
 	
 	private static int id_counter;

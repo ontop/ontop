@@ -141,16 +141,13 @@ public class Mapping2DatalogConverter {
 
     private static void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
         // For the "where" clause
-        SelectionJSQL whereClause = parsedSQLQuery.getWhereClause();
-        if (whereClause != null) {
-            Expression conditions = whereClause.getRawConditions();
-
+        Expression conditions = parsedSQLQuery.getWhereClause();
+        if (conditions != null) {
             Expression2FunctionConverter converter = new Expression2FunctionConverter(lookupTable);
             Function filterFunction =  converter.convert(conditions);
-
             bodyAtoms.add(filterFunction);
         }
-    }
+     }
 
     /**
      * For each join condition, creates an atom and adds it to the body

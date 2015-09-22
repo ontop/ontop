@@ -59,7 +59,7 @@ public class ParsedSQLQuery implements Serializable {
 	private List<SelectJSQL> subSelects;
 	private Map<String, String> aliasMap;
 	private List<Expression> joins;
-	private SelectionJSQL whereClause;
+	private Expression whereClause;
 	private ProjectionJSQL projection;
 	private AggregationJSQL groupByClause;
 
@@ -179,7 +179,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * 
 	 * @throws JSQLParserException
 	 */
-	public SelectionJSQL getWhereClause() throws JSQLParserException {
+	public Expression getWhereClause() throws JSQLParserException {
 		if (whereClause == null) {
 			WhereClauseVisitor visitor = new WhereClauseVisitor();
 			whereClause = visitor.getWhereClause(selectQuery, deepParsing);
@@ -231,7 +231,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * @param whereClause
 	 */
 
-	public void setWhereClause(SelectionJSQL whereClause) {
+	public void setWhereClause(Expression whereClause) {
 		WhereClauseVisitor sel = new WhereClauseVisitor();
 		sel.setWhereClause(selectQuery, whereClause);
 		this.whereClause = whereClause;
