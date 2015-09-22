@@ -58,8 +58,6 @@ public class MappingSplitter {
 
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 
-			OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
-
 			Function head = targetQuery.getHead();
 			List<Function> bodyAtoms = targetQuery.getBody();
 
@@ -71,7 +69,7 @@ public class MappingSplitter {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					
 					CQIE newTargetQuery = dfac.getCQIE(head, bodyAtom);
-					OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, newTargetQuery);
+					OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, mapping.getSourceQuery(), newTargetQuery);
 					newMappings.add(newMapping);
 				}
 			}
