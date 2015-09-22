@@ -4,7 +4,6 @@
 package it.unibz.krdb.sql;
 
 import it.unibz.krdb.sql.api.TableJSQL;
-import net.sf.jsqlparser.schema.Table;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +86,7 @@ public class ImplicitDBConstraints {
 				if (parts.length >= 2){ // Primary or foreign key
 					String tableName = parts[0];
 					String[] keyColumns = parts[1].split(",");
-					if (parts.length == 2) { // Primary key		
+					if (parts.length == 2) { // Primary Key		
 						List<List<String>> pKeyList = uniqueFD.get(tableName);
 						if (pKeyList == null){
 							pKeyList = new ArrayList<>();
@@ -99,7 +98,7 @@ public class ImplicitDBConstraints {
 						}
 						pKeyList.add(pKey);
 					} 
-					else if (parts.length == 4) { // FOreign key
+					else if (parts.length == 4) { // Foreign Key
 						String fkTable = parts[2];
 						this.referredTables.add(fkTable);
 						String[] fkColumnS = parts[3].split(",");			
@@ -147,7 +146,7 @@ public class ImplicitDBConstraints {
 	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
 	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
 	 */
-	public static boolean tableIsInList(List<TableJSQL> tables, String tableGivenName) {
+	private static boolean tableIsInList(List<TableJSQL> tables, String tableGivenName) {
 		for (TableJSQL table : tables) {
 			if (table.getTable().getGivenName().equals(tableGivenName))
 				return true;
@@ -161,34 +160,23 @@ public class ImplicitDBConstraints {
 	 * @param tables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public void addReferredTables(List<TableJSQL> tables){
-		for(String tableGivenName : this.referredTables){
-			if(!tableIsInList(tables, tableGivenName)){
+	public void addReferredTables(List<TableJSQL> tables) {
+		for (String tableGivenName : this.referredTables) {
+			if (!tableIsInList(tables, tableGivenName)) {
 				String[] tablenames = tableGivenName.split("\\.");
-				Table newTable = null;
 				if (tablenames.length == 1) {
-					newTable = new Table(tablenames[0]);
+					tables.add(new TableJSQL(null, tablenames[0], null));
 				} 
 				else if (tablenames.length == 2){
-					newTable = new Table(tablenames[0], tablenames[1]);
+					tables.add(new TableJSQL(tablenames[0], tablenames[1], null));
 				} 
 				else {
 					log.warn("Too many dots in table name " + tableGivenName + " in user-supplied constraints");
-					continue;
 				}
-				tables.add(new TableJSQL(newTable));
 			}
 		}
 	}
 
-	/**
-	 * Adds the parsed user-supplied constraints to the metadata
-	 * @param md
-	 */
-	public void addConstraints(DBMetadata md){
-		this.addFunctionalDependencies(md);
-		this.addForeignKeys(md);
-	}
 	
 	/**
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object

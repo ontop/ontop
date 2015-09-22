@@ -43,7 +43,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
-	private ArrayList<TableJSQL> tables;
+	private List<TableJSQL> tables;
 
 	/**
 	 * There are special names, that are not table names but are parsed as
@@ -63,7 +63,9 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * @return
 	 */
 	public List<TableJSQL> getTables(Select select, boolean deepParsing) throws JSQLParserException {
-		init();
+		otherItemNames = new ArrayList<>();
+		tables = new ArrayList<>();
+
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
@@ -128,8 +130,8 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	
 	@Override
 	public void visit(Table tableName) {
-		TableJSQL relation = new TableJSQL(tableName);
 		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
+			TableJSQL relation = new TableJSQL(tableName.getSchemaName(), tableName.getName(), tableName.getAlias());
 			tables.add(relation);
 		}
 	}
@@ -432,12 +434,6 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(ValuesList valuesList) {
 		unsupported = true;
-	}
-
-	private void init() {
-		otherItemNames = new ArrayList<>();
-		tables = new ArrayList<>();
-
 	}
 
 	@Override

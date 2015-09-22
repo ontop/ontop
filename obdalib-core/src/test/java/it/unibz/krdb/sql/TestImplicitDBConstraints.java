@@ -62,7 +62,7 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 1);
-		assertTrue(uc.tableIsInList(tables, "TABLE2"));
+		assertTrue(tables.contains(new TableJSQL(null, "TABLE2", null)));
 	}
 
 	@Test
@@ -79,7 +79,8 @@ public class TestImplicitDBConstraints {
 	@Test
 	public void testAddKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
-		uc.addConstraints(this.md);
+		uc.addFunctionalDependencies(this.md);
+		uc.addForeignKeys(this.md);
 		RelationDefinition dd = this.md.getDefinition("TABLENAME");
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);

@@ -75,20 +75,11 @@ public class TableJSQL implements Serializable{
 	private final Identifier schema, table;
 	private final Alias alias;
 	
-	/**
-	 * This constructor is used when we take the table names from the mappings.
-	 */
-	public TableJSQL(String schemaName, String tableName, String givenName) {
-		this.schema = new Identifier(schemaName, schemaName);
-		this.table = new Identifier(tableName, givenName);
-		this.alias = null;
-	}
 	
-	@Deprecated
-	public TableJSQL(Table table) {
-		this.schema = new Identifier(table.getSchemaName(), table.getSchemaName());
-		this.table = new Identifier(table.getName(), table.getFullyQualifiedName());
-		Alias a = table.getAlias();
+	public TableJSQL(String schemaName, String tableName, Alias a) {
+		this.schema = new Identifier(schemaName, schemaName);
+		// table FQN is optional schema and "." followed by table name 
+		this.table = new Identifier(tableName, (schemaName == null) ? tableName : schemaName + "." + tableName); 
 		if (a != null) {
 			String name = a.getName();
 			// unquote the alias name AND MODIFY IT (ROMAN 22 Sep 2015)
@@ -107,7 +98,7 @@ public class TableJSQL implements Serializable{
 		
 		Table table = tableColumn.getTable();
 		if (table != null) {
-			TableJSQL fixTable = new TableJSQL(table);
+			TableJSQL fixTable = new TableJSQL(table.getSchemaName(), table.getName(), table.getAlias());
 			table.setAlias(fixTable.getAlias());
 			table.setName(fixTable.getTable().getName());
 			table.setSchemaName(fixTable.getSchema().getName());		

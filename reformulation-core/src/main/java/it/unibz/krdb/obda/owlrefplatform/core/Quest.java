@@ -699,7 +699,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			//Adds keys from the text file
 			if (applyUserConstraints) {
-				userConstraints.addConstraints(metadata);
+				userConstraints.addFunctionalDependencies(metadata);
+				userConstraints.addForeignKeys(metadata);
 			}
 			
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
