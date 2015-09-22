@@ -86,6 +86,16 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	  	public String strLength(String str) {
 	  		return String.format("CHAR_LENGTH(%s)", str);
 	  	}
+
+	@Override
+	public String strUuid() {
+		return "UUID()";
+	}
+
+	@Override
+	public String uuid() {
+		return strConcat(new String[]{"'urn:uuid:'", "UUID()"});
+	}
 	
 	@Override
 	public String strConcat(String[] strings) {

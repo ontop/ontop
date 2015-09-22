@@ -272,23 +272,7 @@ public class BindTestWithFunctionsPostgreSQL {
 
     }
 	
-	public static String sha256(String base) {
-	      try{
-	          MessageDigest digest = MessageDigest.getInstance("MD5");
-	          byte[] hash = digest.digest(base.getBytes("UTF-8"));
-	          StringBuffer hexString = new StringBuffer();
 
-	          for (int i = 0; i < hash.length; i++) {
-	              String hex = Integer.toHexString(0xff & hash[i]);
-	              if(hex.length() == 1) hexString.append('0');
-	              hexString.append(hex);
-	          }
-
-	      return hexString.toString();
-	  } catch(Exception ex){
-	     throw new RuntimeException(ex);
-	  }
-	}
 	
 	/*
 	 * Tests for functions on strings.
@@ -860,10 +844,10 @@ public class BindTestWithFunctionsPostgreSQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2\"");
-        expectedValues.add("\"1\"");
-        expectedValues.add("\"2\"");
-        expectedValues.add("\"1\"");
+        expectedValues.add("\"2:0\"");
+        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"2:0\"");
+        expectedValues.add("\"1:0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 

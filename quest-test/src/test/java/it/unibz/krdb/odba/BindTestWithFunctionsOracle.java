@@ -191,68 +191,75 @@ public class BindTestWithFunctionsOracle {
 	}
 
 	/*
-	 * Tests for hash functions. Oracle does not support any hash functions.
+	 * Tests for hash functions. Oracle does not support any hash functions if DBMS CRYPTO is not enabled
 	 */
 
-	 @Test
+//	 @Test
     public void testHash() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+         QuestPreferences p = new QuestPreferences();
+         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount.\n"
-                + "   ?x dc:title ?title .\n"
-               // + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (SHA1(\"The Semantic Web\") AS ?w)\n"
-                + "}";
+         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                 + "SELECT  ?title ?w WHERE \n"
+                 + "{  ?x ns:price ?p .\n"
+                 + "   ?x ns:discount ?discount.\n"
+                 + "   ?x dc:title ?title .\n"
+//                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                 + "   BIND (SHA1(?title) AS ?w)\n"
+                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        try{
-	          MessageDigest digest = MessageDigest.getInstance("MD5");
-	          byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
-	          StringBuffer hexString = new StringBuffer();
+         List<String> expectedValuesSHA1 = new ArrayList<>();
 
-	          for (int i = 0; i < hash.length; i++) {
-	              String hex = Integer.toHexString(0xff & hash[i]);
-	              if(hex.length() == 1) hexString.append('0');
-	              hexString.append(hex);
-	          }
+         String resultsha1 =  messageDigest(MessageDigest.getInstance("SHA-1"), "The Semantic Web");
+         expectedValuesSHA1.add(String.format("\"%s\"", resultsha1));
 
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+         checkReturnedValues(p, queryBind, expectedValuesSHA1);
 
-	  } catch(Exception ex){
-	     throw new RuntimeException(ex);
-	  }
-        checkReturnedValues(p, queryBind, expectedValues);
+         String querymd5Bind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                 + "SELECT  ?title ?w WHERE \n"
+                 + "{  ?x ns:price ?p .\n"
+                 + "   ?x ns:discount ?discount.\n"
+                 + "   ?x dc:title ?title .\n"
+                 // + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                 + "   BIND (MD5(\"The Semantic Web\") AS ?w)\n"
+                 + "}";
+
+
+         List<String> expectedValuesMD5 = new ArrayList<>();
+
+         String resultmd5 = messageDigest(MessageDigest.getInstance("MD5"), "The Semantic Web");
+         expectedValuesMD5.add(String.format("\"%s\"",resultmd5));
+         expectedValuesMD5.add(String.format("\"%s\"",resultmd5));
+         expectedValuesMD5.add(String.format("\"%s\"", resultmd5));
+         expectedValuesMD5.add(String.format("\"%s\"", resultmd5));
+
+
+         checkReturnedValues(p, querymd5Bind, expectedValuesMD5);
 
     }
 
-	public static String sha256(String base) {
-	      try{
-	          MessageDigest digest = MessageDigest.getInstance("MD5");
-	          byte[] hash = digest.digest(base.getBytes("UTF-8"));
-	          StringBuffer hexString = new StringBuffer();
+    public static String messageDigest(MessageDigest digest, String base) {
+        try{
 
-	          for (int i = 0; i < hash.length; i++) {
-	              String hex = Integer.toHexString(0xff & hash[i]);
-	              if(hex.length() == 1) hexString.append('0');
-	              hexString.append(hex);
-	          }
+            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
 
-	      return hexString.toString();
-	  } catch(Exception ex){
-	     throw new RuntimeException(ex);
-	  }
-	}
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
 
 	/*
 	 * Tests for functions on strings.
@@ -530,7 +537,8 @@ public class BindTestWithFunctionsOracle {
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
-
+//Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
+    //here instead return null value
 
      @Test
     public void testBindWithBefore() throws Exception {
@@ -552,15 +560,16 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
-         expectedValues.add("\"\"");
+         expectedValues.add(null);
          expectedValues.add("\"The Seman\"");
-         expectedValues.add("\"\"");
+         expectedValues.add(null);
          expectedValues.add("\"The Logic Book: Introduc\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
 
-
+    //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
+    //here instead return null value
      @Test
     public void testBindWithAfter() throws Exception {
 
@@ -581,14 +590,13 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"");
+        expectedValues.add(null);
         expectedValues.add("\" Semantic Web\"");
-        expectedValues.add("\"\"");
+        expectedValues.add(null);
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
-    } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
-    //here instead the whole string is returned
+    }
 
 
 	/*
@@ -825,10 +833,10 @@ public class BindTestWithFunctionsOracle {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8\"");
-        expectedValues.add("\"1\"");
-        expectedValues.add("\"0\"");
-        expectedValues.add("\"1\"");
+        expectedValues.add("\"8:0\"");
+        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"0:0\"");
+        expectedValues.add("\"1:0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -898,8 +906,10 @@ public class BindTestWithFunctionsOracle {
                 while (rs.nextRow()) {
                     OWLObject ind1 = rs.getOWLObject("w");
                     // log.debug(ind1.toString());
+                    if (ind1 != null)
                     returnedValues.add(ind1.toString());
-
+                    else
+                        returnedValues.add(null);
                     System.out.println(ind1);
                     i++;
                 }

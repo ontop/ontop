@@ -132,7 +132,7 @@ public interface SQLDialectAdapter {
 
 	public String dateDay(String date);
 
-	public String dateTimezone(String date);
+	public String dateTZ(String date);
 
 	public String dateMonth(String date);
 

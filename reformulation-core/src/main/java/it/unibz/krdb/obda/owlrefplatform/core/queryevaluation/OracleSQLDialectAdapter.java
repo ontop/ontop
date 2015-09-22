@@ -54,12 +54,15 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String SHA1(String str) {
-	  		return String.format("dbms_crypto.HASH(%s, dbms_crypto.HASH_SH1)", str);
+//	  		return String.format("dbms_crypto.HASH(%s, 3)", str);
+		return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH1))))", str);
 	  	}
 	  
 	@Override
 	public String MD5(String str) {
-		return String.format("dbms_crypto.HASH(%s,2)", str);
+//		return String.format("dbms_crypto.HASH(%s, 2)", str);
+		return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), 2))))", str);
+//		return String.format("LOWER( RAWTOHEX( UTL_I18N.STRING_TO_RAW(sys.dbms_obfuscation_toolkit.md5(input_string => %s) , 'AL32UTF8')))", str); //works but deprecated
 	}
 
 	@Override
@@ -146,7 +149,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String uuid() {
-		return "'urn:uuid:'|| regexp_replace(rawtohex(sys_guid()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')";
+		return strConcat(new String[] {"'urn:uuid:'", "regexp_replace(rawtohex(sys_guid()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')"});
 	}
 
 	@Override
@@ -155,8 +158,8 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public String dateTimezone(String str) {
-		return String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str);
+	public String dateTZ(String str) {
+		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'" , String.format("EXTRACT(TIMEZONE_MINUTE FROM %s) ",str)});
 	}
 
 	@Override

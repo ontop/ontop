@@ -984,10 +984,10 @@ public class BindTestWithFunctionsSqlServer {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"08:00\"");
+        expectedValues.add("\"01:00\"");
+        expectedValues.add("\"00:00\"");
+        expectedValues.add("\"01:00\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 

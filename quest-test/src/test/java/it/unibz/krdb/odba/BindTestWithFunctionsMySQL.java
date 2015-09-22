@@ -200,7 +200,7 @@ public class BindTestWithFunctionsMySQL {
 
 
 	 @Test
-    public void testRound() throws Exception {
+    public void testRoundConcat() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -224,8 +224,33 @@ public class BindTestWithFunctionsMySQL {
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
+    @Test
+    public void testRound() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (ROUND(?p) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"43\"^^xsd:decimal");
+        expectedValues.add("\"23\"^^xsd:decimal");
+        expectedValues.add("\"34\"^^xsd:decimal");
+        expectedValues.add("\"10\"^^xsd:decimal");
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+
 	 @Test
-    public void testAbs() throws Exception {
+    public void testAbsOperation() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -242,12 +267,38 @@ public class BindTestWithFunctionsMySQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5000\"");
-        expectedValues.add("\"5.7500\"");
-        expectedValues.add("\"6.7000\"");
-        expectedValues.add("\"1.5000\"");
+         expectedValues.add("\"8.5000\"");
+         expectedValues.add("\"5.7500\"");
+         expectedValues.add("\"6.7000\"");
+         expectedValues.add("\"1.5000\"");
         checkReturnedValues(p, queryBind, expectedValues);
 	}
+
+    @Test
+    public void testAbs() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (ABS(?p)  AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"42.50\"^^xsd:decimal");
+        expectedValues.add("\"23.00\"^^xsd:decimal");
+        expectedValues.add("\"33.50\"^^xsd:decimal");
+        expectedValues.add("\"10.00\"^^xsd:decimal");
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+
 
 	/*
 	 * Tests for hash functions.
@@ -916,7 +967,7 @@ public class BindTestWithFunctionsMySQL {
         runTests(p, queryBind);
     }
 
-//        @Test timezone is not supported
+//        @Test no support
     public void testTimezone() throws Exception {
 
         QuestPreferences p = new QuestPreferences();

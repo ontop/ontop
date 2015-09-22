@@ -1549,7 +1549,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			} else if (functionName.equals(OBDAVocabulary.TIMEZONE.getName())) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateTimezone(literal);
+				String result = sqladapter.dateTZ(literal);
 				return result;
 
 			} else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {

@@ -101,8 +101,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
   	}
     
     @Override
-  	public String dateTimezone(String str) {
-    	throw new UnsupportedOperationException("TIMEZONE is not supported in this dialect.");
+  	public String dateTZ(String str) {
+    	throw new UnsupportedOperationException("TZ is not supported in this dialect.");
   	}
     
   
@@ -128,12 +128,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String strUuid() {
-		return "UUID()";
+		throw new UnsupportedOperationException("strUUID is not supported in this dialect.");
 	}
 
 	@Override
 	public String uuid() {
-		return "'urn:uuid:'|| UUID()";
+		throw new UnsupportedOperationException("UUID is not supported in this dialect.");
 	}
 
 	@Override

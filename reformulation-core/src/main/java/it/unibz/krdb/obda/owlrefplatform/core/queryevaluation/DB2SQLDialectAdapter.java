@@ -100,8 +100,8 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 //	}
 
 	@Override //maybe support from version 10 up
-	public String dateTimezone(String str) {
-		return String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str);
+	public String dateTZ(String str) {
+		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str),":", String.format("EXTRACT(TIMEZONE_MINUTE FROM %s)",str)  });
 	}
 
 	@Override

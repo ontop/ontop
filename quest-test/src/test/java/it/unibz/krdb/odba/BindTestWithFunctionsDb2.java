@@ -843,7 +843,7 @@ public class BindTestWithFunctionsDb2 {
         runTests(p, queryBind);
     }
 
-    @Test //not supported
+//    @Test //not supported
     public void testUuid() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -864,7 +864,7 @@ public class BindTestWithFunctionsDb2 {
         runTests(p, queryBind);
     }
 
-    @Test
+//    @Test maybe in another version of db2?
     public void testTimezone() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -889,7 +889,7 @@ public class BindTestWithFunctionsDb2 {
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
-    @Test //not supported
+//    @Test //not supported
     public void testStrUuid() throws Exception {
 
         QuestPreferences p = new QuestPreferences();

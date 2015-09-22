@@ -80,8 +80,9 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public String dateTimezone(String str) {
-		return String.format("DATEPART(TZ, %s)",str);
+	public String dateTZ(String str) {
+
+		return String.format("CONVERT(varchar(5), DATEADD(minute, DATEPART(TZ, %s), 0), 114)",str);
 	}
 
 	@Override
