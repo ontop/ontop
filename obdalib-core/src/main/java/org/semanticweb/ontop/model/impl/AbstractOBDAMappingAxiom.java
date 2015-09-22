@@ -45,5 +45,5 @@ public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 		return id.hashCode();
 	}
 	
-	public abstract Object clone();
+	public abstract OBDAMappingAxiom clone();
 }
