@@ -66,17 +66,15 @@ public class TableJSQL implements Serializable{
 	};
 	
 	private final Identifier schema, table;
-	private final Alias alias;
+	private final String alias;
 	private final String tableGivenName;
 	
-	public TableJSQL(String schemaName, String tableName, Alias a) {
+	public TableJSQL(String schemaName, String tableName, String a) {
 		this.schema = new Identifier(schemaName);
 		this.table = new Identifier(tableName);
 		// table FQN is optional schema and "." followed by table name 
 		this.tableGivenName =  (schemaName == null) ? tableName : schemaName + "." + tableName;
-		this.alias = a;		
-		if (alias != null) 
-			unQuoteAlias(alias);
+		this.alias = (a != null) ? unquote(a) : a;		
 	}
 
 	public String getTableGivenName() {
@@ -95,10 +93,12 @@ public class TableJSQL implements Serializable{
 		
 		Table table = tableColumn.getTable();
 		if (table != null) {
-			TableJSQL fixTable = new TableJSQL(table.getSchemaName(), table.getName(), table.getAlias());
-			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTable().getName());
-			table.setSchemaName(fixTable.getSchema().getName());		
+			if (table.getName() != null)
+				table.setName(unquote(table.getName()));
+			if (table.getSchemaName() != null)
+				table.setSchemaName(unquote(table.getSchemaName()));		
+			if (table.getAlias() != null)
+				table.getAlias().setName(unquote(table.getAlias().getName()));
 		}
 	}
 	
@@ -125,12 +125,19 @@ public class TableJSQL implements Serializable{
 	 * @param a
 	 */
 	
-	public static void unQuoteAlias(Alias a) {
+	public static void unquoteAlias(Alias a) {
 		String name = a.getName();
 		if (ParsedSQLQuery.pQuotes.matcher(name).matches()) {
 			a.setName(name.substring(1, name.length() - 1));
 		}
 	}
+
+	private static String unquote(String name) {
+		if (ParsedSQLQuery.pQuotes.matcher(name).matches()) 
+			return name.substring(1, name.length() - 1);
+		return name;
+	}
+	
 	
 	public Identifier getSchema() {
 		return schema;
@@ -140,7 +147,7 @@ public class TableJSQL implements Serializable{
 		return table;
 	}
 
-	public Alias getAlias() {
+	public String getAlias() {
 		return alias;
 	}
 	

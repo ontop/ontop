@@ -218,10 +218,7 @@ public class Mapping2DatalogConverter {
             // Swap the column name with a new variable from the lookup table
             List<Term> terms = new ArrayList<>();
             for (int i = 1; i <= arity; i++) {
-            	Alias as = table.getAlias();
-            	String alias = null;
-            	if (as != null)
-            		alias = as.getName();
+            	String alias = table.getAlias();
                 String columnName = getFullQualifiedAttributeName(td, tableName,
                                 alias, i);
                 String termName = lookupTable.lookup(columnName);
@@ -358,12 +355,12 @@ public class Mapping2DatalogConverter {
 				}
 
 				// full qualified attribute name using table alias
-				Alias tableAlias = table.getAlias();
+				String tableAlias = table.getAlias();
 				if (tableAlias != null) {
 					String qualifiedColumnAlias = getFullQualifiedAttributeName(tableDefinition, fullName,
-                                    tableAlias.getName(), i);
+                                    tableAlias, i);
 					lookupTable.add(qualifiedColumnAlias, index);
-					String aliasColumnName = tableAlias.getName().toLowerCase() + "." + lowercaseColumn;
+					String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
 
                     // register the alias name, if any
                     if (aliasMap.containsKey(aliasColumnName)) {

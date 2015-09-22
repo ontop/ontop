@@ -130,7 +130,7 @@ public class AliasMapVisitor {
 				Expression e = selectExpr.getExpression();
 				e.accept(expressionVisitor);
 				//remove alias quotes if present
-				TableJSQL.unQuoteAlias(alias);
+				TableJSQL.unquoteAlias(alias);
 				aliasMap.put(e.toString().toLowerCase(), alias.getName());
 			}
 		}
