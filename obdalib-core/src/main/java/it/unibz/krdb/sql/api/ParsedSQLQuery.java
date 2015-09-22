@@ -128,12 +128,11 @@ public class ParsedSQLQuery implements Serializable {
 	}
 
 	/**
-	 * Returns all the tables in this query.
+	 * Returns all the tables in this query (RO now).
 	 */
 	public List<TableJSQL> getTables() throws JSQLParserException {
 
 		if (tables == null) {
-			// CHNAGES TABLE ALIASES 
 			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing);
 			tables = visitor.getTables();
 		}
@@ -183,6 +182,7 @@ public class ParsedSQLQuery implements Serializable {
 	public Expression getWhereClause() throws JSQLParserException {
 		if (whereClause == null) {
 			WhereClauseVisitor visitor = new WhereClauseVisitor();
+			// CHANGES TABLE SCHEMA / NAME / ALIASES AND COLUMN NAMES
 			whereClause = visitor.getWhereClause(selectQuery, deepParsing);
 		}
 		return whereClause;
