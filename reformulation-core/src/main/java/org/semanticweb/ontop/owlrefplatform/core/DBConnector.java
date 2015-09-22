@@ -1,11 +1,10 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
-import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.nativeql.DBMetadataException;
-import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import javax.annotation.Nullable;
@@ -31,7 +30,7 @@ public interface DBConnector {
     /**
      * Extracts the schema from the DB and/or the mappings.
      */
-    DBMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints)
+    DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints)
             throws DBMetadataException;
 
     /**
@@ -48,4 +47,8 @@ public interface DBConnector {
      * Gets a QuestConnection usually coming from a connection pool.
      */
     IQuestConnection getConnection() throws OBDAException;
+
+    OBDAModel preprocessProjection(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
+
+    LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata);
 }

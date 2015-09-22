@@ -13,7 +13,7 @@ import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryG
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.pivotalrepr.MetadataForQueryOptimization;
-import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 
 /**
  * Automatically extracted.
@@ -55,7 +55,7 @@ public interface IQuest extends RepositoryChangedListener {
 
     Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository();
 
-    DBMetadata getMetaData();
+    DataSourceMetadata getMetaData();
 
     QueryCache getQueryCache();
 

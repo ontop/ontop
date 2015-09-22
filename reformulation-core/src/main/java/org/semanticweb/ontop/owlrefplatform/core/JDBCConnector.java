@@ -2,15 +2,23 @@ package org.semanticweb.ontop.owlrefplatform.core;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.Select;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.nativeql.DBMetadataException;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.nativeql.JDBCConnectionWrapper;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import org.semanticweb.ontop.parser.PreprocessProjection;
 import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
@@ -19,11 +27,15 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.sql.*;
+import java.util.List;
+import java.util.Set;
 
 /**
  * For RDBMS having a JDBC driver.
  */
 public class JDBCConnector implements DBConnector {
+
+    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
     private final IQuest questInstance;
     private final QuestPreferences questPreferences;
@@ -129,9 +141,9 @@ public class JDBCConnector implements DBConnector {
     }
 
     @Override
-    public DBMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
-        DBMetadataExtractor dbMetadataExtractor = nativeQLFactory.create();
-        return dbMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection), userConstraints);
+    public DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
+        DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
+        return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection), userConstraints);
     }
 
     @Override
@@ -261,5 +273,54 @@ public class JDBCConnector implements DBConnector {
     public IQuestConnection getConnection() throws OBDAException {
 
         return new QuestConnection(this, questInstance, getSQLPoolConnection(), questPreferences);
+    }
+
+    /***
+     * Expands a SELECT * into a SELECT with all columns implicit in the *
+     *
+     * @throws java.sql.SQLException
+     */
+    @Override
+    public OBDAModel preprocessProjection(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata)
+            throws OBDAException {
+        if (!(metadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("The JDBC connector expects a SQL-specific DBMetadata");
+        }
+        DBMetadata dbMetadata = (DBMetadata) metadata;
+        List<OBDAMappingAxiom> mappings = obdaModel.getMappings(sourceId);
+
+
+        for (OBDAMappingAxiom axiom : mappings) {
+            String sourceString = axiom.getSourceQuery().toString();
+
+            OBDAQuery targetQuery= axiom.getTargetQuery();
+
+            Select select = null;
+            try {
+                select = (Select) CCJSqlParserUtil.parse(sourceString);
+
+                Set<Variable> variables = ((CQIE) targetQuery).getReferencedVariables();
+                PreprocessProjection ps = new PreprocessProjection(dbMetadata);
+                String query = ps.getMappingQuery(select, variables);
+                axiom.setSourceQuery(fac.getSQLQuery(query));
+
+            } catch (JSQLParserException e) {
+                log.debug("SQL Query cannot be preprocessed by the parser");
+            } catch(SQLException e) {
+                throw new OBDAException(e.getMessage());
+            }
+        }
+
+        return obdaModel;
+    }
+
+    @Override
+    public LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata) {
+        if (metadata instanceof DBMetadata) {
+            return DBMetadataUtil.generateFKRules((DBMetadata)metadata);
+        }
+        else {
+            throw new IllegalArgumentException("A SQL-specific DBMetadata was expected");
+        }
     }
 }

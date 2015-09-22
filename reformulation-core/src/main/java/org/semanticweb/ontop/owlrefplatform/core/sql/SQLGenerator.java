@@ -37,10 +37,7 @@ import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.DataDefinition;
-import org.semanticweb.ontop.sql.TableDefinition;
-import org.semanticweb.ontop.sql.ViewDefinition;
+import org.semanticweb.ontop.sql.*;
 import org.semanticweb.ontop.sql.api.Attribute;
 
 import java.sql.Types;
@@ -170,18 +167,22 @@ public class SQLGenerator implements NativeQueryGenerator {
 	}
 
     @AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
+	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
         this(metadata, dataSource, null, preferences);
     }
 
 	@AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource,
 						 @Assisted SemanticIndexURIMap uriRefIds, QuestPreferences preferences) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		this.metadata = metadata;
+		if (!(metadata instanceof DBMetadata)) {
+			throw new IllegalArgumentException("Not a DBMetadata!");
+		}
+
+		this.metadata = (DBMetadata)metadata;
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, preferences);
 		this.dataTypePredicateUnifyTable = buildPredicateUnifyTable();
 

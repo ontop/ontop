@@ -135,7 +135,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
+		Multimap<Predicate, List<Integer>> pkeys = metadata.extractPKs(unfoldingProgram.getRules());
 		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
 		LinkedList<Term> headterms = new LinkedList<Term>();

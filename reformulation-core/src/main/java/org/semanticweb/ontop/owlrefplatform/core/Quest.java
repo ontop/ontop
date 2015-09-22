@@ -41,7 +41,6 @@ import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -56,9 +55,8 @@ import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.pivotalrepr.MetadataForQueryOptimization;
 import org.semanticweb.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
-import org.semanticweb.ontop.sql.TableDefinition;
-import org.semanticweb.ontop.sql.api.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,7 +195,7 @@ public class Quest implements Serializable, IQuest {
 
 	private QueryCache queryCache;
 
-	private DBMetadata metadata;
+	private DataSourceMetadata metadata;
 
 	private DBConnector dbConnector;
 
@@ -628,29 +626,8 @@ public class Quest implements Serializable, IQuest {
 
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
-			if (printKeys) { 
-				// Prints all primary keys
-				log.debug("\n====== Primary keys ==========");
-				Collection<TableDefinition> table_list = metadata.getTables();
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					for (Attribute attr : dd.getPrimaryKeys()) {
-						log.debug(attr.getName() + ",");
-					}
-				}
-				// Prints all foreign keys
-				log.debug("\n====== Foreign keys ==========");
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-					for(String fkName : fkeys.keySet() ){
-						log.debug("(" + fkName + ":");
-						for(Attribute attr : fkeys.get(fkName)){
-							log.debug(attr.getName() + ",");
-						}
-						log.debug("),");
-					}
-				}		
+			if (printKeys) {
+				log.debug(metadata.printKeys());
 			}
 
             /*
@@ -689,7 +666,7 @@ public class Quest implements Serializable, IQuest {
 				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
 				// Davide> Option to disable T-Mappings (TODO: Test)
 				//if( tMappings ){
-				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
+				unfolder.applyTMappings(reformulationReasoner, true, metadata, dbConnector, excludeFromTMappings);
 				//}
 
 				
@@ -790,7 +767,7 @@ public class Quest implements Serializable, IQuest {
 		unfoldingOBDAModel = unfoldingOBDAModel.newModel(unfoldingOBDAModel.getSources(), mappings);
 
 		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
-										reformulationReasoner, metadata);
+										reformulationReasoner, dbConnector, metadata);
 	}
 
 	public void close() {
@@ -808,7 +785,8 @@ public class Quest implements Serializable, IQuest {
 		return dbConnector.getConnection();
 	}
 
-	public DBMetadata getMetaData() {
+	@Override
+	public DataSourceMetadata getMetaData() {
 		return metadata;
 	}
 

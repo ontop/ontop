@@ -2,7 +2,7 @@ package org.semanticweb.ontop.nativeql;
 
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import javax.annotation.Nullable;
@@ -18,6 +18,6 @@ import javax.annotation.Nullable;
  */
 public interface DBMetadataExtractor {
 
-    DBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
+    DataSourceMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
                        @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException;
 }

@@ -6,13 +6,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.sf.jsqlparser.statement.select.Select;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.mapping.MappingSplitter;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -24,13 +21,11 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
-import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import org.semanticweb.ontop.parser.PreprocessProjection;
 import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.utils.IMapping2DatalogConverter;
-import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +33,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import java.net.URI;
-import java.sql.SQLException;
 
 public class QuestUnfolder {
 
@@ -67,13 +61,13 @@ public class QuestUnfolder {
 	 *          TBox hierarchies
 	 */
 	//private boolean applyExcludeFromTMappings = false;
-	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  DBConnector dbConnector, URI sourceId,
+	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DataSourceMetadata metadata,  DBConnector dbConnector, URI sourceId,
 						 NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception{
 
 		this.nativeQLFactory = nativeQLFactory;
 
-		/** Substitute select * with column names **/
-		preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
+		/** Substitute select * with column names (in the SQL case) **/
+		unfoldingOBDAModel = dbConnector.preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
 
 		/**
 		 * Split the mapping
@@ -115,7 +109,7 @@ public class QuestUnfolder {
 	 * Setting up the unfolder and SQL generation
 	 */
 
-	public void setupUnfolder(DBMetadata metadata) {
+	public void setupUnfolder(DataSourceMetadata metadata) {
 		
 		// Collecting URI templates
 		uriTemplateMatcher = createURITemplateMatcher(unfoldingProgram);
@@ -125,7 +119,7 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 		
-		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
+		Multimap<Predicate, List<Integer>> pkeys = metadata.extractPKs(unfoldingProgram);
 
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
 //		for(CQIE rule : unfoldingProgram){
@@ -162,13 +156,13 @@ public class QuestUnfolder {
 		return multimapBuilder.build();
 	}
 
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata,
-							   TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DataSourceMetadata metadata,
+							   DBConnector dbConnector, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
 		// for eliminating redundancy from the unfolding program
-		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
+		LinearInclusionDependencies foreignKeyRules = dbConnector.generateFKRules(metadata);
 		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 		// Davide> Here now I put another TMappingProcessor taking
 		//         also a list of Predicates as input, that represents
@@ -199,10 +193,17 @@ public class QuestUnfolder {
 	 * Adding data typing on the mapping axioms.
 	 */
 	
-	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, DBMetadata metadata) throws OBDAException {
-
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, nativeQLFactory);
-		typeRepair.insertDataTyping(unfoldingProgram, tBoxReasoner);
+	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, DataSourceMetadata metadata) throws OBDAException {
+		if (metadata instanceof DBMetadata) {
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair((DBMetadata)metadata, nativeQLFactory);
+			typeRepair.insertDataTyping(unfoldingProgram, tBoxReasoner);
+		}
+		/**
+		 * TODO: refactor so as to support this case
+		 */
+		else {
+			log.warn("data-type reparation not supported for not SQL DBMetadata");
+		}
 	}
 
 	/***
@@ -387,14 +388,15 @@ public class QuestUnfolder {
 	}
 	
 	
-	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner, DBMetadata metadata) throws OBDAException {
+	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner,
+											DBConnector dbConnector, DataSourceMetadata metadata) throws OBDAException {
 
 		IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
 		unfoldingProgram = mapping2DatalogConverter.constructDatalogProgram(mappings);
 		
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
-		applyTMappings(reformulationReasoner, false, metadata, TMappingExclusionConfig.empty());
+		applyTMappings(reformulationReasoner, false, metadata, dbConnector, TMappingExclusionConfig.empty());
 		
 		setupUnfolder(metadata);
 
@@ -445,43 +447,6 @@ public class QuestUnfolder {
 	public UriTemplateMatcher getUriTemplateMatcher() {
 		return uriTemplateMatcher;
 	}
-
-
-	/***
-	 * Expands a SELECT * into a SELECT with all columns implicit in the *
-	 *
-	 * @throws java.sql.SQLException
-	 */
-	private void preprocessProjection(OBDAModel unfoldingOBDAModel, URI sourceId, DBMetadata metadata) throws SQLException {
-
-		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
-
-
-		for (OBDAMappingAxiom axiom : mappings) {
-			String sourceString = axiom.getSourceQuery().toString();
-
-			OBDAQuery targetQuery= axiom.getTargetQuery();
-
-			Select select = null;
-			try {
-				select = (Select) CCJSqlParserUtil.parse(sourceString);
-
-				Set<Variable> variables = ((CQIE) targetQuery).getReferencedVariables();
-				PreprocessProjection ps = new PreprocessProjection(metadata);
-				String query = ps.getMappingQuery(select, variables);
-				axiom.setSourceQuery(fac.getSQLQuery(query));
-
-			} catch (JSQLParserException e) {
-				log.debug("SQL Query cannot be preprocessed by the parser");
-
-
-			}
-//
-		}
-	}
-
-
-
 
 	public UnfoldingMechanism getDatalogUnfolder(){
 		return unfolder;
