@@ -133,8 +133,9 @@ public class ParsedSQLQuery implements Serializable {
 	public List<TableJSQL> getTables() throws JSQLParserException {
 
 		if (tables == null) {
-			TableNameVisitor visitor = new TableNameVisitor();
-			tables = visitor.getTables(selectQuery, deepParsing);
+			// CHNAGES TABLE ALIASES 
+			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing);
+			tables = visitor.getTables();
 		}
 		return tables;
 	}

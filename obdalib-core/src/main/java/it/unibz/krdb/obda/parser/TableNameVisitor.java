@@ -37,20 +37,14 @@ import java.util.List;
 /**
  * Find all used tables within an select statement.
  */
-public class TableNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
+public class TableNameVisitor {
 
-	/**
-	 * Store the table selected by the SQL query in RelationJSQL
-	 */
-	
-	private List<TableJSQL> tables;
+	// Store the table selected by the SQL query in RelationJSQL
+	private final List<TableJSQL> tables = new ArrayList<>();
 
-	/**
-	 * There are special names, that are not table names but are parsed as
-	 * tables. These names are collected here and are not included in the tables
-	 * - names anymore.
-	 */
-	private List<String> otherItemNames;
+	// There are special names that are not table names but are parsed as tables. 
+	// These names are collected here and are not included in the table names
+	private final List<String> otherItemNames = new ArrayList<>();
 	
 	private boolean unsupported = false;
 
@@ -58,96 +52,154 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
+	 * NOTE: CHANGES THE QUERY (BRINGS ALIAS NAMES TO THE CANONICAL FORM)
+	 *
 	 * @param select
 	 * @param deepParsing
 	 * @return
 	 */
-	public List<TableJSQL> getTables(Select select, boolean deepParsing) throws JSQLParserException {
-		otherItemNames = new ArrayList<>();
-		tables = new ArrayList<>();
-
+	public TableNameVisitor(Select select, boolean deepParsing) throws JSQLParserException {
+		
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
-				withItem.accept(this);
+				withItem.accept(selectVisitor);
 			}
 		}
-		select.getSelectBody().accept(this);
+		select.getSelectBody().accept(selectVisitor);
 		
-		if(unsupported && deepParsing) // used to throw exception for the currently unsupported methods
-			throw new JSQLParserException("Query not yet supported");
+		if (unsupported && deepParsing) // used to throw exception for the currently unsupported methods
+			throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
+	}
 		
+	public List<TableJSQL> getTables() {	
 		return tables;
 	}
 	
 
+	private final SelectVisitor selectVisitor = new SelectVisitor() {
 
-	@Override
-	public void visit(WithItem withItem) {
-		otherItemNames.add(withItem.getName().toLowerCase());
-		withItem.getSelectBody().accept(this);
-	}
-	
-	/*Visit the FROM clause to find tables
-	 * Visit the JOIN and WHERE clauses to check if nested queries are present
-	 * (non-Javadoc)
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
-	 */
-	@Override
-	public void visit(PlainSelect plainSelect) {
-		plainSelect.getFromItem().accept(this);
+		/*Visit the FROM clause to find tables
+		 * Visit the JOIN and WHERE clauses to check if nested queries are present
+		 * (non-Javadoc)
+		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+		 */
+		@Override
+		public void visit(PlainSelect plainSelect) {
+			plainSelect.getFromItem().accept(fromItemVisitor);
 
-		// When the mapping contains a DISTINCT we interpret it as a HINT to create a subview.
-		// Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE 
-		// for obtaining this behavior.
-		if (plainSelect.getDistinct() != null) {
-            unsupported = true;
-        }
+			// When the mapping contains a DISTINCT we interpret it as a HINT to create a subview.
+			// Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE 
+			// for obtaining this behavior.
+			if (plainSelect.getDistinct() != null) {
+	            unsupported = true;
+	        }
 
-		if (plainSelect.getJoins() != null) {
-			for (Join join : plainSelect.getJoins()) {
-				join.getRightItem().accept(this);
+			if (plainSelect.getJoins() != null) {
+				for (Join join : plainSelect.getJoins()) 
+					join.getRightItem().accept(fromItemVisitor);
+			}
+			if (plainSelect.getWhere() != null) {
+				plainSelect.getWhere().accept(expressionVisitor);
+			}
+			
+			for (SelectItem expr : plainSelect.getSelectItems()) 
+				expr.accept(selectItemVisitor);
+		}
+
+
+		/*
+		 * Visit UNION, INTERSECT, MINUM and EXCEPT to search for table names
+		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.SetOperationList)
+		 */
+		@Override
+		public void visit(SetOperationList list) {
+			unsupported = true;
+			for (PlainSelect plainSelect : list.getPlainSelects()) {
+				visit(plainSelect);
 			}
 		}
-		if (plainSelect.getWhere() != null) {
-			plainSelect.getWhere().accept(this);
-		}
-		
-		for (SelectItem expr : plainSelect.getSelectItems()){
-			expr.accept(this);
-		}
-	}
 
-	/*
-	 * Visit Table and store its value in the list of RelationJSQL(non-Javadoc)
-	 * We want to maintain duplicate tables to retrieve the different aliases assigned
-	 * we use the class TableJSQL to handle quotes and user case choice if present
-	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.schema.Table)
-	 */
+		@Override
+		public void visit(WithItem withItem) {
+			otherItemNames.add(withItem.getName().toLowerCase());
+			withItem.getSelectBody().accept(this);
+		}
+	};
+
+	private final FromItemVisitor fromItemVisitor = new FromItemVisitor() {
+
+		/*
+		 * Visit Table and store its value in the list of RelationJSQL(non-Javadoc)
+		 * We want to maintain duplicate tables to retrieve the different aliases assigned
+		 * we use the class TableJSQL to handle quotes and user case choice if present
+		 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.schema.Table)
+		 */
+		
+		@Override
+		public void visit(Table tableName) {
+			if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
+				// CHNAGES THE ALIAS NAME 
+				TableJSQL relation = new TableJSQL(tableName.getSchemaName(), tableName.getName(), tableName.getAlias());
+				tables.add(relation);
+			}
+		}
+
+		@Override
+		public void visit(SubSelect subSelect) {
+			visitSubSelect(subSelect);
+		}
+
+		@Override
+		public void visit(SubJoin subjoin) {
+			unsupported = true;
+			subjoin.getLeft().accept(this);
+			subjoin.getJoin().getRightItem().accept(this);
+		}
+
+		@Override
+		public void visit(LateralSubSelect lateralSubSelect) {
+			unsupported = true;
+			lateralSubSelect.getSubSelect().getSelectBody().accept(selectVisitor);
+		}
+
+		@Override
+		public void visit(ValuesList valuesList) {
+			unsupported = true;
+		}
+	};
 	
-	@Override
-	public void visit(Table tableName) {
-		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
-			TableJSQL relation = new TableJSQL(tableName.getSchemaName(), tableName.getName(), tableName.getAlias());
-			tables.add(relation);
-		}
-	}
-
-	@Override
-	public void visit(SubSelect subSelect) {
-		
+	
+	private void visitSubSelect(SubSelect subSelect) {
 		if (subSelect.getSelectBody() instanceof PlainSelect) {
-			
-			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
-			
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());	
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
 				unsupported = true;	
 		} 
 		else
 			unsupported = true;
 		
-		subSelect.getSelectBody().accept(this);
+		subSelect.getSelectBody().accept(selectVisitor);
 	}
+	
+	private final SelectItemVisitor selectItemVisitor = new SelectItemVisitor() {
+		@Override
+		public void visit(AllColumns expr) {
+			//Do nothing!
+		}
 
+		@Override
+		public void visit(AllTableColumns arg0) {
+			//Do nothing!
+		}
+
+		@Override
+		public void visit(SelectExpressionItem expr) {
+			expr.getExpression().accept(expressionVisitor);
+		}
+	};
+
+	private final ExpressionVisitor expressionVisitor = new ExpressionVisitor() {
+	
 	/*
 	 * We do the same procedure for all Binary Expressions
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Addition)
@@ -190,28 +242,20 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(Function function) {
-        switch(function.getName().toLowerCase()){
-
+        switch (function.getName().toLowerCase()) {
             case "regexp_like" :
             case "regexp_replace" :
             case "replace" :
             case "concat" :
-
                 for(Expression ex :function.getParameters().getExpressions()) {
                     ex.accept(this);
-
                 }
-
                 break;
 
             default:
                 unsupported = true;
-
                 break;
         }
-
-
-
 	}
 
 	@Override
@@ -227,7 +271,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(InExpression inExpression) {
 		inExpression.getLeftExpression().accept(this);
-		inExpression.getRightItemsList().accept(this);
+		inExpression.getRightItemsList().accept(itemsListVisitor);
 	}
 
 	@Override
@@ -302,14 +346,6 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	}
 
 	@Override
-	public void visit(ExpressionList expressionList) {
-		for (Expression expression : expressionList.getExpressions()) {
-			expression.accept(this);
-		}
-
-	}
-
-	@Override
 	public void visit(DateValue dateValue) {
 	}
 
@@ -336,20 +372,13 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
 		unsupported = true;
-		allComparisonExpression.getSubSelect().getSelectBody().accept(this);
+		allComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
 		unsupported = true;
-		anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
-	}
-
-	@Override
-	public void visit(SubJoin subjoin) {
-		unsupported = true;
-		subjoin.getLeft().accept(this);
-		subjoin.getJoin().getRightItem().accept(this);
+		anyComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
 	}
 
 	@Override
@@ -397,39 +426,8 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 		unsupported = true;
 	}
 
-	/*
-	 * Visit UNION, INTERSECT, MINUM and EXCEPT to search for table names
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.SetOperationList)
-	 */
-	@Override
-	public void visit(SetOperationList list) {
-		unsupported = true;
-		for (PlainSelect plainSelect : list.getPlainSelects()) {
-			visit(plainSelect);
-		}
-	}
-
 	@Override
 	public void visit(ExtractExpression eexpr) {
-		unsupported = true;
-	}
-
-	@Override
-	public void visit(LateralSubSelect lateralSubSelect) {
-		unsupported = true;
-		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
-	}
-
-	@Override
-	public void visit(MultiExpressionList multiExprList) {
-		unsupported = true;
-		for (ExpressionList exprList : multiExprList.getExprList()) {
-			exprList.accept(this);
-		}
-	}
-
-	@Override
-	public void visit(ValuesList valuesList) {
 		unsupported = true;
 	}
 
@@ -461,33 +459,8 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(SignedExpression arg0) {
 		System.out.println("WARNING: SignedExpression   not implemented ");
-
 		unsupported = true;
-		
 	}
-
-
-
-	@Override
-	public void visit(AllColumns expr) {
-		//Do nothing!
-	}
-
-
-
-	@Override
-	public void visit(AllTableColumns arg0) {
-		//Do nothing!
-		
-	}
-
-
-
-	@Override
-	public void visit(SelectExpressionItem expr) {
-		expr.getExpression().accept(this);
-	}
-
 
 
 	@Override
@@ -496,11 +469,41 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 		
 	}
 
-
-
 	@Override
 	public void visit(RegExpMySQLOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void visit(SubSelect subSelect) {
+		visitSubSelect(subSelect);
+	}
+	
+	};
+
+	
+	private final ItemsListVisitor itemsListVisitor = new ItemsListVisitor() {
+		@Override
+		public void visit(ExpressionList expressionList) {
+			for (Expression expression : expressionList.getExpressions()) {
+				expression.accept(expressionVisitor);
+			}
+
+		}
+
+		@Override
+		public void visit(MultiExpressionList multiExprList) {
+			unsupported = true;
+			for (ExpressionList exprList : multiExprList.getExprList()) {
+				exprList.accept(this);
+			}
+		}
+
+		@Override
+		public void visit(SubSelect subSelect) {
+			visitSubSelect(subSelect);
+		}
+	};
+	
 }

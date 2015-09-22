@@ -140,27 +140,22 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			Expression expr = join.getOnExpression();
 			
 			if (join.getUsingColumns()!=null) // JOIN USING column
-				for (Column column : join.getUsingColumns())
-				{
+				for (Column column : join.getUsingColumns()) {
 					String columnName = TableJSQL.unquoteColumnName(column);
 					
 					if (fromItem instanceof Table && join.getRightItem() instanceof Table) {
 						Table table1 = (Table)fromItem;
 						BinaryExpression bexpr = new EqualsTo();
-						Column column1 = new Column();
-						column1.setColumnName(columnName);
-						column1.setTable(table1);
+						Column column1 = new Column(table1, columnName);
 						bexpr.setLeftExpression(column1);
 						
-						Column column2 = new Column();
-						column2.setColumnName(columnName);
-						column2.setTable((Table)join.getRightItem());
+						Column column2 = new Column((Table)join.getRightItem(), columnName);
 						bexpr.setRightExpression(column2);
 						joinConditions.add(bexpr);
 								//plainSelect.getFromItem()+"."+columnName+ bexpr.getStringExpression() +join.getRightItem()+"."+columnName);
 						
-						
-					} else {
+					} 
+					else {
 						//more complex structure in FROM or JOIN e.g. subselects
 					//	plainSelect.getFromItem().accept(this);
 					//	join.getRightItem().accept(this);
@@ -372,8 +367,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 			right.accept(this);
 			joinConditions.add(binaryExpression);
 		}
-		else
-		{
+		else {
 			left.accept(this);
 			right.accept(this);
 		}
