@@ -31,6 +31,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
@@ -53,8 +54,9 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 	private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
 
 
-    @Override
-	public OBDAModel fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
+	@Override
+	public OBDAModel fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary,
+								  NativeQueryLanguageComponentFactory nativeQLFactory) {
         log.debug("Fixing OBDA Model");
 
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
@@ -63,7 +65,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
             ImmutableList<OBDAMappingAxiom> sourceMapping = ImmutableList.copyOf(model.getMappings(source.getSourceID()));
 
             try {
-                mappings.put(source.getSourceID(), fixMappingPredicates(sourceMapping, vocabulary));
+                mappings.put(source.getSourceID(), fixMappingPredicates(sourceMapping, vocabulary, nativeQLFactory));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -84,7 +86,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 	 * @return
 	 */
 	private static ImmutableList<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings,
-                                                      OntologyVocabulary vocabulary) {
+                                                      OntologyVocabulary vocabulary,
+													  NativeQueryLanguageComponentFactory nativeQLFactory) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
 		Map<String, Predicate> urimap = new HashMap<>();
@@ -183,7 +186,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 			} //end for
 			
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
+			result.add(nativeQLFactory.create(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
 		}
 //		log.debug("Repair done. Returning {} mappings", result.size());
 		return ImmutableList.copyOf(result);

@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -44,6 +45,7 @@ public class MappingDataTypeRepair {
 
   	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
     /**
      * Constructs a new mapping data type resolution. The object requires an
@@ -55,8 +57,9 @@ public class MappingDataTypeRepair {
      * 
      * @param metadata The database metadata.
      */
-    public MappingDataTypeRepair(DBMetadata metadata) {
+    public MappingDataTypeRepair(DBMetadata metadata, NativeQueryLanguageComponentFactory nativeQLFactory) {
         this.metadata = metadata;
+        this.nativeQLFactory = nativeQLFactory;
     }
 
     /**
@@ -134,7 +137,7 @@ public class MappingDataTypeRepair {
         }
 
 
-		VocabularyValidator qvv = new VocabularyValidator(reasoner);
+		VocabularyValidator qvv = new VocabularyValidator(reasoner, nativeQLFactory);
 
 		for (CQIE rule : mappingRules) {
             Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);

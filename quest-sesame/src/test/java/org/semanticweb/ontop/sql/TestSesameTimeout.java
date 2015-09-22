@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +20,8 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -51,9 +55,20 @@ public class TestSesameTimeout {
 	@Before
 	public void init()  throws Exception {
 
-		QuestPreferences preference;
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(OBDAProperties.DB_NAME, "countries");
+		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
+		p.setProperty(OBDAProperties.DB_USER, "sa");
+		p.setProperty(OBDAProperties.DB_PASSWORD, "");
+		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+
+		QuestPreferences preferences = new R2RMLQuestPreferences(p);
 		OWLOntology ontology;
 		Model model;
+
+		Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
+		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
@@ -77,18 +92,9 @@ public class TestSesameTimeout {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
+		R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
 		model = rmanager.getModel();
 
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(OBDAProperties.DB_NAME, "countries");
-		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
-		p.setProperty(OBDAProperties.DB_USER, "sa");
-		p.setProperty(OBDAProperties.DB_PASSWORD, "");
-		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
-
-		QuestPreferences preferences = new R2RMLQuestPreferences(p);
 
 		SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preferences);
 		repo.initialize();

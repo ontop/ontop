@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  */
 
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -70,7 +71,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private static final long serialVersionUID = -6494667662327970606L;
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
-	
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+
 	static final class TableDescription {
 		final String tableName;
 		final String createCommand;
@@ -260,8 +262,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
+	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.reasonerDag = reasonerDag;
+		this.nativeQLFactory = nativeQLFactory;
 	}
 
 	public void generateMetadata() {
@@ -908,7 +911,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -947,7 +950,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);			
 			}
 		}
@@ -979,7 +982,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = dfac.getMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1008,7 +1011,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				}
 
 				// Replacing the old mappings 
-				OBDAMappingAxiom mergedMapping = dfac.getMappingAxiom(newSQL.toString(), targetQuery);
+				OBDAMappingAxiom mergedMapping = nativeQLFactory.create(newSQL.toString(), targetQuery);
 				currentMappings.clear();
 				currentMappings.add(mergedMapping);
 			}

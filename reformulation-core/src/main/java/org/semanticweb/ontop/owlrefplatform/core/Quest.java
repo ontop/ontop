@@ -438,7 +438,7 @@ public class Quest implements Serializable, IQuest {
 		 */
 		if (inputOBDAModel != null && !inputOntology.getVocabulary().isEmpty()) {
 			inputOBDAModel = mappingVocabularyFixer.fixOBDAModel(inputOBDAModel,
-					inputOntology.getVocabulary());
+					inputOntology.getVocabulary(), nativeQLFactory);
 		}
 
 		// TODO: better use this constructor.
@@ -456,7 +456,7 @@ public class Quest implements Serializable, IQuest {
 			// generate a new TBox with a simpler vocabulary
 			reformulationReasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reformulationReasoner);
 		} 
-		vocabularyValidator = new VocabularyValidator(reformulationReasoner);
+		vocabularyValidator = new VocabularyValidator(reformulationReasoner, nativeQLFactory);
 
 		try {
 
@@ -515,7 +515,7 @@ public class Quest implements Serializable, IQuest {
 				JDBCConnector jdbcConnector = (JDBCConnector) dbConnector;
 				Connection localConnection = jdbcConnector.getSQLConnection();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
+				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, nativeQLFactory);
 				dataRepository.addRepositoryChangedListener(this);
 
 				if (inmemory) {
@@ -670,7 +670,7 @@ public class Quest implements Serializable, IQuest {
 				dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource);
 			}
 
-			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, dbConnector, sourceId);
+			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, dbConnector, sourceId, nativeQLFactory);
 
 			/***
 			 * T-Mappings and Fact mappings

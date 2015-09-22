@@ -47,6 +47,7 @@ import javax.swing.event.ListDataListener;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
@@ -68,8 +69,9 @@ import org.slf4j.LoggerFactory;
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = -486013653814714526L;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	private Thread validatorThread;
+    private Thread validatorThread;
 
 	private SQLSourceQueryValidator validator;
 
@@ -97,11 +99,13 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(OBDAModelWrapper apic, TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(OBDAModelWrapper apic, TargetQueryVocabularyValidator validator,
+                               NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		validatortrg = validator;
 		
 		mappingsTree = new JTree();
+        this.nativeQLFactory = nativeQLFactory;
 
 		initComponents();
 		addMenu();
@@ -281,7 +285,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg,
+                nativeQLFactory);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -749,7 +754,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("New Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg,
+                nativeQLFactory);
 		panel.setID(id);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);

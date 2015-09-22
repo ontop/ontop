@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.sf.jsqlparser.statement.select.Select;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.mapping.MappingSplitter;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
@@ -23,6 +24,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.semanticweb.ontop.parser.PreprocessProjection;
@@ -39,6 +41,7 @@ import java.sql.SQLException;
 
 public class QuestUnfolder {
 
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	/* The active unfolding engine */
 	private UnfoldingMechanism unfolder;
     
@@ -63,14 +66,18 @@ public class QuestUnfolder {
 	 *          TBox hierarchies
 	 */
 	//private boolean applyExcludeFromTMappings = false;
-	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  DBConnector dbConnector, URI sourceId) throws Exception{
+	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  DBConnector dbConnector, URI sourceId,
+						 NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception{
+
+		this.nativeQLFactory = nativeQLFactory;
+
 		/** Substitute select * with column names **/
 		preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
 
 		/**
 		 * Split the mapping
 		 */
-		unfoldingOBDAModel = MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId);
+		unfoldingOBDAModel = MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId, nativeQLFactory);
 
 		/**
 		 * Expand the meta mapping
@@ -191,7 +198,7 @@ public class QuestUnfolder {
 	
 	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, DBMetadata metadata) throws OBDAException {
 
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, nativeQLFactory);
 		typeRepair.insertDataTyping(unfoldingProgram, tBoxReasoner);
 	}
 

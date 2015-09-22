@@ -34,7 +34,6 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
@@ -295,19 +294,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public RDBMSMappingAxiomImpl getMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
-		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
-	}
-
-	@Override
 	public SQLQueryImpl getSQLQuery(String query) {
 		return new SQLQueryImpl(query);
-	}
-
-	@Override
-	public OBDARDBMappingAxiom getMappingAxiom(OBDAQuery query, OBDAQuery targetQuery) {
-		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
-		return getMappingAxiom(id, query, targetQuery);
 	}
 
 	

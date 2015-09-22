@@ -51,6 +51,7 @@ import javax.swing.plaf.metal.MetalComboBoxButton;
 import javax.swing.table.TableModel;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -102,10 +103,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	
 	private static Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
-	
-	public MappingAssistantPanel(OBDAModelWrapper model) {
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+
+    public MappingAssistantPanel(OBDAModelWrapper model,  NativeQueryLanguageComponentFactory nativeQLFactory) {
 		obdaModel = model;
 		prefixManager = obdaModel.getPrefixManager();
+        this.nativeQLFactory = nativeQLFactory;
 		initComponents();
 	}
 
@@ -512,7 +515,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			OBDAQuery target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 			
 			// Create the mapping axiom
-			OBDAMappingAxiom mappingAxiom = dfac.getMappingAxiom(dfac.getSQLQuery(source), target);
+			OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(dfac.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom);
 			
 			// Clear the form afterwards

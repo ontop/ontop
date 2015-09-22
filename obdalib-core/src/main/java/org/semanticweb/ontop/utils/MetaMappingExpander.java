@@ -41,6 +41,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -65,17 +66,19 @@ public class MetaMappingExpander {
 	private final SQLQueryParser translator;
 	private final List<OBDAMappingAxiom> expandedMappings;
 	private final OBDADataFactory dfac;
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	/**
 	 *
 	 * 
 	 * @param connection a JDBC connection
 	 */
-	public MetaMappingExpander(Connection connection) {
+	public MetaMappingExpander(Connection connection, NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.connection = connection;
 		translator = new SQLQueryParser();
 		expandedMappings = new ArrayList<OBDAMappingAxiom>();
 		dfac = OBDADataFactoryImpl.getInstance();
+		this.nativeQLFactory = nativeQLFactory;
 	}
 
 	/**
@@ -322,7 +325,7 @@ public class MetaMappingExpander {
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
-		OBDAMappingAxiom newMapping = dfac.getMappingAxiom(id, newSourceQuery, newTargetQuery);
+		OBDAMappingAxiom newMapping = nativeQLFactory.create(id, newSourceQuery, newTargetQuery);
 		return newMapping;
 	}
 

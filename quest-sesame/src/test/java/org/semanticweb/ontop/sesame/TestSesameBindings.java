@@ -15,6 +15,10 @@
  */
 package org.semanticweb.ontop.sesame;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -70,6 +74,9 @@ public class TestSesameBindings {
         sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries", "sa", "");
         java.sql.Statement s = sqlConnection.createStatement();
 
+        Injector injector = Guice.createInjector(new OBDACoreModule(new QuestPreferences()));
+        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
         try {
             Scanner sqlFile = new Scanner(new File(uc_create));
             String text = sqlFile.useDelimiter("\\A").next();
@@ -89,7 +96,7 @@ public class TestSesameBindings {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-        R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
+        R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
         model = rmanager.getModel();
 
         Properties p = new Properties();

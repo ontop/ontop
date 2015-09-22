@@ -37,6 +37,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.TargetQueryValidator;
@@ -76,7 +77,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentImmutableOBDAModel());
 		
 		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(obdaModel, validator);
+		mappingPanel = new MappingManagerPanel(obdaModel, validator, controller.getNativeQLFactory());
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
 			@Override

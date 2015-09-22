@@ -7,11 +7,15 @@ import java.io.File;
 import java.util.Properties;
 import java.util.Scanner;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import static org.junit.Assert.*;
 
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.*;
@@ -52,10 +56,6 @@ public class TestSesameImplicitDBConstraints {
 	 */
 	public void init(boolean applyUserConstraints, boolean provideMetadata)  throws Exception {
 
-		DBMetadata dbMetadata;
-		OWLOntology ontology;
-		Model model;
-
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
 
@@ -70,17 +70,6 @@ public class TestSesameImplicitDBConstraints {
 
 		s.close();
 
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .r2rml file
-		 */
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-		model = rmanager.getModel();
 		/*
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
@@ -107,12 +96,33 @@ public class TestSesameImplicitDBConstraints {
 
 		QuestPreferences preferences = new R2RMLQuestPreferences(p);
 
-		dbMetadata = getMeta();
 		SesameVirtualRepo qest1;
+
+		/**
+		 * TODO: simplify this part by updating the prototype of SesameVirtualRepo
+		 */
 		if(provideMetadata){
+			/*
+			 * Load the ontology from an external .owl file.
+			 */
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+
+			Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
+			NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+					NativeQueryLanguageComponentFactory.class);
+
+			/*
+			 * Load the OBDA model from an external .r2rml file
+			 */
+			R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
+			Model model = rmanager.getModel();
+
+			DBMetadata dbMetadata = getMeta();
+
 			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preferences);
 		} else {
-			qest1 = new SesameVirtualRepo("", ontology, model, preferences);
+			qest1 = new SesameVirtualRepo("", owlfile, r2rmlfile, preferences);
 		}
 		qest1.initialize();
 		/*

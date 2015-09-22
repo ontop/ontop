@@ -25,6 +25,7 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.utils.IDGenerator;
@@ -44,7 +45,8 @@ import org.semanticweb.ontop.utils.IDGenerator;
  */
 public class MappingSplitter {
 
-	private static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings) {
+	private static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings,
+														NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		List<OBDAMappingAxiom> newMappings = new ArrayList<OBDAMappingAxiom>();
 		
@@ -69,7 +71,7 @@ public class MappingSplitter {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					
 					CQIE newTargetQuery = dfac.getCQIE(head, bodyAtom);
-					OBDAMappingAxiom newMapping = dfac.getMappingAxiom(newId, sourceQuery, newTargetQuery);
+					OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, newTargetQuery);
 					newMappings.add(newMapping);
 				}
 			}
@@ -86,8 +88,9 @@ public class MappingSplitter {
 	 * @param obdaModel
 	 * @param sourceURI
 	 */
-	public static OBDAModel splitMappings(OBDAModel obdaModel, URI sourceURI) {
-		ImmutableList<OBDAMappingAxiom> splittedMappings = ImmutableList.copyOf(splitMappings(obdaModel.getMappings(sourceURI)));
+	public static OBDAModel splitMappings(OBDAModel obdaModel, URI sourceURI, NativeQueryLanguageComponentFactory nativeQLFactory) {
+		ImmutableList<OBDAMappingAxiom> splittedMappings = ImmutableList.copyOf(splitMappings(obdaModel.getMappings(sourceURI),
+				nativeQLFactory));
 
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>(obdaModel.getMappings());
         //Overwrite

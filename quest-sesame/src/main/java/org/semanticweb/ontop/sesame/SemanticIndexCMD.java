@@ -25,6 +25,10 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.QueryIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -65,6 +69,7 @@ public class SemanticIndexCMD {
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	private OBDADataSource source;
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -82,6 +87,9 @@ public class SemanticIndexCMD {
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+		
+		Injector injector = Guice.createInjector(new OBDACoreModule(new QuestPreferences()));
+		nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
 	}
 
@@ -91,7 +99,7 @@ public class SemanticIndexCMD {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 
 			simanager.setupRepository(true);
 
@@ -113,7 +121,7 @@ public class SemanticIndexCMD {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 
 			simanager.restoreRepository();
 

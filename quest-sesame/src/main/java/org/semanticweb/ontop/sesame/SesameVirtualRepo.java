@@ -76,7 +76,12 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		super();
 		createRepo(name, tbox, mappings, metadata, prop);
 	}
-	
+
+	public SesameVirtualRepo(String name, String tboxFilename, String mappingFilename, QuestPreferences preferences) throws Exception {
+		super();
+		createRepo(name, tboxFilename, mappingFilename, preferences);
+	}
+
 	/**
 	 * Generate QuestPreferences from a config file
 	 * @param configFileName - the path to the config file

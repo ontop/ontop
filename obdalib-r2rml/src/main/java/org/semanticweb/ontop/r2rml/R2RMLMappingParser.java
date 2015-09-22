@@ -115,12 +115,12 @@ public class R2RMLMappingParser implements MappingParser {
         R2RMLManager r2rmlManager;
         if (mappingFile != null)
             try {
-                r2rmlManager = new R2RMLManager(mappingFile);
+                r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
             } catch (RDFParseException | RDFHandlerException e) {
                 throw new InvalidDataSourceException(e.getMessage());
             }
         else if (mappingGraph != null)
-            r2rmlManager = new R2RMLManager(mappingGraph);
+            r2rmlManager = new R2RMLManager(mappingGraph, nativeQLFactory);
         else
             throw new RuntimeException("Internal inconsistency. A mappingFile or a mappingGraph should be defined.");
 

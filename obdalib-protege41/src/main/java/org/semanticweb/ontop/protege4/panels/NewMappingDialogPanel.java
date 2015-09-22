@@ -42,6 +42,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.*;
@@ -79,17 +80,21 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	
 	/** Logger */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModelWrapper obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
+	public NewMappingDialogPanel(OBDAModelWrapper obdaModel, JDialog parent, OBDADataSource dataSource,
+								 TargetQueryVocabularyValidator validator,
+								 NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
 		this.parent = parent;
 		this.dataSource = dataSource;
 		this.validator = validator;
+		this.nativeQLFactory = nativeQLFactory;
 
 		prefixManager = obdaModel.getPrefixManager();
 		
@@ -209,7 +214,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					OBDASQLQuery body = dataFactory.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
-					OBDAMappingAxiom newmapping = dataFactory.getMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
+					OBDAMappingAxiom newmapping = nativeQLFactory.create(txtMappingID.getText().trim(), body, targetQuery);
 					System.out.println(newmapping.toString()+" \n");
 
 					if (mapping == null) {

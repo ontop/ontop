@@ -297,12 +297,12 @@ public class DirectMappingEngine {
 		dma.setbaseuri(baseUri);
 		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
-		axioms.add(dfac.getMappingAxiom("MAPPING-ID" + mapidx, dfac.getSQLQuery(dma.getSQL()), dma.getCQ()));
+		axioms.add(nativeQLFactory.create("MAPPING-ID" + mapidx, dfac.getSQLQuery(dma.getSQL()), dma.getCQ()));
 		mapidx++;
 		
 		Map<String, CQIE> refAxioms = dma.getRefAxioms();
 		for (String refSQL : refAxioms.keySet()) {
-			axioms.add(dfac.getMappingAxiom("MAPPING-ID" + mapidx, dfac.getSQLQuery(refSQL), refAxioms.get(refSQL)));
+			axioms.add(nativeQLFactory.create("MAPPING-ID" + mapidx, dfac.getSQLQuery(refSQL), refAxioms.get(refSQL)));
 			mapidx++;
 		}
 		

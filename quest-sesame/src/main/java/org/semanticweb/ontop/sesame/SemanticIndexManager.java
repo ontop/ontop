@@ -23,6 +23,7 @@ package org.semanticweb.ontop.sesame;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.turtle.TurtleParser;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
@@ -58,7 +59,8 @@ public class SemanticIndexManager {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
+	public SemanticIndexManager(OWLOntology tbox, Connection connection,
+								NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 
@@ -66,7 +68,7 @@ public class SemanticIndexManager {
 		// generate a new TBox with a simpler vocabulary
 		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
 			
-		dataRepository = new RDBMSSIRepositoryManager(reasoner);
+		dataRepository = new RDBMSSIRepositoryManager(reasoner, nativeQLFactory);
 		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");

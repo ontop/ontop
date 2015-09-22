@@ -136,7 +136,7 @@ public class JDBCConnector implements DBConnector {
 
     @Override
     public OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
-        MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
+        MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, nativeQLFactory);
         return metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
     }
 

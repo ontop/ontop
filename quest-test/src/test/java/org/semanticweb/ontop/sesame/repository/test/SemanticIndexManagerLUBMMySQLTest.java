@@ -26,9 +26,13 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 import org.junit.Ignore;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.io.QueryIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
@@ -58,6 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	String driver = "com.mysql.jdbc.Driver";
 	String url = "jdbc:mysql://10.7.20.39/si_test?sessionVariables=sql_mode='ANSI'";
 	String username = "fish";
@@ -83,6 +88,9 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		Injector injector = Guice.createInjector(new OBDACoreModule(new QuestPreferences()));
+		nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	}
 
 	@Override
@@ -90,7 +98,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			simanager.setupRepository(true);
 		} catch (Exception e) {
 			throw e;
@@ -107,7 +115,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			simanager.dropRepository();
 		} catch (Exception e) {
 			
@@ -127,7 +135,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			//simanager.restoreRepository();
 			int inserts = simanager.insertData(ontology, 20000, 5000);
 			simanager.updateMetadata();

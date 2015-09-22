@@ -89,7 +89,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
 		CQIE target = targetParser.parse(targetString);
 		
-		OBDAMappingAxiom mappingAxiom = ofac.getMappingAxiom(ofac.getSQLQuery(source), target);
+		OBDAMappingAxiom mappingAxiom = factory.create(ofac.getSQLQuery(source), target);
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		

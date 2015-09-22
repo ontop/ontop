@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
@@ -45,9 +46,12 @@ public class VocabularyValidator {
 	private final TBoxReasoner reasoner;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	public VocabularyValidator(TBoxReasoner reasoner) {
+	public VocabularyValidator(TBoxReasoner reasoner,
+							   NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.reasoner = reasoner;
+		this.nativeQLFactory = nativeQLFactory;
 	}
 /*
 	public boolean validatePredicates0(DatalogProgram input) {
@@ -197,7 +201,7 @@ public class VocabularyValidator {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			
 			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
-			result.add(dfac.getMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
+			result.add(nativeQLFactory.create(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
 
 		}
 		return ImmutableList.copyOf(result);

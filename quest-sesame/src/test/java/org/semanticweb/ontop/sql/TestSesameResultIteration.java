@@ -54,9 +54,6 @@ public class TestSesameResultIteration {
 	@Before
 	public void init()  throws Exception {
 
-		OWLOntology ontology;
-		Model model;
-
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
 
@@ -76,12 +73,6 @@ public class TestSesameResultIteration {
 
 		s.close();
 
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-		model = rmanager.getModel();
-
 		Properties p = new Properties();
 		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(OBDAProperties.DB_NAME, "countries");
@@ -90,7 +81,7 @@ public class TestSesameResultIteration {
 		p.setProperty(OBDAProperties.DB_PASSWORD, "");
 		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
-		SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, new R2RMLQuestPreferences(p));
+		SesameVirtualRepo repo = new SesameVirtualRepo("", owlfile, r2rmlfile, new R2RMLQuestPreferences(p));
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.

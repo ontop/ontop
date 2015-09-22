@@ -47,6 +47,7 @@ import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.RefObjectMap;
 import eu.optique.api.mapping.TriplesMap;
 
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -61,24 +62,25 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.TermUtils;
 
 public class R2RMLManager {
-	
+
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Model myModel;
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file) throws RDFParseException, IOException, RDFHandlerException {
-		this(new File(file));
+	public R2RMLManager(String file, NativeQueryLanguageComponentFactory nativeQLFactory) throws RDFParseException, IOException, RDFHandlerException {
+		this(new File(file), nativeQLFactory);
 	}
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file) throws IOException, RDFParseException, RDFHandlerException {
+	public R2RMLManager(File file, NativeQueryLanguageComponentFactory nativeQLFactory) throws IOException, RDFParseException, RDFHandlerException {
 
 			myModel = new LinkedHashModel();			
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
@@ -89,15 +91,18 @@ public class R2RMLManager {
 			parser.parse(in, documentUrl.toString());
 			r2rmlParser = new R2RMLParser();
 
+			this.nativeQLFactory = nativeQLFactory;
+
 	}
 	
 	/**
 	 * Constructor to start the parser from an RDF Model
 	 * @param model - the sesame Model containing mappings
 	 */
-	public R2RMLManager(Model model){
+	public R2RMLManager(Model model, NativeQueryLanguageComponentFactory nativeQLFactory){
 		myModel = model;
 		r2rmlParser = new R2RMLParser();
+		this.nativeQLFactory = nativeQLFactory;
 	}
 	
 	/**
@@ -157,7 +162,7 @@ public class R2RMLManager {
 		List<Function> body = getMappingTripleAtoms(tm);
 		Function head = getHeadAtom(body);
 		CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getMappingAxiom("mapping-" + tm.hashCode(), fac.getSQLQuery(sourceQuery), targetQuery);
+		OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-" + tm.hashCode(), fac.getSQLQuery(sourceQuery), targetQuery);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -215,7 +220,7 @@ public class R2RMLManager {
 			}
 			//finally, create mapping and add it to the list
             //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-            OBDAMappingAxiom mapping = fac.getMappingAxiom("mapping-join-" + robm.hashCode(),
+            OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-join-" + robm.hashCode(),
 					fac.getSQLQuery(sourceQuery), targetQuery);
             System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);

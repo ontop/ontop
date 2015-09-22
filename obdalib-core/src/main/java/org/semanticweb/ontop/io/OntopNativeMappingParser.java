@@ -223,7 +223,7 @@ public class OntopNativeMappingParser implements MappingParser {
                         parsers = createParsers(ImmutableMap.copyOf(prefixes));
                     }
 	                currentSourceMappings = readMappingDeclaration(lineNumberReader, currentSourceMappings, parsers,
-                            invalidMappingIndicators);
+                            invalidMappingIndicators, nativeQLFactory);
 	            } else {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
@@ -309,7 +309,8 @@ public class OntopNativeMappingParser implements MappingParser {
     private static List<OBDAMappingAxiom> readMappingDeclaration(LineNumberReader reader,
                                                                  List<OBDAMappingAxiom> currentSourceMappings,
                                                                  List<TargetQueryParser> parsers,
-                                                                 List<Indicator> invalidMappingIndicators)
+                                                                 List<Indicator> invalidMappingIndicators,
+                                                                 NativeQueryLanguageComponentFactory nativeQLFactory)
             throws IOException {
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
@@ -328,7 +329,8 @@ public class OntopNativeMappingParser implements MappingParser {
 	            	// Save the mapping to the model (if valid) at this point
 	                if (isMappingValid) {
 	                    currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
+                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings,
+                                        nativeQLFactory);
 	                    mappingId = "";
 	                    sourceQuery = null;
 	                    targetQuery = null;
@@ -401,7 +403,7 @@ public class OntopNativeMappingParser implements MappingParser {
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
             currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery,
-                    currentSourceMappings);
+                    currentSourceMappings, nativeQLFactory);
         }
 
         return currentSourceMappings;
@@ -433,9 +435,9 @@ public class OntopNativeMappingParser implements MappingParser {
 	}
 
     private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, CQIE targetQuery,
-                                                       List<OBDAMappingAxiom> currentSourceMappings) {
-        OBDAMappingAxiom mapping = DATA_FACTORY.getMappingAxiom(mappingId, DATA_FACTORY.getSQLQuery(sourceQuery),
-                targetQuery);
+                                                        List<OBDAMappingAxiom> currentSourceMappings,
+                                                        NativeQueryLanguageComponentFactory nativeQLFactory) {
+        OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, DATA_FACTORY.getSQLQuery(sourceQuery), targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

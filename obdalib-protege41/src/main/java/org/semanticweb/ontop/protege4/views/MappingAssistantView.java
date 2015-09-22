@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
@@ -64,7 +65,8 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 
 		OBDAModelWrapper dsController = apic.getActiveOBDAModelWrapper();
 
-		MappingAssistantPanel queryPanel = new MappingAssistantPanel(dsController);
+
+		MappingAssistantPanel queryPanel = new MappingAssistantPanel(dsController, apic.getNativeQLFactory());
 		datasourceSelector = new DatasourceSelector(dsController);
 		datasourceSelector.addDatasourceListListener(queryPanel);
 

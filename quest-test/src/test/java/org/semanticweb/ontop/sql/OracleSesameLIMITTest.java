@@ -22,11 +22,16 @@ package org.semanticweb.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
+import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import org.semanticweb.ontop.r2rml.R2RMLManager;
 import org.semanticweb.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.ontop.sql.DBMetadata;
@@ -79,11 +84,6 @@ public class OracleSesameLIMITTest  {
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		/*
-		 * Load the OBDA model from an external .r2rml file
-		 */
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-		model = rmanager.getModel();
-		/*
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
@@ -106,10 +106,22 @@ public class OracleSesameLIMITTest  {
 		p.setProperty(QuestPreferences.DB_PASSWORD, "obdaps83");
 		p.setProperty(QuestPreferences.JDBC_DRIVER, jdbc_driver_class);
 
+		QuestPreferences preferences = new R2RMLQuestPreferences(p);
+
+		Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
+		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+				NativeQueryLanguageComponentFactory.class);
+
+		/*
+		 * Load the OBDA model from an external .r2rml file
+		 */
+		R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
+		model = rmanager.getModel();
+
 		dbMetadata = getMeta(jdbc_driver_class);
 		SesameVirtualRepo qest1;
 
-		qest1 = new SesameVirtualRepo("dbname", ontology, model, dbMetadata, new QuestPreferences(p));
+		qest1 = new SesameVirtualRepo("dbname", ontology, model, dbMetadata, preferences);
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.
