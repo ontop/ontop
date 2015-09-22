@@ -64,21 +64,17 @@ public abstract class AbstractConstraintTest extends TestCase {
 		Collection<TableDefinition> tables = metadata.getTables();
 		for (TableDefinition t : tables) {
 			UniqueConstraint pkc =  t.getPrimaryKey();
-			if (pkc != null) {
-				Collection<Attribute> pk = pkc.getAttributes();
-				if (checkName(t, TB_BOOK)) {
-					assertEquals(1, pk.size());
-				//} else if (checkName(t, TB_BOOKWRITER)) {
-				//	assertEquals(0, pk.size());
-				} else if (checkName(t, TB_EDITION)) {
-					assertEquals(1, pk.size());
-				} else if (checkName(t, TB_WRITER)) {
-					assertEquals(1, pk.size());
-				}
-				writeLog(t.getName(), pk);
+			if (checkName(t, TB_BOOK)) {
+				assertEquals(1, pkc.getAttributes().size());
+			} else if (checkName(t, TB_BOOKWRITER)) {
+				assertTrue(pkc == null);
+			} else if (checkName(t, TB_EDITION)) {
+				assertEquals(1, pkc.getAttributes().size());
+			} else if (checkName(t, TB_WRITER)) {
+				assertEquals(1, pkc.getAttributes().size());
 			}
-			else
-				assertTrue(checkName(t, TB_BOOKWRITER));
+			if (pkc != null)
+				writeLog(t.getName(), pkc.getAttributes());
 		}
 		log.info("\n");
 	}
