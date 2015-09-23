@@ -36,20 +36,20 @@ public class LookupTable {
 	/**
 	 * Map of variable names to the corresponding numbers
 	 */
-	private Map<String, Integer> var2NumMap = new HashMap<>();
+	private final Map<String, Integer> var2NumMap = new HashMap<>();
 
 	/**
      * Map of numbers to their canonical variable names
      *
      * @see #add(String, int)
 	 */
-	private Map<Integer, String> num2CanonicalVarMap = new HashMap<>();
+	private final Map<Integer, String> num2CanonicalVarMap = new HashMap<>();
 
 	/**
 	 * Set with all unsafe names, names with multiple columns (not qualified)
 	 * use for throwing exception.
 	 */
-	private Set<String> unsafeEntries = new HashSet<>();
+	private final Set<String> unsafeEntries = new HashSet<>();
 	
 	public LookupTable() {
 		// NO-OP
@@ -67,6 +67,7 @@ public class LookupTable {
 	 */
 	public void add(String entry, int index) {
 		if (entry != null) {
+			entry = getCanonicalForm(entry);
 			putEntry(entry, index);
 			register(index);
 		}
@@ -84,7 +85,8 @@ public class LookupTable {
 	public void add(String[] entries, int index) {
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				putEntry(entries[i], index);
+				String entry = getCanonicalForm(entries[i]);
+				putEntry(entry, index);
 			}
 		}
 		register(index);
@@ -117,44 +119,29 @@ public class LookupTable {
 	 *            will get its index and assign it to the new entry.
 	 */
 	public void add(String entry, String reference) {
-		if (entry == null || reference == null) {
-			return;
-		}
-		Integer index = getEntry(reference);
+		if (entry == null || reference == null) 
+			throw new IllegalArgumentException();
+		
+		reference = getCanonicalForm(reference);
+		Integer index = var2NumMap.get(reference);
 		if (index != null) {
+			entry = getCanonicalForm(entry);
 			putAliasEntry(entry, index);
 		}
+		else 
+			throw new IllegalArgumentException();
 	}
 
 	/**
 	 * Returns the alternative name for the given entry.
 	 */
 	public String lookup(String entry) {
-		if (exist(entry)) {
-			Integer index = getEntry(entry);
-			return retrieve(index);
-		}
+		entry = getCanonicalForm(entry);
+		Integer index = var2NumMap.get(entry);
+		if (index != null) 
+			return num2CanonicalVarMap.get(index);
+		
 		return null;
-	}
-
-	/**
-	 * Removes the given entry from the lookup table. This action follows the
-	 * removal of the alternative name, if necessary.
-	 */
-	public void remove(String entry) {
-		removeEntry(entry);
-		unregister();
-	}
-
-	/**
-	 * Removes more than one entry from the lookup table. This action follows
-	 * the removal of the alternative name, if necessary.
-	 */
-	public void remove(String[] entries) {
-		for (int i = 0; i < entries.length; i++) {
-			removeEntry(entries[i]);
-		}
-		unregister();
 	}
 
 	/**
@@ -177,67 +164,70 @@ public class LookupTable {
 	 * "Employee.name" --> "t2"
 	 * "Salary.pid" --> "t1"
 	 * </pre>
+	 * 
+	 * TEST ONLY
+	 * 
 	 */
 	public boolean asEqualTo(String entry, String reference) {
-		if (!exist(entry) || !exist(reference)) {
+		entry = getCanonicalForm(entry);
+		reference = getCanonicalForm(reference);
+
+		Integer index = var2NumMap.get(entry);
+		Integer referenceIndex = var2NumMap.get(reference);
+		
+		if ((index == null) || (referenceIndex == null)) 
 			return false;
-		}
-		String name = lookup(reference);
-		Integer index = getEntry(entry);
-		update(index, name);
+		
+		String name = num2CanonicalVarMap.get(referenceIndex);
+		num2CanonicalVarMap.put(index, name);
 
 		return true;
 	}
+	
+	// ROMAN (23 Sep 2015): YET ANOTHER POINT OF CHOPPING THE NAMES
+	// THIS DOES NOT WORK CORRECTLY WITH "A"."B"
+	
+	private static String getCanonicalForm(String s) {
+		if (s.startsWith("\"") && s.endsWith("\"")) {
+			s = s.substring(1, s.length() - 1);
+		}
+		return s.toLowerCase();
+	}
+	
+
+	private static final String printFormat = "%s --> %s\n";
 
 	@Override
 	public String toString() {
-		final String printFormat = "%s --> %s";
 
 		String str = "";
-		for (String entry : var2NumMap.keySet()) {
-			String name = lookup(entry);
-			str += String.format(printFormat, entry, name);
-			str += "\n";
+		for (Map.Entry<String, Integer> entry : var2NumMap.entrySet()) {
+			String name = num2CanonicalVarMap.get(entry.getValue());
+			str += String.format(printFormat, entry.getKey(), name);
 		}
 		return str;
 	}
 
-	/*
-	 * Utility method to check if the entry exists already in the table or not.
-	 * Input string will be written in lower case.
-	 */
-	private boolean exist(String entry) {
-		final String sourceEntry = entry.toLowerCase();
-		return (var2NumMap.containsKey(trim(sourceEntry)) || var2NumMap.containsKey(sourceEntry));
-	}
-
-	private String trim(String string) {
-		
-		while (string.startsWith("\"") && string.endsWith("\"")) {
-			
-			string = string.substring(1, string.length() - 1);
-		}
-		return string;
-	}
+	
 	/*
 	 * Utility method to add an entry in the lookup table. Input string will be
 	 * written in lower case.
 	 */
 	private void putEntry(String entry, Integer index) {
-		final String insertedEntry = entry.toLowerCase();
-		/*
-		 * looking for repeated entries, if they exists they are unsafe
-		 * (generally unqualified names) and they are marked as unsafe.
-		 */
-		boolean isExist = var2NumMap.containsKey(insertedEntry);
+
+		// looking for repeated entries, if they exists they are unsafe
+		// (generally unqualified names) and they are marked as unsafe.
 		
-		if (!ambiguous(insertedEntry)) {
-			if (!isExist) {
-				var2NumMap.put(insertedEntry, index);
-			} else {
-				if (!identical(insertedEntry, index)) {
+		if (!unsafeEntries.contains(entry)) {
+			Integer entryIndex = var2NumMap.get(entry);
+			
+			if (entryIndex == null) {
+				var2NumMap.put(entry, index);
+			} 
+			else {
+				if (entryIndex != index) {
 					// Add the entry to unsafe entries list if the new entry is ambiguous.
-					unsafeEntries.add(insertedEntry);
+					unsafeEntries.add(entry);
 //					var2NumMap.remove(insertedEntry);
 				}
 			}
@@ -245,69 +235,28 @@ public class LookupTable {
 	}
 	
 	/*
-	 * Utility method to add an alias entry in the lookup table. Input string will be
-	 * written in lower case.
+	 * Utility method to add an alias entry in the lookup table. 
 	 */
 	private void putAliasEntry(String entry, Integer index) {
-		final String insertedEntry = entry.toLowerCase();
 		/*
 		 * looking for repeated entries, if they exists they are unsafe
 		 * (generally unqualified names) and they are marked as unsafe.
 		 */
-		boolean isExist = var2NumMap.containsKey(insertedEntry);
+		Integer entryIndex = var2NumMap.get(entry);
 		
-		if (!isExist) {
-			var2NumMap.put(insertedEntry, index);
-		} else {
-			if (!identical(insertedEntry, index)) {
+		if (entryIndex == null) {
+			var2NumMap.put(entry, index);
+		} 
+		else {
+			if (entryIndex != index) {
 				// Add the entry to unsafe entries list if the new entry is ambiguous.
-				unsafeEntries.add(insertedEntry);
-				var2NumMap.remove(insertedEntry);
+				unsafeEntries.add(entry);
+				var2NumMap.remove(entry);
 			}
 		}
 	}
 
-	private boolean ambiguous(String entry) {
-		return unsafeEntries.contains(entry);
-	}
 
-	/*
-	 * Checks if the already existed entry is actually identical entry by checking also its index.
-	 */
-	private boolean identical(String insertedEntry, Integer index) {
-		return (index == var2NumMap.get(insertedEntry)) ? true : false;
-	}
-
-	/*
-	 * Utility method to get an entry from the lookup table. Input string will
-	 * be written in lower case.
-	 */
-	private Integer getEntry(String entry) {
-		return var2NumMap.get(trim(entry.toLowerCase()));
-	}
-
-	/*
-	 * Utility method to remove an entry from the lookup table. Input string
-	 * will be written in lower case.
-	 */
-	private void removeEntry(String entry) {
-		final String sourceEntry = entry.toLowerCase();
-		var2NumMap.remove(sourceEntry);
-	}
-
-	/*
-	 * Retrieves the alternative name given the index number
-	 */
-	private String retrieve(int index) {
-		return num2CanonicalVarMap.get(index);
-	}
-
-	/*
-	 * Changes the alternative in the given index number
-	 */
-	private void update(int index, String value) {
-		num2CanonicalVarMap.put(index, value);
-	}
 
 	/*
 	 * Assigns the newly added entry to an alternative name.
@@ -317,11 +266,52 @@ public class LookupTable {
 			String name = String.format(DEFAULT_NAME_FORMAT, index);
 			num2CanonicalVarMap.put(index, name);
 		}
+		// else already registered -- not an error
 	}
 
+	//=================================================================================
+	
+	/**
+	 * Removes the given entry from the lookup table. 
+	 * This action is followed by the removal of the alternative name, if necessary.
+	 * 
+	 * NOTE: USED IN TESTS ONLY
+	 */
+	public void remove(String entry) {
+		removeEntry(entry);
+		unregister();
+	}
+
+	/**
+	 * Removes more than one entry from the lookup table. 
+	 * This action is followed by the removal of the alternative name, if necessary.
+	 *
+	 * NOTE: USED IN TESTS ONLY
+	 */
+	public void remove(String[] entries) {
+		for (int i = 0; i < entries.length; i++) {
+			removeEntry(entries[i]);
+		}
+		unregister();
+	}
+
+	
+	/*
+	 * Utility method to remove an entry from the lookup table. 
+	 * 
+	 * NOTE: USED IN TESTS ONLY
+	 */
+	private void removeEntry(String entry) {
+		final String sourceEntry = getCanonicalForm(entry);
+		var2NumMap.remove(sourceEntry);
+	}
+
+	
 	/*
 	 * Removes the alternative name if the index is no longer available in the
 	 * lookup table.
+	 * 
+	 * NOTE: USED IN TESTS ONLY
 	 */
 	private void unregister() {
 		Set<Integer> set = new HashSet<Integer>();

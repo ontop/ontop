@@ -56,14 +56,13 @@ public class Mapping2DatalogConverter {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		
-		//DatalogProgram datalogProgram = factory.getDatalogProgram();
 		List<CQIE> datalogProgram = new LinkedList<CQIE>();
 		List<String> errorMessages = new ArrayList<>();
+		
 		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
-				CQIE targetQuery = mappingAxiom.getTargetQuery();
 
 				OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
@@ -92,6 +91,7 @@ public class Mapping2DatalogConverter {
                 // For each body atom in the target query,
                 //  (1) renameVariables its variables and
                 //  (2) use it as the head atom of a new rule
+				CQIE targetQuery = mappingAxiom.getTargetQuery();
                 for (Function atom : targetQuery.getBody()) {
                     // Construct the head from the target query.
                     Function head = createHeadAtom(atom, lookupTable);
@@ -100,7 +100,8 @@ public class Mapping2DatalogConverter {
                     datalogProgram.add(rule);
                 }
 
-			} catch (Exception e) {
+			} 
+			catch (Exception e) {
 				errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
                         + " \n Description: " + e.getMessage()
                         + " \nMapping: [" + mappingAxiom.toString() + "]");
@@ -167,6 +168,7 @@ public class Mapping2DatalogConverter {
      *  will be extended
      * @param parsedSQLQuery
      * @param lookupTable
+     * 
      * @author Dag Hovland
      *
      * @link ConferenceConcatMySQLTest
@@ -258,7 +260,8 @@ public class Mapping2DatalogConverter {
             }
             result = fac.getVariable(termName);
 
-        } else if (term instanceof Function) {
+        } 
+        else if (term instanceof Function) {
             Function func = (Function) term;
             List<Term> terms = func.getTerms();
             List<Term> newTerms = new ArrayList<>();
@@ -266,7 +269,8 @@ public class Mapping2DatalogConverter {
                 newTerms.add(renameVariables(innerTerm, lookupTable));
             }
             result = fac.getFunction(func.getFunctionSymbol(), newTerms);
-        } else if (term instanceof Constant) {
+        } 
+        else if (term instanceof Constant) {
             result = term.clone();
         }
         return result;
@@ -456,13 +460,12 @@ public class Mapping2DatalogConverter {
             return this.result;
         }
 
-        public void visitBinaryExpression(BinaryExpression expression){
+        private void visitBinaryExpression(BinaryExpression expression){
             Expression left = expression.getLeftExpression();
             Expression right = expression.getRightExpression();
 
             Term t1 = visitEx(left);
-
-            if(t1 == null)
+            if (t1 == null)
                 throw new RuntimeException("Unable to find column name for variable: " +left);
 
             Term t2 = visitEx(right);
@@ -539,43 +542,41 @@ public class Mapping2DatalogConverter {
         }
 
         @Override
-        public void visit(net.sf.jsqlparser.expression.Function expression) {
-            net.sf.jsqlparser.expression.Function func = expression;
+        public void visit(net.sf.jsqlparser.expression.Function func) {
             if (func.getName().toLowerCase().equals("regexp_like")) {
 
                 List<Expression> expressions = func.getParameters().getExpressions();
                 if (expressions.size() == 2 || expressions.size() == 3) {
-
-                    Term t1; // first parameter is a source_string, generally a column
+                    // first parameter is a source_string, generally a column
                     Expression first = expressions.get(0);
-                    t1 = visitEx(first);
-
+                    Term t1 = visitEx(first);
                     if (t1 == null)
                         throw new RuntimeException("Unable to find column name for variable: "
                                 + first);
 
-                    Term t2; // second parameter is a pattern, so generally a regex string
+                    // second parameter is a pattern, so generally a regex string
                     Expression second = expressions.get(1);
-
-                    t2 = visitEx(second);
+                    Term t2 = visitEx(second);
 
                     /*
                      * Term t3 is optional for match_parameter in regexp_like
 			         */
                     Term t3;
-                    if(expressions.size() == 3){
+                    if (expressions.size() == 3){
                         Expression third = expressions.get(2);
                         t3 = visitEx(third);
-                    } else {
+                    } 
+                    else {
                         t3 = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
                 } else
 
                 throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
-            } else if (func.getName().toLowerCase().endsWith("replace")) {
+            } 
+            else if (func.getName().toLowerCase().endsWith("replace")) {
 
-                List<Expression> expressions = expression.getParameters().getExpressions();
+                List<Expression> expressions = func.getParameters().getExpressions();
                 if (expressions.size() == 2 || expressions.size() == 3) {
 
                     Term t1; // first parameter is a function expression
@@ -587,10 +588,8 @@ public class Mapping2DatalogConverter {
                                 + first);
 
                     // second parameter is a string
-                    Term out_string;
                     Expression second = expressions.get(1);
-
-                    out_string = visitEx(second);
+                    Term out_string = visitEx(second);
                     
                     /*
                      * Term t3 is optional: no string means delete occurrences of second param
@@ -599,40 +598,38 @@ public class Mapping2DatalogConverter {
                     if (expressions.size() == 3) {
                         Expression third = expressions.get(2);
                         in_string = visitEx(third);
-                    } else {
+                    } 
+                    else {
                         in_string = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionReplace(t1, out_string, in_string);
-                } else
-
+                } 
+                else
                     throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+            }  
+            else if (func.getName().toLowerCase().endsWith("concat")){
 
-            }  else if (func.getName().toLowerCase().endsWith("concat")){
+                List<Expression> expressions = func.getParameters().getExpressions();
 
-                List<Expression> expressions = expression.getParameters().getExpressions();
-
-                int nParameters=expressions.size();
+                int nParameters = expressions.size();
                 Function topConcat = null;
-
 
                 for (int i= 0; i<nParameters; i+=2) {
 
-                    Term first_string, second_string;
-
-                    if(topConcat == null){
+                    if (topConcat == null){
 
                         Expression first = expressions.get(i);
-                        first_string = visitEx(first);
+                        Term first_string = visitEx(first);
 
                         Expression second = expressions.get(i+1);
-                        second_string = visitEx(second);
+                        Term second_string = visitEx(second);
 
                         topConcat = fac.getFunctionConcat(first_string, second_string);
                     }
-                    else{
+                    else {
 
                         Expression second = expressions.get(i);
-                        second_string = visitEx(second);
+                        Term second_string = visitEx(second);
 
                         topConcat = fac.getFunctionConcat(topConcat, second_string);
                     }
@@ -640,9 +637,9 @@ public class Mapping2DatalogConverter {
                 }
 
                 result = topConcat;
-
-            } else {
-                throw new UnsupportedOperationException("Unsupported expression " + expression);
+            } 
+            else {
+                throw new UnsupportedOperationException("Unsupported expression " + func);
             }
         }
 
@@ -696,7 +693,7 @@ public class Mapping2DatalogConverter {
             Expression inside = expression.getExpression();
 
             //Consider the case of NOT(...)
-            if(expression.isNot()){
+            if (expression.isNot()) {
                 result = fac.getFunctionNOT(visitEx(inside));
             } else {
                 result = visitEx(inside);
@@ -845,7 +842,8 @@ public class Mapping2DatalogConverter {
                  * If the termName is not null, create a variable
                  */
                 result = fac.getVariable(termName);
-            } else {
+            } 
+            else {
                 // Constructs constant
                 // if the columns contains a boolean value
                 String columnName = expression.getColumnName();
@@ -858,8 +856,7 @@ public class Mapping2DatalogConverter {
                 	result = fac.getBooleanConstant(false);
                 }
                 else
-                    throw new RuntimeException(
-                            "Unable to find column name for variable: "
+                    throw new RuntimeException( "Unable to find column name for variable: "
                                     + columnName);
             }
 
@@ -988,6 +985,4 @@ public class Mapping2DatalogConverter {
             visitBinaryExpression(regExpMySQLOperator);
         }
     }
-
-
 }
