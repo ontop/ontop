@@ -412,8 +412,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 	
 	@Override
-	public Function getFunctionTimezone(Term arg){
-		return getFunction(OBDAVocabulary.TIMEZONE, arg);
+	public Function getFunctionTZ(Term arg){
+		return getFunction(OBDAVocabulary.TZ, arg);
 		}
 	
 	@Override

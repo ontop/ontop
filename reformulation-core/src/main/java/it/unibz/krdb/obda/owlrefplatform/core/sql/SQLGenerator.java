@@ -1547,7 +1547,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String result = sqladapter.dateHours(literal);
 				return result;
 
-			} else if (functionName.equals(OBDAVocabulary.TIMEZONE.getName())) {
+			} else if (functionName.equals(OBDAVocabulary.TZ.getName())) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateTZ(literal);
 				return result;

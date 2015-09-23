@@ -890,17 +890,17 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 
 	
-	private Term getRand(List<ValueExpr> args) {	
+	private Term getRand() {
 		Term term = ofac.getFunctionRand();
 		return term;	
 	}
 
-	private Term getUUID(List<ValueExpr> args) {	
+	private Term getUUID() {
 		Term term = ofac.getFunctionUUID();
 		return term;	
 	}
 
-	private Term getstrUUID(List<ValueExpr> args) {
+	private Term getstrUUID() {
 		Term term = ofac.getFunctionstrUUID();
 		return term;
 	}
@@ -977,14 +977,14 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;	
 	}
 	
-	private Term getTimezone(List<ValueExpr> args) {
+	private Term getTZ(List<ValueExpr> args) {
 		if (args.size() != 1){
             throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL TIMEZONE function");					
+		+ args.size() + ", only 1 supported) for SQL TZ function");
 		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionTimezone(arg);
+		Term term = ofac.getFunctionTZ(arg);
 		return term;	
 	}
 	
@@ -1121,13 +1121,13 @@ public class SparqlAlgebraToDatalogTranslator {
             	return getRound(expr.getArgs());
             	
             case "RAND":
-            	return getRand(expr.getArgs());
+            	return getRand();
             	
             case "UUID":
-            	return getUUID(expr.getArgs());
+            	return getUUID();
 
 			case "STRUUID":
-				return getstrUUID(expr.getArgs());
+				return getstrUUID();
                         
             case "MD5":
             	return getMD5(expr.getArgs()); 
@@ -1162,8 +1162,8 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#seconds-from-dateTime":
             	return getSeconds(expr.getArgs());	
             	
-            case "http://www.w3.org/2005/xpath-functions#timezone-from-dateTime":
-            	return getTimezone(expr.getArgs());
+            case "TZ":
+            	return getTZ(expr.getArgs());
             	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");

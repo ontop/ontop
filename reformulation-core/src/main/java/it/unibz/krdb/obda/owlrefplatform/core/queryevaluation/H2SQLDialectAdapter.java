@@ -56,7 +56,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String uuid(){
-		return "'urn:uuid:'||RANDOM_UUID()";
+		return strConcat(new String[]{"'urn:uuid:'","RANDOM_UUID()"});
 	}
 
 	@Override

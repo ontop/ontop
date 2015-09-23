@@ -368,7 +368,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionHours(Term arg);
 	
-	public Function getFunctionTimezone(Term arg);
+	public Function getFunctionTZ(Term arg);
 
 	public Function getFunctionMonth(Term arg);
 

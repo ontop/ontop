@@ -816,7 +816,7 @@ public class BindTestWithFunctionsOracle {
     }
 
     @Test
-    public void testTimezone() throws Exception {
+    public void testTZ() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -825,7 +825,7 @@ public class BindTestWithFunctionsOracle {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title (TIMEZONE(?year) AS ?w) WHERE \n"
+                + "SELECT  ?title (TZ(?year) AS ?w) WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
