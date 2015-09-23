@@ -21,6 +21,7 @@ package org.semanticweb.ontop.utils;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.semanticweb.ontop.mapping.sql.LookupTable;
@@ -81,7 +82,7 @@ public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
+	public ImmutableList<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		
@@ -149,7 +150,7 @@ public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 			throw  new IllegalArgumentException(msg);
 		}
 
-		return datalogProgram;
+		return ImmutableList.copyOf(datalogProgram);
 	}
 
     /**

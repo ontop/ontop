@@ -607,16 +607,23 @@ public class Quest implements Serializable, IQuest {
 			/**
 			 * if the metadata was not already set,
 			 * extracts DB metadata completely.
+			 *
+			 * Gets the mapping rules in the same time.
 			 */
-
+			ImmutableList<CQIE> mappingRules;
 			if (metadata == null) {
-				metadata = dbConnector.extractDBMetadata(unfoldingOBDAModel, userConstraints);
+				DBMetadataAndMappings dbMetadataAndMappings = dbConnector.extractDBMetadataAndMappings(unfoldingOBDAModel,
+						sourceId, userConstraints);
+				metadata = dbMetadataAndMappings.getDataSourceMetadata();
+				mappingRules = dbMetadataAndMappings.getMappingRules();
 			}
 			/**
 			 * Otherwise, if partially configured, complete it by applying
 			 * the user-defined constraints.
 			 */
 			else {
+				mappingRules = dbConnector.extractMappings(unfoldingOBDAModel, sourceId, metadata);
+
 				//Adds keys from the text file
 				if (userConstraints != null) {
 					userConstraints.addConstraints(metadata);
@@ -647,7 +654,7 @@ public class Quest implements Serializable, IQuest {
 				dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource);
 			}
 
-			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, dbConnector, sourceId, nativeQLFactory);
+			unfolder = new QuestUnfolder(mappingRules, nativeQLFactory);
 
 			/***
 			 * T-Mappings and Fact mappings

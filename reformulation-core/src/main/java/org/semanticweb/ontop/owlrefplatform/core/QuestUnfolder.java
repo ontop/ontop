@@ -61,16 +61,10 @@ public class QuestUnfolder {
 	 *          TBox hierarchies
 	 */
 	//private boolean applyExcludeFromTMappings = false;
-	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DataSourceMetadata metadata,  DBConnector dbConnector, URI sourceId,
-						 NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception{
+	public QuestUnfolder(ImmutableList<CQIE> mappingRules, NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception{
 
 		this.nativeQLFactory = nativeQLFactory;
-
-		unfoldingOBDAModel = dbConnector.normalizeMappings(unfoldingOBDAModel, sourceId, metadata);
-		ImmutableList<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
-
-		IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
-		unfoldingProgram = mapping2DatalogConverter.constructDatalogProgram(mappings);
+		unfoldingProgram = new ArrayList<>(mappingRules);
 	}
 
 

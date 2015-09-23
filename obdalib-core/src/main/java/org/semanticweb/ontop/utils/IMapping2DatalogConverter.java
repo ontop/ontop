@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.utils;
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 
@@ -10,5 +11,5 @@ import java.util.List;
  */
 public interface IMapping2DatalogConverter {
 
-    List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms);
+    ImmutableList<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms);
 }

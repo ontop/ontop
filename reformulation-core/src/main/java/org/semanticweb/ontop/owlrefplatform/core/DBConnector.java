@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
+import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.nativeql.DBMetadataException;
@@ -9,6 +11,7 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.util.List;
 
 /**
  * High-level component in charge of abstracting the interaction with the DB.
@@ -28,12 +31,6 @@ public interface DBConnector {
     void close();
 
     /**
-     * Extracts the schema from the DB and/or the mappings.
-     */
-    DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints)
-            throws DBMetadataException;
-
-    /**
      * Gets a direct QuestConnection.
      */
     IQuestConnection getNonPoolConnection() throws OBDAException;
@@ -45,8 +42,9 @@ public interface DBConnector {
 
     LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata);
 
-    /**
-     * TODO: explain
-     */
-    OBDAModel normalizeMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
+    DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId,
+                                                       @Nullable ImplicitDBConstraints userConstraints)
+            throws DBMetadataException, OBDAException;
+
+    ImmutableList<CQIE> extractMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
 }

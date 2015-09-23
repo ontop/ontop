@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import net.sf.jsqlparser.JSQLParserException;
@@ -21,6 +22,7 @@ import org.semanticweb.ontop.parser.PreprocessProjection;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
+import org.semanticweb.ontop.utils.IMapping2DatalogConverter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,8 +143,7 @@ public class JDBCConnector implements DBConnector {
         }
     }
 
-    @Override
-    public DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
+    private DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
         return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection), userConstraints);
     }
@@ -322,8 +323,7 @@ public class JDBCConnector implements DBConnector {
         }
     }
 
-    @Override
-    public OBDAModel normalizeMappings(OBDAModel unfoldingOBDAModel, final URI sourceId, final DataSourceMetadata metadata) throws OBDAException {
+    private OBDAModel normalizeMappings(OBDAModel unfoldingOBDAModel, final URI sourceId, final DataSourceMetadata metadata) throws OBDAException {
         /** Substitute select * with column names (in the SQL case) **/
         unfoldingOBDAModel = preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
 
@@ -337,5 +337,25 @@ public class JDBCConnector implements DBConnector {
          */
         unfoldingOBDAModel = expandMetaMappings(unfoldingOBDAModel, sourceId);
         return unfoldingOBDAModel;
+    }
+
+    @Override
+    public DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel,
+                                                              URI sourceId,
+                                                              @Nullable ImplicitDBConstraints userConstraints)
+            throws DBMetadataException, OBDAException {
+        DataSourceMetadata metadata = extractDBMetadata(obdaModel, userConstraints);
+        ImmutableList<CQIE> mappingRules = extractMappings(obdaModel, sourceId, metadata);
+        return new DBMetadataAndMappings(metadata, mappingRules);
+    }
+
+    @Override
+    public ImmutableList<CQIE> extractMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata)
+            throws OBDAException {
+        obdaModel = normalizeMappings(obdaModel, sourceId, metadata);
+        ImmutableList<OBDAMappingAxiom> mappings = obdaModel.getMappings(sourceId);
+
+        IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
+        return ImmutableList.copyOf(mapping2DatalogConverter.constructDatalogProgram(mappings));
     }
 }
