@@ -129,6 +129,9 @@ public class ParsedSQLQuery implements Serializable {
 
 	/**
 	 * Returns all the tables in this query (RO now).
+	 * 
+	 * USED FOR CREATING DATALOG RULES AND PROVIDING METADATA WITH THE LIST OF TABLES
+	 * 
 	 */
 	public List<TableJSQL> getTables() throws JSQLParserException {
 
@@ -141,6 +144,9 @@ public class ParsedSQLQuery implements Serializable {
 
 	/**
 	 * Returns all the subSelect in this query .
+	 * 
+	 * USED FOR CREATING DATALOG RULES (LOOKUP TABLE)
+	 * 
 	 */
 	public List<SelectJSQL> getSubSelects() {
 
@@ -153,6 +159,11 @@ public class ParsedSQLQuery implements Serializable {
 
 	/**
 	 * Get the string construction of alias name.
+	 * 
+	 * CREATING DATALOG RULES (LOOKUP TABLE)
+	 * 
+	 * MAPS EXPRESSION -> NAME
+	 * 
 	 */
 	public Map<String, String> getAliasMap() {
 		if (aliasMap == null) {
@@ -165,6 +176,9 @@ public class ParsedSQLQuery implements Serializable {
 	/**
 	 * Get the string construction of the join condition. The string has the
 	 * format of "VAR1=VAR2".
+	 * 
+	 * CREATING DATALOG RULES (JOIN CONDITIONS)
+	 * 
 	 */
 	public List<Expression> getJoinConditions() throws JSQLParserException {
 		if (joins == null) {
@@ -176,6 +190,9 @@ public class ParsedSQLQuery implements Serializable {
 
 	/**
 	 * Get the object construction for the WHERE clause.
+	 * 
+	 * CREATING DATALOG RULES
+	 * AND META-MAPPING EXPANDER
 	 * 
 	 * @throws JSQLParserException
 	 */
@@ -191,6 +208,9 @@ public class ParsedSQLQuery implements Serializable {
 	/**
 	 * Get the object construction for the SELECT clause (CHANGES TABLE AND COLUMN NAMES).
 	 * 
+	 * CREATING DATALOG RULES
+	 * AND META-MAPPING EXPANDER
+	 * 
 	 * @throws JSQLParserException
 	 */
 	public ProjectionJSQL getProjection() throws JSQLParserException {
@@ -205,6 +225,8 @@ public class ParsedSQLQuery implements Serializable {
 	/**
 	 * Get the list of columns (RO)
 	 * 
+	 * ONLY FOR CREATING VIEWS!
+	 * 
 	 * @return
 	 */
 	public List<String> getColumns() {
@@ -215,6 +237,8 @@ public class ParsedSQLQuery implements Serializable {
 	/**
 	 * Set the object construction for the SELECT clause, modifying the current
 	 * statement
+	 * 
+	 * META-MAPPING EXPANDER
 	 * 
 	 * @param projection
 	 */
@@ -229,6 +253,8 @@ public class ParsedSQLQuery implements Serializable {
 	 * Set the object construction for the WHERE clause, modifying the current
 	 * statement
 	 * 
+	 * META-MAPPING EXPANDER
+	 * 
 	 * @param whereClause
 	 */
 
@@ -240,6 +266,9 @@ public class ParsedSQLQuery implements Serializable {
 
 	/**
 	 * Constructs the GROUP BY statement based on the Aggregation object.
+	 * 
+	 * FUTURE USE
+	 * 
 	 */
 	public AggregationJSQL getGroupByClause() {
 		if (groupByClause == null) {

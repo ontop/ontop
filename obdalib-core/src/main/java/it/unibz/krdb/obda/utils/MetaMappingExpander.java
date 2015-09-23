@@ -45,6 +45,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -69,9 +70,7 @@ public class MetaMappingExpander {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	private final Connection connection;
-	private final SQLQueryParser translator;
-	private final List<OBDAMappingAxiom> expandedMappings;
-	private final OBDADataFactory dfac;
+	private final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 *
@@ -80,9 +79,6 @@ public class MetaMappingExpander {
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
-		translator = new SQLQueryParser();
-		expandedMappings = new ArrayList<>();
-		dfac = OBDADataFactoryImpl.getInstance();
 	}
 
 	/**
@@ -96,104 +92,53 @@ public class MetaMappingExpander {
 	 * @throws JSQLParserException 
 	 */
 	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
-		
+
+		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
+		SQLQueryParser translator = new SQLQueryParser();
+
 		for (OBDAMappingAxiom mapping : mappings) {
 
 			CQIE targetQuery = mapping.getTargetQuery();
-			List<Function> body = targetQuery.getBody();
 			Function bodyAtom = targetQuery.getBody().get(0);
+			Predicate pred = bodyAtom.getFunctionSymbol();
 
-			OBDASQLQuery sourceQuery = mapping.getSourceQuery();
-
-			Function firstBodyAtom = body.get(0);
-			
-			Predicate pred = firstBodyAtom.getFunctionSymbol();
 			if (!pred.isTriplePredicate()){
-				/**
-				 * for normal mappings, we do not need to expand it.
-				 */
-				expandedMappings.add(mapping);
-				
-			} else {
-				
+				// for normal mappings, we do not need to expand it.
+				expandedMappings.add(mapping);	
+			} 
+			else {
+
 				int arity;
-				
-				Term term1 = bodyAtom.getTerm(1);
-				
-				// variables are in the position of object
-				if (isURIRDFType(term1)){
+				if (isURIRDFType(bodyAtom.getTerm(1))) {
+					// variables are in the position of object
 					arity = 1;
-				} else {
-				// variables are in the position of predicate
+				} 
+				else {
+					// variables are in the position of predicate
 					arity = 2;
 				}
 				
-				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
-				
-				if (varsInTemplate.isEmpty()){
+				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);			
+				if (varsInTemplate.isEmpty()) {
 					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 				}
 				
 				// Construct the SQL query tree from the source query we do not work with views 
+				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 				ParsedSQLQuery sourceQueryParsed = translator.parseShallowly(sourceQuery.toString());
-//				Select selectQuery;
-//				
-//				try {
-//					selectQuery = (Select) CCJSqlParserUtil.parse(sourceQuery.toString());
-//				} catch (JSQLParserException e3) {
-//					e3.printStackTrace();
-//				}
 				
-				ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
-				
-				distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
-				
-				
-				ArrayList<SelectExpressionItem> columnList = null;
-			
-					try {
-						columnList = (ArrayList<SelectExpressionItem>) sourceQueryParsed.getProjection().getColumnList();
-					} catch (JSQLParserException e2) {
-						continue;
-					}
-				
+				List<SelectExpressionItem> columnList = null;
+				try {
+					columnList = sourceQueryParsed.getProjection().getColumnList();
+				} 
+				catch (JSQLParserException e2) {
+					continue;
+				}
 				
 				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 				
-				distinctParamsProjection.addAll(columnsForTemplate);
+				List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(sourceQueryParsed, columnsForTemplate, varsInTemplate);
 				
-				/**
-				 * The query for params is almost the same with the original source query, except that
-				 * we only need to distinct project the columns needed for the template expansion 
-				 */
-				
-				ParsedSQLQuery distinctParsedQuery = null;
-				try {
-					distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false);
-					
-				} catch (JSQLParserException e1) {
-					throw new IllegalArgumentException(e1);
-					//continue;
-				}
-
-				distinctParsedQuery.setProjection(distinctParamsProjection);
-				
-				String distinctParamsSQL = distinctParsedQuery.toString();
-				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
-				
-				
-				try(Statement st = connection.createStatement()) {
-					try(ResultSet rs = st.executeQuery(distinctParamsSQL)) {
-						while (rs.next()) {
-							ArrayList<String> params = new ArrayList<>(varsInTemplate.size());
-							for (int i = 1; i <= varsInTemplate.size(); i++) {
-								params.add(rs.getString(i));
-							}
-							paramsForClassTemplate.add(params);
-						}
-					}
-				}
-
 				List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
 				
@@ -218,23 +163,69 @@ public class MetaMappingExpander {
 		return expandedMappings;
 	}
 
+	private List<List<String>> getParamsForClassTemplate(ParsedSQLQuery sourceQueryParsed, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate) throws SQLException {
+		
+		/**
+		 * The query for params is almost the same with the original source query, except that
+		 * we only need to distinct project the columns needed for the template expansion 
+		 */
+		
+		ParsedSQLQuery distinctParsedQuery = null;
+		try {
+			distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false);
+		} 
+		catch (JSQLParserException e1) {
+			throw new IllegalArgumentException(e1);
+			//continue;
+		}
+
+		
+		ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
+		distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
+		distinctParamsProjection.addAll(columnsForTemplate);
+		
+		distinctParsedQuery.setProjection(distinctParamsProjection);
+		
+		
+		String distinctParamsSQL = distinctParsedQuery.toString();
+
+	
+		List<List<String>> paramsForClassTemplate = new LinkedList<List<String>>();
+		try(Statement st = connection.createStatement()) {
+			try(ResultSet rs = st.executeQuery(distinctParamsSQL)) {
+				
+				int varsInTemplateSize = varsInTemplate.size();
+				while (rs.next()) {
+					ArrayList<String> params = new ArrayList<>(varsInTemplateSize);
+					for (int i = 1; i <= varsInTemplateSize; i++) {
+						params.add(rs.getString(i));
+					}
+					paramsForClassTemplate.add(params);
+				}
+			}
+		}
+		return paramsForClassTemplate;
+	}
+	
 	/**
 	 * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
 	 * @param term
 	 * @return
 	 */
-	private boolean isURIRDFType(Term term) {
+	private static boolean isURIRDFType(Term term) {
 		boolean result = true;
 		if(term instanceof Function){
 			Function func = (Function) term;
 			if (func.getArity() != 1){
-				result =false;
-			} else {
+				result = false;
+			} 
+			else {
 				result  = result && (func.getFunctionSymbol() instanceof URITemplatePredicate);
 				result  = result && (func.getTerm(0) instanceof ValueConstant) &&
 						((ValueConstant) func.getTerm(0)).getValue(). equals(OBDAVocabulary.RDF_TYPE);
 			}
-		} else {
+		} 
+		else {
 			result = false;
 		}
 		return result;
@@ -269,44 +260,33 @@ public class MetaMappingExpander {
 		 * Then construct new Source Query
 		 */
 		
-		/*
-		 * new Selection 
-		 */
 		Expression selection = null;
 		try {
 			selection = sourceParsedQuery.getWhereClause();
-			
-		} catch (JSQLParserException e1) {
-			
+		} 
+		catch (JSQLParserException e1) {
 			e1.printStackTrace();
 		}
-		Expression newSelection = selection;
-	
 		
 		int j = 0;
-		for(SelectExpressionItem column : columnsForTemplate){
+		for (SelectExpressionItem column : columnsForTemplate) {
 			
 			Expression columnRefExpression = column.getExpression();
-			
-			StringValue clsStringValue = new StringValue("'"+params.get(j)+"'");
+			StringValue clsStringValue = new StringValue("'" + params.get(j) + "'");
 			
 			//we are considering only equivalences
 			BinaryExpression condition = new EqualsTo();
 			condition.setLeftExpression(columnRefExpression);
 			condition.setRightExpression(clsStringValue);
 			
-			if (newSelection != null) 
-				newSelection = new AndExpression(newSelection, condition);
+			if (selection != null) 
+				selection = new AndExpression(selection, condition);
 			else
-				newSelection = condition;
+				selection = condition;
 			j++;	
 		}
 			
-			
 		
-		/*
-		 * new Projection
-		 */
 		ProjectionJSQL newProjection = new ProjectionJSQL();
 		newProjection.addAll(columnsForValues);
 		
@@ -315,10 +295,9 @@ public class MetaMappingExpander {
 		 * we create a new statement with the changed projection and selection
 		 */
 		
-		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(),false);
+		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(), false);
 		newSourceParsedQuery.setProjection(newProjection);
-		newSourceParsedQuery.setWhereClause(newSelection);
-		
+		newSourceParsedQuery.setWhereClause(selection);
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
@@ -334,23 +313,27 @@ public class MetaMappingExpander {
 	 * @param columnList
 	 * @return
 	 */
-	private List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
-			ArrayList<SelectExpressionItem> columnList) {
-		List<SelectExpressionItem> columnsForTemplate = new ArrayList<SelectExpressionItem>();
-
+	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
+			List<SelectExpressionItem> columnList) {
+		
+		List<SelectExpressionItem> columnsForTemplate = new ArrayList<SelectExpressionItem>(varsInTemplate.size());
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
-				String expression=column.getExpression().toString();
+				
+				// ROMAN (23 Sep 2015): SelectExpressionItem is of the form Expression AS Alias
+				// this code does not work for complex expressions (i.e., 3 * A)
+				String expression = column.getExpression().toString();
 									
-				if ((column.getAlias()==null && expression.equals(var.getName())) ||
-						(column.getAlias()!=null && column.getAlias().getName().equals(var.getName()))) {
+				// ROMAN (23 Sep 2015): comparison is case-sensitive here
+				if ((column.getAlias() == null && expression.equals(var.getName())) ||
+						(column.getAlias() != null && column.getAlias().getName().equals(var.getName()))) {
 					columnsForTemplate.add(column);
 					found = true;
 					break;
 				}
 			}
-			if(!found){
+			if (!found) {
 				throw new IllegalStateException();
 			}
 		}
@@ -383,14 +366,17 @@ public class MetaMappingExpander {
 	 * @param arity 
 	 * @return
 	 */
-	private List<Variable> getVariablesInTemplate(Function atom, int arity) {
+	private static List<Variable> getVariablesInTemplate(Function atom, int arity) {
 		
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
-		List<Variable> vars = new ArrayList<Variable>();
-		//for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		int len = uriTermForPredicate.getTerms().size();
+		List<Variable> vars = new ArrayList<Variable>(len - 1);
+
 		// TODO: check when getTerms().size() != getArity() 
-		for(int i = 1; i < uriTermForPredicate.getTerms().size(); i++){
+		
+		// index 0 is for the URI template
+		for (int i = 1; i < len; i++) {
 			vars.add((Variable) uriTermForPredicate.getTerm(i));
 		}
 		return vars;
@@ -406,7 +392,7 @@ public class MetaMappingExpander {
 	 *  <pre>http://example.org/cls(t1)</pre>, if X is t1
 	 * 
 	 * @param atom 
-	 * 			a Function in form of triple(t1, 'rdf:type', X)
+	 * 			a Function of the form triple(t1, 'rdf:type', X)
 	 * @param values
 	 * 			the concrete name of the X 
 	 * @param arity 
@@ -422,12 +408,12 @@ public class MetaMappingExpander {
 		String predName = URITemplates.format(uriTemplate, values);
 		
 		Function result = null;
-		Predicate p; 
-		if(arity == 1){
-			p = dfac.getClassPredicate(predName);
+		if (arity == 1) {
+			Predicate p = dfac.getClassPredicate(predName);
 			result = dfac.getFunction(p, atom.getTerm(0));
-		} else if (arity == 2){
-			p = dfac.getObjectPropertyPredicate(predName);
+		} 
+		else if (arity == 2) {
+			Predicate p = dfac.getObjectPropertyPredicate(predName);
 			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
 		}
 		return result;
@@ -436,14 +422,16 @@ public class MetaMappingExpander {
 	/**
 	 * This method finds the term for the predicate template
 	 */
-	private Function findTemplatePredicateTerm(Function atom, int arity) {
+	private static Function findTemplatePredicateTerm(Function atom, int arity) {
 		Function uriTermForPredicate;
 		
-		if(arity == 1){
+		if(arity == 1) {
 			uriTermForPredicate = (Function) atom.getTerm(2);
-		} else if (arity == 2){
+		} 
+		else if (arity == 2) {
 			uriTermForPredicate = (Function) atom.getTerm(1);	
-		} else {
+		} 
+		else {
 			throw new IllegalArgumentException("The parameter arity should be 1 or 2");
 		}
 		return uriTermForPredicate;
@@ -463,10 +451,11 @@ public class MetaMappingExpander {
 		List<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
 		
 		obdaModel.removeAllMappings();
-		for(OBDAMappingAxiom mapping : expandedMappings){
+		for(OBDAMappingAxiom mapping : expandedMappings) {
 			try {
 				obdaModel.addMapping(sourceURI, mapping);
-			} catch (DuplicateMappingException e) {
+			} 
+			catch (DuplicateMappingException e) {
 				throw new RuntimeException("Error: Duplicate Mappings generated by the MetaMappingExpander");
 			}
 		}
