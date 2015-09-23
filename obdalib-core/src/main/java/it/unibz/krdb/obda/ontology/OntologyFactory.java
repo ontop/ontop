@@ -21,72 +21,72 @@ package it.unibz.krdb.obda.ontology;
  */
 
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
+
+/**
+ * 
+ * @author Roman Kontchakov
+ *
+ */
 
 public interface OntologyFactory {
 
-	public Ontology createOntology();
+	/**
+	 * creates a modifiable ontology vocabulary 
+	 * 
+	 * @return created vocabulary
+	 */
 	
-	
-	public OClass createClass(String uri);
-
-	public OClass getThing();
-
-	public OClass getNothing();
-	
-	
-	
-	public Datatype createDataType(Predicate.COL_TYPE type);
-	
-	
-	
-	public ObjectPropertyExpression createObjectProperty(String uri);
-	
-	public ObjectPropertyExpression getTopObjectProperty();
-	
-	public ObjectPropertyExpression getBottomObjectProperty();
-
-	
-	
-	public DataPropertyExpression createDataProperty(String uri);
-
-	public DataPropertyExpression getTopDataProperty();
-	
-	public DataPropertyExpression getBottomDataProperty();
-	
+	public OntologyVocabulary createVocabulary();
 	
 	/**
-	 * creates an object property assertion 
-	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 * creates an ontology using a given vocabulary
+	 * (the vocabulary is copied and fixes it)
 	 * 
-	 * @param prop
-	 * @param o1
-	 * @param o2
+	 * @param voc
 	 * @return
 	 */
 	
-	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression prop, ObjectConstant o1, ObjectConstant o2);
-
-	/**
-	 * creates a data property assertion 
-	 * 
-	 * @param prop
-	 * @param o1
-	 * @param o2
-	 * @return
-	 */
+	public Ontology createOntology(ImmutableOntologyVocabulary voc);
 	
-	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2);
-
 	/**
-	 * creates a class assertion 
+	 * Creates a class assertion 
+	 *    (implements rule [C4])
 	 * 
-	 * @param concept
+	 * @param ce 
 	 * @param o
 	 * @return
+	 * @return null if ce is the top class ([C4])
+	 * @throws InconsistentOntologyException if ce is the bottom class ([C4])
 	 */
 	
-	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
+	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
+	
+	
+	/**
+	 * Creates an object property assertion 
+	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 *    (implements rule [O4])
+	 * 
+	 * @param ope
+	 * @param o1
+	 * @param o2
+	 * @return null if ope is the top property ([O4])
+	 * @throws InconsistentOntologyException if ope is the bottom property ([O4])
+	 */
+	
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
 
+	/**
+	 * Creates a data property assertion 
+	 *    (implements rule [D4])
+	 * 
+	 * @param dpe
+	 * @param o
+	 * @param v
+	 * @return null if dpe is the top property ([D4])
+	 * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
+	 */
+	
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
 }

@@ -50,7 +50,7 @@ public class MappingParser {
 	private List<ParsedMapping> parsedMappings;
 	private List<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingAxioms) throws SQLException{
+	public MappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappingList = mappingAxioms;
 		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:sql="http://sws.ifi.uio.no/vocab/sql#"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/sql">
+    <rdfs:comment>SQL annotations</rdfs:comment>
+  </owl:Ontology>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#column"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#columns"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#comment"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#construction"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#datatype"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#label"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/sql#table"/>
+</rdf:RDF>

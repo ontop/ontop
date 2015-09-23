@@ -36,7 +36,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class ExampleManualMetadata {
 final String owlfile = "src/main/resources/example/exampleSensor.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
-private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 private QuestOWLStatement qst = null;
 
 /*
@@ -64,7 +63,7 @@ private void setup()  throws Exception {
 	QuestPreferences preference = new QuestPreferences();
 	preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 	DBMetadata dbMetadata = getMeta();
-	Quest qest = new Quest(getOntologyFromOWLOntology(ontology), obdaModel, dbMetadata, preference);
+	Quest qest = new Quest(OWLAPI3TranslatorUtility.translateImportsClosure(ontology), obdaModel, dbMetadata, preference);
 	qest.setupRepository();
 	
 	/*
@@ -121,11 +120,6 @@ private DBMetadata getMeta(){
 	dbMetadata.add(defStaticTable("a_static"));
 	return dbMetadata;
 }
-private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
-	//compute closure first (owlontology might contain include other source declarations)
-	Set<OWLOntology> clousure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-	return translator.mergeTranslateOntologies(clousure);
-	}
 
 public void runQuery() throws Exception {
 	setup();

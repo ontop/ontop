@@ -24,7 +24,6 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -101,7 +100,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	
 	public static final class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
-		private EquivalencesDAG<T> reasonerDAG;
+		private final EquivalencesDAG<T> reasonerDAG;
 		
 		EquivalencesDAGImpl(EquivalencesDAG<T> reasonerDAG) {
 			this.reasonerDAG = reasonerDAG;
@@ -202,24 +201,11 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 			
 			return result;
 		}
-	}
 
-	@Override
-	public OClass getClassRepresentative(OClass p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
+		@Override
+		public T getCanonicalForm(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }

@@ -4,7 +4,7 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	h2
-connectionUrl	jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE
+connectionUrl	jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE
 username	sa
 password	
 driverClass	org.h2.Driver

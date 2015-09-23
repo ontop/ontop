@@ -96,15 +96,15 @@ public class MetaMappingExpander {
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
 		
 		for (OBDAMappingAxiom mapping : mappings) {
 
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			CQIE targetQuery = mapping.getTargetQuery();
 			List<Function> body = targetQuery.getBody();
 			Function bodyAtom = targetQuery.getBody().get(0);
 
-			OBDASQLQuery sourceQuery = (OBDASQLQuery)mapping.getSourceQuery();
+			OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 
 			Function firstBodyAtom = body.get(0);
 			

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:geos="http://www.opengis.net/ont/geosparql#"
+   xmlns:npd="http://sws.ifi.uio.no/data/npd-v2/"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Formation">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#LithostratigraphicUnit"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Group">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#LithostratigraphicUnit"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Formation"/>
+        <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#stratigraphicParent"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#LithostratigraphicUnit">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#geochronologicEra"/>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Member">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#LithostratigraphicUnit"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Group"/>
+        <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#stratigraphicParent"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#PetroleumDeposit">
+    <npdv:definition>An accumulation of petroleum in a geological unit, delimited by rock types at structural or stratigraphical boundaries, contact surfaces between petroleum and water in the formation, or a combination of these, such that the petroleum concerned is everywhere in pressure communication through liquid or gas.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geology</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Play">
+    <npdv:definition>A geographically and stratigraphically delimited area where a specific set of geological factors is present so that petroleum should be able to be proven in producible volumes. Such geological factors are a reservoir rock, trap, mature source rock, migration routes, and that the trap was formed before the migration of petroleum ceased. All discoveries and prospects in the same play are characterised by the play's specific set of geological factors.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geology</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Prospect">
+    <npdv:definition>A possible petroleum trap with a mappable, delimited volume of rock.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geology</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#definition"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#geochronologicEra">
+    <rdfs:range rdf:resource="http://resource.geosciml.org/ontology/timescale/gts-30#GeochronologicEra"/>
+  </owl:ObjectProperty>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-geology">
+    <!--owl:imports rdf:resource="http://resource.geosciml.org/vocabulary/timescale/isc-2012"/-->
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-isc-2012"/>
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-db"/>
+  </owl:Ontology>
+  <owl:AllDisjointClasses>
+    <owl:members>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Formation"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Group"/>
+            <rdf:rest>
+              <rdf:Description>
+                <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Member"/>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+              </rdf:Description>
+            </rdf:rest>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:members>
+  </owl:AllDisjointClasses>
+</rdf:RDF>

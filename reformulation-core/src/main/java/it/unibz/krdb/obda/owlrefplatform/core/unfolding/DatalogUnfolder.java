@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

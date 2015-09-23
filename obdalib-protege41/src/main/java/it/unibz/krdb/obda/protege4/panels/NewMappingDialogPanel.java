@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -647,11 +646,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		OBDAQuery sourceQuery = mapping.getSourceQuery();
+		OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
-		OBDAQuery targetQuery = mapping.getTargetQuery();
+		CQIE targetQuery = mapping.getTargetQuery();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		txtTargetQuery.setText(trgQuery);
 	}

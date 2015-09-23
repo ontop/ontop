@@ -155,51 +155,35 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
 		for (OClass cl : onto.getVocabulary().getClasses()) {
-			Predicate concept = cl.getPredicate();
+			String concept = cl.getName();
 					
 //			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()
 //					+ ">", reasonerOBDA.getConnection());
-			int conceptR2rml = runSPARQLConceptsQuery("<" + concept.getName()
-					+ ">", reasonerR2rml.getConnection());
+			int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", reasonerR2rml.getConnection());
 
 //			assertEquals(conceptOBDA, conceptR2rml);
 		}
 
 		log.debug("Comparing object properties");
         for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+            String role = prop.getName();
 
-            // We need to make sure we make no mappings for Auxiliary roles
-            // introduced by the Ontology translation process.
-            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
-                Predicate role = prop.getPredicate();
+            log.debug("description " + role);
+            int roleOBDA = runSPARQLRolesQuery("<" + role + ">", reasonerOBDA.getConnection());
+            int roleR2rml = runSPARQLRolesQuery("<" + role + ">", reasonerR2rml.getConnection());
 
-                log.debug("description " + role);
-                int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerOBDA.getConnection());
-                int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerR2rml.getConnection());
-
-                assertEquals(roleOBDA, roleR2rml);
-            //}
+            assertEquals(roleOBDA, roleR2rml);
         }
 
         log.debug("Comparing data properties");
         for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+            String role = prop.getName();
 
-            // We need to make sure we make no mappings for Auxiliary roles
-            // introduced by the Ontology translation process.
-            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
-                Predicate role = prop.getPredicate();
+            log.debug("description " + role);
+            int roleOBDA = runSPARQLRolesQuery("<" + role + ">", reasonerOBDA.getConnection());
+            int roleR2rml = runSPARQLRolesQuery("<" + role + ">", reasonerR2rml.getConnection());
 
-
-                log.debug("description " + role);
-                int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerOBDA.getConnection());
-                int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerR2rml.getConnection());
-
-                assertEquals(roleOBDA, roleR2rml);
-            //}
+            assertEquals(roleOBDA, roleR2rml);
         }
 	}
 

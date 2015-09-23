@@ -29,15 +29,15 @@ public class TMappingExclusionConfig {
     }
 
     public boolean contains(OClass cls){
-        return classes.contains(cls.getPredicate().getName());
+        return classes.contains(cls.getName());
     }
 
     public boolean contains(ObjectPropertyExpression propertyExpression){
-        return !propertyExpression.isInverse() && properties.contains(propertyExpression.getPredicate().getName());
+        return !propertyExpression.isInverse() && properties.contains(propertyExpression.getName());
     }
 
     public boolean contains(DataPropertyExpression propertyExpression){
-        return  properties.contains(propertyExpression.getPredicate().getName());
+        return  properties.contains(propertyExpression.getName());
     }
 
     private static final TMappingExclusionConfig EMPTY = new TMappingExclusionConfig(Collections.<String>emptySet(), Collections.<String>emptySet());

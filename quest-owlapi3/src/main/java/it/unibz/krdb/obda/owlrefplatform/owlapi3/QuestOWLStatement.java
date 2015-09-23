@@ -146,7 +146,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPI3ABoxIterator(set);
+			aBoxIter = new OWLAPI3ABoxIterator(set, st.questInstance.getVocabulary());
 			// TODO: (ROMAN) -- check whether we need to use 
 			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 

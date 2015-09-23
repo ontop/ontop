@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:geos="http://www.opengis.net/ont/geosparql#"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:ptl="http://sws.ifi.uio.no/vocab/npd-v2-ptl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Area">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://www.opengis.net/ont/geosparql#SpatialObject"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#AwardArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BAAArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Block">
+    <npdv:definition>A geographical unit of division used in the petroleum activities on the continental shelf. The maritime areas within the outermost limit of the continental shelf are divided into blocks measuring 15 minutes of latitude and 20 minutes of longitude, unless adjacent areas of land, borders with the continental shelves of other nations, or other factors decree otherwise.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#DiscoveryArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FacilityPoint">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Point"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#FieldArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#LicencedAcreage">
+    <npdv:definition>The acreage awarded in a production licence. Only exploration drilling and production may take place in an area covered by a production licence.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MainArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <owl:NamedIndividual rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#NorwegianContinentalShelf">
+    <npdv:definition>The sea bed and its substrata in the maritime areas which extend beyond Norwegian territorial waters over the entire natural continuation of the land territory to the outermost extent of the continental margin, but not less than 200 nautical miles from the sea boundaries from which the breadth of the territorial waters is measured, yet not beyond the centre line relative to another nation.</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry</rdfs:isDefinedBy>
+  </owl:NamedIndividual>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Point">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://www.opengis.net/ont/geosparql#SpatialObject"/>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceAreaPerBlock">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Quadrant">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurveyCoordinate">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Point"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SurveyArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SurveyMultilineArea">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Area"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCoordinate">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Point"/>
+  </rdf:Description>
+  <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#currentAreaSize"/>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#definition"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature">
+    <rdfs:comment>Note: There is no geos:hasFeature. This property is created for reasons of convenience.</rdfs:comment>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry</rdfs:isDefinedBy>
+    <owl:inverseOf rdf:resource="http://www.opengis.net/ont/geosparql#hasGeometry"/>
+  </owl:ObjectProperty>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-geometry">
+    <dc:source rdf:resource="http://www.npd.no/en/About-us/Information-services/Dictionary/"/>
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-db"/>
+    <owl:imports rdf:resource="http://www.opengis.net/ont/geosparql"/>
+  </owl:Ontology>
+  <owl:Class rdf:about="http://www.opengis.net/ont/geosparql#SpatialObject"/>
+  <owl:ObjectProperty rdf:about="http://www.opengis.net/ont/geosparql#hasGeometry"/>
+</rdf:RDF>

@@ -86,7 +86,8 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
+		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
+		String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
 
@@ -202,7 +203,6 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}
@@ -213,7 +213,6 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);

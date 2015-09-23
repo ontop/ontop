@@ -22,147 +22,92 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public class VocabularyValidator {
 
 	private final TBoxReasoner reasoner;
+	private final ImmutableOntologyVocabulary voc;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	
 
-	public VocabularyValidator(TBoxReasoner reasoner) {
+	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
 		this.reasoner = reasoner;
+		this.voc = voc;
 	}
-/*
-	public boolean validatePredicates0(DatalogProgram input) {
 
-		boolean isValid = true;
+
+	public CQIE replaceEquivalences(CQIE query) {
+		return dfac.getCQIE(query.getHead(), replaceEquivalences(query.getBody()));
+	}
 		
-		for (CQIE query : input.getRules()) {
-			for  (Function atom : query.getBody()) {
-				if (!validate(atom))
-					isValid = false;
-			}
-		}
-
-		return isValid;
-	}
-*/
-/*	
-	private boolean validate(Function atom) {
-
-		Predicate predicate = atom.getPredicate();
-
-//		boolean isClass = vocabulary.contains(predicate)
-//				|| equivalences.containsKey(predicate);
-//		boolean isObjectProp =  vocabulary.contains(predicate)
-//				|| equivalences.containsKey(predicate);
-//		boolean isDataProp = vocabulary.contains(predicate)
-//				|| equivalences.containsKey(predicate);
-//		boolean isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
-
-		// Check if the predicate contains in the ontology vocabulary as one
-		// of these components (i.e., class, object property, data property).
-		// isClass || isObjectProp || isDataProp || isBooleanOpFunction;
-		boolean isPredicateValid = vocabulary.contains(predicate)
-				|| equivalences.containsKey(predicate) 
-				|| (predicate instanceof BooleanOperationPredicate);
-
-		if (!isPredicateValid) {
-			String debugMsg = "The predicate: [" + predicate.toString() + "]";
-			log.warn("WARNING: {} is missing in the ontology!", debugMsg);
-			return false;
-		}
-		return true;
-	}
-*/
-	/*
-	 * Substitute atoms based on the equivalence map.
-	 */
-	public DatalogProgram replaceEquivalences(DatalogProgram queries) {
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		DatalogProgram newprogram = fac.getDatalogProgram(queries.getQueryModifiers());
-		for (CQIE query : queries.getRules()) {
-			newprogram.appendRule(replaceEquivalences(query.clone(), true));
-		}
-		return newprogram;
-	}
-
-	public CQIE replaceEquivalences(CQIE query, boolean inplace) {
-		if (!inplace) {
-			query = query.clone();
-		}
-		replaceEquivalences(query.getBody());
-		return query;
-	}
-
-	public <T extends Term> void replaceEquivalences(List<T> body) {
+	private <T extends Term> List<T> replaceEquivalences(List<T> body) {
+		List<T> result = new ArrayList<T>(body.size());
+		
 		// Get the predicates in the target query.
-		for (int i = 0; i < body.size(); i++) {
-			Term t = body.get(i);
+		for (Term t : body) {
+			Term nt;
 			if (t instanceof Function) {
 				Function atom = (Function)t;
 
-				/*
-				 * Calling recursively for nested expressions
-				 */
-				if (atom.isAlgebraFunction()) {
-					replaceEquivalences(atom.getTerms());
-					continue;
+				if (atom.isBooleanFunction()) {
+					nt = t;
 				}
-				
-				if (atom.isBooleanFunction())
-					continue;
-
-				T newAtom = (T)getNormal(atom);
-
-				body.set(i, newAtom);
+				else if (atom.isAlgebraFunction()) {
+					// Calling recursively for nested expressions
+					nt = dfac.getFunction(atom.getFunctionSymbol(), replaceEquivalences(atom.getTerms()));
+				}
+				else {
+					nt = (T)getNormal(atom);
+				}
 			}
+			else
+				nt = t;
+			result.add((T)nt);
 		}
+		return result;
 	}
-	
-	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	public Function getNormal(Function atom) {
 		Predicate p = atom.getFunctionSymbol();
 		
-		if (p.getArity() == 1) {
-			OClass c = ofac.createClass(p.getName());
-			OClass equivalent = reasoner.getClassRepresentative(c);
-			if (equivalent != null)
+		// the contains tests are inefficient, but tests fails without them 
+		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+		if (/*p.isClass()*/ (p.getArity() == 1) && voc.containsClass(p.getName())) {
+			OClass c = voc.getClass(p.getName());
+			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
+			if (equivalent != null && !equivalent.equals(c))
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
-		else {
-			ObjectPropertyExpression op = ofac.createObjectProperty(p.getName());
-			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyRepresentative(op);
-			if (equivalent != null) {
+		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
+			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
+			if (equivalent != null && !equivalent.equals(ope)) { 
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 			}
-			else {
-				DataPropertyExpression dp = ofac.createDataProperty(p.getName());
-				DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(dp);
-				if (equiv2 != null) {
-					return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
-				}				
-			}
+		}
+		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
+			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
+			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
+			if (equivalent != null && !equivalent.equals(dpe)) 
+				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		}
 		return atom;
 	}
@@ -190,14 +135,11 @@ public class VocabularyValidator {
 	 */
 	public Collection<OBDAMappingAxiom> replaceEquivalences(Collection<OBDAMappingAxiom> originalMappings) {
 		
-		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
-		for (OBDAMappingAxiom mapping : originalMappings) {
-			
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
-			
-			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
-
+		Collection<OBDAMappingAxiom> result = new ArrayList<OBDAMappingAxiom>(originalMappings.size());
+		for (OBDAMappingAxiom mapping : originalMappings) {			
+			CQIE targetQuery = mapping.getTargetQuery();	
+			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), replaceEquivalences(targetQuery.getBody()));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
 		}
 		return result;
 	}

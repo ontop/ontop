@@ -27,7 +27,6 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.StringOperationPredicate;
 import it.unibz.krdb.obda.model.Term;
@@ -55,10 +54,8 @@ public class TargetQueryRenderer {
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
 	 */
-	public static String encode(OBDAQuery input, PrefixManager prefixManager) {
-		if (!(input instanceof CQIE)) {
-			return "";
-		}
+	public static String encode(CQIE input, PrefixManager prefixManager) {
+		
 		TurtleWriter turtleWriter = new TurtleWriter();
 		List<Function> body = ((CQIE) input).getBody();
 		for (Function atom : body) {

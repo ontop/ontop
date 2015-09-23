@@ -20,22 +20,40 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.BuiltinPredicate;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+	private static final boolean noCQC = false;		
 
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final List<TMappingRule> rules = new LinkedList<>();
@@ -103,6 +121,15 @@ public class TMappingProcessor {
 				return;
 			}
 		
+			if (noCQC) {
+				for (TMappingRule r : rules)
+					if (r.equals(newRule))
+						return;
+				
+				rules.add(newRule);
+				return;
+			}
+			
 			Iterator<TMappingRule> mappingIterator = rules.iterator();
 			while (mappingIterator.hasNext()) {
 
@@ -147,21 +174,41 @@ public class TMappingProcessor {
 						SubstitutionUtilities.applySubstitution(f, fromNewRule);
 
 					List<List<Function>> existingconditions = currentRule.getConditions();
+					List<List<Function>> filterAtoms = new ArrayList<>(existingconditions.size() + 1);
+					
 					for (List<Function> econd : existingconditions) {
+						boolean found2 = true;
+						for (Function ec : econd) 
+							if (!newconditions.contains(ec)) {
+								found2 = false;
+								break;
+							}
+						// if each of the existing conditions is found then the new condition is redundant
+						if (found2)
+							return;
+						
 						boolean found = true;
 						for (Function nc : newconditions)
 							if (!econd.contains(nc)) { 
 								found = false;
 								break;
 							}	
-						// if each of the new conditions is found among econd then the new map is redundant
-						if (found)
-							return;
+						// if each of the new conditions is found among econd then the old condition is redundant
+						if (found) {
+							//System.err.println(econd + " contains " + newconditions);
+						}
+						else
+							filterAtoms.add(TMappingRule.cloneList(econd));		
 					}
+
+					filterAtoms.add(newconditions);
+
+					
+					
 					
 	                mappingIterator.remove();
 	                
-					newRule = new TMappingRule(currentRule, newconditions);
+					newRule = new TMappingRule(currentRule, filterAtoms);
 
 					break;
 				}				
@@ -345,6 +392,11 @@ public class TMappingProcessor {
 
 	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 		
+		final boolean printouts = false;
+		
+		if (printouts)
+			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
+		
 		if(excludeFromTMappings == null){
 			throw new NullPointerException("excludeFromTMappings");
 		}
@@ -360,8 +412,25 @@ public class TMappingProcessor {
 		 */
 		
 		//CQContainmentCheckUnderLIDs cqc0 = new CQContainmentCheckUnderLIDs(null);
-		
-		for (CQIE mapping : originalMappings) {			
+
+		if (printouts)
+			System.out.println("===CHECKING REDUNDANCY: " + cqc);
+		for (CQIE mapping : originalMappings) {	
+
+			if (!noCQC)
+				mapping = cqc.removeRedundantAtoms(mapping);
+			else {
+				int c = 0;
+				for (Function a : mapping.getBody()) 
+					if (!(a.getFunctionSymbol() instanceof BuiltinPredicate))
+						c++;
+				
+				if (c == 1)
+					CQContainmentCheckUnderLIDs.oneAtomQs++;
+				else if (c == 2)
+					CQContainmentCheckUnderLIDs.twoAtomQs++;
+			}	
+			
 			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
@@ -374,6 +443,8 @@ public class TMappingProcessor {
 			TMappingIndexEntry set = getMappings(mappingIndex, ruleIndex);
 			set.mergeMappingsWithCQC(rule);
 		}
+		if (printouts)
+			System.out.println("===END OF CHECKING REDUNDANCY: " + CQContainmentCheckUnderLIDs.oneAtomQs + "/" + CQContainmentCheckUnderLIDs.twoAtomQs);
 		
 
 		/*
@@ -494,12 +565,44 @@ public class TMappingProcessor {
 			}
 		}
 		
+		Map<Integer, Set<Predicate>> frequences = new HashMap<>();
+		
+		
 		List<CQIE> tmappingsProgram = new LinkedList<>();
-		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) 
+		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
+			if (printouts && !entry.getValue().rules.isEmpty()) {
+				Set<Predicate> freq = frequences.get(entry.getValue().rules.size());
+				if (freq == null) {
+					freq = new HashSet<>();
+					frequences.put(entry.getValue().rules.size(), freq);
+				}
+				freq.add(entry.getKey());
+			}
 			for (TMappingRule mapping : entry.getValue()) {
 				CQIE cq = mapping.asCQIE();
 				tmappingsProgram.add(cq);
 			}
+		}
+		
+		if (printouts) {
+			System.out.println("T-MAPPING SIZE: " + tmappingsProgram.size());
+			List<Integer> sorted = new ArrayList<>(frequences.keySet());
+			Collections.sort(sorted);
+			for (Integer idx : sorted) {
+				for (Predicate p : frequences.get(idx)) {
+					TMappingIndexEntry e = 	mappingIndex.get(p);
+					System.out.println(p + " " + e.rules.size());
+					for (TMappingRule r : e.rules) 
+						System.out.println("    " + r.asCQIE());
+				}
+			}
+			int total = 0;
+			for (Integer idx: sorted) {
+				System.out.println("   " + idx + ": " +  frequences.get(idx).size() + " " + frequences.get(idx));
+				total += frequences.get(idx).size();
+			}
+			System.out.println("NUMBER OF PREDICATES: " + total);
+		}
 				
 		return tmappingsProgram;
 	}

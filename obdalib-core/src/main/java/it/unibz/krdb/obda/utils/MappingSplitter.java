@@ -59,9 +59,9 @@ public class MappingSplitter {
 
 			String id = mapping.getId();
 
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			CQIE targetQuery = mapping.getTargetQuery();
 
-			OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
+			OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 
 			Function head = targetQuery.getHead();
 			List<Function> bodyAtoms = targetQuery.getBody();
