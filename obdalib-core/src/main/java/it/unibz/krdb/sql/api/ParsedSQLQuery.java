@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.WhereClauseVisitor;
 import it.unibz.krdb.obda.parser.SubSelectVisitor;
 import it.unibz.krdb.obda.parser.TableNameVisitor;
+import it.unibz.krdb.sql.RelationID;
 
 import java.io.Serializable;
 import java.util.List;
@@ -56,6 +57,7 @@ public class ParsedSQLQuery implements Serializable {
 	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 	
 	private List<TableJSQL> tables;
+	private List<RelationID> relations;
 	private List<SelectJSQL> subSelects;
 	private Map<String, String> aliasMap;
 	private List<Expression> joins;
@@ -140,6 +142,15 @@ public class ParsedSQLQuery implements Serializable {
 			tables = visitor.getTables();
 		}
 		return tables;
+	}
+	
+	public List<RelationID> getRelations() throws JSQLParserException {
+
+		if (tables == null) {
+			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing);
+			relations = visitor.getRelations();
+		}
+		return relations;
 	}
 
 	/**

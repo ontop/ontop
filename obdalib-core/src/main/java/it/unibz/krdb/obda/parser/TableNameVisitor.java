@@ -20,6 +20,9 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -46,6 +49,9 @@ public class TableNameVisitor {
 
 	// Store the table selected by the SQL query in TableJSQL
 	private final List<TableJSQL> tables = new LinkedList<>();
+	
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	private final List<RelationID> relations = new LinkedList<>();
 
 	// There are special names that are not table names but are parsed as tables. 
 	// These names are collected here and are not included in the table names
@@ -77,6 +83,9 @@ public class TableNameVisitor {
 		return tables;
 	}
 	
+	public List<RelationID> getRelations() {	
+		return relations;
+	}
 
 	private final SelectVisitor selectVisitor = new SelectVisitor() {
 		/* Visit the FROM clause to find tables
@@ -144,6 +153,9 @@ public class TableNameVisitor {
 				
 				TableJSQL relation = new TableJSQL(table.getSchemaName(), table.getName(), alias);
 				tables.add(relation);
+				
+				RelationID relationID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+				relations.add(relationID);
 			}
 		}
 
