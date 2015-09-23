@@ -34,11 +34,6 @@ public interface DBConnector {
             throws DBMetadataException;
 
     /**
-     * May expand the mappings by querying the DB.
-     */
-    OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException;
-
-    /**
      * Gets a direct QuestConnection.
      */
     IQuestConnection getNonPoolConnection() throws OBDAException;
@@ -48,7 +43,10 @@ public interface DBConnector {
      */
     IQuestConnection getConnection() throws OBDAException;
 
-    OBDAModel preprocessProjection(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
-
     LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata);
+
+    /**
+     * TODO: explain
+     */
+    OBDAModel normalizeMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
 }

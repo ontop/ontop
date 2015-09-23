@@ -8,6 +8,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.mapping.MappingSplitter;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
@@ -146,8 +147,7 @@ public class JDBCConnector implements DBConnector {
         return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection), userConstraints);
     }
 
-    @Override
-    public OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
+    private OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
         MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, nativeQLFactory);
         return metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
     }
@@ -278,10 +278,8 @@ public class JDBCConnector implements DBConnector {
     /***
      * Expands a SELECT * into a SELECT with all columns implicit in the *
      *
-     * @throws java.sql.SQLException
      */
-    @Override
-    public OBDAModel preprocessProjection(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata)
+    private OBDAModel preprocessProjection(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata)
             throws OBDAException {
         if (!(metadata instanceof DBMetadata)) {
             throw new IllegalArgumentException("The JDBC connector expects a SQL-specific DBMetadata");
@@ -322,5 +320,22 @@ public class JDBCConnector implements DBConnector {
         else {
             throw new IllegalArgumentException("A SQL-specific DBMetadata was expected");
         }
+    }
+
+    @Override
+    public OBDAModel normalizeMappings(OBDAModel unfoldingOBDAModel, final URI sourceId, final DataSourceMetadata metadata) throws OBDAException {
+        /** Substitute select * with column names (in the SQL case) **/
+        unfoldingOBDAModel = preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
+
+        /**
+         * Split the mapping
+         */
+        unfoldingOBDAModel = MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId, nativeQLFactory);
+
+        /**
+         * Expand the meta mapping
+         */
+        unfoldingOBDAModel = expandMetaMappings(unfoldingOBDAModel, sourceId);
+        return unfoldingOBDAModel;
     }
 }

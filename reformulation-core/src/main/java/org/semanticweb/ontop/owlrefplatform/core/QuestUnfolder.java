@@ -66,19 +66,7 @@ public class QuestUnfolder {
 
 		this.nativeQLFactory = nativeQLFactory;
 
-		/** Substitute select * with column names (in the SQL case) **/
-		unfoldingOBDAModel = dbConnector.preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
-
-		/**
-		 * Split the mapping
-		 */
-		unfoldingOBDAModel = MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId, nativeQLFactory);
-
-		/**
-		 * Expand the meta mapping
-		 */
-		unfoldingOBDAModel = dbConnector.expandMetaMappings(unfoldingOBDAModel, sourceId);
-
+		unfoldingOBDAModel = dbConnector.normalizeMappings(unfoldingOBDAModel, sourceId, metadata);
 		ImmutableList<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 
 		IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
