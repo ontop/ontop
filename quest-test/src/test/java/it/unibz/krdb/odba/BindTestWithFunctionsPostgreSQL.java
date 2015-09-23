@@ -129,7 +129,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -156,7 +156,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -182,7 +182,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -207,7 +207,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -236,7 +236,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -283,7 +283,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -310,7 +310,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -337,7 +337,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -363,7 +363,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -393,7 +393,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -417,7 +417,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -444,7 +444,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -471,7 +471,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -496,7 +496,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -526,7 +526,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -557,7 +557,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -586,7 +586,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -621,7 +621,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -649,7 +649,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -677,7 +677,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -705,7 +705,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -733,7 +733,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -761,7 +761,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -789,7 +789,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -811,7 +811,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -832,7 +832,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -857,7 +857,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -878,7 +878,7 @@ public class BindTestWithFunctionsPostgreSQL {
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"

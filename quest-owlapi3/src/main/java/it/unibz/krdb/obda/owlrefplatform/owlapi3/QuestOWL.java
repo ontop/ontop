@@ -35,6 +35,7 @@ import it.unibz.krdb.obda.utils.VersionInfo;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
+import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.impl.*;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
