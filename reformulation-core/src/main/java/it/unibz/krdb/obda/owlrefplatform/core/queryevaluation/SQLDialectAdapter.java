@@ -67,15 +67,7 @@ public interface SQLDialectAdapter {
 
 	public String strConcat(String[] strings);
 
-	public String strReplace(String str, char oldchar, char newchar);
-
 	public String strReplace(String str, String oldstr, String newstr);
-
-	public String strReplace(String str, int start, int end, String with);
-
-	public String strIndexOf(String str, char ch);
-
-	public String strIndexOf(String str, String strsr);
 	
 	/*
 	 * Table/Column name functions

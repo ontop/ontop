@@ -47,30 +47,6 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 		return sql.toString();
 	}
 
-	@Override
-	public String strReplace(String str, char oldchar, char newchar) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public String strReplace(String str, int start, int end, String with) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strIndexOf(String str, char ch) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strIndexOf(String str, String strsr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
