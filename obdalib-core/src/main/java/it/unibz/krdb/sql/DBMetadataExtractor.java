@@ -123,10 +123,10 @@ public class DBMetadataExtractor {
 	 * @return The database metadata object.
 	 */
 
-	public static DBMetadata getMetaData(Connection conn, List<TableJSQL> tables) throws SQLException {
+	public static DBMetadata getMetaData(Connection conn, Set<RelationID> realTables) throws SQLException {
 		
 		if (printouts)
-			System.err.println("GETTING METADATA WITH " + conn + " ON " + tables);
+			System.err.println("GETTING METADATA WITH " + conn + " ON " + realTables);
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationDefinition> tableList;
@@ -137,54 +137,54 @@ public class DBMetadataExtractor {
 			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 			
 			String defaultSchema = getOracleDefaultOwner(conn);
-			if (tables == null || tables.isEmpty())
+			if (realTables == null || realTables.isEmpty())
 				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema));
 			else
-				tableList = getTableList(defaultSchema, tables, idNormalizer);
+				tableList = getTableList(defaultSchema, realTables, idNormalizer);
 			
 			dt = OracleTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("DB2")) {
 			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 					
-			if (tables == null || tables.isEmpty()) 
+			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, DB2RelationListProvider);
 			else 
-				tableList = getTableList(null, tables, idNormalizer);
+				tableList = getTableList(null, realTables, idNormalizer);
 		}  
 		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
 			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 				
-			if (tables == null || tables.isEmpty()) 
+			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, tables, idNormalizer);
+				tableList = getTableList(null, realTables, idNormalizer);
 		}
 		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
 			idNormalizer = DBMetadata.LowerCaseIdNormalizer;
 					
 			// Postgres treats unquoted identifiers as lower-case
-			if (tables == null || tables.isEmpty()) 
+			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, tables, idNormalizer);
+				tableList = getTableList(null, realTables, idNormalizer);
 		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
 			idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
-			if (tables == null || tables.isEmpty()) 
+			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, MSSQLServerRelationListProvider);
 			else
-				tableList = getTableList(null, tables, idNormalizer);
+				tableList = getTableList(null, realTables, idNormalizer);
  		} 
 		else {
 			idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
 			// For other database engines, i.e. MySQL
-			if (tables == null || tables.isEmpty()) 
+			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else
-				tableList = getTableList(null, tables, idNormalizer);
+				tableList = getTableList(null, realTables, idNormalizer);
 			
 			dt = MySQLTypeFixer;
 		}
@@ -214,26 +214,27 @@ public class DBMetadataExtractor {
 	 * Retrieve the normalized list of tables from a given list of RelationJSQL
 	 */
 
-	private static List<RelationDefinition> getTableList(String defaultTableSchema, List<TableJSQL> tables, TableIdNormalizer idNormalizer) throws SQLException {
+	private static List<RelationDefinition> getTableList(String defaultTableSchema, Set<RelationID> realTables, TableIdNormalizer idNormalizer) throws SQLException {
 
 		List<RelationDefinition> fks = new LinkedList<>();
 		// The tables contains all tables which occur in the sql source queries
 		// Note that different spellings (casing, quotation marks, optional schema prefix) 
 		// may lead to the same table occurring several times 		
-		for (TableJSQL table : tables) {
+		for (RelationID table : realTables) {
 			// tableGivenName is exactly the name the user provided, 
 			// including schema prefix if that was provided, otherwise without.
-			String tableGivenName = table.getTableGivenName();
-
-			String tblName = idNormalizer.getCanonicalFormOfIdentifier(table.getTable().getName(), table.getTable().isQuoted());
-
-			String tableSchema;
-			if (table.getSchema().getName() != null) 
-				tableSchema = idNormalizer.getCanonicalFormOfIdentifier(table.getSchema().getName(), table.getSchema().isQuoted());
-			else
-				tableSchema = defaultTableSchema;
+			//String tableGivenName = table.getTableGivenName();
+			//
+			//String tblName = idNormalizer.getCanonicalFormOfIdentifier(table.getTable().getName(), table.getTable().isQuoted());
+			//
+			//String tableSchema;
+			//if (table.getSchema().getName() != null) 
+			//	tableSchema = idNormalizer.getCanonicalFormOfIdentifier(table.getSchema().getName(), table.getSchema().isQuoted());
+			//else
+			//	tableSchema = defaultTableSchema;
+			//
 			
-			fks.add(new TableDefinition(null, tableSchema, tblName, tableGivenName));
+			fks.add(new TableDefinition(null, table.getSchema().getName(), table.getTable().getName(), table.getSQLRendering()));
 		}
 		return fks;
 	}

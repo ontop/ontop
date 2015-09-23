@@ -156,26 +156,18 @@ public class ImplicitDBConstraints {
 		return false;
 	}
 	
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
 	/**
 	 * Adds RelationJSQL for all tables referred to by the user supplied foreign keys
 	 * 
-	 * @param tables The new table names are added to this list
+	 * @param realTables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public void addReferredTables(List<TableJSQL> tables) {
+	public void addReferredTables(Set<RelationID> realTables) {
 		for (String tableGivenName : this.referredTables) {
-			if (!tableIsInList(tables, tableGivenName)) {
-				String[] tablenames = tableGivenName.split("\\.");
-				if (tablenames.length == 1) {
-					tables.add(new TableJSQL(null, tablenames[0], null));
-				} 
-				else if (tablenames.length == 2){
-					tables.add(new TableJSQL(tablenames[0], tablenames[1], null));
-				} 
-				else {
-					log.warn("Too many dots in table name " + tableGivenName + " in user-supplied constraints");
-				}
-			}
+			RelationID id = idfac.createRelationFromString(tableGivenName);
+			realTables.add(id);
 		}
 	}
 

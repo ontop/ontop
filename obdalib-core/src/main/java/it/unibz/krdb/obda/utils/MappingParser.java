@@ -22,14 +22,17 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.jsqlparser.JSQLParserException;
 
@@ -46,7 +49,7 @@ public class MappingParser {
 	private List<OBDAMappingAxiom> mappingList;
 	private SQLQueryParser sqlQueryParser;
 	private List<ParsedMapping> parsedMappings;
-	private List<TableJSQL> realTables; // Tables that are not view definitions
+	private Set<RelationID> realTables; // Tables that are not view definitions
 	
 	public MappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappingList = mappingAxioms;
@@ -63,9 +66,9 @@ public class MappingParser {
 	 * @return The tables (same as getTables)
 	 * @throws JSQLParserException 
 	 */
-	public List<TableJSQL> getRealTables() throws JSQLParserException{
-		if(this.realTables == null){
-			List<TableJSQL> _realTables = this.getTables();
+	public Set<RelationID> getRealTables() throws JSQLParserException{
+		if (this.realTables == null){
+			Set<RelationID> _realTables = getTables();
 //			List<RelationJSQL> removeThese = new ArrayList<>();
 //			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
 //				for(RelationJSQL rel : _realTables){
@@ -92,16 +95,13 @@ public class MappingParser {
 		return parsedMappings;
 	}
 	
-	public List<TableJSQL> getTables() throws JSQLParserException{
-		List<TableJSQL> tables = new ArrayList<>();
-		for(ParsedMapping pm : parsedMappings){
+	public Set<RelationID> getTables() throws JSQLParserException{
+		Set<RelationID> tables = new HashSet<>();
+		for (ParsedMapping pm : parsedMappings) {
 			ParsedSQLQuery query = pm.getSourceQueryParsed();
-			List<TableJSQL> queryTables = query.getTables();
-			for(TableJSQL table : queryTables){
-				if (!(tables.contains(table))){
-					tables.add(table);
-				}
-			}
+			List<RelationID> queryTables = query.getRelations();
+			for (RelationID table : queryTables) 
+				tables.add(table);
 		}
 		return tables;
 	}

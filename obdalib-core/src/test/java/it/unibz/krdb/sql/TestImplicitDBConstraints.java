@@ -1,9 +1,9 @@
 package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
-import it.unibz.krdb.sql.api.TableJSQL;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableList;
 public class TestImplicitDBConstraints {
 
 	DBMetadata md;
-	ArrayList<TableJSQL> tables;
+	Set<RelationID> tables;
 	
 	@Before
 	public void setupMetadata(){
@@ -29,7 +29,7 @@ public class TestImplicitDBConstraints {
 	
 	@Before
 	public void initTableList(){
-		tables  = new ArrayList<>();
+		tables  = new HashSet<>();
 	}
 	
 	@Test
@@ -62,7 +62,7 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 1);
-		assertTrue(tables.contains(new TableJSQL(null, "TABLE2", null)));
+		assertTrue(tables.contains(new RelationID(new QuotedID(null, ""), new QuotedID("TABLE2", ""))));
 	}
 
 	@Test
