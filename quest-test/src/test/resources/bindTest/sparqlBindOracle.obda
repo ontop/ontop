@@ -1,0 +1,18 @@
+[PrefixDeclaration]
+dc:  http://purl.org/dc/elements/1.1/
+:   http://example.org/book
+ns:  http://example.org/ns#
+
+[SourceDeclaration]
+sourceUri	mysql
+connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
+username	system
+password	obdaps83
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@{lang} .
+source	SELECT id, title, price, discount, publication_date, description, lang FROM books
+]]
+

@@ -1,0 +1,18 @@
+[PrefixDeclaration]
+dc:  http://purl.org/dc/elements/1.1/
+:   http://example.org/book
+ns:  http://example.org/ns#
+
+[SourceDeclaration]
+sourceUri	db2smallBooks
+connectionUrl jdbc:db2://10.7.20.39:50001/stock
+username	db2inst2
+password	fish
+driverClass	com.ibm.db2.jcc.DB2Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@{lang} .
+source	SELECT id, title, price, discount, publication_date, description, lang FROM smallBooks.books
+]]
+

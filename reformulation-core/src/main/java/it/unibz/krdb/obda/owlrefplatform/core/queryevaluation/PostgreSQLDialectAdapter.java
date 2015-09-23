@@ -27,6 +27,49 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
+    @Override
+    public String MD5(String str){
+    	return String.format("MD5(%s)", str);
+    }
+    
+    @Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s FROM %s FOR %s)", str, start, end);
+	} 
+    
+    @Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
+		}
+    
+    @Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";	
+	} 
+    
+    @Override
+	public String strContainsOperator(){
+		return "POSITION(%2$s IN %1$s) > 0";		
+	}
+    
+    @Override
+	public String strAfter(String str, String after) {
+//SIGN return a double precision, we need to cast to numeric to avoid conversion exception while using substring
+		return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
+				str, after, str , after , after, str, str);
+
+	}
+
+    @Override
+    public String dateTZ(String str){
+    	return strConcat(new String[]{String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'",String.format("EXTRACT(TIMEZONE_MINUTE FROM %s)", str) });
+    }
+
+	@Override
+	public String dateNow(){
+		return "NOW()";
+	}
+    
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {
@@ -46,7 +89,22 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
+	@Override //trick to support uuid
+	public String strUuid() {
+		return "md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'|| md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String rand() {
+		return "RANDOM()";
+	}
+
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
@@ -83,7 +141,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
 
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
@@ -113,7 +171,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param v
 	 * @return
 	 */
 	@Override

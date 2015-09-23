@@ -26,6 +26,46 @@ import java.util.regex.Pattern;
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
+	public String strUuid(){
+		return "RANDOM_UUID()";
+	}
+
+	@Override
+	public String strEncodeForUri(String str){
+	      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+	            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
+	            "'!', '%21')," +
+	            "'@', '%40')," +
+	            "'#', '%23')," +
+	            "'$', '%24')," +
+	            "'&', '%26')," +
+	            "'*', '%42'), " +
+	            "'(', '%28'), " +
+	            "')', '%29'), " +
+	            "'[', '%5B'), " +
+	            "']', '%5D'), " +
+	            "',', '%2C'), " +
+	            "';', '%3B'), " +
+	            "':', '%3A'), " +
+	            "'?', '%3F'), " +
+	            "'=', '%3D'), " +
+	            "'+', '%2B'), " +
+	            "'''', '%22'), " +
+	            "'/', '%2F')";
+	    }
+
+	@Override
+	public String uuid(){
+		return strConcat(new String[]{"'urn:uuid:'","RANDOM_UUID()"});
+	}
+
+	@Override
+	public String SHA256(String str){
+		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1)", str);
+	}
+
+
+	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {
 			if (offset < 0) {
@@ -65,7 +105,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
         oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
 
         newstr = newstr.substring(1, newstr.length() - 1);

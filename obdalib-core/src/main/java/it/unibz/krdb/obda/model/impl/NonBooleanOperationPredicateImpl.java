@@ -26,8 +26,8 @@ public class NonBooleanOperationPredicateImpl extends PredicateImpl implements N
 
 	private static final long serialVersionUID = 1L;
 
-	public NonBooleanOperationPredicateImpl(String name) {
-		super(name, 1, null);
+	public NonBooleanOperationPredicateImpl(String name, int arity) {
+		super(name, arity, null);
 	}
 
 	@Override

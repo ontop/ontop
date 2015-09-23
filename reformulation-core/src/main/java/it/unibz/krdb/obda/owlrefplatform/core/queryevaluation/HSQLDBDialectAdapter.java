@@ -30,7 +30,7 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 
@@ -47,30 +47,6 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 		return sql.toString();
 	}
 
-	@Override
-	public String strreplace(String str, char oldchar, char newchar) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public String strreplace(String str, int start, int end, String with) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strindexOf(String str, char ch) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strindexOf(String str, String strsr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
@@ -148,6 +124,54 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+	public String strUuid(){
+		return "UUID()";
+	}
+
+	@Override
+	public String uuid(){
+		return strConcat(new String[]{"'urn:uuid:'","UUID()"});
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s, 0)";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 1, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "INSTR(%1$s,%2$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,INSTR(%s,%s)-1)", str, str, before);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+//		sign return 1 if positive number, 0 if 0 and -1 if negative number
+//		it will return everything after the value if it is present or it will return an empty string if it is not present
+		return String.format("SUBSTRING(%s,LOCATE(%s,%s) + LENGTH(%s), SIGN(LOCATE(%s,%s)) * LENGTH(%s))",
+				str, after, str , after , after, str, str);
+	}
+
+	@Override
+	public String dateTZ(String str) {
+		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'" , String.format("EXTRACT(TIMEZONE_MINUTE FROM %s) ",str)});
+	}
+
+	@Override
 	public String getDummyTable() {
 		// TODO: check whether it is OK --- this was the behaviour in JDBCUtility
 		return "SELECT 1";
@@ -172,7 +196,7 @@ public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 *
 	 * @return
 	 */
 	@Override

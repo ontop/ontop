@@ -1,0 +1,18 @@
+[PrefixDeclaration]
+dc:  http://purl.org/dc/elements/1.1/
+:   http://example.org/book
+ns:  http://example.org/ns#
+
+[SourceDeclaration]
+sourceUri	postgres
+connectionUrl	jdbc:postgresql:user
+username	user
+password	
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@{lang} .
+source	SELECT id, title, price, discount, publication_date, description, lang FROM books
+]]
+
