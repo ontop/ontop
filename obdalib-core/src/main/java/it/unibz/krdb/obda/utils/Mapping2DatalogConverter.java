@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.api.*;
@@ -210,19 +211,30 @@ public class Mapping2DatalogConverter {
 
         for (TableJSQL table : tables) {
             // Construct the URI from the table name
-            String tableName = getFullTableName(table);
+            String tableName;
+       		if (table.getSchema().getName() != null)
+    			tableName = table.getSchema().getName() + "." + table.getTable().getName();
+    		else 
+    			tableName = table.getTable().getName();
+            
 
             // Construct the predicate using the table name
             final RelationDefinition td = dbMetadata.getDefinition(tableName);
             int arity = td.getAttributes().size();
             Predicate predicate = fac.getPredicate(tableName, arity);
+        	String alias = table.getAlias();
 
             // Swap the column name with a new variable from the lookup table
-            List<Term> terms = new ArrayList<>();
-            for (int i = 1; i <= arity; i++) {
-            	String alias = table.getAlias();
-                String columnName = getFullQualifiedAttributeName(td, tableName,
-                                alias, i);
+            List<Term> terms = new ArrayList<>(arity);
+            for (Attribute attribute : td.getAttributes()) {
+            	
+        		String attributeName = attribute.getName();
+        		String columnName;
+        		if (alias != null) 
+        			columnName = alias + "." + attributeName;
+        		else 
+        			columnName = tableName + "." + attributeName;
+            	
                 String termName = lookupTable.lookup(columnName);
                 if (termName == null) {
                     throw new IllegalStateException("Column '" + columnName
@@ -290,27 +302,30 @@ public class Mapping2DatalogConverter {
 		// Collect all known column aliases
 		Map<String, String> aliasMap = queryParsed.getAliasMap();
 		
-		int offset = 0; // the index offset
+		// assigned index number
+		int index = 0; 
 
 		for (TableJSQL table : tables) {
 			
 			final String tableName = table.getTable().getName();
-			final String fullName = getFullTableName(table);
-			final String tableGivenName = table.getTableGivenName();
+			final String fullName;
+	   		if (table.getSchema().getName() != null)
+	   			fullName  = table.getSchema().getName() + "." + tableName;
+			else 
+				fullName = tableName;
+			
 			final RelationDefinition tableDefinition = dbMetadata.getDefinition(fullName);
 
             if (tableDefinition == null) {
-                throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
+                throw new RuntimeException("Definition not found for table '" + fullName + "'.");
             }
 
-            int size = tableDefinition.getAttributes().size();
-
-			for (int i = 1; i <= size; i++) {
-				// assigned index number
-				int index = i + offset;
+			final String tableGivenName = table.getTableGivenName();
+           
+ 			for (Attribute attribute : tableDefinition.getAttributes()) {
 				
 				// simple attribute name
-				String columnName = tableDefinition.getAttribute(i).getName();
+				String columnName = attribute.getName();
 				
 				lookupTable.add(columnName, index);
 
@@ -347,8 +362,9 @@ public class Mapping2DatalogConverter {
 				}
 
 				// full qualified attribute name
-				String qualifiedColumnName = getFullQualifiedAttributeName(tableDefinition, fullName, null, i);
-
+				String attributeName = attribute.getName();
+				String qualifiedColumnName =  fullName + "." + attributeName;
+				
 				lookupTable.add(qualifiedColumnName, tableColumnName);
 				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
 
@@ -361,8 +377,7 @@ public class Mapping2DatalogConverter {
 				// full qualified attribute name using table alias
 				String tableAlias = table.getAlias();
 				if (tableAlias != null) {
-					String qualifiedColumnAlias = getFullQualifiedAttributeName(tableDefinition, fullName,
-                                    tableAlias, i);
+					String qualifiedColumnAlias =  tableAlias + "." + attributeName;
 					lookupTable.add(qualifiedColumnAlias, index);
 					String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
 
@@ -386,16 +401,16 @@ public class Mapping2DatalogConverter {
 						}
 					}
 				}
+				index++;
 			}
-			offset += size;
 		}
 
-        for(String item:aliasMap.keySet()){
-            offset++;
+        for (String item:aliasMap.keySet()) {
             String alias = aliasMap.get(item);
-            if(lookupTable.lookup(alias) == null){
-                lookupTable.add(item, offset);
-                lookupTable.add(alias, offset);
+            if (lookupTable.lookup(alias) == null) {
+                lookupTable.add(item, index);
+                lookupTable.add(alias, index);
+    			index++;
             }
         }
 
@@ -403,35 +418,7 @@ public class Mapping2DatalogConverter {
 		return lookupTable;
 	}
     
-    private static String getFullTableName(TableJSQL table) {
-   		if (table.getSchema().getName() != null)
-			return table.getSchema().getName() + "." + table.getTable().getName();
-		else 
-			return table.getTable().getName();
-   }
     
-	/**
-	 * Returns the attribute full-qualified name using the table/view ALIAS
-	 * name. [ALIAS_NAME].[ATTRIBUTE_NAME]. If the alias name is blank, the
-	 * method will use the table/view name: [TABLE_NAME].[ATTRIBUTE_NAME].
-	 * 
-	 * @param table
-	 *            Can be a table name or a view name.
-	 * @param alias
-	 *            The table or view alias name.
-	 * @param pos
-	 *            The index position.
-	 * @return
-	 */
-	private static String getFullQualifiedAttributeName(RelationDefinition dd, String table, String alias, int pos) {		
-		String attributeName = dd.getAttribute(pos).getName();
-		
-		if (alias != null && !alias.isEmpty()) {
-			return String.format("%s.%s", alias, attributeName);
-		} else {
-			return String.format("%s.%s", table, attributeName);
-		}
-	}
   
 
     /**
