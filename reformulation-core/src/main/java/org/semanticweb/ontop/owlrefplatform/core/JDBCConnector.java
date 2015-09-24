@@ -43,6 +43,18 @@ public class JDBCConnector implements DBConnector {
     private final IQuest questInstance;
     private final QuestPreferences questPreferences;
 
+    /**
+     * This represents user-supplied constraints, i.e. primary
+     * and foreign keys not present in the database metadata.
+     *
+     * SQL-specific.
+     *
+     * Can be useful for eliminating self-joins
+     *
+     * Also injected in the DBMetadataExtractor. Only useful here if the DBMetadata is pre-defined.
+     */
+    private final ImplicitDBConstraints userConstraints;
+
     /* The active connection used to get metadata from the DBMS */
     private transient Connection localConnection;
     private final OBDADataSource obdaSource;
@@ -68,7 +80,8 @@ public class JDBCConnector implements DBConnector {
     @Inject
     private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
-                          QuestPreferences preferences) {
+                          QuestPreferences preferences,
+                          @Nullable ImplicitDBConstraints userConstraints) {
         this.questPreferences = preferences;
         this.obdaSource = obdaDataSource;
         this.questInstance = questInstance;
@@ -78,6 +91,7 @@ public class JDBCConnector implements DBConnector {
         abandonedTimeout = Integer.valueOf((String) preferences.get(QuestPreferences.ABANDONED_TIMEOUT));
         startPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.INIT_POOL_SIZE));
         maxPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.MAX_POOL_SIZE));
+        this.userConstraints = userConstraints;
 
         setupConnectionPool();
     }
@@ -143,9 +157,9 @@ public class JDBCConnector implements DBConnector {
         }
     }
 
-    private DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
+    private DataSourceMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
-        return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection), userConstraints);
+        return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection));
     }
 
     private OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
@@ -340,11 +354,9 @@ public class JDBCConnector implements DBConnector {
     }
 
     @Override
-    public DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel,
-                                                              URI sourceId,
-                                                              @Nullable ImplicitDBConstraints userConstraints)
+    public DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId)
             throws DBMetadataException, OBDAException {
-        DataSourceMetadata metadata = extractDBMetadata(obdaModel, userConstraints);
+        DataSourceMetadata metadata = extractDBMetadata(obdaModel);
         ImmutableList<CQIE> mappingRules = extractMappings(obdaModel, sourceId, metadata);
         return new DBMetadataAndMappings(metadata, mappingRules);
     }
@@ -357,5 +369,13 @@ public class JDBCConnector implements DBConnector {
 
         IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
         return ImmutableList.copyOf(mapping2DatalogConverter.constructDatalogProgram(mappings));
+    }
+
+    @Override
+    public void completePredefinedMetadata(DataSourceMetadata metadata) {
+        //Adds keys from the text file
+        if (userConstraints != null) {
+            userConstraints.addConstraints(metadata);
+        }
     }
 }

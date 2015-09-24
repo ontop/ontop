@@ -56,7 +56,6 @@ public class QuestPreferences extends OBDAProperties {
 
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
 
-	public static final String DB_CONSTRAINTS = "DB_CONSTRAINTS";
 	public static final String TMAPPING_EXCLUSION = "TMAPPING_EXCLUSION";
 
     //@Deprecated

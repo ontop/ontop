@@ -119,13 +119,6 @@ public class Quest implements Serializable, IQuest {
      */
 	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
 
-	/**
-	 * This represents user-supplied constraints, i.e. primary
-	 * and foreign keys not present in the database metadata
-	 *
-	 * Can be useful for eliminating self-joins
-	 */
-	private final ImplicitDBConstraints userConstraints;
 
 	/*
 	 * Whether to apply the user-supplied database constraints given above
@@ -238,7 +231,6 @@ public class Quest implements Serializable, IQuest {
 				  @Assisted QuestPreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, QueryCache queryCache,
-				  @Nullable ImplicitDBConstraints userConstraints,
 				  TMappingExclusionConfig excludeFromTMappings) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
@@ -250,7 +242,6 @@ public class Quest implements Serializable, IQuest {
 		this.queryCache = queryCache;
 
 		inputOntology = tbox;
-		this.userConstraints = userConstraints;
 
 		// Not null (default value defined by the Guice module)
 		this.excludeFromTMappings = excludeFromTMappings;
@@ -586,8 +577,7 @@ public class Quest implements Serializable, IQuest {
 
 				URI sourceUri = obdaSource.getSourceID();
 				ImmutableList<OBDAMappingAxiom> originalMappings = inputOBDAModel.getMappings(sourceUri);
-				ImmutableList<OBDAMappingAxiom> translatedMappings =
-						vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
+				ImmutableList<OBDAMappingAxiom> translatedMappings = vocabularyValidator.replaceEquivalences(originalMappings);
 
 				Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
 				mappings.put(sourceUri, translatedMappings);
@@ -612,22 +602,19 @@ public class Quest implements Serializable, IQuest {
 			 */
 			ImmutableList<CQIE> mappingRules;
 			if (metadata == null) {
-				DBMetadataAndMappings dbMetadataAndMappings = dbConnector.extractDBMetadataAndMappings(unfoldingOBDAModel,
-						sourceId, userConstraints);
+				DBMetadataAndMappings dbMetadataAndMappings = dbConnector.extractDBMetadataAndMappings(unfoldingOBDAModel, sourceId);
 				metadata = dbMetadataAndMappings.getDataSourceMetadata();
 				mappingRules = dbMetadataAndMappings.getMappingRules();
 			}
 			/**
-			 * Otherwise, if partially configured, complete it by applying
-			 * the user-defined constraints.
+			 * Otherwise, complete the pre-defined metadata with possible user-defined information
+			 * (e.g. user-defined constraints).
+			 *
+			 * Gets the mapping rules afterwards.
 			 */
 			else {
+				dbConnector.completePredefinedMetadata(metadata);
 				mappingRules = dbConnector.extractMappings(unfoldingOBDAModel, sourceId, metadata);
-
-				//Adds keys from the text file
-				if (userConstraints != null) {
-					userConstraints.addConstraints(metadata);
-				}
 			}
 
 

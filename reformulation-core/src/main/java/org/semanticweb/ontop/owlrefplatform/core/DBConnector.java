@@ -42,9 +42,10 @@ public interface DBConnector {
 
     LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata);
 
-    DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId,
-                                                       @Nullable ImplicitDBConstraints userConstraints)
+    DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId)
             throws DBMetadataException, OBDAException;
 
     ImmutableList<CQIE> extractMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
+
+    void completePredefinedMetadata(DataSourceMetadata metadata);
 }

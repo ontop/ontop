@@ -18,6 +18,5 @@ import javax.annotation.Nullable;
  */
 public interface DBMetadataExtractor {
 
-    DataSourceMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
-                       @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException;
+    DataSourceMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection) throws DBMetadataException;
 }

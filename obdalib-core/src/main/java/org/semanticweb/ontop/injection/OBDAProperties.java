@@ -26,6 +26,8 @@ public class OBDAProperties {
 
     public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
 
+    public static final String DB_CONSTRAINTS = "DB_CONSTRAINTS";
+
     public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
     private final Properties properties;

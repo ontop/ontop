@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.sql;
 
 
-import com.google.inject.assistedinject.AssistedInject;
 import net.sf.jsqlparser.JSQLParserException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.sql.SQLTableNameExtractor;
@@ -13,6 +12,7 @@ import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -27,17 +27,25 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
      */
     private final Boolean obtainFullMetadata;
 
-    @AssistedInject
-    private SQLDBMetadataExtractor(OBDAProperties preferences) {
+    /**
+     * This represents user-supplied constraints, i.e. primary
+     * and foreign keys not present in the database metadata
+     *
+     * Can be useful for eliminating self-joins
+     */
+    private final ImplicitDBConstraints userConstraints;
+
+    @Inject
+    private SQLDBMetadataExtractor(OBDAProperties preferences, @Nullable ImplicitDBConstraints userConstraints) {
         this.obtainFullMetadata = preferences.getBoolean(OBDAProperties.OBTAIN_FULL_METADATA);
+        this.userConstraints = userConstraints;
     }
 
     /**
      * Expects the DBConnectionWrapper to wrap a JDBC connection.
      */
     @Override
-    public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection,
-                              @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
+    public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection) throws DBMetadataException {
         boolean applyUserConstraints = (userConstraints != null);
 
         if (dbConnection == null) {
