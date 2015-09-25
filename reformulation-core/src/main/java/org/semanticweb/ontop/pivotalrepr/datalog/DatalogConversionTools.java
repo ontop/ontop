@@ -11,7 +11,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubsti
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.DataNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 
 import java.util.Collection;
 
@@ -29,7 +29,7 @@ public class DatalogConversionTools {
     public static DataNode createDataNode(DataAtom dataAtom, Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
-            return new TableNodeImpl(dataAtom);
+            return new ExtensionalDataNodeImpl(dataAtom);
         }
 
         return new IntensionalDataNodeImpl(dataAtom);

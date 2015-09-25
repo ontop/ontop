@@ -85,7 +85,7 @@ public class UnionLiftTest {
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns2, t1Ans2Node);
 
-		ExtensionalDataNode t1 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t1", 1), a));
+		ExtensionalDataNode t1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t1", 1), a));
 		queryBuilder.addChild(t1Ans2Node, t1);
 
 		Variable b = (Variable) DATA_FACTORY.getVariable("b");
@@ -94,7 +94,7 @@ public class UnionLiftTest {
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns2, t2Ans2Node);
 
-		ExtensionalDataNode t2 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t2", 1), b));
+		ExtensionalDataNode t2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t2", 1), b));
 		queryBuilder.addChild(t2Ans2Node, t2);
 
 		/**
@@ -106,7 +106,7 @@ public class UnionLiftTest {
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, c)), NO_MODIFIER);
 		queryBuilder.addChild(join1, ans3Node);
 
-		ExtensionalDataNode t3 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t3", 1), c));
+		ExtensionalDataNode t3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t3", 1), c));
 		queryBuilder.addChild(ans3Node, t3);
 
 
@@ -127,7 +127,7 @@ public class UnionLiftTest {
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns4, t4Ans4Node);
 
-		ExtensionalDataNode t4 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t4", 2), d, e));
+		ExtensionalDataNode t4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t4", 2), d, e));
 		queryBuilder.addChild(t4Ans4Node, t4);
 
 		Variable f = (Variable) DATA_FACTORY.getVariable("f");
@@ -137,7 +137,7 @@ public class UnionLiftTest {
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns4, t5Ans4Node);
 
-		ExtensionalDataNode t5 = new TableNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t5", 2), f, g));
+		ExtensionalDataNode t5 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t5", 2), f, g));
 		queryBuilder.addChild(t5Ans4Node, t5);
 
         this.unionAns2Node = unionAns2;

@@ -10,7 +10,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
-import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -421,7 +421,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
     private DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
         if (previousDataNode instanceof ExtensionalDataNode) {
-            return new TableNodeImpl(newDataAtom);
+            return new ExtensionalDataNodeImpl(newDataAtom);
         }
         else {
             throw new IllegalArgumentException("Unexpected type of data node: " + previousDataNode);

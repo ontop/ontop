@@ -27,7 +27,7 @@ public class QueryNodeRenamer extends HomogeneousQueryNodeTransformerImpl {
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return new TableNodeImpl(renameDataAtom(extensionalDataNode.getAtom()));
+        return new ExtensionalDataNodeImpl(renameDataAtom(extensionalDataNode.getAtom()));
     }
 
     @Override
