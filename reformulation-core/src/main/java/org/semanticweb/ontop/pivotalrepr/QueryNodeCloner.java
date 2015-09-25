@@ -9,8 +9,8 @@ public class QueryNodeCloner extends HomogeneousQueryNodeTransformerImpl {
     }
 
     @Override
-    public TableNode transform(TableNode tableNode) {
-        return tableNode.clone();
+    public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
+        return extensionalDataNode.clone();
     }
 
     @Override
@@ -24,8 +24,8 @@ public class QueryNodeCloner extends HomogeneousQueryNodeTransformerImpl {
     }
 
     @Override
-    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) {
-        return ordinaryDataNode.clone();
+    public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
+        return intensionalDataNode.clone();
     }
 
     @Override

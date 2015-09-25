@@ -26,11 +26,11 @@ public class VariableUsageValidator implements IntermediateQueryValidator {
         }
 
         @Override
-        public void visit(OrdinaryDataNode ordinaryDataNode) {
+        public void visit(IntensionalDataNode intensionalDataNode) {
         }
 
         @Override
-        public void visit(TableNode tableNode) {
+        public void visit(ExtensionalDataNode extensionalDataNode) {
         }
 
         @Override

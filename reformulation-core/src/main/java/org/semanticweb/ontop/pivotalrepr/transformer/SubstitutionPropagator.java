@@ -68,8 +68,8 @@ public abstract class SubstitutionPropagator
     }
 
     @Override
-    public TableNode transform(TableNode tableNode) {
-        return new TableNodeImpl(transformDataAtom(tableNode.getAtom()));
+    public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
+        return new ExtensionalDataNodeImpl(transformDataAtom(extensionalDataNode.getAtom()));
     }
 
     @Override
@@ -84,8 +84,8 @@ public abstract class SubstitutionPropagator
     }
 
     @Override
-    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) {
-        return new OrdinaryDataNodeImpl(transformDataAtom(ordinaryDataNode.getAtom()));
+    public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
+        return new IntensionalDataNodeImpl(transformDataAtom(intensionalDataNode.getAtom()));
     }
 
     @Override

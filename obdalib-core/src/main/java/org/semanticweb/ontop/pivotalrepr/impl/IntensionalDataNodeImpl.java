@@ -1,13 +1,13 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
 
-public class TableNodeImpl extends DataNodeImpl implements TableNode {
-    private static final String TABLE_NODE_STR = "TABLE";
+public class IntensionalDataNodeImpl extends DataNodeImpl implements IntensionalDataNode {
 
-    public TableNodeImpl(DataAtom atom) {
+    private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
+
+    public IntensionalDataNodeImpl(DataAtom atom) {
         super(atom);
     }
 
@@ -17,12 +17,13 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
     }
 
     @Override
-    public TableNode clone() {
-        return new TableNodeImpl(getAtom());
+    public IntensionalDataNode clone() {
+        return new IntensionalDataNodeImpl(getAtom());
     }
 
     @Override
-    public TableNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 
@@ -33,6 +34,6 @@ public class TableNodeImpl extends DataNodeImpl implements TableNode {
 
     @Override
     public String toString() {
-        return TABLE_NODE_STR + " " + getAtom();
+        return INTENSIONAL_DATA_NODE_STR + " " + getAtom();
     }
 }

@@ -2,7 +2,6 @@ package org.semanticweb.ontop.executor.join;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
-import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -11,7 +10,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
-import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -421,8 +420,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     }
 
     private DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
-        if (previousDataNode instanceof TableNode) {
-            return new TableNodeImpl(newDataAtom);
+        if (previousDataNode instanceof ExtensionalDataNode) {
+            return new ExtensionalDataNodeImpl(newDataAtom);
         }
         else {
             throw new IllegalArgumentException("Unexpected type of data node: " + previousDataNode);

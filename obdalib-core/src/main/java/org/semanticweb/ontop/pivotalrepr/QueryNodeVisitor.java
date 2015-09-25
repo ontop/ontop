@@ -18,9 +18,9 @@ public interface QueryNodeVisitor {
 
     void visit(FilterNode filterNode);
 
-    void visit(OrdinaryDataNode ordinaryDataNode);
+    void visit(IntensionalDataNode intensionalDataNode);
 
-    void visit(TableNode tableNode);
+    void visit(ExtensionalDataNode extensionalDataNode);
 
     void visit(GroupNode groupNode);
 

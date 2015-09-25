@@ -142,7 +142,7 @@ public class IntermediateQueryUtils {
             throws QueryMergingException {
         ConstructionNode rootNode = new ConstructionNodeImpl(headAtom, new NeutralSubstitution(), optionalTopModifiers);
         UnionNode unionNode = new UnionNodeImpl();
-        OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
+        IntensionalDataNode dataNode = new IntensionalDataNodeImpl(subQueryAtom);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
         try {
@@ -167,7 +167,7 @@ public class IntermediateQueryUtils {
 
             UnionNode unionNode = extractUnionNode(queryBuilder, rootConstructionNode);
 
-            OrdinaryDataNode dataNode = new OrdinaryDataNodeImpl(subQueryAtom);
+            IntensionalDataNode dataNode = new IntensionalDataNodeImpl(subQueryAtom);
             queryBuilder.addChild(unionNode, dataNode);
 
             return queryBuilder.build();

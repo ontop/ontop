@@ -27,7 +27,7 @@ public class ReactToChildDeletionTransformer extends HeterogeneousQueryNodeTrans
     }
 
     @Override
-    public NodeTransformationProposal transform(TableNode tableNode){
+    public NodeTransformationProposal transform(ExtensionalDataNode extensionalDataNode){
         throw new UnsupportedOperationException("A TableNode is not expected to have a child");
     }
 
@@ -68,7 +68,7 @@ public class ReactToChildDeletionTransformer extends HeterogeneousQueryNodeTrans
     }
 
     @Override
-    public NodeTransformationProposal transform(OrdinaryDataNode ordinaryDataNode) {
+    public NodeTransformationProposal transform(IntensionalDataNode intensionalDataNode) {
         throw new UnsupportedOperationException("A OrdinaryDataNode is not expected to have a child");
     }
 
