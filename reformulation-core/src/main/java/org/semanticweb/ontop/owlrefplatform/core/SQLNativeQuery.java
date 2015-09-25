@@ -52,4 +52,9 @@ public class SQLNativeQuery implements NativeQuery {
     public String getSQL() {
         return sqlQuery;
     }
+
+    @Override
+    public String toString() {
+        return sqlQuery;
+    }
 }
