@@ -1,13 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 /**
- * TODO: explain
+ * SQL-specific extensional data node
  */
-public interface TableNode extends DataNode {
+public interface TableNode extends ExtensionalDataNode {
 
     @Override
     TableNode clone();
-
-    @Override
-    TableNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 }

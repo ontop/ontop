@@ -3,11 +3,11 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
 
-public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNode {
+public class IntensionalDataNodeImpl extends DataNodeImpl implements IntensionalDataNode {
 
-    private static final String ORDINARY_DATA_NODE_STR = "DATA";
+    private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
-    public OrdinaryDataNodeImpl(DataAtom atom) {
+    public IntensionalDataNodeImpl(DataAtom atom) {
         super(atom);
     }
 
@@ -17,12 +17,12 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
     }
 
     @Override
-    public OrdinaryDataNode clone() {
-        return new OrdinaryDataNodeImpl(getAtom());
+    public IntensionalDataNode clone() {
+        return new IntensionalDataNodeImpl(getAtom());
     }
 
     @Override
-    public OrdinaryDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+    public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
@@ -34,6 +34,6 @@ public class OrdinaryDataNodeImpl extends DataNodeImpl implements OrdinaryDataNo
 
     @Override
     public String toString() {
-        return ORDINARY_DATA_NODE_STR + " " + getAtom();
+        return INTENSIONAL_DATA_NODE_STR + " " + getAtom();
     }
 }

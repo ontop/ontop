@@ -6,7 +6,6 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Collects all the variables found in the nodes.
@@ -39,13 +38,13 @@ public class VariableCollector extends QueryNodeVisitorImpl {
     }
 
     @Override
-    public void visit(OrdinaryDataNode ordinaryDataNode) {
-        collectFromAtom(ordinaryDataNode.getAtom());
+    public void visit(IntensionalDataNode intensionalDataNode) {
+        collectFromAtom(intensionalDataNode.getAtom());
     }
 
     @Override
-    public void visit(TableNode tableNode) {
-        collectFromAtom(tableNode.getAtom());
+    public void visit(ExtensionalDataNode extensionalDataNode) {
+        collectFromAtom(extensionalDataNode.getAtom());
     }
 
     @Override

@@ -10,7 +10,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.DataNode;
-import org.semanticweb.ontop.pivotalrepr.impl.OrdinaryDataNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
 
 import java.util.Collection;
@@ -32,7 +32,7 @@ public class DatalogConversionTools {
             return new TableNodeImpl(dataAtom);
         }
 
-        return new OrdinaryDataNodeImpl(dataAtom);
+        return new IntensionalDataNodeImpl(dataAtom);
     }
 
 

@@ -8,13 +8,13 @@ public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformat
 
     FilterNode transform(FilterNode filterNode) throws T1, T2;
 
-    TableNode transform(TableNode tableNode) throws T1, T2;
+    ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) throws T1, T2;
 
     LeftJoinNode transform(LeftJoinNode leftJoinNode) throws T1, T2;
 
     UnionNode transform(UnionNode unionNode) throws T1, T2;
 
-    OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) throws T1, T2;
+    IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) throws T1, T2;
 
     InnerJoinNode transform(InnerJoinNode innerJoinNode) throws T1, T2;
 

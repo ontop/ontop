@@ -2,7 +2,6 @@ package org.semanticweb.ontop.executor.join;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
-import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -421,7 +420,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     }
 
     private DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
-        if (previousDataNode instanceof TableNode) {
+        if (previousDataNode instanceof ExtensionalDataNode) {
             return new TableNodeImpl(newDataAtom);
         }
         else {

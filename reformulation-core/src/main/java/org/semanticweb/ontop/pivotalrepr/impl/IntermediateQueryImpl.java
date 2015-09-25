@@ -222,12 +222,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * TODO: explain
          */
-        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
+        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
         if (localDataNodes.isEmpty())
             throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootConstructionNode().getProjectionAtom());
 
 
-        for (OrdinaryDataNode localDataNode : localDataNodes) {
+        for (IntensionalDataNode localDataNode : localDataNodes) {
             // TODO: make it be incremental
             ImmutableSet<Variable> localVariables = VariableCollector.collectVariables(this);
 
@@ -266,13 +266,13 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      *
      * TODO: explain
      */
-    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(DataAtom subsumingDataAtom)
+    private ImmutableList<IntensionalDataNode> findOrdinaryDataNodes(DataAtom subsumingDataAtom)
             throws InconsistentIntermediateQueryException {
-        ImmutableList.Builder<OrdinaryDataNode> listBuilder = ImmutableList.builder();
+        ImmutableList.Builder<IntensionalDataNode> listBuilder = ImmutableList.builder();
         try {
             for(QueryNode node : treeComponent.getNodesInBottomUpOrder()) {
-                if (node instanceof OrdinaryDataNode) {
-                    OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
+                if (node instanceof IntensionalDataNode) {
+                    IntensionalDataNode dataNode = (IntensionalDataNode) node;
                     if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getAtom()))
                         listBuilder.add(dataNode);
                 }
