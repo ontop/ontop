@@ -5,4 +5,7 @@ package org.semanticweb.ontop.pivotalrepr;
  *  ---> will return no result.
  */
 public class EmptyQueryException extends Exception {
+    public EmptyQueryException() {
+        super("Empty query");
+    }
 }

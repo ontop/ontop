@@ -23,8 +23,8 @@ package org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration;
 import java.io.Serializable;
 import java.util.List;
 
-import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 
 /**
  * Generates a source query in a given native query language.
@@ -37,11 +37,11 @@ public interface NativeQueryGenerator extends Serializable {
 	 * be evaluated by a evaluation engine.
 	 * 
 	 * @param query
-	 *            the datalog program
+	 *            the intermediate query
 	 * @return the source query
-	 * @throws Exception
+	 * @throws org.semanticweb.ontop.model.OBDAException
 	 */
-	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
+	public String generateSourceQuery(IntermediateQuery query, List<String> signature) throws OBDAException;
 
 	public boolean hasDistinctResultSet() ;
     /**

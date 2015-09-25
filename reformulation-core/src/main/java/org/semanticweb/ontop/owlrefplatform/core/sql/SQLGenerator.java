@@ -33,23 +33,20 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.sql.*;
 import org.semanticweb.ontop.sql.api.Attribute;
 
 import java.sql.Types;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.openrdf.model.Literal;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
@@ -139,7 +136,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
 
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
@@ -289,8 +286,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 *            The Select variables in the SPARQL query
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram queryProgram,
+	public String generateSourceQuery(IntermediateQuery intermediateQuery,
 									  List<String> signature) throws OBDAException {
+
+		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
 
 		normalizeProgram(queryProgram);
 
@@ -355,7 +354,34 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 	}
 
-    @Override
+	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
+		DatalogProgram unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+
+		log.debug("New Datalog query: \n" + unfolding.toString());
+
+		unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
+		log.debug("New flattened Datalog query: \n" + unfolding.toString());
+
+		log.debug("Pulling out equalities...");
+
+		//TODO: use Guice instead
+		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
+		List<CQIE> normalizedRules = new ArrayList<>();
+		for (CQIE rule: unfolding.getRules()) {
+			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+		}
+
+		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
+		unfolding = obdaDataFactory.getDatalogProgram(queryModifiers, normalizedRules);
+
+		log.debug("\n Partial evaluation ended.\n{}", unfolding);
+
+		return unfolding;
+
+	}
+
+	@Override
     public boolean hasDistinctResultSet() {
         return false;
     }

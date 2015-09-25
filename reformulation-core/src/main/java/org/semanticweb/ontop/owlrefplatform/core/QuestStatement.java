@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -36,9 +37,6 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.execution.TargetQueryExecutionException;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
@@ -47,7 +45,6 @@ import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -55,6 +52,8 @@ import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
 import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.UnionNode;
 import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
 import org.slf4j.Logger;
@@ -99,7 +98,7 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	private DatalogProgram programAfterRewriting;
 
-	private DatalogProgram programAfterUnfolding;
+	private IntermediateQuery queryAfterUnfolding;
 
 	/**
 	 * Index function symbols (predicate) that have multiple types.
@@ -460,7 +459,7 @@ public abstract class QuestStatement implements IQuestStatement {
 
 
 
-	private DatalogProgram getUnfolding(DatalogProgram query) throws OBDAException {
+	private IntermediateQuery getUnfolding(DatalogProgram query) throws OBDAException, EmptyQueryException {
 
 		log.debug("Start the partial evaluation process...");
 
@@ -529,47 +528,15 @@ public abstract class QuestStatement implements IQuestStatement {
 				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 				
-				
-				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
-
-				log.debug("New Datalog query: \n" + unfolding.toString());
-
-				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
-				log.debug("New flattened Datalog query: \n" + unfolding.toString());
-
+				return intermediateQuery;
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
 			}
-			/**
-			 * No solution.
-			 */
-			catch (EmptyQueryException e) {
-
-				log.debug("Empty query --> no solution.");
-				/**
-				 * TODO: should we really return an empty datalog program?
-				 */
-				return ofac.getDatalogProgram();
-			}
 		}
-
-		log.debug("Pulling out equalities...");
-
-		//TODO: use Guice instead
-		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
-
-		List<CQIE> normalizedRules = new ArrayList<>();
-		for (CQIE rule: unfolding.getRules()) {
-			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+		else {
+			throw new EmptyQueryException();
 		}
-
-		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
-		unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
-
-		log.debug("\n Partial evaluation ended.\n{}", unfolding);
-
-		return unfolding;
 	}
 
 	/**
@@ -592,20 +559,13 @@ public abstract class QuestStatement implements IQuestStatement {
 	}
 
 
-	private TargetQuery generateTargetQuery(DatalogProgram datalogQuery, ImmutableList<String> signature,
+	private TargetQuery generateTargetQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
 											@Nullable SesameConstructTemplate constructTemplate) throws OBDAException {
-		String nativeQueryString;
-		if (datalogQuery.getRules().isEmpty()) {
-			nativeQueryString = "";
-		}
-		else {
-			log.debug("Producing the native query string...");
+		log.debug("Producing the native query string...");
 
-			// query = DatalogNormalizer.normalizeDatalogProgram(query);
-			nativeQueryString = queryGenerator.generateSourceQuery(datalogQuery, signature);
+		String nativeQueryString = queryGenerator.generateSourceQuery(intermediateQuery, signature);
 
-			log.debug("Resulting native query: \n{}", nativeQueryString);
-		}
+		log.debug("Resulting native query: \n{}", nativeQueryString);
 
 		return new TargetQuery(nativeQueryString, signature, constructTemplate);
 	}
@@ -775,12 +735,19 @@ public abstract class QuestStatement implements IQuestStatement {
 
 
 			final long startTime = System.currentTimeMillis();
-			programAfterUnfolding = getUnfolding(programAfterRewriting);
+			queryAfterUnfolding = getUnfolding(programAfterRewriting);
 			unfoldingTime = System.currentTimeMillis() - startTime;
 
 
-			targetQuery = generateTargetQuery(programAfterUnfolding, signatureContainer, constructTemplate);
+			targetQuery = generateTargetQuery(queryAfterUnfolding, signatureContainer, constructTemplate);
 			queryCache.cacheTargetQuery(sparqlQuery, targetQuery);
+
+		}
+		/**
+		 * TODO: throw an exception when is empty
+		 */
+		catch (EmptyQueryException e) {
+			return new TargetQuery("", signatureContainer, constructTemplate);
 		}
 		catch (Exception e1) {
 			log.debug(e1.getMessage(), e1);
@@ -869,34 +836,44 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	@Override
 	public int getUCQSizeAfterUnfolding() {
-		if( programAfterUnfolding.getRules() != null )
-			return programAfterUnfolding.getRules().size();
-		else return 0;
-	}
-
-	public int getMinQuerySizeAfterUnfolding() {
-		int toReturn = Integer.MAX_VALUE;
-		List<CQIE> rules = programAfterUnfolding.getRules();
-		for (CQIE rule : rules) {
-			int querySize = getBodySize(rule.getBody());
-			if (querySize < toReturn) {
-				toReturn = querySize;
+		Optional<QueryNode> optionalviceRoot =
+				queryAfterUnfolding.getFirstChild(queryAfterUnfolding.getRootConstructionNode());
+		if (optionalviceRoot.isPresent()) {
+			QueryNode viceRoot = optionalviceRoot.get();
+			if (viceRoot instanceof UnionNode) {
+				return queryAfterUnfolding.getChildren(viceRoot).size();
+			} else {
+				return 1;
 			}
 		}
-		return (toReturn == Integer.MAX_VALUE) ? 0 : toReturn;
+		else {
+			throw new RuntimeException("Inconsistent intermediate query: must have more than one node");
+		}
 	}
 
-	public int getMaxQuerySizeAfterUnfolding() {
-		int toReturn = Integer.MIN_VALUE;
-		List<CQIE> rules = programAfterUnfolding.getRules();
-		for (CQIE rule : rules) {
-			int querySize = getBodySize(rule.getBody());
-			if (querySize > toReturn) {
-				toReturn = querySize;
-			}
-		}
-		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
-	}
+//	public int getMinQuerySizeAfterUnfolding() {
+//		int toReturn = Integer.MAX_VALUE;
+//		List<CQIE> rules = queryAfterUnfolding.getRules();
+//		for (CQIE rule : rules) {
+//			int querySize = getBodySize(rule.getBody());
+//			if (querySize < toReturn) {
+//				toReturn = querySize;
+//			}
+//		}
+//		return (toReturn == Integer.MAX_VALUE) ? 0 : toReturn;
+//	}
+//
+//	public int getMaxQuerySizeAfterUnfolding() {
+//		int toReturn = Integer.MIN_VALUE;
+//		List<CQIE> rules = queryAfterUnfolding.getRules();
+//		for (CQIE rule : rules) {
+//			int querySize = getBodySize(rule.getBody());
+//			if (querySize > toReturn) {
+//				toReturn = querySize;
+//			}
+//		}
+//		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
+//	}
 
 	private static int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;

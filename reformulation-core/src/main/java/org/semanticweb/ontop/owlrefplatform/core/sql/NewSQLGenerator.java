@@ -25,6 +25,7 @@ import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectA
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.TableDefinition;
@@ -40,6 +41,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
+import static org.semanticweb.ontop.owlrefplatform.core.sql.SQLGenerator.convertAndPrepare;
 
 public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQueryGenerator {
 
@@ -283,11 +286,11 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * TODO: should we rename it generateNativeQuery?
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
-	
-		DatalogProgram normalizedQuery = normalizeProgram(query);
+	public String generateSourceQuery(IntermediateQuery intermediateQuery, List<String> signature) throws OBDAException {
+		DatalogProgram convertedQuery = convertAndPrepare(intermediateQuery);
+		DatalogProgram normalizedQuery = normalizeProgram(convertedQuery);
 
-		if(query.getQueryModifiers().hasModifiers()) {
+		if(convertedQuery.getQueryModifiers().hasModifiers()) {
 			return generateQueryWithModifiers(normalizedQuery, signature);
 		} else {		
 			return generateQuery(normalizedQuery, signature);
