@@ -60,9 +60,10 @@ public class SesameLGDTest extends TestCase {
 		try {
 			
 			//String owlfile = "/home/constant/Vista/urban_atlas_melod.owl";
-			String owlfile = "src/test/resources/general/dummy.owl";
-			//String owlfile = "/home/constant/gisat/CityDistricts.owl";
-			String obdafile = "src/test/resources/general/lgd-bremen.obda";
+			//String owlfile = "src/test/resources/general/dummy.owl";
+			String owlfile = "/home/constant/gisat/CityDistricts.owl";
+			//String obdafile = "src/test/resources/general/lgd-bremen.obda";
+			String obdafile = "/home/constant/airbus/lgd-bremen.obda";
 			//String owlfile = 	"/home/timi/ontologies/helloworld/helloworld.owl";
 			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
 	
