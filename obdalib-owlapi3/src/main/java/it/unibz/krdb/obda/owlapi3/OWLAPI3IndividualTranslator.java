@@ -33,6 +33,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -40,6 +41,8 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLDatatypeImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImpl;
 
 /***
  * Translates a ontop ABox assertion into an OWLIndividualAxiom. Used in the
@@ -104,6 +107,12 @@ public class OWLAPI3IndividualTranslator {
 		else if (v.getType() == COL_TYPE.LITERAL_LANG) {
 			result = dataFactory.getOWLLiteral(value, v.getLanguage());
 		} 
+		else if (v.getType() == COL_TYPE.GEOMETRY) { //constant: this is an EXTREMELY quick and dirty solution. Should be fixed asap!
+			IRI iri= IRI.create("http://www.opengis.net/ont/geosparql#wktLiteral");
+			OWLDatatype  owlgeom = new OWLDatatypeImpl(iri);
+			OWLLiteralImpl geoliteral = new OWLLiteralImpl(value, v.getLanguage(), owlgeom);
+			result = geoliteral;
+		}
 		else {
 			OWL2Datatype datatype = OWLTypeMapper.getOWLType(v.getType());
 			if (datatype != null)

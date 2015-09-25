@@ -35,8 +35,7 @@ public class OWLTypeMapper {
 		// registerType(OWL2Datatype.XSD_FLOAT, COL_TYPE.DOUBLE); // 12 // TEMPORARY!!
 		registerType(OWL2Datatype.XSD_LONG, COL_TYPE.LONG); // 13 
 		registerType(OWL2Datatype.XSD_BOOLEAN, COL_TYPE.BOOLEAN); // 14
-	
-		
+			
 		// irregularities
 		OWLtoCOLTYPE.put(OWL2Datatype.XSD_FLOAT, COL_TYPE.DOUBLE); // 12 // TEMPORARY!!
 		OWLtoCOLTYPE.put(OWL2Datatype.RDFS_LITERAL, COL_TYPE.LITERAL);		
