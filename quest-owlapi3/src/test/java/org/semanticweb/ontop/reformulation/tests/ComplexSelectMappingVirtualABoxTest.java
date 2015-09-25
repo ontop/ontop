@@ -24,6 +24,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
@@ -144,7 +145,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 
         OWLLiteral val;
 		try {
-			String sql = st.getUnfolding(this.query);
+			String sql = ((SQLNativeQuery)st.getUnfolding(this.query)).getSQL();
 			Pattern pat = Pattern.compile("TABLE1 ");
 		    Matcher m = pat.matcher(sql);
 		    int num_joins = 0;

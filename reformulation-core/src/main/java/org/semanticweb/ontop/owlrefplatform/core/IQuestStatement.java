@@ -7,7 +7,6 @@ import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.ontology.Assertion;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * OBDAStatement specific to Quest.
@@ -23,7 +22,7 @@ public interface IQuestStatement extends OBDAStatement {
 
     String getRewriting(ParsedQuery query) throws OBDAException;
 
-    TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException;
+    NativeQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException;
 
     boolean isCanceled();
 

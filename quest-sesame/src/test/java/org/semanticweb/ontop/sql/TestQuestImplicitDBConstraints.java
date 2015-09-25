@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -126,7 +127,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 		
 		
-		String sql = st.getUnfolding(query);
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertTrue(m);
 		
@@ -143,9 +144,9 @@ public class TestQuestImplicitDBConstraints {
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
 		QuestOWLStatement st = conn.createStatement();
-		
-		
-		String sql = st.getUnfolding(query);
+
+
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
@@ -162,9 +163,9 @@ public class TestQuestImplicitDBConstraints {
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
 		QuestOWLStatement st = conn.createStatement();
-		
-		
-		String sql = st.getUnfolding(query);
+
+
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertFalse(m);
 		
@@ -182,9 +183,9 @@ public class TestQuestImplicitDBConstraints {
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
 		QuestOWLStatement st = conn.createStatement();
-		
-		
-		String sql = st.getUnfolding(query);
+
+
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
@@ -207,9 +208,9 @@ public class TestQuestImplicitDBConstraints {
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";
 		QuestOWLStatement st = conn.createStatement();
-		
-		
-		String sql = st.getUnfolding(query);
+
+
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		System.out.println(sql);
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
@@ -232,9 +233,9 @@ public class TestQuestImplicitDBConstraints {
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";
 		QuestOWLStatement st = conn.createStatement();
-		
-		
-		String sql = st.getUnfolding(query);
+
+
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		System.out.println(sql);
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);

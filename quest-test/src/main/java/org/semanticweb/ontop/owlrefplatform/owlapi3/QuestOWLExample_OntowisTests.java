@@ -25,17 +25,10 @@ import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
-import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.io.File;
@@ -332,7 +325,7 @@ public class QuestOWLExample_OntowisTests {
 				 * Print the query summary
 				 */
 				QuestOWLStatement qst = (QuestOWLStatement) st;
-				String sqlQuery = qst.getUnfolding(sparqlQuery);
+				String sqlQuery = ((SQLNativeQuery)qst.getUnfolding(sparqlQuery)).getSQL();
 
 				System.out.println();
 				System.out.println("The input SPARQL query:");

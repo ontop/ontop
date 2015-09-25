@@ -1,10 +1,8 @@
 package org.semanticweb.ontop.reformulation.tests;
 
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -258,7 +256,7 @@ public class NPDUndolferTest extends TestCase {
 		QuestOWLConnection qconn =  reasoner.getConnection();
 		QuestOWLStatement st = qconn.createStatement();
 		
-		String unfolding = st.getUnfolding(query);
+		String unfolding = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		st.close();
 		
 		reasoner.dispose();
@@ -296,7 +294,7 @@ public class NPDUndolferTest extends TestCase {
 		QuestOWLStatement st = qconn.createStatement();
 		
 //		String rewriting = st.getRewriting(query);
-		String unfolding = st.getUnfolding(query);
+		String unfolding = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 		st.close();
 		
 		reasoner.dispose();

@@ -19,11 +19,9 @@ package org.semanticweb.ontop.quest.sparql;
  * #L%
  */
 
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -111,7 +109,7 @@ public class NestedConcatTest {
 			 * Print the query summary
 			 */
             QuestOWLStatement qst = (QuestOWLStatement) st;
-            String sqlQuery = qst.getUnfolding(sparqlQuery);
+            String sqlQuery = ((SQLNativeQuery)qst.getUnfolding(sparqlQuery)).getSQL();
 
             System.out.println();
             System.out.println("The input SPARQL query:");

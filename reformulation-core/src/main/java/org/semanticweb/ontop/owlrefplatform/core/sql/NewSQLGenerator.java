@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.*;
 import org.semanticweb.ontop.mapping.QueryUtils;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
@@ -18,6 +20,8 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -25,6 +29,7 @@ import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectA
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
@@ -34,11 +39,6 @@ import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -265,6 +265,12 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	@Override
+	public NativeQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+		// Empty query
+		return new SQLNativeQuery(signatureContainer, optionalConstructTemplate);
+	}
+
+	@Override
 	public String getBooleanOperatorTemplate(Predicate booleanPredicate) {
 		if (booleanPredicateToQueryString.containsKey(booleanPredicate)) {
 			return booleanPredicateToQueryString.get(booleanPredicate);
@@ -286,15 +292,18 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * TODO: should we rename it generateNativeQuery?
 	 */
 	@Override
-	public String generateSourceQuery(IntermediateQuery intermediateQuery, List<String> signature) throws OBDAException {
+	public SQLNativeQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+										   Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 		DatalogProgram convertedQuery = convertAndPrepare(intermediateQuery);
 		DatalogProgram normalizedQuery = normalizeProgram(convertedQuery);
 
+		String sqlQuery;
 		if(convertedQuery.getQueryModifiers().hasModifiers()) {
-			return generateQueryWithModifiers(normalizedQuery, signature);
+			sqlQuery = generateQueryWithModifiers(normalizedQuery, signature);
 		} else {		
-			return generateQuery(normalizedQuery, signature);
+			sqlQuery = generateQuery(normalizedQuery, signature);
 		}
+		return new SQLNativeQuery(sqlQuery, signature, optionalConstructTemplate);
 	}
 
 	/**

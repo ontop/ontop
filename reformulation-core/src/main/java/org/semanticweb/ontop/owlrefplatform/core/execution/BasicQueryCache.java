@@ -2,7 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.execution;
 
 import com.google.inject.Inject;
 import org.semanticweb.ontop.owlrefplatform.core.QueryCache;
-import org.semanticweb.ontop.owlrefplatform.core.TargetQuery;
+import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BasicQueryCache implements QueryCache {
 
-    private final Map<String, TargetQuery> targetQueryCache;
+    private final Map<String, NativeQuery> targetQueryCache;
 
     @Inject
     private BasicQueryCache() {
@@ -21,13 +21,13 @@ public class BasicQueryCache implements QueryCache {
     }
 
     @Override
-    public TargetQuery getTargetQuery(String sparqlQuery) {
+    public NativeQuery getTargetQuery(String sparqlQuery) {
         return targetQueryCache.get(sparqlQuery);
     }
 
     @Override
-    public void cacheTargetQuery(String sparqlQuery, TargetQuery targetQuery) {
-        targetQueryCache.put(sparqlQuery, targetQuery);
+    public void cacheTargetQuery(String sparqlQuery, NativeQuery nativeQuery) {
+        targetQueryCache.put(sparqlQuery, nativeQuery);
     }
 
     @Override

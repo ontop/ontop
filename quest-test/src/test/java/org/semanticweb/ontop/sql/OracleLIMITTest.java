@@ -35,6 +35,7 @@ import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -97,7 +98,7 @@ public class OracleLIMITTest  {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x a :Country} LIMIT 10";
 		
 		QuestOWLStatement st = conn.createStatement();
-		String sql = st.getUnfolding(query);
+		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();;
 		boolean m = sql.matches("(?ms)(.*)WHERE ROWNUM <= 10(.*)");
 		assertTrue(m);
 	}

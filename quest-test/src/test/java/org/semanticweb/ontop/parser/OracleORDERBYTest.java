@@ -27,6 +27,7 @@ import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -92,7 +93,7 @@ public class OracleORDERBYTest {
         conn = reasoner.getConnection();
 
         QuestOWLStatement st = conn.createStatement();
-        String sql = st.getUnfolding(query);
+        String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
         //boolean m = sql.matches("(?ms)(.*)ORDER BY country_name (.*)");
         boolean m = sql.matches("(?ms)(.*)ORDER BY (.*)");
         log.debug(sql);

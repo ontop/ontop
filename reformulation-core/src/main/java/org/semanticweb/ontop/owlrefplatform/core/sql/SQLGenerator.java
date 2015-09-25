@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
  */
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -31,6 +32,8 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
@@ -41,6 +44,7 @@ import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryG
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.sql.*;
 import org.semanticweb.ontop.sql.api.Attribute;
@@ -217,6 +221,12 @@ public class SQLGenerator implements NativeQueryGenerator {
                 isSI, uriRefIds);
     }
 
+	@Override
+	public NativeQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+		// Empty string query
+		return new SQLNativeQuery(signatureContainer, optionalConstructTemplate);
+	}
+
 	private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
 		return new ImmutableTable.Builder<Predicate, Predicate, Predicate>()
 				.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.DOUBLE))
@@ -278,16 +288,15 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
 	 * method descriptions. Observe that the SQL itself will be done by
 	 * {@link #generateQuery(DatalogProgram, List, String, Map, List, Set)}
-	 *
-	 * @param queryProgram
+	 *  @param queryProgram
 	 *            This is an arbitrary Datalog Program. In this program ans
 	 *            predicates will be translated to Views.
 	 * @param signature
-	 *            The Select variables in the SPARQL query
+	 * @param optionalConstructTemplate
 	 */
 	@Override
-	public String generateSourceQuery(IntermediateQuery intermediateQuery,
-									  List<String> signature) throws OBDAException {
+	public SQLNativeQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+											  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 
 		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
 
@@ -346,14 +355,18 @@ public class SQLGenerator implements NativeQueryGenerator {
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
 			sql += modifier;
-			return sql;
+			return new SQLNativeQuery(sql, signature, optionalConstructTemplate);
 		} else {
-			return generateQuery(queryProgram, signature, "", ruleIndex,
+			String sqlQuery = generateQuery(queryProgram, signature, "", ruleIndex,
 					ruleIndexByBodyPredicate, predicatesInBottomUp,
 					extensionalPredicates);
+			return new SQLNativeQuery(sqlQuery, signature, optionalConstructTemplate);
 		}
 	}
 
+	/**
+	 * TODO: explain
+	 */
 	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
 		DatalogProgram unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 

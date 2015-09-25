@@ -21,9 +21,12 @@ package org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration;
  */
 
 import java.io.Serializable;
-import java.util.List;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 
 /**
@@ -35,13 +38,10 @@ public interface NativeQueryGenerator extends Serializable {
 	/**
 	 * Translates the given datalog program into a source query, which can later
 	 * be evaluated by a evaluation engine.
-	 * 
-	 * @param query
-	 *            the intermediate query
-	 * @return the source query
-	 * @throws org.semanticweb.ontop.model.OBDAException
+	 *
 	 */
-	public String generateSourceQuery(IntermediateQuery query, List<String> signature) throws OBDAException;
+	public NativeQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature,
+										   Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException;
 
 	public boolean hasDistinctResultSet() ;
     /**
@@ -49,4 +49,6 @@ public interface NativeQueryGenerator extends Serializable {
      * can return itself instead of a clone.
      */
     public NativeQueryGenerator cloneIfNecessary();
+
+	NativeQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate);
 }

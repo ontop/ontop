@@ -23,6 +23,7 @@ package org.semanticweb.ontop.protege4.views;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.OWLResultSetWriter;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
@@ -279,7 +280,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
 			public String executeQuery(QuestOWLStatement st, String query) throws OWLException{
-				return st.getUnfolding(query);
+				// UGLY!!! SQL-specific!
+				return ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
 			}
 
 			@Override

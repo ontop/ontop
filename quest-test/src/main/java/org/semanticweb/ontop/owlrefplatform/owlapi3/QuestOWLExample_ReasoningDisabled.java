@@ -7,8 +7,8 @@ import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
 import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -518,7 +518,7 @@ public class QuestOWLExample_ReasoningDisabled {
 				/*
 				 * Print the query summary
 				 */
-                String sqlQuery = st.getUnfolding(sparqlQuery);
+                String sqlQuery = ((SQLNativeQuery)st.getUnfolding(sparqlQuery)).getSQL();
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");

@@ -1,16 +1,17 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.owlrefplatform.core.execution.TargetQueryExecutionException;
+import org.semanticweb.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.sql.ResultSet;
 import java.util.Iterator;
 
 /**
@@ -109,7 +110,9 @@ public class SQLQuestStatement extends QuestStatement {
     @Override
     public int getTupleCount(String query) throws OBDAException {
 
-        String unf = unfoldAndGenerateTargetQuery(query).getNativeQueryString();
+
+        SQLNativeQuery targetQuery = checkAndConvertTargetQuery(unfoldAndGenerateTargetQuery(query));
+        String unf = targetQuery.getSQL();
         String newsql = "SELECT count(*) FROM (" + unf + ") t1";
         if (!isCanceled()) {
             try {
@@ -139,17 +142,18 @@ public class SQLQuestStatement extends QuestStatement {
         }
     }
 
-    protected void cancelTargetQueryStatement() throws TargetQueryExecutionException {
+    protected void cancelTargetQueryStatement() throws NativeQueryExecutionException {
         try {
             sqlStatement.cancel();
         } catch (SQLException e) {
-            throw new TargetQueryExecutionException(e.getMessage());
+            throw new NativeQueryExecutionException(e.getMessage());
         }
     }
 
     @Override
-    protected TupleResultSet executeBooleanQuery(TargetQuery targetQuery) throws TargetQueryExecutionException {
-        String sqlQuery = targetQuery.getNativeQueryString();
+    protected TupleResultSet executeBooleanQuery(NativeQuery nativeQuery) throws NativeQueryExecutionException {
+        SQLNativeQuery sqlTargetQuery = checkAndConvertTargetQuery(nativeQuery);
+        String sqlQuery = sqlTargetQuery.getSQL();
         if (sqlQuery.equals("")) {
             return new BooleanOWLOBDARefResultSet(false, this);
         }
@@ -158,42 +162,58 @@ public class SQLQuestStatement extends QuestStatement {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return new BooleanOWLOBDARefResultSet(set, this);
         } catch (SQLException e) {
-            throw new TargetQueryExecutionException(e.getMessage());
+            throw new NativeQueryExecutionException(e.getMessage());
         }
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(TargetQuery targetQuery) throws OBDAException {
-        String sqlQuery = targetQuery.getNativeQueryString();
+    protected TupleResultSet executeSelectQuery(NativeQuery nativeQuery) throws OBDAException {
+        SQLNativeQuery sqlTargetQuery = checkAndConvertTargetQuery(nativeQuery);
+        String sqlQuery = sqlTargetQuery.getSQL();
+
         if (sqlQuery.equals("") ) {
-            return new EmptyQueryResultSet(targetQuery.getSignature(), this);
+            return new EmptyQueryResultSet(nativeQuery.getSignature(), this);
         }
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            return new QuestResultset(set, targetQuery.getSignature(), this);
+            return new QuestResultset(set, nativeQuery.getSignature(), this);
         } catch (SQLException e) {
-            throw new TargetQueryExecutionException(e.getMessage());
+            throw new NativeQueryExecutionException(e.getMessage());
         }
     }
 
     @Override
-    protected GraphResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws  OBDAException {
-        String sqlQuery = targetQuery.getNativeQueryString();
-        SesameConstructTemplate constructTemplate = targetQuery.getConstructTemplate();
+    protected GraphResultSet executeGraphQuery(NativeQuery nativeQuery, boolean collectResults) throws  OBDAException {
+        SQLNativeQuery sqlTargetQuery = checkAndConvertTargetQuery(nativeQuery);
+
+        String sqlQuery = sqlTargetQuery.getSQL();
+        Optional<SesameConstructTemplate> optionalTemplate = sqlTargetQuery.getOptionalConstructTemplate();
+
+        if (!optionalTemplate.isPresent()) {
+            throw new IllegalArgumentException("A CONSTRUCT template is required for executing a graph query");
+        }
+
         TupleResultSet tuples;
 
         if (sqlQuery.equals("") ) {
-            tuples = new EmptyQueryResultSet(targetQuery.getSignature(), this);
+            tuples = new EmptyQueryResultSet(nativeQuery.getSignature(), this);
         }
         else {
             try {
-                java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new QuestResultset(set, targetQuery.getSignature(), this);
+                ResultSet set = sqlStatement.executeQuery(sqlQuery);
+                tuples = new QuestResultset(set, nativeQuery.getSignature(), this);
             } catch (SQLException e) {
-                throw new TargetQueryExecutionException(e.getMessage());
+                throw new NativeQueryExecutionException(e.getMessage());
             }
         }
-        return new QuestGraphResultSet(tuples, constructTemplate, collectResults);
+        return new QuestGraphResultSet(tuples, optionalTemplate.get(), collectResults);
+    }
+
+    private SQLNativeQuery checkAndConvertTargetQuery(NativeQuery nativeQuery) {
+        if (! (nativeQuery instanceof SQLNativeQuery)) {
+            throw new IllegalArgumentException("A SQLQuestStatement only accepts SQLTargetQuery instances");
+        }
+        return (SQLNativeQuery) nativeQuery;
     }
 
     protected Statement getSQLStatement() {
