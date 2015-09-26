@@ -25,6 +25,8 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.net.URI;
@@ -41,6 +43,9 @@ import org.slf4j.LoggerFactory;
 public class ParserFileTest extends TestCase {
 	private static final String ROOT = "src/test/resources/scenario/";
 
+	private static final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+
+	
 	final static Logger log = LoggerFactory
 			.getLogger(ParserFileTest.class);
 
@@ -121,7 +126,7 @@ public class ParserFileTest extends TestCase {
 		log.debug("=========== " + identifier + " ===========");
 		for (OBDAMappingAxiom axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
-			boolean result = parse(query);
+			boolean result = parse(query, idfac);
 
 			if (!result) {
 				log.error("Cannot parse query: " + query);
@@ -145,11 +150,11 @@ public class ParserFileTest extends TestCase {
 		return model;
 	}
 
-	private static boolean parse(String input) {
+	private static boolean parse(String input, QuotedIDFactory idfac) {
 		ParsedSQLQuery queryP;
 		
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (JSQLParserException e) {
 			log.debug(e.getMessage());
 			return false;

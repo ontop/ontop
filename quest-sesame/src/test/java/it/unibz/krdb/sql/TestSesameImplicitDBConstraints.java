@@ -54,7 +54,7 @@ public class TestSesameImplicitDBConstraints {
 	private Connection sqlConnection;
 	private QuestDBStatement qst = null;
 	
-	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 	/*
 	 * 	prepare ontop for rewriting and unfolding steps 
@@ -115,14 +115,14 @@ public class TestSesameImplicitDBConstraints {
 			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference);
 			if(applyUserConstraints){
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile, idfac);
 				qest1.setImplicitDBConstraints(userConstraints);
 			}
 		} else {
 			qest1 = new SesameVirtualRepo("", ontology, model, preference);
 			if(applyUserConstraints){
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile, idfac);
 
 				qest1.setImplicitDBConstraints(userConstraints);
 			}

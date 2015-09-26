@@ -43,6 +43,7 @@ public class SQLQueryParser {
 	public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
 
 	private final DBMetadata dbMetaData;
+	private final QuotedIDFactory idfac;
 	
 	private static int id_counter;
 	
@@ -51,11 +52,13 @@ public class SQLQueryParser {
 	// ONLY FOR DEEP PARSING
 	public SQLQueryParser(DBMetadata dbMetaData) {
  		this.dbMetaData = dbMetaData;
+ 		this.idfac = dbMetaData.getQuotedIDFactory();
 	}
 		
 	// ONLY FOR SHALLOW PARSING
-	public SQLQueryParser() {
+	public SQLQueryParser(QuotedIDFactory idfac) {
 		dbMetaData = null;
+		this.idfac = idfac;
 	}
 	
 	/**
@@ -102,7 +105,7 @@ public class SQLQueryParser {
 		ParsedSQLQuery queryParser = null;
 		
 		try {
-			queryParser = new ParsedSQLQuery(query, deeply);
+			queryParser = new ParsedSQLQuery(query, deeply, idfac);
 		} 
 		catch (JSQLParserException e) {
 			if (e.getCause() instanceof ParseException)
@@ -159,7 +162,7 @@ public class SQLQueryParser {
 		
 		ParsedSQLQuery queryParsed = null;
 		try {
-			queryParsed = new ParsedSQLQuery(select, false);
+			queryParsed = new ParsedSQLQuery(select, false, idfac);
 		} 
 		catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)
@@ -175,7 +178,7 @@ public class SQLQueryParser {
         ParsedSQLQuery queryParser = null;
         boolean supported = true;
         try {
-            queryParser = new ParsedSQLQuery(query, false);
+            queryParser = new ParsedSQLQuery(query, false, idfac);
         } 
         catch (JSQLParserException e) {
             supported = false;

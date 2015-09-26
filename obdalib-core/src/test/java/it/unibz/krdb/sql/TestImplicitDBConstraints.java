@@ -15,7 +15,7 @@ public class TestImplicitDBConstraints {
 	DBMetadata md;
 	Set<RelationID> tables;
 	
-	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 	
 	@Before
 	public void setupMetadata(){
@@ -36,7 +36,7 @@ public class TestImplicitDBConstraints {
 	
 	@Test
 	public void testEmptyUserConstraints() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/empty_constraints.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/empty_constraints.lst", idfac);
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 0);
 	}
@@ -44,14 +44,14 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testUserPKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst", idfac);
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 0);
 	}
 
 	@Test
 	public void testAddPrimaryKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst", idfac);
 		uc.addFunctionalDependencies(this.md);
 		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString("TABLENAME"));
 		Attribute attr = dd.getAttribute(idfac.createFromString("KEYNAME"));	
@@ -61,7 +61,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testGetReferredTables() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst", idfac);
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 1);
 		assertTrue(tables.contains(new RelationID(new QuotedID(null, ""), new QuotedID("TABLE2", ""))));
@@ -69,7 +69,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddForeignKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst", idfac);
 		uc.addForeignKeys(this.md);
 		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString("TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
@@ -81,7 +81,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
+		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst", idfac);
 		uc.addFunctionalDependencies(this.md);
 		uc.addForeignKeys(this.md);
 		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString("TABLENAME"));

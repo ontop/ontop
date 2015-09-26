@@ -134,13 +134,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * method descriptions.
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
+	public String generateSourceQuery(DatalogProgram query, List<String> signature, QuotedIDFactory idfac) throws OBDAException {
 		isDistinct = hasSelectDistinctStatement(query);
 		isOrderBy = hasOrderByClause(query);
 		if (query.getQueryModifiers().hasModifiers()) {
 			final String indent = "   ";
 			final String outerViewName = "SUB_QVIEW";
-			String subquery = generateQuery(query, signature, indent);
+			String subquery = generateQuery(query, signature, indent, idfac);
 
 			String modifier = "";
 			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
@@ -159,7 +159,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += modifier;
 			return sql;
 		} else {
-			return generateQuery(query, signature, "");
+			return generateQuery(query, signature, "", idfac);
 		}
 	}
 
@@ -190,7 +190,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * limit/offset/order by.
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
-								 String indent) throws OBDAException {
+								 String indent, QuotedIDFactory idfac) throws OBDAException {
 
 		int numberOfQueries = query.getRules().size();
 
@@ -237,7 +237,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				continue;
 			}
 
-			QueryAliasIndex index = new QueryAliasIndex(cq);
+			QueryAliasIndex index = new QueryAliasIndex(cq, idfac);
 
 			boolean innerdistincts = false;
 			if (isDistinct && !distinctResultSet && numberOfQueries == 1) {
@@ -1582,12 +1582,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
 		final Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
 		
-		final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-
+		final QuotedIDFactory idfac; 
+		
 		int dataTableCount = 0;
 		boolean isEmpty = false;
 
-		public QueryAliasIndex(CQIE query) {
+		public QueryAliasIndex(CQIE query, QuotedIDFactory idfac) {
+			this.idfac = idfac;
 			List<Function> body = query.getBody();
 			generateViews(body);
 		}

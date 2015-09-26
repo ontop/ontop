@@ -11,6 +11,10 @@ package it.unibz.krdb.sql;
 
 public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 
+	public QuotedIDFactoryStandardSQL() {
+		// NO-OP
+	}
+	
 	private static final String QUOTATION = "\"";
 	
 	@Override

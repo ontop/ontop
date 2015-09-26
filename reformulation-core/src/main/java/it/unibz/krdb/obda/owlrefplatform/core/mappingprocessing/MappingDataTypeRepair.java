@@ -123,7 +123,7 @@ public class MappingDataTypeRepair {
                  * @throws OBDAException
                  */
 
-    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
+    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv, QuotedIDFactory idfac) throws OBDAException {
 
         //get all the datatypes in the ontology
     	Map<Predicate, Datatype> dataTypesMap;
@@ -145,12 +145,12 @@ public class MappingDataTypeRepair {
 
                 // If the predicate is a data property
                 Term term = atom.getTerm(1);
-                insertDataTyping(term, atom, 1, termOccurenceIndex, qvv, dataTypesMap);
+                insertDataTyping(term, atom, 1, termOccurenceIndex, qvv, dataTypesMap, idfac);
             }
         }
 	}
 
-    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap) throws OBDAException {
+    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap, QuotedIDFactory idfac) throws OBDAException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -191,7 +191,7 @@ public class MappingDataTypeRepair {
                 else {
                     for (int i = 0; i < function.getArity(); i++) {
 
-                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex,  qvv, dataTypesMap );
+                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex,  qvv, dataTypesMap, idfac);
                     }
                 }
 
@@ -216,7 +216,7 @@ public class MappingDataTypeRepair {
                         Variable variable = (Variable) normal.getTerm(1);
 
                         //No Boolean datatype in DB2 database, the value in the database is used
-                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable, idfac);
                         Term newTerm = fac.getTypedTerm(variable, type);
                         atom.setTerm(position, newTerm);
                     }
@@ -241,7 +241,7 @@ public class MappingDataTypeRepair {
             // column type.
             Term newTerm;
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
-                Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable, idfac);
                 newTerm = fac.getTypedTerm(variable, type);
             } 
             else {
@@ -293,9 +293,7 @@ public class MappingDataTypeRepair {
      * @throws OBDAException
      */
     
-    private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-
-	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
+	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable, QuotedIDFactory idfac) throws OBDAException {
 		List<Object[]> list = termOccurenceIndex.get(variable.getName());
 		if (list == null) {
 			throw new OBDAException("Unknown term in head");

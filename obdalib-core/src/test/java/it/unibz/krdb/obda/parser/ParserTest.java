@@ -20,14 +20,19 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ParserTest extends TestCase {
 	final static Logger log = LoggerFactory.getLogger(ParserTest.class);
 
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL(); 
+	
 	// NO SUPPORT OLD SQL
 	public void test_1_1_1() {
 		final boolean result = parseJSQL("SELECT * FROM student");
@@ -678,7 +683,7 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 
 			return false;

@@ -62,14 +62,18 @@ public class ImplicitDBConstraints {
 	// Lists all tables referred to with a foreign key 
 	//    Used to read metadata also from these 
 	private final Set<String> referredTables = new HashSet<>();
+
+	
+	private final QuotedIDFactory idfac;
+	
 	
 	/**
 	 * Reads colon separated pairs of view name and primary key
 	 * @param filename The name of the plain-text file with the fake keys
 	 * @throws IOException 
 	 */
-	public ImplicitDBConstraints(String filename) {
-		this(new File(filename));
+	public ImplicitDBConstraints(String filename, QuotedIDFactory idfac) {
+		this(new File(filename), idfac);
 	}
 
 	/**
@@ -79,7 +83,8 @@ public class ImplicitDBConstraints {
 	 * 
 	 * @throws IOException 
 	 */
-	public ImplicitDBConstraints(File file) {
+	public ImplicitDBConstraints(File file, QuotedIDFactory idfac) {
+		this.idfac = idfac;
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = null;
@@ -155,9 +160,7 @@ public class ImplicitDBConstraints {
 		}
 		return false;
 	}
-	
-	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
+
 	/**
 	 * Adds RelationJSQL for all tables referred to by the user supplied foreign keys
 	 * 

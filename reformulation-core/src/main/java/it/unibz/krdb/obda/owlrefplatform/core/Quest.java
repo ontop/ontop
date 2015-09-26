@@ -56,6 +56,7 @@ import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
@@ -678,7 +679,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					// (the schema.table names) by parsing the mappings
 					
 					// Parse mappings. Just to get the table names in use
-					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
+					MappingParser mParser = new MappingParser(new QuotedIDFactoryStandardSQL(), 
+								unfoldingOBDAModel.getMappings(sourceId));
 							
 					try {
 						Set<RelationID> realTables = mParser.getRealTables();

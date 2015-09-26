@@ -83,7 +83,7 @@ public class QuestUnfolder {
 		 * Expand the meta mapping
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+		metaMappingExpander.expand(unfoldingOBDAModel, sourceId, metadata.getQuotedIDFactory());
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
@@ -116,7 +116,7 @@ public class QuestUnfolder {
 		 * Expand the meta mapping
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+		metaMappingExpander.expand(unfoldingOBDAModel, sourceId, metadata.getQuotedIDFactory());
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
@@ -158,8 +158,6 @@ public class QuestUnfolder {
 		return new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 	
-	private static final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
 	/***
 	 * Generates a map for each predicate in the body of the rules in 'program'
 	 * that contains the Primary Key data for the predicates obtained from the
@@ -179,6 +177,9 @@ public class QuestUnfolder {
 	 */
 	private static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
 			List<CQIE> program) {
+		
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+		
 		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
@@ -259,7 +260,7 @@ public class QuestUnfolder {
 
 		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
 		System.out.println(unfoldingProgram);
-		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv);
+		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv, metadata.getQuotedIDFactory());
 	}
 
 	/***

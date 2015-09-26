@@ -112,8 +112,6 @@ public class DBMetadataExtractor {
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 	
-	private final static QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
 	/**
 	 * Retrieves the database metadata (table schema and database constraints) 
 	 * 
@@ -139,7 +137,7 @@ public class DBMetadataExtractor {
 			
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (realTables == null || realTables.isEmpty())
-				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema));
+				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema), idfac);
 			else
 				tableList = getTableList(defaultSchema, realTables);
 			
@@ -149,7 +147,7 @@ public class DBMetadataExtractor {
 			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 					
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableList(conn, DB2RelationListProvider);
+				tableList = getTableList(conn, DB2RelationListProvider, idfac);
 			else 
 				tableList = getTableList(null, realTables);
 		}  
@@ -157,7 +155,7 @@ public class DBMetadataExtractor {
 			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 				
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableListDefault(md);
+				tableList = getTableListDefault(md, idfac);
 			else 
 				tableList = getTableList(null, realTables);
 		}
@@ -166,7 +164,7 @@ public class DBMetadataExtractor {
 					
 			// Postgres treats unquoted identifiers as lower-case
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableListDefault(md);
+				tableList = getTableListDefault(md, idfac);
 			else 
 				tableList = getTableList(null, realTables);
 		} 
@@ -174,7 +172,7 @@ public class DBMetadataExtractor {
 			//idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableList(conn, MSSQLServerRelationListProvider);
+				tableList = getTableList(conn, MSSQLServerRelationListProvider, idfac);
 			else
 				tableList = getTableList(null, realTables);
  		} 
@@ -183,7 +181,7 @@ public class DBMetadataExtractor {
 					
 			// For other database engines, i.e. MySQL
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableListDefault(md);
+				tableList = getTableListDefault(md, idfac);
 			else
 				tableList = getTableList(null, realTables);
 			
@@ -194,8 +192,8 @@ public class DBMetadataExtractor {
 		
 		for (RelationDefinition table : tableList) {
 			// ROMAN (20 Sep 2015): careful with duplicates
-			getTableColumns(md, table, dt);
-			getPrimaryKey(md, table);
+			getTableColumns(md, table, dt, idfac);
+			getPrimaryKey(md, table, idfac);
 			getUniqueAttributes(md, table);
 			metadata.add(table);
 			if (printouts)
@@ -205,7 +203,7 @@ public class DBMetadataExtractor {
 		// (refer to two relations), which requires all relations 
 		// to have been constructed 
 		for (RelationDefinition table : tableList) 
-			getForeignKeys(md, table, metadata);
+			getForeignKeys(md, table, metadata, idfac);
 		
 		return metadata;	
 	}
@@ -229,7 +227,7 @@ public class DBMetadataExtractor {
 	/**
 	 * Retrieve the table and view list from the JDBC driver (works for most database engines, e.g., MySQL and PostgreSQL)
 	 */
-	private static List<RelationDefinition> getTableListDefault(DatabaseMetaData md) throws SQLException {
+	private static List<RelationDefinition> getTableListDefault(DatabaseMetaData md, QuotedIDFactory idfac) throws SQLException {
 		List<RelationDefinition> tables = new LinkedList<>();
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
@@ -244,14 +242,14 @@ public class DBMetadataExtractor {
 	/**
 	 * Retrieve metadata for a specific database engine
 	 */
-	private static List<RelationDefinition> getTableList(Connection conn, RelationListProvider relationListProvider) throws SQLException {
+	private static List<RelationDefinition> getTableList(Connection conn, RelationListProvider relationListProvider, QuotedIDFactory idfac) throws SQLException {
 		
 		List<RelationDefinition> fks = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
 			// Obtain the relational objects (i.e., tables and views) 
 			try (ResultSet rs = stmt.executeQuery(relationListProvider.getQuery())) {
 				while (rs.next()) 
-					fks.add(relationListProvider.getTableDefinition(rs));
+					fks.add(relationListProvider.getTableDefinition(rs, idfac));
 			}
 		}
 		return fks; 
@@ -278,7 +276,7 @@ public class DBMetadataExtractor {
 	
 	private interface RelationListProvider {
 		String getQuery();
-		TableDefinition getTableDefinition(ResultSet rs) throws SQLException;
+		TableDefinition getTableDefinition(ResultSet rs, QuotedIDFactory idfac) throws SQLException;
 	}
 	
 	
@@ -314,7 +312,7 @@ public class DBMetadataExtractor {
 		}
 
 		@Override
-		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
+		public TableDefinition getTableDefinition(ResultSet rs, QuotedIDFactory idfac) throws SQLException {
 			RelationID id = idfac.createRelationFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
 			return new TableDefinition(id);
 		}
@@ -334,7 +332,7 @@ public class DBMetadataExtractor {
 		}
 
 		@Override
-		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
+		public TableDefinition getTableDefinition(ResultSet rs, QuotedIDFactory idfac) throws SQLException {
 			RelationID id = idfac.createRelationFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
 			return new TableDefinition(id);
 		}
@@ -354,7 +352,7 @@ public class DBMetadataExtractor {
 		}
 
 		@Override
-		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
+		public TableDefinition getTableDefinition(ResultSet rs, QuotedIDFactory idfac) throws SQLException {
 			//String tblCatalog = rs.getString("TABLE_CATALOG");
 			RelationID id = idfac.createRelationFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
 			return new TableDefinition(id);
@@ -409,7 +407,7 @@ public class DBMetadataExtractor {
 	
 	
 	
-	private static void getTableColumns(DatabaseMetaData md, RelationDefinition table, DatatypeNormalizer dt) throws SQLException {
+	private static void getTableColumns(DatabaseMetaData md, RelationDefinition table, DatatypeNormalizer dt, QuotedIDFactory idfac) throws SQLException {
 		// needed for checking uniqueness of lower-case versions of columns names
 		//  (only in getOtherMetadata)
 		//Set<String> tableColumns = new HashSet<>();
@@ -484,7 +482,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the primary key for the table 
 	 * 
 	 */
-	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table, QuotedIDFactory idfac) throws SQLException {
 		UniqueConstraint.Builder pk = UniqueConstraint.builder(table);
 		String pkName = "";
 		RelationID id = table.getName();
@@ -534,7 +532,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the foreign keys for the table 
 	 * 
 	 */
-	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata) throws SQLException {
+	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata, QuotedIDFactory idfac) throws SQLException {
 		
 		RelationID id = table.getName();
 		

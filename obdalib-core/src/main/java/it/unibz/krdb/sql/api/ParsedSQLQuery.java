@@ -61,8 +61,7 @@ public class ParsedSQLQuery implements Serializable {
 
 //	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
-	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
+	private final QuotedIDFactory idfac;
 	
 	private List<TableJSQL> tables;
 	private List<RelationID> relations;
@@ -88,7 +87,8 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 
 
-	public ParsedSQLQuery(String queryString, boolean deepParsing) throws JSQLParserException {
+	public ParsedSQLQuery(String queryString, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
+		this.idfac = idfac;
 		query = queryString;
 		this.deepParsing = deepParsing;
 		Statement stm = CCJSqlParserUtil.parse(query);
@@ -105,7 +105,8 @@ public class ParsedSQLQuery implements Serializable {
 	 *            for unsupported query in the mapping
 	 * @throws JSQLParserException
 	 */
-	public ParsedSQLQuery(Statement statement, boolean deepParsing) throws JSQLParserException {
+	public ParsedSQLQuery(Statement statement, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
+		this.idfac = idfac;
 		query = statement.toString();
 		this.deepParsing = deepParsing;
 		init(statement);

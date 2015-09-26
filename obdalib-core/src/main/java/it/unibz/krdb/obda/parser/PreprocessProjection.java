@@ -37,7 +37,8 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     private String aliasSubselect ;
 
-    final private DBMetadata metadata;
+    private final DBMetadata metadata;
+    private final  QuotedIDFactory idfac;
     private Set<Variable> variables;
 
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -46,7 +47,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         //use the metadata to get the column names
         this.metadata = metadata;
-
+        this.idfac = metadata.getQuotedIDFactory();
     }
 
     /**
@@ -267,8 +268,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         selectAll = false;
         return result;
     }
-
-	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
     /**
      From a table, obtain all its columns using the metadata information

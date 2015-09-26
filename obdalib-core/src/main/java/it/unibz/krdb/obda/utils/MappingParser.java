@@ -22,6 +22,8 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.TableJSQL;
@@ -51,9 +53,9 @@ public class MappingParser {
 	private List<ParsedMapping> parsedMappings;
 	private Set<RelationID> realTables; // Tables that are not view definitions
 	
-	public MappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
+	public MappingParser(QuotedIDFactory idfac, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappingList = mappingAxioms;
-		this.sqlQueryParser = new SQLQueryParser(/*conn*/); // ROMAN (21 Sep 2015): shallow parsing anyway
+		this.sqlQueryParser = new SQLQueryParser(idfac); 
 		this.parsedMappings = this.parseMappings();
 	}
 

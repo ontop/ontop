@@ -97,10 +97,10 @@ public class MetaMappingExpander {
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings, QuotedIDFactory idfac) throws SQLException, JSQLParserException {
 
 		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
-		SQLQueryParser translator = new SQLQueryParser();
+		SQLQueryParser translator = new SQLQueryParser(idfac);
 
 		for (OBDAMappingAxiom mapping : mappings) {
 
@@ -141,9 +141,9 @@ public class MetaMappingExpander {
 					continue;
 				}
 				
-				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
+				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList, idfac);
 				
-				List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(sourceQueryParsed, columnsForTemplate, varsInTemplate);
+				List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(sourceQueryParsed, columnsForTemplate, varsInTemplate, idfac);
 				
 				List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
@@ -154,7 +154,7 @@ public class MetaMappingExpander {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
 							bodyAtom, sourceQueryParsed, columnsForTemplate,
-							columnsForValues, params, arity);
+							columnsForValues, params, arity, idfac);
 										
 					expandedMappings.add(newMapping);	
 					
@@ -169,7 +169,7 @@ public class MetaMappingExpander {
 		return expandedMappings;
 	}
 
-	private List<List<String>> getParamsForClassTemplate(ParsedSQLQuery sourceQueryParsed, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate) throws SQLException {
+	private List<List<String>> getParamsForClassTemplate(ParsedSQLQuery sourceQueryParsed, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate, QuotedIDFactory idfac) throws SQLException {
 		
 		/**
 		 * The query for params is almost the same with the original source query, except that
@@ -178,7 +178,7 @@ public class MetaMappingExpander {
 		
 		ParsedSQLQuery distinctParsedQuery = null;
 		try {
-			distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false);
+			distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false, idfac);
 		} 
 		catch (JSQLParserException e1) {
 			throw new IllegalArgumentException(e1);
@@ -253,7 +253,7 @@ public class MetaMappingExpander {
 			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
-			List<String> params, int arity) throws JSQLParserException {
+			List<String> params, int arity, QuotedIDFactory idfac) throws JSQLParserException {
 		
 		/*
 		 * First construct new Target Query 
@@ -301,7 +301,7 @@ public class MetaMappingExpander {
 		 * we create a new statement with the changed projection and selection
 		 */
 		
-		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(), false);
+		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(), false, idfac);
 		newSourceParsedQuery.setProjection(newProjection);
 		newSourceParsedQuery.setWhereClause(selection);
 		
@@ -312,8 +312,6 @@ public class MetaMappingExpander {
 		return newMapping;
 	}
 
-	private static final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
 	/**
 	 * This method get the columns which will be used for the predicate template 
 	 * 
@@ -322,7 +320,7 @@ public class MetaMappingExpander {
 	 * @return
 	 */
 	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
-			List<SelectExpressionItem> columnList) {
+			List<SelectExpressionItem> columnList, QuotedIDFactory idfac) {
 		
 		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>(varsInTemplate.size());
 		for (Variable var : varsInTemplate) {
@@ -466,8 +464,8 @@ public class MetaMappingExpander {
 	 * 		expanded normal mappings
 	 * @throws Exception 
 	 */
-	public void expand(OBDAModel obdaModel, URI sourceURI) throws Exception {
-		List<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
+	public void expand(OBDAModel obdaModel, URI sourceURI, QuotedIDFactory idfac) throws Exception {
+		List<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI), idfac);
 		
 		obdaModel.removeAllMappings();
 		for(OBDAMappingAxiom mapping : expandedMappings) {

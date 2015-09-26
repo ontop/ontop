@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.sql.QuotedIDFactory;
 
 import java.io.Serializable;
 import java.util.List;
@@ -45,7 +46,7 @@ public interface SQLQueryGenerator extends Serializable {
 	 * @return the source query
 	 * @throws Exception
 	 */
-	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
+	public String generateSourceQuery(DatalogProgram query, List<String> signature, QuotedIDFactory idfac) throws OBDAException;
 
 	public boolean hasDistinctResultSet() ;
 }

@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
+
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -60,6 +61,7 @@ public class TestQuestImplicitDBConstraints {
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 	
 	public void start_reasoner(String owlfile, String obdafile, String sqlfile) throws Exception {
@@ -172,7 +174,7 @@ public class TestQuestImplicitDBConstraints {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		
 		// Parsing user constraints
-		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile, idfac);
 		factory.setImplicitDBConstraints(userConstraints);
 		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -194,7 +196,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		// Parsing user constraints
-		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile, idfac);
 		factory.setImplicitDBConstraints(userConstraints);
 		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -246,7 +248,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysTablesWithUC() throws Exception {
 		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create);
 		// Parsing user constraints
-		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(fk_keyfile);
+		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(fk_keyfile, idfac);
 		factory.setImplicitDBConstraints(userConstraints);
 		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 

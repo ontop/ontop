@@ -13,9 +13,10 @@ import org.junit.Test;
 
 public class QuotedIdentifierTest {
 
+	QuotedIDFactory fac = new QuotedIDFactoryStandardSQL();
+		
 	@Test
 	public void test1() {
-		QuotedIDFactory fac = new QuotedIDFactoryStandardSQL();
 		
 		assertEquals(fac.createFromDatabaseRecord("A").getSQLRendering(), "\"A\"");
 
@@ -48,7 +49,6 @@ public class QuotedIdentifierTest {
 	
 	public void test1b() {
 		Set<QuotedID> s = new HashSet<>();
-		QuotedIDFactory fac = new QuotedIDFactoryStandardSQL();
 		
 		s.add(fac.createFromString("aaa"));
 		s.add(fac.createFromString("\"AAA\""));
@@ -62,7 +62,7 @@ public class QuotedIdentifierTest {
 	
 	@Test
 	public void test2() {
-		SQLQueryParser parser = new SQLQueryParser();
+		SQLQueryParser parser = new SQLQueryParser(fac);
 		
 		String s = "SELECT Able.\"id\", bB.Col4 AS c FROM TaBle1 able, (SELECT col4 FROM Bable) Bb, " +
 					"c JOIN d ON c.id = d.Id " +
@@ -77,7 +77,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test2b() throws Exception {
-		SQLQueryParser parser = new SQLQueryParser();
+		SQLQueryParser parser = new SQLQueryParser(fac);
 		
 		String s = "SELECT a.id AS c FROM A";
 		
@@ -90,7 +90,7 @@ public class QuotedIdentifierTest {
 	
 	@Test
 	public void test3() throws Exception {
-		SQLQueryParser parser = new SQLQueryParser();
+		SQLQueryParser parser = new SQLQueryParser(fac);
 		
 		String s = "SELECT * FROM A JOIN B ON NOT (a.id <> b.id)";
 		
