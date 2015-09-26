@@ -35,13 +35,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
+import it.unibz.krdb.sql.QualifiedAttributeID;
+import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import org.openrdf.model.Literal;
 
@@ -661,21 +660,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		/*
-		 * For each variable we collect all the columns that shold be equated
+		 * For each variable we collect all the columns that should be equated
 		 * (due to repeated positions of the variable). then we form atoms of
 		 * the form "COL1 = COL2"
 		 */
 		for (Variable var : currentLevelVariables) {
-			Set<String> references = index.getColumnReferences(var);
+			Set<QualifiedAttributeID> references = index.getColumnReferences(var);
 			if (references.size() < 2) {
 				// No need for equality
 				continue;
 			}
-			Iterator<String> referenceIterator = references.iterator();
-			String leftColumnReference = referenceIterator.next();
+			Iterator<QualifiedAttributeID> referenceIterator = references.iterator();
+			QualifiedAttributeID leftColumnReference = referenceIterator.next();
 			while (referenceIterator.hasNext()) {
-				String rightColumnReference = referenceIterator.next();
-				String equality = String.format("(%s = %s)", leftColumnReference, rightColumnReference);
+				QualifiedAttributeID rightColumnReference = referenceIterator.next();
+				String leftColumnString = leftColumnReference.getSQLRendering();
+				String rightColumnString = rightColumnReference.getSQLRendering();
+				String equality = String.format("(%s = %s)", leftColumnString, rightColumnString);
 				equalities.add(equality);
 				leftColumnReference = rightColumnReference;
 			}
@@ -1209,7 +1210,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * A URI function always returns a string, thus it is a string column type.
 				 */
 				return !isSI;
-			} else {
+			} 
+			else {
 				if (isUnary(function)) {
 
 					/*
@@ -1220,41 +1222,34 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return isStringColType(term, index);
 				}
 			}
-		} else if (term instanceof Variable) {
-			Set<String> viewdef = index.getColumnReferences((Variable) term);
-			String def = viewdef.iterator().next();
-			String col = def.split("\\.")[1];
-			String table = def.split("\\.")[0];
-			if (def.startsWith("QVIEW")) {
-				Map<Function, String> views = index.viewNames;
-				for (Function func : views.keySet()) {
-					String value = views.get(func);
-					if (value.equals(def.split("\\.")[0])) {
-						table = func.getFunctionSymbol().toString();
+		} 
+		else if (term instanceof Variable) {
+			Set<QualifiedAttributeID> viewdef = index.getColumnReferences((Variable) term);
+			QualifiedAttributeID def = viewdef.iterator().next();
+			QuotedID attributeId = def.getAttribute();
+			RelationID tableId = null;
+			if (def.getRelation().getTableName().startsWith("QVIEW")) {
+				for (Map.Entry<Function, RelationID> entry : index.viewNames.entrySet()) {
+					RelationID value = entry.getValue();
+					if (value.equals(def.getRelation())) {
+						String predName = entry.getKey().getFunctionSymbol().toString();
+						tableId = RelationID.createRelationFromPredicateName(predName);
 						break;
 					}
 				}
 			}
-			Collection<TableDefinition> tables = metadata.getTables();
-			for (TableDefinition tabledef: tables) {
-				if (tabledef.getID().equals(table)) {
-					Collection<Attribute> attr = tabledef.getAttributes();
-					for (Attribute a : attr) {
-						if (a.getID().equals(col)) {
-							switch (a.getType()) {
-								case Types.VARCHAR:
-								case Types.CHAR:
-								case Types.LONGNVARCHAR:
-								case Types.LONGVARCHAR:
-								case Types.NVARCHAR:
-								case Types.NCHAR:
-									return true;
-								default:
-									return false;
-							}
-						}
-					}
-				}
+			RelationDefinition table = metadata.getDefinition(tableId);
+			Attribute a = table.getAttribute(attributeId);
+			switch (a.getType()) {
+				case Types.VARCHAR:
+				case Types.CHAR:
+				case Types.LONGNVARCHAR:
+				case Types.LONGVARCHAR:
+				case Types.NVARCHAR:
+				case Types.NCHAR:
+					return true;
+				default:
+					return false;
 			}
 		}
 		return false;
@@ -1313,7 +1308,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			}
 			return getSQLLexicalForm(ct);
-		} else if (term instanceof URIConstant) {
+		} 
+		else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
 				int id = uriRefIds.getId(uri);
@@ -1321,13 +1317,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			URIConstant uc = (URIConstant) term;
 			return sqladapter.getSQLLexicalFormString(uc.toString());
-		} else if (term instanceof Variable) {
+		} 
+		else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			Set<String> posList = index.getColumnReferences(var);
+			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
 			if (posList == null || posList.size() == 0) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
-			return posList.iterator().next();
+			return posList.iterator().next().getSQLRendering();
 		}
 
 		/* If its not constant, or variable its a function */
@@ -1577,10 +1574,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	public class QueryAliasIndex {
 
-		final Map<Function, String> viewNames = new HashMap<>();
-		final Map<Function, RelationID> tableNames = new HashMap<>();
+		final Map<Function, RelationID> viewNames = new HashMap<>();
 		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
-		final Map<Variable, Set<String>> columnReferences = new HashMap<>();
+		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 		
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -1615,7 +1611,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		private void generateViewsIndexVariables(Function atom) {
 			if (atom.getFunctionSymbol() instanceof BooleanOperationPredicate) {
 				return;
-			} else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {
+			} 
+			else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {
 				List<Term> lit = atom.getTerms();
 				for (Term subatom : lit) {
 					if (subatom instanceof Function) {
@@ -1631,9 +1628,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				isEmpty = true;
 				return;
 			}
-			dataTableCount += 1;
-			viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
-			tableNames.put(atom, def.getID());
+			dataTableCount++;
+			viewNames.put(atom, RelationID.createRelationFromPredicateName(String.format(VIEW_NAME, dataTableCount)));
 			dataDefinitions.put(atom, def);
 
 			indexVariables(atom);
@@ -1641,20 +1637,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		private void indexVariables(Function atom) {
 			RelationDefinition def = dataDefinitions.get(atom);
-			String viewName = viewNames.get(atom);
+			RelationID viewName = viewNames.get(atom);
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
 				if (!(term instanceof Variable)) {
 					continue;
 				}
-				Set<String> references = columnReferences.get(term);
+				Set<QualifiedAttributeID> references = columnReferences.get(term);
 				if (references == null) {
 					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
-				String columnName = def.getAttribute(index + 1).getID().getName();   // indexes from 1
-				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
-				references.add(reference);
+				QuotedID columnId = def.getAttribute(index + 1).getID();   // indexes from 1
+				QualifiedAttributeID qualifiedId = new QualifiedAttributeID(viewName, columnId);
+				references.add(qualifiedId);
 			}
 		}
 
@@ -1666,7 +1662,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * @param var
 		 *            The variable we want the referenced columns.
 		 */
-		public Set<String> getColumnReferences(Variable var) {
+		public Set<QualifiedAttributeID> getColumnReferences(Variable var) {
 			return columnReferences.get(var);
 		}
 
@@ -1676,23 +1672,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 		public String getViewDefinition(Function atom) {
 			RelationDefinition def = dataDefinitions.get(atom);
 			if (def instanceof TableDefinition) {
-				return sqladapter.sqlTableName(tableNames.get(atom).getSQLRendering(), viewNames.get(atom));
+				return sqladapter.sqlTableName(dataDefinitions.get(atom).getID().getSQLRendering(), 
+									viewNames.get(atom).getSQLRendering());
 			} 
 			else if (def instanceof ViewDefinition) {
-				return String.format("(%s) %s", ((ViewDefinition) def).getStatement(), viewNames.get(atom));
+				return String.format("(%s) %s", ((ViewDefinition) def).getStatement(), 
+								viewNames.get(atom).getSQLRendering());
 			}
 			throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);
 		}
 
-		public String getView(Function atom) {
-			return viewNames.get(atom);
-		}
-
 		public String getColumnReference(Function atom, int column) {
-			String viewName = getView(atom);
+			RelationID viewName = viewNames.get(atom);
 			RelationDefinition def = dataDefinitions.get(atom);
-			String columnname = def.getAttribute(column + 1).getID().getName(); // indexes from 1
-			return sqladapter.sqlQualifiedColumn(viewName, columnname);
+			QuotedID columnname = def.getAttribute(column + 1).getID(); // indexes from 1
+			return new QualifiedAttributeID(viewName, columnname).getSQLRendering();
 		}
 	}
 }
