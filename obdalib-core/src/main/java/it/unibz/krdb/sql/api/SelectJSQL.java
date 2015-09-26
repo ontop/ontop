@@ -20,6 +20,8 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
+import it.unibz.krdb.sql.RelationID;
+
 import java.io.Serializable;
 
 import net.sf.jsqlparser.statement.select.SubSelect;
@@ -33,40 +35,17 @@ public class SelectJSQL implements Serializable{
 		 * Since with Name we don't want to consider columns.
 		 */
 		
-		private String body;
-		private String alias;
+		private final String body;
+		private final RelationID alias;
 		
 		
-		public SelectJSQL(String subSelect, String alias) {
-			setAlias(alias);
-			setBody(subSelect);
-
-		}
-		
-		public SelectJSQL(SubSelect sSelect){
-			if(sSelect.getAlias()!= null)
-				setAlias(sSelect.getAlias().getName());
-			setBody(sSelect.getSelectBody().toString());
-
-		}
-
-		
-		public void setAlias(String alias) {
-			if (alias == null) {
-				return;
-			}
+		public SelectJSQL(String subSelect, RelationID alias) {
+			this.body = subSelect;
 			this.alias = alias;
 		}
-
-		public String getAlias() {
-			return alias;
-		}
 		
-		public void setBody(String string) {
-			if (string == null) {
-				return;
-			}
-			this.body = string;
+		public RelationID getAlias() {
+			return alias;
 		}
 		
 		public String getBody() {
@@ -75,7 +54,6 @@ public class SelectJSQL implements Serializable{
 		
 		@Override
 		public String toString() {
-
 			return body;
 		}
 

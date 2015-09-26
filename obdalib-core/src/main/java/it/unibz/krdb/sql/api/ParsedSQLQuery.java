@@ -165,7 +165,7 @@ public class ParsedSQLQuery implements Serializable {
 	public List<SelectJSQL> getSubSelects() {
 
 		if (subSelects == null) {
-			SubSelectVisitor visitor = new SubSelectVisitor(selectQuery);
+			SubSelectVisitor visitor = new SubSelectVisitor(selectQuery, idfac);
 			subSelects = visitor.getSubSelects();
 		}
 		return subSelects;

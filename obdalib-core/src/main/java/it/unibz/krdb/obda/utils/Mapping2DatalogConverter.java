@@ -296,8 +296,13 @@ public class Mapping2DatalogConverter {
     	void put(RelationID relationId, QuotedID attributeId, Term expression) {
     		QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationId, attributeId);
     		Term prev = lookupTable.put(qualifiedId, expression);
-    		if (prev != null && !prev.equals(expression))
-    			System.err.println("DUPLICATE: " + prev + " AND " + expression + " FOR " + qualifiedId);
+    		if (prev != null && !prev.equals(expression)) {
+    			//System.err.println("DUPLICATE: " + prev + " AND " + expression + " FOR " + qualifiedId);
+    			// there is another expression for the same qualified attribute id
+    			// (i.e., ambiguous column name) 
+    			// reset the value to null to indicate the ambiguity
+    			lookupTable.put(qualifiedId, null);
+    		}
     	}
     	
     	Term get(QualifiedAttributeID qualifiedId) {
@@ -346,15 +351,14 @@ public class Mapping2DatalogConverter {
 				// ROMAN (26 Sep 2015): I'm not sure it should be in this loop
 				//check if we do not have subselect with alias name assigned
 				for (SelectJSQL subSelect: queryParsed.getSubSelects()) {
-					String subSelectAlias = subSelect.getAlias();
+					RelationID subSelectAlias = subSelect.getAlias();
 					if (subSelectAlias != null) 
-						lookupTable.put(idfac.createRelationFromString(null, subSelectAlias), attributeId, var);
+						lookupTable.put(subSelectAlias, attributeId, var);
 				}
 				index++;
 			}
 		}
-
-		
+	
         for (Map.Entry<QuotedID, Expression> item : aliasMap.entrySet()) {
  			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable, idfac);
 			Term atom = visitor.visitEx(item.getValue());

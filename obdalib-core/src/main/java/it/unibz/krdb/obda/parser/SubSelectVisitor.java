@@ -20,9 +20,12 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.SelectJSQL;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
@@ -101,10 +104,11 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
-	private final List<SelectJSQL> subSelects = new ArrayList<>();
+	private final List<SelectJSQL> subSelects = new LinkedList<>();
+	private final QuotedIDFactory idfac;
 
-
-	public SubSelectVisitor(Select select) {
+	public SubSelectVisitor(Select select,  QuotedIDFactory idfac) {
+		this.idfac = idfac;
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
@@ -165,7 +169,11 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	@Override
 	public void visit(SubSelect subSelect) {
 		subSelect.getSelectBody().accept(this);
-		subSelects.add(new SelectJSQL(subSelect));
+		RelationID subSelectId = null;
+		if (subSelect.getAlias() != null)
+			subSelectId = idfac.createRelationFromString(null, subSelect.getAlias().getName());
+		SelectJSQL ss = new SelectJSQL(subSelect.getSelectBody().toString(), subSelectId);
+		subSelects.add(ss);
 	}
 
 	/*

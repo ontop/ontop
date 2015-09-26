@@ -1255,7 +1255,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return false;
 	}
 
-	private static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 	
 	private static String trimLiteral(String string) {
 		while (pQuotes.matcher(string).matches()) {
