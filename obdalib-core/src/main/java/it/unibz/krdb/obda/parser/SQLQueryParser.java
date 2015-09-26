@@ -184,7 +184,7 @@ public class SQLQueryParser {
             supported = false;
         }
 
-        ViewDefinition viewDefinition = new ViewDefinition(idfac.createRelationFromString(viewName), query);
+        ViewDefinition viewDefinition = new ViewDefinition(idfac.createRelationFromString(null, viewName), query);
        
         if (supported) {
             List<String> columns = queryParser.getColumns();

@@ -24,7 +24,7 @@ import java.sql.Types;
 
 public class Attribute {
 	
-	private final QuotedID name;
+	private final QuotedID id;
 	private final int index;
 	private final int type;
 	private final String typeName;
@@ -32,17 +32,17 @@ public class Attribute {
 	
 	private final RelationDefinition table;
 	
-	Attribute(RelationDefinition relation, int index, QuotedID name, int type, String typeName, boolean canNull) {
+	Attribute(RelationDefinition relation, int index, QuotedID id, int type, String typeName, boolean canNull) {
 		this.table = relation;
 		this.index = index;
-		this.name = name;
+		this.id = id;
 		this.type = type;
 		this.typeName = typeName;
 		this.canNull = canNull;
 	}
 	
-	public QuotedID getName() {
-		return name;
+	public QuotedID getID() {
+		return id;
 	}
 	
 	public RelationDefinition getRelation() {
@@ -76,7 +76,7 @@ public class Attribute {
 	
 	@Override
 	public String toString() {
-		return name + ": " + type;
+		return id + ": " + type;
 	}
 	
 	@Override
@@ -87,7 +87,7 @@ public class Attribute {
 		if (obj instanceof Attribute) {
 			Attribute other = (Attribute)obj;
 			//                                 the same reference(!) for the table
-			return this.name.equals(other.name) && (this.table == other.table);  
+			return this.id.equals(other.id) && (this.table == other.table);  
 		}
 		
 		return false;
@@ -95,6 +95,6 @@ public class Attribute {
 	
 	@Override 
 	public int hashCode() {
-		return name.hashCode();
+		return id.hashCode();
 	}
 }

@@ -474,14 +474,14 @@ public class QuestStatement implements OBDAStatement {
 		program.removeRules(toRemove);
 	}
 
-	private String getSQL(DatalogProgram query, List<String> signature, QuotedIDFactory idfac) throws OBDAException {
+	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
 		if (query.getRules().size() == 0) {
 			return "";
 		}
 		log.debug("Producing the SQL string...");
 
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
-		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(query, signature, idfac);
+		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(query, signature);
 
 		log.debug("Resulting SQL: \n{}", sql);
 		return sql;
@@ -680,7 +680,7 @@ public class QuestStatement implements OBDAStatement {
 				unfoldingTime = System.currentTimeMillis() - startTime;
 
 				
-				sql = getSQL(programAfterUnfolding, signatureContainer, questInstance.getMetaData().getQuotedIDFactory());
+				sql = getSQL(programAfterUnfolding, signatureContainer);
 				// cacheQueryAndProperties(strquery, sql);
 				questInstance.cacheSQL(strquery, sql);
 			} 

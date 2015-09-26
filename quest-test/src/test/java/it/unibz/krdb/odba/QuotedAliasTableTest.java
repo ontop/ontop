@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.sql.api.TableJSQL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

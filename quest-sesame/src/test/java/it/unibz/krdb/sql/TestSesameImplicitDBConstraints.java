@@ -153,7 +153,7 @@ public class TestSesameImplicitDBConstraints {
 	}
 
 	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 		tableDefinition.addAttribute(idfac.createFromString("COL1"), java.sql.Types.INTEGER, null, false);
 		tableDefinition.addAttribute(idfac.createFromString("COL2"), java.sql.Types.INTEGER, null, false);
 		return tableDefinition;

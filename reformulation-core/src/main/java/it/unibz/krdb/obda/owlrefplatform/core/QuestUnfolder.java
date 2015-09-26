@@ -178,8 +178,6 @@ public class QuestUnfolder {
 	private static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
 			List<CQIE> program) {
 		
-		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
-		
 		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
@@ -190,7 +188,7 @@ public class QuestUnfolder {
 				if (pkeys.containsKey(newAtomPredicate))
 					continue;
 				
-				RelationID newAtomName = idfac.createRelationFromString(newAtomPredicate.toString());
+				RelationID newAtomName = RelationID.createRelationFromPredicateName(newAtomPredicate.toString());
 				RelationDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					// primary keys
@@ -260,7 +258,7 @@ public class QuestUnfolder {
 
 		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
 		System.out.println(unfoldingProgram);
-		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv, metadata.getQuotedIDFactory());
+		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv);
 	}
 
 	/***

@@ -20,10 +20,10 @@ public class TestImplicitDBConstraints {
 	@Before
 	public void setupMetadata(){
 		this.md = new DBMetadata("dummy class", null, null, idfac);
-		TableDefinition td = new TableDefinition(idfac.createRelationFromString("TABLENAME"));
+		TableDefinition td = new TableDefinition(idfac.createRelationFromString(null, "TABLENAME"));
 		td.addAttribute(idfac.createFromString("KEYNAME"), 0, null, false); // from 1
 		md.add(td); 
-		TableDefinition td2 = new TableDefinition(idfac.createRelationFromString("TABLE2"));
+		TableDefinition td2 = new TableDefinition(idfac.createRelationFromString(null, "TABLE2"));
 		td2.addAttribute(idfac.createFromString("KEY1"), 0, null, false);  // from 1
 		td2.addAttribute(idfac.createFromString("KEY2"), 0, null, false);
 		md.add(td2);
@@ -53,7 +53,7 @@ public class TestImplicitDBConstraints {
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst", idfac);
 		uc.addFunctionalDependencies(this.md);
-		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString("TABLENAME"));
+		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString(null, "TABLENAME"));
 		Attribute attr = dd.getAttribute(idfac.createFromString("KEYNAME"));	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
 	}
@@ -71,12 +71,12 @@ public class TestImplicitDBConstraints {
 	public void testAddForeignKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst", idfac);
 		uc.addForeignKeys(this.md);
-		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString("TABLENAME"));
+		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
-		assertEquals(fk.getComponents().get(0).getReference().getRelation().getName(), 
-				idfac.createRelationFromString("TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getName(), idfac.createFromString("KEY1"));
+		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(), 
+				idfac.createRelationFromString(null, "TABLE2"));
+		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createFromString("KEY1"));
 	}
 
 	@Test
@@ -84,12 +84,12 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst", idfac);
 		uc.addFunctionalDependencies(this.md);
 		uc.addForeignKeys(this.md);
-		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString("TABLENAME"));
+		RelationDefinition dd = this.md.getDefinition(idfac.createRelationFromString(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
-		assertEquals(fk.getComponents().get(0).getReference().getRelation().getName(), 
-						idfac.createRelationFromString("TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getName(), idfac.createFromString("KEY1"));
+		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(), 
+						idfac.createRelationFromString(null, "TABLE2"));
+		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createFromString("KEY1"));
 		assertEquals(dd.getUniqueConstraints().get(0).getAttributes(),
 							ImmutableList.of(dd.getAttribute(idfac.createFromString("KEYNAME")))); 
 	}

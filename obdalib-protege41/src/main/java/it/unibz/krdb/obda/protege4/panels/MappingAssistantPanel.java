@@ -716,13 +716,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(",");
 			}
 			sb.append(" ");
-			sb.append(attr.getName());
+			sb.append(attr.getID());
 			needComma = true;
 		}
 		sb.append(" ");
 		sb.append("from");
 		sb.append(" ");
-		sb.append(table.getName());
+		sb.append(table.getID());
 		return sb.toString();
 	}
 
@@ -899,12 +899,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						TableDefinition td = (TableDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
-						label.setText(td.getName().getSQLRendering());
+						label.setText(td.getID().getSQLRendering());
 					} else if (value instanceof ViewDefinition) {
 						ViewDefinition vd = (ViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);
-						label.setText(vd.getName().getSQLRendering());
+						label.setText(vd.getID().getSQLRendering());
 					}
 					return label;
 				}

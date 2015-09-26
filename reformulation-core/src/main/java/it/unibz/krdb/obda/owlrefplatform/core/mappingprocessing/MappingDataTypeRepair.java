@@ -123,7 +123,7 @@ public class MappingDataTypeRepair {
                  * @throws OBDAException
                  */
 
-    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv, QuotedIDFactory idfac) throws OBDAException {
+    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
 
         //get all the datatypes in the ontology
     	Map<Predicate, Datatype> dataTypesMap;
@@ -145,12 +145,12 @@ public class MappingDataTypeRepair {
 
                 // If the predicate is a data property
                 Term term = atom.getTerm(1);
-                insertDataTyping(term, atom, 1, termOccurenceIndex, qvv, dataTypesMap, idfac);
+                insertDataTyping(term, atom, 1, termOccurenceIndex, qvv, dataTypesMap);
             }
         }
 	}
 
-    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap, QuotedIDFactory idfac) throws OBDAException {
+    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap) throws OBDAException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -191,7 +191,7 @@ public class MappingDataTypeRepair {
                 else {
                     for (int i = 0; i < function.getArity(); i++) {
 
-                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex,  qvv, dataTypesMap, idfac);
+                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex,  qvv, dataTypesMap);
                     }
                 }
 
@@ -216,7 +216,7 @@ public class MappingDataTypeRepair {
                         Variable variable = (Variable) normal.getTerm(1);
 
                         //No Boolean datatype in DB2 database, the value in the database is used
-                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable, idfac);
+                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                         Term newTerm = fac.getTypedTerm(variable, type);
                         atom.setTerm(position, newTerm);
                     }
@@ -241,7 +241,7 @@ public class MappingDataTypeRepair {
             // column type.
             Term newTerm;
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
-                Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable, idfac);
+                Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                 newTerm = fac.getTypedTerm(variable, type);
             } 
             else {
@@ -293,7 +293,7 @@ public class MappingDataTypeRepair {
      * @throws OBDAException
      */
     
-	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable, QuotedIDFactory idfac) throws OBDAException {
+	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
 		List<Object[]> list = termOccurenceIndex.get(variable.getName());
 		if (list == null) {
 			throw new OBDAException("Unknown term in head");
@@ -302,11 +302,10 @@ public class MappingDataTypeRepair {
 		Function atom = (Function) o[0];
 		Integer pos = (Integer) o[1];
 
-		Predicate functionSymbol = atom.getFunctionSymbol();
-		RelationID tableName = idfac.createRelationFromString(functionSymbol.toString());
-		RelationDefinition tableMetadata = metadata.getDefinition(tableName);
+		RelationID tableId = RelationID.createRelationFromPredicateName(atom.getFunctionSymbol().toString());
+		RelationDefinition td = metadata.getDefinition(tableId);
 
-		Attribute attribute = tableMetadata.getAttribute(pos);
+		Attribute attribute = td.getAttribute(pos);
 
 		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
 		return type;

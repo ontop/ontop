@@ -39,7 +39,7 @@ import com.google.common.collect.ImmutableList;
 
 public abstract class RelationDefinition {
 
-	private final RelationID name;
+	private final RelationID id;
 	
 	private final List<Attribute> attributes = new ArrayList<>();
 	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
@@ -48,12 +48,12 @@ public abstract class RelationDefinition {
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 		
-	protected RelationDefinition(RelationID name) {
-		this.name = name;
+	protected RelationDefinition(RelationID id) {
+		this.id = id;
 	}
 
-	public RelationID getName() {
-		return name;
+	public RelationID getID() {
+		return id;
 	}
 	
 	public void setPrimaryKey(UniqueConstraint uc) {
@@ -82,7 +82,7 @@ public abstract class RelationDefinition {
 	
 	public void addAttribute(QuotedID name, int type, String typeName, boolean canNull) {
 		Attribute att = new Attribute(this, attributes.size() + 1, name, type, typeName, canNull);
-		Attribute prev = attributeMap.put(att.getName(), att);
+		Attribute prev = attributeMap.put(att.getID(), att);
 		if (prev != null) 
 			throw new IllegalArgumentException("Duplicate attribute names");
 		

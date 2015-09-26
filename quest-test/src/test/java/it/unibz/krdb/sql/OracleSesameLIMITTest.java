@@ -120,7 +120,7 @@ public class OracleSesameLIMITTest  {
 	}
 
 	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 		tableDefinition.addAttribute(idfac.createFromString("country_name"), java.sql.Types.VARCHAR, null, false);
 		return tableDefinition;
 	}
@@ -128,7 +128,7 @@ public class OracleSesameLIMITTest  {
 		DBMetadata dbMetadata = new DBMetadata(driver_class, null, null, idfac);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.add(new TableDefinition(idfac.createRelationFromString("dual")));
+		dbMetadata.add(new TableDefinition(idfac.createRelationFromString(null, "dual")));
 		return dbMetadata;
 	}
 

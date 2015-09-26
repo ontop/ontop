@@ -22,13 +22,10 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
-import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-import it.unibz.krdb.sql.api.TableJSQL;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;

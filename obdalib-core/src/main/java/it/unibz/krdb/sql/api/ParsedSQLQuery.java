@@ -30,13 +30,11 @@ import it.unibz.krdb.obda.parser.SubSelectVisitor;
 import it.unibz.krdb.obda.parser.TableNameVisitor;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -59,11 +57,10 @@ public class ParsedSQLQuery implements Serializable {
 
 	private Select selectQuery; // the parsed query
 
-//	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
-
 	private final QuotedIDFactory idfac;
 	
-	private List<TableJSQL> tables;
+	// maps aliases or relation names to relation names (identity on the relation names)
+	private Map<RelationID, RelationID> tables;
 	private List<RelationID> relations;
 	private List<SelectJSQL> subSelects;
 	private Map<QuotedID, Expression> aliasMap;
@@ -144,7 +141,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * USED FOR CREATING DATALOG RULES AND PROVIDING METADATA WITH THE LIST OF TABLES
 	 * 
 	 */
-	public List<TableJSQL> getTables() throws JSQLParserException {
+	public Map<RelationID, RelationID> getTables() throws JSQLParserException {
 
 		if (tables == null) {
 			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing, idfac);
@@ -308,8 +305,8 @@ public class ParsedSQLQuery implements Serializable {
 
 		Table table = tableColumn.getTable();
 		RelationID tableName = idfac.createRelationFromString(table.getSchemaName(), table.getName());
-		table.setSchemaName(tableName.getSchema().getSQLRendering());
-		table.setName(tableName.getTable().getSQLRendering());
+		table.setSchemaName(tableName.getSchemaSQLRendering());
+		table.setName(tableName.getTableNameSQLRendering());
 	}
 	
 }

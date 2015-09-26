@@ -37,7 +37,7 @@ public class ViewDefinition extends RelationDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(getName());
+		bf.append(getID());
 		bf.append("[");
 		boolean comma = false;
 		for (Attribute att : getAttributes()) {

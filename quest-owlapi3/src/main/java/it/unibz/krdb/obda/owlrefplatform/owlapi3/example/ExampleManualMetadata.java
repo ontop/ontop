@@ -79,7 +79,7 @@ private void setup()  throws Exception {
 }
 
 private TableDefinition defMeasTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("value"), java.sql.Types.NUMERIC, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
@@ -88,7 +88,7 @@ private TableDefinition defMeasTable(String name){
 }
 
 private TableDefinition defMessTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("eventtext"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
@@ -96,7 +96,7 @@ private TableDefinition defMessTable(String name){
 }
 
 private TableDefinition defStaticTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("domain"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("range"), java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;

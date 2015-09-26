@@ -3,8 +3,6 @@
  */
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.sql.api.TableJSQL;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,22 +142,6 @@ public class ImplicitDBConstraints {
 			log.warn(e.getMessage());
 		} 
 	}
-	
-	/**
-	 * Used by addReferredTables to check whether a RelationJSQL for the table "given name" 
-	 * already exists
-	 * 
-	 * @param tables The list of tables
-	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
-	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
-	 */
-	private static boolean tableIsInList(List<TableJSQL> tables, String tableGivenName) {
-		for (TableJSQL table : tables) {
-			if (table.getTableGivenName().equals(tableGivenName))
-				return true;
-		}
-		return false;
-	}
 
 	/**
 	 * Adds RelationJSQL for all tables referred to by the user supplied foreign keys
@@ -190,7 +172,7 @@ public class ImplicitDBConstraints {
 						QuotedID columnId = idfac.createFromString(keyColumn);
 						Attribute attr = td.getAttribute(columnId);
 						if (attr == null) {
-							System.out.println("Column '" + keyColumn + "' not found in table '" + td.getName() + "'");
+							System.out.println("Column '" + keyColumn + "' not found in table '" + td.getID() + "'");
 						} 
 						else {		
 							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // true

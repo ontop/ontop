@@ -58,7 +58,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	@Override
 	public void setUp() {
 		metadata = new DBMetadata("dummy class", null, null, idfac);
-		TableDefinition table = new TableDefinition(idfac.createRelationFromString("TABLE"));
+		TableDefinition table = new TableDefinition(idfac.createRelationFromString(null, "TABLE"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);
@@ -67,7 +67,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		metadata.add(table);
 		
 		
-		table = new TableDefinition(idfac.createRelationFromString("TABLE2"));
+		table = new TableDefinition(idfac.createRelationFromString(null, "TABLE2"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);

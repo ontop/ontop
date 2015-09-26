@@ -60,9 +60,9 @@ public class DBMetadata implements Serializable {
 	 *            {@link ViewDefinition} object.
 	 */
 	public void add(RelationDefinition td) {
-		schema.put(td.getName(), td);
-		if (td.getName().getSchema().getName() != null) {
-			RelationID noSchemaID = new RelationID(null, td.getName().getTable());
+		schema.put(td.getID(), td);
+		if (td.getID().hasSchema()) {
+			RelationID noSchemaID = td.getID().getSchemalessID();
 			if (!schema.containsKey(noSchemaID)) {
 				schema.put(noSchemaID, td);
 			}
@@ -83,9 +83,8 @@ public class DBMetadata implements Serializable {
 	 */
 	public RelationDefinition getDefinition(RelationID name) {
 		RelationDefinition def = schema.get(name);
-		if (def == null && name.getSchema().getName() != null) {
-			RelationID noSchemaID = new RelationID(null, name.getTable());
-			def = schema.get(noSchemaID);
+		if (def == null && name.hasSchema()) {
+			def = schema.get(name.getSchemalessID());
 		}
 		return def;
 	}

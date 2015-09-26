@@ -20,10 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
@@ -34,9 +32,11 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,7 +48,7 @@ import java.util.Set;
 public class TableNameVisitor {
 
 	// Store the table selected by the SQL query in TableJSQL
-	private final List<TableJSQL> tables = new LinkedList<>();
+	private final Map<RelationID, RelationID> tables = new HashMap<>();
 	
 	private final QuotedIDFactory idfac;
 	private final List<RelationID> relations = new LinkedList<>();
@@ -80,7 +80,7 @@ public class TableNameVisitor {
 			throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
 	}
 		
-	public List<TableJSQL> getTables() {	
+	public Map<RelationID, RelationID> getTables() {	
 		return tables;
 	}
 	
@@ -149,14 +149,13 @@ public class TableNameVisitor {
 		public void visit(Table table) {
 			if (!withTCEs.contains(table.getFullyQualifiedName().toLowerCase())) {
 				
+				RelationID relationId = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+				relations.add(relationId);
+
 				Alias as = table.getAlias();
-				QuotedID alias = (as != null) ? idfac.createFromString(as.getName()) : null;
+				RelationID aliasId = (as != null) ? idfac.createRelationFromString(null, as.getName()) : relationId;
 				
-				RelationID relationID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
-				relations.add(relationID);
-				
-				TableJSQL relation = new TableJSQL(relationID, alias);
-				tables.add(relation);
+				tables.put(aliasId, relationId);
 			}
 		}
 

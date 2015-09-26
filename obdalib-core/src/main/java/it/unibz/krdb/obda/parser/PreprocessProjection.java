@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
@@ -149,8 +150,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     if (aliasName != null) {
 
                         String aliasString = aliasName.getName();
+                        // ROMAN (26 Sep 2015): double check string comparisons
                         SelectExpressionItem columnAlias = new SelectExpressionItem(
-                        		new Column(tableName,  idfac.createFromDatabaseRecord(aliasString).getSQLRendering()));
+                        		new Column(tableName,  QuotedID.createFromDatabaseRecord(aliasString).getSQLRendering()));
                         //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase()))
                                 || variables.contains(fac.getVariable(columnAlias.toString())) || variables.contains(fac.getVariable(aliasString.toString().toLowerCase()))) {
@@ -162,8 +164,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     } else { //when there are no alias add the columns that are used in the mappings
 
                         String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
+                        // ROMAN (26 Sep 2015): double check string comparisons
                         SelectExpressionItem column = new SelectExpressionItem(
-                        		new Column(tableName,  idfac.createFromDatabaseRecord(columnName).getSQLRendering()));
+                        		new Column(tableName,  QuotedID.createFromDatabaseRecord(columnName).getSQLRendering()));
                         
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))
                                 || variables.contains(fac.getVariable(column.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
@@ -293,7 +296,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
 
         for (Attribute att : tableDefinition.getAttributes()) {
-            String columnFromMetadata = att.getName().getSQLRendering();
+            String columnFromMetadata = att.getID().getSQLRendering();
             SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
            
             //construct a column as table.column

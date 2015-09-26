@@ -31,7 +31,6 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QualifiedAttributeID;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.*;
@@ -67,6 +66,7 @@ public class Mapping2DatalogConverter {
 		List<String> errorMessages = new ArrayList<>();
 		
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		
 		
 		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
 			try {
@@ -214,33 +214,24 @@ public class Mapping2DatalogConverter {
      */
     private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, Map<QualifiedAttributeID, Term> lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
-        List<TableJSQL> tables = parsedSQLQuery.getTables();
+        Map<RelationID, RelationID> tables = parsedSQLQuery.getTables();
 
-        for (TableJSQL table : tables) {
-        	RelationID relation = table.getTable();
-        	
+        for (Map.Entry<RelationID, RelationID> entry : tables.entrySet()) {
+        	RelationID relationId = entry.getValue();
+           	RelationID aliasId = entry.getKey();
+                   	
             // Construct the predicate using the table name
-            final RelationDefinition td = dbMetadata.getDefinition(relation);
+            RelationDefinition td = dbMetadata.getDefinition(relationId);
             int arity = td.getAttributes().size();
-            Predicate predicate = fac.getPredicate(relation.getSQLRendering(), arity);
-        	QuotedID alias = table.getAlias();
-
-            // Swap the column name with a new variable from the lookup table
+            Predicate predicate = fac.getPredicate(td.getID().getDatalogPredicateName(), arity);
             List<Term> terms = new ArrayList<>(arity);
+            // Swap the column name with a new variable from the lookup table
             for (Attribute attribute : td.getAttributes()) {
-            	
-        		RelationID a;
-        		if (alias != null) 
-        			a = new RelationID(null, alias);
-        		else 
-        			a = relation;
-            	
-                Term termR = lookupTable.get(new QualifiedAttributeID(a, attribute.getName()));
-                if (termR == null) {
-                    throw new IllegalStateException("Column '" + a + "." + attribute.getName()
-                            + "'was not found in the lookup table: ");
-                }
-                terms.add(termR);
+                Term term = lookupTable.get(new QualifiedAttributeID(aliasId, attribute.getID()));
+                if (term == null) 
+                    throw new IllegalStateException("Column '" + aliasId + "." + attribute.getID() + "'was not found in the lookup table: ");
+                
+                terms.add(term);
             }
             // Create an atom for a particular table
             Function atom = fac.getFunction(predicate, terms);
@@ -258,30 +249,45 @@ public class Mapping2DatalogConverter {
 
         if (term instanceof Variable) {
             Variable var = (Variable) term;
-            String varName = var.getName();
-            String[] s = varName.split("\\.");
-            Term termR;
-            if (s.length == 1) {
-                QualifiedAttributeID a = new QualifiedAttributeID(null, idfac.createFromString("\"" + varName + "\""));
-                termR = lookupTable.get(a);
-                if (termR == null) {
-                    QualifiedAttributeID a2 = new QualifiedAttributeID(null, idfac.createFromString(varName));
-                    termR = lookupTable.get(a2);
-                }
+            String[] varNameComponents = var.getName().split("\\.");
+            String schemaName, tableName, attributeName;
+            if (varNameComponents.length == 1) {
+            	schemaName = tableName = null;
+            	attributeName = varNameComponents[0];		
             }
-            else if (s.length == 2) {
-                QualifiedAttributeID a = new QualifiedAttributeID(idfac.createRelationFromString("\""+ s[0] + "\""), 
-                						idfac.createFromString("\"" + s[1] + "\""));
-                termR = lookupTable.get(a);
-                if (termR == null) {
-                    QualifiedAttributeID a2 = new QualifiedAttributeID(idfac.createRelationFromString(s[0]), 
-                    				idfac.createFromString(s[1]));
-                    termR = lookupTable.get(a2);
-                }
+            else if (varNameComponents.length == 2) {
+            	schemaName = null;
+            	tableName = varNameComponents[0];
+            	attributeName = varNameComponents[1];
             } 	
-            else 
-            	throw new IllegalArgumentException("Wrong number of components in the column name " + varName);
-            	 
+            else if (varNameComponents.length == 3) {
+            	schemaName = varNameComponents[0];
+            	tableName = varNameComponents[1];
+            	attributeName = varNameComponents[2];
+            } 	
+            else
+            	throw new IllegalArgumentException("Wrong number of components in the column name " + var);
+
+            // ROMAN (26 Sep 2015)
+        	// HACKY WAY OF DEALING WITH VARIABLES THAT ARE CASE-SENSITIVE 
+            RelationID relationId;
+            if (tableName != null)
+            	relationId = idfac.createRelationFromString(quote(schemaName), quote(tableName));
+            else
+            	relationId = null;
+            QualifiedAttributeID a = new QualifiedAttributeID(relationId, 
+            						idfac.createFromString(quote(attributeName)));
+            
+            Term termR = lookupTable.get(a);
+            if (termR == null) {
+                if (tableName != null)
+                	relationId = idfac.createRelationFromString(schemaName, tableName);
+                else
+                	relationId = null;
+                a = new QualifiedAttributeID(relationId, idfac.createFromString(attributeName));
+                termR = lookupTable.get(a);
+            }
+            
             if (termR == null) {
                 String messageFormat = "Error in identifying column name \"%s\", " +
                         "please check the query source in the mappings.\n" +
@@ -297,9 +303,9 @@ public class Mapping2DatalogConverter {
             Function func = (Function) term;
             List<Term> terms = func.getTerms();
             List<Term> newTerms = new ArrayList<>(terms.size());
-            for (Term innerTerm : terms) {
+            for (Term innerTerm : terms) 
                 newTerms.add(renameVariables(innerTerm, lookupTable, idfac));
-            }
+            
             result = fac.getFunction(func.getFunctionSymbol(), newTerms);
         } 
         else if (term instanceof Constant) {
@@ -308,6 +314,12 @@ public class Mapping2DatalogConverter {
         return result;
     }
 
+    private static String quote(String s) {
+    	if (s == null)
+    		return s;
+    	return QuotedID.QUOTATION + s + QuotedID.QUOTATION;
+    }
+    
     /**
      * Creates a lookupTable:
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
@@ -317,7 +329,7 @@ public class Mapping2DatalogConverter {
     private static Map<QualifiedAttributeID, Term> createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata, QuotedIDFactory idfac) throws JSQLParserException {
 		Map<QualifiedAttributeID, Term> lookupTable = new HashMap<>();
 
-		List<TableJSQL> tables = queryParsed.getTables();
+		Map<RelationID, RelationID> tables = queryParsed.getTables();
 
 		// Collect all known column aliases
 		Map<QuotedID, Expression> aliasMap = queryParsed.getAliasMap();
@@ -325,42 +337,34 @@ public class Mapping2DatalogConverter {
 		// assigned index number
 		int index = 0; 
 
-		for (TableJSQL table : tables) {
+		for (Map.Entry<RelationID, RelationID> entry : tables.entrySet()) {
 			
-			RelationID relation = table.getTable();
-			
-			final RelationDefinition tableDefinition = dbMetadata.getDefinition(relation);
-
+			RelationID relationId = entry.getValue();
+			RelationDefinition tableDefinition = dbMetadata.getDefinition(relationId);
             if (tableDefinition == null) 
-                throw new RuntimeException("Definition not found for table '" + relation.getSQLRendering() + "'.");
+                throw new RuntimeException("Definition not found for table '" + relationId + "'.");
             
  			for (Attribute attribute : tableDefinition.getAttributes()) {
  				
 				Term var = fac.getVariable("t" + index);
+				QuotedID attributeId = attribute.getID();
 				
-				lookupTable.put(new QualifiedAttributeID(null, attribute.getName()), var);
-				
-				lookupTable.put(new QualifiedAttributeID(new RelationID(null, relation.getTable()), 
-									attribute.getName()), var);
-
-				lookupTable.put(new QualifiedAttributeID(new RelationID(relation.getSchema(), 
-						relation.getTable()), attribute.getName()), var);
-
+				lookupTable.put(new QualifiedAttributeID(null, attributeId), var);
+				lookupTable.put(new QualifiedAttributeID(relationId.getSchemalessID(), attributeId), var);
+				lookupTable.put(new QualifiedAttributeID(relationId, attributeId), var);
 
 				// full qualified attribute name using table alias
-				QuotedID tableAlias = table.getAlias();
-				if (tableAlias != null) {
-					lookupTable.put(new QualifiedAttributeID(new RelationID(null, tableAlias), 
-								attribute.getName()),var);
-				}
-				
+				RelationID tableAlias = entry.getKey();
+				if (tableAlias != relationId) 
+					lookupTable.put(new QualifiedAttributeID(tableAlias, attributeId), var);
+	
+				// ROMAN (26 Sep 2015): I'm not sure it should be in this loop
 				//check if we do not have subselect with alias name assigned
 				for (SelectJSQL subSelect: queryParsed.getSubSelects()) {
 					String subSelectAlias = subSelect.getAlias();
-					if (subSelectAlias != null) {
-						lookupTable.put(new QualifiedAttributeID(new RelationID(null, 
-								idfac.createFromString(subSelectAlias)), attribute.getName()), var);
-					}
+					if (subSelectAlias != null) 
+						lookupTable.put(new QualifiedAttributeID(
+								idfac.createRelationFromString(null, subSelectAlias), attributeId), var);
 				}
 				index++;
 			}

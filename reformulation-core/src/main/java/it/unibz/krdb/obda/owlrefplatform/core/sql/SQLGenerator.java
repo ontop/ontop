@@ -134,13 +134,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * method descriptions.
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram query, List<String> signature, QuotedIDFactory idfac) throws OBDAException {
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
 		isDistinct = hasSelectDistinctStatement(query);
 		isOrderBy = hasOrderByClause(query);
 		if (query.getQueryModifiers().hasModifiers()) {
 			final String indent = "   ";
 			final String outerViewName = "SUB_QVIEW";
-			String subquery = generateQuery(query, signature, indent, idfac);
+			String subquery = generateQuery(query, signature, indent);
 
 			String modifier = "";
 			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
@@ -159,7 +159,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += modifier;
 			return sql;
 		} else {
-			return generateQuery(query, signature, "", idfac);
+			return generateQuery(query, signature, "");
 		}
 	}
 
@@ -190,7 +190,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * limit/offset/order by.
 	 */
 	private String generateQuery(DatalogProgram query, List<String> signature,
-								 String indent, QuotedIDFactory idfac) throws OBDAException {
+								 String indent) throws OBDAException {
 
 		int numberOfQueries = query.getRules().size();
 
@@ -237,7 +237,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				continue;
 			}
 
-			QueryAliasIndex index = new QueryAliasIndex(cq, idfac);
+			QueryAliasIndex index = new QueryAliasIndex(cq);
 
 			boolean innerdistincts = false;
 			if (isDistinct && !distinctResultSet && numberOfQueries == 1) {
@@ -1237,10 +1237,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			Collection<TableDefinition> tables = metadata.getTables();
 			for (TableDefinition tabledef: tables) {
-				if (tabledef.getName().equals(table)) {
+				if (tabledef.getID().equals(table)) {
 					Collection<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
-						if (a.getName().equals(col)) {
+						if (a.getID().equals(col)) {
 							switch (a.getType()) {
 								case Types.VARCHAR:
 								case Types.CHAR:
@@ -1580,15 +1580,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		final Map<Function, String> viewNames = new HashMap<>();
 		final Map<Function, RelationID> tableNames = new HashMap<>();
 		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
-		final Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
-		
-		final QuotedIDFactory idfac; 
+		final Map<Variable, Set<String>> columnReferences = new HashMap<>();
 		
 		int dataTableCount = 0;
 		boolean isEmpty = false;
 
-		public QueryAliasIndex(CQIE query, QuotedIDFactory idfac) {
-			this.idfac = idfac;
+		public QueryAliasIndex(CQIE query) {
 			List<Function> body = query.getBody();
 			generateViews(body);
 		}
@@ -1627,20 +1624,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			}
 
-			Predicate tablePredicate = atom.getFunctionSymbol();
-			String tableName = tablePredicate.toString();
-			RelationDefinition def = metadata.getDefinition(idfac.createRelationFromString(tableName));
+			RelationDefinition def = metadata.getDefinition(RelationID.createRelationFromPredicateName(atom.getFunctionSymbol().toString()));
 			if (def == null) {
-				/*
-				 * There is no definition for this atom, its not a database
-				 * predicate, the query is empty.
-				 */
+				// There is no definition for this atom, its not a database
+				// predicate, the query is empty.
 				isEmpty = true;
 				return;
 			}
 			dataTableCount += 1;
 			viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
-			tableNames.put(atom, def.getName());
+			tableNames.put(atom, def.getID());
 			dataDefinitions.put(atom, def);
 
 			indexVariables(atom);
@@ -1654,12 +1647,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				if (!(term instanceof Variable)) {
 					continue;
 				}
-				LinkedHashSet<String> references = columnReferences.get(term);
+				Set<String> references = columnReferences.get(term);
 				if (references == null) {
 					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
-				String columnName = def.getAttribute(index + 1).getName().getName();   // indexes from 1
+				String columnName = def.getAttribute(index + 1).getID().getName();   // indexes from 1
 				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
 				references.add(reference);
 			}
@@ -1698,7 +1691,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		public String getColumnReference(Function atom, int column) {
 			String viewName = getView(atom);
 			RelationDefinition def = dataDefinitions.get(atom);
-			String columnname = def.getAttribute(column + 1).getName().getName(); // indexes from 1
+			String columnname = def.getAttribute(column + 1).getID().getName(); // indexes from 1
 			return sqladapter.sqlQualifiedColumn(viewName, columnname);
 		}
 	}
