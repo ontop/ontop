@@ -27,6 +27,8 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
@@ -40,30 +42,33 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private DBMetadata md = new DBMetadata("dummy class", null, null, DBMetadata.IdentityIdNormalizer);
+	private QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
+	private DBMetadata md = new DBMetadata("dummy class", null, null, idfac);
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {
 		// Database schema
-		TableDefinition table1 = new TableDefinition("Student");
-		table1.addAttribute("id", Types.INTEGER, null, false);
-		table1.addAttribute("first_name", Types.VARCHAR, null, false);
-		table1.addAttribute("last_name", Types.VARCHAR, null, false);
-		table1.addAttribute("year", Types.INTEGER, null, false);
-		table1.addAttribute("nationality", Types.VARCHAR, null, false);
-		table1.setPrimaryKey(UniqueConstraint.of(table1.getAttribute("id")));
+		TableDefinition table1 = new TableDefinition(idfac.createRelationFromString("Student"));
+		table1.addAttribute(idfac.createFromString("id"), Types.INTEGER, null, false);
+		table1.addAttribute(idfac.createFromString("first_name"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createFromString("last_name"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createFromString("year"), Types.INTEGER, null, false);
+		table1.addAttribute(idfac.createFromString("nationality"), Types.VARCHAR, null, false);
+		table1.setPrimaryKey(UniqueConstraint.of(table1.getAttribute(idfac.createFromString("id"))));
 		
-		TableDefinition table2 = new TableDefinition("Course");
-		table2.addAttribute("cid", Types.VARCHAR, null, false);
-		table2.addAttribute("title", Types.VARCHAR, null, false);
-		table2.addAttribute("credits", Types.INTEGER, null, false);
-		table2.addAttribute("description", Types.VARCHAR, null, false);
-		table2.setPrimaryKey(UniqueConstraint.of(table2.getAttribute("cid")));
+		TableDefinition table2 = new TableDefinition(idfac.createRelationFromString("Course"));
+		table2.addAttribute(idfac.createFromString("cid"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createFromString("title"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createFromString("credits"), Types.INTEGER, null, false);
+		table2.addAttribute(idfac.createFromString("description"), Types.VARCHAR, null, false);
+		table2.setPrimaryKey(UniqueConstraint.of(table2.getAttribute(idfac.createFromString("cid"))));
 		
-		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.addAttribute("student_id", Types.INTEGER, null, false);
-		table3.addAttribute("course_id", Types.VARCHAR, null, false);
-		table3.setPrimaryKey(UniqueConstraint.of(table3.getAttribute("student_id"), table3.getAttribute("course_id")));
+		TableDefinition table3 = new TableDefinition(idfac.createRelationFromString("Enrollment"));
+		table3.addAttribute(idfac.createFromString("student_id"), Types.INTEGER, null, false);
+		table3.addAttribute(idfac.createFromString("course_id"), Types.VARCHAR, null, false);
+		table3.setPrimaryKey(UniqueConstraint.of(table3.getAttribute(idfac.createFromString("student_id")), 
+				table3.getAttribute(idfac.createFromString("course_id"))));
 		
 		md.add(table1);
 		md.add(table2);

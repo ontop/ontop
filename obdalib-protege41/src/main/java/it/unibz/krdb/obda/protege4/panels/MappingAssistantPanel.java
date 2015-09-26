@@ -899,12 +899,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						TableDefinition td = (TableDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
-						label.setText(td.getName());
+						label.setText(td.getName().getSQLRendering());
 					} else if (value instanceof ViewDefinition) {
 						ViewDefinition vd = (ViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);
-						label.setText(vd.getName());
+						label.setText(vd.getName().getSQLRendering());
 					}
 					return label;
 				}

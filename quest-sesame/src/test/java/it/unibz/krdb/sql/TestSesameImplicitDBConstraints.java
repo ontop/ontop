@@ -53,6 +53,8 @@ public class TestSesameImplicitDBConstraints {
 
 	private Connection sqlConnection;
 	private QuestDBStatement qst = null;
+	
+	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 	/*
 	 * 	prepare ontop for rewriting and unfolding steps 
@@ -151,13 +153,13 @@ public class TestSesameImplicitDBConstraints {
 	}
 
 	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(name);
-		tableDefinition.addAttribute("COL1", java.sql.Types.INTEGER, null, false);
-		tableDefinition.addAttribute("COL2", java.sql.Types.INTEGER, null, false);
+		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+		tableDefinition.addAttribute(idfac.createFromString("COL1"), java.sql.Types.INTEGER, null, false);
+		tableDefinition.addAttribute(idfac.createFromString("COL2"), java.sql.Types.INTEGER, null, false);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver", null, null, DBMetadata.IdentityIdNormalizer);
+		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver", null, null, idfac);
 		dbMetadata.add(defTable("TABLE1"));
 		dbMetadata.add(defTable("TABLE2"));
 		dbMetadata.add(defTable("TABLE3"));

@@ -20,8 +20,9 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
-import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
@@ -35,8 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
- * CHANGES TABLE AND COLUMN NAMES
+ * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).<br>
+ * 
+ * BRINGS TABLE NAME / SCHEMA / ALIAS AND COLUMN NAMES in the FROM clause into NORMAL FORM
  *
  * Since the current release does not support Function, we throw a ParserException, when a function is present
  *
@@ -46,13 +48,19 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	
 	private ProjectionJSQL projection;
 	private boolean bdistinctOn = false; // true when a SELECT distinct is present
-	private boolean setProj = false; // true when we are using the method setProjection
 	private boolean unsupported = false;
+	
+	private final QuotedIDFactory idfac;
+	
+	public ProjectionVisitor(QuotedIDFactory idfac) {
+		this.idfac = idfac;
+	}
 
-	
-	
 	/**
-	 * Return the list of Projection with the expressions between SELECT and FROM
+	 * Return the list of Projection with the expressions between SELECT and FROM<br>
+	 * 
+	 * BRINGS TABLE NAME / SCHEMA / ALIAS AND COLUMN NAMES in the FROM clause into NORMAL FORM
+	 * 
 	 * @param select parsed statement
 	 * @return
 	 * @throws JSQLParserException 
@@ -78,11 +86,51 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * @param select parsed statement
 	 * @param proj anew projection expression between SELECT and FROM
 	 */
-	public void setProjection(Select select, ProjectionJSQL proj) {
-		setProj = true;
-		projection = proj;
-		
-		select.getSelectBody().accept(this);
+	public void setProjection(Select select, final ProjectionJSQL proj) {
+
+		select.getSelectBody().accept(new SelectVisitor() {
+
+			@Override
+			public void visit(PlainSelect plainSelect) {
+				if (proj.getType().equals("select distinct on")) {
+					List<SelectItem> distinctList = new ArrayList<>();
+					
+					for (SelectExpressionItem seItem : proj.getColumnList()) 
+						distinctList.add(seItem);
+					
+					Distinct distinct = new Distinct();
+					distinct.setOnSelectItems(distinctList);
+					plainSelect.setDistinct(distinct);
+				}
+				else if (proj.getType().equals("select distinct")) {
+					Distinct distinct = new Distinct();
+					plainSelect.setDistinct(distinct);
+					
+					plainSelect.getSelectItems().clear();
+					plainSelect.getSelectItems().addAll(proj.getColumnList());
+				}
+				else {
+					plainSelect.getSelectItems().clear();
+					List<SelectExpressionItem> columnList = proj.getColumnList();
+					if (!columnList.isEmpty()) {
+						plainSelect.getSelectItems().addAll(columnList);
+					}
+					else {
+						plainSelect.getSelectItems().add(new AllColumns());
+					}
+				}	
+			}
+
+			@Override
+			public void visit(SetOperationList setOpList) {
+				unsupported = true;
+				setOpList.getPlainSelects().get(0).accept(this);
+			}
+
+			@Override
+			public void visit(WithItem withItem) {
+				withItem.getSelectBody().accept(this);
+			}});
 	}
 
 	/*
@@ -93,64 +141,28 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	
 	@Override
 	public void visit(PlainSelect plainSelect) {
-		/*
-		 * We first check if we are setting a new projection for SELECT clause, 
-		 * we distinguish between select, select distinct and select distinct on 
-		 */
-		if (setProj) {
+		// visit the SelectItems and distinguish between select distinct,
+		// select distinct on, select all 
+		
+		projection = new ProjectionJSQL();
+		Distinct distinct = plainSelect.getDistinct();
+	
+		if (distinct != null) { // for SELECT DISTINCT [ON (...)]			
 			
-			if (projection.getType().equals("select distinct on")) {
-				Distinct distinct = new Distinct();
-				List<SelectItem> distinctList = new ArrayList<SelectItem>();
+			if (distinct.getOnSelectItems() != null) {
+				bdistinctOn = true;
+			
+				for (SelectItem item : distinct.getOnSelectItems()) 
+					item.accept(this);
 				
-				for(SelectExpressionItem seItem :projection.getColumnList()) 
-					distinctList.add(seItem);
-				
-				distinct.setOnSelectItems(distinctList);
-				plainSelect.setDistinct(distinct);
+				bdistinctOn = false;
 			}
-			else if(projection.getType().equals("select distinct")) {
-				Distinct distinct = new Distinct();
-				plainSelect.setDistinct(distinct);
-				plainSelect.getSelectItems().clear();
-				plainSelect.getSelectItems().addAll(projection.getColumnList());
-			}
-			else {
-				plainSelect.getSelectItems().clear();
-				List<SelectExpressionItem> columnList = projection.getColumnList();
-				if (!columnList.isEmpty()) {
-					plainSelect.getSelectItems().addAll(columnList);
-				}
-				else {
-					plainSelect.getSelectItems().add(new AllColumns());
-				}
-			}	
+			else
+				projection.setType(ProjectionJSQL.SELECT_DISTINCT);	
 		}
-		else{ /*
-		working with getProjection we visit the SelectItems and distinguish between select distinct,
-		select distinct on, select all 
-		*/
-			projection = new ProjectionJSQL();
-			Distinct distinct= plainSelect.getDistinct();
-		
-			if (distinct != null) { // for SELECT DISTINCT [ON (...)]			
-				
-				if (distinct.getOnSelectItems() != null) {
-					bdistinctOn = true;
-				
-					for (SelectItem item : distinct.getOnSelectItems()) 
-						item.accept(this);
-					
-					bdistinctOn = false;
-				}
-				else
-					projection.setType(ProjectionJSQL.SELECT_DISTINCT);	
-			}
-		
-			for (SelectItem item : plainSelect.getSelectItems()) {
-				item.accept(this);
-			}
-		}
+	
+		for (SelectItem item : plainSelect.getSelectItems()) 
+			item.accept(this);
 	}
 
 	/* visit also the Operation as UNION
@@ -215,7 +227,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			case "regexp_replace" :
 			case "replace" :
 			case "concat" :
-				for(Expression ex :function.getParameters().getExpressions()) 
+				for (Expression ex :function.getParameters().getExpressions()) 
 					ex.accept(this);
 				break;
 
@@ -229,15 +241,11 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(JdbcNamedParameter jdbcNamedParameter) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -285,43 +293,31 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Addition addition) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(Division division) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(Multiplication multiplication) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(Subtraction subtraction) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(AndExpression andExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(OrExpression orExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -329,33 +325,26 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		between.getLeftExpression().accept(this);
 		between.getBetweenExpressionStart().accept(this);
 		between.getBetweenExpressionEnd().accept(this);
-		
 	}
 
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(GreaterThan greaterThan) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(GreaterThanEquals greaterThanEquals) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(InExpression inExpression) {
-		Expression e = inExpression.getLeftExpression();
+		//Expression e = inExpression.getLeftExpression();
 		ItemsList e1 = inExpression.getLeftItemsList();
 		if (e1 instanceof SubSelect){
 			((SubSelect)e1).accept(this);
@@ -377,36 +366,26 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(LikeExpression likeExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(MinorThan minorThan) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	/*
@@ -416,7 +395,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Column tableColumn) {
 		// CHANGES TABLE AND COLUMN NAMES
-		TableJSQL.unquoteColumnAndTableName(tableColumn);
+		ParsedSQLQuery.normalizeColumnName(idfac, tableColumn);
 	}
 
 	@Override
@@ -427,81 +406,63 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
 				unsupported = true;
-			} else {
+			} 
+			else {
 				subSelBody.accept(this);
 			}
-		} else
+		} 
+		else
 			unsupported = true;
-
 	}
 
 	@Override
 	public void visit(CaseExpression caseExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(WhenClause whenClause) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(ExistsExpression existsExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(Concat concat) {
 		visitBinaryExpression(concat);
-
 	}
 
 	@Override
 	public void visit(Matches matches) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
-		// TODO Auto-generated method stub
 		unsupported = true;
-		
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -513,35 +474,26 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Modulo modulo) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(AnalyticExpression aexpr) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(ExtractExpression eexpr) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(IntervalExpression iexpr) {
 		unsupported = true;
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
 		unsupported = true;
-		
 	}
 
 	@Override
@@ -567,7 +519,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		
 	}
 
-	public void visitBinaryExpression(BinaryExpression binaryExpression) {
+	private void visitBinaryExpression(BinaryExpression binaryExpression) {
 		binaryExpression.getLeftExpression().accept(this);
 		binaryExpression.getRightExpression().accept(this);
 	}

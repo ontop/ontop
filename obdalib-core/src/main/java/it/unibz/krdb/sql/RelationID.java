@@ -5,7 +5,7 @@ public class RelationID {
 	private final QuotedID schema, table;
 	
 	public RelationID(QuotedID schema, QuotedID table) {
-		this.schema = schema;
+		this.schema = (schema == null) ? new QuotedID(null, "") : schema;
 		this.table = table;
 	}
 	

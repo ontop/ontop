@@ -39,7 +39,7 @@ public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 	}
 
 	@Override
-	public RelationID createRelationFromDatabaseRecoard(String schema, String table) {
+	public RelationID createRelationFromDatabaseRecord(String schema, String table) {
 		return new RelationID(createFromDatabaseRecord(schema), createFromDatabaseRecord(table));
 	}
 

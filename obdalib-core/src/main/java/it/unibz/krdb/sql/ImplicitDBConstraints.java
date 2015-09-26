@@ -176,18 +176,21 @@ public class ImplicitDBConstraints {
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object
 	 */
 	public void addFunctionalDependencies(DBMetadata md) {
+		
 		for (String tableName : this.uniqueFD.keySet()) {
-			RelationDefinition td = md.getDefinition(tableName);
+			RelationID tableId = idfac.createRelationFromString(tableName);
+			RelationDefinition td = md.getDefinition(tableId);
 			if (td != null && td instanceof TableDefinition) {
 				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
 				for (List<String> listOfConstraints: tableFDs) {
 					for (String keyColumn : listOfConstraints) {
-						Attribute attr = td.getAttribute(keyColumn);
+						QuotedID columnId = idfac.createFromString(keyColumn);
+						Attribute attr = td.getAttribute(columnId);
 						if (attr == null) {
 							System.out.println("Column '" + keyColumn + "' not found in table '" + td.getName() + "'");
 						} 
 						else {		
-							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // ,/*isUnique*/true
+							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // true
 							// ROMAN (17 Aug 2015): do we really change it into NON NULL?
 							td.addUniqueConstraint(UniqueConstraint.of(attr));
 						}
@@ -198,7 +201,7 @@ public class ImplicitDBConstraints {
 			else { // no table definition
 				log.warn("Error in user supplied primary key: No table definition found for " + tableName + ".");
 			}
-		}
+		}		
 	}
 
 
@@ -207,8 +210,10 @@ public class ImplicitDBConstraints {
 	 * Inserts the user-supplied foreign keys / unique valued columns into the metadata object
 	 */
 	public void addForeignKeys(DBMetadata md) {
+		
 		for (String tableName : this.fKeys.keySet()) {
-			RelationDefinition td = md.getDefinition(tableName);
+			RelationID tableId = idfac.createRelationFromString(tableName);
+			RelationDefinition td = md.getDefinition(tableId);
 			if (td == null || ! (td instanceof TableDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
 				continue;
@@ -216,19 +221,22 @@ public class ImplicitDBConstraints {
 			List<Map<String, Reference>> tableFKeys = this.fKeys.get(tableName);
 			for (Map<String, Reference> fKey : tableFKeys) {
 				for (Map.Entry<String, Reference> entry : fKey.entrySet()) {
-					Attribute attr = td.getAttribute(entry.getKey());
+					QuotedID attrId = idfac.createFromString(entry.getKey());
+					Attribute attr = td.getAttribute(attrId);
 					if(attr == null){
 						log.warn("Error getting attribute " + entry.getKey() + " from table " + tableName);
 						continue;
 					}
 					String fkTable = entry.getValue().getTableReference();
-					RelationDefinition fktd = md.getDefinition(fkTable);
+					RelationID fkTableId = idfac.createRelationFromString(fkTable);
+					RelationDefinition fktd = md.getDefinition(fkTableId);
 					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
 						continue;
 					}
 					String fkColumn = entry.getValue().getColumnReference();
-					Attribute fkAttr = fktd.getAttribute(fkColumn);
+					QuotedID fkAttrId = idfac.createFromString(fkColumn);
+					Attribute fkAttr = fktd.getAttribute(fkAttrId);
 					if (fkAttr == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");
 						continue;
@@ -240,6 +248,6 @@ public class ImplicitDBConstraints {
 				}
 			}
 			md.add(td);
-		}
+		}		
 	}
 }

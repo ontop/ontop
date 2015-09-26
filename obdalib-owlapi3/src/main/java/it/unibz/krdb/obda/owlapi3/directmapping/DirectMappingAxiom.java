@@ -26,8 +26,10 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 
@@ -56,7 +58,7 @@ public class DirectMappingAxiom {
 	public String getSQL() {
 		String SQLStringTemple = "SELECT * FROM %s";
 
-		SQLString = String.format(SQLStringTemple, "\"" + table.getName() + "\"");
+		SQLString = String.format(SQLStringTemple, table.getName().getSQLRendering());
 		return SQLString;
 	}
 
@@ -74,11 +76,11 @@ public class DirectMappingAxiom {
 
 		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
 
-		String table = "\"" + this.table.getName() + "\"";
-		String Table = table;
+		RelationID table = this.table.getName();
+		String Table = table.getSQLRendering();
 		String Column = "";
 		String Condition = "";
-		String tableRef = "";
+		RelationID tableRef0 = null;
 		
 		{
 			UniqueConstraint pk = tableDef.getPrimaryKey();
@@ -89,25 +91,26 @@ public class DirectMappingAxiom {
 				attributes = tableDef.getAttributes();
 
 			for (Attribute att : attributes) {
-				String attrName = att.getName();
-				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
+				QuotedID attrName = att.getName();
+				Column += table.getSQLRendering() + "." + attrName.getSQLRendering() + " AS " + 
+						   table.getTable().getName() + "_" + attrName.getName() + ", ";
 			}
 		}
 
 		// referring object
 		int count = 0;
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			Condition += table + ".\"" + comp.getAttribute().getName() + "\" = ";
+			Condition += table + ".\"" + comp.getAttribute().getName().getName() + "\" = ";
 
 			// get referenced object
-			tableRef = comp.getReference().getRelation().getName();
+			tableRef0 = comp.getReference().getRelation().getName();
 			if (count == 0)
-				Table += ", \"" + tableRef + "\"";
-			String columnRef = comp.getReference().getName();
-			Column += "\"" + tableRef + "\".\"" + columnRef + "\" AS "
-					+ tableRef + "_" + columnRef;
+				Table += ", " + tableRef0.getSQLRendering();
+			QuotedID columnRef0 = comp.getReference().getName();
+			Column += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering() + " AS "
+					+ tableRef0.getTable().getName() + "_" + columnRef0.getName();
 
-			Condition += "\"" + tableRef + "\".\"" + columnRef + "\"";
+			Condition += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering();
 
 			if (count < fk.getComponents().size() - 1) {
 				Column += ", ";
@@ -116,21 +119,21 @@ public class DirectMappingAxiom {
 			count++;
 		}
 		for (TableDefinition tdef : metadata.getTables()) {
-			if (tdef.getName().equals(tableRef)) {
+			if (tdef.getName().equals(tableRef0)) {
 				UniqueConstraint pk = tdef.getPrimaryKey();
 				if (pk != null) {
 					for (Attribute att : pk.getAttributes()) {
-						String pki = att.getName();
-						String refPki = "\"" + tableRef + "\".\"" + pki + "\"";
+						QuotedID pki0 = att.getName();
+						String refPki = tableRef0.getSQLRendering() + "." + pki0.getSQLRendering();
 						if (!Column.contains(refPki))
-							Column += ", " + refPki + " AS " + tableRef + "_" + pki;
+							Column += ", " + refPki + " AS " + tableRef0.getTable().getName() + "_" + pki0.getName();
 					}
 				} 
 				else {
 					for (Attribute att : tdef.getAttributes()) {
-						String attrName = att.getName();
-						Column += ", \""+ tableRef + "\".\"" + attrName +
-								"\" AS " + tableRef+"_" + attrName;
+						QuotedID attrName = att.getName();
+						Column += ", " + tableRef0.getSQLRendering() + "." + attrName.getSQLRendering() +
+								" AS " + tableRef0.getTable().getName() + "_" + attrName.getName();
 					}
 				}
 			}
@@ -144,7 +147,7 @@ public class DirectMappingAxiom {
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
-		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getName())), sub));
+		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getName().getTable().getName())), sub));
 		
 		
 		//DataType Atoms
@@ -152,23 +155,23 @@ public class DirectMappingAxiom {
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			if (type == COL_TYPE.LITERAL) {
-				Variable objV = df.getVariable(att.getName());
+				Variable objV = df.getVariable(att.getName().getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
-								table.getName(), att.getName())), sub, objV));
+								table.getName().getTable().getName(), att.getName().getName())), sub, objV));
 			} 
 			else {
-				Function obj = df.getTypedTerm(df.getVariable(att.getName()), type);
+				Function obj = df.getTypedTerm(df.getVariable(att.getName().getName()), type);
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
-								table.getName(), att.getName())), sub, obj));
+								table.getName().getTable().getName(), att.getName().getName())), sub, obj));
 			}
 		}
 	
 		//To construct the head, there is no static field about this predicate
 		List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
 		for (Attribute att : table.getAttributes())
-			headTerms.add(df.getVariable(att.getName()));
+			headTerms.add(df.getVariable(att.getName().getName()));
 		
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
 		Function head = df.getFunction(headPredicate, headTerms);
@@ -184,12 +187,10 @@ public class DirectMappingAxiom {
 		
 		// Object Atoms
 		// Foreign key reference
-		String pkTableReference = fkcomp.getReference().getRelation().getName();
-		TableDefinition tdRef = (TableDefinition) metadata
-				.getDefinition(pkTableReference);
+		TableDefinition tdRef = (TableDefinition) fkcomp.getReference().getRelation();
 		Term obj = generateSubject(tdRef, true);
 
-		String opURI = generateOPURI(table.getName(), fkcomp.getAttribute());
+		String opURI = generateOPURI(table.getName().getTable().getName(), fkcomp.getAttribute());
 		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
 		// construct the head
@@ -227,7 +228,7 @@ public class DirectMappingAxiom {
 //			if (a.isForeignKey() && a.getReference().getTableReference().equals(foreignTable.getName()))
 //				columnsInFK += a.getName() + ";";
 //		columnsInFK = columnsInFK.substring(0, columnsInFK.length() - 1);
-		String columnsInFK = columns.getName();
+		String columnsInFK = columns.getName().getName();
 		return baseuri + percentEncode(table) + "#ref-"  + columnsInFK;
 	}
 
@@ -242,21 +243,21 @@ public class DirectMappingAxiom {
 			boolean ref) {
 		String tableName = "";
 		if (ref)
-			tableName = percentEncode(td.getName()) + "_";
+			tableName = percentEncode(td.getName().getName()) + "_";
 		
 		UniqueConstraint pk = td.getPrimaryKey();	
 		if (pk != null) {
 			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
 			terms.add(df.getConstantLiteral(subjectTemple(td)));
 			for (Attribute att : pk.getAttributes()) {
-				terms.add(df.getVariable(tableName + att.getName()));
+				terms.add(df.getVariable(tableName + att.getName().getName()));
 			}
 			return df.getUriTemplate(terms);
 
 		} else {
 			List<Term> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes()) 
-				vars.add(df.getVariable(tableName + att.getName()));
+				vars.add(df.getVariable(tableName + att.getName().getName()));
 
 			return df.getBNodeTemplate(vars);
 		}
@@ -271,10 +272,10 @@ public class DirectMappingAxiom {
 		 * more than one pk columns, there will be a ";" between column names
 		 */
 
-		String temp = baseuri + percentEncode(td.getName()) + "/";
+		String temp = baseuri + percentEncode(td.getName().getName()) + "/";
 		for (Attribute att : td.getPrimaryKey().getAttributes()) {
 			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
-			temp+=percentEncode(att.getName())+"={};";
+			temp+=percentEncode(att.getName().getName())+"={};";
 		}
 		// remove the last "." which is not neccesary
 		temp = temp.substring(0, temp.length() - 1);
@@ -285,7 +286,7 @@ public class DirectMappingAxiom {
 	/*
 	 * percent encoding for a String
 	 */
-	private String percentEncode(String pe) {
+	private static String percentEncode(String pe) {
 		pe = pe.replace("#", "%23");
 		pe = pe.replace(".", "%2E");
 		pe = pe.replace("-", "%2D");

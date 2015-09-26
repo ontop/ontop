@@ -36,6 +36,11 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.QualifiedAttributeID;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 
@@ -54,6 +59,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 import org.slf4j.Logger;
@@ -306,6 +312,8 @@ public class MetaMappingExpander {
 		return newMapping;
 	}
 
+	private static final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
 	/**
 	 * This method get the columns which will be used for the predicate template 
 	 * 
@@ -316,22 +324,33 @@ public class MetaMappingExpander {
 	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
 			List<SelectExpressionItem> columnList) {
 		
-		List<SelectExpressionItem> columnsForTemplate = new ArrayList<SelectExpressionItem>(varsInTemplate.size());
+		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>(varsInTemplate.size());
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
-			for (SelectExpressionItem column : columnList) {
+			for (SelectExpressionItem selectExpression : columnList) {
 				
 				// ROMAN (23 Sep 2015): SelectExpressionItem is of the form Expression AS Alias
 				// this code does not work for complex expressions (i.e., 3 * A)
-				String expression = column.getExpression().toString();
-									
-				// ROMAN (23 Sep 2015): comparison is case-sensitive here
-				if ((column.getAlias() == null && expression.equals(var.getName())) ||
-						(column.getAlias() != null && column.getAlias().getName().equals(var.getName()))) {
-					columnsForTemplate.add(column);
-					found = true;
-					break;
+				// String expression = column.getExpression().toString();
+				if (selectExpression.getExpression() instanceof Column) {
+					Column c = (Column)selectExpression.getExpression();
+
+		        	QuotedID column1 = idfac.createFromString(c.getColumnName());
+		        	RelationID relation = null;
+		        	if (c.getTable().getName() != null)
+		        		relation = idfac.createRelationFromString(c.getTable().getSchemaName(), c.getTable().getName());
+		        	
+		        	QualifiedAttributeID qa = new QualifiedAttributeID(relation, column1);
+		        	
+					if ((selectExpression.getAlias() == null && qa.getAttribute().getName().equals(var.getName())) ||
+							(selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName()))) {
+						columnsForTemplate.add(selectExpression);
+						found = true;
+						break;
+					}
 				}
+					
+									
 			}
 			if (!found) {
 				throw new IllegalStateException();

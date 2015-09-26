@@ -21,14 +21,14 @@ package it.unibz.krdb.obda.parser;
  */
 
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.DBMetadata.TableIdNormalizer;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
@@ -47,7 +47,6 @@ public class SQLQueryParser {
 	private static int id_counter;
 	
 	private static Logger log = LoggerFactory.getLogger(SQLQueryParser.class);
-	
 	
 	// ONLY FOR DEEP PARSING
 	public SQLQueryParser(DBMetadata dbMetaData) {
@@ -123,7 +122,7 @@ public class SQLQueryParser {
 			
 			// ONLY IN DEEP PARSING
 			if (dbMetaData != null) {
-				ViewDefinition vd = createViewDefinition(viewName, query, dbMetaData.getTableIdNormalizer());
+				ViewDefinition vd = createViewDefinition(viewName, query, dbMetaData.getQuotedIDFactory());
 				dbMetaData.add(vd);
 			}
 			
@@ -171,7 +170,7 @@ public class SQLQueryParser {
 	}
 	
 	
-	private ViewDefinition createViewDefinition(String viewName, String query, TableIdNormalizer tableIdNormalizer) {
+	private ViewDefinition createViewDefinition(String viewName, String query, QuotedIDFactory idfac) {
 
         ParsedSQLQuery queryParser = null;
         boolean supported = true;
@@ -182,28 +181,22 @@ public class SQLQueryParser {
             supported = false;
         }
 
-        ViewDefinition viewDefinition = new ViewDefinition(null, null, viewName, viewName, query);
+        ViewDefinition viewDefinition = new ViewDefinition(idfac.createRelationFromString(viewName), query);
        
         if (supported) {
             List<String> columns = queryParser.getColumns();
             for (String columnName : columns) {
-                if (!ParsedSQLQuery.pQuotes.matcher(columnName).matches()) { //if it is not quoted, change it in uppercase when needed
-                    columnName = tableIdNormalizer.getCanonicalFormOfIdentifier(columnName, false);
-                }
-				else { // if quoted remove the quotes
-					columnName = columnName.substring(1, columnName.length() - 1);
-				}
-
-                viewDefinition.addAttribute(columnName, 0, null, false);
+            	QuotedID columnId = idfac.createFromString(columnName);
+ 
+                viewDefinition.addAttribute(columnId, 0, null, false);
             }
         }
         else {
             int start = "select".length(); 
             int end = query.toLowerCase().indexOf("from");
-
-            if (end == -1) {
+            if (end == -1) 
                 throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
-            }
+         
 
             String projection = query.substring(start, end).trim();
 
@@ -230,29 +223,15 @@ public class SQLQueryParser {
                 if (columnName.contains(" "))
                     columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
                 
-    			
-    			// Remove any identifier quotes
-    			// Example:
-    			// 		INPUT: "table"."column"
-    			// 		OUTPUT: table.column
-    			// ROMAN (21 Aug 2015): what about "table".column? is it a quoted column name?
-    			boolean quoted = false;
-                Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
-                Matcher matcher = pattern.matcher(columnName);
-                if (matcher.find()) {
-                    columnName = columnName.replaceAll("[\\[\\]\"`]", "");
-                    quoted = true;
-                }
-
     			// Get only the short name if the column name uses qualified name.
     			// Example: table.column -> column
                 if (columnName.contains(".")) {
                     columnName = columnName.substring(columnName.lastIndexOf(".") + 1); // get only the name
                 }
 
-                columnName = tableIdNormalizer.getCanonicalFormOfIdentifier(columnName, quoted);
+                QuotedID columnId = idfac.createFromString(columnName);
 
-                viewDefinition.addAttribute(columnName, 0, null, false); 
+                viewDefinition.addAttribute(columnId, 0, null, false); 
             }
         }
         

@@ -78,14 +78,14 @@ public class DBMetadataUtil {
 					positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
 				}
 				// Construct CQIE
-				Predicate p1 = fac.getPredicate(def.getName(), def.getAttributes().size());					
+				Predicate p1 = fac.getPredicate(def.getName().getName(), def.getAttributes().size());					
 				List<Term> terms1 = new ArrayList<>(p1.getArity());
 				for (int i = 1; i <= p1.getArity(); i++) 
 					 terms1.add(fac.getVariable("t" + i));
 				
 				// Roman: important correction because table2 may not be in the same case 
 				// (e.g., it may be all upper-case)
-				Predicate p2 = fac.getPredicate(def2.getName(), def2.getAttributes().size());
+				Predicate p2 = fac.getPredicate(def2.getName().getName(), def2.getAttributes().size());
 				List<Term> terms2 = new ArrayList<>(p2.getArity());
 				for (int i = 1; i <= p2.getArity(); i++) 
 					 terms2.add(fac.getVariable("p" + i));

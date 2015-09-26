@@ -397,9 +397,8 @@ public class TMappingProcessor {
 		if (printouts)
 			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
 		
-		if(excludeFromTMappings == null){
+		if (excludeFromTMappings == null)
 			throw new NullPointerException("excludeFromTMappings");
-		}
 		
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<>();
 

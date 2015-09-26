@@ -2,6 +2,13 @@ package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
+import net.sf.jsqlparser.JSQLParserException;
+
 import org.junit.Test;
 
 public class QuotedIdentifierTest {
@@ -26,9 +33,9 @@ public class QuotedIdentifierTest {
 
 		assertEquals(fac.createFromString(null).getSQLRendering(), null);
 
-		assertEquals(fac.createRelationFromDatabaseRecoard(null, "A").getSQLRendering(), "\"A\"");
+		assertEquals(fac.createRelationFromDatabaseRecord(null, "A").getSQLRendering(), "\"A\"");
 		
-		assertEquals(fac.createRelationFromDatabaseRecoard("S", "A").getSQLRendering(), "\"S\".\"A\"");
+		assertEquals(fac.createRelationFromDatabaseRecord("S", "A").getSQLRendering(), "\"S\".\"A\"");
 		
 		assertEquals(fac.createRelationFromString("S.A").getSQLRendering(), "S.A");
 		
@@ -37,6 +44,62 @@ public class QuotedIdentifierTest {
 		assertEquals(fac.createRelationFromString("\"S\".\"A\"").getSQLRendering(), "\"S\".\"A\"");
 		
 		assertEquals(fac.createRelationFromString("A").getSQLRendering(), "A");
+	}
+	
+	public void test1b() {
+		Set<QuotedID> s = new HashSet<>();
+		QuotedIDFactory fac = new QuotedIDFactoryStandardSQL();
+		
+		s.add(fac.createFromString("aaa"));
+		s.add(fac.createFromString("\"AAA\""));
+		
+		assertEquals(s.size(), 1);
+		
+		QualifiedAttributeID a1 = new QualifiedAttributeID(null, fac.createFromString("aaa"));
+		QualifiedAttributeID a2 = new QualifiedAttributeID(null, fac.createFromString("\"AAA\""));
+		assertEquals(a1, a2);
+	}
+	
+	@Test
+	public void test2() {
+		SQLQueryParser parser = new SQLQueryParser();
+		
+		String s = "SELECT Able.\"id\", bB.Col4 AS c FROM TaBle1 able, (SELECT col4 FROM Bable) Bb, " +
+					"c JOIN d ON c.id = d.Id " +
+					"WHERE \"AblE\".Col = Able.col2";
+		
+		System.out.println(s);
+		
+		ParsedSQLQuery q = parser.parseDeeply(s);
+		
+		System.out.println(q.toString());
+	}
+
+	@Test
+	public void test2b() throws Exception {
+		SQLQueryParser parser = new SQLQueryParser();
+		
+		String s = "SELECT a.id AS c FROM A";
+		
+		System.out.println(s);
+		
+		ParsedSQLQuery q = parser.parseDeeply(s);
+		
+		System.out.println(q.toString());
+	}
+	
+	@Test
+	public void test3() throws Exception {
+		SQLQueryParser parser = new SQLQueryParser();
+		
+		String s = "SELECT * FROM A JOIN B ON NOT (a.id <> b.id)";
+		
+		System.out.println(s);
+		
+		ParsedSQLQuery q = parser.parseDeeply(s);
+		
+		System.out.println(q.toString());
+		System.out.println(q.getJoinConditions().toString());
 	}
 	
 }

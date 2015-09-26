@@ -35,7 +35,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -44,6 +47,7 @@ import org.openrdf.model.Literal;
 
 import java.sql.Types;
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 public class SQLGenerator implements SQLQueryGenerator {
@@ -1113,7 +1117,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				replace1 = replace2 = "";
 			}
 
-			String template = trim(literalValue);
+			String template = trimLiteral(literalValue);
 			String[] split = template.split("[{][}]");
 
 			List<String> vex = new LinkedList<String>();
@@ -1219,7 +1223,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (term instanceof Variable) {
 			Set<String> viewdef = index.getColumnReferences((Variable) term);
 			String def = viewdef.iterator().next();
-			String col = trim(def.split("\\.")[1]);
+			String col = def.split("\\.")[1];
 			String table = def.split("\\.")[0];
 			if (def.startsWith("QVIEW")) {
 				Map<Function, String> views = index.viewNames;
@@ -1256,8 +1260,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return false;
 	}
 
-	private static String trim(String string) {
-		while (ParsedSQLQuery.pQuotes.matcher(string).matches()) {
+	private static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+	
+	private static String trimLiteral(String string) {
+		while (pQuotes.matcher(string).matches()) {
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;
@@ -1317,7 +1323,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return sqladapter.getSQLLexicalFormString(uc.toString());
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			LinkedHashSet<String> posList = index.getColumnReferences(var);
+			Set<String> posList = index.getColumnReferences(var);
 			if (posList == null || posList.size() == 0) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
@@ -1567,14 +1573,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
-	 * the existing view definitons of a query.
+	 * the existing view definitions of a query.
 	 */
 	public class QueryAliasIndex {
 
-		Map<Function, String> viewNames = new HashMap<>();
-		Map<Function, String> tableNames = new HashMap<>();
-		Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
-		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
+		final Map<Function, String> viewNames = new HashMap<>();
+		final Map<Function, RelationID> tableNames = new HashMap<>();
+		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
+		final Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
+		
+		final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -1620,7 +1628,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
 			String tableName = tablePredicate.toString();
-			RelationDefinition def = metadata.getDefinition(tableName);
+			RelationDefinition def = metadata.getDefinition(idfac.createRelationFromString(tableName));
 			if (def == null) {
 				/*
 				 * There is no definition for this atom, its not a database
@@ -1650,7 +1658,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
-				String columnName = def.getAttribute(index + 1).getName();   // indexes from 1
+				String columnName = def.getAttribute(index + 1).getName().getName();   // indexes from 1
 				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
 				references.add(reference);
 			}
@@ -1664,7 +1672,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * @param var
 		 *            The variable we want the referenced columns.
 		 */
-		public LinkedHashSet<String> getColumnReferences(Variable var) {
+		public Set<String> getColumnReferences(Variable var) {
 			return columnReferences.get(var);
 		}
 
@@ -1674,8 +1682,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		public String getViewDefinition(Function atom) {
 			RelationDefinition def = dataDefinitions.get(atom);
 			if (def instanceof TableDefinition) {
-				return sqladapter.sqlTableName(tableNames.get(atom), viewNames.get(atom));
-			} else if (def instanceof ViewDefinition) {
+				return sqladapter.sqlTableName(tableNames.get(atom).getSQLRendering(), viewNames.get(atom));
+			} 
+			else if (def instanceof ViewDefinition) {
 				return String.format("(%s) %s", ((ViewDefinition) def).getStatement(), viewNames.get(atom));
 			}
 			throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);
@@ -1688,7 +1697,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		public String getColumnReference(Function atom, int column) {
 			String viewName = getView(atom);
 			RelationDefinition def = dataDefinitions.get(atom);
-			String columnname = def.getAttribute(column + 1).getName(); // indexes from 1
+			String columnname = def.getAttribute(column + 1).getName().getName(); // indexes from 1
 			return sqladapter.sqlQualifiedColumn(viewName, columnname);
 		}
 	}

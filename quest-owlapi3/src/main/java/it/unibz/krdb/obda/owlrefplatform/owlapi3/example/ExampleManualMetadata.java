@@ -19,6 +19,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
 
 import java.io.File;
@@ -36,6 +38,8 @@ public class ExampleManualMetadata {
 final String owlfile = "src/main/resources/example/exampleSensor.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
 private QuestOWLStatement qst = null;
+
+QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 /*
  * 	prepare ontop for rewriting and unfolding steps 
@@ -75,30 +79,30 @@ private void setup()  throws Exception {
 }
 
 private TableDefinition defMeasTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(name);
-	tableDefinition.addAttribute( "timestamp", java.sql.Types.TIMESTAMP, null, false);
-	tableDefinition.addAttribute("value", java.sql.Types.NUMERIC, null, false);
-	tableDefinition.addAttribute("assembly", java.sql.Types.VARCHAR, null, false);
-	tableDefinition.addAttribute("sensor", java.sql.Types.VARCHAR, null, false);
+	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute(idfac.createFromString("value"), java.sql.Types.NUMERIC, null, false);
+	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createFromString("sensor"), java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 
 private TableDefinition defMessTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(name);
-	tableDefinition.addAttribute("timestamp", java.sql.Types.TIMESTAMP, null, false);
-	tableDefinition.addAttribute("eventtext", java.sql.Types.VARCHAR, null, false);
-	tableDefinition.addAttribute("assembly", java.sql.Types.VARCHAR, null, false);
+	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute(idfac.createFromString("eventtext"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 
 private TableDefinition defStaticTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(name);
-	tableDefinition.addAttribute("domain", java.sql.Types.VARCHAR, null, false);
-	tableDefinition.addAttribute("range", java.sql.Types.VARCHAR, null, false);
+	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+	tableDefinition.addAttribute(idfac.createFromString("domain"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createFromString("range"), java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 private DBMetadata getMeta(){
-	DBMetadata dbMetadata = new DBMetadata("dummy class", null, null, DBMetadata.IdentityIdNormalizer);
+	DBMetadata dbMetadata = new DBMetadata("dummy class", null, null, idfac);
 	dbMetadata.add(defMeasTable("burner"));
 	dbMetadata.add(defMessTable("events"));
 	dbMetadata.add(defStaticTable("a_static"));

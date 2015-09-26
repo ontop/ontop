@@ -25,8 +25,8 @@ public class ViewDefinition extends RelationDefinition {
 
 	private final String statement;
 	
-	public ViewDefinition(String catalogName, String schemaName, String tableName, String name, String statement) {
-		super(catalogName, schemaName, tableName, name);
+	public ViewDefinition(RelationID name, String statement) {
+		super(name);
 		this.statement = statement;
 	}
 

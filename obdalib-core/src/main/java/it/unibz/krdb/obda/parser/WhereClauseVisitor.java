@@ -21,35 +21,43 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.api.AllComparison;
 import it.unibz.krdb.sql.api.AnyComparison;
-
-import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
 
 /**
- * Visitor class to retrieve the whereClause of the statement (WHERE expressions)
+ * Visitor class to retrieve the WHERE clause of the SELECT statement
  * 
- * CHANGES TABLE NAME / SCHEMA / ALIAS AND COLUMN NAMES
+ * BRINGS TABLE NAME / SCHEMA / ALIAS AND COLUMN NAMES in the WHERE clause into NORMAL FORM
  * 
  */
 public class WhereClauseVisitor {
 	
 	private Expression whereClause;
 	private boolean unsupported = false;
+
+	private final QuotedIDFactory idfac;
+	
+	public WhereClauseVisitor(QuotedIDFactory idfac) {
+		this.idfac = idfac;
+	}
 	
 	/**
-	 * Give the WHERE clause of the select statement
+	 * Give the WHERE clause of the SELECT statement<br>
+	 * 
+	 * NOTE: is also BRINGS ALL SCHEMA / TABLE / ALIAS / COLUMN NAMES in the WHERE clause into NORMAL FORM
+	 * 
 	 * @param select the parsed select statement
-	 * @return a SelectionJSQL
+	 * @return an Expression
 	 * @throws JSQLParserException 
 	 */
 	public Expression getWhereClause(Select select, boolean deepParsing) throws JSQLParserException {
@@ -76,7 +84,7 @@ public class WhereClauseVisitor {
     		}
     		@Override
     		public void visit(SetOperationList setOpList) {
-//        		we do not consider the case of UNION
+    			// we do not consider the case of UNION
     			// ROMAN (22 Sep 2015): not sure why it is applied to the first one only 
         		setOpList.getPlainSelects().get(0).accept(this);
     		}
@@ -105,7 +113,8 @@ public class WhereClauseVisitor {
     	}
     	@Override
     	public void visit(SetOperationList setOpList) {
-//    		we do not consider the case of UNION
+    		// we do not consider the case of UNION
+			// ROMAN (22 Sep 2015): not sure why it is applied to the first one only 
     		setOpList.getPlainSelects().get(0).accept(this);
     	}
 
@@ -235,6 +244,10 @@ public class WhereClauseVisitor {
     	public void visit(InExpression inExpression) {
 
     		//Expression e = inExpression.getLeftExpression();
+    		
+    		// ROMAN (25 Sep 2015): why not getLeftExpression? getLeftItemList can be empty
+    		// what about the right-hand side list?!
+    		
     		ItemsList e1 = inExpression.getLeftItemsList();
     		if (e1 instanceof SubSelect) {
     			((SubSelect)e1).accept((ExpressionVisitor)this);
@@ -290,7 +303,7 @@ public class WhereClauseVisitor {
     	@Override
     	public void visit(Column tableColumn) {
     		// CHANGES THE TABLE SCHEMA / NAME AND COLUMN NAME
-    		TableJSQL.unquoteColumnAndTableName(tableColumn);
+    		ParsedSQLQuery.normalizeColumnName(idfac, tableColumn);
     	}
 
     	/*

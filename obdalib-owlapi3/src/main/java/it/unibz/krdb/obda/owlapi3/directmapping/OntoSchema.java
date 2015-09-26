@@ -54,7 +54,7 @@ public class OntoSchema {
 	}
 	
 	public OntoSchema(RelationDefinition dd){
-		this.tablename=dd.getName();
+		this.tablename=dd.getName().getName();
 		this.attrList=dd.getAttributes();
 		
 		baseURI=new String("http://example.org/");
@@ -109,7 +109,7 @@ public class OntoSchema {
 		OWLOntologyManager manager =rootOntology.getOWLOntologyManager();
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		if(!existDataProperty(rootOntology, at)){
-			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName()))));
+			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName().getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newdproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
@@ -128,7 +128,7 @@ public class OntoSchema {
 	private boolean existDataProperty(OWLOntology rootOntology, Attribute at){
 		boolean existDataProperty=false;
 		for(OWLDataProperty dtpp : rootOntology.getDataPropertiesInSignature()){
-			if(dtpp.toString().equalsIgnoreCase("<"+String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName()))+">")){
+			if(dtpp.toString().equalsIgnoreCase("<"+String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName().getName()))+">")){
 				existDataProperty=true;
 			}
 		}
@@ -138,7 +138,7 @@ public class OntoSchema {
 	private boolean existObjectProperty(OWLOntology rootOntology, Attribute at){
 		boolean existObjectProperty=false;
 		for(OWLObjectProperty obpp : rootOntology.getObjectPropertiesInSignature()){
-			if(obpp.toString().equalsIgnoreCase("<"+String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))+">")){
+			if(obpp.toString().equalsIgnoreCase("<"+String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName().getName()))+">")){
 				existObjectProperty=true;
 			}
 		}

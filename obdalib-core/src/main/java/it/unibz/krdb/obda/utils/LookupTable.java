@@ -20,6 +20,9 @@ package it.unibz.krdb.obda.utils;
  * #L%
  */
 
+import it.unibz.krdb.sql.QualifiedAttributeID;
+import it.unibz.krdb.sql.QuotedID;
+
 import java.util.*;
 
 /**
@@ -36,7 +39,7 @@ public class LookupTable {
 	/**
 	 * Map of variable names to the corresponding numbers
 	 */
-	private final Map<String, Integer> var2NumMap = new HashMap<>();
+	private final Map<QualifiedAttributeID, Integer> var2NumMap = new HashMap<>();
 
 	/**
      * Map of numbers to their canonical variable names
@@ -49,7 +52,7 @@ public class LookupTable {
 	 * Set with all unsafe names, names with multiple columns (not qualified)
 	 * use for throwing exception.
 	 */
-	private final Set<String> unsafeEntries = new HashSet<>();
+	private final Set<QualifiedAttributeID> unsafeEntries = new HashSet<>();
 	
 	public LookupTable() {
 		// NO-OP
@@ -65,9 +68,8 @@ public class LookupTable {
 	 * @param index
 	 *            The entry index.
 	 */
-	public void add(String entry, int index) {
+	public void add(QualifiedAttributeID entry, int index) {
 		if (entry != null) {
-			entry = getCanonicalForm(entry);
 			putEntry(entry, index);
 			register(index);
 		}
@@ -82,11 +84,10 @@ public class LookupTable {
 	 * @param index
 	 *            The entries index, all entries share the same index number.
 	 */
-	public void add(String[] entries, int index) {
+	public void add(QualifiedAttributeID[] entries, int index) {
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				String entry = getCanonicalForm(entries[i]);
-				putEntry(entry, index);
+				putEntry(entries[i], index);
 			}
 		}
 		register(index);
@@ -118,14 +119,12 @@ public class LookupTable {
 	 *            An entry that exists already in the lookup table. The method
 	 *            will get its index and assign it to the new entry.
 	 */
-	public void add(String entry, String reference) {
+	public void add(QualifiedAttributeID entry, QualifiedAttributeID reference) {
 		if (entry == null || reference == null) 
 			throw new IllegalArgumentException();
 		
-		reference = getCanonicalForm(reference);
 		Integer index = var2NumMap.get(reference);
 		if (index != null) {
-			entry = getCanonicalForm(entry);
 			putAliasEntry(entry, index);
 		}
 		else 
@@ -135,8 +134,7 @@ public class LookupTable {
 	/**
 	 * Returns the alternative name for the given entry.
 	 */
-	public String lookup(String entry) {
-		entry = getCanonicalForm(entry);
+	public String lookup(QualifiedAttributeID entry) {
 		Integer index = var2NumMap.get(entry);
 		if (index != null) 
 			return num2CanonicalVarMap.get(index);
@@ -168,9 +166,8 @@ public class LookupTable {
 	 * TEST ONLY
 	 * 
 	 */
-	public boolean asEqualTo(String entry, String reference) {
-		entry = getCanonicalForm(entry);
-		reference = getCanonicalForm(reference);
+/*	
+	public boolean asEqualTo(QualifiedAttributeID entry, QualifiedAttributeID reference) {
 
 		Integer index = var2NumMap.get(entry);
 		Integer referenceIndex = var2NumMap.get(reference);
@@ -178,20 +175,21 @@ public class LookupTable {
 		if ((index == null) || (referenceIndex == null)) 
 			return false;
 		
-		String name = num2CanonicalVarMap.get(referenceIndex);
+		QualifiedAttributeID name = num2CanonicalVarMap.get(referenceIndex);
 		num2CanonicalVarMap.put(index, name);
 
 		return true;
 	}
-	
+*/	
 	// ROMAN (23 Sep 2015): YET ANOTHER POINT OF CHOPPING THE NAMES
 	// THIS DOES NOT WORK CORRECTLY WITH "A"."B"
 	
 	private static String getCanonicalForm(String s) {
-		if (s.startsWith("\"") && s.endsWith("\"")) {
-			s = s.substring(1, s.length() - 1);
-		}
-		return s.toLowerCase();
+//		if (s.startsWith("\"") && s.endsWith("\"")) {
+//			s = s.substring(1, s.length() - 1);
+//		}
+//		return s.toLowerCase();
+		return s;
 	}
 	
 
@@ -201,7 +199,7 @@ public class LookupTable {
 	public String toString() {
 
 		String str = "";
-		for (Map.Entry<String, Integer> entry : var2NumMap.entrySet()) {
+		for (Map.Entry<QualifiedAttributeID, Integer> entry : var2NumMap.entrySet()) {
 			String name = num2CanonicalVarMap.get(entry.getValue());
 			str += String.format(printFormat, entry.getKey(), name);
 		}
@@ -213,7 +211,7 @@ public class LookupTable {
 	 * Utility method to add an entry in the lookup table. Input string will be
 	 * written in lower case.
 	 */
-	private void putEntry(String entry, Integer index) {
+	private void putEntry(QualifiedAttributeID entry, Integer index) {
 
 		// looking for repeated entries, if they exists they are unsafe
 		// (generally unqualified names) and they are marked as unsafe.
@@ -237,7 +235,7 @@ public class LookupTable {
 	/*
 	 * Utility method to add an alias entry in the lookup table. 
 	 */
-	private void putAliasEntry(String entry, Integer index) {
+	private void putAliasEntry(QualifiedAttributeID entry, Integer index) {
 		/*
 		 * looking for repeated entries, if they exists they are unsafe
 		 * (generally unqualified names) and they are marked as unsafe.

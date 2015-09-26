@@ -21,7 +21,6 @@ package it.unibz.krdb.sql;
 */
 
 
-import it.unibz.krdb.sql.DBMetadata.TableIdNormalizer;
 import it.unibz.krdb.sql.api.TableJSQL;
 
 import java.sql.Connection;
@@ -113,6 +112,8 @@ public class DBMetadataExtractor {
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 	
+	private final static QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
 	/**
 	 * Retrieves the database metadata (table schema and database constraints) 
 	 * 
@@ -131,65 +132,65 @@ public class DBMetadataExtractor {
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationDefinition> tableList;
 		DatatypeNormalizer dt = DefaultTypeFixer;
-		TableIdNormalizer idNormalizer;
+		QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 		
 		if (md.getDatabaseProductName().contains("Oracle")) {
-			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 			
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (realTables == null || realTables.isEmpty())
 				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema));
 			else
-				tableList = getTableList(defaultSchema, realTables, idNormalizer);
+				tableList = getTableList(defaultSchema, realTables);
 			
 			dt = OracleTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("DB2")) {
-			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 					
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, DB2RelationListProvider);
 			else 
-				tableList = getTableList(null, realTables, idNormalizer);
+				tableList = getTableList(null, realTables);
 		}  
 		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
-			idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
 				
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, realTables, idNormalizer);
+				tableList = getTableList(null, realTables);
 		}
 		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
-			idNormalizer = DBMetadata.LowerCaseIdNormalizer;
+			// idfac = DBMetadata.LowerCaseIdNormalizer;
 					
 			// Postgres treats unquoted identifiers as lower-case
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, realTables, idNormalizer);
+				tableList = getTableList(null, realTables);
 		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
-			idNormalizer = DBMetadata.IdentityIdNormalizer;
+			//idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, MSSQLServerRelationListProvider);
 			else
-				tableList = getTableList(null, realTables, idNormalizer);
+				tableList = getTableList(null, realTables);
  		} 
 		else {
-			idNormalizer = DBMetadata.IdentityIdNormalizer;
+			//idNormalizer = DBMetadata.IdentityIdNormalizer;
 					
 			// For other database engines, i.e. MySQL
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else
-				tableList = getTableList(null, realTables, idNormalizer);
+				tableList = getTableList(null, realTables);
 			
 			dt = MySQLTypeFixer;
 		}
 		
-		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idNormalizer);
+		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idfac);
 		
 		for (RelationDefinition table : tableList) {
 			// ROMAN (20 Sep 2015): careful with duplicates
@@ -198,7 +199,7 @@ public class DBMetadataExtractor {
 			getUniqueAttributes(md, table);
 			metadata.add(table);
 			if (printouts)
-				System.out.println(table.getCatalog() + "." + table.getSchema() + "." + table.getTableName() + ": " + table);
+				System.out.println(table.getName().getSQLRendering() + ": " + table);
 		}	
 		// FKs are processed separately because they are not local 
 		// (refer to two relations), which requires all relations 
@@ -214,27 +215,11 @@ public class DBMetadataExtractor {
 	 * Retrieve the normalized list of tables from a given list of RelationJSQL
 	 */
 
-	private static List<RelationDefinition> getTableList(String defaultTableSchema, Set<RelationID> realTables, TableIdNormalizer idNormalizer) throws SQLException {
+	private static List<RelationDefinition> getTableList(String defaultTableSchema, Set<RelationID> realTables) throws SQLException {
 
 		List<RelationDefinition> fks = new LinkedList<>();
-		// The tables contains all tables which occur in the sql source queries
-		// Note that different spellings (casing, quotation marks, optional schema prefix) 
-		// may lead to the same table occurring several times 		
 		for (RelationID table : realTables) {
-			// tableGivenName is exactly the name the user provided, 
-			// including schema prefix if that was provided, otherwise without.
-			//String tableGivenName = table.getTableGivenName();
-			//
-			//String tblName = idNormalizer.getCanonicalFormOfIdentifier(table.getTable().getName(), table.getTable().isQuoted());
-			//
-			//String tableSchema;
-			//if (table.getSchema().getName() != null) 
-			//	tableSchema = idNormalizer.getCanonicalFormOfIdentifier(table.getSchema().getName(), table.getSchema().isQuoted());
-			//else
-			//	tableSchema = defaultTableSchema;
-			//
-			
-			fks.add(new TableDefinition(null, table.getSchema().getName(), table.getTable().getName(), table.getSQLRendering()));
+			fks.add(new TableDefinition(table));
 		}
 		return fks;
 	}
@@ -248,12 +233,9 @@ public class DBMetadataExtractor {
 		List<RelationDefinition> tables = new LinkedList<>();
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
-				String tblCatalog = rsTables.getString("TABLE_CAT");
-				String tblSchema = rsTables.getString("TABLE_SCHEM");
-				String tblName = rsTables.getString("TABLE_NAME");
-
-				tables.add(new TableDefinition(tblCatalog, tblSchema, tblName, tblName));
-				// null for catalog and null for schema affected FKs only
+				//String tblCatalog = rsTables.getString("TABLE_CAT");
+				RelationID id = idfac.createRelationFromDatabaseRecord(rsTables.getString("TABLE_SCHEM"), rsTables.getString("TABLE_NAME"));
+				tables.add(new TableDefinition(id));
 			}
 		} 
 		return tables;
@@ -333,8 +315,8 @@ public class DBMetadataExtractor {
 
 		@Override
 		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			String tblName = rs.getString("object_name");
-			return new TableDefinition(null, defaultTableOwner, tblName, tblName);
+			RelationID id = idfac.createRelationFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
+			return new TableDefinition(id);
 		}
 	};
 	
@@ -353,9 +335,8 @@ public class DBMetadataExtractor {
 
 		@Override
 		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			String tblSchema = rs.getString("TABSCHEMA");
-			String tblName = rs.getString("TABNAME");
-			return new TableDefinition(null, tblSchema, tblName, tblName);
+			RelationID id = idfac.createRelationFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
+			return new TableDefinition(id);
 		}
 	};
 
@@ -374,10 +355,9 @@ public class DBMetadataExtractor {
 
 		@Override
 		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			String tblCatalog = rs.getString("TABLE_CATALOG");
-			String tblSchema = rs.getString("TABLE_SCHEMA");
-			String tblName = rs.getString("TABLE_NAME");
-			return new TableDefinition(tblCatalog, tblSchema, tblName, tblName);
+			//String tblCatalog = rs.getString("TABLE_CATALOG");
+			RelationID id = idfac.createRelationFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
+			return new TableDefinition(id);
 		}
 	};
 	
@@ -434,7 +414,9 @@ public class DBMetadataExtractor {
 		//  (only in getOtherMetadata)
 		//Set<String> tableColumns = new HashSet<>();
 		
-		try (ResultSet rs = md.getColumns(table.getCatalog(), table.getSchema(), table.getTableName(), null)) {
+		RelationID id = table.getName();
+		
+		try (ResultSet rs = md.getColumns(/*table.getCatalog()*/null, id.getSchema().getName(), id.getTable().getName(), null)) {
 			//if (rsColumns == null) 
 			//	return;			
 			while (rs.next()) {
@@ -442,7 +424,7 @@ public class DBMetadataExtractor {
 					System.out.println(rs.getString("TABLE_CAT") + "." + rs.getString("TABLE_SCHEM") + "." + 
 								rs.getString("TABLE_NAME") + "." + rs.getString("COLUMN_NAME"));
 				// ROMAN (21 Sep 2015): very careful with columns of the same name in tables in different schemas
-				String columnName = rs.getString("COLUMN_NAME");
+				QuotedID columnName = idfac.createFromDatabaseRecord(rs.getString("COLUMN_NAME"));
 				// columnNoNulls, columnNullable, columnNullableUnknown 
 				boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
 				
@@ -505,10 +487,11 @@ public class DBMetadataExtractor {
 	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table) throws SQLException {
 		UniqueConstraint.Builder pk = UniqueConstraint.builder(table);
 		String pkName = "";
-		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(table.getCatalog(), table.getSchema(), table.getTableName())) {
+		RelationID id = table.getName();
+		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(null, id.getSchema().getSQLRendering(), id.getTable().getSQLRendering())) {
 			while (rsPrimaryKeys.next()) {
 				pkName = rsPrimaryKeys.getString("PK_NAME");
-				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
+				QuotedID colName = idfac.createFromDatabaseRecord(rsPrimaryKeys.getString("COLUMN_NAME"));
 				pk.add(table.getAttribute(colName));
 			}
 		} 
@@ -525,8 +508,9 @@ public class DBMetadataExtractor {
 
 		Set<String> uniqueSet  = new HashSet<>();
 
+		RelationID id = table.getName();
 		// extracting unique 
-		try (ResultSet rsUnique = md.getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), true, true)) {
+		try (ResultSet rsUnique = md.getIndexInfo(null, id.getSchema().getSQLRendering(), id.getTable().getSQLRendering(), true, true)) {
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
 				String nonUnique = rsUnique.getString("NON_UNIQUE");
@@ -552,13 +536,16 @@ public class DBMetadataExtractor {
 	 */
 	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata) throws SQLException {
 		
-		try (ResultSet rsForeignKeys = md.getImportedKeys(table.getCatalog(), table.getSchema(), table.getTableName())) {
+		RelationID id = table.getName();
+		
+		try (ResultSet rsForeignKeys = md.getImportedKeys(null, id.getSchema().getSQLRendering(), id.getTable().getSQLRendering())) {
 			ForeignKeyConstraint.Builder builder = null;
 			String currentName = "";
 			while (rsForeignKeys.next()) {
 				String pkSchemaName = rsForeignKeys.getString("PKTABLE_SCHEM");
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-				RelationDefinition ref = metadata.getDefinition(/*pkSchemaName, */pkTableName);
+				RelationID pkTable = idfac.createRelationFromDatabaseRecord(pkSchemaName, pkTableName);
+				RelationDefinition ref = metadata.getDefinition(pkTable);
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {
 					if (builder != null) 
@@ -567,8 +554,8 @@ public class DBMetadataExtractor {
 					builder = new ForeignKeyConstraint.Builder(table, ref);
 					currentName = name;
 				}
-				String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
-				String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
+				QuotedID colName = idfac.createFromDatabaseRecord(rsForeignKeys.getString("FKCOLUMN_NAME"));
+				QuotedID pkColumnName = idfac.createFromDatabaseRecord(rsForeignKeys.getString("PKCOLUMN_NAME"));
 				if (ref != null)
 					builder.add(table.getAttribute(colName), ref.getAttribute(pkColumnName));
 				else {

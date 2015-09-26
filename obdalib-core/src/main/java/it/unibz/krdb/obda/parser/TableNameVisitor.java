@@ -20,8 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
@@ -50,7 +50,7 @@ public class TableNameVisitor {
 	// Store the table selected by the SQL query in TableJSQL
 	private final List<TableJSQL> tables = new LinkedList<>();
 	
-	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	private final QuotedIDFactory idfac;
 	private final List<RelationID> relations = new LinkedList<>();
 
 	// There are special names that are not table names but are parsed as tables. 
@@ -67,7 +67,8 @@ public class TableNameVisitor {
 	 * @param deepParsing
 	 * @return
 	 */
-	public TableNameVisitor(Select select, boolean deepParsing) throws JSQLParserException {
+	public TableNameVisitor(Select select, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
+		this.idfac = idfac;
 		
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) 
@@ -149,13 +150,13 @@ public class TableNameVisitor {
 			if (!withTCEs.contains(table.getFullyQualifiedName().toLowerCase())) {
 				
 				Alias as = table.getAlias();
-				String alias = (as != null) ? as.getName() : null;
-				
-				TableJSQL relation = new TableJSQL(table.getSchemaName(), table.getName(), alias);
-				tables.add(relation);
+				QuotedID alias = (as != null) ? idfac.createFromString(as.getName()) : null;
 				
 				RelationID relationID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
 				relations.add(relationID);
+				
+				TableJSQL relation = new TableJSQL(relationID, alias);
+				tables.add(relation);
 			}
 		}
 

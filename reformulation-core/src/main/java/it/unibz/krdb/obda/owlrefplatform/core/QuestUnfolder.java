@@ -24,7 +24,10 @@ import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -155,6 +158,8 @@ public class QuestUnfolder {
 		return new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 	
+	private static final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
 	/***
 	 * Generates a map for each predicate in the body of the rules in 'program'
 	 * that contains the Primary Key data for the predicates obtained from the
@@ -184,7 +189,7 @@ public class QuestUnfolder {
 				if (pkeys.containsKey(newAtomPredicate))
 					continue;
 				
-				String newAtomName = newAtomPredicate.toString();
+				RelationID newAtomName = idfac.createRelationFromString(newAtomPredicate.toString());
 				RelationDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					// primary keys
@@ -253,6 +258,7 @@ public class QuestUnfolder {
 	public void extendTypesWithMetadata(TBoxReasoner tboxReasoner, VocabularyValidator qvv, DBMetadata metadata) throws OBDAException {
 
 		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+		System.out.println(unfoldingProgram);
 		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv);
 	}
 

@@ -24,7 +24,7 @@ import java.sql.Types;
 
 public class Attribute {
 	
-	private final String name;
+	private final QuotedID name;
 	private final int index;
 	private final int type;
 	private final String typeName;
@@ -32,7 +32,7 @@ public class Attribute {
 	
 	private final RelationDefinition table;
 	
-	Attribute(RelationDefinition relation, int index, String name, int type, String typeName, boolean canNull) {
+	Attribute(RelationDefinition relation, int index, QuotedID name, int type, String typeName, boolean canNull) {
 		this.table = relation;
 		this.index = index;
 		this.name = name;
@@ -41,7 +41,7 @@ public class Attribute {
 		this.canNull = canNull;
 	}
 	
-	public String getName() {
+	public QuotedID getName() {
 		return name;
 	}
 	

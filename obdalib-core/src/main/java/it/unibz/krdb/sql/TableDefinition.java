@@ -2,12 +2,8 @@ package it.unibz.krdb.sql;
 
 public class TableDefinition extends RelationDefinition {
 
-	public TableDefinition(String catalogName, String schemaName, String tableName, String name) {
-		super(catalogName, schemaName, tableName, name);
-	}
-
-	public TableDefinition(String name) {
-		super(null, null, name, name);
+	public TableDefinition(RelationID name) {
+		super(name);
 	}
 
 	@Override

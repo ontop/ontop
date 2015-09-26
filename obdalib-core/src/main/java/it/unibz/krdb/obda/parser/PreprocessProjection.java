@@ -5,7 +5,10 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
@@ -145,7 +148,8 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     if (aliasName != null) {
 
                         String aliasString = aliasName.getName();
-                        SelectExpressionItem columnAlias = newSelectExpressionItem(tableName, aliasString);
+                        SelectExpressionItem columnAlias = new SelectExpressionItem(
+                        		new Column(tableName,  idfac.createFromDatabaseRecord(aliasString).getSQLRendering()));
                         //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase()))
                                 || variables.contains(fac.getVariable(columnAlias.toString())) || variables.contains(fac.getVariable(aliasString.toString().toLowerCase()))) {
@@ -157,7 +161,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     } else { //when there are no alias add the columns that are used in the mappings
 
                         String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
-                        SelectExpressionItem column = newSelectExpressionItem(tableName, columnName);
+                        SelectExpressionItem column = new SelectExpressionItem(
+                        		new Column(tableName,  idfac.createFromDatabaseRecord(columnName).getSQLRendering()));
+                        
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))
                                 || variables.contains(fac.getVariable(column.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
                             columnNames.add(column);
@@ -262,6 +268,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         return result;
     }
 
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
     /**
      From a table, obtain all its columns using the metadata information
@@ -269,12 +276,8 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
      */
     private void obtainColumnsFromMetadata(Table table) {
 
-    	// ROMAN (22 Sep 2015): I'm TOTALLY unsure whether one should unqoute the FULLY QULAIFIED NAME
-        String tableFullName= table.getFullyQualifiedName();
-        if (ParsedSQLQuery.pQuotes.matcher(tableFullName).matches()) {
-            tableFullName = tableFullName.substring(1, tableFullName.length()-1);
-        }
-        RelationDefinition tableDefinition = metadata.getDefinition(tableFullName);
+    	RelationID tableID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+        RelationDefinition tableDefinition = metadata.getDefinition(tableID);
 
         if (tableDefinition == null)
             throw new RuntimeException("Definition not found for table '" + table + "'.");
@@ -291,8 +294,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
 
         for (Attribute att : tableDefinition.getAttributes()) {
-            String columnFromMetadata = att.getName();
-            SelectExpressionItem columnName = newSelectExpressionItem(tableName,  columnFromMetadata);
+            String columnFromMetadata = att.getName().getSQLRendering();
+            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
+           
             //construct a column as table.column
             if (variables.contains(fac.getVariable(columnFromMetadata))
                     || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
@@ -305,13 +309,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
     }
 
-
-    private static SelectExpressionItem newSelectExpressionItem(Table tableName, String columnFromMetadata) {
-        if(ParsedSQLQuery.pQuotes.matcher(columnFromMetadata).matches())
-            return new SelectExpressionItem(new Column(tableName,  columnFromMetadata ));
-        else 
-            return new SelectExpressionItem(new Column(tableName, "\"" + columnFromMetadata + "\""));
-    }
 
 
 

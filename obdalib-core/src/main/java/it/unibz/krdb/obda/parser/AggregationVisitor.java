@@ -347,7 +347,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(Column tableColumn) {
-		TableJSQL.unquoteColumnAndTableName(tableColumn);
+		//TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 
 	@Override

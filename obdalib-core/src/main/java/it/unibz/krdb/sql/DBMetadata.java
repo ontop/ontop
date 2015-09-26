@@ -22,21 +22,19 @@ package it.unibz.krdb.sql;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private final Map<String, RelationDefinition> schema = new HashMap<>();
+	private final Map<RelationID, RelationDefinition> schema = new HashMap<>();
 
 	private final String driverName;
 	private final String driverVersion;
 	private final String databaseProductName;
-	private final TableIdNormalizer tableIdNormalizer;
+	private final QuotedIDFactory idfac;
 
-	// ROMAN (19 Sep 2015): this pQuotes does not consider ' (unlike ParsedSQLQuery.pQuotes). WHY?
-	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
+//	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
 
 	/**
 	 * Constructs an initial metadata with some general information about the
@@ -44,48 +42,13 @@ public class DBMetadata implements Serializable {
 	 * 
 	 */
 
-	public DBMetadata(String driverName, String driverVersion, String databaseProductName, TableIdNormalizer tableIdNormalizer) {
+	public DBMetadata(String driverName, String driverVersion, String databaseProductName, QuotedIDFactory idfac) {
 		this.driverName = driverName;
 		this.driverVersion = driverVersion;
 		this.databaseProductName = databaseProductName;
-		this.tableIdNormalizer = tableIdNormalizer;
+		this.idfac = idfac;
 	}
 
-	/**
-	 * A method for getting the canonical form of identifiers 
-	 * (upper-case, as in SQL standard, or lower-case as in PostgreSQL)
-	 */
-	
-	public interface TableIdNormalizer {
-		String getCanonicalFormOfIdentifier(String id, boolean quoted);
-	}
-	
-	public static final TableIdNormalizer UpperCaseIdNormalizer = new TableIdNormalizer() {
-		@Override
-		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
-			if (!quoted)
-				return id.toUpperCase();
-			return id;
-		}
-	};
-
-	public static final TableIdNormalizer LowerCaseIdNormalizer = new TableIdNormalizer() {
-		@Override
-		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
-			if (!quoted)
-				return id.toLowerCase();
-			return id;
-		}
-	};
-
-	public static final TableIdNormalizer IdentityIdNormalizer = new TableIdNormalizer() {
-		@Override
-		public String getCanonicalFormOfIdentifier(String id, boolean quoted) {
-			return id;
-		}
-	};
-	
-	
 	
 	/**
 	 * Inserts a new data definition to this meta data object. The name is
@@ -97,31 +60,19 @@ public class DBMetadata implements Serializable {
 	 *            {@link ViewDefinition} object.
 	 */
 	public void add(RelationDefinition td) {
-		String name = td.getName();
-		// name without quotes
-		if (pQuotes.matcher(name).matches())
-			schema.put(name.substring(1, name.length() - 1), td);
-
-		else {
-			String[] names = name.split("\\."); // consider the case of
-												// schema.table
-			if (names.length == 2) {
-				String schemaName = unquote(names[0]);
-				String tableName = unquote(names[1]);
-				schema.put(schemaName + "." + tableName, td);
-			} 
-			else
-				schema.put(name, td);
+		schema.put(td.getName(), td);
+		if (td.getName().getSchema().getName() != null) {
+			RelationID noSchemaID = new RelationID(null, td.getName().getTable());
+			if (!schema.containsKey(noSchemaID)) {
+				schema.put(noSchemaID, td);
+			}
+			else {
+				System.err.println("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + td + "\nAND\n" + schema.get(noSchemaID));
+				schema.remove(noSchemaID);
+			}
 		}
 	}
 
-	// ROMAN (19 Sep 2015): Use TableJSQL.unquote(String) instead?
-	private static String unquote(String name) {
-		if (pQuotes.matcher(name).matches()) {
-			return name.substring(1, name.length() - 1);
-		}
-		return name;
-	}
 	
 	/**
 	 * Retrieves the data definition object based on its name. The
@@ -130,32 +81,12 @@ public class DBMetadata implements Serializable {
 	 * @param name
 	 *            The string name.
 	 */
-	public RelationDefinition getDefinition(String name) {
+	public RelationDefinition getDefinition(RelationID name) {
 		RelationDefinition def = schema.get(name);
-		if (def == null)
-			def = schema.get(name.toLowerCase());
-		if (def == null)
-			def = schema.get(name.toUpperCase());
-		return def;
-	}
-
-	/**
-	 * Retrieves the data definition object based on its name. The
-	 * <name>name</name> can be either a table name or a view name.
-	 * 
-	 * @param name
-	 *            The string name.
-	 */
-	public RelationDefinition getDefinition(String schemaName, String name) {
-		// ROMAN (20 Sep 2015): this is just a hack to deal with two different schemas
-		if (schemaName != null)
-			name = schemaName + "." + name;
-		
-		RelationDefinition def = schema.get(name);
-		if (def == null)
-			def = schema.get(name.toLowerCase());
-		if (def == null)
-			def = schema.get(name.toUpperCase());
+		if (def == null && name.getSchema().getName() != null) {
+			RelationID noSchemaID = new RelationID(null, name.getTable());
+			def = schema.get(noSchemaID);
+		}
 		return def;
 	}
 	
@@ -193,14 +124,14 @@ public class DBMetadata implements Serializable {
 		return databaseProductName;
 	}
 
-	public TableIdNormalizer getTableIdNormalizer() {
-		return tableIdNormalizer;
+	public QuotedIDFactory getQuotedIDFactory() {
+		return idfac;
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		for (String key : schema.keySet()) {
+		for (RelationID key : schema.keySet()) {
 			bf.append(key);
 			bf.append("=");
 			bf.append(schema.get(key).toString());

@@ -10,6 +10,6 @@ public interface QuotedIDFactory {
 
 	RelationID createRelationFromString(String schema, String table);
 	
-	RelationID createRelationFromDatabaseRecoard(String schema, String table);
+	RelationID createRelationFromDatabaseRecord(String schema, String table);
 	
 }

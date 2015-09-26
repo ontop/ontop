@@ -28,6 +28,9 @@ import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.WhereClauseVisitor;
 import it.unibz.krdb.obda.parser.SubSelectVisitor;
 import it.unibz.krdb.obda.parser.TableNameVisitor;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 
 import java.io.Serializable;
@@ -38,6 +41,8 @@ import java.util.regex.Pattern;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 
@@ -54,16 +59,19 @@ public class ParsedSQLQuery implements Serializable {
 
 	private Select selectQuery; // the parsed query
 
-	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+//	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+
+	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
 	
 	private List<TableJSQL> tables;
 	private List<RelationID> relations;
 	private List<SelectJSQL> subSelects;
-	private Map<String, String> aliasMap;
+	private Map<QuotedID, Expression> aliasMap;
 	private List<Expression> joins;
 	private Expression whereClause;
 	private ProjectionJSQL projection;
-	private AggregationJSQL groupByClause;
+	//private AggregationJSQL groupByClause;
 
 
 	/**
@@ -112,11 +120,11 @@ public class ParsedSQLQuery implements Serializable {
 
 			if (deepParsing) {
 				tables = getTables();
-				whereClause = getWhereClause();
-				projection = getProjection();
-				joins = getJoinConditions();
-				aliasMap = getAliasMap();
-				groupByClause = getGroupByClause();
+				whereClause = getWhereClause(); // bring the names in WHERE clause into NORMAL FORM
+				projection = getProjection(); // bring the names in FROM clause into NORMAL FORM
+				joins = getJoinConditions(); // bring the names in JOIN clauses into NORMAL FORM
+				aliasMap = getAliasMap();    // bring the alias names in Expr AS Alias into NORMAL FORM 
+				//groupByClause = getGroupByClause();
 			}
 		}
 		// catch exception about wrong inserted columns
@@ -138,18 +146,15 @@ public class ParsedSQLQuery implements Serializable {
 	public List<TableJSQL> getTables() throws JSQLParserException {
 
 		if (tables == null) {
-			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing);
+			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing, idfac);
 			tables = visitor.getTables();
+			relations = visitor.getRelations();
 		}
 		return tables;
 	}
 	
 	public List<RelationID> getRelations() throws JSQLParserException {
-
-		if (tables == null) {
-			TableNameVisitor visitor = new TableNameVisitor(selectQuery, deepParsing);
-			relations = visitor.getRelations();
-		}
+		getTables();
 		return relations;
 	}
 
@@ -176,9 +181,9 @@ public class ParsedSQLQuery implements Serializable {
 	 * MAPS EXPRESSION -> NAME
 	 * 
 	 */
-	public Map<String, String> getAliasMap() {
+	public Map<QuotedID, Expression> getAliasMap() {
 		if (aliasMap == null) {
-			AliasMapVisitor visitor = new AliasMapVisitor(selectQuery);
+			AliasMapVisitor visitor = new AliasMapVisitor(selectQuery, idfac);
 			aliasMap = visitor.getAliasMap();
 		}
 		return aliasMap;
@@ -193,8 +198,8 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 	public List<Expression> getJoinConditions() throws JSQLParserException {
 		if (joins == null) {
-			JoinConditionVisitor visitor = new JoinConditionVisitor();
-			joins = visitor.getJoinConditions(selectQuery, deepParsing);
+			JoinConditionVisitor visitor = new JoinConditionVisitor(selectQuery, deepParsing, idfac);
+			joins = visitor.getJoinConditions();
 		}
 		return joins;
 	}
@@ -209,7 +214,7 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 	public Expression getWhereClause() throws JSQLParserException {
 		if (whereClause == null) {
-			WhereClauseVisitor visitor = new WhereClauseVisitor();
+			WhereClauseVisitor visitor = new WhereClauseVisitor(idfac);
 			// CHANGES TABLE SCHEMA / NAME / ALIASES AND COLUMN NAMES
 			whereClause = visitor.getWhereClause(selectQuery, deepParsing);
 		}
@@ -226,7 +231,7 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 	public ProjectionJSQL getProjection() throws JSQLParserException {
 		if (projection == null) {
-			ProjectionVisitor visitor = new ProjectionVisitor();
+			ProjectionVisitor visitor = new ProjectionVisitor(idfac);
 			projection = visitor.getProjection(selectQuery, deepParsing);
 		}
 		return projection;
@@ -255,7 +260,7 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 
 	public void setProjection(ProjectionJSQL projection) {
-		ProjectionVisitor visitor = new ProjectionVisitor();
+		ProjectionVisitor visitor = new ProjectionVisitor(idfac);
 		visitor.setProjection(selectQuery, projection);
 		this.projection = projection;
 	}
@@ -270,7 +275,7 @@ public class ParsedSQLQuery implements Serializable {
 	 */
 
 	public void setWhereClause(Expression whereClause) {
-		WhereClauseVisitor sel = new WhereClauseVisitor();
+		WhereClauseVisitor sel = new WhereClauseVisitor(idfac);
 		sel.setWhereClause(selectQuery, whereClause);
 		this.whereClause = whereClause;
 	}
@@ -281,6 +286,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * FUTURE USE
 	 * 
 	 */
+/*	
 	public AggregationJSQL getGroupByClause() {
 		if (groupByClause == null) {
 			AggregationVisitor agg = new AggregationVisitor();
@@ -289,9 +295,20 @@ public class ParsedSQLQuery implements Serializable {
 
 		return groupByClause;
 	}
+*/
 
 	public Select getStatement() {
 		return selectQuery;
 	}
 
+	public static void normalizeColumnName(QuotedIDFactory idfac, Column tableColumn) {
+		QuotedID columnName = idfac.createFromString(tableColumn.getColumnName());
+		tableColumn.setColumnName(columnName.getSQLRendering());
+
+		Table table = tableColumn.getTable();
+		RelationID tableName = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+		table.setSchemaName(tableName.getSchema().getSQLRendering());
+		table.setName(tableName.getTable().getSQLRendering());
+	}
+	
 }

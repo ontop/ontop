@@ -74,7 +74,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 				assertEquals(1, pkc.getAttributes().size());
 			}
 			if (pkc != null)
-				writeLog(t.getName(), pkc.getAttributes());
+				writeLog(t.getName().getSQLRendering(), pkc.getAttributes());
 		}
 		log.info("\n");
 	}
@@ -94,13 +94,13 @@ public abstract class AbstractConstraintTest extends TestCase {
 			} else if (checkName(t, TB_WRITER)) {
 				assertEquals(0, fk.size());
 			}
-			writeLog(t.getName(), fk);
+			writeLog(t.getName().getSQLRendering(), fk);
 		}
 		log.info("\n");
 	}
 	
 	private boolean checkName(TableDefinition table, String value) {
-		final String tableName = table.getName();
+		final String tableName = table.getName().getSQLRendering();
 		return tableName.equalsIgnoreCase(value);
 	}
 	

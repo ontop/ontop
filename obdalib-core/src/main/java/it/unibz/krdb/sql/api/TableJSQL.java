@@ -20,9 +20,8 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.RelationID;
 
 import java.io.Serializable;
 
@@ -36,118 +35,27 @@ public class TableJSQL implements Serializable{
 	
 	private static final long serialVersionUID = 7031993308873750327L;
 	
-	public static final class Identifier {
-
-		// These  fields are to handle quoted names in multischema.
-		// givenSchema and givenName are the names with quotes, upper case,
-		// that is, exactly as given by the user. 
-		// quotedTable and quotedSchema are boolean value to identify when quotes have been removed.
-		private final String name;
-		private final boolean quoted;
-	
-		private Identifier(String name) {
-			if (name != null && ParsedSQLQuery.pQuotes.matcher(name).matches()) {
-	            this.name = name.substring(1, name.length() - 1);
-	            this.quoted = true;
-	        }
-			else {
-				this.name = name;
-				this.quoted = false;
-			}
-		}
-		
-		public boolean isQuoted() {
-			return quoted;
-		}
-		
-		public String getName() {
-			return name;
-		}
-	};
-	
-	private final Identifier schema, table;
-	private final String alias;
+	private final RelationID table;
+	private final QuotedID alias;
 	private final String tableGivenName;
 	
-	public TableJSQL(String schemaName, String tableName, String a) {
-		this.schema = new Identifier(schemaName);
-		this.table = new Identifier(tableName);
+	public TableJSQL(RelationID table, QuotedID alias) {
+		this.table = table;
 		// table FQN is optional schema and "." followed by table name 
-		this.tableGivenName =  (schemaName == null) ? tableName : schemaName + "." + tableName;
-		this.alias = (a != null) ? unquote(a) : a;		
+		this.tableGivenName =  table.getSQLRendering();
+		this.alias = alias;		
 	}
 
 	public String getTableGivenName() {
 		return tableGivenName;
 	}
 	
-	/**
-	 * unquote both the column and table names (including the schema and alias)
-	 * and STORE them back
-	 * 
-	 * @param tableColumn
-	 */
 	
-	public static void unquoteColumnAndTableName(Column tableColumn) {
-		unquoteColumnName(tableColumn);
-		
-		Table table = tableColumn.getTable();
-		if (table != null) {
-			if (table.getName() != null)
-				table.setName(unquote(table.getName()));
-			if (table.getSchemaName() != null)
-				table.setSchemaName(unquote(table.getSchemaName()));		
-			if (table.getAlias() != null)
-				table.getAlias().setName(unquote(table.getAlias().getName()));
-		}
-	}
-	
-	/**
-	 * unquote the column name and STORE the unquoted name back
-	 * 
-	 * @param column
-	 * @return
-	 */
-	
-	public static String unquoteColumnName(Column column) {
-		String columnName = column.getColumnName();
-		
-		if (ParsedSQLQuery.pQuotes.matcher(columnName).matches()) {
-			columnName = columnName.substring(1, columnName.length() - 1);
-			column.setColumnName(columnName);
-		}
-		return columnName;
-	}
-
-	/**
-	 * unquote the alias name and STORE the unqouted name back
-	 * 
-	 * @param a
-	 */
-	
-	public static void unquoteAlias(Alias a) {
-		String name = a.getName();
-		if (ParsedSQLQuery.pQuotes.matcher(name).matches()) {
-			a.setName(name.substring(1, name.length() - 1));
-		}
-	}
-
-	private static String unquote(String name) {
-		if (ParsedSQLQuery.pQuotes.matcher(name).matches()) 
-			return name.substring(1, name.length() - 1);
-		return name;
-	}
-	
-	
-	public Identifier getSchema() {
-		return schema;
-	}
-
-	public Identifier getTable() {
+	public RelationID getTable() {
 		return table;
 	}
 
-	public String getAlias() {
+	public QuotedID getAlias() {
 		return alias;
 	}
 	

@@ -20,7 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.QuotedIDFactory;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -35,6 +36,9 @@ import java.util.Map;
 
 /**
  * Class to create an Alias Map for the select statement
+ * 
+ * BRINGS EXPRESSION ALIAS NAMES in SELECT clauses (including subqueries) into NORMAL FORM
+ * 
  */
 
 /**
@@ -46,9 +50,18 @@ import java.util.Map;
 
 public class AliasMapVisitor {
 
-	private final Map<String,String> aliasMap = new HashMap<>();
+	private final QuotedIDFactory idfac;
+	private final Map<QuotedID, Expression> aliasMap = new HashMap<>();
 	
-	public AliasMapVisitor(Select select) {
+	/**
+	 * NORMALISES EXPRESSION ALIAS NAMES in SELECT clauses (including subqueries)
+	 * 
+	 * @param select
+	 * @param idfac
+	 */
+	
+	public AliasMapVisitor(Select select, QuotedIDFactory idfac) {
+		this.idfac = idfac;
 
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -65,7 +78,7 @@ public class AliasMapVisitor {
 	 * @return alias map
 	 */
 	
-	public Map<String,String> getAliasMap() {
+	public Map<QuotedID, Expression> getAliasMap() {
 		return aliasMap;
 	}
 	
@@ -129,12 +142,13 @@ public class AliasMapVisitor {
 			if (alias  != null) {
 				Expression e = selectExpr.getExpression();
 				e.accept(expressionVisitor);
-				//remove alias quotes if present
-				TableJSQL.unquoteAlias(alias);
-				aliasMap.put(e.toString().toLowerCase(), alias.getName());
+				
+				// NORMALIZE EXPRESSION ALIAS NAME
+				QuotedID aliasName = idfac.createFromString(alias.getName());
+				alias.setName(aliasName.getSQLRendering());
+				aliasMap.put(aliasName, e);
 			}
 		}
-	
 	};
 	
 	FromItemVisitor fromItemVisitor = new FromItemVisitor() {

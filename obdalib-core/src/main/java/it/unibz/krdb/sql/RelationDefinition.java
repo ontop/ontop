@@ -39,41 +39,21 @@ import com.google.common.collect.ImmutableList;
 
 public abstract class RelationDefinition {
 
-	private final String givenName;
-
-	private final String catalogName;
-	private final String schemaName;
-	private final String tableName;
+	private final RelationID name;
 	
 	private final List<Attribute> attributes = new ArrayList<>();
-	private final Map<String, Attribute> attributeMap = new HashMap<>();
+	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
 
 	private UniqueConstraint pk;
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 		
-	protected RelationDefinition(String catalogName, String schemaName, String tableName, String givenName) {
-		this.catalogName = catalogName;
-		this.schemaName = schemaName;
-		this.tableName = tableName;
-		this.givenName = givenName;
+	protected RelationDefinition(RelationID name) {
+		this.name = name;
 	}
 
-	@Deprecated
-	public String getName() {
-		return givenName;
-	}
-
-	public String getCatalog() {
-		return catalogName;
-	}
-	
-	public String getSchema() {
-		return schemaName;
-	}
-	
-	public String getTableName() {
-		return tableName;
+	public RelationID getName() {
+		return name;
 	}
 	
 	public void setPrimaryKey(UniqueConstraint uc) {
@@ -100,7 +80,7 @@ public abstract class RelationDefinition {
 		return ImmutableList.copyOf(fks);
 	}
 	
-	public void addAttribute(String name, int type, String typeName, boolean canNull) {
+	public void addAttribute(QuotedID name, int type, String typeName, boolean canNull) {
 		Attribute att = new Attribute(this, attributes.size() + 1, name, type, typeName, canNull);
 		Attribute prev = attributeMap.put(att.getName(), att);
 		if (prev != null) 
@@ -125,7 +105,7 @@ public abstract class RelationDefinition {
 		return Collections.unmodifiableList(attributes);
 	}
 	
-	public Attribute getAttribute(String attributeName) {
+	public Attribute getAttribute(QuotedID attributeName) {
 		return attributeMap.get(attributeName);
 	}
 }

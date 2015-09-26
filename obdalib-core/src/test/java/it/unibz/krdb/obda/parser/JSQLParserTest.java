@@ -794,7 +794,7 @@ public class JSQLParserTest extends TestCase {
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
-				System.out.println("  GroupBy: " + queryP.getGroupByClause());
+				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  SubSelect: "
 						+ (queryP.getSubSelects().isEmpty() ? "--" : queryP
 								.getSubSelects()));

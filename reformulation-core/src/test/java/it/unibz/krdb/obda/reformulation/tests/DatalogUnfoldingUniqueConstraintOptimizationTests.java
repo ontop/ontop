@@ -33,6 +33,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
@@ -50,24 +52,26 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	DatalogProgram unfoldingProgram;
 
+	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+	
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata("dummy class", null, null, DBMetadata.IdentityIdNormalizer);
-		TableDefinition table = new TableDefinition("TABLE");
-		table.addAttribute("col1", Types.INTEGER, null, true);
-		table.addAttribute("col2", Types.INTEGER, null, true);
-		table.addAttribute("col3", Types.INTEGER, null, true);
-		table.addAttribute("col4", Types.INTEGER, null, true);
-		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute("col4")));
+		metadata = new DBMetadata("dummy class", null, null, idfac);
+		TableDefinition table = new TableDefinition(idfac.createRelationFromString("TABLE"));
+		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, true);
+		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute(idfac.createFromString("col4"))));
 		metadata.add(table);
 		
 		
-		table = new TableDefinition("TABLE2");
-		table.addAttribute("col1", Types.INTEGER, null, false);
-		table.addAttribute("col2", Types.INTEGER, null, false);
-		table.addAttribute("col3", Types.INTEGER, null, false);
-		table.addAttribute("col4", Types.INTEGER, null, false);
-		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute("col1")));
+		table = new TableDefinition(idfac.createRelationFromString("TABLE2"));
+		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, false);
+		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute(idfac.createFromString("col1"))));
 		metadata.add(table);
 
         unfoldingProgram = fac.getDatalogProgram();

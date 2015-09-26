@@ -54,6 +54,8 @@ public class OracleSesameLIMITTest  {
 
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String r2rmlfile = "resources/oraclesql/o.ttl";
+	
+	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 	/*
 	 * 	prepare ontop for rewriting and unfolding steps 
@@ -118,15 +120,15 @@ public class OracleSesameLIMITTest  {
 	}
 
 	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(name);
-		tableDefinition.addAttribute("country_name", java.sql.Types.VARCHAR, null, false);
+		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(name));
+		tableDefinition.addAttribute(idfac.createFromString("country_name"), java.sql.Types.VARCHAR, null, false);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = new DBMetadata(driver_class, null, null, DBMetadata.IdentityIdNormalizer);
+		DBMetadata dbMetadata = new DBMetadata(driver_class, null, null, idfac);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.add(new TableDefinition("dual"));
+		dbMetadata.add(new TableDefinition(idfac.createRelationFromString("dual")));
 		return dbMetadata;
 	}
 
