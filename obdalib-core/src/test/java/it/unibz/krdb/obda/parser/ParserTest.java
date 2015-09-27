@@ -538,8 +538,7 @@ public class ParserTest extends TestCase {
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
-		assertFalse(result);
-
+		assertTrue(result);
 	}
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION

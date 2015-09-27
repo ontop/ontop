@@ -201,13 +201,16 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	}
 
 	/*
-	 * Add the projection for the selectExpressionItem, distinguing between select all and select distinct
+	 * Add the projection for the selectExpressionItem, distinguishing between select all and select distinct
 	 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.SelectExpressionItem)
 	 */
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
 		projection.add(selectExpr, bdistinctOn);
 		selectExpr.getExpression().accept(this);
+		// all complex expressions in SELECT must be named (by aliases)
+		if (!(selectExpr.getExpression() instanceof Column) && selectExpr.getAlias() == null)
+			unsupported = true;
 	}
 
 	@Override
@@ -230,86 +233,42 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 				for (Expression ex :function.getParameters().getExpressions()) 
 					ex.accept(this);
 				break;
-
 			default:
-//				unsupported = true;
-				break;
+				unsupported = true;
 		}
 		
 	}
 
 	@Override
-	public void visit(JdbcParameter jdbcParameter) {
-		unsupported = true;
-	}
-
-	@Override
-	public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		unsupported = true;
-	}
-
-	@Override
-	public void visit(DoubleValue doubleValue) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(LongValue longValue) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(DateValue dateValue) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(TimeValue timeValue) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(TimestampValue timestampValue) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void visit(Parenthesis parenthesis) {
-		parenthesis.getExpression().accept(this);
-		
-	}
-
-	@Override
-	public void visit(StringValue stringValue) {
-
-		
+		parenthesis.getExpression().accept(this);		
 	}
 
 	@Override
 	public void visit(Addition addition) {
-		unsupported = true;
+		visitBinaryExpression(addition);
 	}
 
 	@Override
 	public void visit(Division division) {
-		unsupported = true;
+		visitBinaryExpression(division);
 	}
 
 	@Override
 	public void visit(Multiplication multiplication) {
-		unsupported = true;
+		visitBinaryExpression(multiplication);
 	}
 
 	@Override
 	public void visit(Subtraction subtraction) {
-		unsupported = true;
+		visitBinaryExpression(subtraction);
 	}
 
+	@Override
+	public void visit(SignedExpression arg0) {
+		arg0.getExpression().accept(this);
+	}
+	
 	@Override
 	public void visit(AndExpression andExpression) {
 		unsupported = true;
@@ -501,11 +460,6 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		unsupported = true;
 	}
 
-	@Override
-	public void visit(SignedExpression arg0) {
-		unsupported = true;
-		
-	}
 
 	@Override
 	public void visit(JsonExpression arg0) {
@@ -519,8 +473,54 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		
 	}
 
+	@Override
+	public void visit(JdbcParameter jdbcParameter) {
+		unsupported = true;
+	}
+
+	@Override
+	public void visit(JdbcNamedParameter jdbcNamedParameter) {
+		unsupported = true;
+	}
+
+	
 	private void visitBinaryExpression(BinaryExpression binaryExpression) {
 		binaryExpression.getLeftExpression().accept(this);
 		binaryExpression.getRightExpression().accept(this);
 	}
+	
+	/*
+	 * scalar values: all supported 
+	 */
+	
+	@Override
+	public void visit(DoubleValue doubleValue) {
+		// NO-OP
+	}
+
+	@Override
+	public void visit(LongValue longValue) {
+		// NO-OP
+	}
+
+	@Override
+	public void visit(DateValue dateValue) {
+		// NO-OP
+	}
+
+	@Override
+	public void visit(TimeValue timeValue) {
+		// NO-OP
+	}
+
+	@Override
+	public void visit(TimestampValue timestampValue) {
+		// NO-OP
+	}
+
+	@Override
+	public void visit(StringValue stringValue) {
+		// NO-OP
+	}
+	
 }
