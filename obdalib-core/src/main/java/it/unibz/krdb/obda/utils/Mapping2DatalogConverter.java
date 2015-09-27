@@ -86,9 +86,6 @@ public class Mapping2DatalogConverter {
                 // For each table, creates an atom and adds it to the body
                 addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable, dbMetadata);
 
-                // For each function application in the select clause, create an atom and add it to the body
-                addFunctionAtoms(bodyAtoms, parsedSQLQuery, lookupTable, idfac);
-                
                 // For each join condition, creates an atom and adds it to the body
                 List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
                 for (Expression condition : joinConditions) {
@@ -110,13 +107,13 @@ public class Mapping2DatalogConverter {
                 //  (2) use it as the head atom of a new rule
 				CQIE targetQuery = mappingAxiom.getTargetQuery();
                 for (Function atom : targetQuery.getBody()) {
-                    // Construct the head from the target query.
+                    // Construct the head from the target query 
+                	// (includes dealing with functions like concat as well).
                     Function head = (Function)renameVariables(atom, lookupTable, idfac);
                     // Create a new rule from the new head and the body
                     CQIE rule = fac.getCQIE(head, bodyAtoms);
                     datalogProgram.add(rule);
                 }
-
 			} 
 			catch (Exception e) {
 				errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
@@ -140,40 +137,6 @@ public class Mapping2DatalogConverter {
 		return datalogProgram;
 	}
 
-    /**
-     * For each function application in the select clause, create an atom and add it to the body
-     * @param bodyAtoms
-     *  will be extended
-     * @param parsedSQLQuery
-     * @param lookupTable
-     * 
-     * @author Dag Hovland
-     *
-     * @link ConferenceConcatMySQLTest
-     *
-     */
-    private static void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, AttributeLookupTable lookupTable, QuotedIDFactory idfac) throws JSQLParserException {
-    	ProjectionJSQL proj = parsedSQLQuery.getProjection();
-    	List<SelectExpressionItem> selects = proj.getColumnList();
-    	for (SelectExpressionItem select : selects) {
-    		Expression select_expr = select.getExpression();
-    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat || select_expr instanceof StringValue || select_expr instanceof Parenthesis ){
-    			Alias alias = select.getAlias();
-    			if(alias == null){
-    				throw new JSQLParserException("The expression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");
-    			}
-    			String alias_name = alias.getName();
-    			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable, idfac);
-    			Term atom = visitor.visitEx(select_expr);
-                QualifiedAttributeID a = new QualifiedAttributeID(null, idfac.createFromString(alias_name));
-    			Term datalog_alias = lookupTable.get(a); // lookupTable.lookup(alias_name);
-    			//Term datalog_alias = fac.getVariable(var);
-    			Function equalityTerm = fac.getFunctionEQ(datalog_alias, atom);
-
-    			bodyAtoms.add(equalityTerm);
-    		}
-    	}
-    }
 
     
     /**

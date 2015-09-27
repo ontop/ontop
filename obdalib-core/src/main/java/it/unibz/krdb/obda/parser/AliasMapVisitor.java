@@ -148,6 +148,8 @@ public class AliasMapVisitor {
 				alias.setName(aliasName.getSQLRendering());
 				aliasMap.put(aliasName, e);
 			}
+			// ELSE
+			// ROMAN (27 Sep 2015): set an error flag -- each complex expression must have a name (alias)
 		}
 	};
 	

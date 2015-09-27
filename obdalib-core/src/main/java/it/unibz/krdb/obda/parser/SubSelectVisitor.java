@@ -172,7 +172,7 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 		RelationID subSelectId = null;
 		if (subSelect.getAlias() != null)
 			subSelectId = idfac.createRelationFromString(null, subSelect.getAlias().getName());
-		SelectJSQL ss = new SelectJSQL(subSelect.getSelectBody().toString(), subSelectId);
+		SelectJSQL ss = new SelectJSQL(subSelect.getSelectBody(), subSelectId);
 		subSelects.add(ss);
 	}
 

@@ -47,6 +47,12 @@ public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 		
 		if (s.startsWith("\"") && s.endsWith("\"")) 
 			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+		if (s.startsWith("`") && s.endsWith("`")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+		if (s.startsWith("[") && s.endsWith("]")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+		if (s.startsWith("'") && s.endsWith("'")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
 
 		return new QuotedID(s.toUpperCase(), QuotedID.NO_QUOTATION);
 	}

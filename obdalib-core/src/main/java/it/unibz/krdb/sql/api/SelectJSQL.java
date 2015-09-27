@@ -22,56 +22,52 @@ package it.unibz.krdb.sql.api;
 
 import it.unibz.krdb.sql.RelationID;
 
-import java.io.Serializable;
+import net.sf.jsqlparser.statement.select.SelectBody;
 
-import net.sf.jsqlparser.statement.select.SubSelect;
-
-public class SelectJSQL implements Serializable{
+public class SelectJSQL {
 		
 
-	private static final long serialVersionUID = 6565489073454036936L;
-		/**
-		 * Class SelectJSQL used to store the information about the subselect in the query. We distinguish between givenName and Name.
-		 * Since with Name we don't want to consider columns.
-		 */
-		
-		private final String body;
-		private final RelationID alias;
-		
-		
-		public SelectJSQL(String subSelect, RelationID alias) {
-			this.body = subSelect;
-			this.alias = alias;
-		}
-		
-		public RelationID getAlias() {
-			return alias;
-		}
-		
-		public String getBody() {
-			return body;
-		}
-		
-		@Override
-		public String toString() {
-			return body;
-		}
-
-		/**
-		 * Called from the MappingParser:getTables. 
-		 * Needed to remove duplicates from the list of tables
-		 */
-		@Override
-		public boolean equals(Object t){
-			if(t instanceof SelectJSQL){
-				SelectJSQL tp = (SelectJSQL) t;
-				return this.body.equals(tp.getBody())
-						&& ((this.alias == null && tp.getAlias() == null)
-								|| this.alias.equals(tp.getAlias())
-								);
-			}
-			return false;
-		}
-
-		
+	/**
+	 * Class SelectJSQL used to store the information about the subSelect in the query. 
+	 */
+	
+	private final SelectBody body;
+	private final RelationID alias;
+	
+	
+	public SelectJSQL(SelectBody subSelect, RelationID alias) {
+		this.body = subSelect;
+		this.alias = alias;
 	}
+	
+	public RelationID getAlias() {
+		return alias;
+	}
+	
+	public SelectBody getBody() {
+		return body;
+	}
+	
+	@Override
+	public String toString() {
+		return body.toString();
+	}
+
+	/**
+	 * Called from the MappingParser:getTables. 
+	 * Needed to remove duplicates from the list of tables
+	 */
+	@Override
+	public boolean equals(Object t){
+		if(t instanceof SelectJSQL){
+			SelectJSQL tp = (SelectJSQL) t;
+			return this.body.equals(tp.getBody())
+					&& ((this.alias == null && tp.getAlias() == null)
+							|| this.alias.equals(tp.getAlias())
+							);
+		}
+		return false;
+	}
+
+		
+}

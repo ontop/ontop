@@ -7,7 +7,6 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-import net.sf.jsqlparser.JSQLParserException;
 
 import org.junit.Test;
 
