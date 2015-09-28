@@ -20,8 +20,8 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
-import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -265,9 +265,9 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	@Override
-	public NativeQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
 		// Empty query
-		return new SQLNativeQuery(signatureContainer, optionalConstructTemplate);
+		return new SQLExecutableQuery(signatureContainer, optionalConstructTemplate);
 	}
 
 	@Override
@@ -292,7 +292,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * TODO: should we rename it generateNativeQuery?
 	 */
 	@Override
-	public SQLNativeQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
 										   Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 		DatalogProgram convertedQuery = convertAndPrepare(intermediateQuery);
 		DatalogProgram normalizedQuery = normalizeProgram(convertedQuery);
@@ -303,7 +303,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		} else {		
 			sqlQuery = generateQuery(normalizedQuery, signature);
 		}
-		return new SQLNativeQuery(sqlQuery, signature, optionalConstructTemplate);
+		return new SQLExecutableQuery(sqlQuery, signature, optionalConstructTemplate);
 	}
 
 	/**

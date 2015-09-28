@@ -111,7 +111,7 @@ public class SQLQuestStatement extends QuestStatement {
     public int getTupleCount(String query) throws OBDAException {
 
 
-        SQLNativeQuery targetQuery = checkAndConvertTargetQuery(unfoldAndGenerateTargetQuery(query));
+        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(unfoldAndGenerateTargetQuery(query));
         String unf = targetQuery.getSQL();
         String newsql = "SELECT count(*) FROM (" + unf + ") t1";
         if (!isCanceled()) {
@@ -151,8 +151,8 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeBooleanQuery(NativeQuery nativeQuery) throws NativeQueryExecutionException {
-        SQLNativeQuery sqlTargetQuery = checkAndConvertTargetQuery(nativeQuery);
+    protected TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException {
+        SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
         if (sqlQuery.equals("")) {
             return new BooleanOWLOBDARefResultSet(false, this);
@@ -167,24 +167,24 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(NativeQuery nativeQuery) throws OBDAException {
-        SQLNativeQuery sqlTargetQuery = checkAndConvertTargetQuery(nativeQuery);
+    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery) throws OBDAException {
+        SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
 
         if (sqlQuery.equals("") ) {
-            return new EmptyQueryResultSet(nativeQuery.getSignature(), this);
+            return new EmptyQueryResultSet(executableQuery.getSignature(), this);
         }
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            return new QuestResultset(set, nativeQuery.getSignature(), this);
+            return new QuestResultset(set, executableQuery.getSignature(), this);
         } catch (SQLException e) {
             throw new NativeQueryExecutionException(e.getMessage());
         }
     }
 
     @Override
-    protected GraphResultSet executeGraphQuery(NativeQuery nativeQuery, boolean collectResults) throws  OBDAException {
-        SQLNativeQuery sqlTargetQuery = checkAndConvertTargetQuery(nativeQuery);
+    protected GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults) throws  OBDAException {
+        SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
 
         String sqlQuery = sqlTargetQuery.getSQL();
         Optional<SesameConstructTemplate> optionalTemplate = sqlTargetQuery.getOptionalConstructTemplate();
@@ -196,12 +196,12 @@ public class SQLQuestStatement extends QuestStatement {
         TupleResultSet tuples;
 
         if (sqlQuery.equals("") ) {
-            tuples = new EmptyQueryResultSet(nativeQuery.getSignature(), this);
+            tuples = new EmptyQueryResultSet(executableQuery.getSignature(), this);
         }
         else {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new QuestResultset(set, nativeQuery.getSignature(), this);
+                tuples = new QuestResultset(set, executableQuery.getSignature(), this);
             } catch (SQLException e) {
                 throw new NativeQueryExecutionException(e.getMessage());
             }
@@ -209,11 +209,11 @@ public class SQLQuestStatement extends QuestStatement {
         return new QuestGraphResultSet(tuples, optionalTemplate.get(), collectResults);
     }
 
-    private SQLNativeQuery checkAndConvertTargetQuery(NativeQuery nativeQuery) {
-        if (! (nativeQuery instanceof SQLNativeQuery)) {
+    private SQLExecutableQuery checkAndConvertTargetQuery(ExecutableQuery executableQuery) {
+        if (! (executableQuery instanceof SQLExecutableQuery)) {
             throw new IllegalArgumentException("A SQLQuestStatement only accepts SQLTargetQuery instances");
         }
-        return (SQLNativeQuery) nativeQuery;
+        return (SQLExecutableQuery) executableQuery;
     }
 
     protected Statement getSQLStatement() {

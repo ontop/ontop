@@ -7,7 +7,7 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTempl
 /**
  * TODO: explain
  */
-public interface NativeQuery {
+public interface ExecutableQuery {
 
     ImmutableList<String> getSignature();
 

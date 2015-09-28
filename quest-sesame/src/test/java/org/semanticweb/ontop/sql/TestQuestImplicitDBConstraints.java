@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -127,7 +127,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 		
 		
-		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
+		String sql = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertTrue(m);
 		
@@ -146,7 +146,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
+		String sql = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
@@ -165,7 +165,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
+		String sql = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertFalse(m);
 		
@@ -185,7 +185,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
+		String sql = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
@@ -210,7 +210,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
+		String sql = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
 		System.out.println(sql);
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
@@ -235,7 +235,7 @@ public class TestQuestImplicitDBConstraints {
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLNativeQuery)st.getUnfolding(query)).getSQL();
+		String sql = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
 		System.out.println(sql);
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);

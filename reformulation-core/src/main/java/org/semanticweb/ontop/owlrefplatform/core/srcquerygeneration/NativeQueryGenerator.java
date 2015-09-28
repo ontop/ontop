@@ -25,7 +25,7 @@ import java.io.Serializable;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 
@@ -40,7 +40,7 @@ public interface NativeQueryGenerator extends Serializable {
 	 * be evaluated by a evaluation engine.
 	 *
 	 */
-	public NativeQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature,
+	public ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature,
 										   Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException;
 
 	public boolean hasDistinctResultSet() ;
@@ -50,5 +50,5 @@ public interface NativeQueryGenerator extends Serializable {
      */
     public NativeQueryGenerator cloneIfNecessary();
 
-	NativeQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate);
+	ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate);
 }

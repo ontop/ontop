@@ -32,8 +32,8 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
-import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
@@ -222,9 +222,9 @@ public class SQLGenerator implements NativeQueryGenerator {
     }
 
 	@Override
-	public NativeQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
 		// Empty string query
-		return new SQLNativeQuery(signatureContainer, optionalConstructTemplate);
+		return new SQLExecutableQuery(signatureContainer, optionalConstructTemplate);
 	}
 
 	private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
@@ -295,7 +295,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * @param optionalConstructTemplate
 	 */
 	@Override
-	public SQLNativeQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
 											  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 
 		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
@@ -355,12 +355,12 @@ public class SQLGenerator implements NativeQueryGenerator {
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
 			sql += modifier;
-			return new SQLNativeQuery(sql, signature, optionalConstructTemplate);
+			return new SQLExecutableQuery(sql, signature, optionalConstructTemplate);
 		} else {
 			String sqlQuery = generateQuery(queryProgram, signature, "", ruleIndex,
 					ruleIndexByBodyPredicate, predicatesInBottomUp,
 					extensionalPredicates);
-			return new SQLNativeQuery(sqlQuery, signature, optionalConstructTemplate);
+			return new SQLExecutableQuery(sqlQuery, signature, optionalConstructTemplate);
 		}
 	}
 

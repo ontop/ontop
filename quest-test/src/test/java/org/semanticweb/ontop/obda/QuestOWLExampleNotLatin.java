@@ -22,7 +22,7 @@ package org.semanticweb.ontop.obda;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -104,7 +104,7 @@ public class QuestOWLExampleNotLatin {
 			 * Print the query summary
 			 */
 			QuestOWLStatement qst = st;
-			String sqlQuery = ((SQLNativeQuery)qst.getUnfolding(sparqlQuery)).getSQL();
+			String sqlQuery = ((SQLExecutableQuery)qst.getUnfolding(sparqlQuery)).getSQL();
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");

@@ -28,7 +28,7 @@ import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.io.File;
@@ -325,7 +325,7 @@ public class QuestOWLExample_OntowisTests {
 				 * Print the query summary
 				 */
 				QuestOWLStatement qst = (QuestOWLStatement) st;
-				String sqlQuery = ((SQLNativeQuery)qst.getUnfolding(sparqlQuery)).getSQL();
+				String sqlQuery = ((SQLExecutableQuery)qst.getUnfolding(sparqlQuery)).getSQL();
 
 				System.out.println();
 				System.out.println("The input SPARQL query:");

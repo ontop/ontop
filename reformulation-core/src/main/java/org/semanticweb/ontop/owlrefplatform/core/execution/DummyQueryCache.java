@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.execution;
 
 import org.semanticweb.ontop.owlrefplatform.core.QueryCache;
-import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 
 /**
  * Does not cache anything.
@@ -9,12 +9,12 @@ import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
 public class DummyQueryCache implements QueryCache {
 
     @Override
-    public NativeQuery getTargetQuery(String sparqlQuery) {
+    public ExecutableQuery getTargetQuery(String sparqlQuery) {
         return null;
     }
 
     @Override
-    public void cacheTargetQuery(String sparqlQuery, NativeQuery nativeQuery) {
+    public void cacheTargetQuery(String sparqlQuery, ExecutableQuery executableQuery) {
     }
 
     @Override

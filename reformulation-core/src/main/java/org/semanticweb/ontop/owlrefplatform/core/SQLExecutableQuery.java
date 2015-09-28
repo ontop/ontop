@@ -8,27 +8,27 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTempl
  * SQL-query string, signature and optional construct template
  * (for SPARQL CONSTRUCT queries).
  */
-public class SQLNativeQuery implements NativeQuery {
+public class SQLExecutableQuery implements ExecutableQuery {
 
     private final String sqlQuery;
     private final ImmutableList<String> signature;
     private final Optional<SesameConstructTemplate> optionalConstructTemplate;
 
-    public SQLNativeQuery(String sqlQuery, ImmutableList<String> signature,
-                          Optional<SesameConstructTemplate> optionalConstructTemplate) {
+    public SQLExecutableQuery(String sqlQuery, ImmutableList<String> signature,
+                              Optional<SesameConstructTemplate> optionalConstructTemplate) {
         this.sqlQuery = sqlQuery;
         this.signature = signature;
         this.optionalConstructTemplate = optionalConstructTemplate;
     }
 
-    public SQLNativeQuery(String sqlQuery, ImmutableList<String> signature) {
+    public SQLExecutableQuery(String sqlQuery, ImmutableList<String> signature) {
         this(sqlQuery, signature, Optional.<SesameConstructTemplate>absent());
     }
 
     /**
      * Empty SQL
      */
-    public SQLNativeQuery(ImmutableList<String> signature, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+    public SQLExecutableQuery(ImmutableList<String> signature, Optional<SesameConstructTemplate> optionalConstructTemplate) {
         this.sqlQuery = "";
         this.signature = signature;
         this.optionalConstructTemplate = optionalConstructTemplate;

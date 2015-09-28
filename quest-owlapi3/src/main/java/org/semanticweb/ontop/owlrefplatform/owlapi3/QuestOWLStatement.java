@@ -48,7 +48,7 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.IQuestStatement;
-import org.semanticweb.ontop.owlrefplatform.core.NativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -378,7 +378,7 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 	}
 
-	public NativeQuery getUnfolding(String query) throws OWLException {
+	public ExecutableQuery getUnfolding(String query) throws OWLException {
 		try {
 			return st.unfoldAndGenerateTargetQuery(query);
 		} catch (Exception e) {

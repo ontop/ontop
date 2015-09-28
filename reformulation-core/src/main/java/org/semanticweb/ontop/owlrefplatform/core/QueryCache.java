@@ -6,9 +6,9 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * Mutable class.
  */
 public interface QueryCache {
-    NativeQuery getTargetQuery(String sparqlQuery);
+    ExecutableQuery getTargetQuery(String sparqlQuery);
 
-    void cacheTargetQuery(String sparqlQuery, NativeQuery nativeQuery);
+    void cacheTargetQuery(String sparqlQuery, ExecutableQuery executableQuery);
 
     void clear();
 }

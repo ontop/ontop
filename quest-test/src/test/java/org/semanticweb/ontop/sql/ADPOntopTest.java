@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.SQLNativeQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -80,7 +80,7 @@ public class ADPOntopTest {
 			 * Print the query summary
 			 */
 			QuestOWLStatement qst = (QuestOWLStatement) st;
-			String sqlQuery = ((SQLNativeQuery)qst.getUnfolding(sparqlQuery)).getSQL();;
+			String sqlQuery = ((SQLExecutableQuery)qst.getUnfolding(sparqlQuery)).getSQL();;
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");

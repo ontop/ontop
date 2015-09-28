@@ -22,7 +22,7 @@ public interface IQuestStatement extends OBDAStatement {
 
     String getRewriting(ParsedQuery query) throws OBDAException;
 
-    NativeQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException;
+    ExecutableQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException;
 
     boolean isCanceled();
 

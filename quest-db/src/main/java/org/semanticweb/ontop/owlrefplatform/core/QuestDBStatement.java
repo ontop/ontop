@@ -220,10 +220,10 @@ public class QuestDBStatement implements OBDAStatement {
 	 */
 	@Deprecated
 	public String getSQL(String query) throws OBDAException {
-		return ((SQLNativeQuery)st.unfoldAndGenerateTargetQuery(query)).getSQL();
+		return ((SQLExecutableQuery)st.unfoldAndGenerateTargetQuery(query)).getSQL();
 	}
 
-	public NativeQuery getTargetQuery(String query) throws OBDAException {
+	public ExecutableQuery getTargetQuery(String query) throws OBDAException {
 		return st.unfoldAndGenerateTargetQuery(query);
 	}
 
