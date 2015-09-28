@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.FilterNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.HeterogeneousQueryNodeTransformerImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.NodeTransformationProposalImpl;
 
 import static org.semanticweb.ontop.pivotalrepr.NodeTransformationProposedState.*;
@@ -13,7 +12,7 @@ import static org.semanticweb.ontop.pivotalrepr.NodeTransformationProposedState.
 /**
  * TODO: explain
  */
-public class ReactToChildDeletionTransformer extends HeterogeneousQueryNodeTransformerImpl {
+public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTransformer {
 
     private final IntermediateQuery query;
 

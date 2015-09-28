@@ -15,8 +15,7 @@ import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
  * Abstract: does not define transform(ConstructionNode ...).
  *
  */
-public abstract class SubstitutionPropagator
-        extends HomogeneousQueryNodeTransformerImpl<SubstitutionPropagator.UnificationException,
+public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTransformer<SubstitutionPropagator.UnificationException,
         SubstitutionPropagator.NewSubstitutionException> {
 
     /**

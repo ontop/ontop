@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Collects all the variables found in the nodes.
  */
-public class VariableCollector extends QueryNodeVisitorImpl {
+public class VariableCollector implements QueryNodeVisitor {
 
     private final ImmutableSet.Builder<Variable> collectedVariableBuilder;
 
