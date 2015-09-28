@@ -145,7 +145,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 
         OWLLiteral val;
 		try {
-			String sql = ((SQLExecutableQuery)st.getUnfolding(this.query)).getSQL();
+			String sql = ((SQLExecutableQuery)st.getExecutableQuery(this.query)).getSQL();
 			Pattern pat = Pattern.compile("TABLE1 ");
 		    Matcher m = pat.matcher(sql);
 		    int num_joins = 0;

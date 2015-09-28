@@ -281,7 +281,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public String executeQuery(QuestOWLStatement st, String query) throws OWLException{
 				// UGLY!!! SQL-specific!
-				return ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
+				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 			}
 
 			@Override

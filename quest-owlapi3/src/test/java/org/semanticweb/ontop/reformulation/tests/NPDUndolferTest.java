@@ -256,7 +256,7 @@ public class NPDUndolferTest extends TestCase {
 		QuestOWLConnection qconn =  reasoner.getConnection();
 		QuestOWLStatement st = qconn.createStatement();
 		
-		String unfolding = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
+		String unfolding = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 		st.close();
 		
 		reasoner.dispose();
@@ -294,7 +294,7 @@ public class NPDUndolferTest extends TestCase {
 		QuestOWLStatement st = qconn.createStatement();
 		
 //		String rewriting = st.getRewriting(query);
-		String unfolding = ((SQLExecutableQuery)st.getUnfolding(query)).getSQL();
+		String unfolding = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 		st.close();
 		
 		reasoner.dispose();

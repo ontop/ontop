@@ -101,7 +101,7 @@ public class QuestOWLExample {
 			/*
 			 * Print the query summary
 			 */
-			String sqlQuery = ((SQLExecutableQuery)st.getUnfolding(sparqlQuery)).getSQL();
+			String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");

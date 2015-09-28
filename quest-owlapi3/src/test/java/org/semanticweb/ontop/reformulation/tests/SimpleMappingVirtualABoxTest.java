@@ -151,7 +151,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 //			long start = System.currentTimeMillis();
 //			for (int i = 0; i < 3000; i++) {
 //				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
+//				String q = sto.getExecutableQuery(bf.insert(7, ' ').toString());
 //			}
 //			long end = System.currentTimeMillis();
 //			long elapsed = end-start;

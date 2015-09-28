@@ -59,7 +59,11 @@ public interface IQuestOWLStatement {
 
 	String getRewriting(String query) throws OWLException;
 
-	ExecutableQuery getUnfolding(String query) throws OWLException;
+	ExecutableQuery getExecutableQuery(String query) throws OWLException;
+
+	@Deprecated
+	String getUnfolding(String query) throws OWLException;
+
 
 	// Davide> Benchmarking
 	long getUnfoldingTime();

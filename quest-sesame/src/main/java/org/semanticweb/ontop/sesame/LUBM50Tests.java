@@ -249,7 +249,7 @@ public class LUBM50Tests {
 				end = System.nanoTime();
 				long fetchtime = end-start; */
 				out2.write("Query: " + query.getID() + "\n");
-				out2.write(st.getUnfolding(query.getQuery())+ "\n\n+++++++++++++++++++++++++++\n\n");
+				out2.write(st.getExecutableQuery(query.getQuery())+ "\n\n+++++++++++++++++++++++++++\n\n");
 				
 				/*log.debug("Total result: {}", count);
 				log.debug("Elapsed time: {} ms", time);
