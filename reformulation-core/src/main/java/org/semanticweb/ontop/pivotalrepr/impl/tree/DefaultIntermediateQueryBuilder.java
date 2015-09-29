@@ -7,6 +7,7 @@ import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPo
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.IntermediateQueryImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 
 /**
  * TODO: explain
@@ -72,9 +73,16 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = new IntermediateQueryImpl(metadata, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(metadata, new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
+    }
+
+    /**
+     * Can be overwritten to use another constructor
+     */
+    protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata, QueryTreeComponent treeComponent) {
+        return new IntermediateQueryImpl(metadata, treeComponent);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {
