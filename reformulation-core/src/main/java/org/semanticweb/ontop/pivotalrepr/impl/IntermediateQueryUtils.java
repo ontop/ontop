@@ -27,6 +27,18 @@ public class IntermediateQueryUtils {
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final String SUB_QUERY_SUFFIX = "u";
 
+    /**
+     * This class can be derived to construct more specific builders.
+     */
+    protected IntermediateQueryUtils () {
+    }
+
+    /**
+     * Can be overwritten.
+     */
+    protected IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata) {
+        return new DefaultIntermediateQueryBuilder(metadata);
+    }
 
     /**
      * TODO: describe
@@ -59,10 +71,11 @@ public class IntermediateQueryUtils {
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
+        IntermediateQueryUtils utils = new IntermediateQueryUtils();
 
         for (IntermediateQuery originalDefinition : predicateDefinitions) {
             if (mergedDefinition == null) {
-                mergedDefinition = initMergedDefinition(originalDefinition.getMetadata(), headAtom, subQueryAtom,
+                mergedDefinition = utils.initMergedDefinition(originalDefinition.getMetadata(), headAtom, subQueryAtom,
                         optionalTopModifiers);
             } else {
                 mergedDefinition = prepareForMergingNewDefinition(mergedDefinition, subQueryAtom);
@@ -136,7 +149,7 @@ public class IntermediateQueryUtils {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery initMergedDefinition(MetadataForQueryOptimization metadata,
+    private IntermediateQuery initMergedDefinition(MetadataForQueryOptimization metadata,
                                                           DataAtom headAtom, DataAtom subQueryAtom,
                                                           Optional<ImmutableQueryModifiers> optionalTopModifiers)
             throws QueryMergingException {
@@ -144,7 +157,7 @@ public class IntermediateQueryUtils {
         UnionNode unionNode = new UnionNodeImpl();
         IntensionalDataNode dataNode = new IntensionalDataNodeImpl(subQueryAtom);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = newBuilder(metadata);
         try {
             queryBuilder.init(rootNode);
             queryBuilder.addChild(rootNode, unionNode);
@@ -198,8 +211,9 @@ public class IntermediateQueryUtils {
      */
     public static IntermediateQueryBuilder convertToBuilder(IntermediateQuery originalQuery)
             throws IntermediateQueryBuilderException {
+        IntermediateQueryUtils utils = new IntermediateQueryUtils();
         try {
-            return convertToBuilderAndTransform(originalQuery, Optional.<HomogeneousQueryNodeTransformer>absent());
+            return utils.convertToBuilderAndTransform(originalQuery, Optional.<HomogeneousQueryNodeTransformer>absent());
             /**
              * No transformer so should not be expected
              */
@@ -215,7 +229,8 @@ public class IntermediateQueryUtils {
     public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                         HomogeneousQueryNodeTransformer transformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        return convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
+        IntermediateQueryUtils utils = new IntermediateQueryUtils();
+        return utils.convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
     }
 
     /**
@@ -224,10 +239,10 @@ public class IntermediateQueryUtils {
      * TODO: avoid the use of a recursive method. Use a stack instead.
      *
      */
-    private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                        Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
+    protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+                                                                  Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
+        IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata());
 
         // Clone of the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
