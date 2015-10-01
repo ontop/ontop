@@ -35,6 +35,8 @@ public interface IntermediateQuery {
      */
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
+    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child);
+
     /**
      * EXCLUDES the root of the sub-tree (currentNode).
      * TODO: find a better name
