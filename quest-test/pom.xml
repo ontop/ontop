@@ -108,7 +108,12 @@
         <dependency>
    			<groupId>com.google.guava</groupId>
    			<artifactId>guava</artifactId>
-   		</dependency>      
+   		</dependency>
+        <dependency>
+            <groupId>monetdb</groupId>
+            <artifactId>monetdb-jdbc</artifactId>
+        </dependency>
+
 
 	</dependencies>
                           
