@@ -20,8 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -49,7 +52,17 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String sqlSlice(long limit, long offset) {
+		if (limit >= 0 )
 		return String.format("WHERE ROWNUM <= %s", limit);
+		else
+			return "";
+	}
+
+	@Override
+	public String sqlOrderByAndSlice(List<OBDAQueryModifiers.OrderCondition> conditions, String viewname, long limit, long offset) {
+
+		return  sqlSlice(limit, offset)  + "\n" + sqlOrderBy(conditions,viewname);
+
 	}
 
 	@Override

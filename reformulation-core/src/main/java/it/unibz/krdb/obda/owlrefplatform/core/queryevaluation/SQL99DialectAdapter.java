@@ -280,19 +280,29 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlOrderBy(List<OrderCondition> conditions, String viewname) {
-		String sql = "ORDER BY ";
-		boolean needComma = false;
-		for (OrderCondition c : conditions) {
-			if (needComma) {
-				sql += ", ";
+		String sql = "";
+		if(!conditions.isEmpty()) {
+			sql = "ORDER BY ";
+			boolean needComma = false;
+			for (OrderCondition c : conditions) {
+				if (needComma) {
+					sql += ", ";
+				}
+				sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
+				if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
+					sql += " DESC";
+				}
+				needComma = true;
 			}
-			sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
-			if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
-				sql += " DESC";
-			}
-			needComma = true;
 		}
 		return sql;
+	}
+
+	@Override
+	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset) {
+
+		return sqlOrderBy(conditions,viewname) + "\n" + sqlSlice(limit, offset);
+
 	}
 
 	@Override

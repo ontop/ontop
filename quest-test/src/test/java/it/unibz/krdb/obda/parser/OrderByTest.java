@@ -182,5 +182,26 @@ public class OrderByTest {
         checkReturnedUris(query, expectedUris);
     }
 
+    @Test
+    public void testBolzanoOrderingAndLimit() throws Exception {
+        String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
+                + "SELECT ?x ?street ?country ?number "
+                + "WHERE {?x :hasNumber ?number ;"
+                + ":inCountry ?country ;"
+                + ":inStreet ?street . } "
+                + "ORDER BY DESC(?country) ?number DESC(?street)"
+                + "LIMIT 6"
+                ;
+
+        List<String> expectedUris = new ArrayList<>();
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-993");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-991");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-997");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-992");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-995");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-996");
+        checkReturnedUris(query, expectedUris);
+    }
+
 }
 

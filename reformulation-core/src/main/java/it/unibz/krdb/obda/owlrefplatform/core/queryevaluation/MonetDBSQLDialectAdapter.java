@@ -98,17 +98,20 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String sqlOrderBy(List<OBDAQueryModifiers.OrderCondition> conditions, String viewname) {
-        String sql = "ORDER BY ";
-        boolean needComma = false;
-        for (OBDAQueryModifiers.OrderCondition c : conditions) {
-            if (needComma) {
-                sql += ", ";
+        String sql = "";
+        if(!conditions.isEmpty()) {
+            sql = "ORDER BY ";
+            boolean needComma = false;
+            for (OBDAQueryModifiers.OrderCondition c : conditions) {
+                if (needComma) {
+                    sql += ", ";
+                }
+                sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
+                if (c.getDirection() == OBDAQueryModifiers.OrderCondition.ORDER_DESCENDING) {
+                    sql += " DESC";
+                }
+                needComma = true;
             }
-            sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
-            if (c.getDirection() == OBDAQueryModifiers.OrderCondition.ORDER_DESCENDING) {
-                sql += " DESC";
-            }
-            needComma = true;
         }
         return sql;
     }

@@ -143,14 +143,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			String modifier = "";
 			List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
-			if (!conditions.isEmpty()) {
-				modifier += sqladapter.sqlOrderBy(conditions, outerViewName) + "\n";
-			}
 			long limit = query.getQueryModifiers().getLimit();
 			long offset = query.getQueryModifiers().getOffset();
-			if (limit != -1 || offset != -1) {
-				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
-			}
+			modifier = sqladapter.sqlOrderByAndSlice(conditions,outerViewName,limit, offset) + "\n";
+
 			String sql = "SELECT *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
