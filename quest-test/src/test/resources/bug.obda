@@ -1,0 +1,33 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#
+edh:		http://edh-www.adw.uni-heidelberg.de/edh/inschrift/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+core:		http://purl.org/vocab/frbr/core#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+fabio:		http://purl.org/spar/fabio/
+quest:		http://obda.org/quest#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+pleiades:	http://pleiades.stoa.org/places/
+
+[SourceDeclaration]
+sourceUri	Corpus2
+connectionUrl	jdbc:mysql://localhost/Corpus2
+username    root
+password    
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	M_0
+target		:Inscription-{i_id} a :AmphoraSection{rp_id} . 
+source		select i.id as i_id, rp.id as rp_id
+			from 
+			   Inscription i 
+			      join 
+			   RelativePosition rp 
+			      on i.relativePosition=rp.id
+			LIMIT 2
+]]
+
