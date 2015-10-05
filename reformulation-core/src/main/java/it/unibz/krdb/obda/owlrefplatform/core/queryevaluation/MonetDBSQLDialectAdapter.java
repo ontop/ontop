@@ -14,7 +14,7 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
     @Override
-    public String strconcat(String[] strings) {
+    public String strConcat(String[] strings) {
         if (strings.length == 0)
             throw new IllegalArgumentException("Cannot concatenate 0 strings");
 
@@ -31,13 +31,12 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
         return sql.toString();
     }
 
-    @Override
-    public String strreplace(String str, char oldchar, char newchar) {
+    public String strReplace(String str, char oldchar, char newchar) {
         return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
     }
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
         }
@@ -48,23 +47,6 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
         return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
     }
 
-    @Override
-    public String strreplace(String str, int start, int end, String with) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String strindexOf(String str, char ch) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String strindexOf(String str, String strsr) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     public String sqlQualifiedColumn(String tablename, String columnname) {
