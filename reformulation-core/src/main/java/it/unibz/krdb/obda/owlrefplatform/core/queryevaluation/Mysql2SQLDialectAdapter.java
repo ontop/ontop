@@ -137,7 +137,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 			if (offset < 0) {
 				/* If both limit and offset is not specified.
 				 */
-				return "LIMIT 0";
+				return "";
 			} else {
 				/* If the limit is not specified then put a big number as suggested 
 				 * in http://dev.mysql.com/doc/refman/5.0/en/select.html

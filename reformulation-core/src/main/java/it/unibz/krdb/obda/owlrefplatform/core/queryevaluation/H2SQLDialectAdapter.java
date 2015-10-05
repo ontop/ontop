@@ -70,7 +70,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		if (limit < 0 || limit == 0) {
 			if (offset < 0) {
 				// If both limit and offset is not specified.
-				return "LIMIT 0";
+				return "";
 			} else {
 				// Max limit: http://www.h2database.com/html/advanced.html#limits_limitations
 				return String.format("LIMIT %d,2147483647", offset);

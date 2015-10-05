@@ -19,7 +19,7 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 		if (limit < 0 || limit == 0) {
 			if (offset < 0) {
 				// If both limit and offset is not specified.
-				return "LIMIT 0";
+				return "";
 			} else {
 				// if the limit is not specified
 				return String.format("LIMIT ALL\nOFFSET %d", offset);
@@ -33,7 +33,7 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
 	/***
 	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
 	 * The method will strip any fractional seconds found in the date time

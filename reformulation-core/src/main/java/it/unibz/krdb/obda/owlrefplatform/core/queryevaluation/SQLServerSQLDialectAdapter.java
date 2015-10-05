@@ -170,7 +170,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {
 			if (offset < 0) {
-				return "OFFSET 0 ROWS";
+				return "";
 			} else {
 				return String.format("OFFSET %d ROWS", offset);
 			}

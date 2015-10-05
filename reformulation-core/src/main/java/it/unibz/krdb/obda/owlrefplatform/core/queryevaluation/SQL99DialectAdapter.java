@@ -300,8 +300,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset) {
-
-		return sqlOrderBy(conditions,viewname) + "\n" + sqlSlice(limit, offset);
+		String sql=sqlOrderBy(conditions,viewname);
+		if (!sql.equals(""))
+			sql+="\n";
+		return sql + sqlSlice(limit, offset);
 
 	}
 
