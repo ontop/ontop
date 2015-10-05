@@ -14,10 +14,10 @@ pleiades:	http://pleiades.stoa.org/places/
 
 [SourceDeclaration]
 sourceUri	Corpus2
-connectionUrl	jdbc:mysql://localhost/Corpus2
-username    root
-password    
-driverClass	com.mysql.jdbc.Driver
+connectionUrl	jdbc:postgresql://obdalin3.inf.unibz.it/EPNet
+username    postgres
+password    postgres
+driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	M_0
@@ -28,6 +28,6 @@ source		select i.id as i_id, rp.id as rp_id
 			      join 
 			   RelativePosition rp 
 			      on i.relativePosition=rp.id
-			LIMIT 2
+			LIMIT 4
 ]]
 
