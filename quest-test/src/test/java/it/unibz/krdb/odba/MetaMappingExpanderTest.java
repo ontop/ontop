@@ -19,7 +19,7 @@ import java.io.File;
 /**
  * Created by elem on 21/09/15.
  */
-public class EPNetTest {
+public class MetaMappingExpanderTest {
 
         /*
          * Use the sample database using H2 from
@@ -30,8 +30,8 @@ public class EPNetTest {
          * Test with not latin Character
          *
          */
-        final String owlfile = "src/test/resources/bug.owl";
-        final String obdafile = "src/test/resources/bug.obda";
+        final String owlfile = "src/test/resources/EPNet.owl";
+        final String obdafile = "src/test/resources/EPNet.obda";
 
         @Test
         public void runQuery() throws Exception {
@@ -92,7 +92,7 @@ public class EPNetTest {
                     "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
                     "select ?x\n" +
                     "where {\n" +
-                    "?x rdf:type :AmphoraSection .\n" +
+                    "?x rdf:type :AmphoraSection2026 .\n" +
                     "}\n" +
                     "limit 5\n";
 
@@ -150,7 +150,7 @@ public class EPNetTest {
          */
         public static void main(String[] args) {
             try {
-                EPNetTest example = new EPNetTest();
+                MetaMappingExpanderTest example = new MetaMappingExpanderTest();
                 example.runQuery();
             } catch (Exception e) {
                 e.printStackTrace();
