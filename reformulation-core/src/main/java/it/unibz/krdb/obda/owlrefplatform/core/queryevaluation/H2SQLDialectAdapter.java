@@ -67,10 +67,12 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
+		if (limit < 0 ) {
 			if (offset < 0) {
+
 				// If both limit and offset is not specified.
 				return "";
+
 			} else {
 				// Max limit: http://www.h2database.com/html/advanced.html#limits_limitations
 				return String.format("LIMIT %d,2147483647", offset);
