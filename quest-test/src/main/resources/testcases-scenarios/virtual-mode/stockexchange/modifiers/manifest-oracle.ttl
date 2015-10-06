@@ -11,7 +11,7 @@
     ( 
       :slice-test
       :limit-test
-      #:offset-test
+      #:offset-test  #not supported in our version of oracle
       #:limit0-offsetn
       :limitn-offset0
       :orderby-test
