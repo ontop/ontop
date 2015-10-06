@@ -91,9 +91,9 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
 			return parser.parse();
 		} catch (RecognitionException e) {
-			throw new TargetQueryParserException(e);
+			throw new TargetQueryParserException(input, e);
 		} catch (RuntimeException e) {
-			throw new TargetQueryParserException(e);
+			throw new TargetQueryParserException(input, e);
 		}
 	}
 
