@@ -33,7 +33,11 @@ package it.unibz.krdb.sql;
 
 public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 
-	public QuotedIDFactoryStandardSQL() {
+	/**
+	 * used only in DBMetadataExtractor
+	 */
+	
+	QuotedIDFactoryStandardSQL() {
 		// NO-OP
 	}
 

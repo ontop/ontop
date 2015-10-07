@@ -54,8 +54,6 @@ public class TestSesameImplicitDBConstraints {
 	private Connection sqlConnection;
 	private QuestDBStatement qst = null;
 	
-	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-
 	/*
 	 * 	prepare ontop for rewriting and unfolding steps 
 	 */
@@ -115,14 +113,14 @@ public class TestSesameImplicitDBConstraints {
 			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference);
 			if(applyUserConstraints){
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile, idfac);
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
 				qest1.setImplicitDBConstraints(userConstraints);
 			}
 		} else {
 			qest1 = new SesameVirtualRepo("", ontology, model, preference);
 			if(applyUserConstraints){
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile, idfac);
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
 
 				qest1.setImplicitDBConstraints(userConstraints);
 			}
@@ -152,17 +150,18 @@ public class TestSesameImplicitDBConstraints {
 		}
 	}
 
-	private TableDefinition defTable(String name){
+	private TableDefinition defTable(String name, QuotedIDFactory idfac) {
 		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 		tableDefinition.addAttribute(idfac.createFromString("COL1"), java.sql.Types.INTEGER, null, false);
 		tableDefinition.addAttribute(idfac.createFromString("COL2"), java.sql.Types.INTEGER, null, false);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver", null, null, idfac);
-		dbMetadata.add(defTable("TABLE1"));
-		dbMetadata.add(defTable("TABLE2"));
-		dbMetadata.add(defTable("TABLE3"));
+		DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData("org.h2.Driver");
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		dbMetadata.add(defTable("TABLE1", idfac));
+		dbMetadata.add(defTable("TABLE2", idfac));
+		dbMetadata.add(defTable("TABLE3", idfac));
 		return dbMetadata;
 	}
 

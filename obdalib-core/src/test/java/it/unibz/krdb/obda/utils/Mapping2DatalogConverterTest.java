@@ -27,8 +27,8 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
@@ -42,12 +42,13 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
-	private DBMetadata md = new DBMetadata("dummy class", null, null, idfac);
+	private DBMetadata md;
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {
+		md = DBMetadataExtractor.getDummyMetaData();
+		QuotedIDFactory idfac = md.getQuotedIDFactory();
+		
 		// Database schema
 		TableDefinition table1 = new TableDefinition(idfac.createRelationFromString(null, "Student"));
 		table1.addAttribute(idfac.createFromString("id"), Types.INTEGER, null, false);

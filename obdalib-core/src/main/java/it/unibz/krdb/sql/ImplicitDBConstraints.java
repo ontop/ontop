@@ -62,16 +62,13 @@ public class ImplicitDBConstraints {
 	private final Set<String> referredTables = new HashSet<>();
 
 	
-	private final QuotedIDFactory idfac;
-	
-	
 	/**
 	 * Reads colon separated pairs of view name and primary key
 	 * @param filename The name of the plain-text file with the fake keys
 	 * @throws IOException 
 	 */
-	public ImplicitDBConstraints(String filename, QuotedIDFactory idfac) {
-		this(new File(filename), idfac);
+	public ImplicitDBConstraints(String filename) {
+		this(new File(filename));
 	}
 
 	/**
@@ -81,8 +78,7 @@ public class ImplicitDBConstraints {
 	 * 
 	 * @throws IOException 
 	 */
-	public ImplicitDBConstraints(File file, QuotedIDFactory idfac) {
-		this.idfac = idfac;
+	public ImplicitDBConstraints(File file) {
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = null;
@@ -149,14 +145,14 @@ public class ImplicitDBConstraints {
 	 * @param realTables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public void addReferredTables(Set<RelationID> realTables) {
+	public void addReferredTables(Set<RelationID> realTables, QuotedIDFactory idfac) {
 		for (String tableGivenName : this.referredTables) {
-			RelationID id = getRelationIDFromString(tableGivenName);
+			RelationID id = getRelationIDFromString(tableGivenName, idfac);
 			realTables.add(id);
 		}
 	}
 
-	private RelationID getRelationIDFromString(String name) {
+	private RelationID getRelationIDFromString(String name, QuotedIDFactory idfac) {
 		String[] names = name.split("\\.");
 		if (names.length == 1)
 			return idfac.createRelationFromString(null, name);
@@ -168,9 +164,10 @@ public class ImplicitDBConstraints {
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object
 	 */
 	public void addFunctionalDependencies(DBMetadata md) {
+		QuotedIDFactory idfac = md.getQuotedIDFactory();
 		
 		for (String tableName : this.uniqueFD.keySet()) {
-			RelationID tableId = getRelationIDFromString(tableName);
+			RelationID tableId = getRelationIDFromString(tableName, idfac);
 			RelationDefinition td = md.getDefinition(tableId);
 			if (td != null && td instanceof TableDefinition) {
 				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
@@ -202,9 +199,10 @@ public class ImplicitDBConstraints {
 	 * Inserts the user-supplied foreign keys / unique valued columns into the metadata object
 	 */
 	public void addForeignKeys(DBMetadata md) {
+		QuotedIDFactory idfac = md.getQuotedIDFactory();
 		
 		for (String tableName : this.fKeys.keySet()) {
-			RelationID tableId = getRelationIDFromString(tableName);
+			RelationID tableId = getRelationIDFromString(tableName, idfac);
 			RelationDefinition td = md.getDefinition(tableId);
 			if (td == null || ! (td instanceof TableDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
@@ -220,7 +218,7 @@ public class ImplicitDBConstraints {
 						continue;
 					}
 					String fkTable = entry.getValue().getTableReference();
-					RelationID fkTableId = getRelationIDFromString(fkTable);
+					RelationID fkTableId = getRelationIDFromString(fkTable, idfac);
 					RelationDefinition fktd = md.getDefinition(fkTableId);
 					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");

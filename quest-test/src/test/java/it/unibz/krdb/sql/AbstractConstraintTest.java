@@ -51,7 +51,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 		try {
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = DBMetadataExtractor.getMetaData(conn, null);
+			metadata = DBMetadataExtractor.getMetadata(conn);
+			DBMetadataExtractor.loadMetadata(metadata, conn, null);
 		} 
 		catch (SQLException e) { 
 			e.printStackTrace();

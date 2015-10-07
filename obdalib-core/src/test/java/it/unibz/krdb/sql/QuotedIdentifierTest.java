@@ -12,7 +12,8 @@ import org.junit.Test;
 
 public class QuotedIdentifierTest {
 
-	QuotedIDFactory fac = new QuotedIDFactoryStandardSQL();
+	DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+	QuotedIDFactory fac = dbMetadata.getQuotedIDFactory();
 		
 	@Test
 	public void test1() {

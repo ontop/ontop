@@ -666,16 +666,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			//if the metadata was not already set
 			if (metadata == null) {
+				metadata = DBMetadataExtractor.getMetadata(localConnection);
 				// if we have to parse the full metadata or just the table list in the mappings
 				if (obtainFullMetadata) {
-					metadata = DBMetadataExtractor.getMetaData(localConnection, null);
+					DBMetadataExtractor.loadMetadata(metadata, localConnection, null);
 				} 
 				else {
 					// This is the NEW way of obtaining part of the metadata
 					// (the schema.table names) by parsing the mappings
 					
 					// Parse mappings. Just to get the table names in use
-					MappingParser mParser = new MappingParser(new QuotedIDFactoryStandardSQL(), 
+					MappingParser mParser = new MappingParser(metadata.getQuotedIDFactory(), 
 								unfoldingOBDAModel.getMappings(sourceId));
 							
 					try {
@@ -683,10 +684,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						
 						if (applyUserConstraints) {
 							// Add the tables referred to by user-supplied foreign keys
-							userConstraints.addReferredTables(realTables);
+							userConstraints.addReferredTables(realTables, metadata.getQuotedIDFactory());
 						}
 
-						metadata = DBMetadataExtractor.getMetaData(localConnection, realTables);
+						DBMetadataExtractor.loadMetadata(metadata, localConnection, realTables);
 					}
 					catch (JSQLParserException e) {
 						System.out.println("Error obtaining the tables" + e);

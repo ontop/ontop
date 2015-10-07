@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -45,7 +44,8 @@ public abstract class AbstractDBMetadata
 		Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
 				source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), 
 				source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-		DBMetadata metadata =  DBMetadataExtractor.getMetaData(conn, null);
+		DBMetadata metadata = DBMetadataExtractor.getMetadata(conn);
+		DBMetadataExtractor.loadMetadata(metadata, conn, null);
 
 		return metadata;
 	}

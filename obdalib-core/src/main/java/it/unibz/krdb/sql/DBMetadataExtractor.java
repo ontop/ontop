@@ -109,6 +109,54 @@ public class DBMetadataExtractor {
 	private static final boolean printouts = false;
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
+
+	
+	public static DBMetadata getDummyMetaData() {
+		return getDummyMetaData("dummy class");
+	}
+	
+	public static DBMetadata getDummyMetaData(String driver_class) {
+		return new DBMetadata(driver_class, null, null, new QuotedIDFactoryStandardSQL());
+	}
+	
+	
+	/**
+	 * Creates database metadata description (but does not load metadata) 
+	 * 
+	 * @return The database metadata object.
+	 * @throws SQLException 
+	 */
+
+	public static DBMetadata getMetadata(Connection conn) throws SQLException  {
+		
+		final DatabaseMetaData md = conn.getMetaData();
+		QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+		
+		if (md.getDatabaseProductName().contains("Oracle")) {
+			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+		} 
+		else if (md.getDatabaseProductName().contains("DB2")) {
+			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+		}  
+		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
+			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
+		}
+		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
+			// Postgres treats unquoted identifiers as lower-case
+			// idfac = DBMetadata.LowerCaseIdNormalizer;
+		} 
+		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
+			//idNormalizer = DBMetadata.IdentityIdNormalizer;
+ 		} 
+		else {
+			// For other database engines, i.e. MySQL
+			//idNormalizer = DBMetadata.IdentityIdNormalizer;
+		}
+		
+		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idfac);
+		
+		return metadata;	
+	}
 	
 	/**
 	 * Retrieves the database metadata (table schema and database constraints) 
@@ -120,7 +168,7 @@ public class DBMetadataExtractor {
 	 * @return The database metadata object.
 	 */
 
-	public static DBMetadata getMetaData(Connection conn, Set<RelationID> realTables) throws SQLException {
+	public static void loadMetadata(DBMetadata metadata, Connection conn, Set<RelationID> realTables) throws SQLException {
 		
 		if (printouts)
 			System.err.println("GETTING METADATA WITH " + conn + " ON " + realTables);
@@ -128,55 +176,41 @@ public class DBMetadataExtractor {
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationDefinition> tableList;
 		DatatypeNormalizer dt = DefaultTypeFixer;
-		QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 		
 		if (md.getDatabaseProductName().contains("Oracle")) {
-			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
-			
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (realTables == null || realTables.isEmpty())
-				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema), idfac);
+				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema), metadata.getQuotedIDFactory());
 			else
 				tableList = getTableList(defaultSchema, realTables);
 			
 			dt = OracleTypeFixer;
 		} 
 		else if (md.getDatabaseProductName().contains("DB2")) {
-			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
-					
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableList(conn, DB2RelationListProvider, idfac);
+				tableList = getTableList(conn, DB2RelationListProvider, metadata.getQuotedIDFactory());
 			else 
 				tableList = getTableList(null, realTables);
 		}  
 		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
-			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
-				
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
 				tableList = getTableList(null, realTables);
 		}
 		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
-			// idfac = DBMetadata.LowerCaseIdNormalizer;
-					
-			// Postgres treats unquoted identifiers as lower-case
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
 				tableList = getTableList(null, realTables);
 		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
-			//idNormalizer = DBMetadata.IdentityIdNormalizer;
-					
 			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableList(conn, MSSQLServerRelationListProvider, idfac);
+				tableList = getTableList(conn, MSSQLServerRelationListProvider, metadata.getQuotedIDFactory());
 			else
 				tableList = getTableList(null, realTables);
  		} 
 		else {
-			//idNormalizer = DBMetadata.IdentityIdNormalizer;
-					
 			// For other database engines, i.e. MySQL
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
@@ -185,8 +219,6 @@ public class DBMetadataExtractor {
 			
 			dt = MySQLTypeFixer;
 		}
-		
-		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idfac);
 		
 		for (RelationDefinition table : tableList) {
 			// ROMAN (20 Sep 2015): careful with duplicates
@@ -201,9 +233,7 @@ public class DBMetadataExtractor {
 		// (refer to two relations), which requires all relations 
 		// to have been constructed 
 		for (RelationDefinition table : tableList) 
-			getForeignKeys(md, table, metadata, idfac);
-		
-		return metadata;	
+			getForeignKeys(md, table, metadata);
 	}
 	
 	
@@ -530,7 +560,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the foreign keys for the table 
 	 * 
 	 */
-	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata, QuotedIDFactory idfac) throws SQLException {
+	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata) throws SQLException {
 		
 		RelationID id = table.getID();
 		

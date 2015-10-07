@@ -528,7 +528,7 @@ public class OBDAModelManager implements Disposable {
 						if (dbprefsFile.exists()){
 							try {
 								// Load user-supplied constraints
-								userConstraints = new ImplicitDBConstraints(dbprefsFile, new QuotedIDFactoryStandardSQL());
+								userConstraints = new ImplicitDBConstraints(dbprefsFile);
 								applyUserConstraints = true;
 							} catch (Exception ex) {
 								throw new Exception("Exception occurred while loading database preference file : " + dbprefsFile + "\n\n" + ex.getMessage());

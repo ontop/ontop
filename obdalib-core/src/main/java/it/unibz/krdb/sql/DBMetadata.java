@@ -40,7 +40,7 @@ public class DBMetadata implements Serializable {
 	 * 
 	 */
 
-	public DBMetadata(String driverName, String driverVersion, String databaseProductName, QuotedIDFactory idfac) {
+	DBMetadata(String driverName, String driverVersion, String databaseProductName, QuotedIDFactory idfac) {
 		this.driverName = driverName;
 		this.driverVersion = driverVersion;
 		this.databaseProductName = databaseProductName;

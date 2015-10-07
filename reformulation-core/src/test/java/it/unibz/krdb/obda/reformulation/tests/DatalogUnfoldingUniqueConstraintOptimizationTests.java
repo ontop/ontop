@@ -20,21 +20,18 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
@@ -52,11 +49,11 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	DatalogProgram unfoldingProgram;
 
-	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata("dummy class", null, null, idfac);
+		metadata = DBMetadataExtractor.getDummyMetaData();
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+		
 		TableDefinition table = new TableDefinition(idfac.createRelationFromString(null, "TABLE"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, true);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, true);

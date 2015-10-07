@@ -30,7 +30,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -271,7 +270,7 @@ public class QuestOWLExample_OntowisTests {
 
 		if (manualKeys){
 			System.out.println();
-			ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile, new QuotedIDFactoryStandardSQL());
+			ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
 			factory.setImplicitDBConstraints(constr);
 		}
 		/*

@@ -20,6 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -31,8 +33,6 @@ import org.slf4j.LoggerFactory;
 public class JSQLParserTest extends TestCase {
 	final static Logger log = LoggerFactory.getLogger(JSQLParserTest.class);
 
-	private final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
-	
 	public void test_1_1_1() {
 		final boolean result = parseJSQL("SELECT * FROM student");
 		printJSQL("test_1_1_1", result);
@@ -773,6 +773,8 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
+			DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 			queryP = new ParsedSQLQuery(input, false, idfac);
 		} catch (Exception e) {
 
@@ -825,6 +827,9 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
+			DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			
 			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 			e.printStackTrace();

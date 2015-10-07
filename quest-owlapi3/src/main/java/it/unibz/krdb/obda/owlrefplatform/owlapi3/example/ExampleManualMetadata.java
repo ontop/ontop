@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
@@ -38,8 +39,6 @@ public class ExampleManualMetadata {
 final String owlfile = "src/main/resources/example/exampleSensor.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
 private QuestOWLStatement qst = null;
-
-QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 /*
  * 	prepare ontop for rewriting and unfolding steps 
@@ -78,7 +77,7 @@ private void setup()  throws Exception {
 	qst = connOWL.createStatement();
 }
 
-private TableDefinition defMeasTable(String name){
+private TableDefinition defMeasTable(String name, QuotedIDFactory idfac) {
 	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("value"), java.sql.Types.NUMERIC, null, false);
@@ -87,7 +86,7 @@ private TableDefinition defMeasTable(String name){
 	return tableDefinition;
 }
 
-private TableDefinition defMessTable(String name){
+private TableDefinition defMessTable(String name, QuotedIDFactory idfac) {
 	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("eventtext"), java.sql.Types.VARCHAR, null, false);
@@ -95,17 +94,19 @@ private TableDefinition defMessTable(String name){
 	return tableDefinition;
 }
 
-private TableDefinition defStaticTable(String name){
+private TableDefinition defStaticTable(String name, QuotedIDFactory idfac) {
 	TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("domain"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("range"), java.sql.Types.VARCHAR, null, false);
 	return tableDefinition;
 }
 private DBMetadata getMeta(){
-	DBMetadata dbMetadata = new DBMetadata("dummy class", null, null, idfac);
-	dbMetadata.add(defMeasTable("burner"));
-	dbMetadata.add(defMessTable("events"));
-	dbMetadata.add(defStaticTable("a_static"));
+	DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+
+	dbMetadata.add(defMeasTable("burner", idfac));
+	dbMetadata.add(defMessTable("events", idfac));
+	dbMetadata.add(defStaticTable("a_static", idfac));
 	return dbMetadata;
 }
 

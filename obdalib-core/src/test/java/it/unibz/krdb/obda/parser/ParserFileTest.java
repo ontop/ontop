@@ -25,6 +25,8 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -42,8 +44,6 @@ import org.slf4j.LoggerFactory;
 
 public class ParserFileTest extends TestCase {
 	private static final String ROOT = "src/test/resources/scenario/";
-
-	private static final QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 
 	
 	final static Logger log = LoggerFactory
@@ -119,6 +119,10 @@ public class ParserFileTest extends TestCase {
 	// ------- Utility methods
 
 	private void execute(OBDAModel model, URI identifier) {
+		
+		DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		
 		OBDAModel controller = model;
 		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingList = controller.getMappings();
 		ArrayList<OBDAMappingAxiom> mappings = mappingList.get(identifier);

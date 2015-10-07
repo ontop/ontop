@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.TableDefinition;
@@ -53,11 +54,12 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DatalogProgram unfoldingProgram;
 
-	QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
 	
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata("dummy class", null, null, idfac);
+		metadata = DBMetadataExtractor.getDummyMetaData();
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+		
 		TableDefinition table = new TableDefinition(idfac.createRelationFromString(null, "TABLE"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
