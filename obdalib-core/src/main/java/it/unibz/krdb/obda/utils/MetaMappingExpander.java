@@ -96,15 +96,15 @@ public class MetaMappingExpander {
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
 		
 		for (OBDAMappingAxiom mapping : mappings) {
 
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			CQIE targetQuery = mapping.getTargetQuery();
 			List<Function> body = targetQuery.getBody();
 			Function bodyAtom = targetQuery.getBody().get(0);
 
-			OBDASQLQuery sourceQuery = (OBDASQLQuery)mapping.getSourceQuery();
+			OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 
 			Function firstBodyAtom = body.get(0);
 			
@@ -203,9 +203,9 @@ public class MetaMappingExpander {
 				for(List<String> params : paramsForClassTemplate) {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
-							bodyAtom, sourceQueryParsed, columnsForTemplate,
+							bodyAtom, sourceQuery.toString(), columnsForTemplate,
 							columnsForValues, params, arity);
-										
+						//sourceQuery.toString()
 					expandedMappings.add(newMapping);	
 					
 					log.debug("Expanded Mapping: {}", newMapping);
@@ -254,7 +254,7 @@ public class MetaMappingExpander {
 	 * @throws JSQLParserException 
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
-			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
+			Function bodyAtom, String sourceQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
 			List<String> params, int arity) throws JSQLParserException {
@@ -269,6 +269,7 @@ public class MetaMappingExpander {
 		/*
 		 * Then construct new Source Query
 		 */
+        ParsedSQLQuery sourceParsedQuery = translator.parseShallowly(sourceQuery.toString());
 		
 		/*
 		 * new Selection 

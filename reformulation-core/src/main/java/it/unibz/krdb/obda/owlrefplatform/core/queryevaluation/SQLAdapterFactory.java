@@ -50,6 +50,8 @@ public class SQLAdapterFactory {
 				return new SQLServerSQLDialectAdapter();
 			case "madgik.adp.federatedjdbc.AdpDriver":
 				return new AdpSQLDialectAdapter();
+            case "nl.cwi.monetdb.jdbc.MonetDriver":
+                return new MonetDBSQLDialectAdapter();
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");

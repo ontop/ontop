@@ -23,8 +23,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
@@ -51,6 +51,47 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	public String sqlSlice(long limit, long offset) {
 		return String.format("WHERE ROWNUM <= %s", limit);
 	}
+
+	@Override
+	public String SHA1(String str) {
+//	  		return String.format("dbms_crypto.HASH(%s, 3)", str);
+		return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH1))))", str);
+	  	}
+	  
+	@Override
+	public String MD5(String str) {
+//		return String.format("dbms_crypto.HASH(%s, 2)", str);
+		return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), 2))))", str);
+//		return String.format("LOWER( RAWTOHEX( UTL_I18N.STRING_TO_RAW(sys.dbms_obfuscation_toolkit.md5(input_string => %s) , 'AL32UTF8')))", str); //works but deprecated
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "SUBSTR(%1$s, -LENGTH(%2$s) ) LIKE %2$s";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "SUBSTR(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "INSTR(%1$s,%2$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("NVL(SUBSTR(%s, 0, INSTR(%s,%s )-1), '') ", str,  str , before);
+	};
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s), SIGN(INSTR(%s,%s))*LENGTH(%s)), '')",
+				str, str, after, after, str, after, str); //FIXME when no match found should return empty string
+	}
+//	"SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
+//	str, after, str , after , after, str, str
 
 	@Override
 	public String sqlCast(String value, int type) {
@@ -84,7 +125,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
         }
@@ -94,6 +135,32 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
         }
         return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
     }
+
+	@Override
+	public String dateNow() {
+		return "CURRENT_TIMESTAMP";
+
+	}
+
+	@Override
+	public String strUuid() {
+		return "regexp_replace(rawtohex(sys_guid()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')";
+	}
+
+	@Override
+	public String uuid() {
+		return strConcat(new String[] {"'urn:uuid:'", "regexp_replace(rawtohex(sys_guid()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')"});
+	}
+
+	@Override
+	public String rand() {
+		return "dbms_random.random";
+	}
+
+	@Override
+	public String dateTZ(String str) {
+		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'" , String.format("EXTRACT(TIMEZONE_MINUTE FROM %s) ",str)});
+	}
 
 	@Override
 	public String getDummyTable() {

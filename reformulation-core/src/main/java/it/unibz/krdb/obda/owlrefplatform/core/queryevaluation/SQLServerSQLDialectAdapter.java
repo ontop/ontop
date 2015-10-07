@@ -23,9 +23,123 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
+	
+	 @Override
+	  	public String SHA256(String str) {
+	    	return String.format("LOWER(CONVERT(VARCHAR(64),  HashBytes('SHA2_256',%s),2 ))", str);
+	  	}
+	    
+	    @Override
+	  	public String SHA1(String str) {
+	    	return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('SHA1',%s),2 ))", str);
+	  	}
+	    
+	    @Override
+	  	public String SHA512(String str) {
+	    	return String.format("LOWER(CONVERT(VARCHAR(128),HASHBYTES('SHA2_512',%s) ,2 ))", str);
+	  	}
+	      
+	      @Override
+	  	public String MD5(String str) {
+		    	return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('MD5',%s) ,2 ))", str);
+	  	}
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String dateNow() {
+		return "CURRENT_TIMESTAMP";
+	}
+
+	@Override
+	public String dateYear(String str) {
+		return String.format("YEAR ( %s)",str);
+	}
+
+	@Override
+	public String dateDay(String str) {
+		return String.format("DAY ( %s)",str);
+	}
+
+	@Override
+	public String dateHours(String str) {
+		return String.format("DATEPART(HOUR , %s)",str);
+	}
+
+	@Override
+	public String dateMonth(String str) {
+		return String.format("MONTH (%s)",str);
+	}
+
+	@Override
+	public String dateMinutes(String str) {
+		return String.format("DATEPART( MINUTE, %s)",str);
+	}
+
+	@Override
+	public String dateSeconds(String str) {
+		return String.format("DATEPART(SECOND, %s)",str);
+	}
+
+	@Override
+	public String dateTZ(String str) {
+
+		return String.format("CONVERT(varchar(5), DATEADD(minute, DATEPART(TZ, %s), 0), 114)",str);
+	}
+
+	@Override
+	public String ceil() {
+		return "CEILING(%s)";
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s, 0)";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LEN(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, LEN(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "CHARINDEX(%2$s,%1$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,SIGN(CHARINDEX(%s,%s))* (CHARINDEX(%s,%s)-1))", str, before, str, before, str);
+
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
+				str, after, str , after , after, str, str); //FIXME when no match found should return empty string
+	}
+
+	@Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s,%s,%s)", str, start, end);
+	}
+
+	@Override
+	public String strSubstr(String str, String start) {
+		return String.format("SUBSTRING(%s,%s,LEN(%s) )", str, start, str);
+	}
+
+
+	@Override
+	public String strLength(String str) {
+		return String.format("LEN(%s)", str);
+	}
+
+	@Override
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		
@@ -34,14 +148,24 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(String.format("(%s", strings[0]));
+		sql.append(String.format("(CAST (%s as varchar(8000))", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
 			sql.append(String.format(" + CAST(%s as varchar(8000))", strings[i]));
 		}
 		sql.append(")");
 		return sql.toString();
 	}
-	
+
+	@Override
+	public String strUuid() {
+		return "NEWID()";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'+ CONVERT (VARCHAR(255),NEWID())";
+	}
+
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {

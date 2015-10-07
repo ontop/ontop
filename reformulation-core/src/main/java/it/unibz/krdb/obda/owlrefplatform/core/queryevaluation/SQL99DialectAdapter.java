@@ -24,15 +24,130 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
-    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");  
+    
+  
+    
+    @Override 
+    public String strEncodeForUri(String str){
+      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
+            "'!', '%21')," +
+            "'@', '%40')," +
+            "'#', '%23')," +
+            "'$', '%24')," +
+            "'&', '%26')," +
+            "'*', '%42'), " +
+            "'(', '%28'), " +
+            "')', '%29'), " +
+            "'[', '%5B'), " +
+            "']', '%5D'), " +
+            "',', '%2C'), " +
+            "';', '%3B'), " +
+            "':', '%3A'), " +
+            "'?', '%3F'), " +
+            "'=', '%3D'), " +
+            "'+', '%2B'), " +
+            "'''', '%22'), " +
+            "'/', '%2F')"; 
+
+    }
+    
+    
+    @Override
+  	public String dateNow() {
+    	return "CURRENT_TIMESTAMP()";
+    	
+  	}
+    
+    @Override
+  	public String dateYear(String str) {
+    	return String.format("EXTRACT(YEAR FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateDay(String str) {
+    	return String.format("EXTRACT(DAY FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateHours(String str) {
+    	return String.format("EXTRACT(HOUR FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateMonth(String str) {
+    	return String.format("EXTRACT(MONTH FROM %s)",str);
+  	}
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String rand() {
+		return "RAND()";
+	}
+
+	@Override
+  	public String dateMinutes(String str) {
+    	return String.format("EXTRACT(MINUTE FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateSeconds(String str) {
+    	return String.format("EXTRACT(SECOND FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateTZ(String str) {
+    	throw new UnsupportedOperationException("TZ is not supported in this dialect.");
+  	}
+    
+  
+    @Override
+  	public String SHA256(String str) {
+    	throw new UnsupportedOperationException("SHA256 is not supported in this dialect.");
+  	}
+    
+    @Override
+  	public String SHA1(String str) {
+    	throw new UnsupportedOperationException("SHA1 is not supported in this dialect.");
+  	}
+    
+    @Override
+  	public String SHA512(String str) {
+    	throw new UnsupportedOperationException("SHA512 is not supported in this dialect.");
+  	}
+      
+   @Override
+  	public String MD5(String str) {
+      	throw new UnsupportedOperationException("MD5 is not supported in this dialect.");
+  	}
+
+	@Override
+	public String strUuid() {
+		throw new UnsupportedOperationException("strUUID is not supported in this dialect.");
+	}
+
+	@Override
+	public String uuid() {
+		throw new UnsupportedOperationException("UUID is not supported in this dialect.");
+	}
+
+	@Override
+	public String ceil() {
+		return "CEIL(%s)";
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s)";
+	}
+
+	@Override
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 
@@ -50,12 +165,60 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
-	public String strreplace(String str, char oldchar, char newchar) {
-		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
+	public String strUcase(String str) {
+		return String.format("UPPER(%s)", str);
+	} 
+	
+	@Override
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 1, LENGTH(%2$s)) LIKE %2$s";
+	} 
+	
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, LENGTH(%2$s)) LIKE %2$s";
+	}
+	
+	@Override
+	public String strContainsOperator(){
+		return "CHARINDEX(%2$s,%1$s) > 0";		
+	}
+	
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
+	} 
+	
+	@Override
+	public String strAfter(String str, String after) {
+//		sign return 1 if positive number, 0 if 0, and -1 if negative number
+//		it will return everything after the value if it is present or it will return an empty string if it is not present
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s) + LENGTH(%s), SIGN(CHARINDEX(%s,%s)) * LENGTH(%s))",
+				str, after, str , after , after, str, str);
+	}
+	
+	@Override
+	public String strLcase(String str) {
+		return String.format("LOWER(%s)", str);
+	}
+	
+	@Override
+	public String strLength(String str) {
+		return String.format("LENGTH(%s)", str);
+	} 
+	
+	@Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTR(%s,%s,%s)", str, start, end);
 	}
 
 	@Override
-	public String strreplace(String str, String oldstr, String newstr) {
+	public String strSubstr(String str, String start) {
+		return String.format("SUBSTR(%s,%s)", str, start);
+	}
+
+	@Override
+	public String strReplace(String str, String oldstr, String newstr) {
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
         }
@@ -66,23 +229,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 
-	@Override
-	public String strreplace(String str, int start, int end, String with) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strindexOf(String str, char ch) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strindexOf(String str, String strsr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
@@ -175,6 +321,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		}
 		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
+	
 	
 	@Override
 	public String getDummyTable() {
@@ -280,6 +427,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
 		return sqlQuote(signatureVariableName + proposedSuffix);
 	}
+
+	
+
+
 
 
 }

@@ -144,10 +144,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		onto = translator.translate(ontology);
-
+		onto = OWLAPI3TranslatorUtility.translate(ontology);
 	}
 
 	@After
@@ -233,9 +230,9 @@ public class EmptyEntitiesTest {
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
 		for (OClass cl : onto.getVocabulary().getClasses()) {
-			Predicate concept = cl.getPredicate();
-			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
-				emptyConcepts.add(concept.getName());
+			String concept = cl.getName();
+			if (!runSPARQLConceptsQuery("<" + concept + ">")) {
+				emptyConcepts.add(concept);
 				c++;
 			}
 		}
@@ -252,9 +249,9 @@ public class EmptyEntitiesTest {
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
 		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role.getName());
+			String role = prop.getName();
+			if (!runSPARQLRolesQuery("<" + role + ">")) {
+				emptyRoles.add(role);
 				r++;
 			}
 		}
@@ -262,9 +259,9 @@ public class EmptyEntitiesTest {
 
 		r = 0; // number of empty roles
 		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role.getName());
+			String role = prop.getName();
+			if (!runSPARQLRolesQuery("<" + role + ">")) {
+				emptyRoles.add(role);
 				r++;
 			}
 		}
@@ -281,9 +278,9 @@ public class EmptyEntitiesTest {
 
 		int c = 0; // number of empty concepts
 		for (OClass cl : onto.getVocabulary().getClasses()) {
-			Predicate concept = cl.getPredicate();
-			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
-				emptyConcepts.add(concept.getName());
+			String concept = cl.getName();
+			if (!runSPARQLConceptsQuery("<" + concept + ">")) {
+				emptyConcepts.add(concept);
 				c++;
 			}
 		}
@@ -291,9 +288,9 @@ public class EmptyEntitiesTest {
 
 		int r = 0; // number of empty roles
 		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role.getName());
+			String role = prop.getName();
+			if (!runSPARQLRolesQuery("<" + role + ">")) {
+				emptyRoles.add(role);
 				r++;
 			}
 		}
@@ -301,9 +298,9 @@ public class EmptyEntitiesTest {
 
 		r = 0; // number of empty roles
 		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role.getName());
+			String role = prop.getName();
+			if (!runSPARQLRolesQuery("<" + role + ">")) {
+				emptyRoles.add(role);
 				r++;
 			}
 		}
@@ -318,7 +315,7 @@ public class EmptyEntitiesTest {
 	 */
 	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-		TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
+		TBoxReasoner tboxreasoner = TBoxReasonerImpl.create(onto);
 		System.out.println();
 		System.out.println(tboxreasoner.getObjectPropertyDAG());
 

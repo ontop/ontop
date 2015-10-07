@@ -20,8 +20,18 @@ package it.unibz.krdb.obda.io;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.*;
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.exception.Indicator;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.obda.exception.UnsupportedTagException;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
+
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.parser.*;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
@@ -260,10 +270,10 @@ public class ModelIOManager {
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
             
-            OBDAQuery targetQuery = mapping.getTargetQuery();
+            CQIE targetQuery = mapping.getTargetQuery();
             writer.write(Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
             
-            OBDAQuery sourceQuery = mapping.getSourceQuery();
+            OBDASQLQuery sourceQuery = mapping.getSourceQuery();
             writer.write(Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
@@ -271,11 +281,11 @@ public class ModelIOManager {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(OBDAQuery query) {
+    private String printTargetQuery(CQIE query) {
     	return TargetQueryRenderer.encode(query, prefixManager);
     }
     
-    private String printSourceQuery(OBDAQuery query) {
+    private String printSourceQuery(OBDASQLQuery query) {
     	String sourceString = SourceQueryRenderer.encode(query);
     	String toReturn = convertTabToSpaces(sourceString);
     	return toReturn.replaceAll("\n", "\n\t\t\t");
@@ -315,6 +325,13 @@ public class ModelIOManager {
             } else if (parameter.equals(Label.password.name())) {
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, inputParamter);
             } else if (parameter.equals(Label.driverClass.name())) {
+                //Class.forName was added for MonetDB driver.
+                // Because it does not work without it.
+                try {
+                    Class.forName(inputParamter);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);
             } else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", parameter, lineNumber);

@@ -58,7 +58,6 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 

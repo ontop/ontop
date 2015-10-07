@@ -43,8 +43,62 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
 	}
 	
+	
 	@Override
-	public String strconcat(String[] strings) {
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 1, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+	
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+	
+	@Override
+	public String strContainsOperator(){
+		return "INSTR(%1$s,%2$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,INSTR(%s,%s)-1)", str,  str, before);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+//		sign return 1 if positive number, 0 if 0 and -1 if negative number
+//		it will return everything after the value if it is present or it will return an empty string if it is not present
+		return String.format("SUBSTRING(%s,LOCATE(%s,%s) + LENGTH(%s), SIGN(LOCATE(%s,%s)) * LENGTH(%s))",
+				str, after, str , after , after, str, str);
+	}
+
+	@Override
+	  	public String SHA1(String str) {
+	  		return String.format("SHA1(%s)", str);
+	  	}
+	 
+	 @Override
+	  	public String MD5(String str) {
+	  		return String.format("MD5(%s)", str);
+	  	}
+	 
+	 @Override
+	  	public String strLength(String str) {
+	  		return String.format("CHAR_LENGTH(%s)", str);
+	  	}
+
+	@Override
+	public String strUuid() {
+		return "UUID()";
+	}
+
+	@Override
+	public String uuid() {
+		return strConcat(new String[]{"'urn:uuid:'", "UUID()"});
+	}
+	
+	@Override
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		if (strings.length == 1)
