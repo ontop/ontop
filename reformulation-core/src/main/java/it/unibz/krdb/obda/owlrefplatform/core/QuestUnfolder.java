@@ -28,6 +28,7 @@ import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -188,7 +189,7 @@ public class QuestUnfolder {
 				if (pkeys.containsKey(newAtomPredicate))
 					continue;
 				
-				RelationID newAtomName = RelationID.createRelationFromPredicateName(newAtomPredicate.toString());
+				RelationID newAtomName = Relation2DatalogPredicate.createRelationFromPredicateName(newAtomPredicate);
 				RelationDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					// primary keys

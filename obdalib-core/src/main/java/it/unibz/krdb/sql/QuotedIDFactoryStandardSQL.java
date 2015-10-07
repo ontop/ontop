@@ -58,16 +58,8 @@ public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 	}
 
 	@Override
-	public RelationID createRelationFromString(String s) {
-		String[] names = s.split("\\.");
-		if (names.length == 1)
-			return new RelationID(createFromString(null), createFromString(s));
-		else
-			return new RelationID(createFromString(names[0]), createFromString(names[1]));			
-	}
-
-	@Override
 	public RelationID createRelationFromString(String schema, String table) {
 		return new RelationID(createFromString(schema), createFromString(table));			
 	}
+	
 }

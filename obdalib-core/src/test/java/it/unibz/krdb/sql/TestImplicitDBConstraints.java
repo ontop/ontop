@@ -64,7 +64,7 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst", idfac);
 		uc.addReferredTables(tables);
 		assertTrue(tables.size() == 1);
-		assertTrue(tables.contains(new RelationID(new QuotedID(null, ""), new QuotedID("TABLE2", ""))));
+		assertTrue(tables.contains(idfac.createRelationFromString(null, "TABLE2")));
 	}
 
 	@Test

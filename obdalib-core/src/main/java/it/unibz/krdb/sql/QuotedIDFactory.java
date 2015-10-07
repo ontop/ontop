@@ -42,21 +42,10 @@ public interface QuotedIDFactory {
 	
 	/**
 	 * 
-	 * @param s an SQL rendering of a possibly qualified table name
-	 * @return
-	 */
-	
-	RelationID createRelationFromString(String s);
-
-	
-	/**
-	 * 
 	 * @param schema null or a possibly quoted string (SQL rendering)
 	 * @param table a possibly quoted string (SQL rendering)
 	 * @return
 	 */
 	
-	RelationID createRelationFromString(String schema, String table);
-	
-	
+	RelationID createRelationFromString(String schema, String table);	
 }

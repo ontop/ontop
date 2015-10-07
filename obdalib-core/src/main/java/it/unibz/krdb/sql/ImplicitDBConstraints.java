@@ -151,11 +151,18 @@ public class ImplicitDBConstraints {
 	 */
 	public void addReferredTables(Set<RelationID> realTables) {
 		for (String tableGivenName : this.referredTables) {
-			RelationID id = idfac.createRelationFromString(tableGivenName);
+			RelationID id = getRelationIDFromString(tableGivenName);
 			realTables.add(id);
 		}
 	}
 
+	private RelationID getRelationIDFromString(String name) {
+		String[] names = name.split("\\.");
+		if (names.length == 1)
+			return idfac.createRelationFromString(null, name);
+		else
+			return idfac.createRelationFromString(names[0], names[1]);			
+	}
 	
 	/**
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object
@@ -163,7 +170,7 @@ public class ImplicitDBConstraints {
 	public void addFunctionalDependencies(DBMetadata md) {
 		
 		for (String tableName : this.uniqueFD.keySet()) {
-			RelationID tableId = idfac.createRelationFromString(tableName);
+			RelationID tableId = getRelationIDFromString(tableName);
 			RelationDefinition td = md.getDefinition(tableId);
 			if (td != null && td instanceof TableDefinition) {
 				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
@@ -197,7 +204,7 @@ public class ImplicitDBConstraints {
 	public void addForeignKeys(DBMetadata md) {
 		
 		for (String tableName : this.fKeys.keySet()) {
-			RelationID tableId = idfac.createRelationFromString(tableName);
+			RelationID tableId = getRelationIDFromString(tableName);
 			RelationDefinition td = md.getDefinition(tableId);
 			if (td == null || ! (td instanceof TableDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
@@ -213,7 +220,7 @@ public class ImplicitDBConstraints {
 						continue;
 					}
 					String fkTable = entry.getValue().getTableReference();
-					RelationID fkTableId = idfac.createRelationFromString(fkTable);
+					RelationID fkTableId = getRelationIDFromString(fkTable);
 					RelationDefinition fktd = md.getDefinition(fkTableId);
 					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");

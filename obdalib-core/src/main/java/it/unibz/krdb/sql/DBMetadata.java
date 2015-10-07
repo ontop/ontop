@@ -34,8 +34,6 @@ public class DBMetadata implements Serializable {
 	private final String databaseProductName;
 	private final QuotedIDFactory idfac;
 
-//	private static final Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
-
 	/**
 	 * Constructs an initial metadata with some general information about the
 	 * database, e.g., the driver name, the database engine name.

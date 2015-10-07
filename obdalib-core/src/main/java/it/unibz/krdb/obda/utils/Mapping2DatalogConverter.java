@@ -33,6 +33,7 @@ import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.api.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -156,9 +157,7 @@ public class Mapping2DatalogConverter {
                    	
             // Construct the predicate using the table name
             RelationDefinition td = dbMetadata.getDefinition(relationId);
-            int arity = td.getAttributes().size();
-            Predicate predicate = fac.getPredicate(td.getID().getDatalogPredicateName(), arity);
-            List<Term> terms = new ArrayList<>(arity);
+            List<Term> terms = new ArrayList<>(td.getAttributes().size());
             // Swap the column name with a new variable from the lookup table
             for (Attribute attribute : td.getAttributes()) {
                 Term term = lookupTable.get(new QualifiedAttributeID(aliasId, attribute.getID()));
@@ -168,7 +167,7 @@ public class Mapping2DatalogConverter {
                 terms.add(term);
             }
             // Create an atom for a particular table
-            Function atom = fac.getFunction(predicate, terms);
+            Function atom = Relation2DatalogPredicate.getAtom(td, terms);
             bodyAtoms.add(atom);
         }
     }
@@ -760,6 +759,7 @@ public class Mapping2DatalogConverter {
             }
 
         }
+        
 
         private Term getVariable(Column expression) {
         	QuotedID column = idfac.createFromString(expression.getColumnName());

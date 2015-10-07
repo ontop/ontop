@@ -33,6 +33,7 @@ import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.Relation2DatalogPredicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -302,7 +303,7 @@ public class MappingDataTypeRepair {
 		Function atom = (Function) o[0];
 		Integer pos = (Integer) o[1];
 
-		RelationID tableId = RelationID.createRelationFromPredicateName(atom.getFunctionSymbol().toString());
+		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(atom.getFunctionSymbol());
 		RelationDefinition td = metadata.getDefinition(tableId);
 
 		Attribute attribute = td.getAttribute(pos);

@@ -24,7 +24,7 @@ package it.unibz.krdb.sql;
 /**
  * Database identifier used for possibly qualified table names and aliases
  * <p>
- * Schema name can be empty (null)
+ * Schema name can be empty
  * 
  * @author Roman Kontchakov
  *
@@ -35,58 +35,18 @@ public class RelationID {
 
 	private final QuotedID schema, table;
 	
+	/**
+	 * (used only in QuotedIDFactory implementations)
+	 * 
+	 * @param schema 
+	 * @param table
+	 */
+	
 	RelationID(QuotedID schema, QuotedID table) {
-		this.schema = (schema == null) ? new QuotedID(null, "") : schema;
+		this.schema = schema;
 		this.table = table;
 	}
 	
-	public RelationID getSchemalessID() {
-		return new RelationID(null, table);
-	}
-	
-	public boolean hasSchema() {
-		return schema.getName() != null;
-	}
-	
-	public String getSchemaSQLRendering() {
-		return schema.getSQLRendering();
-	}
-
-	public String getTableNameSQLRendering() {
-		return table.getSQLRendering();
-	}
-
-	public String getSchemaName() {
-		return schema.getName();
-	}
-	
-	public String getTableName() {
-		return table.getName();
-	}
-	
-	public String getDatalogPredicateName() {
-		String s = schema.getName();
-		if (s == null)
-			return table.getName();
-		
-		return s + "." + table.getName();
-	}
-	
-	/**
-	 * 
-	 * @param s a predicate-name rendering of a possibly qualified table name
-	 * @return
-	 */
-	
-	
-	public static RelationID createRelationFromPredicateName(String s) {
-		String[] names = s.split("\\.");
-		if (names.length == 1)
-			return new RelationID(new QuotedID(null, QuotedID.QUOTATION), new QuotedID(s, QuotedID.QUOTATION));
-		else
-			return new RelationID(new QuotedID(names[0], QuotedID.QUOTATION), new QuotedID(names[1], QuotedID.QUOTATION));			
-	}
-
 	/**
 	 * 
 	 * @param schema as is in DB (possibly null)
@@ -94,11 +54,66 @@ public class RelationID {
 	 * @return
 	 */
 	
-	public static RelationID createRelationFromDatabaseRecord(String schema, String table) {
-		return new RelationID(new QuotedID(schema, QuotedID.QUOTATION), new QuotedID(table, QuotedID.QUOTATION));			
+	public static RelationID createRelationIdFromDatabaseRecord(String schema, String table) {
+		// both IDs are as though they are quoted -- DB stores names as is 
+		return new RelationID(QuotedID.createFromDatabaseRecord(schema), QuotedID.createFromDatabaseRecord(table));			
+	}
+	
+	/**
+	 * 
+	 * @return the relation ID that has the same name but no schema name
+	 */
+	
+	public RelationID getSchemalessID() {
+		return new RelationID(QuotedID.createFromDatabaseRecord(null), table);
+	}
+	
+	/**
+	 * 
+	 * @return true if the relation ID contains schema 
+	 */
+	public boolean hasSchema() {
+		return schema.getName() != null;
+	}
+	
+	/**
+	 * 
+	 * @return null if the schema name is empty or SQL rendering of the schema name (possibly in quotation marks)
+	 */
+	public String getSchemaSQLRendering() {
+		return schema.getSQLRendering();
 	}
 
+	/**
+	 * 
+	 * @return SQL rendering of the table name (possibly in quotation marks)
+	 */
+	public String getTableNameSQLRendering() {
+		return table.getSQLRendering();
+	}
+	
+	/**
+	 * 
+	 * @return null if the schema name is empty or the schema name (as is, without quotation marks)
+	 */
 
+	public String getSchemaName() {
+		return schema.getName();
+	}
+	
+	/**
+	 * 
+	 * @return table name (as is, without quotation marks)
+	 */
+	public String getTableName() {
+		return table.getName();
+	}
+	
+	/**
+	 * 
+	 * @return SQL rendering of the name (possibly with quotation marks)
+	 */
+	
 	public String getSQLRendering() {
 		String s = schema.getSQLRendering();
 		if (s == null)

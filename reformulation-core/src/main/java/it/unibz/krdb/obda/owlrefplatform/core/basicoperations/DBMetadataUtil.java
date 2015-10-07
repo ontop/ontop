@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
+import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.TableDefinition;
 
 import java.util.ArrayList;
@@ -75,27 +76,27 @@ public class DBMetadataUtil {
 					// Get positions of referenced attribute
 					int pos1 = att1.getIndex();
 					int pos2 = att2.getIndex();
-					positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
+					positionMatch.put(pos1 - 1, pos2 - 1); // indexes start at 1
 				}
 				// Construct CQIE
-				Predicate p1 = fac.getPredicate(def.getID().getDatalogPredicateName(), def.getAttributes().size());					
-				List<Term> terms1 = new ArrayList<>(p1.getArity());
-				for (int i = 1; i <= p1.getArity(); i++) 
+				int len1 = def.getAttributes().size();
+				List<Term> terms1 = new ArrayList<>(len1);
+				for (int i = 1; i <= len1; i++) 
 					 terms1.add(fac.getVariable("t" + i));
 				
 				// Roman: important correction because table2 may not be in the same case 
 				// (e.g., it may be all upper-case)
-				Predicate p2 = fac.getPredicate(def2.getID().getDatalogPredicateName(), def2.getAttributes().size());
-				List<Term> terms2 = new ArrayList<>(p2.getArity());
-				for (int i = 1; i <= p2.getArity(); i++) 
+				int len2 = def2.getAttributes().size();
+				List<Term> terms2 = new ArrayList<>(len2);
+				for (int i = 1; i <= len2; i++) 
 					 terms2.add(fac.getVariable("p" + i));
 				
 				// do the swapping
 				for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
 					terms1.set(swap.getKey(), terms2.get(swap.getValue()));
 				
-				Function head = fac.getFunction(p2, terms2);
-				Function body = fac.getFunction(p1, terms1);
+				Function head = Relation2DatalogPredicate.getAtom(def2, terms2);
+				Function body = Relation2DatalogPredicate.getAtom(def, terms1);
 				
 				dependencies.addRule(head, body);				
 				if (printouts)

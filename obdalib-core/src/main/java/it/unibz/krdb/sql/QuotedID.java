@@ -40,6 +40,7 @@ public class QuotedID {
 	public static final String QUOTATION = "\"";
 	
 	/**
+	 * (used only in QuotedIDFactory implementations)
 	 * 
 	 * @param name can be null
 	 * @param quotes cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
@@ -49,7 +50,14 @@ public class QuotedID {
 		this.quoteString = quoteString;
 	}
 	
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	
 	public static QuotedID createFromDatabaseRecord(String s) {
+		// ID is as though it is quoted -- DB stores names as is 
 		return new QuotedID(s, QUOTATION);
 	}
 	

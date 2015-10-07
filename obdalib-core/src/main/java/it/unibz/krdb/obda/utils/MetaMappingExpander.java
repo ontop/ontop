@@ -312,6 +312,7 @@ public class MetaMappingExpander {
 		return newMapping;
 	}
 
+	
 	/**
 	 * This method get the columns which will be used for the predicate template 
 	 * 

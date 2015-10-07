@@ -39,6 +39,7 @@ import it.unibz.krdb.sql.QualifiedAttributeID;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 
@@ -88,6 +89,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Formatting template
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
+	private static final String VIEW_NAME_PREFIX = "QVIEW";
 
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -1228,12 +1230,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			QualifiedAttributeID def = viewdef.iterator().next();
 			QuotedID attributeId = def.getAttribute();
 			RelationID tableId = null;
-			if (def.getRelation().getTableName().startsWith("QVIEW")) {
+			if (def.getRelation().getTableName().startsWith(VIEW_NAME_PREFIX)) {
 				for (Map.Entry<Function, RelationID> entry : index.viewNames.entrySet()) {
 					RelationID value = entry.getValue();
 					if (value.equals(def.getRelation())) {
-						String predName = entry.getKey().getFunctionSymbol().toString();
-						tableId = RelationID.createRelationFromPredicateName(predName);
+						tableId = Relation2DatalogPredicate
+									.createRelationFromPredicateName(entry.getKey().getFunctionSymbol());
 						break;
 					}
 				}
@@ -1621,7 +1623,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			}
 
-			RelationDefinition def = metadata.getDefinition(RelationID.createRelationFromPredicateName(atom.getFunctionSymbol().toString()));
+			RelationID id = Relation2DatalogPredicate.createRelationFromPredicateName(atom.getFunctionSymbol());
+			RelationDefinition def = metadata.getDefinition(id);
 			if (def == null) {
 				// There is no definition for this atom, its not a database
 				// predicate, the query is empty.
@@ -1629,7 +1632,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return;
 			}
 			dataTableCount++;
-			viewNames.put(atom, RelationID.createRelationFromPredicateName(String.format(VIEW_NAME, dataTableCount)));
+			viewNames.put(atom, metadata.getQuotedIDFactory().createRelationFromString(null, String.format(VIEW_NAME, dataTableCount)));
 			dataDefinitions.put(atom, def);
 
 			indexVariables(atom);

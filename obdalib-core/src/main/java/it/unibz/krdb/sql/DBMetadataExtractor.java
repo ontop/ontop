@@ -230,7 +230,7 @@ public class DBMetadataExtractor {
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
 				//String tblCatalog = rsTables.getString("TABLE_CAT");
-				RelationID id = RelationID.createRelationFromDatabaseRecord(rsTables.getString("TABLE_SCHEM"), rsTables.getString("TABLE_NAME"));
+				RelationID id = RelationID.createRelationIdFromDatabaseRecord(rsTables.getString("TABLE_SCHEM"), rsTables.getString("TABLE_NAME"));
 				tables.add(new TableDefinition(id));
 			}
 		} 
@@ -311,7 +311,7 @@ public class DBMetadataExtractor {
 
 		@Override
 		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			RelationID id = RelationID.createRelationFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
+			RelationID id = RelationID.createRelationIdFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
 			return new TableDefinition(id);
 		}
 	};
@@ -331,7 +331,7 @@ public class DBMetadataExtractor {
 
 		@Override
 		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			RelationID id = RelationID.createRelationFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
+			RelationID id = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
 			return new TableDefinition(id);
 		}
 	};
@@ -352,7 +352,7 @@ public class DBMetadataExtractor {
 		@Override
 		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
 			//String tblCatalog = rs.getString("TABLE_CATALOG");
-			RelationID id = RelationID.createRelationFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
+			RelationID id = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
 			return new TableDefinition(id);
 		}
 	};
@@ -540,7 +540,7 @@ public class DBMetadataExtractor {
 			while (rsForeignKeys.next()) {
 				String pkSchemaName = rsForeignKeys.getString("PKTABLE_SCHEM");
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
-				RelationID pkTable = RelationID.createRelationFromDatabaseRecord(pkSchemaName, pkTableName);
+				RelationID pkTable = RelationID.createRelationIdFromDatabaseRecord(pkSchemaName, pkTableName);
 				RelationDefinition ref = metadata.getDefinition(pkTable);
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {

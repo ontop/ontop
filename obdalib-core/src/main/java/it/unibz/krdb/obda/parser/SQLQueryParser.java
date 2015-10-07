@@ -24,6 +24,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
@@ -121,15 +122,15 @@ public class SQLQueryParser {
 					"If you think this query is already simple and should be parsed by Quest, " +
 					"please contact the authors. \nQuery: '{}'", query);
 			
-			String viewName = String.format("view_%s", id_counter++);
+			RelationID viewId = idfac.createRelationFromString(null, String.format("view_%s", id_counter++));
 			
 			// ONLY IN DEEP PARSING
 			if (dbMetaData != null) {
-				ViewDefinition vd = createViewDefinition(viewName, query, dbMetaData.getQuotedIDFactory());
+				ViewDefinition vd = createViewDefinition(viewId, query, dbMetaData.getQuotedIDFactory());
 				dbMetaData.add(vd);
 			}
 			
-			queryParser = createViewParsed(viewName, query);	
+			queryParser = createViewParsed(viewId, query);	
 		}
 		return queryParser;
 	}
@@ -140,7 +141,7 @@ public class SQLQueryParser {
 	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROM item expression
 	 * We create a query that looks like SELECT * FROM viewName
 	 */
-	private ParsedSQLQuery createViewParsed(String viewName, String query) {
+	private ParsedSQLQuery createViewParsed(RelationID viewId, String query) {
 		
 		/*
 		 * Create a new SELECT statement containing the viewTable in the FROM clause
@@ -154,7 +155,7 @@ public class SQLQueryParser {
 		body.setSelectItems(list); 
 		
 		// create FROM viewTable
-		Table viewTable = new Table(null, viewName);
+		Table viewTable = new Table(viewId.getSchemaSQLRendering(), viewId.getTableNameSQLRendering());
 		body.setFromItem(viewTable);
 		
 		Select select = new Select();
@@ -173,7 +174,7 @@ public class SQLQueryParser {
 	}
 	
 	
-	private ViewDefinition createViewDefinition(String viewName, String query, QuotedIDFactory idfac) {
+	private ViewDefinition createViewDefinition(RelationID viewName, String query, QuotedIDFactory idfac) {
 
         ParsedSQLQuery queryParser = null;
         boolean supported = true;
@@ -184,7 +185,7 @@ public class SQLQueryParser {
             supported = false;
         }
 
-        ViewDefinition viewDefinition = new ViewDefinition(idfac.createRelationFromString(null, viewName), query);
+        ViewDefinition viewDefinition = new ViewDefinition(viewName, query);
        
         if (supported) {
             List<String> columns = queryParser.getColumns();
