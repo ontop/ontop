@@ -106,7 +106,7 @@ import org.slf4j.LoggerFactory;
 
 public class DBMetadataExtractor {
 
-	private static final boolean printouts = false;
+	private static final boolean printouts = true;
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 
@@ -167,7 +167,7 @@ public class DBMetadataExtractor {
 	public static void loadMetadata(DBMetadata metadata, Connection conn, Set<RelationID> realTables) throws SQLException {
 		
 		if (printouts)
-			System.err.println("GETTING METADATA WITH " + conn + " ON " + realTables);
+			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		List<RelationID> tableList;
@@ -218,7 +218,7 @@ public class DBMetadataExtractor {
 			getPrimaryKey(md, table);
 			getUniqueAttributes(md, table);
 			if (printouts)
-				System.out.println(table.getID() + ": " + table);
+				System.out.println("  T " + table.getID() + ": " + table);
 		}	
 		// FKs are processed separately because they are not local 
 		// (refer to two relations), which requires all relations 
@@ -437,7 +437,7 @@ public class DBMetadataExtractor {
 			//	return;			
 			while (rs.next()) {
 				if (printouts)
-					System.out.println(rs.getString("TABLE_CAT") + "." + rs.getString("TABLE_SCHEM") + "." + 
+					System.out.println("         " + rs.getString("TABLE_CAT") + "." + rs.getString("TABLE_SCHEM") + "." + 
 								rs.getString("TABLE_NAME") + "." + rs.getString("COLUMN_NAME"));
 				// ROMAN (21 Sep 2015): very careful with columns of the same name in tables in different schemas
 				QuotedID columnName = QuotedID.createFromDatabaseRecord(rs.getString("COLUMN_NAME"));
