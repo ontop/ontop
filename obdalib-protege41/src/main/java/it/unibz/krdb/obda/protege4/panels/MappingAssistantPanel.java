@@ -776,10 +776,15 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			Connection conn = man.getConnection(selectedSource);
-			DBMetadata md = DBMetadataExtractor.getMetadata(conn);
-			// this operation is EXPENSIVE
+			DBMetadata md = DBMetadataExtractor.createMetadata(conn);
+			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			DBMetadataExtractor.loadMetadata(md, conn, null);
-			for (RelationDefinition relation : md.getRelations()) {
+			for (TableDefinition relation : md.getTables()) {
+				relationList.addElement(relation);
+			}
+			// ROMAN (7 Oct 2015): I'm not sure we need these views -- they are 
+			// created by SQLQueryParser for complex queries that cannot be parsed
+			for (ViewDefinition relation : md.getViews()) {
 				relationList.addElement(relation);
 			}
 		} 

@@ -44,7 +44,7 @@ public abstract class AbstractDBMetadata
 		Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
 				source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), 
 				source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-		DBMetadata metadata = DBMetadataExtractor.getMetadata(conn);
+		DBMetadata metadata = DBMetadataExtractor.createMetadata(conn);
 		DBMetadataExtractor.loadMetadata(metadata, conn, null);
 
 		return metadata;

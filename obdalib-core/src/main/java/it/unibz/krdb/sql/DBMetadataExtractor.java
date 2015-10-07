@@ -111,11 +111,11 @@ public class DBMetadataExtractor {
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 
 	
-	public static DBMetadata getDummyMetaData() {
-		return getDummyMetaData("dummy class");
+	public static DBMetadata createDummyMetadata() {
+		return createDummyMetadata("dummy class");
 	}
 	
-	public static DBMetadata getDummyMetaData(String driver_class) {
+	public static DBMetadata createDummyMetadata(String driver_class) {
 		return new DBMetadata(driver_class, null, null, new QuotedIDFactoryStandardSQL());
 	}
 	
@@ -127,33 +127,29 @@ public class DBMetadataExtractor {
 	 * @throws SQLException 
 	 */
 
-	public static DBMetadata getMetadata(Connection conn) throws SQLException  {
+	public static DBMetadata createMetadata(Connection conn) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
-		QuotedIDFactory idfac = new QuotedIDFactoryStandardSQL();
+		String productName = md.getDatabaseProductName();
 		
-		if (md.getDatabaseProductName().contains("Oracle")) {
-			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
-		} 
-		else if (md.getDatabaseProductName().contains("DB2")) {
-			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
-		}  
-		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
-			//idNormalizer = DBMetadata.UpperCaseIdNormalizer;
-		}
-		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
+		// ROMAN (7 Oct 2015): these ifs are to be replaced by checking boolean flags in md
+		
+		QuotedIDFactory idfac;
+		if (productName.contains("Oracle")) 
+			idfac = new QuotedIDFactoryStandardSQL();
+		else if (productName.contains("DB2")) 
+			idfac = new QuotedIDFactoryStandardSQL();
+		else if (productName.contains("H2") || productName.contains("HSQL")) 
+			idfac = new QuotedIDFactoryStandardSQL();
+		else if (productName.contains("PostgreSQL")) 
 			// Postgres treats unquoted identifiers as lower-case
-			// idfac = DBMetadata.LowerCaseIdNormalizer;
-		} 
-		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
-			//idNormalizer = DBMetadata.IdentityIdNormalizer;
- 		} 
-		else {
-			// For other database engines, i.e. MySQL
-			//idNormalizer = DBMetadata.IdentityIdNormalizer;
-		}
+			idfac = new QuotedIDFactoryLowerCase();
+		else if (productName.contains("SQL Server"))  // MS SQL Server
+			idfac = new QuotedIDFactoryIdentity();
+		else // For other database engines, i.e. MySQL
+			idfac = new QuotedIDFactoryIdentity();
 		
-		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), md.getDatabaseProductName(), idfac);
+		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), productName, idfac);
 		
 		return metadata;	
 	}
@@ -174,7 +170,7 @@ public class DBMetadataExtractor {
 			System.err.println("GETTING METADATA WITH " + conn + " ON " + realTables);
 		
 		final DatabaseMetaData md = conn.getMetaData();
-		List<RelationDefinition> tableList;
+		List<RelationID> tableList;
 		DatatypeNormalizer dt = DefaultTypeFixer;
 		
 		if (md.getDatabaseProductName().contains("Oracle")) {
@@ -192,24 +188,20 @@ public class DBMetadataExtractor {
 			else 
 				tableList = getTableList(null, realTables);
 		}  
-		else if (md.getDatabaseProductName().contains("H2") || md.getDatabaseProductName().contains("HSQL")) {
-			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableListDefault(md);
-			else 
-				tableList = getTableList(null, realTables);
-		}
-		else if (md.getDatabaseProductName().contains("PostgreSQL")) {
-			if (realTables == null || realTables.isEmpty()) 
-				tableList = getTableListDefault(md);
-			else 
-				tableList = getTableList(null, realTables);
-		} 
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, MSSQLServerRelationListProvider, metadata.getQuotedIDFactory());
 			else
 				tableList = getTableList(null, realTables);
  		} 
+		else if (md.getDatabaseProductName().contains("H2") || 
+				md.getDatabaseProductName().contains("HSQL") || 
+				md.getDatabaseProductName().contains("PostgreSQL")) {
+			if (realTables == null || realTables.isEmpty()) 
+				tableList = getTableListDefault(md);
+			else 
+				tableList = getTableList(null, realTables);
+		}
 		else {
 			// For other database engines, i.e. MySQL
 			if (realTables == null || realTables.isEmpty()) 
@@ -220,20 +212,21 @@ public class DBMetadataExtractor {
 			dt = MySQLTypeFixer;
 		}
 		
-		for (RelationDefinition table : tableList) {
-			// ROMAN (20 Sep 2015): careful with duplicates
+		for (RelationID id : tableList) {
+			TableDefinition table = metadata.createTable(id);
 			getTableColumns(md, table, dt);
 			getPrimaryKey(md, table);
 			getUniqueAttributes(md, table);
-			metadata.add(table);
 			if (printouts)
 				System.out.println(table.getID() + ": " + table);
 		}	
 		// FKs are processed separately because they are not local 
 		// (refer to two relations), which requires all relations 
 		// to have been constructed 
-		for (RelationDefinition table : tableList) 
+		for (RelationID id : tableList) { 
+			TableDefinition table = metadata.getTable(id);
 			getForeignKeys(md, table, metadata);
+		}
 	}
 	
 	
@@ -241,11 +234,11 @@ public class DBMetadataExtractor {
 	 * Retrieve the normalized list of tables from a given list of RelationJSQL
 	 */
 
-	private static List<RelationDefinition> getTableList(String defaultTableSchema, Set<RelationID> realTables) throws SQLException {
+	private static List<RelationID> getTableList(String defaultTableSchema, Set<RelationID> realTables) throws SQLException {
 
-		List<RelationDefinition> fks = new LinkedList<>();
+		List<RelationID> fks = new LinkedList<>();
 		for (RelationID table : realTables) {
-			fks.add(new TableDefinition(table));
+			fks.add(table);
 		}
 		return fks;
 	}
@@ -255,13 +248,13 @@ public class DBMetadataExtractor {
 	/**
 	 * Retrieve the table and view list from the JDBC driver (works for most database engines, e.g., MySQL and PostgreSQL)
 	 */
-	private static List<RelationDefinition> getTableListDefault(DatabaseMetaData md) throws SQLException {
-		List<RelationDefinition> tables = new LinkedList<>();
+	private static List<RelationID> getTableListDefault(DatabaseMetaData md) throws SQLException {
+		List<RelationID> tables = new LinkedList<>();
 		try (ResultSet rsTables = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rsTables.next()) {
 				//String tblCatalog = rsTables.getString("TABLE_CAT");
 				RelationID id = RelationID.createRelationIdFromDatabaseRecord(rsTables.getString("TABLE_SCHEM"), rsTables.getString("TABLE_NAME"));
-				tables.add(new TableDefinition(id));
+				tables.add(id);
 			}
 		} 
 		return tables;
@@ -270,9 +263,9 @@ public class DBMetadataExtractor {
 	/**
 	 * Retrieve metadata for a specific database engine
 	 */
-	private static List<RelationDefinition> getTableList(Connection conn, RelationListProvider relationListProvider, QuotedIDFactory idfac) throws SQLException {
+	private static List<RelationID> getTableList(Connection conn, RelationListProvider relationListProvider, QuotedIDFactory idfac) throws SQLException {
 		
-		List<RelationDefinition> fks = new LinkedList<>();
+		List<RelationID> fks = new LinkedList<>();
 		try (Statement stmt = conn.createStatement()) {
 			// Obtain the relational objects (i.e., tables and views) 
 			try (ResultSet rs = stmt.executeQuery(relationListProvider.getQuery())) {
@@ -304,7 +297,7 @@ public class DBMetadataExtractor {
 	
 	private interface RelationListProvider {
 		String getQuery();
-		TableDefinition getTableDefinition(ResultSet rs) throws SQLException;
+		RelationID getTableDefinition(ResultSet rs) throws SQLException;
 	}
 	
 	
@@ -340,9 +333,8 @@ public class DBMetadataExtractor {
 		}
 
 		@Override
-		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			RelationID id = RelationID.createRelationIdFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
-			return new TableDefinition(id);
+		public RelationID getTableDefinition(ResultSet rs) throws SQLException {
+			return RelationID.createRelationIdFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
 		}
 	};
 	
@@ -360,9 +352,8 @@ public class DBMetadataExtractor {
 		}
 
 		@Override
-		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
-			RelationID id = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
-			return new TableDefinition(id);
+		public RelationID getTableDefinition(ResultSet rs) throws SQLException {
+			return RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
 		}
 	};
 
@@ -380,10 +371,9 @@ public class DBMetadataExtractor {
 		}
 
 		@Override
-		public TableDefinition getTableDefinition(ResultSet rs) throws SQLException {
+		public RelationID getTableDefinition(ResultSet rs) throws SQLException {
 			//String tblCatalog = rs.getString("TABLE_CATALOG");
-			RelationID id = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
-			return new TableDefinition(id);
+			return RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
 		}
 	};
 	
@@ -571,7 +561,7 @@ public class DBMetadataExtractor {
 				String pkSchemaName = rsForeignKeys.getString("PKTABLE_SCHEM");
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
 				RelationID pkTable = RelationID.createRelationIdFromDatabaseRecord(pkSchemaName, pkTableName);
-				RelationDefinition ref = metadata.getDefinition(pkTable);
+				TableDefinition ref = metadata.getTable(pkTable);
 				String name = rsForeignKeys.getString("FK_NAME");
 				if (!currentName.equals(name)) {
 					if (builder != null) 

@@ -682,7 +682,7 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
 			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {

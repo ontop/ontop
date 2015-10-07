@@ -150,18 +150,17 @@ public class TestSesameImplicitDBConstraints {
 		}
 	}
 
-	private TableDefinition defTable(String name, QuotedIDFactory idfac) {
-		TableDefinition tableDefinition = new TableDefinition(idfac.createRelationFromString(null, name));
+	private void defTable(DBMetadata dbMetadata, String name) {
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(null, name));
 		tableDefinition.addAttribute(idfac.createFromString("COL1"), java.sql.Types.INTEGER, null, false);
 		tableDefinition.addAttribute(idfac.createFromString("COL2"), java.sql.Types.INTEGER, null, false);
-		return tableDefinition;
 	}
 	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData("org.h2.Driver");
-		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		dbMetadata.add(defTable("TABLE1", idfac));
-		dbMetadata.add(defTable("TABLE2", idfac));
-		dbMetadata.add(defTable("TABLE3", idfac));
+		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata("org.h2.Driver");
+		defTable(dbMetadata, "TABLE1");
+		defTable(dbMetadata, "TABLE2");
+		defTable(dbMetadata, "TABLE3");
 		return dbMetadata;
 	}
 

@@ -126,8 +126,7 @@ public class SQLQueryParser {
 			
 			// ONLY IN DEEP PARSING
 			if (dbMetaData != null) {
-				ViewDefinition vd = createViewDefinition(viewId, query, dbMetaData.getQuotedIDFactory());
-				dbMetaData.add(vd);
+				createViewDefinition(dbMetaData, viewId, query);
 			}
 			
 			queryParser = createViewParsed(viewId, query);	
@@ -174,7 +173,7 @@ public class SQLQueryParser {
 	}
 	
 	
-	private ViewDefinition createViewDefinition(RelationID viewName, String query, QuotedIDFactory idfac) {
+	private void createViewDefinition(DBMetadata md, RelationID viewName, String query) {
 
         ParsedSQLQuery queryParser = null;
         boolean supported = true;
@@ -185,7 +184,7 @@ public class SQLQueryParser {
             supported = false;
         }
 
-        ViewDefinition viewDefinition = new ViewDefinition(viewName, query);
+        ViewDefinition viewDefinition = md.createView(viewName, query);
        
         if (supported) {
             List<String> columns = queryParser.getColumns();
@@ -238,7 +237,5 @@ public class SQLQueryParser {
                 viewDefinition.addAttribute(columnId, 0, null, false); 
             }
         }
-        
-        return viewDefinition;
 	}
 }

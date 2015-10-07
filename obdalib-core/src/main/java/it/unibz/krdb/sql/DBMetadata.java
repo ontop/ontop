@@ -27,7 +27,8 @@ public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private final Map<RelationID, RelationDefinition> schema = new HashMap<>();
+	private final Map<RelationID, TableDefinition> tables = new HashMap<>();
+	private final Map<RelationID, ViewDefinition> views = new HashMap<>();
 
 	private final String driverName;
 	private final String driverVersion;
@@ -48,16 +49,34 @@ public class DBMetadata implements Serializable {
 	}
 
 	
+	public TableDefinition createTable(RelationID id) {
+		TableDefinition table = new TableDefinition(id);
+		add(table, tables);
+		return table;
+	}
+
 	/**
-	 * Inserts a new data definition to this meta data object. The name is
-	 * inserted without quotes so it can be used for the mapping, while the
-	 * value that is used also for the generated SQL conserves the quotes
+	 * THESE VIEWS ARE CREATED ONLY BY SQLQueryParser AS ABBREVIATIONS OF COMPLEX UNPARSABLE SUBQUERIES
+	 * 
+	 * @param id
+	 * @param sql
+	 * @return
+	 */
+	
+	public ViewDefinition createView(RelationID id, String sql) {
+		ViewDefinition table = new ViewDefinition(id, sql);
+		add(table, views);
+		return table;
+	}
+	
+	/**
+	 * Inserts a new data definition to this metadata object. 
 	 * 
 	 * @param td
 	 *            The data definition. It can be a {@link TableDefinition} or a
 	 *            {@link ViewDefinition} object.
 	 */
-	public void add(RelationDefinition td) {
+	private <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
 		schema.put(td.getID(), td);
 		if (td.getID().hasSchema()) {
 			RelationID noSchemaID = td.getID().getSchemalessID();
@@ -79,32 +98,37 @@ public class DBMetadata implements Serializable {
 	 * @param name
 	 *            The string name.
 	 */
-	public RelationDefinition getDefinition(RelationID name) {
-		RelationDefinition def = schema.get(name);
+	public TableDefinition getTable(RelationID name) {
+		TableDefinition def = tables.get(name);
 		if (def == null && name.hasSchema()) {
-			def = schema.get(name.getSchemalessID());
+			def = tables.get(name.getSchemalessID());
+		}
+		return def;
+	}
+
+	public RelationDefinition getRelation(RelationID name) {
+		RelationDefinition def = getTable(name);
+		if (def == null) {
+			def = views.get(name);
+			if (def == null && name.hasSchema()) {
+				def = views.get(name.getSchemalessID());
+			}
 		}
 		return def;
 	}
 	
 	/**
-	 * Retrieves the relation list (table and view definition) form the
-	 * metadata.
+	 * Retrieves the tables list form the metadata.
 	 */
-	public Collection<RelationDefinition> getRelations() {
-		return Collections.unmodifiableCollection(schema.values());
+	public Collection<TableDefinition> getTables() {
+		return Collections.unmodifiableCollection(tables.values());
 	}
 
 	/**
-	 * Retrieves the table list form the metadata.
+	 * Retrieves the views list form the metadata.
 	 */
-	public Collection<TableDefinition> getTables() {
-		List<TableDefinition> tableList = new ArrayList<>(schema.size());
-		for (RelationDefinition dd : schema.values()) {
-			if (dd instanceof TableDefinition) 
-				tableList.add((TableDefinition) dd);
-		}
-		return tableList;
+	public Collection<ViewDefinition> getViews() {
+		return Collections.unmodifiableCollection(views.values());
 	}
 
 
@@ -128,10 +152,16 @@ public class DBMetadata implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		for (RelationID key : schema.keySet()) {
+		for (RelationID key : tables.keySet()) {
 			bf.append(key);
 			bf.append("=");
-			bf.append(schema.get(key).toString());
+			bf.append(tables.get(key).toString());
+			bf.append("\n");
+		}
+		for (RelationID key : views.keySet()) {
+			bf.append(key);
+			bf.append("=");
+			bf.append(views.get(key).toString());
 			bf.append("\n");
 		}
 		return bf.toString();

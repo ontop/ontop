@@ -156,7 +156,7 @@ public class Mapping2DatalogConverter {
            	RelationID aliasId = entry.getKey();
                    	
             // Construct the predicate using the table name
-            RelationDefinition td = dbMetadata.getDefinition(relationId);
+            RelationDefinition td = dbMetadata.getRelation(relationId);
             List<Term> terms = new ArrayList<>(td.getAttributes().size());
             // Swap the column name with a new variable from the lookup table
             for (Attribute attribute : td.getAttributes()) {
@@ -290,7 +290,7 @@ public class Mapping2DatalogConverter {
 		for (Map.Entry<RelationID, RelationID> entry : tables.entrySet()) {
 			
 			RelationID relationId = entry.getValue();
-			RelationDefinition tableDefinition = dbMetadata.getDefinition(relationId);
+			RelationDefinition tableDefinition = dbMetadata.getRelation(relationId);
             if (tableDefinition == null) 
                 throw new RuntimeException("Definition not found for table '" + relationId + "'.");
             

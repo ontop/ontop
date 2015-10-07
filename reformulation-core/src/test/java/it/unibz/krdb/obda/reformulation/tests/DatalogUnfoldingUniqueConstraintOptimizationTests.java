@@ -51,25 +51,22 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	@Override
 	public void setUp() {
-		metadata = DBMetadataExtractor.getDummyMetaData();
+		metadata = DBMetadataExtractor.createDummyMetadata();
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		
-		TableDefinition table = new TableDefinition(idfac.createRelationFromString(null, "TABLE"));
+		TableDefinition table = metadata.createTable(idfac.createRelationFromString(null, "TABLE"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, true);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, true);
 		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, true);
 		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, true);
 		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute(idfac.createFromString("col4"))));
-		metadata.add(table);
 		
-		
-		table = new TableDefinition(idfac.createRelationFromString(null, "TABLE2"));
+		table = metadata.createTable(idfac.createRelationFromString(null, "TABLE2"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, false);
 		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute(idfac.createFromString("col1"))));
-		metadata.add(table);
 
         unfoldingProgram = fac.getDatalogProgram();
 

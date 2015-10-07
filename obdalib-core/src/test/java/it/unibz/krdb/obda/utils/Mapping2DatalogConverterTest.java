@@ -46,11 +46,11 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {
-		md = DBMetadataExtractor.getDummyMetaData();
+		md = DBMetadataExtractor.createDummyMetadata();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 		
 		// Database schema
-		TableDefinition table1 = new TableDefinition(idfac.createRelationFromString(null, "Student"));
+		TableDefinition table1 = md.createTable(idfac.createRelationFromString(null, "Student"));
 		table1.addAttribute(idfac.createFromString("id"), Types.INTEGER, null, false);
 		table1.addAttribute(idfac.createFromString("first_name"), Types.VARCHAR, null, false);
 		table1.addAttribute(idfac.createFromString("last_name"), Types.VARCHAR, null, false);
@@ -58,22 +58,18 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		table1.addAttribute(idfac.createFromString("nationality"), Types.VARCHAR, null, false);
 		table1.setPrimaryKey(UniqueConstraint.of(table1.getAttribute(idfac.createFromString("id"))));
 		
-		TableDefinition table2 = new TableDefinition(idfac.createRelationFromString(null, "Course"));
+		TableDefinition table2 = md.createTable(idfac.createRelationFromString(null, "Course"));
 		table2.addAttribute(idfac.createFromString("cid"), Types.VARCHAR, null, false);
 		table2.addAttribute(idfac.createFromString("title"), Types.VARCHAR, null, false);
 		table2.addAttribute(idfac.createFromString("credits"), Types.INTEGER, null, false);
 		table2.addAttribute(idfac.createFromString("description"), Types.VARCHAR, null, false);
 		table2.setPrimaryKey(UniqueConstraint.of(table2.getAttribute(idfac.createFromString("cid"))));
 		
-		TableDefinition table3 = new TableDefinition(idfac.createRelationFromString(null, "Enrollment"));
+		TableDefinition table3 = md.createTable(idfac.createRelationFromString(null, "Enrollment"));
 		table3.addAttribute(idfac.createFromString("student_id"), Types.INTEGER, null, false);
 		table3.addAttribute(idfac.createFromString("course_id"), Types.VARCHAR, null, false);
 		table3.setPrimaryKey(UniqueConstraint.of(table3.getAttribute(idfac.createFromString("student_id")), 
 				table3.getAttribute(idfac.createFromString("course_id"))));
-		
-		md.add(table1);
-		md.add(table2);
-		md.add(table3);
 		
 		// Prefix manager
 		pm.addPrefix(":", "http://www.example.org/university#");

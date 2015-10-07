@@ -128,7 +128,7 @@ public class DirectMappingEngine {
 		if (metadata == null) {
 			for (int i = 0; i < sourcelist.size(); i++) {
 				Connection conn = conMan.getConnection(sourcelist.get(i));		
-				DBMetadata metadata = DBMetadataExtractor.getMetadata(conn);
+				DBMetadata metadata = DBMetadataExtractor.createMetadata(conn);
 				// this operation is EXPENSIVE
 				DBMetadataExtractor.loadMetadata(metadata, conn, null);
 				oe.enrichOntology(metadata, ontology);
@@ -212,7 +212,7 @@ public class DirectMappingEngine {
 	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception {		
 		model.addSource(source);
 		Connection conn = conMan.getConnection(source);		
-		DBMetadata metadata = DBMetadataExtractor.getMetadata(conn);
+		DBMetadata metadata = DBMetadataExtractor.createMetadata(conn);
 		// this operation is EXPENSIVE
 		DBMetadataExtractor.loadMetadata(metadata, conn, null);
 		insertMapping(metadata, model,source.getSourceID());

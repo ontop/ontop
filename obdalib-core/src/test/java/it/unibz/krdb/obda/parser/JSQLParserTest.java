@@ -773,7 +773,7 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
 			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 			queryP = new ParsedSQLQuery(input, false, idfac);
 		} catch (Exception e) {
@@ -827,7 +827,7 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
 			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 			
 			queryP = new ParsedSQLQuery(input, true, idfac);

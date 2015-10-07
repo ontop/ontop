@@ -145,11 +145,13 @@ public class ImplicitDBConstraints {
 	 * @param realTables The new table names are added to this list
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
-	public void addReferredTables(Set<RelationID> realTables, QuotedIDFactory idfac) {
+	public Set<RelationID> getReferredTables(QuotedIDFactory idfac) {
+		Set<RelationID> refTables = new HashSet<>();
 		for (String tableGivenName : this.referredTables) {
 			RelationID id = getRelationIDFromString(tableGivenName, idfac);
-			realTables.add(id);
+			refTables.add(id);
 		}
+		return refTables;
 	}
 
 	private RelationID getRelationIDFromString(String name, QuotedIDFactory idfac) {
@@ -168,7 +170,7 @@ public class ImplicitDBConstraints {
 		
 		for (String tableName : this.uniqueFD.keySet()) {
 			RelationID tableId = getRelationIDFromString(tableName, idfac);
-			RelationDefinition td = md.getDefinition(tableId);
+			TableDefinition td = md.getTable(tableId);
 			if (td != null && td instanceof TableDefinition) {
 				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
 				for (List<String> listOfConstraints: tableFDs) {
@@ -185,7 +187,6 @@ public class ImplicitDBConstraints {
 						}
 					}
 				}							
-				md.add(td);
 			} 
 			else { // no table definition
 				log.warn("Error in user supplied primary key: No table definition found for " + tableName + ".");
@@ -203,7 +204,7 @@ public class ImplicitDBConstraints {
 		
 		for (String tableName : this.fKeys.keySet()) {
 			RelationID tableId = getRelationIDFromString(tableName, idfac);
-			RelationDefinition td = md.getDefinition(tableId);
+			TableDefinition td = md.getTable(tableId);
 			if (td == null || ! (td instanceof TableDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
 				continue;
@@ -219,7 +220,7 @@ public class ImplicitDBConstraints {
 					}
 					String fkTable = entry.getValue().getTableReference();
 					RelationID fkTableId = getRelationIDFromString(fkTable, idfac);
-					RelationDefinition fktd = md.getDefinition(fkTableId);
+					TableDefinition fktd = md.getTable(fkTableId);
 					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
 						continue;
@@ -237,7 +238,6 @@ public class ImplicitDBConstraints {
 									.build("_FK_" + tableName + "_" + entry.getKey()));
 				}
 			}
-			md.add(td);
 		}		
 	}
 }

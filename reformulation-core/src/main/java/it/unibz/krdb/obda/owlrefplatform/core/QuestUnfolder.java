@@ -190,7 +190,7 @@ public class QuestUnfolder {
 					continue;
 				
 				RelationID newAtomName = Relation2DatalogPredicate.createRelationFromPredicateName(newAtomPredicate);
-				RelationDefinition def = metadata.getDefinition(newAtomName);
+				RelationDefinition def = metadata.getRelation(newAtomName);
 				if (def != null) {
 					// primary keys
 					UniqueConstraint pk = def.getPrimaryKey();

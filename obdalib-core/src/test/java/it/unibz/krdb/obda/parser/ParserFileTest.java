@@ -120,7 +120,7 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(OBDAModel model, URI identifier) {
 		
-		DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		
 		OBDAModel controller = model;

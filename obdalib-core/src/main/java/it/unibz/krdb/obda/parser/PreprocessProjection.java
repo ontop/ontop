@@ -279,7 +279,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
     private void obtainColumnsFromMetadata(Table table) {
 
     	RelationID tableID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
-        RelationDefinition tableDefinition = metadata.getDefinition(tableID);
+        RelationDefinition tableDefinition = metadata.getRelation(tableID);
 
         if (tableDefinition == null)
             throw new RuntimeException("Definition not found for table '" + table + "'.");

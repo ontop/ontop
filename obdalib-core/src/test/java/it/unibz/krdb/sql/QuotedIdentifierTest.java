@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class QuotedIdentifierTest {
 
-	DBMetadata dbMetadata = DBMetadataExtractor.getDummyMetaData();
+	DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
 	QuotedIDFactory fac = dbMetadata.getQuotedIDFactory();
 		
 	@Test

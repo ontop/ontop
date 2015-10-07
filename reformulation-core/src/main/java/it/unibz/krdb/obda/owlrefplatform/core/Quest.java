@@ -666,25 +666,26 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			
 			//if the metadata was not already set
 			if (metadata == null) {
-				metadata = DBMetadataExtractor.getMetadata(localConnection);
+				metadata = DBMetadataExtractor.createMetadata(localConnection);
 				// if we have to parse the full metadata or just the table list in the mappings
 				if (obtainFullMetadata) {
 					DBMetadataExtractor.loadMetadata(metadata, localConnection, null);
 				} 
 				else {
-					// This is the NEW way of obtaining part of the metadata
-					// (the schema.table names) by parsing the mappings
-					
-					// Parse mappings. Just to get the table names in use
-					MappingParser mParser = new MappingParser(metadata.getQuotedIDFactory(), 
-								unfoldingOBDAModel.getMappings(sourceId));
-							
 					try {
+						// This is the NEW way of obtaining part of the metadata
+						// (the schema.table names) by parsing the mappings
+						
+						// Parse mappings. Just to get the table names in use
+						MappingParser mParser = new MappingParser(metadata.getQuotedIDFactory(), 
+									unfoldingOBDAModel.getMappings(sourceId));
+								
 						Set<RelationID> realTables = mParser.getRealTables();
 						
 						if (applyUserConstraints) {
 							// Add the tables referred to by user-supplied foreign keys
-							userConstraints.addReferredTables(realTables, metadata.getQuotedIDFactory());
+							Set<RelationID> referredTables = userConstraints.getReferredTables(metadata.getQuotedIDFactory());
+							realTables.addAll(referredTables);
 						}
 
 						DBMetadataExtractor.loadMetadata(metadata, localConnection, realTables);

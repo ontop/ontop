@@ -25,7 +25,14 @@ public class ViewDefinition extends RelationDefinition {
 
 	private final String statement;
 	
-	public ViewDefinition(RelationID name, String statement) {
+	/**
+	 * used only in DBMetadata
+	 * 
+	 * @param name
+	 * @param statement
+	 */
+	
+	ViewDefinition(RelationID name, String statement) {
 		super(name);
 		this.statement = statement;
 	}

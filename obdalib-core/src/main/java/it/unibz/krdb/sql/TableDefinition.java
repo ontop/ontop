@@ -2,7 +2,13 @@ package it.unibz.krdb.sql;
 
 public class TableDefinition extends RelationDefinition {
 
-	public TableDefinition(RelationID name) {
+	/**
+	 * used only in DBMetadata
+	 * 
+	 * @param name
+	 */
+	
+	TableDefinition(RelationID name) {
 		super(name);
 	}
 

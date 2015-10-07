@@ -304,7 +304,7 @@ public class MappingDataTypeRepair {
 		Integer pos = (Integer) o[1];
 
 		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(atom.getFunctionSymbol());
-		RelationDefinition td = metadata.getDefinition(tableId);
+		RelationDefinition td = metadata.getRelation(tableId);
 
 		Attribute attribute = td.getAttribute(pos);
 

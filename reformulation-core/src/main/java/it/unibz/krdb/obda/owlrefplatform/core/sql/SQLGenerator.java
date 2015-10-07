@@ -1240,7 +1240,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			RelationDefinition table = metadata.getDefinition(tableId);
+			RelationDefinition table = metadata.getRelation(tableId);
 			Attribute a = table.getAttribute(attributeId);
 			switch (a.getType()) {
 				case Types.VARCHAR:
@@ -1624,7 +1624,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 
 			RelationID id = Relation2DatalogPredicate.createRelationFromPredicateName(atom.getFunctionSymbol());
-			RelationDefinition def = metadata.getDefinition(id);
+			RelationDefinition def = metadata.getRelation(id);
 			if (def == null) {
 				// There is no definition for this atom, its not a database
 				// predicate, the query is empty.

@@ -48,7 +48,6 @@ public class MappingParser {
 	private List<OBDAMappingAxiom> mappingList;
 	private SQLQueryParser sqlQueryParser;
 	private List<ParsedMapping> parsedMappings;
-	private Set<RelationID> realTables; // Tables that are not view definitions
 	
 	public MappingParser(QuotedIDFactory idfac, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappingList = mappingAxioms;
@@ -66,21 +65,18 @@ public class MappingParser {
 	 * @throws JSQLParserException 
 	 */
 	public Set<RelationID> getRealTables() throws JSQLParserException{
-		if (this.realTables == null){
-			Set<RelationID> _realTables = getTables();
+		Set<RelationID> realTables = getTables();
 //			List<RelationJSQL> removeThese = new ArrayList<>();
 //			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
-//				for(RelationJSQL rel : _realTables){
+//				for(RelationJSQL rel : realTables){
 //					if(rel.getFullName().equals(vd.getName()))
 //						removeThese.add(rel);
 //				}
 //			}
 //			for(RelationJSQL remRel : removeThese){
-//				_realTables.remove(remRel);
+//				realTables.remove(remRel);
 //			}
-			this.realTables = _realTables;
-		}
-		return this.realTables;
+		return realTables;
 	}
 	
 	/**
