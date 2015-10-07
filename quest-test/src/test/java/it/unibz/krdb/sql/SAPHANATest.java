@@ -66,9 +66,9 @@ public class SAPHANATest {
             * Get the book information that is stored in the database 
             */
         String sparqlQuery =
-                "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
-                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                        "select ?x ?y where {?x rdf:type :Author. ?x :name ?y.}";
+//                "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
+//                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                        "select ?x ?y where {?x rdf:type :Author. ?x :name ?y.} limit 5 offset 2";
 //                    "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
 //                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
 //                    "select ?title ?author ?genre ?edition where {\n" +
@@ -78,6 +78,17 @@ public class SAPHANATest {
 //                    "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n"+
 //                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
 //                    "select ?x ?y ?z where {?x rdf:type :SpecialEdition. ?x :dateOfPublication ?y. ?x :editionNumber ?z}";
+//        "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
+//                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                "select ?x ?y where {?x rdf:type :Author. ?x :name ?y. FILTER regex(?y,\"Carr\")}";
+                "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                    "select ?x ?edition where {\n" +
+                    "?x a :Edition;\n" +
+                        ":editionNumber ?edition .\n" +
+                        "FILTER (xsd:double(?edition) > 1.0)" +
+                        "}";
 
         try {
             long t1 = System.currentTimeMillis();
