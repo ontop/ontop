@@ -58,8 +58,10 @@ public class DBMetadata implements Serializable {
 	/**
 	 * Constructs a blank metadata. Use only for testing purpose.
 	 */
+	@Deprecated
 	public DBMetadata(String driverName) {
 		this.driverName = driverName;
+		this.databaseVersion = "";
 	}
 
 	/**

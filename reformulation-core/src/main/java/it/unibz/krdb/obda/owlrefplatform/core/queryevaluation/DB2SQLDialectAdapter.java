@@ -133,7 +133,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 *
 	 * @return
 	 */
 	@Override
