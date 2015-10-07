@@ -42,7 +42,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
+		if (limit < 0 ) {
 			if (offset < 0) {
 				// If both limit and offset is not specified.
 				return "";
@@ -133,7 +133,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 *
 	 * @return
 	 */
 	@Override

@@ -27,7 +27,7 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName) {
 
 		switch (className) {
 			case "org.postgresql.Driver":
@@ -42,7 +42,7 @@ public class SQLAdapterFactory {
 				return new DB2SQLDialectAdapter();
 			case "oracle.jdbc.driver.OracleDriver":
 			case "oracle.jdbc.OracleDriver":
-				return new OracleSQLDialectAdapter();
+				return new OracleSQLDialectAdapter(databaseName);
 			case "org.teiid.jdbc.TeiidDriver":
 				return new TeiidSQLDialectAdapter();
 			case "net.sourceforge.jtds.jdbc.Driver":
