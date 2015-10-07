@@ -779,12 +779,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			DBMetadata md = DBMetadataExtractor.createMetadata(conn);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			DBMetadataExtractor.loadMetadata(md, conn, null);
-			for (TableDefinition relation : md.getTables()) {
-				relationList.addElement(relation);
-			}
-			// ROMAN (7 Oct 2015): I'm not sure we need these views -- they are 
+			// ROMAN (7 Oct 2015): I'm not sure we need to add "views" -- they are 
 			// created by SQLQueryParser for complex queries that cannot be parsed
-			for (ViewDefinition relation : md.getViews()) {
+			for (TableDefinition relation : md.getTables()) {
 				relationList.addElement(relation);
 			}
 		} 
@@ -908,6 +905,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						label.setIcon(icon);
 						label.setText(td.getID().getSQLRendering());
 					} else if (value instanceof ViewDefinition) {
+						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are 
+						// created by SQLQueryParser for complex queries that cannot be parsed
 						ViewDefinition vd = (ViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);

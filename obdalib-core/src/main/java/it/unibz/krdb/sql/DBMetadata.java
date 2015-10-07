@@ -28,7 +28,9 @@ public class DBMetadata implements Serializable {
 	private static final long serialVersionUID = -806363154890865756L;
 
 	private final Map<RelationID, TableDefinition> tables = new HashMap<>();
-	private final Map<RelationID, ViewDefinition> views = new HashMap<>();
+	
+	// relations include tables and views (views are only created for complex queries in mappings)
+	private final Map<RelationID, RelationDefinition> relations = new HashMap<>();
 
 	private final String driverName;
 	private final String driverVersion;
@@ -38,7 +40,8 @@ public class DBMetadata implements Serializable {
 	/**
 	 * Constructs an initial metadata with some general information about the
 	 * database, e.g., the driver name, the database engine name.
-	 * 
+	 *
+	 * DO NOT USE THIS CONSTRUCTOR -- USE MetadataExtractor METHODS INSTEAD
 	 */
 
 	DBMetadata(String driverName, String driverVersion, String databaseProductName, QuotedIDFactory idfac) {
@@ -52,6 +55,7 @@ public class DBMetadata implements Serializable {
 	public TableDefinition createTable(RelationID id) {
 		TableDefinition table = new TableDefinition(id);
 		add(table, tables);
+		add(table, relations);
 		return table;
 	}
 
@@ -64,9 +68,9 @@ public class DBMetadata implements Serializable {
 	 */
 	
 	public ViewDefinition createView(RelationID id, String sql) {
-		ViewDefinition table = new ViewDefinition(id, sql);
-		add(table, views);
-		return table;
+		ViewDefinition view = new ViewDefinition(id, sql);
+		add(view, relations);
+		return view;
 	}
 	
 	/**
@@ -93,10 +97,9 @@ public class DBMetadata implements Serializable {
 	
 	/**
 	 * Retrieves the data definition object based on its name. The
-	 * <name>name</name> can be either a table name or a view name.
+	 * <name>name</name> is a table name.
 	 * 
 	 * @param name
-	 *            The string name.
 	 */
 	public TableDefinition getTable(RelationID name) {
 		TableDefinition def = tables.get(name);
@@ -106,13 +109,16 @@ public class DBMetadata implements Serializable {
 		return def;
 	}
 
+	/**
+	 * Retrieves the data definition object based on its name. The
+	 * <name>name</name> can be either a table name or a view name.
+	 * 
+	 * @param name
+	 */
 	public RelationDefinition getRelation(RelationID name) {
-		RelationDefinition def = getTable(name);
-		if (def == null) {
-			def = views.get(name);
-			if (def == null && name.hasSchema()) {
-				def = views.get(name.getSchemalessID());
-			}
+		RelationDefinition def = relations.get(name);
+		if (def == null && name.hasSchema()) {
+			def = relations.get(name.getSchemalessID());
 		}
 		return def;
 	}
@@ -123,14 +129,6 @@ public class DBMetadata implements Serializable {
 	public Collection<TableDefinition> getTables() {
 		return Collections.unmodifiableCollection(tables.values());
 	}
-
-	/**
-	 * Retrieves the views list form the metadata.
-	 */
-	public Collection<ViewDefinition> getViews() {
-		return Collections.unmodifiableCollection(views.values());
-	}
-
 
 
 	public String getDriverName() {
@@ -152,16 +150,10 @@ public class DBMetadata implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		for (RelationID key : tables.keySet()) {
+		for (RelationID key : relations.keySet()) {
 			bf.append(key);
 			bf.append("=");
-			bf.append(tables.get(key).toString());
-			bf.append("\n");
-		}
-		for (RelationID key : views.keySet()) {
-			bf.append(key);
-			bf.append("=");
-			bf.append(views.get(key).toString());
+			bf.append(relations.get(key).toString());
 			bf.append("\n");
 		}
 		return bf.toString();
