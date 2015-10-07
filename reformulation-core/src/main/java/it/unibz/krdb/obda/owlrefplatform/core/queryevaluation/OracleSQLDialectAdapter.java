@@ -67,35 +67,42 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlSlice(long limit, long offset) {
 
-		String version =databaseVersion.split("\\.")[0];
-		try {
-			int versionInt = Integer.parseInt(version);
+			String version = databaseVersion.split("\\.")[0];
+			try {
+				int versionInt = Integer.parseInt(version);
 
-			if (versionInt<12) {
-				if (limit == 0) {
-					return "WHERE 1 = 0";
-				}
+//			In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
+				if (versionInt < 12) {
 
-				if (limit < 0) {
-					if (offset < 0) {
-						return "";
-					} else {
-
-						return String.format("OFFSET %d ROWS", offset);
+					if (limit == 0) {
+						return "WHERE 1 = 0";
 					}
-				} else {
-					if (offset < 0) {
-						// If the offset is not specified
-						return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
-					} else {
-						return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+
+					if (limit < 0) {
+						if (offset < 0)
+						{
+							return "";
+						} else
+						{
+
+							return String.format("OFFSET %d ROWS", offset);
+						}
+					} else
+					{
+						if (offset < 0) {
+							// If the offset is not specified
+							return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
+						} else
+						{
+							return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+						}
 					}
 				}
+			} catch (NumberFormatException nfe) {
+				//not a number  use new concat
+
 			}
-			}catch (NumberFormatException nfe){
-			//not a number  use new concat
 
-		}
 		if (limit >= 0 )
 			return String.format("WHERE ROWNUM <= %s", limit);
 		else
