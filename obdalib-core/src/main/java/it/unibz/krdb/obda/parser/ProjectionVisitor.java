@@ -133,6 +133,12 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			}});
 	}
 
+	private void unsupported(Object o) {
+		System.out.println(this.getClass() + " DOES NOT SUPPORT " + o);
+		unsupported = true;
+	}
+	
+	
 	/*
 	 * visit PlainSelect, search for the SelectExpressionItems
 	 * Stored in ProjectionSQL 
@@ -169,7 +175,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * it is not supported now */
 	@Override
 	public void visit(SetOperationList setOpList) { 
-		unsupported = true;
+		unsupported(setOpList);
 		setOpList.getPlainSelects().get(0).accept(this);
 	}
 
@@ -210,7 +216,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		selectExpr.getExpression().accept(this);
 		// all complex expressions in SELECT must be named (by aliases)
 		if (!(selectExpr.getExpression() instanceof Column) && selectExpr.getAlias() == null)
-			unsupported = true;
+			unsupported(selectExpr);
 	}
 
 	@Override
@@ -225,16 +231,17 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(Function function) {
-		switch(function.getName().toLowerCase()) {
+		switch (function.getName().toLowerCase()) {
 			case "regexp_like" :
 			case "regexp_replace" :
 			case "replace" :
 			case "concat" :
+			//case "substr" : 
 				for (Expression ex :function.getParameters().getExpressions()) 
 					ex.accept(this);
 				break;
 			default:
-				unsupported = true;
+				unsupported(function);
 		}
 		
 	}
@@ -271,12 +278,12 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	
 	@Override
 	public void visit(AndExpression andExpression) {
-		unsupported = true;
+		unsupported(andExpression);
 	}
 
 	@Override
 	public void visit(OrExpression orExpression) {
-		unsupported = true;
+		unsupported(orExpression);
 	}
 
 	@Override
@@ -288,17 +295,17 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		unsupported = true;
+		unsupported(equalsTo);
 	}
 
 	@Override
 	public void visit(GreaterThan greaterThan) {
-		unsupported = true;
+		unsupported(greaterThan);
 	}
 
 	@Override
 	public void visit(GreaterThanEquals greaterThanEquals) {
-		unsupported = true;
+		unsupported(greaterThanEquals);
 	}
 
 	@Override
@@ -324,27 +331,27 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(IsNullExpression isNullExpression) {
-		unsupported = true;
+		unsupported(isNullExpression);
 	}
 
 	@Override
 	public void visit(LikeExpression likeExpression) {
-		unsupported = true;
+		unsupported(likeExpression);
 	}
 
 	@Override
 	public void visit(MinorThan minorThan) {
-		unsupported = true;
+		unsupported(minorThan);
 	}
 
 	@Override
 	public void visit(MinorThanEquals minorThanEquals) {
-		unsupported = true;
+		unsupported(minorThanEquals);
 	}
 
 	@Override
 	public void visit(NotEqualsTo notEqualsTo) {
-		unsupported = true;
+		unsupported(notEqualsTo);
 	}
 
 	/*
@@ -364,39 +371,39 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) {
-				unsupported = true;
+				unsupported(subSelect);
 			} 
 			else {
 				subSelBody.accept(this);
 			}
 		} 
 		else
-			unsupported = true;
+			unsupported(subSelect);
 	}
 
 	@Override
 	public void visit(CaseExpression caseExpression) {
-		unsupported = true;
+		unsupported(caseExpression);
 	}
 
 	@Override
 	public void visit(WhenClause whenClause) {
-		unsupported = true;
+		unsupported(whenClause);
 	}
 
 	@Override
 	public void visit(ExistsExpression existsExpression) {
-		unsupported = true;
+		unsupported(existsExpression);
 	}
 
 	@Override
 	public void visit(AllComparisonExpression allComparisonExpression) {
-		unsupported = true;
+		unsupported(allComparisonExpression);
 	}
 
 	@Override
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		unsupported = true;
+		unsupported(anyComparisonExpression);
 	}
 
 	@Override
@@ -406,22 +413,22 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Matches matches) {
-		unsupported = true;
+		unsupported(matches);
 	}
 
 	@Override
 	public void visit(BitwiseAnd bitwiseAnd) {
-		unsupported = true;
+		unsupported(bitwiseAnd);
 	}
 
 	@Override
 	public void visit(BitwiseOr bitwiseOr) {
-		unsupported = true;
+		unsupported(bitwiseOr);
 	}
 
 	@Override
 	public void visit(BitwiseXor bitwiseXor) {
-		unsupported = true;
+		unsupported(bitwiseXor);
 	}
 
 	@Override
@@ -432,32 +439,32 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Modulo modulo) {
-		unsupported = true;
+		unsupported(modulo);
 	}
 
 	@Override
 	public void visit(AnalyticExpression aexpr) {
-		unsupported = true;
+		unsupported(aexpr);
 	}
 
 	@Override
 	public void visit(ExtractExpression eexpr) {
-		unsupported = true;
+		unsupported(eexpr);
 	}
 
 	@Override
 	public void visit(IntervalExpression iexpr) {
-		unsupported = true;
+		unsupported(iexpr);
 	}
 
 	@Override
 	public void visit(OracleHierarchicalExpression oexpr) {
-		unsupported = true;
+		unsupported(oexpr);
 	}
 
 	@Override
 	public void visit(RegExpMatchOperator arg0) {
-		unsupported = true;
+		unsupported(arg0);
 	}
 
 
@@ -475,12 +482,12 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
-		unsupported = true;
+		unsupported(jdbcParameter);
 	}
 
 	@Override
 	public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		unsupported = true;
+		unsupported(jdbcNamedParameter);
 	}
 
 	

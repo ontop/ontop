@@ -1230,7 +1230,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			QualifiedAttributeID def = viewdef.iterator().next();
 			QuotedID attributeId = def.getAttribute();
 			RelationID tableId = null;
-			if (def.getRelation().getTableName().startsWith(VIEW_NAME_PREFIX)) {
+			// ROMAN (8 Oct 2015)
+			if (def.getRelation().getTableName().toUpperCase().startsWith(VIEW_NAME_PREFIX)) {
 				for (Map.Entry<Function, RelationID> entry : index.viewNames.entrySet()) {
 					RelationID value = entry.getValue();
 					if (value.equals(def.getRelation())) {

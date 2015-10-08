@@ -20,31 +20,30 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This visitor class remove * in select clause and substitute it with the columns name
+ * This visitor class replaces * in SELECT clause with the columns name
+ * 
  * Gets the column names or aliases also from the subclasses.
  *
  */
 
-public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, FromItemVisitor {
+public class PreprocessProjection {
 
 
     private List<SelectItem> columns = new ArrayList<>();
 
 
-    private boolean selectAll = false;
     private boolean subselect = false;
-
-    private String aliasSubselect ;
+    private String aliasSubselect;
 
     private final DBMetadata metadata;
     private final  QuotedIDFactory idfac;
-    private Set<Variable> variables;
+    
+    private Set<Variable> variables; // output variable
 
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
     public PreprocessProjection(DBMetadata metadata) throws SQLException {
-
-        //use the metadata to get the column names
+        // we use the metadata to get the column names
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
     }
@@ -57,19 +56,22 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
      */
     public String getMappingQuery(Select select, Set<Variable> variables) {
 
+    	// variables is an output variable
         this.variables = variables;
 
         if (select.getWithItemsList() != null) {
             for (WithItem withItem : select.getWithItemsList()) {
-                withItem.accept(this);
+                withItem.accept(new ReplaceStarSelectVisitor());
             }
         }
-        select.getSelectBody().accept(this);
+        select.getSelectBody().accept(new ReplaceStarSelectVisitor());
 
         return select.toString();
     }
 
 
+    private class ReplaceStarSelectVisitor implements SelectVisitor {
+    
     /*
     Create a set of selectItem (columns)
     if * add all selectItems obtained by the metadata or the subselect clause
@@ -103,7 +105,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
 
                 if(joinTable!=null){
-                    joinTable.accept(this);
+                    joinTable.accept(new ReplaceStarFromItemVisitor());
 
                     columnNames.addAll(columns);
 
@@ -112,7 +114,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                 }
 
                 if(table!=null){
-                    table.accept(this);
+                    table.accept(new ReplaceStarFromItemVisitor());
 
                     columnNames.addAll(columns);
 
@@ -194,82 +196,83 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     }
 
-    @Override
-    public void visit(SetOperationList setOpList) {
+    	@Override
+    	public void visit(SetOperationList setOpList) {
 
+    	}
+
+    	@Override
+    	public void visit(WithItem withItem) {
+
+    	}
     }
+    
+    private class ReplaceStarFromItemVisitor implements FromItemVisitor {
+    
+        @Override
+        public void visit(Table tableName) {
+            //obtain the column names from the metadata
+            obtainColumnsFromMetadata(tableName);
+        }
 
-    @Override
-    public void visit(WithItem withItem) {
+        @Override
+        public void visit(SubSelect subSelect) {
+            subselect = true;
+            aliasSubselect = subSelect.getAlias().getName();
+            subSelect.getSelectBody().accept(new ReplaceStarSelectVisitor());
 
+            subselect = false;
+            aliasSubselect = null;
+        }
+
+        @Override
+        public void visit(SubJoin subjoin) {
+        	// ??
+        }
+
+        @Override
+        public void visit(LateralSubSelect lateralSubSelect) {
+        	// NO-OP
+        }
+
+        @Override
+        public void visit(ValuesList valuesList) {
+        	// NO-OP
+        }
     }
-
-    @Override
-    public void visit(AllColumns allColumns) {
-
-        selectAll=true;
-
-    }
-
-    @Override
-    public void visit(AllTableColumns allTableColumns) {
-
-
-        selectAll=true;
-
-    }
-
-    @Override
-    public void visit(SelectExpressionItem selectExpressionItem) {
-
-    }
-
-    @Override
-    public void visit(Table tableName) {
-
-        //obtain the column names from the metadata
-        obtainColumnsFromMetadata(tableName);
-
-    }
-
-    @Override
-    public void visit(SubSelect subSelect) {
-
-        subselect = true;
-        aliasSubselect = subSelect.getAlias().getName();
-        subSelect.getSelectBody().accept(this);
-
-        subselect = false;
-        aliasSubselect = null;
-
-    }
-
-    @Override
-    public void visit(SubJoin subjoin) {
-
-    }
-
-    @Override
-    public void visit(LateralSubSelect lateralSubSelect) {
-
-    }
-
-    @Override
-    public void visit(ValuesList valuesList) {
-
-    }
-
+        
     /*
     Flag for the presence of the * in the query
      */
 
-    private boolean isSelectAll(SelectItem expr){
-        expr.accept(this);
-        boolean result =selectAll;
-        selectAll = false;
-        return result;
+    private static boolean isSelectAll(SelectItem expr) {
+    	ReplaceStarSelectItemVisitor visitor = new ReplaceStarSelectItemVisitor();
+        expr.accept(visitor);
+        return visitor.selectAll;
     }
 
+    private static class ReplaceStarSelectItemVisitor implements SelectItemVisitor {
+
+        boolean selectAll = false;
+   	
+        @Override
+        public void visit(AllColumns allColumns) {
+            selectAll = true;
+        }
+
+        @Override
+        public void visit(AllTableColumns allTableColumns) {
+            selectAll = true;
+        }
+
+        @Override
+        public void visit(SelectExpressionItem selectExpressionItem) {
+        	// NO-OP
+        }
+    }
+    
+   
+    
     /**
      From a table, obtain all its columns using the metadata information
      @return List<SelectItem> list of columns in JSQL SelectItem class the column is rewritten as tableName.columnName or aliasName.columnName

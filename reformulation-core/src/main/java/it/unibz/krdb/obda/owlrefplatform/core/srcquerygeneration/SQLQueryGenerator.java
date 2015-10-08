@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.sql.QuotedIDFactory;
 
 import java.io.Serializable;
 import java.util.List;

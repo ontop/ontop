@@ -75,6 +75,7 @@ public class WhereClauseVisitor {
 		return whereClause;
 	}
 
+		
     public void setWhereClause(Select selectQuery, final Expression whereClause) {
 
         selectQuery.getSelectBody().accept(new SelectVisitor() {
@@ -94,6 +95,11 @@ public class WhereClauseVisitor {
     		}    	
         });
     }
+
+	private void unsupported(Object o) {
+		System.out.println(this.getClass() + " DOES NOT SUPPORT " + o);
+		unsupported = true;
+	}
 
     
     private SelectVisitor selectVisitor = new SelectVisitor() {
@@ -140,7 +146,7 @@ public class WhereClauseVisitor {
     				ex.accept(this);
     		}
     		else
-                unsupported = true;
+                unsupported(function);
     	}
 
     	@Override
@@ -316,12 +322,12 @@ public class WhereClauseVisitor {
     			
     			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
     			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
-    				unsupported = true;
+    				unsupported(subSelect);
     			else 
     				subSelBody.accept(selectVisitor);
     		} 
     		else
-    			unsupported = true;		
+    			unsupported(subSelect);		
     	}
 
     	@Override
@@ -458,7 +464,7 @@ public class WhereClauseVisitor {
 
     	@Override
     	public void visit(JsonExpression arg0) {
-            unsupported = true;		
+            unsupported(arg0);		
     	}
     };
 }

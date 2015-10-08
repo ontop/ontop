@@ -88,6 +88,11 @@ public class TableNameVisitor {
 		return relations;
 	}
 
+	private void unsupported(Object o) {
+		System.out.println(this.getClass() + " DOES NOT SUPPORT " + o);
+		unsupported = true;
+	}
+	
 	private final SelectVisitor selectVisitor = new SelectVisitor() {
 		/* Visit the FROM clause to find tables
 		 * Visit the JOIN and WHERE clauses to check if nested queries are present (non-Javadoc)
@@ -98,9 +103,8 @@ public class TableNameVisitor {
 		public void visit(PlainSelect plainSelect) {
 			plainSelect.getFromItem().accept(fromItemVisitor);
 
-			// When the mapping contains a DISTINCT we interpret it as a HINT to create a subview.
-			// Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE 
-			// for obtaining this behavior.
+			// When the mapping contains a DISTINCT we interpret it as a HINT to create a SUBVIEW.
+			// Thus we presume that the unusual use of DISTINCT here is done ON PURPOSE for achieving this effect.
 			if (plainSelect.getDistinct() != null) 
 	            unsupported = true;
 
@@ -123,7 +127,7 @@ public class TableNameVisitor {
 		 */
 		@Override
 		public void visit(SetOperationList list) {
-			unsupported = true;
+			unsupported(list);
 			for (PlainSelect plainSelect : list.getPlainSelects()) 
 				visit(plainSelect);
 		}
@@ -166,20 +170,20 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(SubJoin subjoin) {
-			unsupported = true;
+			unsupported(subjoin);
 			subjoin.getLeft().accept(this);
 			subjoin.getJoin().getRightItem().accept(this);
 		}
 
 		@Override
 		public void visit(LateralSubSelect lateralSubSelect) {
-			unsupported = true;
+			unsupported(lateralSubSelect);
 			lateralSubSelect.getSubSelect().getSelectBody().accept(selectVisitor);
 		}
 
 		@Override
 		public void visit(ValuesList valuesList) {
-			unsupported = true;
+			unsupported(valuesList);
 		}
 	};
 	
@@ -188,10 +192,10 @@ public class TableNameVisitor {
 		if (subSelect.getSelectBody() instanceof PlainSelect) {
 			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());	
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
-				unsupported = true;	
+				unsupported(subSelect);	
 		} 
 		else
-			unsupported = true;
+			unsupported(subSelect);
 		
 		subSelect.getSelectBody().accept(selectVisitor);
 	}
@@ -262,12 +266,13 @@ public class TableNameVisitor {
 	            case "regexp_replace" :
 	            case "replace" :
 	            case "concat" :
+	            case "substr" : 
 	                for(Expression ex :function.getParameters().getExpressions()) 
 	                    ex.accept(this);
 	                break;
 
 	            default:
-	                unsupported = true;
+	                unsupported(function);
 	                break;
 	        }
 		}
@@ -294,7 +299,7 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(JdbcParameter jdbcParameter) {
-			unsupported = true;
+			unsupported(jdbcParameter);
 		}
 
 		@Override
@@ -374,23 +379,23 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(CaseExpression caseExpression) {
-			unsupported = true;
+			unsupported(caseExpression);
 		}
 
 		@Override
 		public void visit(WhenClause whenClause) {
-			unsupported = true;
+			unsupported(whenClause);
 		}
 
 		@Override
 		public void visit(AllComparisonExpression allComparisonExpression) {
-			unsupported = true;
+			unsupported(allComparisonExpression);
 			allComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
 		}
 
 		@Override
 		public void visit(AnyComparisonExpression anyComparisonExpression) {
-			unsupported = true;
+			unsupported(anyComparisonExpression);
 			anyComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
 		}
 
@@ -401,25 +406,25 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(Matches matches) {
-			unsupported = true;
+			unsupported(matches);
 			visitBinaryExpression(matches);
 		}
 
 		@Override
 		public void visit(BitwiseAnd bitwiseAnd) {
-			unsupported = true;
+			unsupported(bitwiseAnd);
 			visitBinaryExpression(bitwiseAnd);
 		}
 
 		@Override
 		public void visit(BitwiseOr bitwiseOr) {
-			unsupported = true;
+			unsupported(bitwiseOr);
 			visitBinaryExpression(bitwiseOr);
 		}
 
 		@Override
 		public void visit(BitwiseXor bitwiseXor) {
-			unsupported = true;
+			unsupported(bitwiseXor);
 			visitBinaryExpression(bitwiseXor);
 		}
 
@@ -430,33 +435,33 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(Modulo modulo) {
-			unsupported = true;
+			unsupported(modulo);
 			visitBinaryExpression(modulo);
 		}
 
 		@Override
 		public void visit(AnalyticExpression analytic) {
-			unsupported = true;
+			unsupported(analytic);
 		}
 
 		@Override
 		public void visit(ExtractExpression eexpr) {
-			unsupported = true;
+			unsupported(eexpr);
 		}
 
 		@Override
 		public void visit(IntervalExpression iexpr) {
-			unsupported = true;
+			unsupported(iexpr);
 		}
 
 	    @Override
 	    public void visit(JdbcNamedParameter jdbcNamedParameter) {
-			unsupported = true;
+			unsupported(jdbcNamedParameter);
 	    }
 
 		@Override
 		public void visit(OracleHierarchicalExpression arg0) {
-			unsupported = true;		
+			unsupported(arg0);		
 		}
 
 		@Override
@@ -469,7 +474,7 @@ public class TableNameVisitor {
 		@Override
 		public void visit(SignedExpression arg0) {
 			System.out.println("WARNING: SignedExpression   not implemented ");
-			unsupported = true;
+			unsupported(arg0);
 		}
 
 		@Override
@@ -500,7 +505,7 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(MultiExpressionList multiExprList) {
-			unsupported = true;
+			unsupported(multiExprList);
 			for (ExpressionList exprList : multiExprList.getExprList()) 
 				exprList.accept(this);
 		}
