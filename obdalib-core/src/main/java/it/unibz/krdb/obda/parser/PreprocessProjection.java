@@ -28,18 +28,11 @@ import java.util.Set;
 
 public class PreprocessProjection {
 
-
     private List<SelectItem> columns = new ArrayList<>();
-
-
-    private boolean subselect = false;
-    private String aliasSubselect;
 
     private final DBMetadata metadata;
     private final  QuotedIDFactory idfac;
     
-    private Set<Variable> variables; // output variable
-
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
     public PreprocessProjection(DBMetadata metadata) throws SQLException {
@@ -56,15 +49,11 @@ public class PreprocessProjection {
      */
     public String getMappingQuery(Select select, Set<Variable> variables) {
 
-    	// variables is an output variable
-        this.variables = variables;
-
-        if (select.getWithItemsList() != null) {
-            for (WithItem withItem : select.getWithItemsList()) {
-                withItem.accept(new ReplaceStarSelectVisitor());
-            }
+         if (select.getWithItemsList() != null) {
+            for (WithItem withItem : select.getWithItemsList()) 
+                withItem.accept(new ReplaceStarSelectVisitor(false, null, variables));
         }
-        select.getSelectBody().accept(new ReplaceStarSelectVisitor());
+        select.getSelectBody().accept(new ReplaceStarSelectVisitor(false, null, variables));
 
         return select.toString();
     }
@@ -72,157 +61,162 @@ public class PreprocessProjection {
 
     private class ReplaceStarSelectVisitor implements SelectVisitor {
     
-    /*
-    Create a set of selectItem (columns)
-    if * add all selectItems obtained by the metadata or the subselect clause
-    */
-
-    @Override
-    public void visit(PlainSelect plainSelect) {
-
-        List<SelectItem> columnNames = new ArrayList<SelectItem>();
-
-        //get the from clause (can have subselect)
-        FromItem table = plainSelect.getFromItem();
-
-        FromItem joinTable = null;
-
-        //get the join clause (can have subselect)
-        if (plainSelect.getJoins() != null) {
-            for (Join join : plainSelect.getJoins()) {
-                joinTable = join.getRightItem();
-            }
+        private final boolean subselect;
+        private final String aliasSubselect;
+        private final Set<Variable> variables; // referenced variables from the target query
+        
+        ReplaceStarSelectVisitor(boolean subselect, String aliasSubselect, Set<Variable> variables) {
+        	this.subselect = subselect;
+        	this.aliasSubselect = aliasSubselect;
+        	this.variables = variables;
         }
+    	
+        /*
+        Create a set of selectItem (columns)
+        if * add all selectItems obtained by the metadata or the subselect clause
+        */
 
-        // look at the projection clause
-        for (SelectItem expr : plainSelect.getSelectItems()) {
+        @Override
+        public void visit(PlainSelect plainSelect) {
 
+            List<SelectItem> columnNames = new ArrayList<SelectItem>();
 
-            //create a set of selectItem (columns)
-            //if * add all selectItems obtained by the metadata or the subselect clause
+            //get the from clause (can have subselect)
+            FromItem table = plainSelect.getFromItem();
 
-            if (isSelectAll(expr)) {
+            FromItem joinTable = null;
 
-
-                if(joinTable!=null){
-                    joinTable.accept(new ReplaceStarFromItemVisitor());
-
-                    columnNames.addAll(columns);
-
-                    columns.clear();
-
+            //get the join clause (can have subselect)
+            if (plainSelect.getJoins() != null) {
+                for (Join join : plainSelect.getJoins()) {
+                    joinTable = join.getRightItem();
                 }
-
-                if(table!=null){
-                    table.accept(new ReplaceStarFromItemVisitor());
-
-                    columnNames.addAll(columns);
-
-                    columns.clear();
-
-                }
-
             }
 
-//				else add only the column
+            // look at the projection clause
+            for (SelectItem expr : plainSelect.getSelectItems()) {
+
+                //create a set of selectItem (columns)
+                //if * add all selectItems obtained by the metadata or the subselect clause
+
+                if (isSelectAll(expr)) {
+
+                    if (joinTable != null) {
+                        joinTable.accept(new ReplaceStarFromItemVisitor(aliasSubselect, variables));
+                        columnNames.addAll(columns);
+                        columns.clear();
+                    }
+
+                    if (table != null) {
+                        table.accept(new ReplaceStarFromItemVisitor(aliasSubselect, variables));
+                        columnNames.addAll(columns);
+                        columns.clear();
+                    }
+                }
+                else {
+                	// else add only the column
+
+                    if (!subselect) {
+                        columnNames.add(expr);
+                    }
+                    else { //in case of subselects
+
+                        //see if there is an alias
+                        Table tableName;
+                        if (aliasSubselect != null) {
+                            tableName = new Table(aliasSubselect);
+                        }
+                        else {
+                            //use the alias if present
+                            if (table.getAlias() != null) {
+                                tableName = new Table(table.getAlias().getName());
+                            } else {
+                                tableName = (Table)table;
+                            }
+                        }
+                        Alias aliasName = ((SelectExpressionItem) expr).getAlias();
+                        if (aliasName != null) {
+                            String aliasString = aliasName.getName();
+                            // ROMAN (26 Sep 2015): double check string comparisons
+                            SelectExpressionItem columnAlias = new SelectExpressionItem(
+                            		new Column(tableName,  QuotedID.createFromDatabaseRecord(aliasString).getSQLRendering()));
+
+                            addToColumns(columns, columnAlias, aliasString, variables);
+                        } 
+                        else { //when there are no alias add the columns that are used in the mappings
+
+                            String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
+                            // ROMAN (26 Sep 2015): double check string comparisons
+                            SelectExpressionItem column = new SelectExpressionItem(
+                            		new Column(tableName,  QuotedID.createFromDatabaseRecord(columnName).getSQLRendering()));
+                            
+                            addToColumns(columns, column, columnName, variables);
+                        }
+                    }
+                }
+            }
+
+            if (!subselect) {
+                if (!columnNames.isEmpty())
+                plainSelect.setSelectItems(columnNames);
+            }
             else {
-
-                if(!subselect) {
-
-                    columnNames.add(expr);
-                }
-                else { //in case of subselects
-
-                    //see if there is an alias
-                    Table tableName;
-                    if(aliasSubselect != null){
-                        tableName= new Table(aliasSubselect);
-                    }
-                    else {
-                        //use the alias if present
-                        if (table.getAlias() != null) {
-                            tableName = new Table(table.getAlias().getName());
-                        } else {
-                            tableName = (Table)table;
-                        }
-                    }
-                    Alias aliasName = ((SelectExpressionItem) expr).getAlias();
-                    if (aliasName != null) {
-
-                        String aliasString = aliasName.getName();
-                        // ROMAN (26 Sep 2015): double check string comparisons
-                        SelectExpressionItem columnAlias = new SelectExpressionItem(
-                        		new Column(tableName,  QuotedID.createFromDatabaseRecord(aliasString).getSQLRendering()));
-                        //construct a column from alias name
-                        if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase()))
-                                || variables.contains(fac.getVariable(columnAlias.toString())) || variables.contains(fac.getVariable(aliasString.toString().toLowerCase()))) {
-
-                            columnNames.add(columnAlias);
-
-                        }
-
-                    } else { //when there are no alias add the columns that are used in the mappings
-
-                        String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
-                        // ROMAN (26 Sep 2015): double check string comparisons
-                        SelectExpressionItem column = new SelectExpressionItem(
-                        		new Column(tableName,  QuotedID.createFromDatabaseRecord(columnName).getSQLRendering()));
-                        
-                        if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))
-                                || variables.contains(fac.getVariable(column.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
-                            columnNames.add(column);
-
-                        }
-
-                    }
-                }
-
+                columns.addAll(columnNames);
             }
-
-
         }
-
-        if(!subselect) {
-            if(!columnNames.isEmpty())
-            plainSelect.setSelectItems(columnNames);
-        }
-        else{
-
-            columns.addAll(columnNames);
-        }
-
-
-
-
-    }
 
     	@Override
     	public void visit(SetOperationList setOpList) {
-
+    		// ??
     	}
 
     	@Override
     	public void visit(WithItem withItem) {
-
+    		// ??
     	}
     }
     
     private class ReplaceStarFromItemVisitor implements FromItemVisitor {
     
+    	private final String aliasSubselect;
+    	private final Set<Variable> variables;
+    	
+    	ReplaceStarFromItemVisitor(String aliasSubselect, Set<Variable> variables) {
+    		this.aliasSubselect = aliasSubselect;
+    		this.variables = variables;
+    	}
+    	
         @Override
-        public void visit(Table tableName) {
+        public void visit(Table table) {
             //obtain the column names from the metadata
-            obtainColumnsFromMetadata(tableName);
+     	   RelationID tableID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+           RelationDefinition tableDefinition = metadata.getRelation(tableID);
+           if (tableDefinition == null)
+               throw new RuntimeException("Definition not found for table '" + table + "'.");
+
+           Table tableName;
+           if (aliasSubselect != null) {
+               tableName= new Table(aliasSubselect);
+           }
+           else if (table.getAlias() != null) { //use the alias if present
+               tableName = new Table(table.getAlias().getName());
+           }
+           else {
+               tableName = table;
+           }
+
+           for (Attribute att : tableDefinition.getAttributes()) {
+               String columnFromMetadata = att.getID().getSQLRendering();
+               //construct a column as table.column
+               SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
+              
+               addToColumns(columns, columnName, columnFromMetadata, variables);
+           }
         }
 
         @Override
         public void visit(SubSelect subSelect) {
-            subselect = true;
-            aliasSubselect = subSelect.getAlias().getName();
-            subSelect.getSelectBody().accept(new ReplaceStarSelectVisitor());
-
-            subselect = false;
-            aliasSubselect = null;
+            subSelect.getSelectBody().accept(new ReplaceStarSelectVisitor(true, subSelect.getAlias().getName(), variables));
         }
 
         @Override
@@ -238,7 +232,7 @@ public class PreprocessProjection {
         @Override
         public void visit(ValuesList valuesList) {
         	// NO-OP
-        }
+        }   
     }
         
     /*
@@ -273,47 +267,16 @@ public class PreprocessProjection {
     
    
     
-    /**
-     From a table, obtain all its columns using the metadata information
-     @return List<SelectItem> list of columns in JSQL SelectItem class the column is rewritten as tableName.columnName or aliasName.columnName
-     */
-    private void obtainColumnsFromMetadata(Table table) {
-
-    	RelationID tableID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
-        RelationDefinition tableDefinition = metadata.getRelation(tableID);
-
-        if (tableDefinition == null)
-            throw new RuntimeException("Definition not found for table '" + table + "'.");
-
-        Table tableName;
-        if (aliasSubselect != null) {
-            tableName= new Table(aliasSubselect);
-        }
-        else if (table.getAlias() != null) { //use the alias if present
-            tableName = new Table(table.getAlias().getName());
-        }
-        else {
-            tableName = table;
-        }
-
-        for (Attribute att : tableDefinition.getAttributes()) {
-            String columnFromMetadata = att.getID().getSQLRendering();
-            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
-           
-            //construct a column as table.column
-            if (variables.contains(fac.getVariable(columnFromMetadata))
-                    || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
-                    || variables.contains(fac.getVariable(columnName.toString()))
-                    || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
-
-                columns.add(columnName);
-
-            }
-        }
-    }
 
 
+   private static void addToColumns(List<SelectItem> columns, SelectExpressionItem columnName, String simpleColumnName, Set<Variable> variables) {
+       if (variables.contains(fac.getVariable(simpleColumnName))
+               || variables.contains(fac.getVariable(simpleColumnName.toLowerCase()))
+               || variables.contains(fac.getVariable(columnName.toString()))
+               || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
 
-
+           columns.add(columnName);
+       }
+   }
 
 }

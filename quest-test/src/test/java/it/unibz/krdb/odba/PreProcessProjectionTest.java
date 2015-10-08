@@ -45,13 +45,11 @@ public class PreProcessProjectionTest {
     public void setUp() throws Exception {
 
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:stars";
-		String username = "sa";
-		String password = "";
-
-		Connection conn = DriverManager.getConnection(url, username, password);
- 	
-    	//execute(conn, "src/test/resources/mappingStars-create-h2.sql");
+		// String url = "jdbc:h2:mem:stars";
+		// String username = "sa";
+		// String password = "";
+		// Connection conn = DriverManager.getConnection(url, username, password);
+    	// execute(conn, "src/test/resources/mappingStars-create-h2.sql");
     	
         fac = OBDADataFactoryImpl.getInstance();
 

@@ -29,8 +29,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
@@ -43,6 +41,7 @@ import java.util.*;
 public class MappingDataTypeRepair {
 
 	private final DBMetadata metadata;
+	private final boolean isDB2;
 
   	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
@@ -59,13 +58,17 @@ public class MappingDataTypeRepair {
      */
     public MappingDataTypeRepair(DBMetadata metadata) {
         this.metadata = metadata;
+        String databaseName = metadata.getDatabaseProductName();
+        String databaseDriver = metadata.getDriverName();
+        this.isDB2 = (databaseName!= null && databaseName.contains("DB2"))
+        			|| (databaseDriver != null && databaseDriver.contains("IBM"));   
     }
 
     /**
      * Private method that gets the datatypes already present in the ontology and stores them in a map
      * It will be used later in insertDataTyping
      */
-    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
+    private static Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
 
     	final Map<Predicate, Datatype> dataTypesMap = new HashMap<>();
         
@@ -169,7 +172,7 @@ public class MappingDataTypeRepair {
              if present or the information from the database will be used.
              */
 
-            else if (functionSymbol.isStringOperationPredicate()) {
+            else if (functionSymbol.isStringOperationPredicate() || functionSymbol.isArithmeticPredicate()) {
 
 
                 //check in the ontology if we have already information about the datatype
@@ -223,8 +226,8 @@ public class MappingDataTypeRepair {
                     }
                 }
             } 
-            else 
-                throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
+           else 
+               throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
         } 
         else if (term instanceof Variable) {
 
@@ -267,14 +270,8 @@ public class MappingDataTypeRepair {
      */
     private boolean isBooleanDB2(Predicate dataType){
 
-        String databaseName = metadata.getDatabaseProductName();
-        String databaseDriver = metadata.getDriverName();
-        if(databaseName!= null && databaseName.contains("DB2")
-                || databaseDriver != null && databaseDriver.contains("IBM")){
-
-
+        if (isDB2){
             if (fac.getDatatypeFactory().isBoolean(dataType)) {
-
                 log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
                 return true;
             }
@@ -312,8 +309,8 @@ public class MappingDataTypeRepair {
 		return type;
 	}
 
-	private Map<String, List<Object[]>> createIndex(CQIE rule) {
-		Map<String, List<Object[]>> termOccurenceIndex = new HashMap<String, List<Object[]>>();
+	private static Map<String, List<Object[]>> createIndex(CQIE rule) {
+		Map<String, List<Object[]>> termOccurenceIndex = new HashMap<>();
 		List<Function> body = rule.getBody();
 		Iterator<Function> it = body.iterator();
 		while (it.hasNext()) {
