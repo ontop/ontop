@@ -23,8 +23,8 @@ package it.unibz.krdb.sql;
 
 
 /**
- * Creates QuotedIdentifiers following the rules of SQL standard:<br>
- *    - unquoted identifiers are converted into upper case<br>
+ * Creates QuotedIdentifiers following the rules of PostrgeSQL:<br>
+ *    - unquoted identifiers are converted into lower case<br>
  *    - quoted identifiers are preserved
  * 
  * @author Roman Kontchakov

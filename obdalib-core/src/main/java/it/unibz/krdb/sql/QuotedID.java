@@ -35,6 +35,8 @@ public class QuotedID {
 	
 	private final String id;
 	private final String quoteString;
+	private final boolean caseSensitive;
+	private final int hashCode;
 
 	public static final String NO_QUOTATION = "";
 	public static final String QUOTATION = "\"";
@@ -46,8 +48,18 @@ public class QuotedID {
 	 * @param quotes cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
 	 */
 	QuotedID(String id, String quoteString) {
+		this(id, quoteString, true);
+	}
+	
+	QuotedID(String id, String quoteString, boolean caseSensitive) {
 		this.id = id;
 		this.quoteString = quoteString;
+		this.caseSensitive = caseSensitive;
+		// increases collisions but makes it possible to have case-insensitive ids
+		if (id != null)
+			this.hashCode = id.toLowerCase().hashCode();
+		else
+			this.hashCode  = 0;
 	}
 	
 	/**
@@ -104,16 +116,19 @@ public class QuotedID {
 			if (this.id == other.id)
 				return true;
 			
-			return (this.id != null) && this.id.equals(other.id);
+			if  ((this.id != null) && (other.id != null)) {
+				if (this.id.equals(other.id))
+					return true;
+				if (!this.caseSensitive || !other.caseSensitive)
+					return this.id.toLowerCase().equals(other.id.toLowerCase());
+			}
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		if (id != null)
-			return id.hashCode();
-		return 0;
+		return hashCode;
 	}
 
 }

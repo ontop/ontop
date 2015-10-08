@@ -102,11 +102,13 @@ import org.slf4j.LoggerFactory;
  * How table and database names are stored on disk and used in MySQL is affected 
  * by the lower_case_table_names system variable, which you can set when starting mysqld.
  * 
+ * Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases. 
+ * 
  */
 
 public class DBMetadataExtractor {
 
-	private static final boolean printouts = true;
+	private static final boolean printouts = false;
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 
@@ -146,7 +148,9 @@ public class DBMetadataExtractor {
 			idfac = new QuotedIDFactoryLowerCase();
 		else if (productName.contains("SQL Server"))  // MS SQL Server
 			idfac = new QuotedIDFactoryIdentity();
-		else // For other database engines, i.e. MySQL
+		else if (productName.contains("MySQL"))  //  MySQL
+			idfac = new QuotedIDFactoryMySQL(); 
+		else // For other database engines
 			idfac = new QuotedIDFactoryIdentity();
 		
 		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), productName, idfac);

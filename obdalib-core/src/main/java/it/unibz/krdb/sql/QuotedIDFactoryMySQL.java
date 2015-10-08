@@ -23,26 +23,43 @@ package it.unibz.krdb.sql;
 
 
 /**
- * Creates QuotedIdentifiers following the rules of MS SQL Server:<br>
- *    - unquoted identifiers are preserved<br>
+ * Creates QuotedIdentifiers following the rules of MySQL:<br>
+ *    - unquoted table identifiers are preserved<br>
+ *    - unquoted column identifiers are not case-sensitive<br>
  *    - quoted identifiers are preserved
  * 
  * @author Roman Kontchakov
  *
  */
 
-public class QuotedIDFactoryIdentity implements QuotedIDFactory {
+public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 
 	/**
 	 * used only in DBMetadataExtractor
 	 */
 	
-	QuotedIDFactoryIdentity() {
+	QuotedIDFactoryMySQL() {
 		// NO-OP
 	}
 
 	@Override
 	public QuotedID createFromString(String s) {
+		if (s == null)
+			return new QuotedID(s, QuotedID.NO_QUOTATION);
+		
+		if (s.startsWith("\"") && s.endsWith("\"")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION, false);
+		if (s.startsWith("`") && s.endsWith("`")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION, false);
+		if (s.startsWith("[") && s.endsWith("]")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION, false);
+		if (s.startsWith("'") && s.endsWith("'")) 
+			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION, false);
+
+		return new QuotedID(s, QuotedID.NO_QUOTATION, false);
+	}
+
+	public QuotedID createFromStringForTable(String s) {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
@@ -57,10 +74,10 @@ public class QuotedIDFactoryIdentity implements QuotedIDFactory {
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION);
 	}
-
+	
 	@Override
 	public RelationID createRelationFromString(String schema, String table) {
-		return new RelationID(createFromString(schema), createFromString(table));			
+		return new RelationID(createFromStringForTable(schema), createFromStringForTable(table));			
 	}
 	
 }
