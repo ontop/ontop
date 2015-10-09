@@ -194,8 +194,8 @@ public class DirectMappingAxiom {
 		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
 		// construct the head
-		Set<Variable> headTermsSet = new HashSet<>();
-		TermUtils.addReferencedVariablesTo(headTermsSet, atom);
+		//Set<Variable> headTermsSet = new HashSet<>();
+		//TermUtils.addReferencedVariablesTo(headTermsSet, atom);
 		
 		//List<Term> headTerms = new ArrayList<>();
 		//headTerms.addAll(headTermsSet);
