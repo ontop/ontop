@@ -108,7 +108,7 @@ import org.slf4j.LoggerFactory;
 
 public class DBMetadataExtractor {
 
-	private static final boolean printouts = false;
+	private static final boolean printouts = true;
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 
@@ -242,7 +242,8 @@ public class DBMetadataExtractor {
 
 		List<RelationID> fks = new LinkedList<>();
 		for (RelationID table : realTables) {
-			if (table.hasSchema() || (defaultTableSchema == null))
+			// defaultTableSchema is non-empty only for Oracle and DUAL is a special Oracle table 
+			if (table.hasSchema() || (defaultTableSchema == null) || table.getTableName().equals("DUAL"))
 				fks.add(table);
 			else {
 				RelationID qualifiedTableId = idfac.createRelationFromString(defaultTableSchema, table.getTableNameSQLRendering());

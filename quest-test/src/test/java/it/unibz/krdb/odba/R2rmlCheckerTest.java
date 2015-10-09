@@ -148,8 +148,8 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 
-	//@Test
-	public void AtestDescriptionsCheck() throws Exception {
+	@Test
+	public void testDescriptionsCheck() throws Exception {
 		
 
 		// Now we are ready for querying
