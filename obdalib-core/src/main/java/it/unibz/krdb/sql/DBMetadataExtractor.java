@@ -182,7 +182,7 @@ public class DBMetadataExtractor {
 			if (realTables == null || realTables.isEmpty())
 				tableList = getTableList(conn, new OracleRelationListProvider(defaultSchema), metadata.getQuotedIDFactory());
 			else
-				tableList = getTableList(defaultSchema, realTables);
+				tableList = getTableList(defaultSchema, realTables, metadata.getQuotedIDFactory());
 			
 			dt = OracleTypeFixer;
 		} 
@@ -190,13 +190,13 @@ public class DBMetadataExtractor {
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, DB2RelationListProvider, metadata.getQuotedIDFactory());
 			else 
-				tableList = getTableList(null, realTables);
+				tableList = getTableList(null, realTables, metadata.getQuotedIDFactory());
 		}  
 		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableList(conn, MSSQLServerRelationListProvider, metadata.getQuotedIDFactory());
 			else
-				tableList = getTableList(null, realTables);
+				tableList = getTableList(null, realTables, metadata.getQuotedIDFactory());
  		} 
 		else if (md.getDatabaseProductName().contains("H2") || 
 				md.getDatabaseProductName().contains("HSQL") || 
@@ -204,14 +204,14 @@ public class DBMetadataExtractor {
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else 
-				tableList = getTableList(null, realTables);
+				tableList = getTableList(null, realTables, metadata.getQuotedIDFactory());
 		}
 		else {
 			// For other database engines, i.e. MySQL
 			if (realTables == null || realTables.isEmpty()) 
 				tableList = getTableListDefault(md);
 			else
-				tableList = getTableList(null, realTables);
+				tableList = getTableList(null, realTables, metadata.getQuotedIDFactory());
 			
 			dt = MySQLTypeFixer;
 		}
@@ -238,11 +238,16 @@ public class DBMetadataExtractor {
 	 * Retrieve the normalized list of tables from a given list of RelationJSQL
 	 */
 
-	private static List<RelationID> getTableList(String defaultTableSchema, Set<RelationID> realTables) throws SQLException {
+	private static List<RelationID> getTableList(String defaultTableSchema, Set<RelationID> realTables, QuotedIDFactory idfac) throws SQLException {
 
 		List<RelationID> fks = new LinkedList<>();
 		for (RelationID table : realTables) {
-			fks.add(table);
+			if (table.hasSchema() || (defaultTableSchema == null))
+				fks.add(table);
+			else {
+				RelationID qualifiedTableId = idfac.createRelationFromString(defaultTableSchema, table.getTableNameSQLRendering());
+				fks.add(qualifiedTableId);
+			}
 		}
 		return fks;
 	}

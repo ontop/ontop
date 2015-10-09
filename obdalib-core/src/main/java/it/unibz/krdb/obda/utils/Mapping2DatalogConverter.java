@@ -226,7 +226,7 @@ public class Mapping2DatalogConverter {
                         "Possible reasons:\n" +
                         "1. The name is ambiguous, or\n" +
                         "2. The name is not defined in the database schema.";
-                final String msg = String.format(messageFormat, var);
+                final String msg = String.format(messageFormat, var) + "\n" + lookupTable;
                 throw new RuntimeException(msg);
             }
             return termR;
@@ -269,6 +269,11 @@ public class Mapping2DatalogConverter {
     	
     	Term get(QualifiedAttributeID qualifiedId) {
     		return lookupTable.get(qualifiedId);
+    	}
+    	
+    	@Override
+		public String toString() {
+    		return lookupTable.toString();
     	}
     }
     

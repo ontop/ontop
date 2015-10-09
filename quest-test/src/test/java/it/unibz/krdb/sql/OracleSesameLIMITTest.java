@@ -117,16 +117,16 @@ public class OracleSesameLIMITTest  {
 		conn.close();
 	}
 
-	private void defTable(DBMetadata dbMetadata, String name) {
+	private void defTable(DBMetadata dbMetadata, String schema, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(null, name));
+		TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(schema, name));
 		tableDefinition.addAttribute(idfac.createFromString("country_name"), java.sql.Types.VARCHAR, null, false);
 	}
 	private DBMetadata getMeta(String driver_class){
 		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata(driver_class);
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		defTable(dbMetadata, "hr.countries");
-		defTable(dbMetadata, "HR.countries");
+		defTable(dbMetadata, "hr", "countries");
+		defTable(dbMetadata, "HR", "countries");
 		dbMetadata.createTable(idfac.createRelationFromString(null, "dual"));
 		return dbMetadata;
 	}
