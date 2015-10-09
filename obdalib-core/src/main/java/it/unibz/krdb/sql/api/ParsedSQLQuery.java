@@ -243,7 +243,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * 
 	 * @return
 	 */
-	public List<String> getColumns() {
+	public List<Column> getColumns() {
 		ColumnsVisitor visitor = new ColumnsVisitor(selectQuery);
 		return visitor.getColumns();
 	}

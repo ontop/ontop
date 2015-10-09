@@ -38,7 +38,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor {
 	
-	private final List<String> columns = new ArrayList<>(); //create a list of projections if we want to consider union 
+	private final List<Column> columns = new ArrayList<>(); //create a list of projections if we want to consider union 
 
 	/**
 	 * Return the list of columns with the expressions between SELECT and FROM, 
@@ -57,7 +57,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		select.getSelectBody().accept(this);
 	}
 		
-	public List<String> getColumns() {
+	public List<Column> getColumns() {
 		return columns;	
 	}
 	
@@ -134,7 +134,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 		 * Here we found a column
 		 */
 		if (selectExpr.getAlias() != null) {
-			columns.add(selectExpr.getAlias().getName());
+			columns.add(new Column(selectExpr.getAlias().getName()));
 		}
 		else {
 			selectExpr.getExpression().accept(this);
@@ -147,7 +147,7 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 	 */
 	@Override
 	public void visit(Column tableColumn) {
-		columns.add(tableColumn.getColumnName());
+		columns.add(tableColumn);
 	}
 	
 

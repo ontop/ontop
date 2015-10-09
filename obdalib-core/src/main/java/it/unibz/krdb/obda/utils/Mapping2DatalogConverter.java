@@ -160,7 +160,9 @@ public class Mapping2DatalogConverter {
             List<Term> terms = new ArrayList<>(td.getAttributes().size());
             // Swap the column name with a new variable from the lookup table
             for (Attribute attribute : td.getAttributes()) {
-                Term term = lookupTable.get(new QualifiedAttributeID(aliasId, attribute.getID()));
+            	Term term = lookupTable.get(new QualifiedAttributeID(aliasId, attribute.getID()));
+            	if (term == null)
+            		term = lookupTable.get(new QualifiedAttributeID(null, attribute.getID()));
                 if (term == null) 
                     throw new IllegalStateException("Column '" + aliasId + "." + attribute.getID() + "'was not found in the lookup table: ");
                 
@@ -208,9 +210,9 @@ public class Mapping2DatalogConverter {
             else
             	relationId = null;
             QualifiedAttributeID a = new QualifiedAttributeID(relationId, 
-            						idfac.createFromString(quote(attributeName)));
-            
+            						idfac.createFromString(quote(attributeName)));         
             Term termR = lookupTable.get(a);
+            
             if (termR == null) {
                 if (tableName != null)
                 	relationId = idfac.createRelationFromString(schemaName, tableName);
@@ -219,6 +221,15 @@ public class Mapping2DatalogConverter {
                 a = new QualifiedAttributeID(relationId, idfac.createFromString(attributeName));
                 termR = lookupTable.get(a);
             }
+
+            // ROMAN (10 Oct 2015): hack for FQDN
+            if (termR == null)
+            	termR = lookupTable.get(new QualifiedAttributeID(null, 
+						idfac.createFromString(quote(attributeName))));
+            
+            if (termR == null)
+            	termR = lookupTable.get(new QualifiedAttributeID(null, 
+						idfac.createFromString(attributeName)));
             
             if (termR == null) {
                 String messageFormat = "Error in identifying column name \"%s\", " +
@@ -300,10 +311,10 @@ public class Mapping2DatalogConverter {
                 throw new RuntimeException("Definition not found for table '" + relationId + "'.");
             
  			for (Attribute attribute : tableDefinition.getAttributes()) {
- 				
+
 				Term var = fac.getVariable("t" + index);
 				QuotedID attributeId = attribute.getID();
-				
+
 				lookupTable.put(null, attributeId, var);
 
 				// full qualified attribute name using table alias
@@ -314,7 +325,7 @@ public class Mapping2DatalogConverter {
 					lookupTable.put(relationId.getSchemalessID(), attributeId, var);
 					lookupTable.put(relationId, attributeId, var);
 				}
-	
+				
 				// ROMAN (26 Sep 2015): I'm not sure it should be in this loop
 				//check if we do not have subselect with alias name assigned
 				for (SelectJSQL subSelect: queryParsed.getSubSelects()) {

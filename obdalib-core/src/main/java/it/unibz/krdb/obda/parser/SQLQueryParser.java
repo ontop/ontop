@@ -33,6 +33,7 @@ import java.util.List;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -187,10 +188,9 @@ public class SQLQueryParser {
         ViewDefinition viewDefinition = md.createView(viewName, query);
        
         if (supported) {
-            List<String> columns = queryParser.getColumns();
-            for (String columnName : columns) {
-            	QuotedID columnId = idfac.createFromString(columnName);
- 
+            List<Column> columns = queryParser.getColumns();
+            for (Column column : columns) {
+            	QuotedID columnId = idfac.createFromString(column.getColumnName());
                 viewDefinition.addAttribute(columnId, 0, null, false);
             }
         }
