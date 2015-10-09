@@ -108,7 +108,7 @@ import org.slf4j.LoggerFactory;
 
 public class DBMetadataExtractor {
 
-	private static final boolean printouts = true;
+	private static final boolean printouts = false;
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 

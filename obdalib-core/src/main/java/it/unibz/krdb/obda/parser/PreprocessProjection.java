@@ -139,7 +139,7 @@ public class PreprocessProjection {
                             String aliasString = aliasName.getName();
                             // ROMAN (26 Sep 2015): double check string comparisons
                             SelectExpressionItem columnAlias = new SelectExpressionItem(
-                            		new Column(tableName,  QuotedID.createFromDatabaseRecord(aliasString).getSQLRendering()));
+                            		new Column(tableName,  QuotedID.createFromDatabaseRecord(aliasString).getName()));
 
                             addToColumns(columns, columnAlias, aliasString, variables);
                         } 
@@ -148,7 +148,7 @@ public class PreprocessProjection {
                             String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
                             // ROMAN (26 Sep 2015): double check string comparisons
                             SelectExpressionItem column = new SelectExpressionItem(
-                            		new Column(tableName,  QuotedID.createFromDatabaseRecord(columnName).getSQLRendering()));
+                            		new Column(tableName,  QuotedID.createFromDatabaseRecord(columnName).getName()));
                             
                             addToColumns(columns, column, columnName, variables);
                         }
@@ -206,7 +206,7 @@ public class PreprocessProjection {
            }
 
            for (Attribute att : tableDefinition.getAttributes()) {
-               String columnFromMetadata = att.getID().getSQLRendering();
+               String columnFromMetadata = att.getID().getName();
                //construct a column as table.column
                SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
               
@@ -274,7 +274,7 @@ public class PreprocessProjection {
                || variables.contains(fac.getVariable(simpleColumnName.toLowerCase()))
                || variables.contains(fac.getVariable(columnName.toString()))
                || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
-
+    	   
            columns.add(columnName);
        }
    }
