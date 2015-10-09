@@ -21,17 +21,16 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -51,38 +50,31 @@ public class MappingSplitter {
 
 	private static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings) {
 
-		List<OBDAMappingAxiom> newMappings = new ArrayList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> newMappings = new LinkedList<>();
 		
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 		for (OBDAMappingAxiom mapping : mappings) {
 
 			String id = mapping.getId();
-
-			CQIE targetQuery = mapping.getTargetQuery();
-
 			OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 
-			Function head = targetQuery.getHead();
-			List<Function> bodyAtoms = targetQuery.getBody();
+			List<Function> targetQuery = mapping.getTargetQuery();
 
-			if(bodyAtoms.size() == 1){
+			if (targetQuery.size() == 1) {
 				// For mappings with only one body atom, we do not need to change it
 				newMappings.add(mapping);
-			} else {
-				for (Function bodyAtom : bodyAtoms) {
+			} 
+			else {
+				for (Function bodyAtom : targetQuery) {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
-					
-					CQIE newTargetQuery = dfac.getCQIE(head, bodyAtom);
-					OBDARDBMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(newId, sourceQuery, newTargetQuery);
+					OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(newId, sourceQuery, Collections.singletonList(bodyAtom));
 					newMappings.add(newMapping);
 				}
 			}
-
 		}
 
 		return newMappings;
-
 	}
 
 	/**

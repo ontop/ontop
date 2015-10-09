@@ -230,8 +230,8 @@ public class DirectMappingEngine {
 		model.addMappings(sourceUri, mappingAxioms);
 		for (URI uri : model.getMappings().keySet()) {
 			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
-				CQIE rule = mapping.getTargetQuery();
-				for (Function f : rule.getBody()) {
+				List<Function> rule = mapping.getTargetQuery();
+				for (Function f : rule) {
 					if (f.getArity() == 1)
 						model.getOntologyVocabulary().createClass(f.getFunctionSymbol().getName());
 					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
@@ -260,12 +260,12 @@ public class DirectMappingEngine {
 		DirectMappingAxiom dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
 
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
-		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx,dma.getSQL(), dma.getCQ()));
+		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, dfac.getSQLQuery(dma.getSQL()), dma.getCQ()));
 		mapidx++;
 		
-		Map<String, CQIE> refAxioms = dma.getRefAxioms();
+		Map<String, List<Function>> refAxioms = dma.getRefAxioms();
 		for (String refSQL : refAxioms.keySet()) {
-			axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, refSQL, refAxioms.get(refSQL)));
+			axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, dfac.getSQLQuery(refSQL), refAxioms.get(refSQL)));
 			mapidx++;
 		}
 		

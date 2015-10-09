@@ -20,12 +20,14 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
+import java.util.List;
+
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.io.PrefixManager;
 
 public interface TargetQueryParser {
 	
 	public void setPrefixManager(PrefixManager manager);
 	
-	public CQIE parse(String input) throws TargetQueryParserException;
+	public List<Function> parse(String input) throws TargetQueryParserException;
 }

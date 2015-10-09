@@ -62,8 +62,8 @@ public class DirectMappingAxiom {
 		return SQLString;
 	}
 
-	public Map<String, CQIE> getRefAxioms() {
-		HashMap<String, CQIE> refAxioms = new HashMap<>();
+	public Map<String, List<Function>> getRefAxioms() {
+		HashMap<String, List<Function>> refAxioms = new HashMap<>();
 		List<ForeignKeyConstraint> fks = ((TableDefinition) table).getForeignKeys();
 		for (ForeignKeyConstraint fk : fks) {
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
@@ -142,7 +142,7 @@ public class DirectMappingAxiom {
 		return String.format(SQLStringTempl, Column, Table, Condition);
 	}
 
-	public CQIE getCQ(){
+	public List<Function> getCQ(){
 		Term sub = generateSubject((TableDefinition)table, false);
 		List<Function> atoms = new ArrayList<Function>();
 		
@@ -169,17 +169,17 @@ public class DirectMappingAxiom {
 		}
 	
 		//To construct the head, there is no static field about this predicate
-		List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
-		for (Attribute att : table.getAttributes())
-			headTerms.add(df.getVariable(att.getID().getName()));
+		//List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
+		//for (Attribute att : table.getAttributes())
+		//	headTerms.add(df.getVariable(att.getID().getName()));
 		
-		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
-		Function head = df.getFunction(headPredicate, headTerms);
+		//Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
+		//Function head = df.getFunction(headPredicate, headTerms);
 		
-		return df.getCQIE(head, atoms);
+		return atoms;
 	}
 
-	private CQIE getRefCQ(ForeignKeyConstraint fk) {
+	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
 
 		Term sub = generateSubject((TableDefinition) table, true);
 
@@ -197,14 +197,14 @@ public class DirectMappingAxiom {
 		Set<Variable> headTermsSet = new HashSet<>();
 		TermUtils.addReferencedVariablesTo(headTermsSet, atom);
 		
-		List<Term> headTerms = new ArrayList<>();
-		headTerms.addAll(headTermsSet);
+		//List<Term> headTerms = new ArrayList<>();
+		//headTerms.addAll(headTermsSet);
 
-		Predicate headPredicate = df.getPredicate(
-				"http://obda.inf.unibz.it/quest/vocabulary#q",
-				headTerms.size());
-		Function head = df.getFunction(headPredicate, headTerms);
-		return df.getCQIE(head, atom);
+		//Predicate headPredicate = df.getPredicate(
+		//		"http://obda.inf.unibz.it/quest/vocabulary#q",
+		//		headTerms.size());
+		//Function head = df.getFunction(headPredicate, headTerms);
+		return Collections.singletonList(atom);
 	}
 
 	// Generate an URI for class predicate from a string(name of table)

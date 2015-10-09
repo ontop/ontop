@@ -106,8 +106,8 @@ public class Mapping2DatalogConverter {
                 // For each body atom in the target query,
                 //  (1) renameVariables its variables and
                 //  (2) use it as the head atom of a new rule
-				CQIE targetQuery = mappingAxiom.getTargetQuery();
-                for (Function atom : targetQuery.getBody()) {
+                List<Function> targetQuery = mappingAxiom.getTargetQuery();
+                for (Function atom : targetQuery) {
                     // Construct the head from the target query 
                 	// (includes dealing with functions like concat as well).
                     Function head = (Function)renameVariables(atom, lookupTable, idfac);

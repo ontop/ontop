@@ -21,12 +21,10 @@ package it.unibz.krdb.obda.utils;
  */
  
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
@@ -39,7 +37,6 @@ import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.QualifiedAttributeID;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
@@ -50,6 +47,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -104,8 +102,8 @@ public class MetaMappingExpander {
 
 		for (OBDAMappingAxiom mapping : mappings) {
 
-			CQIE targetQuery = mapping.getTargetQuery();
-			Function bodyAtom = targetQuery.getBody().get(0);
+			List<Function> targetQuery = mapping.getTargetQuery();
+			Function bodyAtom = targetQuery.get(0);
 			Predicate pred = bodyAtom.getFunctionSymbol();
 
 			if (!pred.isTriplePredicate()){
@@ -152,7 +150,7 @@ public class MetaMappingExpander {
 				
 				for(List<String> params : paramsForClassTemplate) {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
-					OBDARDBMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
+					OBDAMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
 							bodyAtom, sourceQueryParsed, columnsForTemplate,
 							columnsForValues, params, arity, idfac);
 										
@@ -249,7 +247,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * @throws JSQLParserException 
 	 */
-	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
+	private OBDAMappingAxiom instantiateMapping(String id, List<Function> targetQuery,
 			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
@@ -258,9 +256,7 @@ public class MetaMappingExpander {
 		/*
 		 * First construct new Target Query 
 		 */
-		Function newTargetHead = targetQuery.getHead();
 		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params, arity);
-		CQIE newTargetQuery = dfac.getCQIE(newTargetHead, newTargetBody);
 		
 		/*
 		 * Then construct new Source Query
@@ -308,7 +304,8 @@ public class MetaMappingExpander {
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
-		OBDARDBMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, newTargetQuery);
+		OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, 
+										Collections.singletonList(newTargetBody));
 		return newMapping;
 	}
 

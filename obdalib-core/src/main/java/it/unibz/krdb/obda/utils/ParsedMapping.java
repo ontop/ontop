@@ -20,7 +20,10 @@ package it.unibz.krdb.obda.utils;
  * #L%
  */
  
+import java.util.List;
+
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
@@ -71,7 +74,7 @@ public class ParsedMapping {
 	 * This returns the same target query as in the original axiom / mapping
 	 * @return
 	 */
-	public CQIE getTargetQuery(){
+	public List<Function> getTargetQuery(){
 		return axiom.getTargetQuery();
 	}
 	

@@ -515,25 +515,24 @@ public class QuestUnfolder {
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 
-
 		for (OBDAMappingAxiom axiom : mappings) {
-			String sourceString = axiom.getSourceQuery().toString();
 
-			CQIE targetQuery = axiom.getTargetQuery();
-
-			Select select = null;
 			try {
-				select = (Select) CCJSqlParserUtil.parse(sourceString);
+				String sourceString = axiom.getSourceQuery().toString();
 
-				Set<Variable> variables = targetQuery.getReferencedVariables();
+				Select select = (Select) CCJSqlParserUtil.parse(sourceString);
+
+				List<Function> targetQuery = axiom.getTargetQuery();
+				Set<Variable> variables = new HashSet<Variable>();
+				for (Function atom : targetQuery) 
+					TermUtils.addReferencedVariablesTo(variables, atom);
+				
 				PreprocessProjection ps = new PreprocessProjection(metadata);
 				String query = ps.getMappingQuery(select, variables);
 				axiom.setSourceQuery(fac.getSQLQuery(query));
-
-			} catch (JSQLParserException e) {
+			} 
+			catch (JSQLParserException e) {
 				log.debug("SQL Query cannot be preprocessed by the parser");
-
-
 			}
 //
 		}

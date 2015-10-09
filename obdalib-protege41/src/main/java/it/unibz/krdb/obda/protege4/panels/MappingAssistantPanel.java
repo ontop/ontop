@@ -516,7 +516,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			
 			// Prepare the mapping target
 			predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			CQIE target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			List<Function> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 			
 			// Create the mapping axiom
 			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(source, target);
@@ -536,7 +536,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
 	
-	private CQIE prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
+	private List<Function> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
 		List<Function> body = new ArrayList<Function>();
 		
@@ -548,13 +548,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		
 		// Store attributes and roles in the body
-		List<Term> distinguishVariables = new ArrayList<Term>();
+		//List<Term> distinguishVariables = new ArrayList<Term>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
 				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
-				distinguishVariables.add(objectTerm);
+				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
 				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
@@ -562,11 +562,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 		}
 		// Create the head
-		int arity = distinguishVariables.size();
-		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//int arity = distinguishVariables.size();
+		//Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
-		return dfac.getCQIE(head, body);
+		return body;
 	}
 	
 	private Function createSubjectTerm(MapItem predicateSubjectMap) {

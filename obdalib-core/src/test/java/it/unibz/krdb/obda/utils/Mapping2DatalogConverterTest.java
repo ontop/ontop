@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -77,7 +78,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm);
-		CQIE target = targetParser.parse(targetString);
+		List<Function> target = targetParser.parse(targetString);
 		
 		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(source, target);
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();

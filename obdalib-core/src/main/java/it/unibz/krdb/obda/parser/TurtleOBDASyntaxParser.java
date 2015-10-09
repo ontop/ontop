@@ -21,9 +21,11 @@ package it.unibz.krdb.obda.parser;
  */
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.io.PrefixManager;
 
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -75,7 +77,7 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	 * @return A CQIE object.
 	 */
 	@Override
-	public CQIE parse(String input) throws TargetQueryParserException {
+	public List<Function> parse(String input) throws TargetQueryParserException {
 		StringBuffer bf = new StringBuffer(input.trim());
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');

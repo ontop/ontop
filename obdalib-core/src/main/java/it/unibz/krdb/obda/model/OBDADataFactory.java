@@ -287,11 +287,9 @@ public interface OBDADataFactory extends Serializable {
 	
 
 	
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, CQIE targetQuery);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, CQIE targetQuery);
-
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, CQIE targetQuery);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(String sql, List<Function> targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
 

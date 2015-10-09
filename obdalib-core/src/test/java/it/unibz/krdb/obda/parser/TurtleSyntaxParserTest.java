@@ -20,10 +20,14 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import java.util.List;
+
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +207,7 @@ public class TurtleSyntaxParserTest extends TestCase {
 	private boolean compareCQIE(String input, int countBody) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
 		parser.setPrefixManager(getPrefixManager());
-		CQIE mapping;
+		List<Function> mapping;
 		try {
 			mapping = parser.parse(input);
 		} catch (TargetQueryParserException e) {
@@ -213,7 +217,7 @@ public class TurtleSyntaxParserTest extends TestCase {
 			log.debug(e.getMessage());
 			return false;
 		}
-		return mapping.getBody().size()==countBody;
+		return mapping.size()==countBody;
 	}
 	private boolean parse(String input) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
