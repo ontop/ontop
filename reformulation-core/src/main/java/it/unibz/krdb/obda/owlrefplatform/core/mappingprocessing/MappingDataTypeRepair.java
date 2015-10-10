@@ -42,6 +42,8 @@ public class MappingDataTypeRepair {
 
 	private final DBMetadata metadata;
 	private final boolean isDB2;
+	private final Map<Predicate, Datatype> dataTypesMap;
+	private final VocabularyValidator qvv;
 
   	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
@@ -55,13 +57,22 @@ public class MappingDataTypeRepair {
      * default data-type.
      * 
      * @param metadata The database metadata.
+     * @throws OBDAException 
      */
-    public MappingDataTypeRepair(DBMetadata metadata) {
+    public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
         this.metadata = metadata;
         String databaseName = metadata.getDatabaseProductName();
         String databaseDriver = metadata.getDriverName();
         this.isDB2 = (databaseName!= null && databaseName.contains("DB2"))
-        			|| (databaseDriver != null && databaseDriver.contains("IBM"));   
+        			|| (databaseDriver != null && databaseDriver.contains("IBM"));
+        
+        this.qvv = qvv;
+        try {
+            dataTypesMap = getDataTypeFromOntology(reasoner);
+        } 
+        catch (PredicateRedefinitionException pe) {
+            throw new OBDAException(pe);
+        }
     }
 
     /**
@@ -115,46 +126,30 @@ public class MappingDataTypeRepair {
     	}
     }
    
-                /**
-                 * This method wraps the variable that holds data property values with a
-                 * data type predicate. It will replace the variable with a new function
-                 * symbol and update the rule atom. However, if the users already defined
-                 * the data-type in the mapping, this method simply accepts the function
-                 * symbol.
-                 *
-                 * @param mappingRules
-                 *            The set of mapping axioms.
-                 * @throws OBDAException
-                 */
+    /**
+     * This method wraps the variable that holds data property values with a
+     * data type predicate. It will replace the variable with a new function
+     * symbol and update the rule atom. However, if the users already defined
+     * the data-type in the mapping, this method simply accepts the function
+     * symbol.
+     *
+     * @param mappingRules
+     *            The set of mapping axioms.
+     * @throws OBDAException
+     */
 
-    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
-
-        //get all the datatypes in the ontology
-    	Map<Predicate, Datatype> dataTypesMap;
-
-        try {
-            dataTypesMap = getDataTypeFromOntology(reasoner);
-        } 
-        catch (PredicateRedefinitionException pe) {
-            throw new OBDAException(pe);
-        }
-
-
-		for (CQIE rule : mappingRules) {
-			Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);
-            Function atom = rule.getHead();
-
-            Predicate predicate = atom.getFunctionSymbol();
-            if (predicate.getArity() == 2) { // we check both for data and object property
-
-                // If the predicate is a data property
-                Term term = atom.getTerm(1);
-                insertDataTyping(term, atom, 1, termOccurenceIndex, qvv, dataTypesMap);
-            }
+    public void insertDataTyping(CQIE rule) throws OBDAException {
+        Function atom = rule.getHead();
+        Predicate predicate = atom.getFunctionSymbol();
+        if (predicate.getArity() == 2) { // we check both for data and object property
+            Term term = atom.getTerm(1); // the second argument only
+            
+    		Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
+            insertDataTyping(term, atom, 1, termOccurenceIndex);
         }
 	}
 
-    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap) throws OBDAException {
+    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex) throws OBDAException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -163,9 +158,7 @@ public class MappingDataTypeRepair {
 
             if (functionSymbol instanceof URITemplatePredicate || functionSymbol instanceof BNodePredicate) {
                 // NO-OP for object properties
-
             }
-
 
             /** If it is a concat or replace function, can have a datatype assigned to its alias (function with datatype predicate)
              *  or if no information about the datatype is assigned we will assign the value from the ontology
@@ -174,32 +167,22 @@ public class MappingDataTypeRepair {
 
             else if (functionSymbol.isStringOperationPredicate() || functionSymbol.isArithmeticPredicate()) {
 
-
-                //check in the ontology if we have already information about the datatype
-
-                Function normal = qvv.getNormal(atom);
-                //Check if a datatype was already assigned in the ontology
+            	Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
-                //assign the datatype of the ontology
+                //Check if a datatype was already assigned in the ontology
                 if (dataType != null) {
+                    //assign the datatype of the ontology
                     if (!isBooleanDB2(dataType.getPredicate())) {
-                        Term newTerm;
-
                         Predicate replacement = dataType.getPredicate();
-                        newTerm = fac.getFunction(replacement, function);
-
+                        Term newTerm = fac.getFunction(replacement, function);
                         atom.setTerm(position, newTerm);
                     }
                 } 
                 else {
-                    for (int i = 0; i < function.getArity(); i++) {
-
-                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex,  qvv, dataTypesMap);
-                    }
+                    for (int i = 0; i < function.getArity(); i++) 
+                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
-
-
             } 
             else if (functionSymbol.isDataTypePredicate()) {
 
@@ -231,18 +214,16 @@ public class MappingDataTypeRepair {
         } 
         else if (term instanceof Variable) {
 
-            Variable variable = (Variable) term;
-
             //check in the ontology if we have already information about the datatype
 
             Function normal = qvv.getNormal(atom);
-            //Check if a datatype was already assigned in the ontology
             Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
-
 
             // If the term has no data-type predicate then by default the
             // predicate is created following the database metadata of
             // column type.
+            Variable variable = (Variable) term;
+
             Term newTerm;
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
                 Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
@@ -256,10 +237,8 @@ public class MappingDataTypeRepair {
             atom.setTerm(position, newTerm);
         } 
         else if (term instanceof ValueConstant) {
-            Term newTerm;
-            newTerm = fac.getTypedTerm( term, Predicate.COL_TYPE.LITERAL);
+            Term newTerm = fac.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
             atom.setTerm(position, newTerm);
-
         }
     }
 
@@ -291,58 +270,60 @@ public class MappingDataTypeRepair {
      * @throws OBDAException
      */
     
-	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
-		List<Object[]> list = termOccurenceIndex.get(variable.getName());
-		if (list == null) {
+	private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable) throws OBDAException {
+		List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
+		if (list == null) 
 			throw new OBDAException("Unknown term in head");
-		}
-		Object[] o = list.get(0);
-		Function atom = (Function) o[0];
-		Integer pos = (Integer) o[1];
+		
+		// ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
+		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
+		IndexedPosititon ip = list.get(0);
 
-		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(atom.getFunctionSymbol());
+		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(ip.atom.getFunctionSymbol());
 		RelationDefinition td = metadata.getRelation(tableId);
-
-		Attribute attribute = td.getAttribute(pos);
+		Attribute attribute = td.getAttribute(ip.pos);
 
 		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
 		return type;
 	}
+	
+	private static class IndexedPosititon {
+		final Function atom;
+		final int pos;
+		
+		IndexedPosititon(Function atom, int pos) {
+			this.atom = atom;
+			this.pos = pos;
+		}
+	}
 
-	private static Map<String, List<Object[]>> createIndex(CQIE rule) {
-		Map<String, List<Object[]>> termOccurenceIndex = new HashMap<>();
-		List<Function> body = rule.getBody();
-		Iterator<Function> it = body.iterator();
-		while (it.hasNext()) {
-			Function a = (Function) it.next();
+	private static Map<String, List<IndexedPosititon>> createIndex(List<Function> body) {
+		Map<String, List<IndexedPosititon>> termOccurenceIndex = new HashMap<>();
+		for (Function a : body) {
 			List<Term> terms = a.getTerms();
 			int i = 1; // position index
 			for (Term t : terms) {
 				if (t instanceof Variable) {
 					Variable var = (Variable) t;
-					Object[] o = new Object[2];
-					o[0] = a; // atom
-					o[1] = i; // position index
-					List<Object[]> aux = termOccurenceIndex.get(var.getName());
-					if (aux == null) {
-						aux = new LinkedList<>();
-					}
-					aux.add(o);
+					List<IndexedPosititon> aux = termOccurenceIndex.get(var.getName());
+					if (aux == null) 
+						aux = new LinkedList<>();	
+					aux.add(new IndexedPosititon(a, i));
 					termOccurenceIndex.put(var.getName(), aux);
-					i++; // increase the position index to evaluate the next
-							// variable
-				} else if (t instanceof FunctionalTermImpl) {
+					i++; // increase the position index for the next variable
+				} 
+				else if (t instanceof FunctionalTermImpl) {
 					// NO-OP
-				} else if (t instanceof ValueConstant) {
+				} 
+				else if (t instanceof ValueConstant) {
 					// NO-OP
-				} else if (t instanceof URIConstant) {
+				} 
+				else if (t instanceof URIConstant) {
 					// NO-OP
 				}
 			}
 		}
 		return termOccurenceIndex;
 	}
-
-
 }
 

@@ -67,27 +67,8 @@ public class QuestUnfolder {
 	 *          those predicates should not be extended according to the 
 	 *          TBox hierarchies
 	 */
-	//private boolean applyExcludeFromTMappings = false;
-	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
-
-		/** Substitute select * with column names **/
-		preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
-
-		/**
-		 * Split the mapping
-		 */
-		MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId);
-
-		/**
-		 * Expand the meta mapping
-		 */
-		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-		metaMappingExpander.expand(unfoldingOBDAModel, sourceId, metadata.getQuotedIDFactory());
-
-		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
-		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
-
-		this.excludeFromTMappings = TMappingExclusionConfig.empty();
+	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception {
+		this(unfoldingOBDAModel, metadata, localConnection, sourceId, TMappingExclusionConfig.empty());
 	}
     
 	
@@ -96,7 +77,6 @@ public class QuestUnfolder {
 	 * of predicates for which the T-Mappings procedure should be 
 	 * disabled.
 	 *  
-	 * @author Davide
 	 * @param mappings
 	 * @param metadata
 	 * @param analyzer
@@ -254,10 +234,9 @@ public class QuestUnfolder {
 	 */
 	
 	public void extendTypesWithMetadata(TBoxReasoner tboxReasoner, VocabularyValidator qvv, DBMetadata metadata) throws OBDAException {
-
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
-		System.out.println(unfoldingProgram);
-		typeRepair.insertDataTyping(unfoldingProgram, tboxReasoner, qvv);
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tboxReasoner, qvv);
+		for (CQIE mapping : unfoldingProgram) 
+			typeRepair.insertDataTyping(mapping);
 	}
 
 	/***
@@ -511,7 +490,7 @@ public class QuestUnfolder {
 	 *
 	 * @throws java.sql.SQLException
 	 */
-	private void preprocessProjection(OBDAModel unfoldingOBDAModel, URI sourceId, DBMetadata metadata) throws SQLException {
+	private static void preprocessProjection(OBDAModel unfoldingOBDAModel, URI sourceId, DBMetadata metadata) throws SQLException {
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 
@@ -523,7 +502,7 @@ public class QuestUnfolder {
 				Select select = (Select) CCJSqlParserUtil.parse(sourceString);
 
 				List<Function> targetQuery = axiom.getTargetQuery();
-				Set<Variable> variables = new HashSet<Variable>();
+				Set<Variable> variables = new HashSet<>();
 				for (Function atom : targetQuery) 
 					TermUtils.addReferencedVariablesTo(variables, atom);
 				

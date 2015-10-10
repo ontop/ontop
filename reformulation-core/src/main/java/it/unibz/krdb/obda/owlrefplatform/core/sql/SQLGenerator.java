@@ -1231,6 +1231,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			QuotedID attributeId = def.getAttribute();
 			RelationID tableId = null;
 			// ROMAN (8 Oct 2015)
+			// case conversion to be removed
 			if (def.getRelation().getTableName().toUpperCase().startsWith(VIEW_NAME_PREFIX)) {
 				for (Map.Entry<Function, RelationID> entry : index.viewNames.entrySet()) {
 					RelationID value = entry.getValue();
@@ -1245,7 +1246,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Attribute a = table.getAttribute(attributeId);
 			switch (a.getType()) {
 				case Types.VARCHAR:
-				case Types.CHAR:
+				// case Types.CHAR: // ROMAN (10 Oct 2015) -- otherwise PgsqlDatatypeTest.all fails 
 				case Types.LONGNVARCHAR:
 				case Types.LONGVARCHAR:
 				case Types.NVARCHAR:
