@@ -28,6 +28,7 @@ import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,12 +46,12 @@ import net.sf.jsqlparser.JSQLParserException;
  */
 public class MappingParser {
 	
-	private List<OBDAMappingAxiom> mappingList;
+	private Collection<OBDAMappingAxiom> mappingList;
 	private SQLQueryParser sqlQueryParser;
 	private List<ParsedMapping> parsedMappings;
 	
-	public MappingParser(QuotedIDFactory idfac, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
-		this.mappingList = mappingAxioms;
+	public MappingParser(QuotedIDFactory idfac, Collection<OBDAMappingAxiom> mappings) throws SQLException{
+		this.mappingList = mappings;
 		this.sqlQueryParser = new SQLQueryParser(idfac); 
 		this.parsedMappings = this.parseMappings();
 	}

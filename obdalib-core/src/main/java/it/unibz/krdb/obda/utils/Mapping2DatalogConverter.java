@@ -47,6 +47,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class Mapping2DatalogConverter {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public static List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms, DBMetadata dbMetadata) {
+	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		
@@ -68,7 +69,7 @@ public class Mapping2DatalogConverter {
 		
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		
-		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
+		for (OBDAMappingAxiom mappingAxiom : mappings) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.

@@ -44,6 +44,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -87,19 +88,19 @@ public class MetaMappingExpander {
 	/**
 	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
 	 * 
-	 * @param mappings
+	 * @param splittedMappings
 	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	public List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+	public Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> splittedMappings) throws SQLException, JSQLParserException {
 
 		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
 		SQLQueryParser translator = new SQLQueryParser(idfac);
 
-		for (OBDAMappingAxiom mapping : mappings) {
+		for (OBDAMappingAxiom mapping : splittedMappings) {
 
 			List<Function> targetQuery = mapping.getTargetQuery();
 			Function bodyAtom = targetQuery.get(0);

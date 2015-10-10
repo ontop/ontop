@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,7 @@ import java.util.List;
  */
 public class MappingSplitter {
 
-	public static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings) {
+	public static Collection<OBDAMappingAxiom> splitMappings(Collection<OBDAMappingAxiom> mappings) {
 
 		List<OBDAMappingAxiom> newMappings = new LinkedList<>();
 		

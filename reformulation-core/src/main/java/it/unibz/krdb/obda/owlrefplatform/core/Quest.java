@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -53,7 +52,6 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
@@ -129,9 +127,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* The input OBDA model */
 	private OBDAModel inputOBDAModel = null;
 
-	/* The input OBDA model */
-	private OBDAModel unfoldingOBDAModel;
-	
 	private QuestUnfolder unfolder;
 		
 	/**
@@ -250,7 +245,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param tbox
 	 *            . The TBox must not be null, even if its empty. At least, the
 	 *            TBox must define all the vocabulary of the system.
-	 * @param mappings
+	 * @param obdaModel
 	 *            . The mappings of the system. The vocabulary of the mappings
 	 *            must be subset or equal to the vocabulary of the ontology.
 	 * @param config
@@ -258,7 +253,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 *            QuestDefaults.properties for a description (in
 	 *            src/main/resources)
 	 */
-	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
+	public Quest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, Properties config) {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 		
@@ -267,20 +262,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		setPreferences(config);
 
-		if (mappings == null && !aboxMode.equals(QuestConstants.CLASSIC)) {
+		if (obdaModel == null && !aboxMode.equals(QuestConstants.CLASSIC)) {
 			throw new IllegalArgumentException(
 					"When working without mappings, you must set the ABox mode to \""
 							+ QuestConstants.CLASSIC
 							+ "\". If you want to work with no mappings in virtual ABox mode you must at least provide an empty but not null OBDAModel");
 		}
-		if (mappings != null && !aboxMode.equals(QuestConstants.VIRTUAL)) {
+		if (obdaModel != null && !aboxMode.equals(QuestConstants.VIRTUAL)) {
 			throw new IllegalArgumentException(
 					"When working with mappings, you must set the ABox mode to \""
 							+ QuestConstants.VIRTUAL
 							+ "\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
-		loadOBDAModel(mappings);
+		loadOBDAModel(obdaModel);
 	}
 	
 	
@@ -298,7 +293,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
 	 * 						May be used by ontop to eliminate self-joins
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
@@ -522,8 +517,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MappingVocabularyRepair.fixOBDAModel(inputOBDAModel, inputOntology.getVocabulary());
 		}
 
-		unfoldingOBDAModel = fac.getOBDAModel();
-
 
 		/*
 		 * Simplifying the vocabulary of the TBox
@@ -534,13 +527,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		try {
 
+			Collection<OBDAMappingAxiom> mappings = null;
+			
 			/*
 			 * Preparing the data source
 			 */
 
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
-				//isSemanticIdx = true;
-				
 				if (inmemory) {
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
@@ -555,7 +548,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-				} else {
+				} 
+				else {
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 
 					if (aboxJdbcURL.trim().equals(""))
@@ -615,10 +609,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				}
 
-				/* Setting up the OBDA model */
-
-				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
+				// getting OBDA mapping axioms
+				mappings = dataRepository.getMappings();
 			} 
 			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 				// log.debug("Working in virtual mode");
@@ -642,27 +634,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-
-				/*
-				 * Processing mappings with respect to the vocabulary
-				 * simplification
-				 */
-
-				Collection<OBDAMappingAxiom> newMappings = 
-						vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
-
-				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
+				// obtain mappings by replace equivalences in the source mappings
+				mappings = vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
 			}
 
-			// NOTE: Currently the system only supports one data source.
-			//
-			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
-			URI sourceId = datasource.getSourceID();
-
-            SQLDialectAdapter sqladapter = SQLAdapterFactory
-                    .getSQLDialectAdapter(datasource
-                            .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -677,8 +652,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						// (the schema.table names) by parsing the mappings
 						
 						// Parse mappings. Just to get the table names in use
-						MappingParser mParser = new MappingParser(metadata.getQuotedIDFactory(), 
-									unfoldingOBDAModel.getMappings(sourceId));
+						MappingParser mParser = new MappingParser(metadata.getQuotedIDFactory(), mappings);
 								
 						Set<RelationID> realTables = mParser.getRealTables();
 						
@@ -734,22 +708,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				}		
 			}
 
+			log.debug("DB Metadata: \n{}", metadata);
 
-
+            SQLDialectAdapter sqladapter = SQLAdapterFactory
+                   .getSQLDialectAdapter(obdaSource
+                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			
 			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
 
-
-
-
-
-			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, localConnection, sourceId);
+			unfolder = new QuestUnfolder(mappings, metadata, localConnection);
 
 			/*
 			 * T-Mappings and Fact mappings
 			 */
-
-
 			if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 				log.debug("Original mapping size: {}", unfolder.getRulesSize());
 
@@ -757,7 +729,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeMappings();
 
 				// Apply TMappings
-				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
+				unfolder.applyTMappings(reformulationReasoner, true, excludeFromTMappings);
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());
@@ -772,11 +744,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // of all mappings to preserve SQL-RDF semantics
 				unfolder.addNOTNULLToMappings();
 			}
-
 			
-			unfolder.setupUnfolder(metadata);
-
-			log.debug("DB Metadata: \n{}", metadata);
+			unfolder.setupUnfolder();
 
 			/* The active ABox dependencies */
 			sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
@@ -807,7 +776,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 
 			log.debug("... Quest has been initialized.");
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			OBDAException ex = new OBDAException(e);
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
@@ -819,7 +789,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				}
 			}
 			throw ex;
-		} finally {
+		} 
+		finally {
 			if (!(aboxMode.equals(QuestConstants.CLASSIC) && (inmemory))) {
 				/*
 				 * If we are not in classic + inmemory mode we can disconnect
@@ -835,14 +806,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 
-	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {
+	public void updateSemanticIndexMappings() throws OBDAException {
 		/* Setting up the OBDA model */
-
-		unfoldingOBDAModel.removeAllMappings(obdaSource.getSourceID());
-		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
-
-		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
-										reformulationReasoner, metadata);
+		unfolder.updateSemanticIndexMappings(dataRepository.getMappings(), reformulationReasoner);
 	}
 
 
