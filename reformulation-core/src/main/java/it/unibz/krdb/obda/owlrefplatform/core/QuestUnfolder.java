@@ -125,6 +125,7 @@ public class QuestUnfolder {
 		return unfoldingProgram.size();
 	}
 
+	// USED ONLY IN TESTS
 	@Deprecated
 	public List<CQIE> getRules() {
 		return unfoldingProgram;
