@@ -753,19 +753,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 				log.debug("Original mapping size: {}", unfolder.getRulesSize());
 
-				 // Normalizing language tags: make all LOWER CASE
-				unfolder.normalizeLanguageTagsinMappings();
+				 // Normalizing language tags and equalities
+				unfolder.normalizeMappings();
 
-				 // Normalizing equalities
-				unfolder.normalizeEqualities();
-				
 				// Apply TMappings
-				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
-				// Davide> Option to disable T-Mappings (TODO: Test)
-				//if( tMappings ){
 				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
-				//}
-
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());

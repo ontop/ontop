@@ -60,6 +60,10 @@ public class TableNameVisitor {
 	private boolean unsupported = false;
 
 
+	private boolean inSubSelect = false;
+	private Alias subSelectAlias = null;
+	
+
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
@@ -156,10 +160,16 @@ public class TableNameVisitor {
 				RelationID relationId = idfac.createRelationFromString(table.getSchemaName(), table.getName());
 				relations.add(relationId);
 
-				Alias as = table.getAlias();
-				RelationID aliasId = (as != null) ? idfac.createRelationFromString(null, as.getName()) : relationId;
-				
-				tables.put(aliasId, relationId);
+				if (inSubSelect && subSelectAlias != null) {
+					// ONLY SIMPLE SUBSELECTS, WITH ONE TABLE
+					RelationID subSelectAliasId = idfac.createRelationFromString(null, subSelectAlias.getName());
+					tables.put(subSelectAliasId, relationId);
+				}
+				else {
+					Alias as = table.getAlias();
+					RelationID aliasId = (as != null) ? idfac.createRelationFromString(null, as.getName()) : relationId;
+					tables.put(aliasId, relationId);
+				}
 			}
 		}
 
@@ -196,8 +206,12 @@ public class TableNameVisitor {
 		} 
 		else
 			unsupported(subSelect);
-		
+
+		inSubSelect = true;
+		subSelectAlias = subSelect.getAlias();
 		subSelect.getSelectBody().accept(selectVisitor);
+		subSelectAlias = null;
+		inSubSelect = false;
 	}
 	
 	private final SelectItemVisitor selectItemVisitor = new SelectItemVisitor() {

@@ -270,11 +270,12 @@ public class Mapping2DatalogConverter {
     		QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationId, attributeId);
     		Term prev = lookupTable.put(qualifiedId, expression);
     		if (prev != null && !prev.equals(expression)) {
-    			//System.err.println("DUPLICATE: " + prev + " AND " + expression + " FOR " + qualifiedId);
+    			// System.err.println("DUPLICATE: " + prev + " AND " + expression + " FOR " + qualifiedId);
     			// there is another expression for the same qualified attribute id
     			// (i.e., ambiguous column name) 
     			// reset the value to null to indicate the ambiguity
-    			lookupTable.put(qualifiedId, null);
+    			// THIS DOES NOT MAKE MUCH SENSE BUT NEEDED FOR R2rmlJoinTest (WHICH HAS AMBIGUOUS REFS ANYWAY)
+    			// lookupTable.put(qualifiedId, null);
     		}
     	}
     	
@@ -328,11 +329,12 @@ public class Mapping2DatalogConverter {
 				
 				// ROMAN (26 Sep 2015): I'm not sure it should be in this loop
 				//check if we do not have subselect with alias name assigned
-				for (SelectJSQL subSelect: queryParsed.getSubSelects()) {
-					RelationID subSelectAlias = subSelect.getAlias();
-					if (subSelectAlias != null) 
-						lookupTable.put(subSelectAlias, attributeId, var);
-				}
+				//for (SelectJSQL subSelect: queryParsed.getSubSelects()) {
+				//	System.err.println("SUBSELECT " + subSelect);
+				//	RelationID subSelectAlias = subSelect.getAlias();
+				//	if (subSelectAlias != null) 
+				//		lookupTable.put(subSelectAlias, attributeId, var);
+				//}
 				index++;
 			}
 		}
