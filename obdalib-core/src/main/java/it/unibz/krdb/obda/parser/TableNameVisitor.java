@@ -161,7 +161,7 @@ public class TableNameVisitor {
 				relations.add(relationId);
 
 				if (inSubSelect && subSelectAlias != null) {
-					// ONLY SIMPLE SUBSELECTS, WITH ONE TABLE
+					// ONLY SIMPLE SUBSELECTS, WITH ONE TABLE: see WhereClauseVisitor and ProjectionVisitor
 					RelationID subSelectAliasId = idfac.createRelationFromString(null, subSelectAlias.getName());
 					tables.put(subSelectAliasId, relationId);
 				}

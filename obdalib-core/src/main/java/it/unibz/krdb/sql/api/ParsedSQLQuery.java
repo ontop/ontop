@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.parser.ColumnsVisitor;
 import it.unibz.krdb.obda.parser.JoinConditionVisitor;
 import it.unibz.krdb.obda.parser.ProjectionVisitor;
 import it.unibz.krdb.obda.parser.WhereClauseVisitor;
-import it.unibz.krdb.obda.parser.SubSelectVisitor;
 import it.unibz.krdb.obda.parser.TableNameVisitor;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
@@ -62,7 +61,6 @@ public class ParsedSQLQuery implements Serializable {
 	// maps aliases or relation names to relation names (identity on the relation names)
 	private Map<RelationID, RelationID> tables;
 	private List<RelationID> relations;
-	private List<SelectJSQL> subSelects;
 	private Map<QuotedID, Expression> aliasMap;
 	private List<Expression> joins;
 	private Expression whereClause;
@@ -154,21 +152,6 @@ public class ParsedSQLQuery implements Serializable {
 	public List<RelationID> getRelations() throws JSQLParserException {
 		getTables();
 		return relations;
-	}
-
-	/**
-	 * Returns all the subSelect in this query .
-	 * 
-	 * USED FOR CREATING DATALOG RULES (LOOKUP TABLE)
-	 * 
-	 */
-	public List<SelectJSQL> getSubSelects() {
-
-		if (subSelects == null) {
-			SubSelectVisitor visitor = new SubSelectVisitor(selectQuery, idfac);
-			subSelects = visitor.getSubSelects();
-		}
-		return subSelects;
 	}
 
 	/**

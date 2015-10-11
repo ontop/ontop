@@ -327,15 +327,7 @@ public class Mapping2DatalogConverter {
 					lookupTable.put(relationId.getSchemalessID(), attributeId, var);
 					lookupTable.put(relationId, attributeId, var);
 				}
-				
-				// ROMAN (26 Sep 2015): I'm not sure it should be in this loop
-				//check if we do not have subselect with alias name assigned
-				//for (SelectJSQL subSelect: queryParsed.getSubSelects()) {
-				//	System.err.println("SUBSELECT " + subSelect);
-				//	RelationID subSelectAlias = subSelect.getAlias();
-				//	if (subSelectAlias != null) 
-				//		lookupTable.put(subSelectAlias, attributeId, var);
-				//}
+
 				index++;
 			}
 		}

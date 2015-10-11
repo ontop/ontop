@@ -801,9 +801,6 @@ public class JSQLParserTest extends TestCase {
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
 				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
-				System.out.println("  SubSelect: "
-						+ (queryP.getSubSelects().isEmpty() ? "--" : queryP
-								.getSubSelects()));
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
 								.getJoinConditions()));
