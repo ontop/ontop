@@ -37,13 +37,14 @@ import sesameWrapper.SesameVirtualRepo;
  * @author dhovl
  *
  */
-public class TestSesameResultIteration {
+public class SesameResultIterationTest {
 	static String owlfile = "src/test/resources/userconstraints/uc.owl";
-	static String obdafile = "src/test/resources/userconstraints/uc.obda";
 	static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
 	static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
+
+    static String jdbcUrl = "jdbc:h2:mem:countries_iteration_test";
 
 	private Connection sqlConnection;
 	private RepositoryConnection conn;
@@ -56,7 +57,8 @@ public class TestSesameResultIteration {
 		OWLOntology ontology;
 		Model model;
 
-		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
+
+        sqlConnection= DriverManager.getConnection(jdbcUrl,"sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
@@ -84,7 +86,7 @@ public class TestSesameResultIteration {
 		preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:h2:mem:countries");
+		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, jdbcUrl);
 		preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
 		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
 		preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
