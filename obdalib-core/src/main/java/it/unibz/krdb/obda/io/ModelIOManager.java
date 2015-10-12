@@ -325,12 +325,17 @@ public class ModelIOManager {
             } else if (parameter.equals(Label.password.name())) {
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, inputParamter);
             } else if (parameter.equals(Label.driverClass.name())) {
-                //Class.forName was added for MonetDB driver.
-                // Because it does not work without it.
+                // Class.forName was added for old fashion JDBC drivers (e.g., MonetDB driver).
+                // Otherwise, it won't work for these drivers
                 try {
                     Class.forName(inputParamter);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
+                    /**
+                     * This is harmless when you do not need to do query answering
+                     */
+                    log.warn("JDBC driver \"{}\" is not available on the class path! Query answering service will be unavailable!", inputParamter );
+
                 }
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);
             } else {
