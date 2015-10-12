@@ -534,7 +534,8 @@ public class DBMetadataExtractor {
 		RelationID id = table.getID();
 		// extracting unique 
 		try (ResultSet rsUnique = md.getIndexInfo(null, id.getSchemaName(), id.getTableName(), true, true)) {
-			System.out.println("UNIQUENESS " + id);
+			if (printouts)
+				System.out.println("UNIQUENESS " + id);
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
 				String tableName = rsUnique.getString("TABLE_NAME");
