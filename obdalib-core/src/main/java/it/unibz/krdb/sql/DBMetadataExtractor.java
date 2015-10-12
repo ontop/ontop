@@ -28,7 +28,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -108,7 +107,7 @@ import org.slf4j.LoggerFactory;
 
 public class DBMetadataExtractor {
 
-	private static final boolean printouts = false;
+	private static final boolean printouts = true;
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 
@@ -532,28 +531,20 @@ public class DBMetadataExtractor {
 	 */
 	private static void getUniqueAttributes(DatabaseMetaData md, RelationDefinition table) throws SQLException {
 
-		Set<String> uniqueSet  = new HashSet<>();
-
 		RelationID id = table.getID();
 		// extracting unique 
 		try (ResultSet rsUnique = md.getIndexInfo(null, id.getSchemaName(), id.getTableName(), true, true)) {
+			System.out.println("UNIQUENESS " + id);
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
-				String nonUnique = rsUnique.getString("NON_UNIQUE");
-				
-				if (colName!= null){
-                // MySQL: false
-                // Postgres: f
-				// DB2 : 0
-					boolean unique =  nonUnique.toLowerCase().startsWith("f") || nonUnique.toLowerCase().startsWith("0") ;
-					if (unique /*&& !(pk.contains(colName))*/ ) { // !!! ROMAN
-						uniqueSet.add(colName);
-					}
-				}
+				String tableName = rsUnique.getString("TABLE_NAME");
+				String tableSchema = rsUnique.getString("TABLE_SCHEM");
+				String indexName = rsUnique.getString("INDEX_NAME");
+				if (printouts)
+					System.out.println("  " + tableSchema + "." + tableName + ":"  + indexName + " with " + colName);
+				// ROMAN (12 Oct 2015): this is unfinished 
 			}
 		}
-		
-		// ROMAN (20 Sep 2015): this is unfinished 
 	}
 	
 	/** 

@@ -62,7 +62,7 @@ public class HomomorphismUtilities {
 		int fromSize = from.size();
 		if (fromSize == 0)
 			return sb.getSubstituition();
-
+		
 		// stack of partial homomorphisms
 		Stack<SubstitutionBuilder> sbStack = new Stack<>();	
 		sbStack.push(sb);
@@ -92,7 +92,7 @@ public class HomomorphismUtilities {
 				if (choiceMade) {
 					// we reached the last atom
 					if (currentAtomIdx == fromSize - 1) 
-						return sb.getSubstituition();
+						return sb1.getSubstituition();
 					
 					// otherwise, save the partial homomorphism
 					sbStack.push(sb);  
