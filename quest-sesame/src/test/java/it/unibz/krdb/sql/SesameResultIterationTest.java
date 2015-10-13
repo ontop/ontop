@@ -85,7 +85,7 @@ public class SesameResultIterationTest {
 
 		preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
+		preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries_iteration_test");
 		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, jdbcUrl);
 		preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
 		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
