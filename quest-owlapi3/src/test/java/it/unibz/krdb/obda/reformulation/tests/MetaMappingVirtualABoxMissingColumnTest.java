@@ -31,6 +31,20 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,20 +55,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +70,7 @@ import static org.junit.Assert.assertTrue;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MetaMappingVirtualABoxTest {
+public class MetaMappingVirtualABoxMissingColumnTest {
 
 
 	private OBDADataFactory fac;
@@ -81,10 +81,10 @@ public class MetaMappingVirtualABoxTest {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
-	final String obdafile = "src/test/resources/test/metamapping.obda";
+	final String obdafile = "src/test/resources/test/metamapping_broken.obda";
 
 	@Before
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
 
 		
 		/*
@@ -92,7 +92,7 @@ public class MetaMappingVirtualABoxTest {
 		 */
 		// String driver = "org.h2.Driver";
 		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-		String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
+		String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
 
@@ -158,7 +158,6 @@ public class MetaMappingVirtualABoxTest {
 
 
 		String query1 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-		String query2 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
         try (QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
@@ -172,45 +171,23 @@ public class MetaMappingVirtualABoxTest {
 			assertEquals("<uri1>", ind.toString());
 			//assertEquals("<uri1>", ind2.toString());
 			//assertEquals("\"value1\"", val.toString());
-
-
 		}
 
-        try (QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-             // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs2 = st.executeTuple(query2);
-        ) {
-            assertTrue(rs2.nextRow());
-            OWLIndividual ind1 = rs2.getOWLIndividual("x");
-            //OWLIndividual ind2 = rs.getOWLIndividual("y");
-            OWLLiteral val = rs2.getOWLLiteral("y");
-            assertEquals("<uri1>", ind1.toString());
-            //assertEquals("<uri1>", ind2.toString());
-            assertEquals("\"A\"", val.toString());
-        }
 	}
 
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
 
     @Test
 	public void testViEqSig() throws Exception {
 
+        expectedEx.expect(ReasonerInternalException.class);
+        expectedEx.expectMessage("The placeholder 'code1' in the target does not occur in the body of the mapping");
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-		runTests(p);
-	}
-
-	@Test
-	public void testClassicEqSig() throws Exception {
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);
 	}
