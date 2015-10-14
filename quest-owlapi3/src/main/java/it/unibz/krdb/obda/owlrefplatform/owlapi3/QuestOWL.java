@@ -24,99 +24,26 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.NaryAxiom;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.*;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.utils.VersionInfo;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointDataPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.reasoner.AxiomNotInProfileException;
-import org.semanticweb.owlapi.reasoner.BufferingMode;
-import org.semanticweb.owlapi.reasoner.ClassExpressionNotInProfileException;
-import org.semanticweb.owlapi.reasoner.FreshEntitiesException;
-import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
-import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
-import org.semanticweb.owlapi.reasoner.InferenceType;
-import org.semanticweb.owlapi.reasoner.Node;
-import org.semanticweb.owlapi.reasoner.NodeSet;
-import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
-import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
-import org.semanticweb.owlapi.reasoner.OWLReasonerRuntimeException;
-import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
-import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-import org.semanticweb.owlapi.reasoner.TimeOutException;
-import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
-import org.semanticweb.owlapi.reasoner.impl.DefaultNode;
-import org.semanticweb.owlapi.reasoner.impl.DefaultNodeSet;
-import org.semanticweb.owlapi.reasoner.impl.OWLClassNode;
-import org.semanticweb.owlapi.reasoner.impl.OWLClassNodeSet;
-import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNode;
-import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNodeSet;
-import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNode;
-import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
-import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
-import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
-import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
+import org.semanticweb.owlapi.reasoner.impl.*;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
@@ -189,6 +116,18 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
 	
+	// //////////////////////////////////////////////////////////////////////////////////////
+	//  Davide>
+	//  T-Mappings Configuration
+	//  
+	//
+	// //////////////////////////////////////////////////////////////////////////////////////
+
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
+	
+	/* Used to signal whether to apply the user constraints above */
+	//private boolean applyExcludeFromTMappings = false;
+	
 	/**
 	 * Initialization code which is called from both of the two constructors. 
 	 * @param obdaModel 
@@ -238,7 +177,45 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
 	
+	/**
+	 * This constructor is the same as the default constructor, 
+	 * plus the list of predicates for which TMappings reasoning 
+	 * should be disallowed is supplied 
+	 * @param excludeFromTMappings from TMappings User-supplied predicates for which TMappings should be forbidden
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, TMappingExclusionConfig excludeFromTMappings) {
+		super(rootOntology, configuration, bufferingMode);
+		
+		// Davide> T-Mappings handling
+		this.excludeFromTMappings = excludeFromTMappings;
+		assert(excludeFromTMappings != null);
+		
+		this.init(rootOntology, obdaModel, configuration, preferences);
+
+	}
 	
+	/**
+	 * This constructor is the same as the default constructor plus the extra constraints, 
+	 * but the list of predicates for which TMappings reasoning should be disallowed is 
+	 * supplied 
+	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, ImplicitDBConstraints userConstraints, 
+			TMappingExclusionConfig excludeFromTMappings) {
+		super(rootOntology, configuration, bufferingMode);
+		
+		this.userConstraints = userConstraints;
+		assert(userConstraints != null);
+		this.applyUserConstraints = true;
+
+		this.excludeFromTMappings = excludeFromTMappings;
+		assert(excludeFromTMappings != null);
+		//this.applyExcludeFromTMappings = true;
+		
+		this.init(rootOntology, obdaModel, configuration, preferences);
+	}
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -311,7 +288,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		if(this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
-				
+		
+		//if( this.applyExcludeFromTMappings )
+			questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
+		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
 
@@ -334,7 +314,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure, questInstance.getVocabulary());
 					EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
@@ -346,7 +326,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
+					obdaModelForMaterialization.getOntologyVocabulary().merge(translatedOntologyMerge.getVocabulary());
 					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
@@ -411,10 +391,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		log.debug("Load ontologies called. Translating ontologies.");
 
 		try {
-
-			OWLOntologyManager man = ontology.getOWLOntologyManager();
-			Set<OWLOntology> closure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
+			Ontology mergeOntology = OWLAPI3TranslatorUtility.translateImportsClosure(ontology);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;
@@ -574,9 +551,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {		
+			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
-				Set<ClassExpression> disj = dda.getComponents();
+				Collection<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
 				ClassExpression s1 = classIterator.next();
 				ClassExpression s2 = classIterator.next();
@@ -594,10 +571,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			for(NaryAxiom<ObjectPropertyExpression> dda 
+			for(NaryAxiom<ObjectPropertyExpression> dda
 						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				Set<ObjectPropertyExpression> props = dda.getComponents();
+				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
 				ObjectPropertyExpression p1 = iterator.next();
 				ObjectPropertyExpression p2 = iterator.next();
@@ -617,7 +594,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			for(NaryAxiom<DataPropertyExpression> dda 
 						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				Set<DataPropertyExpression> props = dda.getComponents();
+				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
 				DataPropertyExpression p1 = iterator.next();
 				DataPropertyExpression p2 = iterator.next();
@@ -642,7 +619,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getPredicate().getName();
+			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -653,7 +630,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
-			String propFunc = pfa.getPredicate().getName();
+			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);

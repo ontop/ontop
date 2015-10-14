@@ -22,30 +22,42 @@ package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Translates an OWLOntology into ontop's internal ontology representation. It
- * does a syntactic approximation of the ontology, dropping anything not supported 
- * by Quest during inference.
+ * Translates an OWLOntology into ontop's internal ontology representation. 
+ * It performs a check whether the ontology belongs to OWL 2 QL and reports 
+ * all axioms that do not belong to the profile.
+ * 
+ * @author Roman Kontchakov
  * 
  */
 public class OWLAPI3TranslatorUtility {
 
 	private static final Logger log = LoggerFactory.getLogger(OWLAPI3TranslatorUtility.class);
 
-	private static Class<?extends OWLAPI3TranslatorBase> factory = OWLAPI3TranslatorDLLiteA.class;
-
-	public static void setTranslator(Class<?extends OWLAPI3TranslatorBase> factory) {
-		OWLAPI3TranslatorUtility.factory = factory;
+	/***
+	 * Load all the imports of the ontology and merges into a single ontop internal representation
+	 * 
+	 * @param ontologies
+	 * @return
+	 */
+	
+	public static Ontology translateImportsClosure(OWLOntology ontology) {
+		Set<OWLOntology> clousure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
+		return mergeTranslateOntologies(clousure);		
 	}
 	
 	/***
@@ -54,66 +66,60 @@ public class OWLAPI3TranslatorUtility {
 	 * @param ontologies
 	 * @return
 	 */
-	public static Ontology mergeTranslateOntologies(Set<OWLOntology> ontologies)   {
-		
-		// We will keep track of the loaded ontologies and translate the TBox
-		// part of them into our internal representation
-		
-		log.debug("Load ontologies called. Translating ontologies.");
-		
-		try {
-			OWLAPI3TranslatorBase translator = factory.newInstance();
-			for (OWLOntology onto : ontologies) 
-				translateInto(translator, onto);
+	
+	@Deprecated
+	public static Ontology mergeTranslateOntologies(Collection<OWLOntology> ontologies)   {
+		log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
 
-			log.debug("Ontology loaded: {}", translator.getOntology());
-
-			return translator.getOntology();
-		} catch (InstantiationException e) {
-			log.debug("Failed to instantiate the factory {}.", e.getMessage());
-			throw new RuntimeException(e.getMessage());
-		} catch (IllegalAccessException e) {
-			log.debug("Failed to instantiate the factory {}.", e.getMessage());
-			throw new RuntimeException(e.getMessage());
+		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(ontologies);
+		for (OWLOntology owl : ontologies) {
+			translator.setCurrentOWLOntology(owl);
+			for (OWLAxiom axiom : owl.getAxioms())  {
+				//if (!(axiom.isAnnotationAxiom()) && !(axiom instanceof OWLDeclarationAxiom))
+				//	System.out.println(axiom);
+				axiom.accept(translator);
+			}
 		}
+		
+		log.debug("Ontology loaded: {}", translator.getOntology());
+
+		return translator.getOntology();
 	}
 
-	
+	/**
+	 * USE FOR TESTS ONLY
+	 * 
+	 * @param owl
+	 * @return
+	 */
 	
 	public static Ontology translate(OWLOntology owl) {
-		try {
-			OWLAPI3TranslatorBase translator = factory.newInstance();
-			translateInto(translator, owl);
-			return translator.getOntology();	
-		} 
-		catch (InstantiationException e) {
-			log.debug("Failed to instantiate the factory {}.", e.getMessage());
-			throw new RuntimeException(e.getMessage());
-		} 
-		catch (IllegalAccessException e) {
-			log.debug("Failed to instantiate the factory {}.", e.getMessage());
-			throw new RuntimeException(e.getMessage());
-		}
+		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(Collections.singleton(owl));
+		translator.setCurrentOWLOntology(owl);
+
+		for (OWLAxiom axiom : owl.getAxioms()) 
+			axiom.accept(translator);
+		return translator.getOntology();	
 	}
 	
-	private static void translateInto(OWLAPI3TranslatorBase translator, OWLOntology owl) {
+	/**
+	 * USE FOR TESTS ONLY
+	 * 
+	 * @param filename
+	 * @return
+	 * @throws OWLOntologyCreationException
+	 */
+	
+	public static Ontology loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
+		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(Collections.singleton(owl));
+		translator.setCurrentOWLOntology(owl);
 
-		// add all definitions for classes and roles
-					
-		for (OWLClass entity : owl.getClassesInSignature()) 
-			translator.declare(entity);
-
-		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) 
-			translator.declare(prop);
-		
-		for (OWLDataProperty prop : owl.getDataPropertiesInSignature()) 
-			translator.declare(prop);
-
-		// process all axioms
-		
-		for (OWLAxiom axiom : owl.getAxioms()) {
-			//System.out.println(axiom);
+		for (OWLAxiom axiom : owl.getAxioms()) 
 			axiom.accept(translator);
-		}
+	
+		return translator.getOntology();	
 	}
+	
 }

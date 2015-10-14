@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -63,38 +64,43 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		originalIterator.remove();
 	}
 	
-	// used in EquivalentTriplePredicateIterator
 	
 	private Assertion getNormal(Assertion assertion) {
-		if (assertion instanceof ClassAssertion) {
-			ClassAssertion ca = (ClassAssertion) assertion;
-			OClass description = reasoner.getClassRepresentative(ca.getConcept());
-			
-			if (description != null) {
-				ObjectConstant object = ca.getIndividual();
-				return ofac.createClassAssertion(description, object);
-			}			
+		
+		try {
+			if (assertion instanceof ClassAssertion) {
+				ClassAssertion ca = (ClassAssertion) assertion;
+				OClass ce = (OClass)reasoner.getClassDAG().getCanonicalForm(ca.getConcept());
+				
+				if (ce != null && !ce.equals(ca.getConcept())) {
+					ObjectConstant object = ca.getIndividual();
+					return ofac.createClassAssertion(ce, object);
+				}			
+			} 
+			else if (assertion instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
+				ObjectPropertyExpression property = reasoner.getObjectPropertyDAG().getCanonicalForm(opa.getProperty());
+				
+				if (property != null && !property.equals(opa.getProperty())) {
+					ObjectConstant object1 = opa.getSubject();
+					ObjectConstant object2 = opa.getObject();
+					return ofac.createObjectPropertyAssertion(property, object1, object2);
+				}
+			} 
+			else if (assertion instanceof DataPropertyAssertion) {
+				DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
+				DataPropertyExpression property = reasoner.getDataPropertyDAG().getCanonicalForm(dpa.getProperty());
+				
+				if (property != null && !property.equals(dpa.getProperty())) {
+					ObjectConstant object1 = dpa.getSubject();
+					ValueConstant constant = dpa.getValue();
+					return ofac.createDataPropertyAssertion(property, object1, constant);
+				}
+			} 
 		} 
-		else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(opa.getProperty());
-			
-			if (property != null) {
-				ObjectConstant object1 = opa.getSubject();
-				ObjectConstant object2 = opa.getObject();
-				return ofac.createObjectPropertyAssertion(property, object1, object2);
-			}
-		} 
-		else if (assertion instanceof DataPropertyAssertion) {
-			DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
-			DataPropertyExpression property = reasoner.getDataPropertyRepresentative(opa.getProperty());
-			
-			if (property != null) {
-				ObjectConstant object1 = opa.getSubject();
-				ValueConstant constant = opa.getValue();
-				return ofac.createDataPropertyAssertion(property, object1, constant);					
-			}
-		} 
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + assertion);
+		}					
 		return assertion;
 	}
 }

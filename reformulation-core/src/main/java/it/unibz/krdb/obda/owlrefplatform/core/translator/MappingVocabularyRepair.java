@@ -28,13 +28,12 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.util.Collection;
@@ -59,7 +58,7 @@ public class MappingVocabularyRepair {
 
 	private static final Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public static void fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
+	public static void fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(source.getSourceID()));
@@ -80,22 +79,22 @@ public class MappingVocabularyRepair {
 	 * @param vocabulary
 	 * @return
 	 */
-	private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
+	private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, ImmutableOntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
 		Map<String, Predicate> urimap = new HashMap<>();
 		for (OClass p : vocabulary.getClasses()) 
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+			urimap.put(p.getName(), p.getPredicate());
 
 		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+			urimap.put(p.getName(), p.getPredicate());
 		
 		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+			urimap.put(p.getName(), p.getPredicate());
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			CQIE targetQuery = mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
 
 			for (Function atom : targetQuery.getBody()) {
@@ -144,13 +143,13 @@ public class MappingVocabularyRepair {
 								}
 							} 
 							else  {
-								System.err.println("INTERNAL ERROR: " + p.getName());
-								throw new RuntimeException("INTERNAL ERROR: " + p.getName());
+								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
+								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName());
 							}
 						}
 						else  {
 							System.err.println("ERROR: Predicate has an incorrect arity: " + p.getName());
-							throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
+							throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + p.getName());
 						}
 					}
 					else {
@@ -179,7 +178,7 @@ public class MappingVocabularyRepair {
 			} //end for
 			
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
 		}
 //		log.debug("Repair done. Returning {} mappings", result.size());
 		return result;

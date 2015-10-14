@@ -5,7 +5,7 @@ import java.util.Map;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorBase.TranslationException;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorOWL2QL.TranslationException;
 
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
@@ -52,14 +52,23 @@ public class OWLTypeMapper {
 	}
 	
 	// OWLAPI3TranslatorDLLiteA only
-	public static Predicate.COL_TYPE getType(OWLDatatype datatype) throws TranslationException {
-		if (datatype == null) 
+	public static Predicate.COL_TYPE getType(OWL2Datatype owlDatatype) throws TranslationException {
+		if (owlDatatype == null) 
 			return COL_TYPE.LITERAL;
 		
-		COL_TYPE type = OWLtoCOLTYPE.get(datatype.getBuiltInDatatype());
+		COL_TYPE type = OWLtoCOLTYPE.get(owlDatatype);
 		if (type == null)
-			throw new TranslationException("Unsupported data range: " + datatype);
+			throw new TranslationException("Unsupported data range: " + owlDatatype);
 		return type;
+	}
+
+	// OWLAPI3TranslatorDLLiteA only
+	@Deprecated
+	public static Predicate.COL_TYPE getType(OWLDatatype owlDatatype) throws TranslationException {
+		if (owlDatatype == null) 
+			return COL_TYPE.LITERAL;
+		
+		return getType(owlDatatype.getBuiltInDatatype());
 	}
 	
 	// OWLAPI3IndividualTranslator only

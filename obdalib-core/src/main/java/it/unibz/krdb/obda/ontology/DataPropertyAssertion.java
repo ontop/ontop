@@ -30,6 +30,20 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
+/**
+ * Represents DataPropertyAssertion from the OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations 
+ * 								DataPropertyExpression sourceIndividual targetValue ')'
+ * DataPropertyExpression := DataProperty
+ * 
+ *  Support for owl:topDataProperty and owl:bottomDataProperty
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
+
 public interface DataPropertyAssertion extends Assertion {
 
 	public DataPropertyExpression getProperty();

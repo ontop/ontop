@@ -205,10 +205,8 @@ public class DirectMappingAxiom {
 							.getDefinition(pkTableReference);
 					Term obj = generateSubject(tdRef, true);
 
-					atom = (df.getFunction(
-							df.getObjectPropertyPredicate(generateOPURI(
-									table.getName(), table.getAttributes())),
-							sub, obj));
+					String opURI = generateOPURI(table.getName(), att);
+					atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
 					// construct the head
 					Set<Variable> headTermsSet = new HashSet<>();
@@ -245,13 +243,14 @@ public class DirectMappingAxiom {
 	}
 
 	// Generate an URI for object property from a string(name of column)
-	private String generateOPURI(String table, Collection<Attribute> columns) {
-		String column = "";
-		for (Attribute a : columns)
-			if (a.isForeignKey())
-				column += a.getName() + "_";
-		column = column.substring(0, column.length() - 1);
-		return new String(baseuri + percentEncode(table) + "#ref-" + column);
+	private String generateOPURI(String table, Attribute columns) {
+//		String columnsInFK = "";
+//		for (Attribute a : columns)
+//			if (a.isForeignKey() && a.getReference().getTableReference().equals(foreignTable.getName()))
+//				columnsInFK += a.getName() + ";";
+//		columnsInFK = columnsInFK.substring(0, columnsInFK.length() - 1);
+		String columnsInFK = columns.getName();
+		return baseuri + percentEncode(table) + "#ref-"  + columnsInFK;
 	}
 
 	/*

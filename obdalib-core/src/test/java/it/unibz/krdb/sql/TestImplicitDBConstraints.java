@@ -1,13 +1,13 @@
 package it.unibz.krdb.sql;
 
-import static org.junit.Assert.*;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class TestImplicitDBConstraints {
 
@@ -49,10 +49,10 @@ public class TestImplicitDBConstraints {
 	@Test
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
-		uc.addPrimaryKeys(this.md);
+		uc.addFunctionalDependency(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
-		Attribute attr = dd.getAttribute(1); // from 1
-		assertTrue(attr.isPrimaryKey());
+		Attribute attr = dd.getAttribute(1);
+		assertTrue(attr.isUnique());
 	}
 
 
@@ -86,7 +86,7 @@ public class TestImplicitDBConstraints {
 		Reference ref = attr.getReference();
 		assertTrue(ref.getTableReference().equals("TABLE2"));
 		assertTrue(ref.getColumnReference().equals("KEY1"));
-		assertTrue(attr.isPrimaryKey());
+		assertTrue(attr.isUnique());
 	}
 
 	

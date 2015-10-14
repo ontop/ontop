@@ -20,9 +20,9 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-import io.airlift.airline.Command;
-import io.airlift.airline.Option;
-import io.airlift.airline.OptionType;
+import com.github.rvesse.airline.Command;
+import com.github.rvesse.airline.Option;
+import com.github.rvesse.airline.OptionType;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -120,7 +120,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
 
-            obdaModel.declareAll(inputOntology.getVocabulary());
+            obdaModel.getOntologyVocabulary().merge(inputOntology.getVocabulary());
 
 
             int numPredicates = predicates.size();
@@ -236,7 +236,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 }
 
                 Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
-                obdaModel.declareAll(onto.getVocabulary());
+                obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
                 materializer = new OWLAPI3Materializer(obdaModel, onto, DO_STREAM_RESULTS);
             } else {
                 ontology = manager.createOntology();

@@ -27,7 +27,7 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName) {
 
 		switch (className) {
 			case "org.postgresql.Driver":
@@ -42,7 +42,7 @@ public class SQLAdapterFactory {
 				return new DB2SQLDialectAdapter();
 			case "oracle.jdbc.driver.OracleDriver":
 			case "oracle.jdbc.OracleDriver":
-				return new OracleSQLDialectAdapter();
+				return new OracleSQLDialectAdapter(databaseName);
 			case "org.teiid.jdbc.TeiidDriver":
 				return new TeiidSQLDialectAdapter();
 			case "net.sourceforge.jtds.jdbc.Driver":
@@ -50,6 +50,10 @@ public class SQLAdapterFactory {
 				return new SQLServerSQLDialectAdapter();
 			case "madgik.adp.federatedjdbc.AdpDriver":
 				return new AdpSQLDialectAdapter();
+            case "nl.cwi.monetdb.jdbc.MonetDriver":
+                return new MonetDBSQLDialectAdapter();
+            case "com.sap.db.jdbc.Driver":
+                return new SAPHANASQLDialectAdapter();
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");

@@ -28,17 +28,17 @@ public interface OBDARDBMappingAxiom extends OBDAMappingAxiom {
 	 * @param query
 	 *            a SQL Query object.
 	 */
-	public void setSourceQuery(OBDAQuery query);
+	public void setSourceQuery(OBDASQLQuery query);
 
+	public OBDASQLQuery getSourceQuery();
+	
 	/**
 	 * Set the target query for this mapping axiom.
 	 * 
 	 * @param query
 	 *            a conjunctive query object;
 	 */
-	public void setTargetQuery(OBDAQuery query);
-
-	public OBDASQLQuery getSourceQuery();
+	public void setTargetQuery(CQIE query);
 
 	public CQIE getTargetQuery();
 

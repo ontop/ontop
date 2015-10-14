@@ -150,10 +150,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			man.load(f);
 			
 			// read onto 
-			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  OWLAPI3TranslatorUtility.translate(owl_onto);
+			Ontology onto =  OWLAPI3TranslatorUtility.loadOntologyFromFile("src/test/resources/test/materializer/MaterializeTest.owl");
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());

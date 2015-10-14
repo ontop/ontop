@@ -28,15 +28,13 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -44,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -113,6 +113,29 @@ public class OracleORDERBYTest {
         assertTrue(m);
     }
 
+    private void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
+        QuestOWLStatement st = conn.createStatement();
+        int i = 0;
+        List<String> returnedUris = new ArrayList<>();
+        try {
+            QuestOWLResultSet rs = st.executeTuple(query);
+            while (rs.nextRow()) {
+                OWLNamedIndividual ind1 = (OWLNamedIndividual) rs.getOWLIndividual("x");
+                // log.debug(ind1.toString());
+                returnedUris.add(ind1.getIRI().toString());
+                java.lang.System.out.println(ind1.getIRI());
+                i++;
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            conn.close();
+            reasoner.dispose();
+        }
+        assertTrue(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()),
+                returnedUris.equals(expectedUris));
+        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedUris.size()), expectedUris.size() == i);
+    }
 
     @Test
     public void testOrderBy() throws Exception {
@@ -124,7 +147,55 @@ public class OracleORDERBYTest {
                 "WHERE { ?x a :Country; :name ?name . } "
                 + "ORDER BY ?name"
                 ;
+
         runQuery(query);
+        List<String> expectedUris = new ArrayList<>();
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Australia");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Belgium");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Brazil");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Canada");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-China");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Denmark");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-France");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Germany");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-India");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Israel");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Italy");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Japan");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Kuwait");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Malaysia");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Mexico");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Netherlands");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Nigeria");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Singapore");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Switzerland");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20States%20of%20America");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Zambia");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Zimbabwe");
+
+        checkReturnedUris(query, expectedUris);
+    }
+
+
+    @Test
+    public void testOrderByAndLimit() throws Exception {
+
+        ModelIOManager ioManager = new ModelIOManager(obdaModel);
+        ioManager.load(obdaFile);
+        String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
+                "SELECT ?x ?name " +
+                "WHERE { ?x a :Country; :name ?name . } "
+                + "ORDER BY ?name "
+                + "LIMIT 2 " ;
+
+        runQuery(query);
+        List<String> expectedUris = new ArrayList<>();
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Australia");
+        checkReturnedUris(query, expectedUris);
     }
 
 

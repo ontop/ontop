@@ -1,11 +1,12 @@
 package org.semanticweb.ontop.cli;
 
-import io.airlift.airline.Cli;
-import io.airlift.airline.Cli.CliBuilder;
-import io.airlift.airline.ParseArgumentsUnexpectedException;
-import io.airlift.airline.ParseCommandMissingException;
-import io.airlift.airline.ParseCommandUnrecognizedException;
-import io.airlift.airline.ParseOptionMissingException;
+
+import com.github.rvesse.airline.Cli;
+import com.github.rvesse.airline.builder.CliBuilder;
+import com.github.rvesse.airline.parser.ParseArgumentsUnexpectedException;
+import com.github.rvesse.airline.parser.ParseCommandMissingException;
+import com.github.rvesse.airline.parser.ParseCommandUnrecognizedException;
+import com.github.rvesse.airline.parser.ParseOptionMissingException;
 
 public class Ontop {
 

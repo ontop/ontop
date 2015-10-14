@@ -389,14 +389,14 @@ parse returns [CQIE value]
       List<Function> triples = $t1.value;
       $value = dfac.getCQIE(head, triples);
     }
-    (t2=triplesStatement)* EOF {
+      (t2=triplesStatement {
       List<Function> additionalTriples = $t2.value;
       if (additionalTriples != null) {
         // If there are additional triple statements then just add to the existing body
         List<Function> existingBody = $value.getBody();
         existingBody.addAll(additionalTriples);
       }
-    }
+    } )* EOF
   ;
 
 directiveStatement
