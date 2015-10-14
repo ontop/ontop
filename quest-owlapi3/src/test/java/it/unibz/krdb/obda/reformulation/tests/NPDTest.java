@@ -145,7 +145,8 @@ public class NPDTest {
 			int tbl = 0;
 			while (rsTables.next()) {
 				final String tblName = rsTables.getString("TABLE_NAME");
-				//System.out.println("Table " + ++tbl + ": " + tblName);
+				tbl++;
+				//System.out.println("Table " + tbl + ": " + tblName);
 			}
 			assertEquals(tbl, 70);
 		}
