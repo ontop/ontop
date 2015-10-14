@@ -132,7 +132,7 @@ public class NPDTest {
 			for (String line = in.readLine(); line != null; line = in.readLine()) {
 				bf.append(line + "\n");
 				if (line.startsWith("--")) {
-					System.out.println("EXECUTING " + i++ + ":\n" + bf.toString());
+					//System.out.println("EXECUTING " + i++ + ":\n" + bf.toString());
 					st.executeUpdate(bf.toString());
 					conn.commit();
 					bf = new StringBuilder();
@@ -145,7 +145,7 @@ public class NPDTest {
 			int tbl = 0;
 			while (rsTables.next()) {
 				final String tblName = rsTables.getString("TABLE_NAME");
-				System.out.println("Table " + ++tbl + ": " + tblName);
+				//System.out.println("Table " + ++tbl + ": " + tblName);
 			}
 			assertEquals(tbl, 70);
 		}
@@ -168,7 +168,7 @@ public class NPDTest {
 				String colName = rsIndexes.getString("COLUMN_NAME");
 				String indName = rsIndexes.getString("INDEX_NAME");
 				boolean nonUnique = rsIndexes.getBoolean("NON_UNIQUE");
-				System.out.println(indName + " " +colName + " " + nonUnique);
+				//System.out.println(indName + " " +colName + " " + nonUnique);
 			}
 		} 
 		

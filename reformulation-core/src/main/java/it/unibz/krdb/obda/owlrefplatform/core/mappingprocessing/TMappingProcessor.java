@@ -392,7 +392,7 @@ public class TMappingProcessor {
 
 	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 		
-		final boolean printouts = true;
+		final boolean printouts = false;
 		
 		if (printouts)
 			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
