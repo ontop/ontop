@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 
 /**
- * This class generates a SQL string from the datalog program coming from the
+ * This class generates an SQLExecutableQuery from the datalog program coming from the
  * unfolder.
  *
  * This class is NOT thread-safe (attributes values are query-dependent).
