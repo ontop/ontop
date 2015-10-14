@@ -515,7 +515,12 @@ public class DBMetadataExtractor {
 		RelationID id = table.getID();
 		try (ResultSet rsPrimaryKeys = md.getPrimaryKeys(null, id.getSchemaName(), id.getTableName())) {
 			while (rsPrimaryKeys.next()) {
-				pkName = rsPrimaryKeys.getString("PK_NAME");
+				// TABLE_CAT
+				// TABLE_SCHEM
+				// TABLE_NAME 
+				// COLUMN_NAME
+				// KEY_SEQ (short)
+				pkName = rsPrimaryKeys.getString("PK_NAME"); // may be null
 				QuotedID colName = QuotedID.createFromDatabaseRecord(rsPrimaryKeys.getString("COLUMN_NAME"));
 				pk.add(table.getAttribute(colName));
 			}
@@ -537,10 +542,24 @@ public class DBMetadataExtractor {
 			if (printouts)
 				System.out.println("UNIQUENESS " + id);
 			while (rsUnique.next()) {
-				String colName = rsUnique.getString("COLUMN_NAME");
-				String tableName = rsUnique.getString("TABLE_NAME");
+				// TABLE_CAT
 				String tableSchema = rsUnique.getString("TABLE_SCHEM");
-				String indexName = rsUnique.getString("INDEX_NAME");
+				String tableName = rsUnique.getString("TABLE_NAME");
+				// NON_UNIQUE boolean
+				String indexName = rsUnique.getString("INDEX_NAME"); // null when TYPE is tableIndexStatistic
+				// TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjuction with a table's index descriptions
+				//       tableIndexClustered - this is a clustered index
+				//       tableIndexHashed - this is a hashed index
+				//       tableIndexOther (all are static final int in DatabaseMetaData)
+				// ORDINAL_POSITION short 
+				String colName = rsUnique.getString("COLUMN_NAME"); // null when TYPE is tableIndexStatistic
+				// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending, 
+				//        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
+				// CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table; 
+				//                      otherwise, it is the number of unique values in the index.
+				// PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table, 
+				//                    otherwise it is the number of pages used for the current index.
+				// FILTER_CONDITION String => Filter condition, if any. (may be null)
 				if (printouts)
 					System.out.println("  " + tableSchema + "." + tableName + ":"  + indexName + " with " + colName);
 				// ROMAN (12 Oct 2015): this is unfinished 
@@ -564,7 +583,9 @@ public class DBMetadataExtractor {
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
 				RelationID pkTable = RelationID.createRelationIdFromDatabaseRecord(pkSchemaName, pkTableName);
 				TableDefinition ref = metadata.getTable(pkTable);
-				String name = rsForeignKeys.getString("FK_NAME");
+				// FKTABLE_SCHEM 
+				// FKTABLE_NAME 
+				String name = rsForeignKeys.getString("FK_NAME"); // String => foreign key name (may be null)
 				if (!currentName.equals(name)) {
 					if (builder != null) 
 						table.addForeignKeyConstraint(builder.build(currentName));

@@ -134,6 +134,9 @@ public class TMappingProcessor {
 			while (mappingIterator.hasNext()) {
 
 				TMappingRule currentRule = mappingIterator.next(); 
+				// ROMAN (14 Oct 2015): quick fix, but one has to be more careful with variables in filters
+				if (currentRule.equals(newRule))
+					return;
 						
 				boolean couldIgnore = false;
 				
@@ -201,10 +204,7 @@ public class TMappingProcessor {
 							filterAtoms.add(TMappingRule.cloneList(econd));		
 					}
 
-					filterAtoms.add(newconditions);
-
-					
-					
+					filterAtoms.add(newconditions);	
 					
 	                mappingIterator.remove();
 	                
@@ -392,7 +392,7 @@ public class TMappingProcessor {
 
 	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 		
-		final boolean printouts = false;
+		final boolean printouts = true;
 		
 		if (printouts)
 			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
