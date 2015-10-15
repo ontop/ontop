@@ -34,7 +34,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public DatatypeFactory getDatatypeFactory();
 
-	public CQIE getCQIE(Function head, Function... body );
+	public CQIE getCQIE(Function head, Function... body);
 	
 	public CQIE getCQIE(Function head, List<Function> body);
 	
@@ -289,12 +289,12 @@ public interface OBDADataFactory extends Serializable {
 	
 	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
-	public OBDAMappingAxiom getRDBMSMappingAxiom(String sql, List<Function> targetQuery);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
 
 	
-	public Function getSPARQLJoin(Term t1, Term t2);
+	public Function getSPARQLJoin(Function t1, Function t2);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);
+	public Function getSPARQLLeftJoin(Function t1, Function t2);
 }

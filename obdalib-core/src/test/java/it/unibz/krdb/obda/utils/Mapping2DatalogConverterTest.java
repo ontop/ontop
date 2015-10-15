@@ -80,7 +80,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm);
 		List<Function> target = targetParser.parse(targetString);
 		
-		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(source, target);
+		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(ofac.getSQLQuery(source), target);
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		

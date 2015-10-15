@@ -434,7 +434,7 @@ public class DBMetadataExtractor {
 	
 	
 	
-	private static void getTableColumns(DatabaseMetaData md, RelationDefinition table, DatatypeNormalizer dt) throws SQLException {
+	private static void getTableColumns(DatabaseMetaData md, TableDefinition table, DatatypeNormalizer dt) throws SQLException {
 		// needed for checking uniqueness of lower-case versions of columns names
 		//  (only in getOtherMetadata)
 		//Set<String> tableColumns = new HashSet<>();
@@ -509,7 +509,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the primary key for the table 
 	 * 
 	 */
-	private static void getPrimaryKey(DatabaseMetaData md, RelationDefinition table) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, TableDefinition table) throws SQLException {
 		UniqueConstraint.Builder pk = UniqueConstraint.builder(table);
 		String pkName = "";
 		RelationID id = table.getID();
@@ -571,7 +571,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the foreign keys for the table 
 	 * 
 	 */
-	private static void getForeignKeys(DatabaseMetaData md, RelationDefinition table, DBMetadata metadata) throws SQLException {
+	private static void getForeignKeys(DatabaseMetaData md, TableDefinition table, DBMetadata metadata) throws SQLException {
 		
 		RelationID id = table.getID();
 		

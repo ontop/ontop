@@ -1242,18 +1242,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			RelationDefinition table = metadata.getRelation(tableId);
-			Attribute a = table.getAttribute(attributeId);
-			switch (a.getType()) {
-				case Types.VARCHAR:
-				// case Types.CHAR: // ROMAN (10 Oct 2015) -- otherwise PgsqlDatatypeTest.all fails 
-				case Types.LONGNVARCHAR:
-				case Types.LONGVARCHAR:
-				case Types.NVARCHAR:
-				case Types.NCHAR:
-					return true;
-				default:
-					return false;
+			TableDefinition table = metadata.getTable(tableId);
+			if (table != null) {
+				// ROMAN (15 Oct 2015): i'm not sure what to do if it is a view (i.e., a complex subquery)
+	 			Attribute a = table.getAttribute(attributeId);
+				switch (a.getType()) {
+					case Types.VARCHAR:
+					// case Types.CHAR: // ROMAN (10 Oct 2015) -- otherwise PgsqlDatatypeTest.all fails 
+					case Types.LONGNVARCHAR:
+					case Types.LONGVARCHAR:
+					case Types.NVARCHAR:
+					case Types.NCHAR:
+						return true;
+					default:
+						return false;
+				}
 			}
 		}
 		return false;

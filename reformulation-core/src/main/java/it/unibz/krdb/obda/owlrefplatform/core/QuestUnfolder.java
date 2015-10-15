@@ -24,9 +24,9 @@ import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
+import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -153,7 +153,7 @@ public class QuestUnfolder {
 					continue;
 				
 				RelationID newAtomName = Relation2DatalogPredicate.createRelationFromPredicateName(newAtomPredicate);
-				RelationDefinition def = metadata.getRelation(newAtomName);
+				TableDefinition def = metadata.getTable(newAtomName);
 				if (def != null) {
 					// primary keys
 					UniqueConstraint pk = def.getPrimaryKey();

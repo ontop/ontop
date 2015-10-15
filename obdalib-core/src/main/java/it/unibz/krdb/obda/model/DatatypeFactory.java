@@ -16,7 +16,7 @@ public interface DatatypeFactory {
 	public URI getDatatypeURI(COL_TYPE type);
 
 	
-	public Predicate getTypePredicate(COL_TYPE type);
+	public DatatypePredicate getTypePredicate(COL_TYPE type);
 	
 		
 	public boolean isBoolean(Predicate p);

@@ -139,7 +139,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	
 	@Override
-	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
+	public DatatypePredicate getTypePredicate(Predicate.COL_TYPE type) {
 		return mapCOLTYPEtoPredicate.get(type);
 		
 		//case OBJECT:   // different uses

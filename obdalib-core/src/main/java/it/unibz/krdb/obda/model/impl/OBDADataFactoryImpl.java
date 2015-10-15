@@ -228,14 +228,14 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public SQLQueryImpl getSQLQuery(String query) {
-		return new SQLQueryImpl(query);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery) {
+		String id = IDGenerator.getNextUniqueID("MAPID-");
+		return getRDBMSMappingAxiom(id, sourceQuery, targetQuery);
 	}
 
 	@Override
-	public OBDAMappingAxiom getRDBMSMappingAxiom(String sql, List<Function> targetQuery) {
-		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
-		return getRDBMSMappingAxiom(id, getSQLQuery(sql), targetQuery);
+	public SQLQueryImpl getSQLQuery(String query) {
+		return new SQLQueryImpl(query);
 	}
 
 	
@@ -453,12 +453,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getSPARQLJoin(Term t1, Term t2) {
+	public Function getSPARQLJoin(Function t1, Function t2) {
 		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
 	@Override
-	public Function getSPARQLLeftJoin(Term t1, Term t2) {
+	public Function getSPARQLLeftJoin(Function t1, Function t2) {
 		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}
 

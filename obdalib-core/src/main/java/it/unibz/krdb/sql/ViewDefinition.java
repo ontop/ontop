@@ -1,6 +1,5 @@
 package it.unibz.krdb.sql;
 
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,8 +20,23 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Represents a complex subquery (not a database view!)
+ * 
+ * @author Roman Kontchakov
+*/
+
 public class ViewDefinition extends RelationDefinition {
 
+	private final List<Attribute> attributes = new ArrayList<>();
+	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
+	
 	private final String statement;
 	
 	/**
@@ -37,17 +51,40 @@ public class ViewDefinition extends RelationDefinition {
 		this.statement = statement;
 	}
 
+	public void addAttribute(QuotedID name) {
+		Attribute att = new Attribute(this, attributes.size() + 1, name, 0, null, true);
+		Attribute prev = attributeMap.put(name, att);
+		if (prev != null) 
+			throw new IllegalArgumentException("Duplicate attribute names");
+		
+		attributes.add(att);
+	}
+	
+	
 	public String getStatement() {
 		return statement;
 	}
 
+	@Override
+	public Attribute getAttribute(int index) {
+		// positions start at 1
+		Attribute attribute = attributes.get(index - 1);
+		return attribute;
+	}
+
+	@Override
+	public List<Attribute> getAttributes() {
+		return Collections.unmodifiableList(attributes);
+	}
+	
+	
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
 		bf.append(getID());
 		bf.append("[");
 		boolean comma = false;
-		for (Attribute att : getAttributes()) {
+		for (Attribute att : attributes) {
 			if (comma) 
 				bf.append(",");
 			
@@ -59,4 +96,5 @@ public class ViewDefinition extends RelationDefinition {
 		bf.append(String.format("   (%s)", statement));
 		return bf.toString();
 	}
+
 }

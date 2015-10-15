@@ -657,7 +657,7 @@ public class DatalogNormalizer {
 		for (Term term : atom.getTerms()) {
 			innerFunctionalTerms.addAll(getUnfolderTermList((Function) term));
 		}
-		List<Function> newatoms = new LinkedList<Function>();
+		List<Function> newatoms = new LinkedList<>();
 		for (Term innerterm : innerFunctionalTerms) {
 			Function f = (Function) innerterm;
 			Function newatom = fac.getFunction(f.getFunctionSymbol(), f.getTerms());

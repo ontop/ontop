@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -191,7 +190,7 @@ public class SQLQueryParser {
             List<Column> columns = queryParser.getColumns();
             for (Column column : columns) {
             	QuotedID columnId = idfac.createFromString(column.getColumnName());
-                viewDefinition.addAttribute(columnId, 0, null, false);
+                viewDefinition.addAttribute(columnId);
             }
         }
         else {
@@ -234,7 +233,7 @@ public class SQLQueryParser {
 
                 QuotedID columnId = idfac.createFromString(columnName);
 
-                viewDefinition.addAttribute(columnId, 0, null, false); 
+                viewDefinition.addAttribute(columnId); 
             }
         }
 	}

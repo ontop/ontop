@@ -45,6 +45,10 @@ public class Attribute {
 		return id;
 	}
 	
+	public QualifiedAttributeID getQualifiedID() {
+		return new QualifiedAttributeID(table.getID(), id);
+	}
+	
 	public RelationDefinition getRelation() {
 		return table;
 	}
