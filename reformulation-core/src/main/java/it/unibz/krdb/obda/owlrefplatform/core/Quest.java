@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -35,6 +34,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDep
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -56,7 +56,6 @@ import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
-
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
@@ -672,7 +671,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					}
 				}
 			}
-			
+
 			//Adds keys from the text file
 			if (applyUserConstraints) {
 				userConstraints.addFunctionalDependencies(metadata);
@@ -712,7 +711,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
             SQLDialectAdapter sqladapter = SQLAdapterFactory
                    .getSQLDialectAdapter(obdaSource
-                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDatabaseVersion());
 			
 			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 

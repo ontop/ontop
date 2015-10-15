@@ -2,11 +2,10 @@ package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 

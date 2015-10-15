@@ -117,7 +117,7 @@ public class DBMetadataExtractor {
 	}
 	
 	public static DBMetadata createDummyMetadata(String driver_class) {
-		return new DBMetadata(driver_class, null, null, new QuotedIDFactoryStandardSQL());
+		return new DBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL());
 	}
 	
 	
@@ -152,7 +152,8 @@ public class DBMetadataExtractor {
 		else // For other database engines
 			idfac = new QuotedIDFactoryIdentity();
 		
-		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), productName, idfac);
+		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), 
+							productName, md.getDatabaseProductVersion(), idfac);
 		
 		return metadata;	
 	}

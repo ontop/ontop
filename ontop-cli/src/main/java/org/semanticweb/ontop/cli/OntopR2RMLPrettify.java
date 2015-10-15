@@ -21,10 +21,10 @@ package org.semanticweb.ontop.cli;
  */
 
 
-import com.hp.hpl.jena.rdf.model.Model;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
+import com.hp.hpl.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;

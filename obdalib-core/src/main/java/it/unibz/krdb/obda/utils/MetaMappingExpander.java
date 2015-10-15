@@ -75,7 +75,7 @@ public class MetaMappingExpander {
 	private final QuotedIDFactory idfac;
 	private final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	/**
+    /**
 	 *
 	 * 
 	 * @param connection a JDBC connection
@@ -132,6 +132,14 @@ public class MetaMappingExpander {
 				ParsedSQLQuery sourceQueryParsed = translator.parseShallowly(sourceQuery.toString());
 				
 				List<SelectExpressionItem> columnList = null;
+				
+				// distinctParamsProjection.addAll(columnsForTemplate);
+				
+				/**
+				 * The query for params is almost the same with the original source query, except that
+				 * we only need to distinct project the columns needed for the template expansion 
+				 */
+				
 				try {
 					columnList = sourceQueryParsed.getProjection().getColumnList();
 				} 
@@ -236,14 +244,7 @@ public class MetaMappingExpander {
 
 	/**
 	 * This method instantiate a meta mapping by the concrete parameters
-	 * 
-	 * @param targetQuery
-	 * @param bodyAtom
-	 * @param sourceParsedQuery
-	 * @param columnsForTemplate
-	 * @param columnsForValues
-	 * @param params
-	 * @return
+	 *
 	 * @throws JSQLParserException 
 	 */
 	private OBDAMappingAxiom instantiateMapping(String id, List<Function> targetQuery,
@@ -256,10 +257,6 @@ public class MetaMappingExpander {
 		 * First construct new Target Query 
 		 */
 		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params, arity);
-		
-		/*
-		 * Then construct new Source Query
-		 */
 		
 		Expression selection = null;
 		try {
@@ -314,12 +311,14 @@ public class MetaMappingExpander {
 	 * 
 	 * @param varsInTemplate
 	 * @param columnList
-	 * @return
+	 * @param mapping
+     * @return
 	 */
 	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
 			List<SelectExpressionItem> columnList, QuotedIDFactory idfac) {
 		
 		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>(varsInTemplate.size());
+
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
 			for (SelectExpressionItem selectExpression : columnList) {
@@ -347,8 +346,11 @@ public class MetaMappingExpander {
 					
 									
 			}
-			if (!found) {
-				throw new IllegalStateException();
+			if(!found){
+                String format = "The placeholder '%s' in the target does not occur in the body of the mapping";
+
+                throw new IllegalStateException(String.format(format,
+                        var.getName()/*,  mapping.toString()*/));
 			}
 		}
 		
@@ -374,7 +376,6 @@ public class MetaMappingExpander {
 	 * <pre>triple(t1,  URI("http://example.org/{}/{}", X, Y), t2)</pre>
 	 * 
 	 * Output: [X, Y]
-
 	 * 
 	 * @param atom
 	 * @param arity 

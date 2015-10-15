@@ -35,6 +35,7 @@ public class DBMetadata implements Serializable {
 	private final String driverName;
 	private final String driverVersion;
 	private final String databaseProductName;
+	private final String databaseVersion;
 	private final QuotedIDFactory idfac;
 
 	/**
@@ -44,10 +45,11 @@ public class DBMetadata implements Serializable {
 	 * DO NOT USE THIS CONSTRUCTOR -- USE MetadataExtractor METHODS INSTEAD
 	 */
 
-	DBMetadata(String driverName, String driverVersion, String databaseProductName, QuotedIDFactory idfac) {
+	DBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
 		this.driverName = driverName;
 		this.driverVersion = driverVersion;
 		this.databaseProductName = databaseProductName;
+		this.databaseVersion = databaseVersion;
 		this.idfac = idfac;
 	}
 
@@ -158,5 +160,10 @@ public class DBMetadata implements Serializable {
 			bf.append("\n");
 		}
 		return bf.toString();
+	}
+
+
+	public String getDatabaseVersion() {
+		return databaseVersion;
 	}
 }

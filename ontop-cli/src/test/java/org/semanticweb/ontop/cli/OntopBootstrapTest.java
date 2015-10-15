@@ -9,6 +9,7 @@ public class OntopBootstrapTest {
         Ontop.main("help", "bootstrap");
     }
 
+
     @Test
     public void testOntopBootstrap (){
         String[] argv = {"bootstrap",
