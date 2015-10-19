@@ -2313,18 +2313,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return atom;
 	}
 
-	@Override
-	@Deprecated
-	/**
-	 * This method is deprecated and does the unfolding of the program assuming that the strategy is TOP-DOWN
-	 */
-	public DatalogProgram unfold(DatalogProgram query, String targetPredicate)
-			throws OBDAException {
-		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
-		unfold(query,targetPredicate,QuestConstants.TDOWN, false,multiplePredIdx);
-		return null;
-	}
-
 
 	/**
 	 * This method returns the predicates that define two different templates

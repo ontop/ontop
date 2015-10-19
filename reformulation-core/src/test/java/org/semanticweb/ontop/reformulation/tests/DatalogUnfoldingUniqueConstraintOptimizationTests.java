@@ -20,11 +20,13 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import junit.framework.TestCase;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.TableDefinition;
@@ -159,7 +161,8 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
-		DatalogProgram output = unfolder.unfold(input, "q");
+		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
+				ArrayListMultimap.<Predicate, Integer>create());
 		System.out.println("input " + input);
 
 		int atomcount = 0;
