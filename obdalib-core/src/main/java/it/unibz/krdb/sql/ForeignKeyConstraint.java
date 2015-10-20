@@ -20,6 +20,9 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -53,11 +56,6 @@ public class ForeignKeyConstraint {
 		
 		public Attribute getReference() {
 			return reference;
-		}
-		
-		@Override
-		public String toString() {
-			return attribute.getID() + "->" + reference.getID();
 		}
 	}
 	
@@ -149,17 +147,23 @@ public class ForeignKeyConstraint {
 	
 	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append("FK ")
-			.append(relation.getID().getSQLRendering())
-			.append("->")
-			.append(referencedRelation.getID().getSQLRendering())
-			.append(": ")
-			.append(name) 
-			.append(" (");
+		List<String> columns = new ArrayList<>(components.size());
+		List<String> refColumns = new ArrayList<>(components.size());
+		for (Component c : components) {
+			columns.add(c.getAttribute().getID().toString());
+			refColumns.add(c.getReference().getID().toString());
+		}
 		
-		Joiner.on(", ").appendTo(bf, components);
+		StringBuilder bf = new StringBuilder();
+
+		bf.append("ALTER TABLE ").append(relation.getID().getSQLRendering())
+			.append(" ADD CONSTRAINT ").append(name).append(" FOREIGN KEY (");
+		Joiner.on(", ").appendTo(bf, columns);	
+		bf.append(") REFERENCES ").append(referencedRelation.getID().getSQLRendering())
+			.append(" (");
+		Joiner.on(", ").appendTo(bf, refColumns);	
 		bf.append(")");
+		
 		return bf.toString();
 	}
 }

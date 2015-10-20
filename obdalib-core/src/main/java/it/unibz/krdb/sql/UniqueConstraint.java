@@ -20,6 +20,11 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -142,7 +147,17 @@ public class UniqueConstraint {
 	}
 	
 	@Override
-	public String toString() {
-		return name + (isPK ? " (PK): " : ": " ) + Joiner.on(", ").join(attributes);
+	public String toString() {	
+		List<String> columns = new ArrayList<>(attributes.size());
+		for (Attribute c : attributes) 
+			columns.add(c.getID().toString());
+		
+		StringBuilder bf = new StringBuilder();
+		bf.append("ALTER TABLE ").append(attributes.get(0).getRelation().getID())
+			.append(" ADD CONSTRAINT ").append(name).append(isPK ? " PRIMARY KEY " : " UNIQUE ")
+			.append("(");
+		Joiner.on(", ").appendTo(bf, columns);
+		bf.append(")");
+		return bf.toString();
 	}
 }

@@ -31,6 +31,7 @@ public class DBMetadata implements Serializable {
 	
 	// relations include tables and views (views are only created for complex queries in mappings)
 	private final Map<RelationID, RelationDefinition> relations = new HashMap<>();
+	private final List<DatabaseRelationDefinition> listOfTables = new LinkedList<>();
 
 	private final String driverName;
 	private final String driverVersion;
@@ -64,6 +65,7 @@ public class DBMetadata implements Serializable {
 		DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
 		add(table, tables);
 		add(table, relations);
+		listOfTables.add(table);
 		return table;
 	}
 
@@ -142,7 +144,7 @@ public class DBMetadata implements Serializable {
 	 * Retrieves the tables list form the metadata.
 	 */
 	public Collection<DatabaseRelationDefinition> getTables() {
-		return Collections.unmodifiableCollection(tables.values());
+		return Collections.unmodifiableCollection(listOfTables);
 	}
 
 
@@ -157,6 +159,11 @@ public class DBMetadata implements Serializable {
 	public String getDatabaseProductName() {
 		return databaseProductName;
 	}
+	
+	public String getDatabaseVersion() {
+		return databaseVersion;
+	}
+	
 
 	public QuotedIDFactory getQuotedIDFactory() {
 		return idfac;
@@ -172,10 +179,5 @@ public class DBMetadata implements Serializable {
 			bf.append("\n");
 		}
 		return bf.toString();
-	}
-
-
-	public String getDatabaseVersion() {
-		return databaseVersion;
 	}
 }

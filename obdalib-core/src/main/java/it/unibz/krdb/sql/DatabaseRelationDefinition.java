@@ -171,14 +171,9 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(getID());
-		bf.append("[");
-		Joiner.on(", ").appendTo(bf, attributes);
-		bf.append("]\n U {");
-		Joiner.on(",\n   ").appendTo(bf, ucs);
-		bf.append("}\n FK {");
-		Joiner.on(",\n   ").appendTo(bf, fks);
-		bf.append("}");
+		bf.append("CREATE TABLE ").append(getID()).append(" (\n   ");
+		Joiner.on(",\n   ").appendTo(bf, attributes);
+		bf.append("\n)");
 		return bf.toString();
 	}
 

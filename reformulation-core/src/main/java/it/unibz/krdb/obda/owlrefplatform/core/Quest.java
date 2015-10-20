@@ -681,17 +681,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (printKeys) { 
 				Collection<DatabaseRelationDefinition> table_list = metadata.getTables();
 				// Prints all primary keys
-				System.out.println("\n====== Primary keys ==========\n");
+				System.out.println("\n====== Unique constraints ==========");
 				for (DatabaseRelationDefinition dd : table_list) {
-					System.out.print(dd.getID().getSQLRendering() + ":\n");
+					System.out.println(dd + ";");
 					for (UniqueConstraint uc : dd.getUniqueConstraints()) 
-						System.out.println("  " + uc + "\n");
+						System.out.println(uc + ";");
+					System.out.println("");
 				}
 				// Prints all foreign keys
-				System.out.println("====== Foreign keys ==========\n");
-				for(DatabaseRelationDefinition dd : table_list){
+				System.out.println("====== Foreign key constraints ==========");
+				for(DatabaseRelationDefinition dd : table_list) {
 					for (ForeignKeyConstraint fk : dd.getForeignKeys()) 
-						System.out.print(" " + fk + "\n");
+						System.out.println(fk + ";");
 				}		
 			}
 

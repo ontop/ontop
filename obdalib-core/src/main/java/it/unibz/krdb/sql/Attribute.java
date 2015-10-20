@@ -88,7 +88,7 @@ public class Attribute {
 	
 	@Override
 	public String toString() {
-		return id + ": " + type;
+		return id.getAttribute() + " " + typeName + (!canNull ? " NOT NULL" : "");
 	}
 	
 	@Override
