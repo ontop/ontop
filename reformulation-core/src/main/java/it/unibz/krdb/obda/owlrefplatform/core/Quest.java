@@ -679,7 +679,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
 			if (printKeys) { 
-				Collection<DatabaseRelationDefinition> table_list = metadata.getTables();
+				Collection<DatabaseRelationDefinition> table_list = metadata.getDatabaseRelations();
 				// Prints all primary keys
 				System.out.println("\n====== Unique constraints ==========");
 				for (DatabaseRelationDefinition dd : table_list) {
@@ -700,7 +700,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
             SQLDialectAdapter sqladapter = SQLAdapterFactory
                    .getSQLDialectAdapter(obdaSource
-                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDatabaseVersion());
+                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDbmsVersion());
 			
 			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 

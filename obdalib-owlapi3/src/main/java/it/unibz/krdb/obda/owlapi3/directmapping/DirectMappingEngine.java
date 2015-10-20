@@ -222,7 +222,7 @@ public class DirectMappingEngine {
 	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws Exception{			
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
-		Collection<DatabaseRelationDefinition> tables = metadata.getTables();
+		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
 		for (DatabaseRelationDefinition td : tables) {
 			model.addMappings(sourceUri, getMapping(td, metadata, baseuri));

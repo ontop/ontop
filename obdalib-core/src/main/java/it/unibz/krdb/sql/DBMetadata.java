@@ -118,7 +118,7 @@ public class DBMetadata implements Serializable {
 	 * 
 	 * @param name
 	 */
-	public DatabaseRelationDefinition getTable(RelationID name) {
+	public DatabaseRelationDefinition getDatabaseRelation(RelationID name) {
 		DatabaseRelationDefinition def = tables.get(name);
 		if (def == null && name.hasSchema()) {
 			def = tables.get(name.getSchemalessID());
@@ -143,7 +143,7 @@ public class DBMetadata implements Serializable {
 	/**
 	 * Retrieves the tables list form the metadata.
 	 */
-	public Collection<DatabaseRelationDefinition> getTables() {
+	public Collection<DatabaseRelationDefinition> getDatabaseRelations() {
 		return Collections.unmodifiableCollection(listOfTables);
 	}
 
@@ -156,11 +156,11 @@ public class DBMetadata implements Serializable {
 		return driverVersion;
 	}
 
-	public String getDatabaseProductName() {
+	public String getDbmsProductName() {
 		return databaseProductName;
 	}
 	
-	public String getDatabaseVersion() {
+	public String getDbmsVersion() {
 		return databaseVersion;
 	}
 	

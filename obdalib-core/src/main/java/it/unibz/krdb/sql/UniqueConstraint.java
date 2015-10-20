@@ -20,8 +20,6 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +42,7 @@ public class UniqueConstraint {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
-		private final RelationDefinition relation;
+		private final DatabaseRelationDefinition relation;
 		
 		/**
 		 * creates a UNIQUE constraint builder 
@@ -52,7 +50,7 @@ public class UniqueConstraint {
 		 * @param relation 
 		 */
 		
-		public Builder(RelationDefinition relation) {
+		public Builder(DatabaseRelationDefinition relation) {
 			this.relation = relation;
 		}
 		
@@ -87,16 +85,16 @@ public class UniqueConstraint {
 	}
 	
 	public static UniqueConstraint primaryKeyOf(Attribute att) {
-		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
+		UniqueConstraint.Builder builder = new UniqueConstraint.Builder((DatabaseRelationDefinition)att.getRelation());
 		return builder.add(att).build("PK_" + att.getRelation().getID().getTableName(), true);
 	}
 
 	public static UniqueConstraint primaryKeyOf(Attribute att, Attribute att2) {
-		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
+		UniqueConstraint.Builder builder = new UniqueConstraint.Builder((DatabaseRelationDefinition)att.getRelation());
 		return builder.add(att).add(att2).build("PK_" + att.getRelation().getID().getTableName(), true);
 	}
 	
-	public static Builder builder(RelationDefinition relation) {
+	public static Builder builder(DatabaseRelationDefinition relation) {
 		return new Builder(relation);
 	}
 	
@@ -124,6 +122,16 @@ public class UniqueConstraint {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * return the database relation for the unique constraint
+	 * 
+	 * @return
+	 */
+	
+	public DatabaseRelationDefinition getRelation() {
+		return (DatabaseRelationDefinition)attributes.get(0).getRelation();
 	}
 
 	/**

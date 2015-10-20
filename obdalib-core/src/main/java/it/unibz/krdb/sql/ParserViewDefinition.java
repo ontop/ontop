@@ -29,7 +29,7 @@ import java.util.Map;
 import com.google.common.base.Joiner;
 
 /**
- * Represents a complex subquery (not a database view!)
+ * Represents a complex sub-query created by the SQL parser (not a database view!)
  * 
  * @author Roman Kontchakov
 */
@@ -53,6 +53,14 @@ public class ParserViewDefinition extends RelationDefinition {
 		this.statement = statement;
 	}
 
+	/**
+	 * adds a new attribute
+	 * <p>
+	 * (note that attributes may have fully qualified names because 
+	 * attributes in the sub-query do not necessarily have aliases)
+	 * 
+	 * @param name
+	 */
 	public void addAttribute(QualifiedAttributeID name) {
 		Attribute att = new Attribute(this, name, attributes.size() + 1, 0, null, true);
 		Attribute prev = attributeMap.put(name, att);
@@ -62,6 +70,11 @@ public class ParserViewDefinition extends RelationDefinition {
 		attributes.add(att);
 	}
 	
+	/**
+	 * returns the SQL definition of the sub-query
+	 *  
+	 * @return
+	 */
 	
 	public String getStatement() {
 		return statement;

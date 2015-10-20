@@ -118,7 +118,7 @@ public class DirectMappingAxiom {
 			}
 			count++;
 		}
-		for (DatabaseRelationDefinition tdef : metadata.getTables()) {
+		for (DatabaseRelationDefinition tdef : metadata.getDatabaseRelations()) {
 			if (tdef.getID().equals(tableRef0)) {
 				UniqueConstraint pk = tdef.getPrimaryKey();
 				if (pk != null) {

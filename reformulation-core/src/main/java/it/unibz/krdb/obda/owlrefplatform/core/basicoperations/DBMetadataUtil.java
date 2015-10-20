@@ -59,7 +59,7 @@ public class DBMetadataUtil {
 		if (printouts)
 			System.out.println("===FOREIGN KEY RULES");
 		int count = 0;
-		Collection<DatabaseRelationDefinition> tableDefs = metadata.getTables();
+		Collection<DatabaseRelationDefinition> tableDefs = metadata.getDatabaseRelations();
 		for (DatabaseRelationDefinition def : tableDefs) {
 			for (ForeignKeyConstraint fks : def.getForeignKeys()) {
 

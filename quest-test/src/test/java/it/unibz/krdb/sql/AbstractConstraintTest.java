@@ -62,7 +62,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
 		
-		Collection<DatabaseRelationDefinition> tables = metadata.getTables();
+		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		for (DatabaseRelationDefinition t : tables) {
 			UniqueConstraint pkc = null;
 			List<UniqueConstraint> pks = t.getUniqueConstraints();
@@ -86,7 +86,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
 		
-		Collection<DatabaseRelationDefinition> tables = metadata.getTables();
+		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		for (DatabaseRelationDefinition t : tables) {
 			List<ForeignKeyConstraint> fk =  t.getForeignKeys();
 			if (checkName(t, TB_BOOK)) {

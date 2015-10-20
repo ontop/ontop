@@ -120,7 +120,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	public void addUniqueConstraint(UniqueConstraint uc) {
 		if (uc.isPrimaryKey()) {
 			if (pk != null)
-				throw new IllegalArgumentException("Duplicate PK" + pk + " " + uc);
+				throw new IllegalArgumentException("Duplicate PK " + pk + " " + uc);
 			pk = uc;
 		}
 		else {

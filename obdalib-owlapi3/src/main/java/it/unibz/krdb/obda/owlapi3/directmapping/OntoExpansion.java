@@ -40,7 +40,7 @@ public class OntoExpansion {
 
 	
 	public void enrichOntology(DBMetadata md, OWLOntology rootOntology) throws OWLOntologyStorageException{
-		for (DatabaseRelationDefinition td : md.getTables()) {
+		for (DatabaseRelationDefinition td : md.getDatabaseRelations()) {
 			OntoSchema os = new OntoSchema(td);
 			os.setBaseURI(this.baseURI);
 			os.enrichOntology(rootOntology);

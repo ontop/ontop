@@ -1285,7 +1285,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			DatabaseRelationDefinition table = metadata.getTable(tableId);
+			DatabaseRelationDefinition table = metadata.getDatabaseRelation(tableId);
 			if (table != null) {
 				// ROMAN (15 Oct 2015): i'm not sure what to do if it is a view (i.e., a complex subquery)
 	 			Attribute a = table.getAttribute(attributeId);

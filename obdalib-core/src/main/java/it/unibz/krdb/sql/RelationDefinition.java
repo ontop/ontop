@@ -20,16 +20,14 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
- * Basis of the representation for information on relational tables and views
- * (attributes and integrity constraints: primary keys, unique keys and foreign keys)
+ * Basis of the representation for information on both<br> 
+ *   (a) relational tables and views<br>
+ *   (b) and views created by the SQL parser for complex sub-queries
+ * 
  * 
  * @author Roman Kontchakov
  *

@@ -761,7 +761,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			DBMetadataExtractor.loadMetadata(md, conn, null);
 			// ROMAN (7 Oct 2015): I'm not sure we need to add "views" -- they are 
 			// created by SQLQueryParser for complex queries that cannot be parsed
-			for (DatabaseRelationDefinition relation : md.getTables()) {
+			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
 				relationList.addElement(relation);
 			}
 		} 

@@ -61,7 +61,7 @@ public class MappingDataTypeRepair {
      */
     public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
         this.metadata = metadata;
-        String databaseName = metadata.getDatabaseProductName();
+        String databaseName = metadata.getDbmsProductName();
         String databaseDriver = metadata.getDriverName();
         this.isDB2 = (databaseName!= null && databaseName.contains("DB2"))
         			|| (databaseDriver != null && databaseDriver.contains("IBM"));

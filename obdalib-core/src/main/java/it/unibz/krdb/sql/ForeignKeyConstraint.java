@@ -61,7 +61,7 @@ public class ForeignKeyConstraint {
 	
 	public static final class Builder {
 		private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
-		private final RelationDefinition relation, referencedRelation;
+		private final DatabaseRelationDefinition relation, referencedRelation;
 		
 		/**
 		 * creates a FOREIGN KEY builder 
@@ -70,7 +70,7 @@ public class ForeignKeyConstraint {
 		 * @param referencedRelation
 		 */
 		
-		public Builder(RelationDefinition relation, RelationDefinition referencedRelation) {
+		public Builder(DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
 			this.relation = relation;
 			this.referencedRelation = referencedRelation;
 		}
@@ -110,14 +110,23 @@ public class ForeignKeyConstraint {
 		}
 	}
 	
+	/**
+	 * creates a single-attribute foreign key 
+	 * 
+	 * @param name
+	 * @param attribute
+	 * @param referenced attribute
+	 * @return
+	 */
 	public static ForeignKeyConstraint of(String name, Attribute attribute, Attribute reference) {
-		return new Builder(attribute.getRelation(), reference.getRelation())
-						.add(attribute, reference).build(name);
+		return new Builder((DatabaseRelationDefinition)attribute.getRelation(), 
+							(DatabaseRelationDefinition)reference.getRelation())
+									.add(attribute, reference).build(name);
 	}
 	
 	private final String name;
 	private final ImmutableList<Component> components;
-	private final RelationDefinition relation, referencedRelation;
+	private final DatabaseRelationDefinition relation, referencedRelation;
 	
 	/**
 	 * private constructor (use Builder instead)
@@ -129,20 +138,47 @@ public class ForeignKeyConstraint {
 	private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
 		this.name = name;
 		this.components = components;
-		this.relation = components.get(0).getAttribute().getRelation();
-		this.referencedRelation = components.get(0).getReference().getRelation();
+		this.relation = (DatabaseRelationDefinition)components.get(0).getAttribute().getRelation();
+		this.referencedRelation = (DatabaseRelationDefinition)components.get(0).getReference().getRelation();
 	}
 	
+	/**
+	 * returns the name of the foreign key constraint
+	 * 
+	 * @return name
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * returns the components of the foreign key constraint
+	 * each component defines a map from an attribute of the relation 
+	 * 			to an attribute of the referenced relation
+	 *  
+	 * @return
+	 */
 	public ImmutableList<Component> getComponents() {
 		return components;
 	}
 	
-	public RelationDefinition getReferencedRelation() {
+	/**
+	 * returns referenced database relation
+	 * 
+	 * @return referenced relation 
+	 */
+	public DatabaseRelationDefinition getReferencedRelation() {
 		return referencedRelation;
+	}
+
+	/**
+	 * returns the relation with the foreign key
+	 * 
+	 * @return relation
+	 */
+	
+	public DatabaseRelationDefinition getRelation() {
+		return relation;
 	}
 	
 	@Override

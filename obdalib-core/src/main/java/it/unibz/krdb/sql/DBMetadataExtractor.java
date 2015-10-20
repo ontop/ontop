@@ -174,50 +174,37 @@ public class DBMetadataExtractor {
 			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
 		
 		final DatabaseMetaData md = conn.getMetaData();
+		String productName = md.getDatabaseProductName();
+
 		List<RelationID> seedRelationIds;
-		DatatypeNormalizer dt = DefaultTypeFixer;
 		QuotedIDFactory idfac =  metadata.getQuotedIDFactory();
 
-		
-		if (md.getDatabaseProductName().contains("Oracle")) {
+		if (productName.contains("Oracle")) {
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (realTables == null || realTables.isEmpty())
 				seedRelationIds = getTableList(conn, new OracleRelationListProvider(defaultSchema), idfac);
 			else
-				seedRelationIds = getTableList(defaultSchema, realTables, metadata.getQuotedIDFactory());
-			
-			dt = OracleTypeFixer;
+				seedRelationIds = getTableList(defaultSchema, realTables, idfac);		
 		} 
-		else if (md.getDatabaseProductName().contains("DB2")) {
-			if (realTables == null || realTables.isEmpty()) 
-				seedRelationIds = getTableList(conn, DB2RelationListProvider, idfac);
-			else 
-				seedRelationIds = getTableList(null, realTables, metadata.getQuotedIDFactory());
-		}  
-		else if (md.getDatabaseProductName().contains("SQL Server")) { // MS SQL Server
-			if (realTables == null || realTables.isEmpty()) 
-				seedRelationIds = getTableList(conn, MSSQLServerRelationListProvider, idfac);
-			else
-				seedRelationIds = getTableList(null, realTables, idfac);
- 		} 
-		else if (md.getDatabaseProductName().contains("H2") || 
-				md.getDatabaseProductName().contains("HSQL") || 
-				md.getDatabaseProductName().contains("PostgreSQL")) {
-			if (realTables == null || realTables.isEmpty()) 
-				seedRelationIds = getTableListDefault(md);
-			else 
-				seedRelationIds = getTableList(null, realTables, idfac);
-		}
 		else {
-			// For other database engines, i.e. MySQL
-			if (realTables == null || realTables.isEmpty()) 
-				seedRelationIds = getTableListDefault(md);
-			else
+			if (realTables == null || realTables.isEmpty())  {
+				if (productName.contains("DB2")) 
+					seedRelationIds = getTableList(conn, DB2RelationListProvider, idfac);
+				else if (productName.contains("SQL Server"))  // MS SQL Server
+					seedRelationIds = getTableList(conn, MSSQLServerRelationListProvider, idfac);
+				else 
+					// for other database engines, including H2, HSQL, PostgreSQL and MySQL
+					seedRelationIds = getTableListDefault(md);
+			}
+			else 
 				seedRelationIds = getTableList(null, realTables, idfac);
-			
-			dt = MySQLTypeFixer;
 		}
 		
+		DatatypeNormalizer dt = DefaultTypeFixer;
+		if (productName.contains("Oracle"))
+			dt = OracleTypeFixer;
+		else if (productName.contains("MySQL"))
+			dt = MySQLTypeFixer;
 
 		List<DatabaseRelationDefinition> extractedRelations = new LinkedList<>();
 		
@@ -255,8 +242,11 @@ public class DBMetadataExtractor {
 			getPrimaryKey(md, relation);
 			getUniqueAttributes(md, relation);
 			getForeignKeys(md, relation, metadata);
-			if (printouts)
+			if (printouts) {
 				System.out.println(relation);
+				System.out.println(relation.getUniqueConstraints());
+				System.out.println(relation.getForeignKeys());
+			}
 		}	
 	}
 	
@@ -603,7 +593,7 @@ public class DBMetadataExtractor {
 			while (rs.next()) {
 				RelationID refId = RelationID.createRelationIdFromDatabaseRecord(
 										rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
-				DatabaseRelationDefinition ref = metadata.getTable(refId);
+				DatabaseRelationDefinition ref = metadata.getDatabaseRelation(refId);
 				// FKTABLE_SCHEM and FKTABLE_NAME are ignored for now  
 				int seq = rs.getShort("KEY_SEQ");
 				if (seq == 1) {

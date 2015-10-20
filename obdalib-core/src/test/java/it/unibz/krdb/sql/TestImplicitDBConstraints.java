@@ -46,7 +46,7 @@ public class TestImplicitDBConstraints {
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addFunctionalDependencies(this.md);
-		DatabaseRelationDefinition dd = this.md.getTable(idfac.createRelationFromString(null, "TABLENAME"));
+		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
 		Attribute attr = dd.getAttribute(idfac.createFromString("KEYNAME"));	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
 	}
@@ -64,7 +64,7 @@ public class TestImplicitDBConstraints {
 	public void testAddForeignKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addForeignKeys(this.md);
-		DatabaseRelationDefinition dd = this.md.getTable(idfac.createRelationFromString(null, "TABLENAME"));
+		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
 		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(), 
@@ -77,7 +77,7 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
 		uc.addFunctionalDependencies(this.md);
 		uc.addForeignKeys(this.md);
-		DatabaseRelationDefinition dd = this.md.getTable(idfac.createRelationFromString(null, "TABLENAME"));
+		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
 		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(), 
