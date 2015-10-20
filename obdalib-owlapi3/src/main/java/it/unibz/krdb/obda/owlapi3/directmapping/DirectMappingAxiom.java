@@ -30,7 +30,7 @@ import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 
 import java.util.*;
@@ -64,7 +64,7 @@ public class DirectMappingAxiom {
 
 	public Map<String, List<Function>> getRefAxioms() {
 		HashMap<String, List<Function>> refAxioms = new HashMap<>();
-		List<ForeignKeyConstraint> fks = ((TableDefinition) table).getForeignKeys();
+		List<ForeignKeyConstraint> fks = ((DatabaseRelationDefinition) table).getForeignKeys();
 		for (ForeignKeyConstraint fk : fks) {
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		}
@@ -72,7 +72,7 @@ public class DirectMappingAxiom {
 	}
 
 	private String getRefSQL(ForeignKeyConstraint fk) {
-		TableDefinition tableDef = ((TableDefinition) table);
+		DatabaseRelationDefinition tableDef = ((DatabaseRelationDefinition) table);
 
 		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
 
@@ -118,15 +118,15 @@ public class DirectMappingAxiom {
 			}
 			count++;
 		}
-		for (TableDefinition tdef : metadata.getTables()) {
+		for (DatabaseRelationDefinition tdef : metadata.getTables()) {
 			if (tdef.getID().equals(tableRef0)) {
 				UniqueConstraint pk = tdef.getPrimaryKey();
 				if (pk != null) {
 					for (Attribute att : pk.getAttributes()) {
-						QuotedID pki0 = att.getID();
-						String refPki = tableRef0.getSQLRendering() + "." + pki0.getSQLRendering();
+						QuotedID attrName = att.getID();
+						String refPki = tableRef0.getSQLRendering() + "." + attrName.getSQLRendering();
 						if (!Column.contains(refPki))
-							Column += ", " + refPki + " AS " + tableRef0.getTableName() + "_" + pki0.getName();
+							Column += ", " + refPki + " AS " + tableRef0.getTableName() + "_" + attrName.getName();
 					}
 				} 
 				else {
@@ -143,7 +143,7 @@ public class DirectMappingAxiom {
 	}
 
 	public List<Function> getCQ(){
-		Term sub = generateSubject((TableDefinition)table, false);
+		Term sub = generateSubject((DatabaseRelationDefinition)table, false);
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
@@ -181,13 +181,13 @@ public class DirectMappingAxiom {
 
 	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
 
-		Term sub = generateSubject((TableDefinition) table, true);
+		Term sub = generateSubject((DatabaseRelationDefinition) table, true);
 
 		ForeignKeyConstraint.Component fkcomp = fk.getComponents().get(0);
 		
 		// Object Atoms
 		// Foreign key reference
-		TableDefinition tdRef = (TableDefinition) fkcomp.getReference().getRelation();
+		DatabaseRelationDefinition tdRef = (DatabaseRelationDefinition) fkcomp.getReference().getRelation();
 		Term obj = generateSubject(tdRef, true);
 
 		String opURI = generateOPURI(table.getID().getTableName(), fkcomp.getAttribute());
@@ -239,7 +239,7 @@ public class DirectMappingAxiom {
 	 * TODO replace URI predicate to BNode predicate for tables without PKs in
 	 * the following method after 'else'
 	 */
-	private Term generateSubject(TableDefinition td,
+	private Term generateSubject(DatabaseRelationDefinition td,
 			boolean ref) {
 		String tableName = "";
 		if (ref)
@@ -249,12 +249,12 @@ public class DirectMappingAxiom {
 		if (pk != null) {
 			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
 			terms.add(df.getConstantLiteral(subjectTemple(td)));
-			for (Attribute att : pk.getAttributes()) {
+			for (Attribute att : pk.getAttributes()) 
 				terms.add(df.getVariable(tableName + att.getID().getName()));
-			}
+			
 			return df.getUriTemplate(terms);
-
-		} else {
+		} 
+		else {
 			List<Term> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes()) 
 				vars.add(df.getVariable(tableName + att.getID().getName()));
@@ -264,7 +264,7 @@ public class DirectMappingAxiom {
 	}
 
 	
-	private String subjectTemple(TableDefinition td) {
+	private String subjectTemple(DatabaseRelationDefinition td) {
 		/*
 		 * It is hard to generate a uniform temple since the number of PK
 		 * differs For example, the subject uri temple with one pk should be

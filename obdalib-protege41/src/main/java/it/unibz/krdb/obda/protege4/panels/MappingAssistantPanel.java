@@ -47,7 +47,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.ParserViewDefinition;
 
 import javax.swing.*;
@@ -761,7 +761,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			DBMetadataExtractor.loadMetadata(md, conn, null);
 			// ROMAN (7 Oct 2015): I'm not sure we need to add "views" -- they are 
 			// created by SQLQueryParser for complex queries that cannot be parsed
-			for (TableDefinition relation : md.getTables()) {
+			for (DatabaseRelationDefinition relation : md.getTables()) {
 				relationList.addElement(relation);
 			}
 		} 
@@ -879,8 +879,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					label.setText("<Select database table>");
 					return label;
 				} else {				
-					if (value instanceof TableDefinition) {
-						TableDefinition td = (TableDefinition) value;
+					if (value instanceof DatabaseRelationDefinition) {
+						DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
 						label.setText(td.getID().getSQLRendering());

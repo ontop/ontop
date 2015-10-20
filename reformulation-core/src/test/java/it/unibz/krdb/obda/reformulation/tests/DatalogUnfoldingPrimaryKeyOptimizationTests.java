@@ -33,7 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
 import it.unibz.krdb.sql.UniqueConstraint;
 
@@ -60,19 +60,19 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		metadata = DBMetadataExtractor.createDummyMetadata();
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		
-		TableDefinition table = metadata.createTable(idfac.createRelationFromString(null, "TABLE"));
+		DatabaseRelationDefinition table = metadata.createDatabaseRelation(idfac.createRelationFromString(null, "TABLE"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, false);
-		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute(idfac.createFromString("col1"))));
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createFromString("col1"))));
 		
-		table = metadata.createTable(idfac.createRelationFromString(null, "TABLE2"));
+		table = metadata.createDatabaseRelation(idfac.createRelationFromString(null, "TABLE2"));
 		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);
 		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, false);
-		table.setPrimaryKey(UniqueConstraint.of(table.getAttribute(idfac.createFromString("col1"))));
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createFromString("col1"))));
 
 		unfoldingProgram = fac.getDatalogProgram();
 

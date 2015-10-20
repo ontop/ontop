@@ -217,7 +217,7 @@ public class DBMetadataExtractor {
 		}
 		
 		for (RelationID id : tableList) {
-			TableDefinition table = metadata.createTable(id);
+			DatabaseRelationDefinition table = metadata.createDatabaseRelation(id);
 			getTableColumns(md, table, dt);
 			getPrimaryKey(md, table);
 			getUniqueAttributes(md, table);
@@ -228,7 +228,7 @@ public class DBMetadataExtractor {
 		// (refer to two relations), which requires all relations 
 		// to have been constructed 
 		for (RelationID id : tableList) { 
-			TableDefinition table = metadata.getTable(id);
+			DatabaseRelationDefinition table = metadata.getTable(id);
 			getForeignKeys(md, table, metadata);
 		}
 	}
@@ -435,7 +435,7 @@ public class DBMetadataExtractor {
 	
 	
 	
-	private static void getTableColumns(DatabaseMetaData md, TableDefinition table, DatatypeNormalizer dt) throws SQLException {
+	private static void getTableColumns(DatabaseMetaData md, DatabaseRelationDefinition table, DatatypeNormalizer dt) throws SQLException {
 		// needed for checking uniqueness of lower-case versions of columns names
 		//  (only in getOtherMetadata)
 		//Set<String> tableColumns = new HashSet<>();
@@ -510,7 +510,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the primary key for the table 
 	 * 
 	 */
-	private static void getPrimaryKey(DatabaseMetaData md, TableDefinition table) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, DatabaseRelationDefinition table) throws SQLException {
 		UniqueConstraint.Builder pk = UniqueConstraint.builder(table);
 		String pkName = "";
 		RelationID id = table.getID();
@@ -526,7 +526,9 @@ public class DBMetadataExtractor {
 				pk.add(table.getAttribute(colName));
 			}
 		} 
-		table.setPrimaryKey(pk.build(pkName));
+		UniqueConstraint uc = pk.build(pkName, true);
+		if (uc != null)
+			table.addUniqueConstraint(uc);
 	}
 	
 	/**
@@ -572,7 +574,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the foreign keys for the table 
 	 * 
 	 */
-	private static void getForeignKeys(DatabaseMetaData md, TableDefinition table, DBMetadata metadata) throws SQLException {
+	private static void getForeignKeys(DatabaseMetaData md, DatabaseRelationDefinition table, DBMetadata metadata) throws SQLException {
 		
 		RelationID id = table.getID();
 		
@@ -583,7 +585,7 @@ public class DBMetadataExtractor {
 				String pkSchemaName = rsForeignKeys.getString("PKTABLE_SCHEM");
 				String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
 				RelationID pkTable = RelationID.createRelationIdFromDatabaseRecord(pkSchemaName, pkTableName);
-				TableDefinition ref = metadata.getTable(pkTable);
+				DatabaseRelationDefinition ref = metadata.getTable(pkTable);
 				// FKTABLE_SCHEM 
 				// FKTABLE_NAME 
 				String name = rsForeignKeys.getString("FK_NAME"); // String => foreign key name (may be null)

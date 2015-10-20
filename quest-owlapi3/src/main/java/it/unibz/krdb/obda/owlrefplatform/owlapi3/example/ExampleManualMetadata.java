@@ -22,7 +22,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
 import java.io.File;
 
@@ -79,7 +79,7 @@ private void setup()  throws Exception {
 
 private void defMeasTable(DBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(null, name));
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("value"), java.sql.Types.NUMERIC, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
@@ -88,7 +88,7 @@ private void defMeasTable(DBMetadata dbMetadata, String name) {
 
 private void defMessTable(DBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(null, name));
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("eventtext"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
@@ -96,7 +96,7 @@ private void defMessTable(DBMetadata dbMetadata, String name) {
 
 private void defStaticTable(DBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(null, name));
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
 	tableDefinition.addAttribute(idfac.createFromString("domain"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createFromString("range"), java.sql.Types.VARCHAR, null, false);
 }

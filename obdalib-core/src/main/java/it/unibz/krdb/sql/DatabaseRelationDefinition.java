@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -36,15 +37,15 @@ import com.google.common.collect.ImmutableList;
  *
  */
 
-public class TableDefinition extends RelationDefinition {
+public class DatabaseRelationDefinition extends RelationDefinition {
 
 	private final List<Attribute> attributes = new ArrayList<>();
 	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
 
-	private UniqueConstraint pk;
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
-		
+	private UniqueConstraint pk;	
+	
 	
 	/**
 	 * used only in DBMetadata
@@ -52,22 +53,40 @@ public class TableDefinition extends RelationDefinition {
 	 * @param name
 	 */
 	
-	TableDefinition(RelationID name) {
+	DatabaseRelationDefinition(RelationID name) {
 		super(name);
 	}
 	
-	public void addAttribute(QuotedID name, int type, String typeName, boolean canNull) {
-		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), name), 
+	/**
+	 * creates a new attribute 
+	 * 
+	 * @param id
+	 * @param type
+	 * @param typeName
+	 * @param canNull
+	 */
+	
+	public void addAttribute(QuotedID id, int type, String typeName, boolean canNull) {
+		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id), 
 										attributes.size() + 1, type, typeName, canNull);
-		Attribute prev = attributeMap.put(name, att);
+		
+		//check for duplicate names (put returns the previous value)
+		Attribute prev = attributeMap.put(id, att);
 		if (prev != null) 
 			throw new IllegalArgumentException("Duplicate attribute names");
 		
 		attributes.add(att);
 	}
 
-	public Attribute getAttribute(QuotedID attributeName) {
-		return attributeMap.get(attributeName);
+	/**
+	 * return an attribute with the specified ID
+	 * 
+	 * @param attributeId
+	 * @return
+	 */
+	
+	public Attribute getAttribute(QuotedID attributeId) {
+		return attributeMap.get(attributeId);
 	}	
 	
 	/**
@@ -78,36 +97,71 @@ public class TableDefinition extends RelationDefinition {
 	 */
 	@Override
 	public Attribute getAttribute(int index) {
-		// positions start at 1
 		Attribute attribute = attributes.get(index - 1);
 		return attribute;
 	}
 
+	/**
+	 * returns the list of attributes
+	 * 
+	 * @return list of attributes
+	 */
 	@Override
 	public List<Attribute> getAttributes() {
 		return Collections.unmodifiableList(attributes);
 	}
 	
-	
-	public void setPrimaryKey(UniqueConstraint uc) {
-		pk = uc;
-	}
-	
-	public UniqueConstraint getPrimaryKey() {
-		return pk;
-	}
+	/**
+	 * adds a unique constraint (a primary key or a proper unique constraint)
+	 *
+	 * @param uc
+	 */
 	
 	public void addUniqueConstraint(UniqueConstraint uc) {
+		if (uc.isPrimaryKey()) {
+			if (pk != null)
+				throw new IllegalArgumentException("Duplicate PK" + pk + " " + uc);
+			pk = uc;
+		}
 		ucs.add(uc);
 	}
+	
+	/**
+	 * returns the list of unique constraints (including the primary key if present)
+	 * 
+	 * @return
+	 */
 	
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
 		return ImmutableList.copyOf(ucs);
 	}
 	
+	/**
+	 * return primary key (if present) or null (otherwise)
+	 * 
+	 * @return
+	 */
+	
+	public UniqueConstraint getPrimaryKey() {
+		return pk;
+	}
+	
+	
+	/**
+	 * adds a foreign key constraints 
+	 * 
+	 * @param fk a foreign key
+	 */
+	
 	public void addForeignKeyConstraint(ForeignKeyConstraint fk) {
 		fks.add(fk);
 	}
+	
+	/**
+	 * returns the list of foreign key constraints 
+	 * 
+	 * @return list of foreign keys
+	 */
 	
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
 		return ImmutableList.copyOf(fks);
@@ -119,16 +173,12 @@ public class TableDefinition extends RelationDefinition {
 		StringBuilder bf = new StringBuilder();
 		bf.append(getID());
 		bf.append("[");
-		boolean comma = false;
-		for (Attribute att : attributes) {
-			if (comma) 
-				bf.append(",");
-			
-			bf.append(att);
-			comma = true;
-		}
-		bf.append("]");
-
+		Joiner.on(", ").appendTo(bf, attributes);
+		bf.append("]\n U {");
+		Joiner.on(",\n   ").appendTo(bf, ucs);
+		bf.append("}\n FK {");
+		Joiner.on(",\n   ").appendTo(bf, fks);
+		bf.append("}");
 		return bf.toString();
 	}
 

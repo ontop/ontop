@@ -170,8 +170,8 @@ public class ImplicitDBConstraints {
 		
 		for (String tableName : this.uniqueFD.keySet()) {
 			RelationID tableId = getRelationIDFromString(tableName, idfac);
-			TableDefinition td = md.getTable(tableId);
-			if (td != null && td instanceof TableDefinition) {
+			DatabaseRelationDefinition td = md.getTable(tableId);
+			if (td != null && td instanceof DatabaseRelationDefinition) {
 				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
 				for (List<String> listOfConstraints: tableFDs) {
 					for (String keyColumn : listOfConstraints) {
@@ -183,7 +183,9 @@ public class ImplicitDBConstraints {
 						else {		
 							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // true
 							// ROMAN (17 Aug 2015): do we really change it into NON NULL?
-							td.addUniqueConstraint(UniqueConstraint.of(attr));
+							UniqueConstraint.Builder builder = UniqueConstraint.builder(td);
+							builder.add(attr);
+							td.addUniqueConstraint(builder.build("UC_NAME", false));
 						}
 					}
 				}							
@@ -204,8 +206,8 @@ public class ImplicitDBConstraints {
 		
 		for (String tableName : this.fKeys.keySet()) {
 			RelationID tableId = getRelationIDFromString(tableName, idfac);
-			TableDefinition td = md.getTable(tableId);
-			if (td == null || ! (td instanceof TableDefinition)){
+			DatabaseRelationDefinition td = md.getTable(tableId);
+			if (td == null || ! (td instanceof DatabaseRelationDefinition)){
 				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
 				continue;
 			}
@@ -220,7 +222,7 @@ public class ImplicitDBConstraints {
 					}
 					String fkTable = entry.getValue().getTableReference();
 					RelationID fkTableId = getRelationIDFromString(fkTable, idfac);
-					TableDefinition fktd = md.getTable(fkTableId);
+					DatabaseRelationDefinition fktd = md.getTable(fkTableId);
 					if (fktd == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
 						continue;

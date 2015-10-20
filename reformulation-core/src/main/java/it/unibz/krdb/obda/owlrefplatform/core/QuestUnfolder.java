@@ -26,7 +26,7 @@ import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -152,20 +152,9 @@ public class QuestUnfolder {
 					continue;
 				
 				RelationID newAtomName = Relation2DatalogPredicate.createRelationFromPredicateName(newAtomPredicate);
-				TableDefinition def = metadata.getTable(newAtomName);
+				DatabaseRelationDefinition def = metadata.getTable(newAtomName);
 				if (def != null) {
-					// primary keys
-					UniqueConstraint pk = def.getPrimaryKey();
-					if (pk != null) {
-						List<Integer> pkeyIdx = new ArrayList<>(pk.getAttributes().size());
-						for (Attribute att : def.getAttributes()) {
-							if (pk.getAttributes().contains(att)) 
-								pkeyIdx.add(att.getIndex());
-						}
-						pkeys.put(newAtomPredicate, pkeyIdx);
-					}
-
-                    // unique constraints
+					// primary key and unique constraints
 					for (UniqueConstraint uc : def.getUniqueConstraints()) {
 						List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
 						for (Attribute att : def.getAttributes()) {

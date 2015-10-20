@@ -36,7 +36,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -222,9 +222,9 @@ public class DirectMappingEngine {
 	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws Exception{			
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
-		Collection<TableDefinition> tables = metadata.getTables();
+		Collection<DatabaseRelationDefinition> tables = metadata.getTables();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
-		for (TableDefinition td : tables) {
+		for (DatabaseRelationDefinition td : tables) {
 			model.addMappings(sourceUri, getMapping(td, metadata, baseuri));
 		}
 		model.addMappings(sourceUri, mappingAxioms);

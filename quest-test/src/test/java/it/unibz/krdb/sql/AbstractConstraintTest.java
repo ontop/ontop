@@ -62,9 +62,12 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
 		
-		Collection<TableDefinition> tables = metadata.getTables();
-		for (TableDefinition t : tables) {
-			UniqueConstraint pkc =  t.getPrimaryKey();
+		Collection<DatabaseRelationDefinition> tables = metadata.getTables();
+		for (DatabaseRelationDefinition t : tables) {
+			UniqueConstraint pkc = null;
+			List<UniqueConstraint> pks = t.getUniqueConstraints();
+			if (!pks.isEmpty())
+				pkc = pks.get(0);
 			if (checkName(t, TB_BOOK)) {
 				assertEquals(1, pkc.getAttributes().size());
 			} else if (checkName(t, TB_BOOKWRITER)) {
@@ -83,8 +86,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
 		
-		Collection<TableDefinition> tables = metadata.getTables();
-		for (TableDefinition t : tables) {
+		Collection<DatabaseRelationDefinition> tables = metadata.getTables();
+		for (DatabaseRelationDefinition t : tables) {
 			List<ForeignKeyConstraint> fk =  t.getForeignKeys();
 			if (checkName(t, TB_BOOK)) {
 				assertEquals(0, fk.size());
@@ -100,7 +103,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		log.info("\n");
 	}
 	
-	private boolean checkName(TableDefinition table, String value) {
+	private boolean checkName(DatabaseRelationDefinition table, String value) {
 		final String tableName = table.getID().getSQLRendering();
 		return tableName.equalsIgnoreCase(value);
 	}

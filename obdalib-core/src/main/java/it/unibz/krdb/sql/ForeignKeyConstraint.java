@@ -20,6 +20,7 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -52,6 +53,11 @@ public class ForeignKeyConstraint {
 		
 		public Attribute getReference() {
 			return reference;
+		}
+		
+		@Override
+		public String toString() {
+			return attribute.getID() + "->" + reference.getID();
 		}
 	}
 	
@@ -113,7 +119,7 @@ public class ForeignKeyConstraint {
 	
 	private final String name;
 	private final ImmutableList<Component> components;
-	private final RelationDefinition referencedRelation;
+	private final RelationDefinition relation, referencedRelation;
 	
 	/**
 	 * private constructor (use Builder instead)
@@ -125,6 +131,7 @@ public class ForeignKeyConstraint {
 	private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
 		this.name = name;
 		this.components = components;
+		this.relation = components.get(0).getAttribute().getRelation();
 		this.referencedRelation = components.get(0).getReference().getRelation();
 	}
 	
@@ -138,5 +145,21 @@ public class ForeignKeyConstraint {
 	
 	public RelationDefinition getReferencedRelation() {
 		return referencedRelation;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder bf = new StringBuilder();
+		bf.append("FK ")
+			.append(relation.getID().getSQLRendering())
+			.append("->")
+			.append(referencedRelation.getID().getSQLRendering())
+			.append(": ")
+			.append(name) 
+			.append(" (");
+		
+		Joiner.on(", ").appendTo(bf, components);
+		bf.append(")");
+		return bf.toString();
 	}
 }

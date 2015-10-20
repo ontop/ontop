@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -152,7 +152,7 @@ public class TestSesameImplicitDBConstraints {
 
 	private void defTable(DBMetadata dbMetadata, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		TableDefinition tableDefinition = dbMetadata.createTable(idfac.createRelationFromString(null, name));
+		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
 		tableDefinition.addAttribute(idfac.createFromString("COL1"), java.sql.Types.INTEGER, null, false);
 		tableDefinition.addAttribute(idfac.createFromString("COL2"), java.sql.Types.INTEGER, null, false);
 	}

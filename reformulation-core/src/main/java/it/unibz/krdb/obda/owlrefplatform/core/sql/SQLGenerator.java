@@ -40,7 +40,7 @@ import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.ParserViewDefinition;
 
 import org.openrdf.model.Literal;
@@ -1285,7 +1285,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			TableDefinition table = metadata.getTable(tableId);
+			DatabaseRelationDefinition table = metadata.getTable(tableId);
 			if (table != null) {
 				// ROMAN (15 Oct 2015): i'm not sure what to do if it is a view (i.e., a complex subquery)
 	 			Attribute a = table.getAttribute(attributeId);
@@ -1860,7 +1860,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		public String getViewDefinition(Function atom) {
 			RelationDefinition def = dataDefinitions.get(atom);
-			if (def instanceof TableDefinition) {
+			if (def instanceof DatabaseRelationDefinition) {
 				return sqladapter.sqlTableName(dataDefinitions.get(atom).getID().getSQLRendering(), 
 									viewNames.get(atom).getSQLRendering());
 			} 

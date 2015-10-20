@@ -30,7 +30,7 @@ import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import junit.framework.TestCase;
 
@@ -51,25 +51,25 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 		
 		// Database schema
-		TableDefinition table1 = md.createTable(idfac.createRelationFromString(null, "Student"));
+		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationFromString(null, "Student"));
 		table1.addAttribute(idfac.createFromString("id"), Types.INTEGER, null, false);
 		table1.addAttribute(idfac.createFromString("first_name"), Types.VARCHAR, null, false);
 		table1.addAttribute(idfac.createFromString("last_name"), Types.VARCHAR, null, false);
 		table1.addAttribute(idfac.createFromString("year"), Types.INTEGER, null, false);
 		table1.addAttribute(idfac.createFromString("nationality"), Types.VARCHAR, null, false);
-		table1.setPrimaryKey(UniqueConstraint.of(table1.getAttribute(idfac.createFromString("id"))));
+		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createFromString("id"))));
 		
-		TableDefinition table2 = md.createTable(idfac.createRelationFromString(null, "Course"));
+		DatabaseRelationDefinition table2 = md.createDatabaseRelation(idfac.createRelationFromString(null, "Course"));
 		table2.addAttribute(idfac.createFromString("cid"), Types.VARCHAR, null, false);
 		table2.addAttribute(idfac.createFromString("title"), Types.VARCHAR, null, false);
 		table2.addAttribute(idfac.createFromString("credits"), Types.INTEGER, null, false);
 		table2.addAttribute(idfac.createFromString("description"), Types.VARCHAR, null, false);
-		table2.setPrimaryKey(UniqueConstraint.of(table2.getAttribute(idfac.createFromString("cid"))));
+		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createFromString("cid"))));
 		
-		TableDefinition table3 = md.createTable(idfac.createRelationFromString(null, "Enrollment"));
+		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationFromString(null, "Enrollment"));
 		table3.addAttribute(idfac.createFromString("student_id"), Types.INTEGER, null, false);
 		table3.addAttribute(idfac.createFromString("course_id"), Types.VARCHAR, null, false);
-		table3.setPrimaryKey(UniqueConstraint.of(table3.getAttribute(idfac.createFromString("student_id")), 
+		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createFromString("student_id")), 
 				table3.getAttribute(idfac.createFromString("course_id"))));
 		
 		// Prefix manager

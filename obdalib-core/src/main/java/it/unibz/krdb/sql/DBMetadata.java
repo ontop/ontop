@@ -27,7 +27,7 @@ public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private final Map<RelationID, TableDefinition> tables = new HashMap<>();
+	private final Map<RelationID, DatabaseRelationDefinition> tables = new HashMap<>();
 	
 	// relations include tables and views (views are only created for complex queries in mappings)
 	private final Map<RelationID, RelationDefinition> relations = new HashMap<>();
@@ -60,8 +60,8 @@ public class DBMetadata implements Serializable {
 	 * @return
 	 */
 	
-	public TableDefinition createTable(RelationID id) {
-		TableDefinition table = new TableDefinition(id);
+	public DatabaseRelationDefinition createDatabaseRelation(RelationID id) {
+		DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
 		add(table, tables);
 		add(table, relations);
 		return table;
@@ -91,7 +91,7 @@ public class DBMetadata implements Serializable {
 	 * Inserts a new data definition to this metadata object. 
 	 * 
 	 * @param td
-	 *            The data definition. It can be a {@link TableDefinition} or a
+	 *            The data definition. It can be a {@link DatabaseRelationDefinition} or a
 	 *            {@link ParserViewDefinition} object.
 	 */
 	private <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
@@ -116,8 +116,8 @@ public class DBMetadata implements Serializable {
 	 * 
 	 * @param name
 	 */
-	public TableDefinition getTable(RelationID name) {
-		TableDefinition def = tables.get(name);
+	public DatabaseRelationDefinition getTable(RelationID name) {
+		DatabaseRelationDefinition def = tables.get(name);
 		if (def == null && name.hasSchema()) {
 			def = tables.get(name.getSchemalessID());
 		}
@@ -141,7 +141,7 @@ public class DBMetadata implements Serializable {
 	/**
 	 * Retrieves the tables list form the metadata.
 	 */
-	public Collection<TableDefinition> getTables() {
+	public Collection<DatabaseRelationDefinition> getTables() {
 		return Collections.unmodifiableCollection(tables.values());
 	}
 

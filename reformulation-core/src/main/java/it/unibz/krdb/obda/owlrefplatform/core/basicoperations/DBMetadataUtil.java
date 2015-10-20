@@ -29,7 +29,7 @@ import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,11 +59,11 @@ public class DBMetadataUtil {
 		if (printouts)
 			System.out.println("===FOREIGN KEY RULES");
 		int count = 0;
-		Collection<TableDefinition> tableDefs = metadata.getTables();
-		for (TableDefinition def : tableDefs) {
+		Collection<DatabaseRelationDefinition> tableDefs = metadata.getTables();
+		for (DatabaseRelationDefinition def : tableDefs) {
 			for (ForeignKeyConstraint fks : def.getForeignKeys()) {
 
-				TableDefinition def2 = (TableDefinition) fks.getReferencedRelation();
+				DatabaseRelationDefinition def2 = (DatabaseRelationDefinition) fks.getReferencedRelation();
 
 				Map<Integer, Integer> positionMatch = new HashMap<>();
 				for (ForeignKeyConstraint.Component comp : fks.getComponents()) {

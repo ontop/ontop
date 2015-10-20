@@ -20,6 +20,7 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -72,22 +73,22 @@ public class UniqueConstraint {
 		 * @return null if the list of attributes is empty
 		 */
 		
-		public UniqueConstraint build(String name) {
+		public UniqueConstraint build(String name, boolean isPK) {
 			ImmutableList<Attribute> attributes = builder.build();
 			if (attributes.isEmpty())
 				return null;
-			return new UniqueConstraint(name, builder.build());
+			return new UniqueConstraint(name, isPK, builder.build());
 		}
 	}
 	
-	public static UniqueConstraint of(Attribute att) {
+	public static UniqueConstraint primaryKeyOf(Attribute att) {
 		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
-		return builder.add(att).build("PK_" + att.getRelation().getID().getTableName());
+		return builder.add(att).build("PK_" + att.getRelation().getID().getTableName(), true);
 	}
 
-	public static UniqueConstraint of(Attribute att, Attribute att2) {
+	public static UniqueConstraint primaryKeyOf(Attribute att, Attribute att2) {
 		UniqueConstraint.Builder builder = new UniqueConstraint.Builder(att.getRelation());
-		return builder.add(att).add(att2).build("PK_" + att.getRelation().getID().getTableName());
+		return builder.add(att).add(att2).build("PK_" + att.getRelation().getID().getTableName(), true);
 	}
 	
 	public static Builder builder(RelationDefinition relation) {
@@ -96,6 +97,7 @@ public class UniqueConstraint {
 	
 	private final String name;
 	private final ImmutableList<Attribute> attributes;
+	private final boolean isPK; // primary key
 	
 	/**
 	 * private constructor (use Builder instead)
@@ -104,16 +106,43 @@ public class UniqueConstraint {
 	 * @param attributes
 	 */
 	
-	private UniqueConstraint(String name, ImmutableList<Attribute> attributes) {
+	private UniqueConstraint(String name, boolean isPK, ImmutableList<Attribute> attributes) {
 		this.name = name;
+		this.isPK = isPK;
 		this.attributes = attributes;
 	}
 	
+	/**
+	 * return the name of the constraint
+	 * 
+	 * @return name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * return true if it is a primary key and false otherwise
+	 * 
+	 * @return true if it is a primary key constraint (false otherwise)
+	 */
+	
+	public boolean isPrimaryKey() {
+		return isPK;
+	}
+	
+	/**
+	 * return the list of attributes in the unique constraint
+	 * 
+	 * @return list of attributes
+	 */
+	
 	public ImmutableList<Attribute> getAttributes() {
 		return attributes;
+	}
+	
+	@Override
+	public String toString() {
+		return name + (isPK ? " (PK): " : ": " ) + Joiner.on(", ").join(attributes);
 	}
 }

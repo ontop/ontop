@@ -53,7 +53,7 @@ import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -679,29 +679,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
 			if (printKeys) { 
+				Collection<DatabaseRelationDefinition> table_list = metadata.getTables();
 				// Prints all primary keys
-				System.out.println("\n====== Primary keys ==========");
-				Collection<TableDefinition> table_list = metadata.getTables();
-				for(TableDefinition dd : table_list){
-					System.out.print("\n" + dd.getID().getSQLRendering() + ":");
-					UniqueConstraint pk = dd.getPrimaryKey();
-					if (pk != null)
-						for (Attribute attr : pk.getAttributes()) 
-							System.out.print(attr.getID() + ",");
+				System.out.println("\n====== Primary keys ==========\n");
+				for (DatabaseRelationDefinition dd : table_list) {
+					System.out.print(dd.getID().getSQLRendering() + ":\n");
+					for (UniqueConstraint uc : dd.getUniqueConstraints()) 
+						System.out.println("  " + uc + "\n");
 				}
 				// Prints all foreign keys
-				System.out.println("\n====== Foreign keys ==========");
-				for(TableDefinition dd : table_list){
-					List<ForeignKeyConstraint> fkeys = dd.getForeignKeys();
-					for (ForeignKeyConstraint fk : fkeys) {
-						System.out.print("\n" + dd.getID().getSQLRendering() + "->" + 
-									fk.getReferencedRelation().getID().getSQLRendering() + 
-									": " + fk.getName() + "(");
-						for (ForeignKeyConstraint.Component attr : fk.getComponents()) 
-							System.out.print(attr.getAttribute().getID() + "->" + attr.getReference().getID() + ",");
-					
-						System.out.print("),");
-					}
+				System.out.println("====== Foreign keys ==========\n");
+				for(DatabaseRelationDefinition dd : table_list){
+					for (ForeignKeyConstraint fk : dd.getForeignKeys()) 
+						System.out.print(" " + fk + "\n");
 				}		
 			}
 
