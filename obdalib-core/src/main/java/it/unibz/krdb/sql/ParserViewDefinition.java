@@ -26,16 +26,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Joiner;
+
 /**
  * Represents a complex subquery (not a database view!)
  * 
  * @author Roman Kontchakov
 */
 
-public class ViewDefinition extends RelationDefinition {
+public class ParserViewDefinition extends RelationDefinition {
 
 	private final List<Attribute> attributes = new ArrayList<>();
-	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
+	private final Map<QualifiedAttributeID, Attribute> attributeMap = new HashMap<>();
 	
 	private final String statement;
 	
@@ -46,13 +48,13 @@ public class ViewDefinition extends RelationDefinition {
 	 * @param statement
 	 */
 	
-	ViewDefinition(RelationID name, String statement) {
+	ParserViewDefinition(RelationID name, String statement) {
 		super(name);
 		this.statement = statement;
 	}
 
-	public void addAttribute(QuotedID name) {
-		Attribute att = new Attribute(this, attributes.size() + 1, name, 0, null, true);
+	public void addAttribute(QualifiedAttributeID name) {
+		Attribute att = new Attribute(this, name, attributes.size() + 1, 0, null, true);
 		Attribute prev = attributeMap.put(name, att);
 		if (prev != null) 
 			throw new IllegalArgumentException("Duplicate attribute names");
@@ -82,18 +84,10 @@ public class ViewDefinition extends RelationDefinition {
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
 		bf.append(getID());
-		bf.append("[");
-		boolean comma = false;
-		for (Attribute att : attributes) {
-			if (comma) 
-				bf.append(",");
-			
-			bf.append(att);
-			comma = true;
-		}
+		bf.append(" [");
+		Joiner.on(", ").appendTo(bf, attributes);
 		bf.append("]");
-
-		bf.append(String.format("   (%s)", statement));
+		bf.append(" (").append(statement).append(")");
 		return bf.toString();
 	}
 

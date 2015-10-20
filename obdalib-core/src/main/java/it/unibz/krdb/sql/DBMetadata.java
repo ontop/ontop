@@ -53,6 +53,12 @@ public class DBMetadata implements Serializable {
 		this.idfac = idfac;
 	}
 
+	/**
+	 * creates a database table (which can also be a database view) 
+	 * 
+	 * @param id
+	 * @return
+	 */
 	
 	public TableDefinition createTable(RelationID id) {
 		TableDefinition table = new TableDefinition(id);
@@ -61,16 +67,22 @@ public class DBMetadata implements Serializable {
 		return table;
 	}
 
+	
+	private int parserViewCounter;
+	
 	/**
-	 * THESE VIEWS ARE CREATED ONLY BY SQLQueryParser AS ABBREVIATIONS OF COMPLEX UNPARSABLE SUBQUERIES
+	 * creates a view for SQLQueryParser
+	 * (NOTE: these views are simply names for complex non-parsable subqueries, not database views)
 	 * 
 	 * @param id
 	 * @param sql
 	 * @return
 	 */
 	
-	public ViewDefinition createView(RelationID id, String sql) {
-		ViewDefinition view = new ViewDefinition(id, sql);
+	public ParserViewDefinition createParserView(String sql) {
+		RelationID id = idfac.createRelationFromString(null, String.format("view_%s", parserViewCounter++));	
+		
+		ParserViewDefinition view = new ParserViewDefinition(id, sql);
 		add(view, relations);
 		return view;
 	}
@@ -80,7 +92,7 @@ public class DBMetadata implements Serializable {
 	 * 
 	 * @param td
 	 *            The data definition. It can be a {@link TableDefinition} or a
-	 *            {@link ViewDefinition} object.
+	 *            {@link ParserViewDefinition} object.
 	 */
 	private <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
 		schema.put(td.getID(), td);

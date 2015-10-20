@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QualifiedAttributeID;
@@ -62,8 +62,6 @@ public class Mapping2DatalogConverter {
 	 */
 	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
 		
-		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
-		
 		List<CQIE> datalogProgram = new LinkedList<CQIE>();
 		List<String> errorMessages = new ArrayList<>();
 		
@@ -77,7 +75,7 @@ public class Mapping2DatalogConverter {
 				OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
 				// Parse the SQL query tree from the source query
-				ParsedSQLQuery parsedSQLQuery = sqlQueryParser.parseDeeply(sourceQuery.toString());
+				ParsedSQLQuery parsedSQLQuery = SQLQueryDeepParser.parse(dbMetadata, sourceQuery.toString());
 
 				// Create a lookup table for variable swapping
 				AttributeLookupTable lookupTable = createLookupTable(parsedSQLQuery, dbMetadata, idfac);

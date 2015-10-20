@@ -21,10 +21,11 @@ package it.unibz.krdb.obda.parser;
  */
 
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.QualifiedAttributeID;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.ParserViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import java.util.ArrayList;
@@ -39,74 +40,29 @@ import net.sf.jsqlparser.statement.select.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SQLQueryParser {
+public class SQLQueryDeepParser {
 
 	public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
 
-	private final DBMetadata dbMetaData;
-	private final QuotedIDFactory idfac;
+	private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
 	
-	private static int id_counter;
-	
-	private static Logger log = LoggerFactory.getLogger(SQLQueryParser.class);
-	
-	// ONLY FOR DEEP PARSING
-	public SQLQueryParser(DBMetadata dbMetaData) {
- 		this.dbMetaData = dbMetaData;
- 		this.idfac = dbMetaData.getQuotedIDFactory();
-	}
-		
-	// ONLY FOR SHALLOW PARSING
-	public SQLQueryParser(QuotedIDFactory idfac) {
-		dbMetaData = null;
-		this.idfac = idfac;
-	}
-	
-	/**
-	 * Called from ParsedMapping. Returns the query, even if there were 
-	 * parsing errors.
-	 * 
-	 * @param query The sql query to be parsed
-	 * @return A VisitedQuery (possible with null values)
-	 */
-	public ParsedSQLQuery parseShallowly(String query) {
-		return parse(query, false);
-	}
-	
-
 	/**
 	 * Called from MappingAnalyzer:createLookupTable. Returns the parsed query, or, if there are
 	 * syntax error, the name of a generated view, even if there were 
 	 * parsing errors. 
+     *               If true, (i) deepParsing columns, (ii) create a view if an error is generated,
+     *               and (iii) store information about the different part of the query
 	 * 
 	 * @param query The sql query to be parsed
 	 * @return A ParsedQuery (or a SELECT * FROM table with the generated view)
 	 */
-	public ParsedSQLQuery parseDeeply(String query) {
-		return parse(query, true);
-	}
-
-
-    /**
-     * @param query
-     * @param deeply <ul>
-     *               <li>
-     *               <p/>
-     *               If true, (i) deepParsing columns, (ii) create a view if an error is generated,
-     *               and (iii) store information about the different part of the query
-     *               </li>
-     *               <li>
-     *               Otherwise the query is simply parsed and we do not check for unsupported
-     *               </li>
-     *               </ul>
-     * @return
-     */
-    private ParsedSQLQuery parse(String query, boolean deeply) {
+	public static ParsedSQLQuery parse(DBMetadata dbMetaData, String query) {
+    	
 		boolean errors = false;
 		ParsedSQLQuery queryParser = null;
 		
 		try {
-			queryParser = new ParsedSQLQuery(query, deeply, idfac);
+			queryParser = new ParsedSQLQuery(query, true, dbMetaData.getQuotedIDFactory());
 		} 
 		catch (JSQLParserException e) {
 			if (e.getCause() instanceof ParseException)
@@ -114,7 +70,7 @@ public class SQLQueryParser {
 			errors = true;
 		}
 		
-		if (queryParser == null || (errors && deeply)) {
+		if (queryParser == null || errors) {
 			log.warn("The following query couldn't be parsed. " +
 					"This means Quest will need to use nested subqueries (views) to use this mappings. " +
 					"This is not good for SQL performance, specially in MySQL. " + 
@@ -122,40 +78,28 @@ public class SQLQueryParser {
 					"If you think this query is already simple and should be parsed by Quest, " +
 					"please contact the authors. \nQuery: '{}'", query);
 			
-			RelationID viewId = idfac.createRelationFromString(null, String.format("view_%s", id_counter++));
-			
-			// ONLY IN DEEP PARSING
-			if (dbMetaData != null) {
-				createViewDefinition(dbMetaData, viewId, query);
-			}
-			
-			queryParser = createViewParsed(viewId, query);	
+			ParserViewDefinition viewDef = createViewDefinition(dbMetaData, query);
+			queryParser = createParsedSqlForGeneratedView(dbMetaData.getQuotedIDFactory(), viewDef.getID());	
 		}
 		return queryParser;
 	}
 
 	
 	
-	/*
-	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROM item expression
-	 * We create a query that looks like SELECT * FROM viewName
+	/**
+	 * creates a query of the form SELECT * FROM viewName
 	 */
-	private ParsedSQLQuery createViewParsed(RelationID viewId, String query) {
-		
-		/*
-		 * Create a new SELECT statement containing the viewTable in the FROM clause
-		 */
+    
+	static ParsedSQLQuery createParsedSqlForGeneratedView(QuotedIDFactory idfac, RelationID viewId) {
 		
 		PlainSelect body = new PlainSelect();
 		
-		// create SELECT *
 		List<SelectItem> list = new ArrayList<>(1);
 		list.add(new AllColumns());
-		body.setSelectItems(list); 
+		body.setSelectItems(list); // create SELECT *
 		
-		// create FROM viewTable
 		Table viewTable = new Table(viewId.getSchemaSQLRendering(), viewId.getTableNameSQLRendering());
-		body.setFromItem(viewTable);
+		body.setFromItem(viewTable); // create FROM viewTable
 		
 		Select select = new Select();
 		select.setSelectBody(body);
@@ -165,7 +109,7 @@ public class SQLQueryParser {
 			queryParsed = new ParsedSQLQuery(select, false, idfac);
 		} 
 		catch (JSQLParserException e) {
-			if(e.getCause() instanceof ParseException)
+			if (e.getCause() instanceof ParseException)
 				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
 		}
 
@@ -173,8 +117,10 @@ public class SQLQueryParser {
 	}
 	
 	
-	private void createViewDefinition(DBMetadata md, RelationID viewName, String query) {
+	private static ParserViewDefinition createViewDefinition(DBMetadata md, String query) {
 
+        QuotedIDFactory idfac = md.getQuotedIDFactory();
+		
         ParsedSQLQuery queryParser = null;
         boolean supported = true;
         try {
@@ -184,13 +130,20 @@ public class SQLQueryParser {
             supported = false;
         }
 
-        ViewDefinition viewDefinition = md.createView(viewName, query);
-       
+        ParserViewDefinition viewDefinition = md.createParserView(query);
+        
         if (supported) {
             List<Column> columns = queryParser.getColumns();
             for (Column column : columns) {
             	QuotedID columnId = idfac.createFromString(column.getColumnName());
-                viewDefinition.addAttribute(columnId);
+            	RelationID relationId;
+            	Table table = column.getTable();
+            	if (table == null) // this column is an alias 
+            		relationId = viewDefinition.getID();
+            	else
+            		relationId = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+            	
+                viewDefinition.addAttribute(new QualifiedAttributeID(relationId, columnId));
             }
         }
         else {
@@ -230,11 +183,13 @@ public class SQLQueryParser {
                 if (columnName.contains(".")) {
                     columnName = columnName.substring(columnName.lastIndexOf(".") + 1); // get only the name
                 }
+                // TODO (ROMAN 20 Oct 2015): extract schema and table name as well
 
                 QuotedID columnId = idfac.createFromString(columnName);
 
-                viewDefinition.addAttribute(columnId); 
+                viewDefinition.addAttribute(new QualifiedAttributeID(null, columnId)); 
             }
         }
+        return viewDefinition;
 	}
 }

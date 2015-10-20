@@ -48,7 +48,7 @@ import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.ParserViewDefinition;
 
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalComboBoxButton;
@@ -884,10 +884,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
 						label.setText(td.getID().getSQLRendering());
-					} else if (value instanceof ViewDefinition) {
+					} else if (value instanceof ParserViewDefinition) {
 						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are 
 						// created by SQLQueryParser for complex queries that cannot be parsed
-						ViewDefinition vd = (ViewDefinition) value;
+						ParserViewDefinition vd = (ParserViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);
 						label.setText(vd.getID().getSQLRendering());

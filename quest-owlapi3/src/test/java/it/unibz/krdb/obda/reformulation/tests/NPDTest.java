@@ -22,7 +22,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -112,8 +114,53 @@ public class NPDTest {
 		
 		QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
 	
+
+			String q12 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+					"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+					"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +
+					"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+					"PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+					"SELECT DISTINCT ?unit ?well " +
+					"WHERE { " +
+					"[] npdv:wellboreStratumTopDepth     ?stratTop ; " +
+				    " npdv:wellboreStratumBottomDepth  ?stratBottom ; " +
+				    " npdv:stratumForWellbore          ?wellboreURI ; " +
+				    " npdv:inLithostratigraphicUnit [ npdv:name ?unit ] . "+
+				    "?wellboreURI npdv:name ?well . " +
+				    " "+
+				    "?core " + // "a npdv:WellboreCoreSample ; " +
+					"npdv:coreForWellbore ?wellboreURI ." +
+					"" +
+					"{ ?core npdv:coreIntervalUOM \"m\"^^xsd:string ; " +
+				    "	  npdv:coreIntervalTop     ?coreTopM ;" +
+				    " 	  npdv:coreIntervalBottom  ?coreBottomM ;" +
+				    "BIND(?coreTopM    AS ?coreTop) " +
+				    "BIND(?coreBottomM AS ?coreBottom) " +
+				    "}" +
+				    "UNION " +
+				    "{ ?core npdv:coreIntervalUOM \"ft\"^^xsd:string ; " +
+				    "	  npdv:coreIntervalTop     ?coreTopFT ; " +
+				    " 	  npdv:coreIntervalBottom  ?coreBottomFT ; " +
+				    "BIND((?coreTopFT    * 0.3048) AS ?coreTop) " +
+				    "BIND((?coreBottomFT * 0.3048) AS ?coreBottom) " +
+				    "} " +
+	                "" +
+//				    "BIND(IF(?coreTop > ?stratTop, ?coreTop, ?stratTop) AS ?max) " + 
+//				    "BIND(IF(?coreBottom < ?stratBottom, ?coreBottom, ?stratBottom) AS ?min) " +
+//				    " " +
+//				    "FILTER(?max < ?min) " +
+				    "} ORDER BY ?unit ?well";
+
+			QuestOWLConnection qconn =  reasoner.getConnection();
+			QuestOWLStatement st = qconn.createStatement();
+			
+			String unfolding = st.getUnfolding(q12);
+			st.close();
 		
+			System.out.println(unfolding);
 	}
+	
+	
 	
 	public void setupDatabase() throws SQLException, IOException {
 		// String driver = "org.h2.Driver";

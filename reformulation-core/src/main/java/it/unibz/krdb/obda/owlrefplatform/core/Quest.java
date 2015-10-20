@@ -651,9 +651,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						// (the schema.table names) by parsing the mappings
 						
 						// Parse mappings. Just to get the table names in use
-						MappingParser mParser = new MappingParser(metadata.getQuotedIDFactory(), mappings);
-								
-						Set<RelationID> realTables = mParser.getRealTables();
+						Set<RelationID> realTables = MappingParser.getRealTables(metadata.getQuotedIDFactory(), mappings);
 						
 						if (applyUserConstraints) {
 							// Add the tables referred to by user-supplied foreign keys

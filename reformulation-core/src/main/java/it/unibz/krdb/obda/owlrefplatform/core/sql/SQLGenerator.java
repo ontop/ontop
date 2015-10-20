@@ -41,7 +41,7 @@ import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.sql.ParserViewDefinition;
 
 import org.openrdf.model.Literal;
 
@@ -1864,8 +1864,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return sqladapter.sqlTableName(dataDefinitions.get(atom).getID().getSQLRendering(), 
 									viewNames.get(atom).getSQLRendering());
 			} 
-			else if (def instanceof ViewDefinition) {
-				return String.format("(%s) %s", ((ViewDefinition) def).getStatement(), 
+			else if (def instanceof ParserViewDefinition) {
+				return String.format("(%s) %s", ((ParserViewDefinition) def).getStatement(), 
 								viewNames.get(atom).getSQLRendering());
 			}
 			throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);

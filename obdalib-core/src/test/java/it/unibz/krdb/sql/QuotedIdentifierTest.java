@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import org.junit.Test;
@@ -62,41 +62,35 @@ public class QuotedIdentifierTest {
 	
 	@Test
 	public void test2() {
-		SQLQueryParser parser = new SQLQueryParser(fac);
-		
 		String s = "SELECT Able.\"id\", bB.Col4 AS c FROM TaBle1 able, (SELECT col4 FROM Bable) Bb, " +
 					"c JOIN d ON c.id = d.Id " +
 					"WHERE \"AblE\".Col = Able.col2";
 		
 		System.out.println(s);
 		
-		ParsedSQLQuery q = parser.parseDeeply(s);
+		ParsedSQLQuery q = SQLQueryDeepParser.parse(dbMetadata, s);
 		
 		System.out.println(q.toString());
 	}
 
 	@Test
 	public void test2b() throws Exception {
-		SQLQueryParser parser = new SQLQueryParser(fac);
-		
 		String s = "SELECT a.id AS c FROM A";
 		
 		System.out.println(s);
 		
-		ParsedSQLQuery q = parser.parseDeeply(s);
+		ParsedSQLQuery q = SQLQueryDeepParser.parse(dbMetadata, s);
 		
 		System.out.println(q.toString());
 	}
 	
 	@Test
 	public void test3() throws Exception {
-		SQLQueryParser parser = new SQLQueryParser(fac);
-		
 		String s = "SELECT * FROM A JOIN B ON NOT (a.id <> b.id)";
 		
 		System.out.println(s);
 		
-		ParsedSQLQuery q = parser.parseDeeply(s);
+		ParsedSQLQuery q = SQLQueryDeepParser.parse(dbMetadata, s);
 		
 		System.out.println(q.toString());
 		System.out.println(q.getJoinConditions().toString());

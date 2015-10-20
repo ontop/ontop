@@ -67,7 +67,7 @@ public class JoinConditionVisitor {
 		select.getSelectBody().accept(selectVisitor);
 	
 		if(notSupported && deepParsing) // used to throw exception for the currently unsupported methods
-			throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
+			throw new JSQLParserException(SQLQueryDeepParser.QUERY_NOT_SUPPORTED);
 	}
 		
 		

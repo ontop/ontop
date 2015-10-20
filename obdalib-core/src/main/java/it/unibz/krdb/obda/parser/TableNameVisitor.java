@@ -81,7 +81,7 @@ public class TableNameVisitor {
 		select.getSelectBody().accept(selectVisitor);
 		
 		if (unsupported && deepParsing) // used to throw exception for the currently unsupported methods
-			throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
+			throw new JSQLParserException(SQLQueryDeepParser.QUERY_NOT_SUPPORTED);
 	}
 		
 	public Map<RelationID, RelationID> getTables() {	
@@ -281,7 +281,7 @@ public class TableNameVisitor {
 	            case "replace" :
 	            case "concat" :
 	            case "substr" : 
-	                for(Expression ex :function.getParameters().getExpressions()) 
+	                for (Expression ex :function.getParameters().getExpressions()) 
 	                    ex.accept(this);
 	                break;
 

@@ -22,17 +22,25 @@ package it.unibz.krdb.sql;
 
 import java.sql.Types;
 
+/**
+ * Represents an attribute (column) of a database relation (table or view) or a parser view
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public class Attribute {
+
+	private final RelationDefinition table; // reference to the relation or parser view
 	
-	private final QuotedID id;
+	private final QualifiedAttributeID id; // qualified id (table = tableId for database relation
+	                                       //               parser views, however, have properly qualified column names
 	private final int index;
 	private final int type;
 	private final String typeName;
 	private final boolean canNull;
 	
-	private final RelationDefinition table;
-	
-	Attribute(RelationDefinition relation, int index, QuotedID id, int type, String typeName, boolean canNull) {
+	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, int type, String typeName, boolean canNull) {
 		this.table = relation;
 		this.index = index;
 		this.id = id;
@@ -42,11 +50,11 @@ public class Attribute {
 	}
 	
 	public QuotedID getID() {
-		return id;
+		return id.getAttribute();
 	}
 	
 	public QualifiedAttributeID getQualifiedID() {
-		return new QualifiedAttributeID(table.getID(), id);
+		return id;
 	}
 	
 	public RelationDefinition getRelation() {

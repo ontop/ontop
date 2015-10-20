@@ -57,7 +57,8 @@ public class TableDefinition extends RelationDefinition {
 	}
 	
 	public void addAttribute(QuotedID name, int type, String typeName, boolean canNull) {
-		Attribute att = new Attribute(this, attributes.size() + 1, name, type, typeName, canNull);
+		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), name), 
+										attributes.size() + 1, type, typeName, canNull);
 		Attribute prev = attributeMap.put(name, att);
 		if (prev != null) 
 			throw new IllegalArgumentException("Duplicate attribute names");

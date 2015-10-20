@@ -31,7 +31,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.obda.parser.SQLQueryShallowParser;
 import it.unibz.krdb.sql.QualifiedAttributeID;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
@@ -98,7 +98,6 @@ public class MetaMappingExpander {
 	public Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> splittedMappings) throws SQLException, JSQLParserException {
 
 		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
-		SQLQueryParser translator = new SQLQueryParser(idfac);
 
 		for (OBDAMappingAxiom mapping : splittedMappings) {
 
@@ -129,7 +128,7 @@ public class MetaMappingExpander {
 				
 				// Construct the SQL query tree from the source query we do not work with views 
 				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
-				ParsedSQLQuery sourceQueryParsed = translator.parseShallowly(sourceQuery.toString());
+				ParsedSQLQuery sourceQueryParsed = SQLQueryShallowParser.parse(idfac, sourceQuery.toString());
 				
 				List<SelectExpressionItem> columnList = null;
 				
@@ -202,8 +201,8 @@ public class MetaMappingExpander {
 
 	
 		List<List<String>> paramsForClassTemplate = new LinkedList<List<String>>();
-		try(Statement st = connection.createStatement()) {
-			try(ResultSet rs = st.executeQuery(distinctParamsSQL)) {
+		try (Statement st = connection.createStatement()) {
+			try (ResultSet rs = st.executeQuery(distinctParamsSQL)) {
 				
 				int varsInTemplateSize = varsInTemplate.size();
 				while (rs.next()) {

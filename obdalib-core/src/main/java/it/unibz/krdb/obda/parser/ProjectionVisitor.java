@@ -75,7 +75,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		select.getSelectBody().accept(this);
 		
 		if (unsupported && deepParsing) // used to throw exception for the currently unsupported methods
-				throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
+				throw new JSQLParserException(SQLQueryDeepParser.QUERY_NOT_SUPPORTED);
 		
 		return projection;	
 		

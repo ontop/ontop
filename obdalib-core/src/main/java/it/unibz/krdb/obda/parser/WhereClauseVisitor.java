@@ -68,7 +68,7 @@ public class WhereClauseVisitor {
 		select.getSelectBody().accept(selectVisitor);
 		
 		if (unsupported && deepParsing)
-				throw new JSQLParserException(SQLQueryParser.QUERY_NOT_SUPPORTED);
+				throw new JSQLParserException(SQLQueryDeepParser.QUERY_NOT_SUPPORTED);
 		
 		return whereClause;
 	}
