@@ -112,7 +112,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	}
 	
 	/**
-	 * adds a unique constraint (a primary key or a proper unique constraint)
+	 * adds a unique constraint (a primary key or a unique constraint proper)
 	 *
 	 * @param uc
 	 */
@@ -122,6 +122,12 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 			if (pk != null)
 				throw new IllegalArgumentException("Duplicate PK" + pk + " " + uc);
 			pk = uc;
+		}
+		else {
+			if (pk != null)
+				if (uc.getAttributes().equals(pk.getAttributes()))
+					// ignore the unique index created for the primary key
+					return;
 		}
 		ucs.add(uc);
 	}
