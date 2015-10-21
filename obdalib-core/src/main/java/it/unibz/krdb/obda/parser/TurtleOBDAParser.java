@@ -1,4 +1,4 @@
-// $ANTLR 3.5.1 /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-10-20 17:50:16
+// $ANTLR 3.5.1 /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-10-21 11:38:11
 
 package it.unibz.krdb.obda.parser;
 
@@ -2364,7 +2364,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral927); 
 
-					  ValueConstant trueConstant = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN);
+					  ValueConstant trueConstant = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); 
 					}
 					break;
@@ -2373,7 +2373,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral936); 
 
-					  ValueConstant falseConstant = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN);
+					  ValueConstant falseConstant = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
 					  
 					}
@@ -2434,7 +2434,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned955); 
 
-					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER);
+					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
 					  
 					}
@@ -2444,7 +2444,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned963); 
 
-					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE);
+					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
 					  
 					}
@@ -2454,7 +2454,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned972); 
 
-					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DOUBLE);
+					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
 					   
 					}
@@ -2515,7 +2515,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive991); 
 
-					   ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER);
+					   ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.LITERAL);
 					   value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
 					  
 					}
@@ -2525,7 +2525,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive999); 
 
-					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE);
+					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
 					  
 					}
@@ -2535,7 +2535,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1008); 
 
-					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DOUBLE);
+					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
 					   
 					}
@@ -2596,7 +2596,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1027); 
 
-					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER);
+					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
 					  
 					}
@@ -2606,7 +2606,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1035); 
 
-					   ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE);
+					   ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.LITERAL);
 					   value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
 					  
 					}
@@ -2616,7 +2616,7 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1044); 
 
-					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DOUBLE);
+					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.LITERAL);
 					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
 					  
 					}

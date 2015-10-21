@@ -676,55 +676,55 @@ languageTag
 
 booleanLiteral returns [Term value]
   : TRUE  {
-  ValueConstant trueConstant = dfac.getConstantLiteral($TRUE.text, COL_TYPE.BOOLEAN);
+  ValueConstant trueConstant = dfac.getConstantLiteral($TRUE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); }
   | FALSE {
-  ValueConstant falseConstant = dfac.getConstantLiteral($FALSE.text, COL_TYPE.BOOLEAN);
+  ValueConstant falseConstant = dfac.getConstantLiteral($FALSE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
   }
   ;
 
 numericUnsigned returns [Term value]
   : INTEGER {
-  ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER.text, COL_TYPE.INTEGER);
+  ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
   }
   | DOUBLE  {
-  ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE.text, COL_TYPE.DOUBLE);
+  ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
   }
   | DECIMAL {
-  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL.text, COL_TYPE.DOUBLE);
+  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
    }
   ;
 
 numericPositive returns [Term value]
   : INTEGER_POSITIVE {
-   ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.INTEGER);
+   ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.LITERAL);
    $value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
   }
   | DOUBLE_POSITIVE  {
-  ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.DOUBLE);
+  ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
   }
   | DECIMAL_POSITIVE {
-  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.DOUBLE);
+  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
    }
   ;
 
 numericNegative returns [Term value]
   : INTEGER_NEGATIVE {
-  ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.INTEGER);
+  ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
   }
   | DOUBLE_NEGATIVE  {
-   ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.DOUBLE);
+   ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.LITERAL);
    $value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
   }
   | DECIMAL_NEGATIVE {
-  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.DOUBLE);
+  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.LITERAL);
   $value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
   }
   ;
