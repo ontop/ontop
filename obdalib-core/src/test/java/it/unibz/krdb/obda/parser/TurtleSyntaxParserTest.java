@@ -200,6 +200,12 @@ public class TurtleSyntaxParserTest extends TestCase {
 
 	}
 
+		//Test for value constant
+	public void test10() {
+		final boolean result = parse(":Person-{id} a :Person ; :age 25 ; :hasDegree true ; :averageGrade 28.3 .");
+		assertTrue(result);
+	}
+
 	private boolean compareCQIE(String input, int countBody) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
 		parser.setPrefixManager(getPrefixManager());
@@ -218,9 +224,10 @@ public class TurtleSyntaxParserTest extends TestCase {
 	private boolean parse(String input) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
 		parser.setPrefixManager(getPrefixManager());
-
+		CQIE mapping;
 		try {
-			parser.parse(input);
+			mapping = parser.parse(input);
+			log.debug("mapping " + mapping);
 		} catch (TargetQueryParserException e) {
 			log.debug(e.getMessage());
 			return false;

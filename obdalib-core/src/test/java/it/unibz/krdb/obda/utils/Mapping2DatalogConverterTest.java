@@ -238,4 +238,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 				"select \"QINVESTIGACIONPUARTTMP0\".\"id\" \"t1_1\" from Student \"QINVESTIGACIONPUARTTMP0\"  where \"QINVESTIGACIONPUARTTMP0\".\"first_name\" IS NOT NULL ",
 				":S_{t1_1} a :Student .");
 	}
+
+
+
 }
