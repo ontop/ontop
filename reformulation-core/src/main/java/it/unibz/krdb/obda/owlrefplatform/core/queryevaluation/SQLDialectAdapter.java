@@ -83,6 +83,8 @@ public interface SQLDialectAdapter {
 
 	public String sqlOrderBy(List<OrderCondition> conditions, String viewname);
 
+	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset);
+
 	/***
 	 * Returns the expression that cast's the given column into a particular SQL
 	 * type. The types are those enumerated in java.sql.Types.
