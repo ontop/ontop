@@ -21,12 +21,6 @@ The project is a [Maven](http://maven.apache.org/) project. Compiling, running t
 
 Currently we use Maven 3 and Java 7 to build the project.
 
-Code organization
---------------------
-The code is organized in several submodules as follows:
-
-// TODO - extend this section of the readme
-
 
 Links
 --------------------
@@ -35,13 +29,15 @@ official website and documentations: http://ontop.inf.unibz.it/
 
 Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 
-Blog: http://ontop-obda.blogspot.it/
-
 Source Code: https://github.com/ontop/ontop
 
 Issue Tracker: https://github.com/ontop/ontop/issues
 
 Wiki: https://github.com/ontop/ontop/wiki
+
+Facebook: https://www.facebook.com/obdaontop/
+
+Twitter: https://twitter.com/ontop4obda
 
 
 
