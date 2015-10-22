@@ -449,6 +449,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution = proposal.getOptionalSubstitution();
         if (optionalSubstitution.isPresent()) {
 
+            // TODO: filter the non-bound variables from the substitution before propagating!!!
+
             SubstitutionPropagationProposal propagationProposal = new SubstitutionPropagationProposalImpl(topJoinNode,
                     optionalSubstitution.get());
 

@@ -14,7 +14,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2Va
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import org.semanticweb.ontop.pivotalrepr.transformer.FullSubstitutionPropagator;
+import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
 
 import java.util.HashMap;
@@ -186,14 +186,14 @@ public class SubQueryUnificationTools {
                  * New substitution
                  * TODO: further explain
                  */
-            } catch (SubstitutionPropagator.NewSubstitutionException e) {
+            } catch (SubstitutionDownPropagator.NewSubstitutionException e) {
                 optionalNewChild = Optional.of(e.getTransformedNode());
-                propagatorForChild = new FullSubstitutionPropagator(e.getSubstitution());
+                propagatorForChild = new SubstitutionDownPropagator(e.getSubstitution());
             }
             /**
              * Unification rejected by a sub-construction node.
              */
-            catch(SubstitutionPropagator.UnificationException e) {
+            catch(SubstitutionDownPropagator.UnificationException e) {
                 throw new SubQueryUnificationException(e.getMessage());
             }
             /**
@@ -310,7 +310,7 @@ public class SubQueryUnificationTools {
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution,
                 newOptionalQueryModifiers);
         return new ConstructionNodeUnification(newConstructionNode,
-                new FullSubstitutionPropagator(substitutionToPropagate));
+                new SubstitutionDownPropagator(substitutionToPropagate));
     }
 
     /**
