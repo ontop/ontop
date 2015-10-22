@@ -1,16 +1,13 @@
-CREATE SCHEMA "stockexchange";
-
-CREATE TABLE "stockexchange".test (
+CREATE TABLE test (
     name1 character varying(100),
 	name2 character varying(100),
 	name3 character varying(100)
 );
 
-INSERT INTO "stockexchange".test VALUES ('John Smith', 'John Smith 2', 'John Smith 3');
-INSERT INTO "stockexchange".test VALUES ('Cote D''ivore', 'Cote D''ivore 2', 'Cote D''ivore 3');
--- INSERT INTO "stockexchange".test VALUES ();
+INSERT INTO test (name1, name2, name3) VALUES ('John Smith', 'John Smith 2', 'John Smith 3');
+INSERT INTO test (name1, name2, name3) VALUES ('Cote D''ivore', 'Cote D''ivore 2', 'Cote D''ivore 3');
 
 
--- ALTER TABLE "stockexchange".test
---     ADD CONSTRAINT test_pkey PRIMARY KEY (id);
+-- ALTER TABLE test
+--     ADD CONSTRAINT test_pkey PRIMARY KEY (id); 
 

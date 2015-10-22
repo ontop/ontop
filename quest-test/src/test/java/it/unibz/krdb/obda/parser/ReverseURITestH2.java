@@ -40,9 +40,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import junit.framework.TestCase;
-
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -59,127 +61,160 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class ReverseURITestH2 extends TestCase {
+public class ReverseURITestH2 {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
+	private static OBDADataFactory fac;
+	private static QuestOWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+	static Logger log = LoggerFactory.getLogger(ReverseURITestH2.class);
+	private static OBDAModel obdaModel;
+	private static OWLOntology ontology;
 
-    final String owlfile =
-            "src/test/resources/reverse-uri-test.owl";
-    final String obdafile =
-            "src/test/resources/reverse-uri-test.obda";
-	private QuestOWL reasoner;
+	final static String owlfile = "src/test/resources/reverse-uri-test.owl";
+	final static String obdafile = "src/test/resources/reverse-uri-test.obda";
+	private static QuestOWL reasoner;
 
-    private Connection sqlConnection;
+	private static Connection sqlConnection;
 
-	@Override
-	public void setUp() throws Exception {
+	private static void runUpdateOnSQLDB(String sqlscript, Connection sqlConnection)
+			throws Exception {
 
-        String url = "jdbc:h2:mem:questrepository;";
-        String username = "fish";
-        String password = "fish";
+		Statement st = sqlConnection.createStatement();
 
-        fac = OBDADataFactoryImpl.getInstance();
+		FileReader reader = new FileReader(sqlscript);
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			bf.append("\n");
+			line = in.readLine();
+		}
+		in.close();
 
-        sqlConnection = DriverManager.getConnection(url, username, password);
-        Statement st = sqlConnection.createStatement();
-
-        FileReader reader = new FileReader("src/test/resources/reverse-uri-test.sql");
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            bf.append("\n");
-            line = in.readLine();
-        }
-        in.close();
-
-        st.execute("DROP ALL OBJECTS DELETE FILES");
-        System.out.println(bf.toString());
-        st.executeUpdate(bf.toString());
-        sqlConnection.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+		System.out.println(bf.toString());
+		st.executeUpdate(bf.toString());
+		if (!sqlConnection.getAutoCommit())
+			sqlConnection.commit();
+	}
 	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
+	@Before
+	public void init() {
 		
 	}
-
-
-    @After
-    public void tearDown() throws Exception {
-        conn.close();
-        reasoner.dispose();
-        if (!sqlConnection.isClosed()) {
-            java.sql.Statement s = sqlConnection.createStatement();
-            try {
-                s.execute("DROP ALL OBJECTS DELETE FILES");
-            } catch (SQLException sqle) {
-                System.out.println("Table not found, not dropping");
-            } finally {
-                s.close();
-                sqlConnection.close();
-            }
-        }
-
-    }
+	
+	@After
+	public void after() {
+		
+	}
+	
 	
 
-	
+	@BeforeClass
+	public static void setUp() throws Exception {
+
+		// String url = "jdbc:h2:mem:questrepository;";
+		// String username = "fish";
+		// String password = "fish";
+
+
+//		String url = "jdbc:mysql://33.33.33.1:3306/ontop?sessionVariables=sql_mode='ANSI'&allowMultiQueries=true";
+		String url = "jdbc:postgresql://localhost/ontop";
+		String username = "postgres";
+		String password = "postgres";
+
+		System.out.println("Test");
+		fac = OBDADataFactoryImpl.getInstance();
+
+		try {
+
+			sqlConnection = DriverManager
+					.getConnection(url, username, password);
+
+			runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql",
+					sqlConnection);
+
+			// Loading the OWL file
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			ontology = manager.loadOntologyFromOntologyDocument((new File(
+					owlfile)));
+
+			// Loading the OBDA data
+			fac = OBDADataFactoryImpl.getInstance();
+			obdaModel = fac.getOBDAModel();
+
+			ModelIOManager ioManager = new ModelIOManager(obdaModel);
+			ioManager.load(obdafile);
+
+			QuestPreferences p = new QuestPreferences();
+			p.setCurrentValueOf(QuestPreferences.ABOX_MODE,
+					QuestConstants.VIRTUAL);
+			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
+					QuestConstants.FALSE);
+			// Creating a new instance of the reasoner
+			QuestOWLFactory factory = new QuestOWLFactory();
+			factory.setOBDAController(obdaModel);
+
+			factory.setPreferenceHolder(p);
+
+			reasoner = (QuestOWL) factory.createReasoner(ontology,
+					new SimpleConfiguration());
+
+			// Now we are ready for querying
+			conn = reasoner.getConnection();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			log.error(e.getMessage(), e);
+			throw e;
+		}
+
+	}
+
+	@AfterClass
+	public static void tearDown() throws Exception {
+		runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql.drop",
+				sqlConnection);
+
+		conn.close();
+		reasoner.dispose();
+		if (!sqlConnection.isClosed()) {
+			java.sql.Statement s = sqlConnection.createStatement();
+			try {
+				s.execute("DROP ALL OBJECTS DELETE FILES");
+			} catch (SQLException sqle) {
+				System.out.println("Table not found, not dropping");
+			} finally {
+				s.close();
+				sqlConnection.close();
+			}
+		}
+
+	}
+
 	private void runTests(String query, int numberOfResults) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		try {
-			
 
 			QuestOWLResultSet rs = st.executeTuple(query);
 			/*
-			boolean nextRow = rs.nextRow();
-			
-			*/
-//			assertTrue(rs.nextRow());
+			 * boolean nextRow = rs.nextRow();
+			 */
+			// assertTrue(rs.nextRow());
 			int count = 0;
-			while (rs.nextRow()){
-				OWLObject ind1 =	rs.getOWLObject("x")	 ;
-				System.out.println("Result " +  ind1.toString());
+			while (rs.nextRow()) {
+				OWLObject ind1 = rs.getOWLObject("x");
+				System.out.println("Result " + ind1.toString());
 				count += 1;
 			}
-			assertTrue(count == numberOfResults);
-		
-/*
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
-	*/		
+			org.junit.Assert.assertTrue(count == numberOfResults);
+
+			/*
+			 * assertEquals("<uri1>", ind1.toString()); assertEquals("<uri1>",
+			 * ind2.toString()); assertEquals("\"value1\"", val.toString());
+			 */
 
 		} catch (Exception e) {
 			throw e;
@@ -188,7 +223,7 @@ public class ReverseURITestH2 extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
-				assertTrue(false);
+				org.junit.Assert.assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
@@ -197,95 +232,112 @@ public class ReverseURITestH2 extends TestCase {
 
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testSingleColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore> a ?x}";
-		runTests(query,1);
-	}
-	
-	/**
-	 * Test use of two aliases to same table
-	 * @throws Exception
-	 */
-	public void testSingleColum() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-John%20Smith> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
 
-	
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
+	public void testSingleColum() throws Exception {
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-John%20Smith> a ?x}";
+		runTests(query, 1);
+	}
+
+	/**
+	 * Test use of two aliases to same table
+	 * 
+	 * @throws Exception
+	 */
+	@Test
 	public void testTwoColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-	
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testTwoColum2Value() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith%202> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-	
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testTwoColum22Vaule() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore%202> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-	
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testTwoColum() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-	
-	
-	
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testThreeColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore-Cote%20D%22ivore> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-	
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testThreeColum() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith-John%20Smith> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-		
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testThreeColum23Value() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore%202-Cote%20D%22ivore%203> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-	
+
 	/**
 	 * Test use of two aliases to same table
+	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testThreeColum3Value() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith%202-John%20Smith%203> a ?x}";
-		runTests(query,1);
+		runTests(query, 1);
 	}
-		
+
 }

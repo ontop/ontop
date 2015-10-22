@@ -8,41 +8,41 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:h2:mem:questrepository
-username	fish
-password	fish
-driverClass	org.h2.Driver
+connectionUrl	jdbc:postgresql://localhost/ontop
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
 target		:test-{name1} a :Test ; :name {name1} .
-source		select name1 from "stockexchange".test
+source		select name1 from  test
 
 mappingId	mapping-addresses-2
 target		:test-{name1}-{name1} a :Test ; :name {name1} .
-source		select name1 from "stockexchange".test
+source		select name1 from  test
 
 mappingId	mapping-addresses-3
 target		:test-{name1}-{name1}-{name1} a :Test ; :name {name1} .
-source		select name1 from "stockexchange".test
+source		select name1 from  test
 
 
 mappingId	mapping-addresses-21
 target		:test-{name1}-{name2} a :Test ; :name {name1} .
-source		select name1, name2 from "stockexchange".test
+source		select name1, name2 from  test
 
 mappingId	mapping-addresses-31
 target		:test-{name1}-{name2}-{name3} a :Test ; :name {name1} .
-source		select name1, name2, name3 from "stockexchange".test
+source		select name1, name2, name3 from  test
 
 
 mappingId	mapping-addresses-2
 target		:test-{name1}-{name2} a :Test ; :name {name1} .
-source		select name1, name2 from "stockexchange".test
+source		select name1, name2 from  test
 
 mappingId	mapping-addresses-3
 target		:test-{name1}-{name2}-{name3} a :Test ; :name {name1} .
-source		select name1, name2, name3 from "stockexchange".test
+source		select name1, name2, name3 from  test
 
 ]]
 
