@@ -9,7 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 /**
  * TODO: explain
  *
- * Quasi-immutable (depends on ConstructionNode).
+ * Immutable (depends on ConstructionNode).
  */
 public interface ConstructionNodeUpdate {
 

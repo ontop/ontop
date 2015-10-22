@@ -15,7 +15,9 @@ import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 
 /**
  * TODO: explain
@@ -143,7 +145,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                applyOptimization(treeComponent, highLevelProposal.getFocusNode(), concreteProposal);
+                applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(), concreteProposal);
             }
         }
         return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
@@ -431,7 +433,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     /**
      * Assumes that the data atoms are leafs
      */
-    private static void applyOptimization(QueryTreeComponent treeComponent, InnerJoinNode topJoinNode,
+    private static void applyOptimization(IntermediateQuery query, QueryTreeComponent treeComponent, InnerJoinNode topJoinNode,
                                           ConcreteProposal proposal) {
         for (DataNode nodeToRemove : proposal.getDataNodesToRemove()) {
             treeComponent.removeSubTree(nodeToRemove);
@@ -446,11 +448,17 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution = proposal.getOptionalSubstitution();
         if (optionalSubstitution.isPresent()) {
-            /**
-             * TODO: propagate the substitution
-             */
-            throw new RuntimeException("TODO: propagate the substitution to the upper construction node " +
-                    "and the surroundings");
+
+            SubstitutionPropagationProposal propagationProposal = new SubstitutionPropagationProposalImpl(topJoinNode,
+                    optionalSubstitution.get());
+
+            // Forces the use of an internal executor (the treeComponent must remain the same).
+            try {
+                query.applyProposal(propagationProposal, true);
+            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
+                throw new RuntimeException("Internal error: not able to propagate the substitution "
+                        + optionalSubstitution.get() + "\n Reason: " + e.getMessage());
+            }
         }
     }
 }

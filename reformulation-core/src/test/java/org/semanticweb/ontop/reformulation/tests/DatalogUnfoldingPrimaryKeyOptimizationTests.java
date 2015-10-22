@@ -45,6 +45,9 @@ import com.google.common.collect.Multimap;
 
 import junit.framework.TestCase;
 
+/**
+ * TODO: disable this test
+ */
 public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
