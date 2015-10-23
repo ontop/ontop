@@ -6,6 +6,9 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
  * TODO: explain
+ *
+ * The substitution is expected to have already been
+ *
  */
 public interface SubstitutionPropagationProposal extends NodeCentricOptimizationProposal<QueryNode> {
 

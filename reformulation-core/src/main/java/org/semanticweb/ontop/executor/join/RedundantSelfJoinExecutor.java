@@ -129,6 +129,9 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
+        // By default, keep the former (non-final)
+        InnerJoinNode newTopJoinNode = topJoinNode;
+
         /**
          * Tries to optimize if there are data nodes
          */
@@ -145,10 +148,11 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(), concreteProposal);
+                newTopJoinNode = applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(),
+                        concreteProposal);
             }
         }
-        return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
+        return new NodeCentricOptimizationResultsImpl<>(query, newTopJoinNode);
     }
 
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
@@ -433,8 +437,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     /**
      * Assumes that the data atoms are leafs
      */
-    private static void applyOptimization(IntermediateQuery query, QueryTreeComponent treeComponent, InnerJoinNode topJoinNode,
-                                          ConcreteProposal proposal) {
+    private static InnerJoinNode applyOptimization(IntermediateQuery query, QueryTreeComponent treeComponent,
+                                                   InnerJoinNode topJoinNode, ConcreteProposal proposal) {
         for (DataNode nodeToRemove : proposal.getDataNodesToRemove()) {
             treeComponent.removeSubTree(nodeToRemove);
         }
@@ -456,11 +460,29 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {
-                query.applyProposal(propagationProposal, true);
+                NodeCentricOptimizationResults results = propagationProposal.castResults(query.applyProposal(
+                        propagationProposal, true));
+
+                Optional<QueryNode> optionalNewJoinNode = results.getOptionalNewNode();
+                if (optionalNewJoinNode.isPresent()) {
+                    QueryNode newNode = optionalNewJoinNode.get();
+                    if (newNode instanceof InnerJoinNode) {
+                        return (InnerJoinNode) newNode;
+                    }
+                    else {
+                        throw new RuntimeException("Not a inner join returned after the substitution propagation");
+                    }
+                }
+                else {
+                    throw new RuntimeException("No focus node returned after the substitution propagation");
+                }
+
+
             } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
                 throw new RuntimeException("Internal error: not able to propagate the substitution "
                         + optionalSubstitution.get() + "\n Reason: " + e.getMessage());
             }
         }
+        return null;
     }
 }
