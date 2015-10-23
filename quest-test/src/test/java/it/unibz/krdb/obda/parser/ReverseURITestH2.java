@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.utils.SQLScriptRunner;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -122,9 +123,12 @@ public class ReverseURITestH2 {
 
 
 //		String url = "jdbc:mysql://33.33.33.1:3306/ontop?sessionVariables=sql_mode='ANSI'&allowMultiQueries=true";
-		String url = "jdbc:postgresql://localhost/ontop";
-		String username = "postgres";
-		String password = "postgres";
+		//String url = "jdbc:postgresql://localhost/ontop";
+//		String url = "jdbc:db2://192.168.0.100:50000/ontop";
+		String url = "jdbc:oracle:thin:@192.168.99.100:49161:xe";
+		
+		String username = "system";
+		String password = "oracle";
 
 		System.out.println("Test");
 		fac = OBDADataFactoryImpl.getInstance();
@@ -134,8 +138,16 @@ public class ReverseURITestH2 {
 			sqlConnection = DriverManager
 					.getConnection(url, username, password);
 
-			runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql",
-					sqlConnection);
+//			runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql",
+//					sqlConnection);
+			
+			FileReader reader = new FileReader("src/test/resources/reverse-uri-test.sql");
+			BufferedReader in = new BufferedReader(reader);
+			SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
+			runner.runScript(in);
+			
+					
+					
 
 			// Loading the OWL file
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -175,8 +187,12 @@ public class ReverseURITestH2 {
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql.drop",
-				sqlConnection);
+		
+		FileReader reader = new FileReader("src/test/resources/reverse-uri-test.sql.drop");
+		BufferedReader in = new BufferedReader(reader);
+		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
+		runner.runScript(in);
+		
 
 		conn.close();
 		reasoner.dispose();
