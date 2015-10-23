@@ -8,10 +8,10 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:postgresql://localhost/ontop
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
+connectionUrl	jdbc:h2:mem:questrepository;
+username	fish
+password	fish
+driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses

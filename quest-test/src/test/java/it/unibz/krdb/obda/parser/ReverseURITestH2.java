@@ -117,19 +117,21 @@ public class ReverseURITestH2 {
 	@BeforeClass
 	public static void setUp() throws Exception {
 
-		// String url = "jdbc:h2:mem:questrepository;";
-		// String username = "fish";
-		// String password = "fish";
+		 String url = "jdbc:h2:mem:questrepository;";
+		 String username = "fish";
+		 String password = "fish";
 
 
 //		String url = "jdbc:mysql://33.33.33.1:3306/ontop?sessionVariables=sql_mode='ANSI'&allowMultiQueries=true";
 		//String url = "jdbc:postgresql://localhost/ontop";
-//		String url = "jdbc:db2://192.168.0.100:50000/ontop";
-		String url = "jdbc:oracle:thin:@192.168.99.100:49161:xe";
+//		String url = "jdbc:db2://192.168.99.100:50000/ontop";
+//		String url = "jdbc:oracle:thin:@192.168.99.100:49161:xe";
 		
-		String username = "system";
-		String password = "oracle";
+//		String username = "db2inst1";
+//		String password = "ontop";
 
+		// system/oracle
+		
 		System.out.println("Test");
 		fac = OBDADataFactoryImpl.getInstance();
 

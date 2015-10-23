@@ -1,3 +1,5 @@
+DROP TABLE test;
+
 CREATE TABLE test (
     name1 character varying(100),
 	name2 character varying(100),
@@ -6,8 +8,3 @@ CREATE TABLE test (
 
 INSERT INTO test (name1, name2, name3) VALUES ('John Smith', 'John Smith 2', 'John Smith 3');
 INSERT INTO test (name1, name2, name3) VALUES ('Cote D''ivore', 'Cote D''ivore 2', 'Cote D''ivore 3');
-
-
--- ALTER TABLE test
---     ADD CONSTRAINT test_pkey PRIMARY KEY (id); 
-
