@@ -69,7 +69,7 @@ public class QuotedID {
 	 * @return
 	 */
 	
-	public static QuotedID createFromDatabaseRecord(String s) {
+	public static QuotedID createIdFromDatabaseRecord(String s) {
 		// ID is as though it is quoted -- DB stores names as is 
 		return new QuotedID(s, QUOTATION);
 	}
