@@ -104,7 +104,7 @@ public class NPDTest {
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		//pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
+		pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.FALSE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
