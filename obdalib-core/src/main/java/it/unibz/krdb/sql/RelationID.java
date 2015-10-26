@@ -48,6 +48,7 @@ public class RelationID {
 	}
 	
 	/**
+	 * creates relation id from the database record (as though it is quoted)
 	 * 
 	 * @param schema as is in DB (possibly null)
 	 * @param table as is in DB
@@ -56,7 +57,8 @@ public class RelationID {
 	
 	public static RelationID createRelationIdFromDatabaseRecord(String schema, String table) {
 		// both IDs are as though they are quoted -- DB stores names as is 
-		return new RelationID(QuotedID.createFromDatabaseRecord(schema), QuotedID.createFromDatabaseRecord(table));			
+		return new RelationID(QuotedID.createIdFromDatabaseRecord(schema), 
+								QuotedID.createIdFromDatabaseRecord(table));			
 	}
 	
 	/**
@@ -65,7 +67,7 @@ public class RelationID {
 	 */
 	
 	public RelationID getSchemalessID() {
-		return new RelationID(QuotedID.createFromDatabaseRecord(null), table);
+		return new RelationID(QuotedID.createIdFromDatabaseRecord(null), table);
 	}
 	
 	/**

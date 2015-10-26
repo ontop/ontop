@@ -19,12 +19,12 @@ public class TestImplicitDBConstraints {
 		this.md = DBMetadataExtractor.createDummyMetadata();
 		this.idfac = md.getQuotedIDFactory();
 
-		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
-		td.addAttribute(idfac.createFromString("KEYNAME"), 0, null, false); // from 1
+		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
+		td.addAttribute(idfac.createAttributeID("KEYNAME"), 0, null, false); // from 1
 
-		DatabaseRelationDefinition td2 = md.createDatabaseRelation(idfac.createRelationFromString(null, "TABLE2"));
-		td2.addAttribute(idfac.createFromString("KEY1"), 0, null, false);  // from 1
-		td2.addAttribute(idfac.createFromString("KEY2"), 0, null, false);
+		DatabaseRelationDefinition td2 = md.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
+		td2.addAttribute(idfac.createAttributeID("KEY1"), 0, null, false);  // from 1
+		td2.addAttribute(idfac.createAttributeID("KEY2"), 0, null, false);
 	}
 	
 	@Test
@@ -46,8 +46,8 @@ public class TestImplicitDBConstraints {
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
 		uc.addFunctionalDependencies(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
-		Attribute attr = dd.getAttribute(idfac.createFromString("KEYNAME"));	
+		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
+		Attribute attr = dd.getAttribute(idfac.createAttributeID("KEYNAME"));	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
 	}
 
@@ -57,19 +57,19 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		Set<RelationID> refs = uc.getReferredTables(idfac);
 		assertTrue(refs.size() == 1);
-		assertTrue(refs.contains(idfac.createRelationFromString(null, "TABLE2")));
+		assertTrue(refs.contains(idfac.createRelationID(null, "TABLE2")));
 	}
 
 	@Test
 	public void testAddForeignKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
 		uc.addForeignKeys(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
+		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
 		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(), 
-				idfac.createRelationFromString(null, "TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createFromString("KEY1"));
+				idfac.createRelationID(null, "TABLE2"));
+		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createAttributeID("KEY1"));
 	}
 
 	@Test
@@ -77,14 +77,14 @@ public class TestImplicitDBConstraints {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
 		uc.addFunctionalDependencies(this.md);
 		uc.addForeignKeys(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationFromString(null, "TABLENAME"));
+		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
 		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(), 
-						idfac.createRelationFromString(null, "TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createFromString("KEY1"));
+						idfac.createRelationID(null, "TABLE2"));
+		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createAttributeID("KEY1"));
 		assertEquals(dd.getUniqueConstraints().get(0).getAttributes(),
-							ImmutableList.of(dd.getAttribute(idfac.createFromString("KEYNAME")))); 
+							ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME")))); 
 	}
 
 	

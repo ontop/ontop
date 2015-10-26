@@ -328,10 +328,10 @@ public class MetaMappingExpander {
 				if (selectExpression.getExpression() instanceof Column) {
 					Column c = (Column)selectExpression.getExpression();
 
-		        	QuotedID column1 = idfac.createFromString(c.getColumnName());
+		        	QuotedID column1 = idfac.createAttributeID(c.getColumnName());
 		        	RelationID relation = null;
 		        	if (c.getTable().getName() != null)
-		        		relation = idfac.createRelationFromString(c.getTable().getSchemaName(), c.getTable().getName());
+		        		relation = idfac.createRelationID(c.getTable().getSchemaName(), c.getTable().getName());
 		        	
 		        	QualifiedAttributeID qa = new QualifiedAttributeID(relation, column1);
 		        	

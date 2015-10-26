@@ -197,7 +197,7 @@ public class PreprocessProjection {
         @Override
         public void visit(Table table) {
             //obtain the column names from the metadata
-     	   RelationID tableID = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+     	   RelationID tableID = idfac.createRelationID(table.getSchemaName(), table.getName());
            RelationDefinition tableDefinition = metadata.getRelation(tableID);
            if (tableDefinition == null)
                throw new RuntimeException("Definition not found for table '" + table + "'.");

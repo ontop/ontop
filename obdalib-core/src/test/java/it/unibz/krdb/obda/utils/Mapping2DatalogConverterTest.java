@@ -51,26 +51,26 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 		
 		// Database schema
-		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationFromString(null, "Student"));
-		table1.addAttribute(idfac.createFromString("id"), Types.INTEGER, null, false);
-		table1.addAttribute(idfac.createFromString("first_name"), Types.VARCHAR, null, false);
-		table1.addAttribute(idfac.createFromString("last_name"), Types.VARCHAR, null, false);
-		table1.addAttribute(idfac.createFromString("year"), Types.INTEGER, null, false);
-		table1.addAttribute(idfac.createFromString("nationality"), Types.VARCHAR, null, false);
-		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createFromString("id"))));
+		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationID(null, "Student"));
+		table1.addAttribute(idfac.createAttributeID("id"), Types.INTEGER, null, false);
+		table1.addAttribute(idfac.createAttributeID("first_name"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createAttributeID("last_name"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createAttributeID("year"), Types.INTEGER, null, false);
+		table1.addAttribute(idfac.createAttributeID("nationality"), Types.VARCHAR, null, false);
+		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
 		
-		DatabaseRelationDefinition table2 = md.createDatabaseRelation(idfac.createRelationFromString(null, "Course"));
-		table2.addAttribute(idfac.createFromString("cid"), Types.VARCHAR, null, false);
-		table2.addAttribute(idfac.createFromString("title"), Types.VARCHAR, null, false);
-		table2.addAttribute(idfac.createFromString("credits"), Types.INTEGER, null, false);
-		table2.addAttribute(idfac.createFromString("description"), Types.VARCHAR, null, false);
-		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createFromString("cid"))));
+		DatabaseRelationDefinition table2 = md.createDatabaseRelation(idfac.createRelationID(null, "Course"));
+		table2.addAttribute(idfac.createAttributeID("cid"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createAttributeID("title"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createAttributeID("credits"), Types.INTEGER, null, false);
+		table2.addAttribute(idfac.createAttributeID("description"), Types.VARCHAR, null, false);
+		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
 		
-		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationFromString(null, "Enrollment"));
-		table3.addAttribute(idfac.createFromString("student_id"), Types.INTEGER, null, false);
-		table3.addAttribute(idfac.createFromString("course_id"), Types.VARCHAR, null, false);
-		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createFromString("student_id")), 
-				table3.getAttribute(idfac.createFromString("course_id"))));
+		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationID(null, "Enrollment"));
+		table3.addAttribute(idfac.createAttributeID("student_id"), Types.INTEGER, null, false);
+		table3.addAttribute(idfac.createAttributeID("course_id"), Types.VARCHAR, null, false);
+		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")), 
+				table3.getAttribute(idfac.createAttributeID("course_id"))));
 		
 		// Prefix manager
 		pm.addPrefix(":", "http://www.example.org/university#");

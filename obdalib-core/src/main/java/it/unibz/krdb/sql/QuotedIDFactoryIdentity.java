@@ -42,7 +42,16 @@ public class QuotedIDFactoryIdentity implements QuotedIDFactory {
 	}
 
 	@Override
-	public QuotedID createFromString(String s) {
+	public QuotedID createAttributeID(String s) {
+		return createFromString(s);
+	}
+
+	@Override
+	public RelationID createRelationID(String schema, String table) {
+		return new RelationID(createFromString(schema), createFromString(table));			
+	}
+	
+	private QuotedID createFromString(String s) {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
@@ -57,10 +66,4 @@ public class QuotedIDFactoryIdentity implements QuotedIDFactory {
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION);
 	}
-
-	@Override
-	public RelationID createRelationFromString(String schema, String table) {
-		return new RelationID(createFromString(schema), createFromString(table));			
-	}
-	
 }

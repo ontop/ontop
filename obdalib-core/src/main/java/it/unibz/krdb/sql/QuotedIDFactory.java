@@ -37,7 +37,7 @@ public interface QuotedIDFactory {
 	 * @return
 	 */
 	
-	QuotedID createFromString(String s);
+	QuotedID createAttributeID(String s);
 	
 	
 	/**
@@ -47,5 +47,5 @@ public interface QuotedIDFactory {
 	 * @return
 	 */
 	
-	RelationID createRelationFromString(String schema, String table);	
+	RelationID createRelationID(String schema, String table);	
 }

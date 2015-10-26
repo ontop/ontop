@@ -283,11 +283,11 @@ public class ParsedSQLQuery implements Serializable {
 	}
 
 	public static void normalizeColumnName(QuotedIDFactory idfac, Column tableColumn) {
-		QuotedID columnName = idfac.createFromString(tableColumn.getColumnName());
+		QuotedID columnName = idfac.createAttributeID(tableColumn.getColumnName());
 		tableColumn.setColumnName(columnName.getSQLRendering());
 
 		Table table = tableColumn.getTable();
-		RelationID tableName = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+		RelationID tableName = idfac.createRelationID(table.getSchemaName(), table.getName());
 		table.setSchemaName(tableName.getSchemaSQLRendering());
 		table.setName(tableName.getTableNameSQLRendering());
 	}

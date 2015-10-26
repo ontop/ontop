@@ -135,13 +135,13 @@ public class SQLQueryDeepParser {
         if (supported) {
             List<Column> columns = queryParser.getColumns();
             for (Column column : columns) {
-            	QuotedID columnId = idfac.createFromString(column.getColumnName());
+            	QuotedID columnId = idfac.createAttributeID(column.getColumnName());
             	RelationID relationId;
             	Table table = column.getTable();
             	if (table == null) // this column is an alias 
             		relationId = viewDefinition.getID();
             	else
-            		relationId = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+            		relationId = idfac.createRelationID(table.getSchemaName(), table.getName());
             	
                 viewDefinition.addAttribute(new QualifiedAttributeID(relationId, columnId));
             }
@@ -185,7 +185,7 @@ public class SQLQueryDeepParser {
                 }
                 // TODO (ROMAN 20 Oct 2015): extract schema and table name as well
 
-                QuotedID columnId = idfac.createFromString(columnName);
+                QuotedID columnId = idfac.createAttributeID(columnName);
 
                 viewDefinition.addAttribute(new QualifiedAttributeID(null, columnId)); 
             }

@@ -218,7 +218,7 @@ public class DBMetadataExtractor {
 				while (rs.next()) {
 					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), 
 										rs.getString("TABLE_NAME"));
-					QuotedID attributeId = QuotedID.createFromDatabaseRecord(rs.getString("COLUMN_NAME"));
+					QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
 					if (printouts)
 						System.out.println("         " + relationId + "." + attributeId);
 					
@@ -263,7 +263,7 @@ public class DBMetadataExtractor {
 			if (table.hasSchema() || (defaultTableSchema == null) || table.getTableName().equals("DUAL"))
 				fks.add(table);
 			else {
-				RelationID qualifiedTableId = idfac.createRelationFromString(defaultTableSchema, table.getTableNameSQLRendering());
+				RelationID qualifiedTableId = idfac.createRelationID(defaultTableSchema, table.getTableNameSQLRendering());
 				fks.add(qualifiedTableId);
 			}
 		}
@@ -514,7 +514,7 @@ public class DBMetadataExtractor {
 				}
 				
 				if (builder != null) {
-					QuotedID attrId = QuotedID.createFromDatabaseRecord(rs.getString("COLUMN_NAME"));
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
 					builder.add(relation.getAttribute(attrId));
 				}
 			}
@@ -564,7 +564,7 @@ public class DBMetadataExtractor {
 				}
 				
 				if (builder != null) {
-					QuotedID attrId = QuotedID.createFromDatabaseRecord(rs.getString("COLUMN_NAME"));
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
 					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending, 
 					//        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
 					// CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table; 
@@ -612,8 +612,8 @@ public class DBMetadataExtractor {
 					}
 				}
 				if (builder != null) {
-					QuotedID attrId = QuotedID.createFromDatabaseRecord(rs.getString("FKCOLUMN_NAME"));
-					QuotedID refAttrId = QuotedID.createFromDatabaseRecord(rs.getString("PKCOLUMN_NAME"));
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("FKCOLUMN_NAME"));
+					QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(rs.getString("PKCOLUMN_NAME"));
 					builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
 				}
 			}

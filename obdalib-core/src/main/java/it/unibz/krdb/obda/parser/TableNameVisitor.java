@@ -157,17 +157,17 @@ public class TableNameVisitor {
 		public void visit(Table table) {
 			if (!withTCEs.contains(table.getFullyQualifiedName().toLowerCase())) {
 				
-				RelationID relationId = idfac.createRelationFromString(table.getSchemaName(), table.getName());
+				RelationID relationId = idfac.createRelationID(table.getSchemaName(), table.getName());
 				relations.add(relationId);
 
 				if (inSubSelect && subSelectAlias != null) {
 					// ONLY SIMPLE SUBSELECTS, WITH ONE TABLE: see WhereClauseVisitor and ProjectionVisitor
-					RelationID subSelectAliasId = idfac.createRelationFromString(null, subSelectAlias.getName());
+					RelationID subSelectAliasId = idfac.createRelationID(null, subSelectAlias.getName());
 					tables.put(subSelectAliasId, relationId);
 				}
 				else {
 					Alias as = table.getAlias();
-					RelationID aliasId = (as != null) ? idfac.createRelationFromString(null, as.getName()) : relationId;
+					RelationID aliasId = (as != null) ? idfac.createRelationID(null, as.getName()) : relationId;
 					tables.put(aliasId, relationId);
 				}
 			}

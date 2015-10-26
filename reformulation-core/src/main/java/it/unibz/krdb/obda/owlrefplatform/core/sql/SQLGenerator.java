@@ -1818,7 +1818,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return;
 			}
 			dataTableCount++;
-			viewNames.put(atom, metadata.getQuotedIDFactory().createRelationFromString(null, String.format(VIEW_NAME, dataTableCount)));
+			viewNames.put(atom, metadata.getQuotedIDFactory().createRelationID(null, String.format(VIEW_NAME, dataTableCount)));
 			dataDefinitions.put(atom, def);
 			
 			indexVariables(atom);

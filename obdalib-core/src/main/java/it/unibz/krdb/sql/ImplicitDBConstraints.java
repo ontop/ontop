@@ -157,9 +157,9 @@ public class ImplicitDBConstraints {
 	private RelationID getRelationIDFromString(String name, QuotedIDFactory idfac) {
 		String[] names = name.split("\\.");
 		if (names.length == 1)
-			return idfac.createRelationFromString(null, name);
+			return idfac.createRelationID(null, name);
 		else
-			return idfac.createRelationFromString(names[0], names[1]);			
+			return idfac.createRelationID(names[0], names[1]);			
 	}
 	
 	/**
@@ -175,7 +175,7 @@ public class ImplicitDBConstraints {
 				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
 				for (List<String> listOfConstraints: tableFDs) {
 					for (String keyColumn : listOfConstraints) {
-						QuotedID columnId = idfac.createFromString(keyColumn);
+						QuotedID columnId = idfac.createAttributeID(keyColumn);
 						Attribute attr = td.getAttribute(columnId);
 						if (attr == null) {
 							System.out.println("Column '" + keyColumn + "' not found in table '" + td.getID() + "'");
@@ -214,7 +214,7 @@ public class ImplicitDBConstraints {
 			List<Map<String, Reference>> tableFKeys = this.fKeys.get(tableName);
 			for (Map<String, Reference> fKey : tableFKeys) {
 				for (Map.Entry<String, Reference> entry : fKey.entrySet()) {
-					QuotedID attrId = idfac.createFromString(entry.getKey());
+					QuotedID attrId = idfac.createAttributeID(entry.getKey());
 					Attribute attr = td.getAttribute(attrId);
 					if(attr == null){
 						log.warn("Error getting attribute " + entry.getKey() + " from table " + tableName);
@@ -228,7 +228,7 @@ public class ImplicitDBConstraints {
 						continue;
 					}
 					String fkColumn = entry.getValue().getColumnReference();
-					QuotedID fkAttrId = idfac.createFromString(fkColumn);
+					QuotedID fkAttrId = idfac.createAttributeID(fkColumn);
 					Attribute fkAttr = fktd.getAttribute(fkAttrId);
 					if (fkAttr == null) {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");

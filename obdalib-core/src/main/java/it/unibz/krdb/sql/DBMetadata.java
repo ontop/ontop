@@ -82,7 +82,7 @@ public class DBMetadata implements Serializable {
 	 */
 	
 	public ParserViewDefinition createParserView(String sql) {
-		RelationID id = idfac.createRelationFromString(null, String.format("view_%s", parserViewCounter++));	
+		RelationID id = idfac.createRelationID(null, String.format("view_%s", parserViewCounter++));	
 		
 		ParserViewDefinition view = new ParserViewDefinition(id, sql);
 		add(view, relations);

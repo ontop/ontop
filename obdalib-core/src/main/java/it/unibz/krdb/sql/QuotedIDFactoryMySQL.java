@@ -43,7 +43,7 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 	}
 
 	@Override
-	public QuotedID createFromString(String s) {
+	public QuotedID createAttributeID(String s) {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
@@ -59,7 +59,12 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 		return new QuotedID(s, QuotedID.NO_QUOTATION, false);
 	}
 
-	public QuotedID createFromStringForTable(String s) {
+	@Override
+	public RelationID createRelationID(String schema, String table) {
+		return new RelationID(createFromString(schema), createFromString(table));			
+	}
+
+	public QuotedID createFromString(String s) {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
@@ -74,10 +79,4 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION);
 	}
-	
-	@Override
-	public RelationID createRelationFromString(String schema, String table) {
-		return new RelationID(createFromStringForTable(schema), createFromStringForTable(table));			
-	}
-	
 }

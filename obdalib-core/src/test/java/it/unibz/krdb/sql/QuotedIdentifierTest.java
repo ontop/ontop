@@ -18,21 +18,21 @@ public class QuotedIdentifierTest {
 	@Test
 	public void test1() {
 		
-		assertEquals(QuotedID.createFromDatabaseRecord("A").getSQLRendering(), "\"A\"");
+		assertEquals(QuotedID.createIdFromDatabaseRecord("A").getSQLRendering(), "\"A\"");
 
-		assertEquals(QuotedID.createFromDatabaseRecord("abc").getSQLRendering(), "\"abc\"");
+		assertEquals(QuotedID.createIdFromDatabaseRecord("abc").getSQLRendering(), "\"abc\"");
 
-		assertEquals(QuotedID.createFromDatabaseRecord(null).getSQLRendering(), null);
+		assertEquals(QuotedID.createIdFromDatabaseRecord(null).getSQLRendering(), null);
 
-		assertEquals(fac.createFromString("A").getSQLRendering(), "A");
+		assertEquals(fac.createAttributeID("A").getSQLRendering(), "A");
 
-		assertEquals(fac.createFromString("a").getSQLRendering(), "A"); // convert to upper case
+		assertEquals(fac.createAttributeID("a").getSQLRendering(), "A"); // convert to upper case
 		
-		assertEquals(fac.createFromString("\"a\"").getSQLRendering(), "\"a\""); // leave as is
+		assertEquals(fac.createAttributeID("\"a\"").getSQLRendering(), "\"a\""); // leave as is
 
-		assertEquals(fac.createFromString("\"A\"").getSQLRendering(), "\"A\"");
+		assertEquals(fac.createAttributeID("\"A\"").getSQLRendering(), "\"A\"");
 
-		assertEquals(fac.createFromString(null).getSQLRendering(), null);
+		assertEquals(fac.createAttributeID(null).getSQLRendering(), null);
 
 		assertEquals(RelationID.createRelationIdFromDatabaseRecord(null, "A").getSQLRendering(), "\"A\"");
 		
@@ -50,13 +50,13 @@ public class QuotedIdentifierTest {
 	public void test1b() {
 		Set<QuotedID> s = new HashSet<>();
 		
-		s.add(fac.createFromString("aaa"));
-		s.add(fac.createFromString("\"AAA\""));
+		s.add(fac.createAttributeID("aaa"));
+		s.add(fac.createAttributeID("\"AAA\""));
 		
 		assertEquals(s.size(), 1);
 		
-		QualifiedAttributeID a1 = new QualifiedAttributeID(null, fac.createFromString("aaa"));
-		QualifiedAttributeID a2 = new QualifiedAttributeID(null, fac.createFromString("\"AAA\""));
+		QualifiedAttributeID a1 = new QualifiedAttributeID(null, fac.createAttributeID("aaa"));
+		QualifiedAttributeID a2 = new QualifiedAttributeID(null, fac.createAttributeID("\"AAA\""));
 		assertEquals(a1, a2);
 	}
 	

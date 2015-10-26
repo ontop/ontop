@@ -205,30 +205,30 @@ public class Mapping2DatalogConverter {
         	// HACKY WAY OF DEALING WITH VARIABLES THAT ARE CASE-SENSITIVE 
             RelationID relationId;
             if (tableName != null)
-            	relationId = idfac.createRelationFromString(quote(schemaName), quote(tableName));
+            	relationId = idfac.createRelationID(quote(schemaName), quote(tableName));
             else
             	relationId = null;
             QualifiedAttributeID a = new QualifiedAttributeID(relationId, 
-            						idfac.createFromString(quote(attributeName)));         
+            						idfac.createAttributeID(quote(attributeName)));         
             Term termR = lookupTable.get(a);
             
             if (termR == null) {
                 if (tableName != null)
-                	relationId = idfac.createRelationFromString(schemaName, tableName);
+                	relationId = idfac.createRelationID(schemaName, tableName);
                 else
                 	relationId = null;
-                a = new QualifiedAttributeID(relationId, idfac.createFromString(attributeName));
+                a = new QualifiedAttributeID(relationId, idfac.createAttributeID(attributeName));
                 termR = lookupTable.get(a);
             }
 
             // ROMAN (10 Oct 2015): hack for FQDN
             if (termR == null)
             	termR = lookupTable.get(new QualifiedAttributeID(null, 
-						idfac.createFromString(quote(attributeName))));
+						idfac.createAttributeID(quote(attributeName))));
             
             if (termR == null)
             	termR = lookupTable.get(new QualifiedAttributeID(null, 
-						idfac.createFromString(attributeName)));
+						idfac.createAttributeID(attributeName)));
             
             if (termR == null) {
                 String messageFormat = "Error in identifying column name \"%s\", " +
@@ -771,10 +771,10 @@ public class Mapping2DatalogConverter {
         
 
         private Term getVariable(Column expression) {
-        	QuotedID column = idfac.createFromString(expression.getColumnName());
+        	QuotedID column = idfac.createAttributeID(expression.getColumnName());
         	RelationID relation = null;
         	if (expression.getTable().getName() != null)
-        		relation = idfac.createRelationFromString(expression.getTable().getSchemaName(), expression.getTable().getName());
+        		relation = idfac.createRelationID(expression.getTable().getSchemaName(), expression.getTable().getName());
         	
         	QualifiedAttributeID qa = new QualifiedAttributeID(relation, column);
         	

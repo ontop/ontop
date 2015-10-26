@@ -42,7 +42,7 @@ public class SQLQueryShallowParser {
 					"If you think this query is already simple and should be parsed by Quest, " +
 					"please contact the authors. \nQuery: '{}'", query);
 			
-			RelationID viewId = idfac.createRelationFromString(null, String.format("view_%s", id_counter++));
+			RelationID viewId = idfac.createRelationID(null, String.format("view_%s", id_counter++));
 			parsedQuery = SQLQueryDeepParser.createParsedSqlForGeneratedView(idfac, viewId);	
 		}
 		return parsedQuery;

@@ -54,19 +54,19 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		metadata = DBMetadataExtractor.createDummyMetadata();
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		
-		DatabaseRelationDefinition table = metadata.createDatabaseRelation(idfac.createRelationFromString(null, "TABLE"));
-		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, true);
-		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, true);
-		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, true);
-		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, true);
-		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createFromString("col4"))));
+		DatabaseRelationDefinition table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, true);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col4"))));
 		
-		table = metadata.createDatabaseRelation(idfac.createRelationFromString(null, "TABLE2"));
-		table.addAttribute(idfac.createFromString("col1"), Types.INTEGER, null, false);
-		table.addAttribute(idfac.createFromString("col2"), Types.INTEGER, null, false);
-		table.addAttribute(idfac.createFromString("col3"), Types.INTEGER, null, false);
-		table.addAttribute(idfac.createFromString("col4"), Types.INTEGER, null, false);
-		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createFromString("col1"))));
+		table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, false);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col1"))));
 
         unfoldingProgram = fac.getDatalogProgram();
 

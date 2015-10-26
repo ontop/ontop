@@ -144,7 +144,7 @@ public class AliasMapVisitor {
 				e.accept(expressionVisitor);
 				
 				// NORMALIZE EXPRESSION ALIAS NAME
-				QuotedID aliasName = idfac.createFromString(alias.getName());
+				QuotedID aliasName = idfac.createAttributeID(alias.getName());
 				alias.setName(aliasName.getSQLRendering());
 				aliasMap.put(aliasName, e);
 			}

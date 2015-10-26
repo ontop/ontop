@@ -63,12 +63,13 @@ public class QuotedID {
 	}
 	
 	/**
+	 * creates attribute ID from the database record (as though it is a quoted name)
 	 * 
 	 * @param s
 	 * @return
 	 */
 	
-	public static QuotedID createFromDatabaseRecord(String s) {
+	public static QuotedID createIdFromDatabaseRecord(String s) {
 		// ID is as though it is quoted -- DB stores names as is 
 		return new QuotedID(s, QUOTATION);
 	}
@@ -112,7 +113,7 @@ public class QuotedID {
 		
 		if (obj instanceof QuotedID)  {
 			QuotedID other = (QuotedID)obj;
-			// very careful, name can be null
+			// very careful, id can be null
 			if (this.id == other.id)
 				return true;
 			

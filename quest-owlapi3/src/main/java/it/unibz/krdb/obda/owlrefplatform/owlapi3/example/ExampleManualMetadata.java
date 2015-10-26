@@ -79,26 +79,26 @@ private void setup()  throws Exception {
 
 private void defMeasTable(DBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
-	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
-	tableDefinition.addAttribute(idfac.createFromString("value"), java.sql.Types.NUMERIC, null, false);
-	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
-	tableDefinition.addAttribute(idfac.createFromString("sensor"), java.sql.Types.VARCHAR, null, false);
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("value"), java.sql.Types.NUMERIC, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), java.sql.Types.VARCHAR, null, false);
 }
 
 private void defMessTable(DBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
-	tableDefinition.addAttribute(idfac.createFromString("timestamp"), java.sql.Types.TIMESTAMP, null, false);
-	tableDefinition.addAttribute(idfac.createFromString("eventtext"), java.sql.Types.VARCHAR, null, false);
-	tableDefinition.addAttribute(idfac.createFromString("assembly"), java.sql.Types.VARCHAR, null, false);
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("eventtext"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), java.sql.Types.VARCHAR, null, false);
 }
 
 private void defStaticTable(DBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
-	tableDefinition.addAttribute(idfac.createFromString("domain"), java.sql.Types.VARCHAR, null, false);
-	tableDefinition.addAttribute(idfac.createFromString("range"), java.sql.Types.VARCHAR, null, false);
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+	tableDefinition.addAttribute(idfac.createAttributeID("domain"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("range"), java.sql.Types.VARCHAR, null, false);
 }
 private DBMetadata getMeta(){
 	DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();

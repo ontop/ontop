@@ -152,9 +152,9 @@ public class TestSesameImplicitDBConstraints {
 
 	private void defTable(DBMetadata dbMetadata, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationFromString(null, name));
-		tableDefinition.addAttribute(idfac.createFromString("COL1"), java.sql.Types.INTEGER, null, false);
-		tableDefinition.addAttribute(idfac.createFromString("COL2"), java.sql.Types.INTEGER, null, false);
+		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+		tableDefinition.addAttribute(idfac.createAttributeID("COL1"), java.sql.Types.INTEGER, null, false);
+		tableDefinition.addAttribute(idfac.createAttributeID("COL2"), java.sql.Types.INTEGER, null, false);
 	}
 	private DBMetadata getMeta(){
 		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata("org.h2.Driver");
