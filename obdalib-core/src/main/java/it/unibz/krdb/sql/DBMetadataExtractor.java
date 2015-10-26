@@ -243,9 +243,12 @@ public class DBMetadataExtractor {
 			getUniqueAttributes(md, relation);
 			getForeignKeys(md, relation, metadata);
 			if (printouts) {
-				System.out.println(relation);
-				System.out.println(relation.getUniqueConstraints());
-				System.out.println(relation.getForeignKeys());
+				System.out.println(relation + ";");
+				for (UniqueConstraint uc : relation.getUniqueConstraints())				
+					System.out.println(uc + ";");
+				for (ForeignKeyConstraint fk : relation.getForeignKeys())
+					System.out.println(fk +  ";");
+				System.out.println("");
 			}
 		}	
 	}

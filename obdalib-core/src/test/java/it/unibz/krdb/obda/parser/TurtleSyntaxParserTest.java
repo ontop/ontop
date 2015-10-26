@@ -228,7 +228,7 @@ public class TurtleSyntaxParserTest extends TestCase {
 	private boolean parse(String input) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
 		parser.setPrefixManager(getPrefixManager());
-		CQIE mapping;
+		List<Function> mapping;
 		try {
 			mapping = parser.parse(input);
 			log.debug("mapping " + mapping);

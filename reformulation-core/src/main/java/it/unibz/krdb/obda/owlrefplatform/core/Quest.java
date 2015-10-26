@@ -695,8 +695,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						System.out.println(fk + ";");
 				}		
 			}
-
-			log.debug("DB Metadata: \n{}", metadata);
+			else
+				log.debug("DB Metadata: \n{}", metadata);
 
             SQLDialectAdapter sqladapter = SQLAdapterFactory
                    .getSQLDialectAdapter(obdaSource
