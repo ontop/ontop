@@ -69,7 +69,7 @@ public class QuotedID {
 	 * @return
 	 */
 	
-	public static QuotedID createIdFromDatabaseRecord(String s) {
+	public static QuotedID createFromDatabaseRecord(String s) {
 		// ID is as though it is quoted -- DB stores names as is 
 		return new QuotedID(s, QUOTATION);
 	}
@@ -114,6 +114,7 @@ public class QuotedID {
 		if (obj instanceof QuotedID)  {
 			QuotedID other = (QuotedID)obj;
 			// very careful, id can be null
+			//noinspection StringEquality
 			if (this.id == other.id)
 				return true;
 			
