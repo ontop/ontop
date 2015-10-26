@@ -586,7 +586,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		int length = encodedURI.length();
 		StringBuilder strBuilder = new StringBuilder(length+20);
 		
-		char[] codeBuffer = new char[2];
+		char[] codeBuffer = new char[3];
 		
 		for (int ci = 0; ci < length; ci++) {
 			char c = encodedURI.charAt(ci);
@@ -606,8 +606,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			 */
 
 			// First we get the 2 chars next to %
-			codeBuffer[0] = encodedURI.charAt(ci + 1);
-			codeBuffer[1] = encodedURI.charAt(ci + 2);
+			codeBuffer[0] = '%';
+			codeBuffer[1] = encodedURI.charAt(ci + 1);
+			codeBuffer[2] = encodedURI.charAt(ci + 2);
 
 			// now we check if they match any of our escape codes, if
 			// they do the char to be inserted is put in codeBuffer
@@ -648,12 +649,14 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (code.equals("%2B")) {
 				strBuilder.append('+');
 			} else if (code.equals("%22")) {
-				strBuilder.append('\'');
+				strBuilder.append("''");
 			} else if (code.equals("%2F")) {
 				strBuilder.append('/');
 			} else {
 				// This was not an escape code, so we just append the
 				// characters and continue;
+				log.warn("Error decoding an encoded URI from the query. Problematic code: {}", code);
+				log.warn("Problematic URI: {}", encodedURI);
 				strBuilder.append(codeBuffer);
 			}
 			ci += 2;

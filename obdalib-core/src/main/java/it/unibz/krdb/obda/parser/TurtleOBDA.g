@@ -644,7 +644,7 @@ dataTypeString returns [Term value]
       }
   };
 
-numericLiteral returns [ValueConstant value]
+numericLiteral returns [Term value]
   : numericUnsigned { $value = $numericUnsigned.value; }
   | numericPositive { $value = $numericPositive.value; }
   | numericNegative { $value = $numericNegative.value; }
@@ -674,27 +674,59 @@ languageTag
   : VARNAME
   ;
 
-booleanLiteral returns [ValueConstant value]
-  : TRUE  { $value = dfac.getConstantLiteral($TRUE.text, COL_TYPE.BOOLEAN); }
-  | FALSE { $value = dfac.getConstantLiteral($FALSE.text, COL_TYPE.BOOLEAN); }
+booleanLiteral returns [Term value]
+  : TRUE  {
+  ValueConstant trueConstant = dfac.getConstantLiteral($TRUE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); }
+  | FALSE {
+  ValueConstant falseConstant = dfac.getConstantLiteral($FALSE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
+  }
   ;
 
-numericUnsigned returns [ValueConstant value]
-  : INTEGER { $value = dfac.getConstantLiteral($INTEGER.text, COL_TYPE.INTEGER); }
-  | DOUBLE  { $value = dfac.getConstantLiteral($DOUBLE.text, COL_TYPE.DOUBLE); }
-  | DECIMAL { $value = dfac.getConstantLiteral($DECIMAL.text, COL_TYPE.DECIMAL); }
+numericUnsigned returns [Term value]
+  : INTEGER {
+  ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+  }
+  | DOUBLE  {
+  ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+  }
+  | DECIMAL {
+  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+   }
   ;
 
-numericPositive returns [ValueConstant value]
-  : INTEGER_POSITIVE { $value = dfac.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.INTEGER); }
-  | DOUBLE_POSITIVE  { $value = dfac.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.DOUBLE); }
-  | DECIMAL_POSITIVE { $value = dfac.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.DECIMAL); }
+numericPositive returns [Term value]
+  : INTEGER_POSITIVE {
+   ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.LITERAL);
+   $value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+  }
+  | DOUBLE_POSITIVE  {
+  ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+  }
+  | DECIMAL_POSITIVE {
+  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+   }
   ;
 
-numericNegative returns [ValueConstant value]
-  : INTEGER_NEGATIVE { $value = dfac.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.INTEGER); }
-  | DOUBLE_NEGATIVE  { $value = dfac.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.DOUBLE); }
-  | DECIMAL_NEGATIVE { $value = dfac.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.DECIMAL); }
+numericNegative returns [Term value]
+  : INTEGER_NEGATIVE {
+  ValueConstant integerConstant = dfac.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+  }
+  | DOUBLE_NEGATIVE  {
+   ValueConstant doubleConstant = dfac.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.LITERAL);
+   $value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+  }
+  | DECIMAL_NEGATIVE {
+  ValueConstant decimalConstant = dfac.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.LITERAL);
+  $value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+  }
   ;
 
 /*------------------------------------------------------------------
@@ -784,9 +816,9 @@ INTEGER
   ;
 
 DOUBLE
-  : DIGIT+ PERIOD DIGIT* ('e'|'E') ('-'|'+')?
-  | PERIOD DIGIT+ ('e'|'E') ('-'|'+')?
-  | DIGIT+ ('e'|'E') ('-'|'+')?
+  : DIGIT+ PERIOD DIGIT* ('e'|'E') ('-'|'+')? DIGIT*
+  | PERIOD DIGIT+ ('e'|'E') ('-'|'+')? DIGIT*
+  | DIGIT+ ('e'|'E') ('-'|'+')? DIGIT*
   ;
 
 DECIMAL
