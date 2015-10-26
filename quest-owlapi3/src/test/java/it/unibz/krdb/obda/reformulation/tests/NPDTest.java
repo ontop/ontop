@@ -157,7 +157,7 @@ public class NPDTest {
 			String unfolding = st.getUnfolding(q12);
 			st.close();
 		
-			System.out.println(unfolding);
+			//System.out.println(unfolding);
 	}
 	
 	
