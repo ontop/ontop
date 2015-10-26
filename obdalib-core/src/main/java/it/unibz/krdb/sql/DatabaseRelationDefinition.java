@@ -66,7 +66,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * @param canNull
 	 */
 	
-	public void addAttribute(QuotedID id, int type, String typeName, boolean canNull) {
+	public Attribute addAttribute(QuotedID id, int type, String typeName, boolean canNull) {
 		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id), 
 										attributes.size() + 1, type, typeName, canNull);
 		
@@ -76,6 +76,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 			throw new IllegalArgumentException("Duplicate attribute names");
 		
 		attributes.add(att);
+		return att;
 	}
 
 	/**

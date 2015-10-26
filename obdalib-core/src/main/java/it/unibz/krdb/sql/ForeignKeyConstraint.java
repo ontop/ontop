@@ -111,6 +111,18 @@ public class ForeignKeyConstraint {
 	}
 	
 	/**
+	 * creates a FOREIGN KEY builder
+	 * 
+	 * @param relation
+	 * @param referencedRelation
+	 * @return
+	 */
+	
+	public static Builder builder(DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+		return new Builder(relation, referencedRelation);
+	}
+	
+	/**
 	 * creates a single-attribute foreign key 
 	 * 
 	 * @param name

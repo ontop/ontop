@@ -94,6 +94,13 @@ public class UniqueConstraint {
 		return builder.add(att).add(att2).build("PK_" + att.getRelation().getID().getTableName(), true);
 	}
 	
+	/**
+	 * creates a UNIQUE constraint builder (which is also used for a PRIMARY KET builder)
+	 * 
+	 * @param relation
+	 * @return
+	 */
+	
 	public static Builder builder(DatabaseRelationDefinition relation) {
 		return new Builder(relation);
 	}

@@ -55,7 +55,7 @@ public class QuotedID {
 		this.id = id;
 		this.quoteString = quoteString;
 		this.caseSensitive = caseSensitive;
-		// increases collisions but makes it possible to have case-insensitive ids
+		// increases collisions but makes it possible to have case-insensitive ids (for MySQL)
 		if (id != null)
 			this.hashCode = id.toLowerCase().hashCode();
 		else
@@ -113,7 +113,8 @@ public class QuotedID {
 		
 		if (obj instanceof QuotedID)  {
 			QuotedID other = (QuotedID)obj;
-			// very careful, id can be null
+			// very careful, id can be null 
+			// (proper comparison with .equals is below)
 			//noinspection StringEquality
 			if (this.id == other.id)
 				return true;
