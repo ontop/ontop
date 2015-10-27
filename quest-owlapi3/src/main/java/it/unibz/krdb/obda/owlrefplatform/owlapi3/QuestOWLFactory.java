@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.*;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * The user can supply information about keys that are not in the
 	 * database metadata. 
 	 */
-	private ImplicitDBConstraints userConstraints = null;
+	private ImplicitDBConstraintsReader userConstraints = null;
 	private boolean applyUserConstraints = false;
 	
 	/**
@@ -90,7 +90,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * 
 	 * @param userConstraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints) {
 		if(userConstraints == null)
 			throw new NullPointerException();
 		this.userConstraints = userConstraints;

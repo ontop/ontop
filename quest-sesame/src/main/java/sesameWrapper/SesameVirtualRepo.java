@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -128,7 +128,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 * 
 	 * @param userConstraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints){
 		if(userConstraints == null)
 			throw new NullPointerException();
 		if(this.isinitialized)
@@ -153,7 +153,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		}
 	}
 	
-	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraints userConstraints) throws Exception
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraintsReader userConstraints) throws Exception
 	{
 		if (mappingFile == null) {
 			//if we have no mappings 

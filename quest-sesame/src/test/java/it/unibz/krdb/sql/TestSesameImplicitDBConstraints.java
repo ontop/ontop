@@ -113,14 +113,14 @@ public class TestSesameImplicitDBConstraints {
 			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference);
 			if(applyUserConstraints){
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+				ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
 				qest1.setImplicitDBConstraints(userConstraints);
 			}
 		} else {
 			qest1 = new SesameVirtualRepo("", ontology, model, preference);
 			if(applyUserConstraints){
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+				ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
 
 				qest1.setImplicitDBConstraints(userConstraints);
 			}

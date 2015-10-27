@@ -51,7 +51,7 @@ import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
@@ -132,7 +132,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
 	 */
-	private ImplicitDBConstraints userConstraints = null;
+	private ImplicitDBConstraintsReader userConstraints = null;
 	
 	/*
 	 * Whether to apply the user-supplied database constraints given above
@@ -292,7 +292,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
 	 * 						May be used by ontop to eliminate self-joins
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints) {
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
@@ -672,8 +672,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			//Adds keys from the text file
 			if (applyUserConstraints) {
-				userConstraints.addFunctionalDependencies(metadata);
-				userConstraints.addForeignKeys(metadata);
+				userConstraints.insertUniqueConstraints(metadata);
+				userConstraints.insertForeignKeyConstraints(metadata);
 			}
 			
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true

@@ -46,7 +46,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 
 import java.io.File;
@@ -110,7 +110,7 @@ public class OBDAModelManager implements Disposable {
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private boolean applyUserConstraints = false;
-	private ImplicitDBConstraints userConstraints;
+	private ImplicitDBConstraintsReader userConstraints;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
@@ -528,7 +528,7 @@ public class OBDAModelManager implements Disposable {
 						if (dbprefsFile.exists()){
 							try {
 								// Load user-supplied constraints
-								userConstraints = new ImplicitDBConstraints(dbprefsFile);
+								userConstraints = new ImplicitDBConstraintsReader(dbprefsFile);
 								applyUserConstraints = true;
 							} catch (Exception ex) {
 								throw new Exception("Exception occurred while loading database preference file : " + dbprefsFile + "\n\n" + ex.getMessage());

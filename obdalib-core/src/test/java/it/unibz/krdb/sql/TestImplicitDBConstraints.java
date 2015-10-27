@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
@@ -29,7 +30,7 @@ public class TestImplicitDBConstraints {
 	
 	@Test
 	public void testEmptyUserConstraints() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/empty_constraints.lst");
+		ImplicitDBConstraintsReader uc = new ImplicitDBConstraintsReader(new File("src/test/resources/userconstraints/empty_constraints.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
 		assertTrue(refs.size() == 0);
 	}
@@ -37,15 +38,15 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testUserPKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
+		ImplicitDBConstraintsReader uc = new ImplicitDBConstraintsReader(new File("src/test/resources/userconstraints/pkeys.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
 		assertTrue(refs.size() == 0);
 	}
 
 	@Test
 	public void testAddPrimaryKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
-		uc.addFunctionalDependencies(this.md);
+		ImplicitDBConstraintsReader uc = new ImplicitDBConstraintsReader(new File("src/test/resources/userconstraints/pkeys.lst"));
+		uc.insertUniqueConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		Attribute attr = dd.getAttribute(idfac.createAttributeID("KEYNAME"));	
 		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr))); 
@@ -54,7 +55,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testGetReferredTables() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
+		ImplicitDBConstraintsReader uc = new ImplicitDBConstraintsReader(new File("src/test/resources/userconstraints/fkeys.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
 		assertTrue(refs.size() == 1);
 		assertTrue(refs.contains(idfac.createRelationID(null, "TABLE2")));
@@ -62,8 +63,8 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddForeignKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/fkeys.lst");
-		uc.addForeignKeys(this.md);
+		ImplicitDBConstraintsReader uc = new ImplicitDBConstraintsReader(new File("src/test/resources/userconstraints/fkeys.lst"));
+		uc.insertForeignKeyConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
@@ -74,9 +75,9 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddKeys() {
-		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/keys.lst");
-		uc.addFunctionalDependencies(this.md);
-		uc.addForeignKeys(this.md);
+		ImplicitDBConstraintsReader uc = new ImplicitDBConstraintsReader(new File("src/test/resources/userconstraints/keys.lst"));
+		uc.insertUniqueConstraints(this.md);
+		uc.insertForeignKeyConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
 		assertTrue(fk != null);
