@@ -7,11 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,34 +30,12 @@ public class ImplicitDBConstraints {
 	
 	private static Logger log = LoggerFactory.getLogger(ImplicitDBConstraints.class);
 	
-	private static final class Reference {
-		final String fkTable, fkColumn;
-		
-		Reference(String fkTable, String fkColumn) {
-			this.fkTable = fkTable;
-			this.fkColumn = fkColumn;
-		}
-
-		String getColumnReference() {
-			return fkColumn;
-		}
-
-		String getTableReference() {
-			return fkTable;
-		}	
-	}
+	// List of two-element arrays: table id and a comma-separated list of columns
+	private final List<String[]> ucs = new LinkedList<>();
 	
-	// The key is a table name, each element in the array list is a primary key, 
-	//            which is a list of the attributes making up the key
-	private final Map<String, List<List<String>>> uniqueFD = new HashMap<>();
-	
-	// The key is a table name, and the values are all the foreign keys. 
-	// The keys in the inner hash map are column names, while Reference object refers to a table
-	private final Map<String, List<Map<String, Reference>>> fKeys = new HashMap<>();
-	
-	// Lists all tables referred to with a foreign key 
-	//    Used to read metadata also from these 
-	private final Set<String> referredTables = new HashSet<>();
+	// List of four-element arrays: foreign key table id, comma-separated foreign key columns, 
+	//                              primary key (referred) table id, comma-separated primary key columns
+	private final List<String[]> fks = new LinkedList<>();
 
 	
 	/**
@@ -84,53 +60,18 @@ public class ImplicitDBConstraints {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(":");
-				if (parts.length >= 2){ // Primary or foreign key
-					String tableName = parts[0];
-					String[] keyColumns = parts[1].split(",");
-					if (parts.length == 2) { // Primary Key		
-						List<List<String>> pKeyList = uniqueFD.get(tableName);
-						if (pKeyList == null){
-							pKeyList = new ArrayList<>();
-							uniqueFD.put(tableName, pKeyList);
-						}
-						List<String> pKey = new ArrayList<>();
-						for(String pKeyCol : keyColumns){
-							pKey.add(pKeyCol);
-						}
-						pKeyList.add(pKey);
-					} 
-					else if (parts.length == 4) { // Foreign Key
-						String fkTable = parts[2];
-						this.referredTables.add(fkTable);
-						String[] fkColumnS = parts[3].split(",");			
-						if (fkColumnS.length != keyColumns.length) {
-							log.warn("Compound foreign key refers to different number of columns: " + line);
-							continue;
-						}
-						
-						List<Map<String, Reference>> tableFKeys = fKeys.get(tableName);
-						if(tableFKeys == null){
-							tableFKeys = new ArrayList<>();
-							fKeys.put(tableName, tableFKeys);
-						}
-						Map<String, Reference> fKey = new HashMap<>();
-						String fkName = keyColumns[0] + fkTable;
-						for (int i = 0; i < fkColumnS.length; i++){
-							String keyColumn = keyColumns[i];
-							String fkColumn = fkColumnS[i];
-							
-							Reference ref = new Reference(fkTable, fkColumn);
-							fKey.put(keyColumn, ref);
-						}
-						tableFKeys.add(fKey);
-					}
+				if (parts.length == 2) { // Primary Key		
+					ucs.add(parts);
+				} 
+				else if (parts.length == 4) { // Foreign Key
+					fks.add(parts);
 				}
 			}
 		} 
 		catch (FileNotFoundException e) {
 			log.warn("Could not find file " + file + " in directory " + System.getenv().get("PWD"));
 			String currentDir = System.getProperty("user.dir");
-			log.warn("Current dir using System:" +currentDir);
+			log.warn("Current dir using System:" + currentDir);
 			throw new IllegalArgumentException("File " + file + " does not exist");
 		} 
 		catch (IOException e) {
@@ -146,12 +87,14 @@ public class ImplicitDBConstraints {
 	 * @return The parameter tables is returned, possible extended with new tables
 	 */
 	public Set<RelationID> getReferredTables(QuotedIDFactory idfac) {
-		Set<RelationID> refTables = new HashSet<>();
-		for (String tableGivenName : this.referredTables) {
-			RelationID id = getRelationIDFromString(tableGivenName, idfac);
-			refTables.add(id);
+		Set<RelationID> referredTables = new HashSet<>();
+
+		for (String[] fk : fks) {
+			RelationID fkTableId = getRelationIDFromString(fk[2], idfac);
+			referredTables.add(fkTableId);
 		}
-		return refTables;
+		
+		return referredTables;
 	}
 
 	private RelationID getRelationIDFromString(String name, QuotedIDFactory idfac) {
@@ -168,31 +111,28 @@ public class ImplicitDBConstraints {
 	public void addFunctionalDependencies(DBMetadata md) {
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 		
-		for (String tableName : this.uniqueFD.keySet()) {
-			RelationID tableId = getRelationIDFromString(tableName, idfac);
+		for (String[] uc : ucs) {
+			RelationID tableId = getRelationIDFromString(uc[0], idfac);
 			DatabaseRelationDefinition td = md.getDatabaseRelation(tableId);
-			if (td != null && td instanceof DatabaseRelationDefinition) {
-				List<List<String>> tableFDs = this.uniqueFD.get(tableName);
-				for (List<String> listOfConstraints: tableFDs) {
-					for (String keyColumn : listOfConstraints) {
-						QuotedID columnId = idfac.createAttributeID(keyColumn);
-						Attribute attr = td.getAttribute(columnId);
-						if (attr == null) {
-							System.out.println("Column '" + keyColumn + "' not found in table '" + td.getID() + "'");
-						} 
-						else {		
-							//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // true
-							// ROMAN (17 Aug 2015): do we really change it into NON NULL?
-							UniqueConstraint.Builder builder = UniqueConstraint.builder(td);
-							builder.add(attr);
-							td.addUniqueConstraint(builder.build("UC_NAME", false));
-						}
-					}
-				}							
+
+			if (td != null) {
+				UniqueConstraint.Builder builder = UniqueConstraint.builder(td);
+				String[] columns = uc[1].split(",");
+				for (String column : columns) {
+					QuotedID columnId = idfac.createAttributeID(column);
+					Attribute attr = td.getAttribute(columnId);
+					if (attr != null) {
+						//td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // true
+						// ROMAN (17 Aug 2015): do we really change it into NON NULL?
+						builder.add(attr);
+					} 
+					else 		
+						log.warn("Column '" + columnId + "' not found in table '" + td.getID() + "'");
+				}
+				td.addUniqueConstraint(builder.build("UC_NAME", false));
 			} 
-			else { // no table definition
-				log.warn("Error in user supplied primary key: No table definition found for " + tableName + ".");
-			}
+			else 
+				log.warn("Error in user supplied primary key: No table definition found for " + tableId + ".");
 		}		
 	}
 
@@ -203,43 +143,46 @@ public class ImplicitDBConstraints {
 	 */
 	public void addForeignKeys(DBMetadata md) {
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
-		
-		for (String tableName : this.fKeys.keySet()) {
-			RelationID tableId = getRelationIDFromString(tableName, idfac);
-			DatabaseRelationDefinition td = md.getDatabaseRelation(tableId);
-			if (td == null || ! (td instanceof DatabaseRelationDefinition)){
-				log.warn("Error in user-supplied foreign key: Table '" + tableName + "' not found");
+				
+		for (String[] fk : fks) {
+			RelationID pkTableId = getRelationIDFromString(fk[2], idfac);
+			DatabaseRelationDefinition pkTable = md.getDatabaseRelation(pkTableId);
+			if (pkTable == null) {
+				log.warn("Error in user-supplied foreign key: " + pkTableId + " not found");
 				continue;
 			}
-			List<Map<String, Reference>> tableFKeys = this.fKeys.get(tableName);
-			for (Map<String, Reference> fKey : tableFKeys) {
-				for (Map.Entry<String, Reference> entry : fKey.entrySet()) {
-					QuotedID attrId = idfac.createAttributeID(entry.getKey());
-					Attribute attr = td.getAttribute(attrId);
-					if(attr == null){
-						log.warn("Error getting attribute " + entry.getKey() + " from table " + tableName);
-						continue;
-					}
-					String fkTable = entry.getValue().getTableReference();
-					RelationID fkTableId = getRelationIDFromString(fkTable, idfac);
-					DatabaseRelationDefinition fktd = md.getDatabaseRelation(fkTableId);
-					if (fktd == null) {
-						log.warn("Error in user-supplied foreign key: Reference to non-existing table '" + fkTable + "'");
-						continue;
-					}
-					String fkColumn = entry.getValue().getColumnReference();
-					QuotedID fkAttrId = idfac.createAttributeID(fkColumn);
-					Attribute fkAttr = fktd.getAttribute(fkAttrId);
-					if (fkAttr == null) {
-						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");
-						continue;
-					}
-					
-					td.addForeignKeyConstraint(
-							new ForeignKeyConstraint.Builder(td, fktd).add(attr, fkAttr)
-									.build("_FK_" + tableName + "_" + entry.getKey()));
-				}
+			RelationID fkTableId = getRelationIDFromString(fk[0], idfac);
+			DatabaseRelationDefinition fkTable = md.getDatabaseRelation(fkTableId);
+			if (fkTable == null) {
+				log.warn("Error in user-supplied foreign key: " + fkTableId + " not found");
+				continue;
 			}
+			String[] pkColumns = fk[3].split(",");
+			String[] fkColumns = fk[1].split(",");
+			if (fkColumns.length != pkColumns.length) {
+				log.warn("Compound foreign key refers to different number of columns: " + fk);
+				continue;
+			}
+			
+			ForeignKeyConstraint.Builder fkBuilder = ForeignKeyConstraint.builder(fkTable, pkTable);
+			for (int i = 0; i < pkColumns.length; i++) {
+				QuotedID pkColumnId = idfac.createAttributeID(pkColumns[i]);
+				Attribute pkAttr = pkTable.getAttribute(pkColumnId);
+				if (pkAttr == null) {
+					log.warn("Error in user-supplied foreign key: " + pkColumnId + " in table " + pkTable);
+					continue;
+				}
+				QuotedID fkColumnId = idfac.createAttributeID(fkColumns[i]);
+				Attribute fkAttr = fkTable.getAttribute(fkColumnId);
+				if (fkAttr == null) {
+					log.warn("Error in user-supplied foreign key: " + fkColumnId + " in table " + fkTable);
+					continue;
+				}
+				
+				fkBuilder.add(fkAttr, pkAttr);
+			}
+			fkTable.addForeignKeyConstraint(
+					fkBuilder.build(fkTable.getID().getTableName() + "_FK_" + pkTable.getID().getTableName()));
 		}		
 	}
 }

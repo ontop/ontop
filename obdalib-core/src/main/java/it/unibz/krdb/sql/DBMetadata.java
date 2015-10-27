@@ -56,6 +56,9 @@ public class DBMetadata implements Serializable {
 
 	/**
 	 * creates a database table (which can also be a database view) 
+	 * if the <name>id</name> contains schema than the relation is added 
+	 * to the lookup table (see getDatabaseRelation and getRelation) with 
+	 * both the fully qualified id and the table name only id
 	 * 
 	 * @param id
 	 * @return
@@ -114,14 +117,16 @@ public class DBMetadata implements Serializable {
 	
 	/**
 	 * Retrieves the data definition object based on its name. The
-	 * <name>name</name> is a table name.
+	 * <name>id</name> is a table name.
+	 * If <name>id</name> has schema and the fully qualified id 
+	 * cannot be resolved the the table-only id is used  
 	 * 
 	 * @param name
 	 */
-	public DatabaseRelationDefinition getDatabaseRelation(RelationID name) {
-		DatabaseRelationDefinition def = tables.get(name);
-		if (def == null && name.hasSchema()) {
-			def = tables.get(name.getSchemalessID());
+	public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
+		DatabaseRelationDefinition def = tables.get(id);
+		if (def == null && id.hasSchema()) {
+			def = tables.get(id.getSchemalessID());
 		}
 		return def;
 	}
@@ -129,6 +134,8 @@ public class DBMetadata implements Serializable {
 	/**
 	 * Retrieves the data definition object based on its name. The
 	 * <name>name</name> can be either a table name or a view name.
+	 * If <name>id</name> has schema and the fully qualified id 
+	 * cannot be resolved the the table-only id is used  
 	 * 
 	 * @param name
 	 */
