@@ -85,10 +85,10 @@ public class ForeignKeyConstraint {
 		
 		public Builder add(Attribute attribute, Attribute referencedAttribute) {
 			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation);
+				throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation + " (attribute " + attribute.getRelation().getID() + "." + attribute + ")");
 			
 			if (referencedRelation != referencedAttribute.getRelation())
-				throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: "  + relation + " -> " + referencedRelation);
+				throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: "  + relation + " -> " + referencedRelation  + " (attribute " + referencedAttribute.getRelation().getID() + "." + referencedAttribute + ")");
 			
 			builder.add(new Component(attribute, referencedAttribute));
 			return this;
