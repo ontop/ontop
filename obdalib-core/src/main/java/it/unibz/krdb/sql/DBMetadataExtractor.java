@@ -35,6 +35,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Retrieves the database metadata (table schema and database constraints) 
  * 
@@ -133,24 +135,38 @@ public class DBMetadataExtractor {
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
 		
-		// ROMAN (7 Oct 2015): these ifs are to be replaced by checking boolean flags in md
-		
 		QuotedIDFactory idfac;
-		if (productName.contains("Oracle")) 
-			idfac = new QuotedIDFactoryStandardSQL();
-		else if (productName.contains("DB2")) 
-			idfac = new QuotedIDFactoryStandardSQL();
-		else if (productName.contains("H2") || productName.contains("HSQL")) 
-			idfac = new QuotedIDFactoryStandardSQL();
-		else if (productName.contains("PostgreSQL")) 
-			// Postgres treats unquoted identifiers as lower-case
-			idfac = new QuotedIDFactoryLowerCase();
-		else if (productName.contains("SQL Server"))  // MS SQL Server
-			idfac = new QuotedIDFactoryIdentity();
-		else if (productName.contains("MySQL"))  //  MySQL
-			idfac = new QuotedIDFactoryMySQL(); 
-		else // For other database engines
-			idfac = new QuotedIDFactoryIdentity();
+		// Exareme driver does not support method supportsMixedCaseIdentifiers()
+		if (!productName.contains("ADP") && md.supportsMixedCaseIdentifiers()) {
+			 //  MySQL
+			if (productName.contains("MySQL")) 
+				idfac = new QuotedIDFactoryMySQL(); 
+			else
+				// "SQL Server" = MS SQL Server
+				idfac = new QuotedIDFactoryIdentity();
+		}
+		else {
+			if (md.storesLowerCaseIdentifiers())
+				// PostgreSQL treats unquoted identifiers as lower-case
+				idfac = new QuotedIDFactoryLowerCase();
+			else if (md.storesUpperCaseIdentifiers())
+				// Oracle, DB2, H2, HSQL 
+				idfac = new QuotedIDFactoryStandardSQL();
+			else {
+				log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
+				log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
+				log.warn("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
+				log.warn("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
+				log.warn("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
+				log.warn("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
+				log.warn("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
+				log.warn("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
+				log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
+				log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
+				
+				idfac = new QuotedIDFactoryStandardSQL();
+			}
+		}
 		
 		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), 
 							productName, md.getDatabaseProductVersion(), idfac);
@@ -189,12 +205,17 @@ public class DBMetadataExtractor {
 		else {
 			if (realTables == null || realTables.isEmpty())  {
 				if (productName.contains("DB2")) 
-					seedRelationIds = getTableList(conn, DB2RelationListProvider, idfac);
+					// select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1
+					seedRelationIds = getTableListDefault(md, 
+							ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT"));
 				else if (productName.contains("SQL Server"))  // MS SQL Server
-					seedRelationIds = getTableList(conn, MSSQLServerRelationListProvider, idfac);
+					// SELECT SCHEMA_NAME() would give default schema name
+					// https://msdn.microsoft.com/en-us/library/ms175068.aspx
+					seedRelationIds = getTableListDefault(md, 
+							ImmutableSet.of("sys", "INFORMATION_SCHEMA"));
 				else 
 					// for other database engines, including H2, HSQL, PostgreSQL and MySQL
-					seedRelationIds = getTableListDefault(md);
+					seedRelationIds = getTableListDefault(md, ImmutableSet.<String>of());
 			}
 			else 
 				seedRelationIds = getTableList(null, realTables, idfac);
@@ -255,7 +276,7 @@ public class DBMetadataExtractor {
 	
 	
 	/**
-	 * Retrieve the normalized list of tables from a given list of RelationJSQL
+	 * Retrieve the normalized list of tables from a given list of RelationIDs
 	 */
 
 	private static List<RelationID> getTableList(String defaultTableSchema, Set<RelationID> realTables, QuotedIDFactory idfac) throws SQLException {
@@ -278,12 +299,17 @@ public class DBMetadataExtractor {
 	/**
 	 * Retrieve the table and view list from the JDBC driver (works for most database engines, e.g., MySQL and PostgreSQL)
 	 */
-	private static List<RelationID> getTableListDefault(DatabaseMetaData md) throws SQLException {
+	private static List<RelationID> getTableListDefault(DatabaseMetaData md, ImmutableSet<String> ignoredSchemas) throws SQLException {
 		List<RelationID> relationIds = new LinkedList<>();
 		try (ResultSet rs = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rs.next()) {
-				//String tblCatalog = rsTables.getString("TABLE_CAT");
-				RelationID id = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
+				// String catalog = rs.getString("TABLE_CAT"); // not used
+				String schema = rs.getString("TABLE_SCHEM");
+				String table = rs.getString("TABLE_NAME");
+				if (ignoredSchemas.contains(schema)) {
+					continue;
+				}
+				RelationID id = RelationID.createRelationIdFromDatabaseRecord(schema, table);
 				relationIds.add(id);
 			}
 		} 
@@ -344,9 +370,8 @@ public class DBMetadataExtractor {
 		
 		@Override
 		public String getQuery() {
-			// ROMAN (19 Sep 2015): not clear why the outer query is needed
-			return "SELECT object_name FROM ( " +
-				   "SELECT table_name as object_name FROM user_tables WHERE " +
+			// filter out all irrelevant table and view names
+			return "SELECT table_name as object_name FROM user_tables WHERE " +
 			       "   NOT table_name LIKE 'MVIEW$_%' AND " +
 			       "   NOT table_name LIKE 'LOGMNR_%' AND " +
 			       "   NOT table_name LIKE 'AQ$_%' AND " +
@@ -354,11 +379,11 @@ public class DBMetadataExtractor {
 			       "   NOT table_name LIKE 'REPCAT$_%' AND " +
 			       "   NOT table_name LIKE 'LOGSTDBY$%' AND " +
 			       "   NOT table_name LIKE 'OL$%' " +
-			       "UNION " +
+			       "UNION ALL " +
 			       "SELECT view_name as object_name FROM user_views WHERE " +
 			       "   NOT view_name LIKE 'MVIEW_%' AND " +
 			       "   NOT view_name LIKE 'LOGMNR_%' AND " +
-			       "   NOT view_name LIKE 'AQ$_%')";
+			       "   NOT view_name LIKE 'AQ$_%'";
 		}
 
 		@Override
@@ -368,7 +393,7 @@ public class DBMetadataExtractor {
 	};
 	
 	/**
-	 * Table list for DB2 database engine
+	 * Table list for DB2 database engine (not needed now -- use JDBC metadata instead)
 	 */
 	
 	private static final RelationListProvider DB2RelationListProvider = new RelationListProvider() {
@@ -388,7 +413,7 @@ public class DBMetadataExtractor {
 
 	
 	/**
-	 * Table list for MS SQL Server database engine
+	 * Table list for MS SQL Server database engine (not needed now -- use JDBC metadata instead)
 	 */
 
 	private static final RelationListProvider MSSQLServerRelationListProvider = new RelationListProvider() {
