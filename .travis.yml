@@ -9,6 +9,7 @@ services:
   - docker
   
 before_install:
+  - ls -lah
   - sh ontop-docker-test-env/src/test/resources/container/build-oracle.sh
   - sh ontop-docker-test-env/src/test/resources/container/build-db2.sh
   - sh ontop-docker-test-env/src/test/resources/container/build-mysql.sh
