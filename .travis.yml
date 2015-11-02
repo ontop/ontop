@@ -10,6 +10,8 @@ services:
   
 before_install:
   - ls -lah
+  - df -h
+  - quota
   - cd ontop-docker-test-env/src/test/resources/containers/
   - sh build-postgres.sh
   - sh run-postgres.sh
