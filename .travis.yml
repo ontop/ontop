@@ -19,5 +19,5 @@ before_install:
   - sh run-oracle.sh
   - sh run-db2.sh
   - sh run-mysql.sh
-  
+  - cd ../../../../../
   
