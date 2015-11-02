@@ -11,13 +11,13 @@ services:
 before_install:
   - ls -lah
   - cd ontop-docker-test-env/src/test/resources/containers/
+  - sh build-postgres.sh
+  - sh run-postgres.sh
   - sh build-oracle.sh
   - sh build-db2.sh
   - sh build-mysql.sh
-  - sh build-postgres.sh
   - sh run-oracle.sh
   - sh run-db2.sh
   - sh run-mysql.sh
-  - sh run-postgres.sh
   
   
