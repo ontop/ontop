@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.parser;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
