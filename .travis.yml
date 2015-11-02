@@ -10,13 +10,14 @@ services:
   
 before_install:
   - ls -lah
-  - sh ontop-docker-test-env/src/test/resources/container/build-oracle.sh
-  - sh ontop-docker-test-env/src/test/resources/container/build-db2.sh
-  - sh ontop-docker-test-env/src/test/resources/container/build-mysql.sh
-  - sh ontop-docker-test-env/src/test/resources/container/build-postgres.sh
-  - sh ontop-docker-test-env/src/test/resources/container/run-oracle.sh
-  - sh ontop-docker-test-env/src/test/resources/container/run-db2.sh
-  - sh ontop-docker-test-env/src/test/resources/container/run-mysql.sh
-  - sh ontop-docker-test-env/src/test/resources/container/run-postgres.sh
+  - cd ontop-docker-test-env/src/test/resources/containers/
+  - sh build-oracle.sh
+  - sh build-db2.sh
+  - sh build-mysql.sh
+  - sh build-postgres.sh
+  - sh run-oracle.sh
+  - sh run-db2.sh
+  - sh run-mysql.sh
+  - sh run-postgres.sh
   
   
