@@ -1,7 +1,21 @@
-sudo: false
+sudo: required
 
 language: java
 
 jdk:
   - oraclejdk7
 
+services:
+  - docker
+  
+before_install:
+  - sh ontop-docker-test-env/src/test/resources/container/build-oracle.sh
+  - sh ontop-docker-test-env/src/test/resources/container/build-db2.sh
+  - sh ontop-docker-test-env/src/test/resources/container/build-mysql.sh
+  - sh ontop-docker-test-env/src/test/resources/container/build-postgres.sh
+  - sh ontop-docker-test-env/src/test/resources/container/run-oracle.sh
+  - sh ontop-docker-test-env/src/test/resources/container/run-db2.sh
+  - sh ontop-docker-test-env/src/test/resources/container/run-mysql.sh
+  - sh ontop-docker-test-env/src/test/resources/container/run-postgres.sh
+  
+  

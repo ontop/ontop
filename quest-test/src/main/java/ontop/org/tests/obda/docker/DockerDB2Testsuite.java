@@ -20,33 +20,39 @@ package ontop.org.tests.obda.docker;
  * #L%
  */
 
-import it.unibz.krdb.obda.quest.scenarios.QuestScenarioParent;
 import it.unibz.krdb.obda.quest.scenarios.QuestVirtualScenarioParent;
 import it.unibz.krdb.obda.quest.scenarios.ScenarioManifestTestUtils;
-import it.unibz.krdb.obda.quest.scenarios.QuestScenarioParent.Factory;
 import junit.framework.Test;
 
 public class DockerDB2Testsuite extends QuestVirtualScenarioParent {
 
-	public DockerDB2Testsuite(String testURI, String name, String queryFileURL, String resultFileURL, 
-			String owlFileURL, String obdaFileURL, String parameterFileURL) {
-		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
+	public DockerDB2Testsuite(String testURI, String name, String queryFileURL,
+			String resultFileURL, String owlFileURL, String obdaFileURL,
+			String parameterFileURL) {
+		super(testURI, name, queryFileURL, resultFileURL, owlFileURL,
+				obdaFileURL, parameterFileURL);
 	}
 
 	public static Test suite() throws Exception {
 		return ScenarioManifestTestUtils.suite(new Factory() {
 			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+			public QuestVirtualScenarioParent createQuestScenarioTest(
+					String testURI, String name, String queryFileURL,
 					String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new DockerDB2Testsuite(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
-						obdaFileURL, "");
+				return new DockerDB2Testsuite(testURI, name, queryFileURL,
+						resultFileURL, owlFileURL, obdaFileURL, "");
 			}
+
 			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
-					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
-				return new DockerDB2Testsuite(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
-						obdaFileURL, parameterFileURL);
+			public QuestVirtualScenarioParent createQuestScenarioTest(
+					String testURI, String name, String queryFileURL,
+					String resultFileURL, String owlFileURL,
+					String obdaFileURL, String parameterFileURL) {
+				return new DockerDB2Testsuite(testURI, name, queryFileURL,
+						resultFileURL, owlFileURL, obdaFileURL,
+						parameterFileURL);
 			}
+
 			@Override
 			public String getMainManifestFile() {
 				return "/testcases-docker/manifest-scenario-db2.ttl";

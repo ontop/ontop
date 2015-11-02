@@ -7,7 +7,7 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	lubm
-connectionUrl	jdbc:postgresql://192.168.99.100/
+connectionUrl	jdbc:postgresql://localhost/
 username	postgres
 password	postgres
 driverClass	org.postgresql.Driver

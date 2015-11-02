@@ -7,7 +7,7 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	lubm
-connectionUrl	jdbc:mysql://192.168.99.100:3306/ontop
+connectionUrl	jdbc:mysql://localhost:3306/ontop
 username	root
 password	mysql
 driverClass	com.mysql.jdbc.Driver

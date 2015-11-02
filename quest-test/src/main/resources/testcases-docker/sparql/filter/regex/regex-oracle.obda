@@ -7,7 +7,7 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	lubm
-connectionUrl	jdbc:oracle:thin:@192.168.99.100:49161:xe
+connectionUrl	jdbc:oracle:thin:@localhost:49161:xe
 username	system
 password	oracle
 driverClass	oracle.jdbc.driver.OracleDriver

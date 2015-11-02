@@ -7,7 +7,7 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	lubm
-connectionUrl	jdbc:db2://192.168.99.100:50000/ontop
+connectionUrl	jdbc:db2://localhost:50000/ontop
 username	db2inst1
 password	db2inst1-pwd
 driverClass	com.ibm.db2.jcc.DB2Driver
