@@ -65,7 +65,7 @@ public class ABoxMaterializerExample {
 		 */
 
 		// TODO: try the streaming mode.
-		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false);
+		try (OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false)) {
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);
@@ -83,19 +83,13 @@ public class ABoxMaterializerExample {
 			fout.delete(); // clean any existing output file.
 		}
 		
-		PrintWriter out = null;
-		try {
-		    out = new PrintWriter(new BufferedWriter(new FileWriter(fout, true)));
+		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fout, true)))) {
 			while (triplesIter.hasNext()) {
 				OWLIndividualAxiom individual = triplesIter.next();
 				out.println(individual.toString());
 			}
 			out.flush();
-		} finally {
-		    if (out != null) {
-		    	out.close();
-		    }
-		    materializer.disconnect();
+		} 
 		}
 	}
 

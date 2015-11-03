@@ -95,7 +95,7 @@ public class QuestDBStatement implements OBDAStatement {
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
+						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos, st.questInstance.getVocabulary()), 
 								st.questInstance.getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);

@@ -31,9 +31,9 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAxiom> {
 
-	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+	private final OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
 	
-	private Iterator<Assertion> assertions = null;
+	private final Iterator<Assertion> assertions;
 
 	public QuestOWLIndividualAxiomIterator(Iterator<Assertion> assertions) {
 		this.assertions = assertions;
@@ -59,8 +59,6 @@ public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAx
 		else
 			return translator.translate((DataPropertyAssertion) a);
 	}
-	
-	
 	
 	@Override
 	public void remove() {

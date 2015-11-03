@@ -56,7 +56,7 @@ public class OWLAPI3IndividualTranslator {
 	private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 
 	public OWLIndividualAxiom translate(ClassAssertion ca) {
-		IRI conceptIRI = IRI.create(ca.getConcept().getPredicate().getName().toString());
+		IRI conceptIRI = IRI.create(ca.getConcept().getName());
 
 		OWLClass description = dataFactory.getOWLClass(conceptIRI);
 		OWLIndividual object = translate(ca.getIndividual());
@@ -64,7 +64,7 @@ public class OWLAPI3IndividualTranslator {
 	} 
 	
 	public OWLIndividualAxiom translate(ObjectPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getPredicate().getName().toString());
+		IRI roleIRI = IRI.create(opa.getProperty().getName());
 
 		OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
 		OWLIndividual subject = translate(opa.getSubject());
@@ -73,7 +73,7 @@ public class OWLAPI3IndividualTranslator {
 	}
 	
 	public OWLIndividualAxiom translate(DataPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getPredicate().getName().toString());
+		IRI roleIRI = IRI.create(opa.getProperty().getName());
 
 		OWLDataProperty property = dataFactory.getOWLDataProperty(roleIRI);
 		OWLIndividual subject = translate(opa.getSubject());
@@ -97,15 +97,16 @@ public class OWLAPI3IndividualTranslator {
 	
 	public OWLLiteral translate(ValueConstant v) {
 		OWLLiteral result = null;
+
 		if (v == null)
 			return null;
 		
 		String value = v.getValue();
 		if (value == null) {
-			result = null;
+			return null;
 		} 
 		else if (v.getType() == COL_TYPE.LITERAL_LANG) {
-			result = dataFactory.getOWLLiteral(value, v.getLanguage());
+			return dataFactory.getOWLLiteral(value, v.getLanguage());
 		} 
 		else if (v.getType() == COL_TYPE.GEOMETRY) { //constant: this is an EXTREMELY quick and dirty solution. Should be fixed asap!
 			IRI iri= IRI.create("http://www.opengis.net/ont/geosparql#wktLiteral");
@@ -116,7 +117,7 @@ public class OWLAPI3IndividualTranslator {
 		else {
 			OWL2Datatype datatype = OWLTypeMapper.getOWLType(v.getType());
 			if (datatype != null)
-				result = dataFactory.getOWLLiteral(value, datatype);
+				return dataFactory.getOWLLiteral(value, datatype);
 			else 
 				throw new IllegalArgumentException(v.getType().toString());
 		}

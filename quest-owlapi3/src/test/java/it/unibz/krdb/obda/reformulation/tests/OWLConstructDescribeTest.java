@@ -89,7 +89,6 @@ public class OWLConstructDescribeTest extends TestCase{
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 

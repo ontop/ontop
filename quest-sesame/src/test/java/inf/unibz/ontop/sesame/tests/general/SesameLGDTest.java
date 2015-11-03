@@ -151,7 +151,7 @@ public class SesameLGDTest extends TestCase {
 				 
 				  
 	
-			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, spatialSelection);
+			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, spatialJoin);
 			      FileOutputStream f = new FileOutputStream("/home/constant/ontop-kml/Vista.kml");
 				  TupleQueryResultHandler handler = new SPARQLResultsTSVWriter(System.out);
 				  //TupleQueryResultWriterFactory kml = new stSPARQLResultsKMLWriterFactory();

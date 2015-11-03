@@ -20,6 +20,9 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
@@ -29,13 +32,7 @@ import it.unibz.krdb.sql.api.Attribute;
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class DBMetadata implements Serializable {
@@ -47,6 +44,7 @@ public class DBMetadata implements Serializable {
 	private final String driverName;
 	private String driverVersion;
 	private String databaseProductName;
+	private String databaseVersion;
 
 	private boolean storesLowerCaseIdentifiers = false;
 	private boolean storesLowerCaseQuotedIdentifiers = false;
@@ -60,8 +58,10 @@ public class DBMetadata implements Serializable {
 	/**
 	 * Constructs a blank metadata. Use only for testing purpose.
 	 */
+	@Deprecated
 	public DBMetadata(String driverName) {
 		this.driverName = driverName;
+		this.databaseVersion = "";
 	}
 
 	/**
@@ -78,7 +78,8 @@ public class DBMetadata implements Serializable {
 			driverName = md.getDriverName();
 			driverVersion = md.getDriverVersion();
 			databaseProductName = md.getDatabaseProductName();
-			
+			databaseVersion = md.getDatabaseProductVersion();
+
 			storesLowerCaseIdentifiers = md.storesLowerCaseIdentifiers();
 			storesLowerCaseQuotedIdentifiers = md.storesLowerCaseQuotedIdentifiers();
 
@@ -275,13 +276,22 @@ public class DBMetadata implements Serializable {
 	 * Generates a map for each predicate in the body of the rules in 'program'
 	 * that contains the Primary Key data for the predicates obtained from the
 	 * info in the metadata.
+     *
+     * It also returns the columns with unique constraints
+     *
+     * For instance, Given the table definition
+     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
+     *
+     * The methods will return the following Multimap:
+     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
+     *
 	 * 
 	 * @param metadata
 	 * @param program
 	 */
-	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
+	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
 			List<CQIE> program) {
-		Map<Predicate, List<Integer>> pkeys = new HashMap<>();
+		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();
@@ -296,14 +306,24 @@ public class DBMetadata implements Serializable {
 				String newAtomName = newAtomPredicate.toString();
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
+					// primary keys
 					List<Integer> pkeyIdx = new LinkedList<>();
 					for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
 						if (column.isPrimaryKey()) 
 							pkeyIdx.add(columnidx);
 					}
-					if (!pkeyIdx.isEmpty()) 
+					if (!pkeyIdx.isEmpty()) {
 						pkeys.put(newAtomPredicate, pkeyIdx);
+					}
+
+                    // unique constraints
+                    for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
+                        Attribute column = def.getAttribute(columnidx);
+                        if (column.isUnique()) {
+                            pkeys.put(newAtomPredicate, ImmutableList.of(columnidx));
+                        }
+                    }
 				}
 			}
 		}
@@ -325,4 +345,7 @@ public class DBMetadata implements Serializable {
 	}
 
 
+	public String getDatabaseVersion() {
+		return databaseVersion;
+	}
 }

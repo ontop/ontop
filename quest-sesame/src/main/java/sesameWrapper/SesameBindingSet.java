@@ -26,8 +26,11 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 import it.unibz.krdb.obda.sesame.SesameHelper;
+import org.openrdf.model.Value;
+import org.openrdf.query.Binding;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.impl.BindingImpl;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,15 +38,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.impl.BindingImpl;
-
 public class SesameBindingSet implements BindingSet {
 
 	private static final long serialVersionUID = -8455466574395305166L;
-	private QuestResultset set = null;
+	private TupleResultSet set = null;
 	private int count = 0;
 	private final Set<String> bindingnames;
 //	private List<String> signature;
@@ -53,7 +51,7 @@ public class SesameBindingSet implements BindingSet {
 	public SesameBindingSet(TupleResultSet set, Set<String> bindingnames) {
 		this.bindingnames = bindingnames;
 //		this.signature = signature;
-		this.set = (QuestResultset) set;
+		this.set = set;
 		this.count = bindingnames.size();
 		
 	}

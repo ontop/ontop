@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:gts="http://resource.geosciml.org/ontology/timescale/gts-30#"
+   xmlns:npd="http://sws.ifi.uio.no/data/npd-v2/"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:ptl="http://sws.ifi.uio.no/vocab/npd-v2-ptl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:AnnotationProperty rdf:about="http://purl.org/dc/elements/1.1/source"/>
+  <owl:Class rdf:about="http://resource.geosciml.org/ontology/timescale/gts-30#GeochronologicEra"/>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#AbandonedWell">
+    <npdv:definition>A well permanently plugged in the drilling phase for technical reasons.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Well"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#AppraisalWell">
+    <npdv:definition>An exploration well drilled to determine the extent and size of a petroleum deposit that has already been discovered by a wildcat well.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/ </npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#BlowOut">
+    <npdv:definition>Sudden, powerful, uncontrolled discharge of gas, oil, drilling mud and water from a well.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#DevelopmentWell">
+    <npdv:definition>A generic term for wells used for production of petroleum, production wells, injection wells and observation wells, and possible combinations thereof.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</npdv:definition>
+    <npdv:definition>Under the Resource Management Regulations, this is a common designation for wells used to produce petroleum.  The NPD assigns wellbore designations based on forms submitted by the operator. Development wells are divided into the categories production, injection and observation wells.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Established-practice-for-well-designation/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Well"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#DevelopmentWellbore">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#DiscoveryWellbore">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWell">
+    <npdv:definition>The Resource Management Regulations define an exploration well as a well that is drilled to prove potential petroleum deposits, or to obtain information needed to delineate a proven deposit.  The NPD grants permission for exploration drilling, and assigns the proper designation to the wellbore. Such a permit must be granted for the respective well or wellbore before drilling activity is initiated. The permit is granted on the basis of registration applications and drilling programs, and on the condition that all other permits and consents required by other authorities have been secured.  Exploration wells are divided in two categories: wildcat wells and appraisal wells.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Established-practice-for-well-designation/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Well"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#InitialWellbore">
+    <npdv:definition>The first wellbore of a well?</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWell">
+    <npdv:definition>A development well or test development well used for injection of gas, water or other medium.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#RecoveryWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Kick">
+    <npdv:definition>Loss of control over a well, resulting in uncontrolled backflow of drilling liquid. It is an indication of a blow-out due to the well taking in gas, oil or water.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#KickOffPoint">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MultibranchWell">
+    <npdv:definition>A well drilled to produce and/or inject from several well paths simultaneously.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Well"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MultifieldWellbore">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MultilateralWell">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Well"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MultilateralWellbore">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#MultipurposeWellbore">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ObservationWell">
+    <npdv:definition>Production or test production well used to measure specific well parameters.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#DevelopmentWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWell">
+    <npdv:definition>A development well used for production of petroleum or of water for injection purposes.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#RecoveryWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#RecoveryWell">
+    <npdv:definition>A well used for production or injection.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#DevelopmentWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ShallowWell">
+    <npdv:definition>Shallow boreholes are defined in Section 2 of the Resource Management Regulations: Holes drilled in order to acquire information on the properties of the rock and/or to conduct geotechnical surveys to determine the location of facilities, and which are not drilled to prove or delimit a petroleum deposit or to produce or inject petroleum, water or other medium.  In reality, the definition includes two types of boreholes that are regulated by different provisions:      1. For route surveys and other soil surveys, boreholes can be drilled to study the subsurface before a facility is placed. These boreholes cannot be drilled deeper than 200 metres below the seabed, cf. Section 30 of the Petroleum Regulations.     2. When exploring for petroleum, “shallow drillings” can be carried out, cf. Section 4 of the Petroleum Regulations. These are boreholes that are drilled to acquire data on geological development of the rocks to explore for petroleum. In addition to the information on the geology at the drill site, the information can be linked with seismic data to calibrate seismic reflectors against geological units and to depth-convert seismic data. These boreholes previously had a depth restriction of 200 metres, but the Norwegian Petroleum Directorate (NPD) can now stipulate the depth. For drilling deeper than 200 metres below the seabed, an application for consent must be submitted to the Petroleum Safety Authority Norway, in addition to registration of the borehole with the NPD, cf. Section 25 of the Management Regulations.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Established-practice-for-well-designation/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Well"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#ShallowWellbore">
+    <npdv:definition>Hole drilled in order to acquire information on the rock characteristics and/or carry out geotechnical examinations for the location of installationsand which are not drilled to discover or delimit a petroleum deposit or to produce or inject petroleum, water or other medium.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/ </npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Sidetrack">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SidetrackWellbore">
+    <npdv:definition>A wellbore with a sidetrack</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SubseaCompletedWell">
+    <npdv:definition>Development well completed with the wellhead either on the seabed or on a template, and connected to a production or injection facility.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#DevelopmentWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TechnicalSideTrack">
+    <npdv:definition>Technical sidetracking: necessary drilling sideways (new well track) in order to bypass unforeseen obstacles in the well and where the geological and drilling operational well target remains unaltered.  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Sidetrack"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TerminationPoint">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#TestProductionWell">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#DevelopmentWell"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Well">
+    <npdv:definition>Borehole which is drilled in order to discover or delimit a petroleum deposit and/ or to produce petroleum or water for injection purposes, to inject gas, water or other medium, or to map or monitor well parameters. There are several categories of wells. A well may consist of one or several wellbores (well paths) and may have one or several termination poins.  Source: http://www.npd.no/Global/Norsk/5-Regelverk/Tematiske-veiledninger/B_og_b_betegnelser_og_klassifisering.pdf</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#name"/>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellHead">
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellTarget">
+    <npdv:definition>Geological well target: that or those geological unit(s) into which the well is to be drilled, drilling operational well target: the termination point of the well path (includes geographical coordinates and depths in meters).  Source: http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellTrack">
+    <npdv:definition>The part of a wellbore (well path) which extends from a point of drilling out on the existing wellbore (kick-off point) to a new termination point for the well.  Source: http://www.npd.no/Global/Norsk/5-Regelverk/Tematiske-veiledninger/B_og_b_betegnelser_og_klassifisering.pdf</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore">
+    <npdv:definition>Designates the location of the well from one termination point to the wellhead. A wellbore may consistof one or more well tracks.  Source: http://www.npd.no/Global/Norsk/5-Regelverk/Tematiske-veiledninger/B_og_b_betegnelser_og_klassifisering.pdf </npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#name"/>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCoreSet">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCore"/>
+        <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#member"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WellboreStratigraphicCoreSet">
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#WellboreCoreSet"/>
+  </rdf:Description>
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#WildcatWell">
+    <npdv:definition>An exploration well drilled to find out whether petroleum exists in a prospect.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-well</rdfs:isDefinedBy>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWell"/>
+  </owl:Class>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#definition"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#developmentWellboreForField">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreForField"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#discoveryWellbore">
+    <rdfs:range rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#DiscoveryWellbore"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#explorationWellboreForField">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreForField"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#isDiscoveryWellbore"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#member"/>
+  <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#name"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#shallowWellboreForField">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreForField"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHc">
+    <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+    <rdfs:range rdf:resource="http://resource.geosciml.org/ontology/timescale/gts-30#GeochronologicEra"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHcLevel1">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHc"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHcLevel2">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHc"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHcLevel3">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreAgeHc"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreForField">
+    <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+    <rdfs:range rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Field"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHc"/>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHcLevel1">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHc"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHcLevel2">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHc"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHcLevel3">
+    <rdfs:subPropertyOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationHc"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#wellboreFormationTD"/>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-well">
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <dc:source>http://www.npd.no/Global/Norsk/5-Regelverk/Tematiske-veiledninger/B_og_b_betegnelser_og_klassifisering.pdf</dc:source>
+    <dc:source>http://www.npd.no/en/About-us/Information-services/Dictionary/</dc:source>
+    <dc:source>http://www.npd.no/en/Topics/Wells/Temaartikler/Established-practice-for-well-designation/</dc:source>
+    <dc:source>http://www.npd.no/en/Topics/Wells/Temaartikler/Well-definitions/</dc:source>
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-db"/>
+  </owl:Ontology>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">13</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">17</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">70</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">80</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">50</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">71</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">9</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">72</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">82</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">91</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">171</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">173</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#InjectionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">180</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">81</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">90</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">170</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ExplorationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">12</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">172</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <dc:source>http://www.npd.no/Global/Norsk/2-Tema/Bronner/Symboloversikt_nov04_m_legend.pdf</dc:source>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ObservationWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">99</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#wellborePlotSymbol"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+  <owl:Class>
+    <rdfs:subClassOf rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#DiscoveryWellbore"/>
+    <owl:intersectionOf>
+      <rdf:Description>
+        <rdf:first rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"/>
+        <rdf:rest>
+          <rdf:Description>
+            <rdf:first>
+              <owl:Restriction>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+                <owl:onProperty rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#isDiscoveryWellbore"/>
+              </owl:Restriction>
+            </rdf:first>
+            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+          </rdf:Description>
+        </rdf:rest>
+      </rdf:Description>
+    </owl:intersectionOf>
+  </owl:Class>
+</rdf:RDF>

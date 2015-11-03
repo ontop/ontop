@@ -53,16 +53,17 @@ public class DBMetadataUtil {
 	 */
 	public static LinearInclusionDependencies generateFKRules(DBMetadata metadata) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
+		final boolean printouts = false;
 		
+		if (printouts)
+			System.out.println("===FOREIGN KEY RULES");
+		int count = 0;
 		Collection<TableDefinition> tableDefs = metadata.getTables();
 		for (TableDefinition def : tableDefs) {
 			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
 			for (Entry<String, List<Attribute>> fks : foreignKeys.entrySet()) {
-				String fkName = fks.getKey();
 				List<Attribute> fkAttributes = fks.getValue();
 				try {
-					String table1 = def.getName();
-					String table2 = "";
 					TableDefinition def2 = null;
 					Map<Integer, Integer> positionMatch = new HashMap<>();
 					for (Attribute attr : fkAttributes) {
@@ -71,7 +72,7 @@ public class DBMetadataUtil {
 						
 						// Get referenced table and column (2)
 						Reference reference = attr.getReference();
-						table2 = reference.getTableReference();
+						String table2 = reference.getTableReference();
 						String column2 = reference.getColumnReference();				
 						
 						// Get table definition for referenced table
@@ -93,12 +94,14 @@ public class DBMetadataUtil {
 						positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
 					}
 					// Construct CQIE
-					Predicate p1 = fac.getPredicate(table1, def.getAttributes().size());					
+					Predicate p1 = fac.getPredicate(def.getName(), def.getAttributes().size());					
 					List<Term> terms1 = new ArrayList<>(p1.getArity());
 					for (int i = 1; i <= p1.getArity(); i++) 
 						 terms1.add(fac.getVariable("t" + i));
 					
-					Predicate p2 = fac.getPredicate(table2, def2.getAttributes().size());
+					// Roman: important correction because table2 may not be in the same case 
+					// (e.g., it may be all upper-case)
+					Predicate p2 = fac.getPredicate(def2.getName(), def2.getAttributes().size());
 					List<Term> terms2 = new ArrayList<>(p2.getArity());
 					for (int i = 1; i <= p2.getArity(); i++) 
 						 terms2.add(fac.getVariable("p" + i));
@@ -111,6 +114,8 @@ public class DBMetadataUtil {
 					Function body = fac.getFunction(p1, terms1);
 					
 					dependencies.addRule(head, body);				
+					if (printouts)
+						System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
 				} 
 				catch (BrokenForeignKeyException e) {
 					// Log the warning message
@@ -118,6 +123,8 @@ public class DBMetadataUtil {
 				}
 			}
 		}		
+		if (printouts)
+			System.out.println("===END OF FOREIGN KEY RULES");
 		return dependencies;
 	}
 }

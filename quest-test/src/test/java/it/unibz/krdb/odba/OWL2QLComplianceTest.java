@@ -97,9 +97,7 @@ public class OWL2QLComplianceTest {
 
 		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		onto = translator.translate(ontology);
+		onto = OWLAPI3TranslatorUtility.translate(ontology);
 	
 		QuestOWLConnection conn = reasoner.getConnection();
 		

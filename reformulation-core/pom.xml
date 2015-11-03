@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.15.0</version>
+		<version>1.16.0</version>
 	</parent>
 	<artifactId>ontop-reformulation-core</artifactId>
 	<name>ontop-reformulation-core</name>
@@ -45,9 +45,14 @@
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency> 
  -->
- 		<dependency>
+<!--  		<dependency>
   			<groupId>net.sf.jgrapht</groupId>
   			<artifactId>jgrapht</artifactId>
+		</dependency> -->
+		
+		<dependency>
+				<groupId>org.javabits.jgrapht</groupId>
+				<artifactId>jgrapht-core</artifactId>		
 		</dependency>
 			
 		<dependency>

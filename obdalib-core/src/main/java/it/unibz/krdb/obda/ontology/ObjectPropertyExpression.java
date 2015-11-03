@@ -23,19 +23,19 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.Predicate;
 
 /**
- * Represents ObjectPropertyExpression from OWL 2 QL Specification
+ * Represents ObjectPropertyExpression from the OWL 2 QL Specification
  * 
  * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
  * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
  * 
- *  Support for owl:topObjectProperty and owl:bottomObjectProperty
+ * Support for owl:topObjectProperty and owl:bottomObjectProperty
  *     - the inverses of the two coincide with themselves 
  * 
- * @author roman
+ * @author Roman Kontchakov
  *
  */
 
-public interface ObjectPropertyExpression extends Description {
+public interface ObjectPropertyExpression extends DescriptionBT {
 
 	/**
 	 * checks whether the property expression is the inverse of an object property
@@ -52,6 +52,8 @@ public interface ObjectPropertyExpression extends Description {
 	 */
 	
 	public Predicate getPredicate();
+
+	public String getName();
 	
 	/**
 	 * the inverse of the object property
@@ -87,19 +89,4 @@ public interface ObjectPropertyExpression extends Description {
 	 */
 	
 	public ObjectSomeValuesFrom getRange();
-	
-	/**
-	 * checks (syntactically, irrespective of any ontology) whether the property is bottom
-	 * 
-	 * @return true if the predicate is owl:BottomObjectProperty (and inverse is true or false)
-	 */
-	public boolean isBottom();
-	
-	/**
-	 * checks (syntactically, irrespective of any ontology) whether the property is top
-	 * 
-	 * @return true if the predicate is owl:TopObjectProperty (and inverse is true or false)
-	 */
-	public boolean isTop();
-	
 }

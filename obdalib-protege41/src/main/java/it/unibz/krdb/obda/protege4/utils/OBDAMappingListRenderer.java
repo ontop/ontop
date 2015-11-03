@@ -22,9 +22,10 @@ package it.unibz.krdb.obda.protege4.utils;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
@@ -437,11 +438,11 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	}
 
 	private void prepareTextPanes(OBDAMappingAxiom value, boolean selected) {
-		OBDAQuery targetQuery = value.getTargetQuery();
+		CQIE targetQuery = value.getTargetQuery();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);
 
-		OBDAQuery sourceQuery = value.getSourceQuery();
+ 		OBDASQLQuery sourceQuery = value.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		srcQueryTextPane.setText(srcQuery);
 		

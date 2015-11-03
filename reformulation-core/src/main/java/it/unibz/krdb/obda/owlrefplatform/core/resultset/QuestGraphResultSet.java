@@ -32,13 +32,16 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -74,7 +77,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	private boolean storeResults = false;
 
 	private OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
 			boolean storeResult) throws OBDAException {
@@ -147,33 +150,25 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
-			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				OClass concept = ofac.createClass(objectConstant.getValue());
-				ClassAssertion ca = ofac.createClassAssertion(concept, subjectConstant);
-				tripleAssertions.add(ca);
-			} 
-			else {
-				if (objectConstant instanceof URIConstant) {
-					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop, subjectConstant,
-									(ObjectConstant) objectConstant);
-					tripleAssertions.add(op);
-				} 
-				else if (objectConstant instanceof BNode) {
-					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop, subjectConstant,
-									(ObjectConstant) objectConstant);
-					tripleAssertions.add(op);
+			Assertion assertion;
+			try {
+				if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
+					assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
 				} 
 				else {
-					DataPropertyExpression prop = ofac.createDataProperty(predicateName);
-					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(prop, subjectConstant,
-									(ValueConstant) objectConstant);
-					tripleAssertions.add(dp);
-				}
+					if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) 
+						assertion = ofac.createObjectPropertyAssertion(predicateName, 
+								subjectConstant, (ObjectConstant) objectConstant);
+					else 
+						assertion = ofac.createDataPropertyAssertion(predicateName, 
+									subjectConstant, (ValueConstant) objectConstant);
+				} 
+				if (assertion != null)
+					tripleAssertions.add(assertion);
+			}
+			catch (InconsistentOntologyException e) {
+				throw new RuntimeException("InconsistentOntologyException: " + 
+							predicateName + " " + subjectConstant + " " + objectConstant);
 			}
 		}
 		}
