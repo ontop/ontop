@@ -91,8 +91,8 @@ public class RDB2RDFTest {
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
 	private static Set<String> IGNORE = Sets.newHashSet(
-		"tc0001b", "tc0002b", "tc0002d", "tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0005a", "tc0005b", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
-		"tc0012a", "tc0012b", "tc0012e", "dg0014", "tc0014a", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016b", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
+		"tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0005a", "tc0005b", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
+		"tc0012a", "tc0012e", "dg0014", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016b", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
 		"tc0019b", "tc0020b", "dg0021", "dg0022", "dg0023", "dg0024", "dg0025"
 	);
 	private static List<String> FAILURES = Lists.newArrayList();
