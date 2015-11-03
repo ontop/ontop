@@ -38,9 +38,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,17 +45,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.ModelUtil;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.QueryResults;
@@ -71,8 +65,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sesameWrapper.SesameVirtualRepo;
@@ -90,11 +82,12 @@ public class RDB2RDFTest {
 	/**
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
-	private static Set<String> IGNORE = Sets.newHashSet(
-		"tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0005a", "tc0005b", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
-		"tc0012a", "tc0012e", "dg0014", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016b", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
+	private static Set<String> IGNORE = ImmutableSet.of(
+		"tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
+		"dg0014", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
 		"tc0019b", "tc0020b", "dg0025"
 	);
+
 	private static List<String> FAILURES = Lists.newArrayList();
 
 	private static final String BASE_IRI = "http://example.com/base/";
@@ -287,11 +280,8 @@ public class RDB2RDFTest {
 	@AfterClass
 	public static void afterClass() throws Exception {
 		System.out.println("RDB2RDF Summary");
-		System.out.println("IGNORED " + IGNORE.size());
-		System.out.println("FAILED " + FAILURES.size());
-		if (!FAILURES.isEmpty()) {
-			System.out.println("FAILURES: " + FAILURES);
-		}
+		System.out.println("IGNORED " + IGNORE.size() + " " + IGNORE);
+		System.out.println("FAILED " + FAILURES.size() + " " + FAILURES);
 
 		try {
 			clearDB();
@@ -343,7 +333,7 @@ public class RDB2RDFTest {
 
 			Set<Statement> expected = ImmutableSet.of();
 			if (outputExpected) {
-				expected = normalizeTypedLiterals(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile)));
+				expected = stripNamedGraphs(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile)));
 			}
 
 			if (!ModelUtil.equals(expected, actual)) {
@@ -377,19 +367,13 @@ public class RDB2RDFTest {
 	}
 
 	/**
-	 * RDB2RDF test suite expects "3.0E1"^^xsD:double in results but Quest returns "30"^^xsd:double which is
-	 * semantically equivalent but syntactically different. We normalize those types here so they won't trigger
-	 * a bigus failure.
+	 * Remove named graphs from expected answers since they are not supported
 	 */
-	private Set<Statement> normalizeTypedLiterals(Iterable<Statement> statements) {
-		TreeModel model = new TreeModel();
+	private Set<Statement> stripNamedGraphs(Iterable<Statement> statements) {
+		Set<Statement> model = Sets.newHashSet();
 		for (Statement stmt : statements) {
-			if (stmt.getObject() instanceof Literal) {
-				Literal lit = (Literal) stmt.getObject();
-				if (XMLSchema.DOUBLE.equals(lit.getDatatype())) {
-					lit = FACTORY.createLiteral(lit.doubleValue());
-					stmt = FACTORY.createStatement(stmt.getSubject(), stmt.getPredicate(), lit, stmt.getContext());
-				}
+			if (stmt.getContext() != null) {
+				stmt = FACTORY.createStatement(stmt.getSubject(), stmt.getPredicate(), stmt.getObject());
 			}
 
 			model.add(stmt);
