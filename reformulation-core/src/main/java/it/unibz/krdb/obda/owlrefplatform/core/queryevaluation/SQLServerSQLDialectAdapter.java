@@ -20,7 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+
 import java.sql.Types;
+import java.util.List;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
@@ -168,10 +171,15 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
-			if (offset < 0) {
-				return "OFFSET 0 ROWS";
+		if(limit == 0){
+			return "WHERE 1 = 0";
+		}
+
+		if (limit < 0)  {
+			if (offset < 0 ) {
+				return "";
 			} else {
+
 				return String.format("OFFSET %d ROWS", offset);
 			}
 		} else {
@@ -183,7 +191,20 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
+	@Override
+	public String sqlOrderByAndSlice(List<OBDAQueryModifiers.OrderCondition> conditions, String viewname, long limit, long offset) {
+
+		//BUGFIX LIMIT 0 is not supported in sql server
+		if(limit == 0){
+			return "WHERE 1 = 0";
+		}
+		String sql=sqlOrderBy(conditions,viewname);
+		if (!sql.equals(""))
+			sql+="\n";
+		return sql + sqlSlice(limit, offset);
+
+	}
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;

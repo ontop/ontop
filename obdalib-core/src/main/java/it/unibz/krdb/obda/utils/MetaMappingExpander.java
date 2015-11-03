@@ -74,7 +74,7 @@ public class MetaMappingExpander {
 	private final List<OBDAMappingAxiom> expandedMappings;
 	private final OBDADataFactory dfac;
 
-	/**
+    /**
 	 *
 	 * 
 	 * @param connection a JDBC connection
@@ -82,7 +82,7 @@ public class MetaMappingExpander {
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
 		translator = new SQLQueryParser();
-		expandedMappings = new ArrayList<OBDAMappingAxiom>();
+		expandedMappings = new ArrayList<>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}
 
@@ -159,7 +159,7 @@ public class MetaMappingExpander {
 					}
 				
 				
-				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
+				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList, mapping);
 				
 				distinctParamsProjection.addAll(columnsForTemplate);
 				
@@ -243,14 +243,7 @@ public class MetaMappingExpander {
 
 	/**
 	 * This method instantiate a meta mapping by the concrete parameters
-	 * 
-	 * @param targetQuery
-	 * @param bodyAtom
-	 * @param sourceParsedQuery
-	 * @param columnsForTemplate
-	 * @param columnsForValues
-	 * @param params
-	 * @return
+	 *
 	 * @throws JSQLParserException 
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
@@ -269,7 +262,7 @@ public class MetaMappingExpander {
 		/*
 		 * Then construct new Source Query
 		 */
-        ParsedSQLQuery sourceParsedQuery = translator.parseShallowly(sourceQuery.toString());
+        ParsedSQLQuery sourceParsedQuery = translator.parseShallowly(sourceQuery);
 		
 		/*
 		 * new Selection 
@@ -342,11 +335,12 @@ public class MetaMappingExpander {
 	 * 
 	 * @param varsInTemplate
 	 * @param columnList
-	 * @return
+	 * @param mapping
+     * @return
 	 */
 	private List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
-			ArrayList<SelectExpressionItem> columnList) {
-		List<SelectExpressionItem> columnsForTemplate = new ArrayList<SelectExpressionItem>();
+                                                             ArrayList<SelectExpressionItem> columnList, OBDAMappingAxiom mapping) {
+		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>();
 
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
@@ -361,7 +355,11 @@ public class MetaMappingExpander {
 				}
 			}
 			if(!found){
-				throw new IllegalStateException();
+
+                String format = "The placeholder '%s' in the target does not occur in the body of the mapping %s ";
+
+                throw new IllegalStateException(String.format(format,
+                        var.getName(),  mapping.toString()));
 			}
 		}
 		
@@ -387,7 +385,6 @@ public class MetaMappingExpander {
 	 * <pre>triple(t1,  URI("http://example.org/{}/{}", X, Y), t2)</pre>
 	 * 
 	 * Output: [X, Y]
-
 	 * 
 	 * @param atom
 	 * @param arity 

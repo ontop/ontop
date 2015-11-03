@@ -20,8 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -46,10 +49,72 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.CLOB, "CLOB");
 		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 	}
-	
+
+
+	private String databaseVersion ;
+
+	public OracleSQLDialectAdapter() {
+		this.databaseVersion = "";
+
+	}
+
+	public OracleSQLDialectAdapter(String databaseVersion) {
+		this.databaseVersion = databaseVersion;
+
+	}
+
+
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		return String.format("WHERE ROWNUM <= %s", limit);
+
+			String version = databaseVersion.split("\\.")[0];
+			try {
+				int versionInt = Integer.parseInt(version);
+
+//			In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
+				if (versionInt < 12) {
+
+					if (limit == 0) {
+						return "WHERE 1 = 0";
+					}
+
+					if (limit < 0) {
+						if (offset < 0)
+						{
+							return "";
+						} else
+						{
+
+							return String.format("OFFSET %d ROWS", offset);
+						}
+					} else
+					{
+						if (offset < 0) {
+							// If the offset is not specified
+							return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
+						} else
+						{
+							return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+						}
+					}
+				}
+			} catch (NumberFormatException nfe) {
+				//not a number  use new concat
+
+			}
+
+		if (limit >= 0 )
+			return String.format("WHERE ROWNUM <= %s", limit);
+		else
+			return "";
+
+	}
+
+	@Override
+	public String sqlOrderByAndSlice(List<OBDAQueryModifiers.OrderCondition> conditions, String viewname, long limit, long offset) {
+
+		return  sqlSlice(limit, offset)  + "\n" + sqlOrderBy(conditions,viewname);
+
 	}
 
 	@Override
