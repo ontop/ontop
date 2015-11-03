@@ -137,7 +137,7 @@ public class DBMetadataExtractor {
 		
 		QuotedIDFactory idfac;
 		// Exareme driver does not support method supportsMixedCaseIdentifiers()
-		if (!productName.contains("ADP") && md.supportsMixedCaseIdentifiers()) {
+		if (md.supportsMixedCaseIdentifiers()) {
 			 //  MySQL
 			if (productName.contains("MySQL")) 
 				idfac = new QuotedIDFactoryMySQL(); 
