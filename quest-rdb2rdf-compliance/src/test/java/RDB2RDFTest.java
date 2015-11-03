@@ -38,6 +38,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,6 +49,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -64,6 +69,10 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.RDFHandlerBase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sesameWrapper.SesameVirtualRepo;
@@ -82,21 +91,24 @@ public class RDB2RDFTest {
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
 	private static Set<String> IGNORE = Sets.newHashSet(
-       "dg0001", "tc0001b", "dg0002", "tc0002b", "tc0002d", "tc0002f", "tc0002h", "dg0003", "tc0003a", "dg0004", "dg0005", "tc0005a", "tc0005b", "dg0006", "dg0007", "tc0007h",
-       "dg0008", "dg0009", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0011", "dg0012", "tc0012a", "tc0012b", "tc0012e", "dg0013", "dg0014", "tc0014a", "tc0014b",
-       "tc0014c", "dg0015", "tc0015b", "dg0016", "tc0016b", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a", "tc0019b", "tc0020b", "dg0021", "dg0022", "dg0023",
-       "dg0024", "dg0025"
+		"tc0001b", "tc0002b", "tc0002d", "tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0005a", "tc0005b", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
+		"tc0012a", "tc0012b", "tc0012e", "dg0014", "tc0014a", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016b", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
+		"tc0019b", "tc0020b", "dg0021", "dg0022", "dg0023", "dg0024", "dg0025"
 	);
-
 	private static List<String> FAILURES = Lists.newArrayList();
 
-	private static final String BASE_URI = "http://example.com/base/";
+	private static final String BASE_IRI = "http://example.com/base/";
 
 	private static String LAST_SQL_SCRIPT = null;
 
 	private static Connection SQL_CONN;
 
 	private static ValueFactory FACTORY = ValueFactoryImpl.getInstance();
+
+	private static OWLOntology EMPTY_ONT;
+
+
+	private static QuestPreferences QUEST_PREFS = new QuestPreferences();
 
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
@@ -213,6 +225,15 @@ public class RDB2RDFTest {
 	public static void beforeClass() throws Exception {
 		SQL_CONN = DriverManager.getConnection("jdbc:h2:mem:questrepository","sa", "");
 		//Server.startWebServer(SQL_CONN);
+
+		EMPTY_ONT = OWLManager.createOWLOntologyManager().createOntology();
+
+		QUEST_PREFS.setProperty(QuestPreferences.DBNAME, "h2");
+		QUEST_PREFS.setProperty(QuestPreferences.DBUSER, "sa");
+		QUEST_PREFS.setProperty(QuestPreferences.DBPASSWORD, "");
+		QUEST_PREFS.setProperty(QuestPreferences.JDBC_URL, "jdbc:h2:mem:questrepository");
+		QUEST_PREFS.setProperty(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
+		QUEST_PREFS.setProperty(QuestPreferences.BASE_IRI, BASE_IRI);
 	}
 
 	@Before
@@ -244,10 +265,10 @@ public class RDB2RDFTest {
 	}
 
 	protected Repository createRepository() throws Exception {
-		String mappingURL = mappingFile == null ? null : url(mappingFile).toString();
-		logger.info("RDB2RDFTest " + name + " " + mappingURL);
-		// FIXME We should pass BASE_URI to the repo so it knows what base URI we want to use for mappings
-		SesameVirtualRepo repo = new SesameVirtualRepo(name, mappingURL, false, "TreeWitness");
+		logger.info("RDB2RDFTest " + name + " " + mappingFile);
+
+		Model mappings = mappingFile == null ? null : Rio.parse(stream(mappingFile), BASE_IRI, Rio.getParserFormatForFileName(mappingFile));
+		SesameVirtualRepo repo = new SesameVirtualRepo(name, EMPTY_ONT, mappings, null, QUEST_PREFS);
 		repo.initialize();
 		return repo;
 	}
@@ -322,7 +343,7 @@ public class RDB2RDFTest {
 
 			Set<Statement> expected = ImmutableSet.of();
 			if (outputExpected) {
-				expected = normalizeTypedLiterals(Rio.parse(stream(outputFile), BASE_URI, RDFFormat.NQUADS));
+				expected = normalizeTypedLiterals(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile)));
 			}
 
 			if (!ModelUtil.equals(expected, actual)) {
