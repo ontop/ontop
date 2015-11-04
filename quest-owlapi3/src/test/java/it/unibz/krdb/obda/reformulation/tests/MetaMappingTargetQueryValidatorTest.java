@@ -136,11 +136,11 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 	public void testValidate(){
 
-		// Creating a new instance of the reasoner
-		OBDAModelValidator obdaModelValidator = new OBDAModelValidator(obdaModel, ontology);
+		// run validador
 		try {
-			obdaModelValidator.run();
-		} catch (Exception e) {
+			OBDAModelValidator.validate(obdaModel);
+		} 
+		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
 		}
 		

@@ -43,7 +43,7 @@ public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAx
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		final CQIE headquery = (CQIEImpl) object.getTargetQuery();
+		final CQIE headquery = object.getTargetQuery();
 		final List<Function> atoms = headquery.getBody();
 
 		boolean isMatch = false;

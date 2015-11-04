@@ -24,17 +24,18 @@ import java.io.Serializable;
 
 public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
-	public void setSourceQuery(OBDAQuery query);
+	public void setSourceQuery(OBDASQLQuery query);
 
-	public OBDAQuery getSourceQuery();
+	public OBDASQLQuery getSourceQuery();
 
-	public void setTargetQuery(OBDAQuery query);
+	public void setTargetQuery(CQIE query);
 
-	public OBDAQuery getTargetQuery();
-
-	public Object clone();
+	public CQIE getTargetQuery();
 
 	public void setId(String id);
 
 	public String getId();
+
+	public OBDAMappingAxiom clone();
+
 }

@@ -35,7 +35,7 @@ public class MappingSQLStringTreeModelFilter extends TreeModelFilter<OBDAMapping
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		final OBDASQLQuery bodyquery = (OBDASQLQuery) object.getSourceQuery();
+		final OBDASQLQuery bodyquery = object.getSourceQuery();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

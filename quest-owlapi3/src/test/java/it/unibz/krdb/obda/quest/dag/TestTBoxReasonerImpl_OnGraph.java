@@ -23,17 +23,13 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -45,6 +41,8 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Reasoning over the TBox using the ontology graph
  * 
@@ -53,26 +51,16 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 @Deprecated
 public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
-	private final DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> objectPropertyGraph;
-	private final DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph;
-	private final DefaultDirectedGraph<ClassExpression,DefaultEdge> classGraph;
-	private final DefaultDirectedGraph<DataRangeExpression,DefaultEdge> dataRangeGraph;
-	
 	private final EquivalencesDAGImplOnGraph<ObjectPropertyExpression> objectPropertyDAG;
 	private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
 	private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
 
 	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
-		this.objectPropertyGraph = reasoner.getObjectPropertyGraph();
-		this.dataPropertyGraph = reasoner.getDataPropertyGraph();
-		this.classGraph = reasoner.getClassGraph();
-		this.dataRangeGraph = reasoner.getDataRangeGraph();
-		
-		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<ObjectPropertyExpression>(objectPropertyGraph);
-		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<DataPropertyExpression>(dataPropertyGraph);
-		this.classDAG = new EquivalencesDAGImplOnGraph<ClassExpression>(classGraph);
-		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<DataRangeExpression>(dataRangeGraph);
+		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<ObjectPropertyExpression>(reasoner.getObjectPropertyGraph());
+		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<DataPropertyExpression>(reasoner.getDataPropertyGraph());
+		this.classDAG = new EquivalencesDAGImplOnGraph<ClassExpression>(reasoner.getClassGraph());
+		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<DataRangeExpression>(reasoner.getDataRangeGraph());
 	}
 	
 	/**
@@ -156,7 +144,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 								return new Equivalences<Description>(equivalences);
 							}
 						*/
-						return new Equivalences<T>(equivalenceSet, equivalenceSet.iterator().next());
+						return new Equivalences<T>(ImmutableSet.copyOf(equivalenceSet), equivalenceSet.iterator().next(), false);
 					}
 				}
 			}
@@ -172,7 +160,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 						return new Equivalences<Description>(equivalences);
 					}
 			}*/
-			return new Equivalences<T>(Collections.singleton(desc), desc);
+			return new Equivalences<T>(ImmutableSet.of(desc), desc, false);
 		}
 
 		@Override
@@ -235,9 +223,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-				Set<T> sources = new HashSet<T>();
-				sources.add(node);
-				result.add(new Equivalences<T>(sources));
+				result.add(new Equivalences<T>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
@@ -302,9 +288,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-				Set<T> sources = new HashSet<T>();
-				sources.add(node);
-				result.add(new Equivalences<T>(sources));
+				result.add(new Equivalences<T>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
@@ -315,118 +299,31 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			// TODO Auto-generated method stub
 			return null;
 		}
-	}
-	
-	
-	/***
-	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
-	 * relation of the original DAG gets extended to the reachability relation
-	 * of T and Sigma chains.
-	 * 
-	 */
-	
-	public void convertIntoChainDAG() {
 
-		Collection<ClassExpression> nodes = new HashSet<ClassExpression>(classGraph.vertexSet());
-		HashSet<ClassExpression> processedNodes = new HashSet<ClassExpression>();
-		for (ClassExpression node : nodes) {
-			if ((!(node instanceof ObjectSomeValuesFrom) /*&& !(node instanceof DataSomeValuesFrom)*/)
-					|| processedNodes.contains(node)) {
-				continue;
-			}
-
-			/*
-			 * Adding a cycle between exists R and exists R- for each R.
-			 */
-
-			ClassExpression existsRin;
-			
-			//if (node instanceof ObjectSomeValuesFrom) {
-				ObjectSomeValuesFrom existsR = (ObjectSomeValuesFrom) node;
-				ObjectPropertyExpression exists = existsR.getProperty();
-				existsRin = exists.getInverse().getDomain();
-			//}
-/*				
-			else {
-				DataSomeValuesFrom existsR = (DataSomeValuesFrom) node;
-				DataPropertyExpression exists = existsR.getProperty();
-				existsRin = fac.createPropertySomeRestriction(exists.getInverse());
-					// TODO: fix DataRange
-//					existsRin = fac.createDataPropertyRange((DataPropertyExpression)exists);
-			}
-*/				
-//			ClassExpression existsR = node;
-			
-			Equivalences<ClassExpression> existsNode = classDAG.getVertex(existsR);
-			Equivalences<ClassExpression> existsInvNode = classDAG.getVertex(existsRin);
-			
-			Set<Equivalences<ClassExpression>> childrenExist 
-					= new HashSet<Equivalences<ClassExpression>>(classDAG.getDirectSub(existsNode));
-			Set<Equivalences<ClassExpression>> childrenExistInv 
-					= new HashSet<Equivalences<ClassExpression>>(classDAG.getDirectSub(existsInvNode));
-
-			for (Equivalences<ClassExpression> children : childrenExist) {
-				for (ClassExpression child : children) 
-					classGraph.addEdge(child, existsRin);
-			}
-			for (Equivalences<ClassExpression> children : childrenExistInv) {
-				for (ClassExpression child : children) 
-					classGraph.addEdge(child, existsR);
-			}
-
-			Set<Equivalences<ClassExpression>> parentExist 
-					= new HashSet<Equivalences<ClassExpression>>(classDAG.getDirectSuper(existsNode));
-			Set<Equivalences<ClassExpression>> parentsExistInv 
-					= new HashSet<Equivalences<ClassExpression>>(classDAG.getDirectSuper(existsInvNode));
-
-			for (Equivalences<ClassExpression> parents : parentExist) {
-				for (ClassExpression parent : parents) 
-					classGraph.addEdge(existsRin, parent);
-			}
-
-			for (Equivalences<ClassExpression> parents : parentsExistInv) {
-				for (ClassExpression parent : parents) 
-					classGraph.addEdge(existsR, parent);
-			}
-
-			processedNodes.add(existsRin);
-			processedNodes.add(existsR);
+		@Override
+		public T getCanonicalForm(T v) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
+	
+	
 
 	public int vertexSetSize() {
-		return objectPropertyGraph.vertexSet().size() + dataPropertyGraph.vertexSet().size() + classGraph.vertexSet().size();
+		return objectPropertyDAG.graph.vertexSet().size() + dataPropertyDAG.graph.vertexSet().size() + classDAG.graph.vertexSet().size();
 	}
 
 	public int edgeSetSize() {
-		return objectPropertyGraph.edgeSet().size() + dataPropertyGraph.edgeSet().size() +  classGraph.edgeSet().size();
+		return objectPropertyDAG.graph.edgeSet().size() + dataPropertyDAG.graph.edgeSet().size() +  classDAG.graph.edgeSet().size();
 	}
 
 	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() {
-		return objectPropertyGraph;
+		return objectPropertyDAG.graph;
 	}
 	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() {
-		return dataPropertyGraph;
+		return dataPropertyDAG.graph;
 	}
 	public DefaultDirectedGraph<ClassExpression, DefaultEdge> getClassGraph() {
-		return classGraph;
+		return classDAG.graph;
 	}
-
-	@Override
-	public OClass getClassRepresentative(OClass p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
-	}	
-	
-	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
-	}	
 }

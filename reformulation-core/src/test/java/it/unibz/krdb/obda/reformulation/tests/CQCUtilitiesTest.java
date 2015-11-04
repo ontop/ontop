@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
@@ -492,16 +493,19 @@ public class CQCUtilitiesTest {
 	}
 
     @Test
-	public void testSemanticContainment() {
+	public void testSemanticContainment() throws Exception {
 		OntologyFactory dfac = OntologyFactoryImpl.getInstance();
 
 		/* we always assert true = isContainedIn(q1, q2) */
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
-			Ontology sigma = dfac.createOntology();
-			OClass left = sigma.getVocabulary().createClass("A");
-			OClass right = sigma.getVocabulary().createClass("C");
+			
+	        OntologyVocabulary vb = dfac.createVocabulary();
+			OClass left = vb.createClass("A");
+			OClass right = vb.createClass("C");
+	        
+			Ontology sigma = dfac.createOntology(vb);
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -513,7 +517,7 @@ public class CQCUtilitiesTest {
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -524,9 +528,11 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
-			OClass left = sigma.getVocabulary().createClass("A");
-			ObjectPropertyExpression pright = sigma.getVocabulary().createObjectProperty("R");
+	        OntologyVocabulary vb = dfac.createVocabulary();
+	        OClass left = vb.createClass("A");
+			ObjectPropertyExpression pright = vb.createObjectProperty("R");
+			
+			Ontology sigma = dfac.createOntology(vb);
 			ObjectSomeValuesFrom right = pright.getDomain();
 			sigma.addSubClassOfAxiom(left, right);
 
@@ -539,7 +545,7 @@ public class CQCUtilitiesTest {
 					tfac.getVariable("y"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -550,9 +556,11 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
-			OClass left = sigma.getVocabulary().createClass("A");
-			ObjectPropertyExpression pright = sigma.getVocabulary().createObjectProperty("R").getInverse();
+	        OntologyVocabulary vb = dfac.createVocabulary();			
+			OClass left = vb.createClass("A");
+			ObjectPropertyExpression pright = vb.createObjectProperty("R").getInverse();
+						
+			Ontology sigma = dfac.createOntology(vb);
 			ObjectSomeValuesFrom right = pright.getDomain();
 			sigma.addSubClassOfAxiom(left, right);
 
@@ -565,7 +573,7 @@ public class CQCUtilitiesTest {
 					tfac.getVariable("z"), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -576,10 +584,12 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-			Ontology sigma = dfac.createOntology();
-			ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R");
+	        OntologyVocabulary vb = dfac.createVocabulary();			
+			ObjectPropertyExpression pleft = vb.createObjectProperty("R");
+			OClass right = vb.createClass("A");
+			
+			Ontology sigma = dfac.createOntology(vb);
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			OClass right = sigma.getVocabulary().createClass("A");
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -591,7 +601,7 @@ public class CQCUtilitiesTest {
 			Function body2 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -602,10 +612,13 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
-			Ontology sigma = dfac.createOntology();
-			ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R").getInverse();
+			
+	        OntologyVocabulary vb = dfac.createVocabulary();
+			OClass right = vb.createClass("A");
+			ObjectPropertyExpression pleft = vb.createObjectProperty("R").getInverse();
+	        
+			Ontology sigma = dfac.createOntology(vb);			
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			OClass right = sigma.getVocabulary().createClass("A");
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
@@ -617,7 +630,7 @@ public class CQCUtilitiesTest {
 			Function body2 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -645,15 +658,17 @@ public class CQCUtilitiesTest {
 
     //Facts should not be removed by the CQCUtilities
     @Test
-    public void testFacts() {
+    public void testFacts() throws Exception {
 
         OntologyFactory dfac = OntologyFactoryImpl.getInstance();
 
         // q(x) :- , q(x) :- R(x,y), A(x)
 
-        Ontology sigma = dfac.createOntology();
-        OClass left = sigma.getVocabulary().createClass("A");
-        ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R");
+        OntologyVocabulary vb = dfac.createVocabulary();
+        OClass left = vb.createClass("A");
+        ObjectPropertyExpression pleft = vb.createObjectProperty("R");
+        
+        Ontology sigma = dfac.createOntology(vb);
         ObjectSomeValuesFrom right = pleft.getDomain();
         sigma.addSubClassOfAxiom(left, right);
 
@@ -685,7 +700,7 @@ public class CQCUtilitiesTest {
         body = new LinkedList<Function>();
         CQIE query2 = tfac.getCQIE(head, body);
 
-		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 				
         assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False

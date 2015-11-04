@@ -24,8 +24,6 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -42,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessGenerator {
 	private final ObjectPropertyExpression property;
-	private final OClass filler;
+//	private final OClass filler;
 
 	private final Set<ClassExpression> concepts = new HashSet<ClassExpression>();
 	private Set<ClassExpression> subconcepts;
@@ -51,12 +49,12 @@ public class TreeWitnessGenerator {
 	private final TBoxReasoner reasoner;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
-	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
+//	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	public TreeWitnessGenerator(TBoxReasoner reasoner, ObjectPropertyExpression property, OClass filler) {
+	public TreeWitnessGenerator(TBoxReasoner reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
 		this.reasoner = reasoner;
 		this.property = property;
-		this.filler = filler;
+//		this.filler = filler;
 	}
 
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
@@ -75,7 +73,7 @@ public class TreeWitnessGenerator {
 					ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)concept;
 					TreeWitnessGenerator twg = gens.get(some);
 					if (twg == null) {
-						twg = new TreeWitnessGenerator(reasoner, some.getProperty(), ontFactory.getThing());			
+						twg = new TreeWitnessGenerator(reasoner, some.getProperty());			
 						gens.put(concept, twg);
 					}
 					for (Equivalences<ClassExpression> subClassSet : subClasses) {
@@ -198,7 +196,7 @@ public class TreeWitnessGenerator {
 
 	public boolean endPointEntailsAnyOf(Set<ClassExpression> subc) {
 		ensureExistsRinv();
-		return subc.contains(existsRinv) || subc.contains(filler);
+		return subc.contains(existsRinv); // || subc.contains(filler);
 	}
 	
 	public boolean endPointEntailsAnyOf(Intersection<ClassExpression> subc) {
@@ -207,24 +205,24 @@ public class TreeWitnessGenerator {
 		
 		ensureExistsRinv();
 		
-		return subc.subsumes(existsRinv) || subc.subsumes(filler);
+		return subc.subsumes(existsRinv); // || subc.subsumes(filler);
 	}
 	
 	@Override 
 	public String toString() {
-		return "tw-generator E" + property.toString() + "." + filler.toString();
+		return "tw-generator E" + property.toString(); // + "." + filler.toString();
 	}
 	
 	@Override
 	public int hashCode() {
-		return property.hashCode() ^ filler.hashCode();
+		return property.hashCode(); // ^ filler.hashCode();
 	}
 	
 	@Override 
 	public boolean equals(Object other) {
 		if (other instanceof TreeWitnessGenerator) {
 			TreeWitnessGenerator o = (TreeWitnessGenerator)other;
-			return (this.property.equals(o.property) && this.filler.equals(o.filler));		
+			return this.property.equals(o.property); // && this.filler.equals(o.filler));		
 		}
 		return false;
 	}

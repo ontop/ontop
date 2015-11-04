@@ -63,10 +63,9 @@ public class Mapping2DatalogConverter {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
-				CQIE targetQuery = (CQIE) mappingAxiom.getTargetQuery();
+				CQIE targetQuery = mappingAxiom.getTargetQuery();
 
-				OBDASQLQuery sourceQuery = (OBDASQLQuery) mappingAxiom
-						.getSourceQuery();
+				OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
 				// Parse the SQL query tree from the source query
 				ParsedSQLQuery parsedSQLQuery = sqlQueryParser.parseDeeply(sourceQuery.toString());

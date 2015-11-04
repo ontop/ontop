@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
@@ -31,7 +31,7 @@ import java.sql.Statement;
 
 public class SourceQueryValidator {
 
-	private OBDAQuery sourceQuery = null;
+	private OBDASQLQuery sourceQuery = null;
 
 	private Exception reason = null;
 
@@ -43,7 +43,7 @@ public class SourceQueryValidator {
 
 	private Connection c;
 
-	public SourceQueryValidator(OBDADataSource source, OBDAQuery q) {
+	public SourceQueryValidator(OBDADataSource source, OBDASQLQuery q) {
 		this.source = source;
 		sourceQuery = q;
 	}
