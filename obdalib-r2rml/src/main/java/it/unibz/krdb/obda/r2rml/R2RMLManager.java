@@ -142,9 +142,9 @@ public class R2RMLManager {
 	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm);
 		List<Function> body = getMappingTripleAtoms(tm);
-		Function head = getHeadAtom(body);
-		CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), sourceQuery, targetQuery);
+		//Function head = getHeadAtom(body);
+		//CQIE targetQuery = fac.getCQIE(head, body);
+		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), fac.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -194,15 +194,15 @@ public class R2RMLManager {
 				body.add(bodyAtom);
 			}
 
-			Function head = getHeadAtom(body);
-			CQIE targetQuery = fac.getCQIE(head, body);
+			//Function head = getHeadAtom(body);
+			//CQIE targetQuery = fac.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
 				throw new Exception("Could not create source query for join in "+tm.toString());
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), sourceQuery, targetQuery);
+			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), fac.getSQLQuery(sourceQuery), body);
 			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}
@@ -216,6 +216,7 @@ public class R2RMLManager {
 	 * @param body
 	 * @return
 	 */
+/*	
 	private Function getHeadAtom(List<Function> body) {
 		Set<Variable> vars = new HashSet<>();
 		for (Function bodyAtom : body) {
@@ -226,7 +227,7 @@ public class R2RMLManager {
 		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
-	
+*/	
 	/**
 	 * Get OBDA mapping body terms from R2RML TriplesMap
 	 * @param tm

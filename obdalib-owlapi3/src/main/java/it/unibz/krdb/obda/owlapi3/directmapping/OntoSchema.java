@@ -21,8 +21,8 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  */
 
 
-import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.Attribute;
+import it.unibz.krdb.sql.RelationDefinition;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,8 +53,8 @@ public class OntoSchema {
 	public OntoSchema(){
 	}
 	
-	public OntoSchema(DataDefinition dd){
-		this.tablename=dd.getName();
+	public OntoSchema(RelationDefinition dd){
+		this.tablename=dd.getID().getTableName();
 		this.attrList=dd.getAttributes();
 		
 		baseURI=new String("http://example.org/");
@@ -109,23 +109,26 @@ public class OntoSchema {
 		OWLOntologyManager manager =rootOntology.getOWLOntologyManager();
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		if(!existDataProperty(rootOntology, at)){
-			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName()))));
+			OWLDataProperty newdproperty = dataFactory.getOWLDataProperty(IRI.create(String.format(dataIRI, percentEncode(tablename), percentEncode(at.getID().getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newdproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
-		if(at.isForeignKey() && !existObjectProperty(rootOntology, at)){
+/*	
+ * 		ROMAN : NOT SURE HOW TO DO THAT	
+		if((at.getReference() != null) && !existObjectProperty(rootOntology, at)){
 			OWLObjectProperty newoproperty = dataFactory.getOWLObjectProperty(IRI.create(String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newoproperty);
 			manager.addAxiom(rootOntology,declarationAxiom );
 			manager.saveOntology(rootOntology);
 		}
+*/		
 	}
 	
 	private boolean existDataProperty(OWLOntology rootOntology, Attribute at){
 		boolean existDataProperty=false;
 		for(OWLDataProperty dtpp : rootOntology.getDataPropertiesInSignature()){
-			if(dtpp.toString().equalsIgnoreCase("<"+String.format(dataIRI, percentEncode(tablename), percentEncode(at.getName()))+">")){
+			if(dtpp.toString().equalsIgnoreCase("<"+String.format(dataIRI, percentEncode(tablename), percentEncode(at.getID().getName()))+">")){
 				existDataProperty=true;
 			}
 		}
@@ -135,7 +138,7 @@ public class OntoSchema {
 	private boolean existObjectProperty(OWLOntology rootOntology, Attribute at){
 		boolean existObjectProperty=false;
 		for(OWLObjectProperty obpp : rootOntology.getObjectPropertiesInSignature()){
-			if(obpp.toString().equalsIgnoreCase("<"+String.format(objectIRI, percentEncode(tablename), percentEncode(at.getName()))+">")){
+			if(obpp.toString().equalsIgnoreCase("<"+String.format(objectIRI, percentEncode(tablename), percentEncode(at.getID().getName()))+">")){
 				existObjectProperty=true;
 			}
 		}

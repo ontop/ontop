@@ -94,10 +94,10 @@ public class MappingVocabularyRepair {
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
-			CQIE targetQuery = mapping.getTargetQuery();
+			List<Function> targetQuery = mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
 
-			for (Function atom : targetQuery.getBody()) {
+			for (Function atom : targetQuery) {
 				Predicate p = atom.getFunctionSymbol();
 
 				/* Fixing terms */
@@ -177,8 +177,8 @@ public class MappingVocabularyRepair {
 				newbody.add(newatom);
 			} //end for
 			
-			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), 
+					dfac.getSQLQuery(mapping.getSourceQuery().toString()), newbody));
 		}
 //		log.debug("Repair done. Returning {} mappings", result.size());
 		return result;

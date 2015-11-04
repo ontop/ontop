@@ -7,7 +7,7 @@ CREATE TABLE `apaAreaGross` (
   `apaAreaGeometry_KML_WGS84` text NOT NULL,
   `apaAreaGross_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`apaAreaGross_id`),
-  UNIQUE KEY `apaAreaGross_id` (`apaAreaGross_id`)
+  UNIQUE `apaAreaGross_id` (`apaAreaGross_id`)
 );
 
 -- Table structure for table `apaAreaNet`
@@ -24,7 +24,7 @@ CREATE TABLE `apaAreaNet` (
   `apaAreaNetGeometryWKT` geometry NOT NULL,
   `apaAreaNet_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`apaAreaNet_id`,`qdrName`,`blkName`,`prvName`,`blkId`),
-  UNIQUE KEY `apaAreaNet_id` (`apaAreaNet_id`)
+  UNIQUE `apaAreaNet_id` (`apaAreaNet_id`)
 );
 
 -- Table structure for table `bsns_arr_area`
@@ -43,7 +43,7 @@ CREATE TABLE `bsns_arr_area` (
   `baaDateUpdatedMax` date DEFAULT NULL COMMENT 'Date all updated',
   `dateSyncNPD` date NOT NULL,
   PRIMARY KEY (`baaNpdidBsnsArrArea`),
-  UNIQUE KEY `index__bsns_arr_area__baaName` (`baaName`)
+  UNIQUE `index__bsns_arr_area__baaName` (`baaName`)
 );
 
 -- Table structure for table `baaArea`
@@ -179,7 +179,7 @@ CREATE TABLE `licence` (
   `prlDateUpdatedMax` date DEFAULT NULL COMMENT 'Date all updated',
   `dateSyncNPD` date NOT NULL,
   PRIMARY KEY (`prlNpdidLicence`),
-  UNIQUE KEY `index__licence__prlName` (`prlName`)
+  UNIQUE `index__licence__prlName` (`prlName`)
 );
 
 -- Table structure for table `wellbore_npdid_overview`
@@ -851,7 +851,7 @@ CREATE TABLE `prlArea` (
   `prlAreaGeometryWKT` geometry NOT NULL,
   `prlArea_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`prlArea_id`,`prlNpdidLicence`,`prlAreaPolyDateValidFrom`,`prlAreaPolyDateValidTo`),
-  UNIQUE KEY `prlArea_id` (`prlArea_id`),
+  UNIQUE `prlArea_id` (`prlArea_id`),
   CONSTRAINT `prlArea_ibfk_2` FOREIGN KEY (`prlLastOperatorNpdidCompany`) REFERENCES `company` (`cmpNpdidCompany`),
   CONSTRAINT `prlArea_ibfk_1` FOREIGN KEY (`prlNpdidLicence`) REFERENCES `licence` (`prlNpdidLicence`)
 );
@@ -911,7 +911,7 @@ CREATE TABLE `seis_acquisition` (
   `seaGeotechnical` varchar(20) DEFAULT NULL COMMENT 'Geotechnical measurement',
   `dateSyncNPD` date NOT NULL,
   PRIMARY KEY (`seaNpdidSurvey`,`seaName`),
-  UNIQUE KEY `index__seis_acquisition__seaName` (`seaName`),
+  UNIQUE `index__seis_acquisition__seaName` (`seaName`),
   CONSTRAINT `seis_acquisition_ibfk_1` FOREIGN KEY (`seaCompanyReported`) REFERENCES `company` (`cmpLongName`)
 );
 
@@ -950,7 +950,7 @@ CREATE TABLE `seaArea` (
   `seaPolyGeometryWKT` geometry NOT NULL,
   `seaArea_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`seaArea_id`,`seaSurveyName`),
-  UNIQUE KEY `seaArea_id` (`seaArea_id`),
+  UNIQUE `seaArea_id` (`seaArea_id`),
   CONSTRAINT `seaArea_ibfk_1` FOREIGN KEY (`seaNpdidSurvey`) REFERENCES `seis_acquisition` (`seaNpdidSurvey`)
 );
 
@@ -1015,7 +1015,7 @@ CREATE TABLE `seis_acquisition_progress` (
   `seaNpdidSurvey` int(11) NOT NULL COMMENT 'NPDID for survey',
   `seis_acquisition_progress_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`seis_acquisition_progress_id`,`seaProgressText2`),
-  UNIQUE KEY `seis_acquisition_progress_id` (`seis_acquisition_progress_id`),
+  UNIQUE `seis_acquisition_progress_id` (`seis_acquisition_progress_id`),
   CONSTRAINT `seis_acquisition_progress_ibfk_1` FOREIGN KEY (`seaNpdidSurvey`) REFERENCES `seis_acquisition` (`seaNpdidSurvey`)
 );
 
@@ -1155,7 +1155,7 @@ CREATE TABLE `wellbore_casing_and_lot` (
   `dateSyncNPD` date NOT NULL,
   `wellbore_casing_and_lot_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`wellbore_casing_and_lot_id`,`wlbNpdidWellbore`),
-  UNIQUE KEY `wellbore_casing_and_lot_id` (`wellbore_casing_and_lot_id`),
+  UNIQUE `wellbore_casing_and_lot_id` (`wellbore_casing_and_lot_id`),
   CONSTRAINT `wellbore_casing_and_lot_ibfk_1` FOREIGN KEY (`wlbNpdidWellbore`) REFERENCES `wellbore_npdid_overview` (`wlbNpdidWellbore`)
 );
 
@@ -1210,7 +1210,7 @@ CREATE TABLE `wellbore_core` (
   `dateSyncNPD` date NOT NULL,
   `wellbore_core_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`wellbore_core_id`,`wlbNpdidWellbore`,`wlbCoreNumber`),
-  UNIQUE KEY `wellbore_core_id` (`wellbore_core_id`),
+  UNIQUE `wellbore_core_id` (`wellbore_core_id`),
   CONSTRAINT `wellbore_core_ibfk_1` FOREIGN KEY (`wlbNpdidWellbore`) REFERENCES `wellbore_npdid_overview` (`wlbNpdidWellbore`)
 );
 
@@ -1226,7 +1226,7 @@ CREATE TABLE `wellbore_core_photo` (
   `wlbCorePhotoDateUpdated` date DEFAULT NULL COMMENT 'Date updated',
   `wellbore_core_photo_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`wellbore_core_photo_id`,`wlbNpdidWellbore`,`wlbCoreNumber`,`wlbCorePhotoTitle`),
-  UNIQUE KEY `wellbore_core_photo_id` (`wellbore_core_photo_id`),
+  UNIQUE `wellbore_core_photo_id` (`wellbore_core_photo_id`),
   CONSTRAINT `wellbore_core_photo_ibfk_1` FOREIGN KEY (`wlbNpdidWellbore`) REFERENCES `wellbore_npdid_overview` (`wlbNpdidWellbore`)
 );
 
@@ -1324,7 +1324,7 @@ CREATE TABLE `wellbore_document` (
   `dateSyncNPD` date NOT NULL,
   `wellbore_document_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`wellbore_document_id`,`wlbNpdidWellbore`,`wlbDocumentName`),
-  UNIQUE KEY `wellbore_document_id` (`wellbore_document_id`),
+  UNIQUE `wellbore_document_id` (`wellbore_document_id`),
   CONSTRAINT `wellbore_document_ibfk_1` FOREIGN KEY (`wlbNpdidWellbore`) REFERENCES `wellbore_npdid_overview` (`wlbNpdidWellbore`)
 );
 
@@ -1479,7 +1479,7 @@ CREATE TABLE `wellbore_mud` (
   `dateSyncNPD` date NOT NULL,
   `wellbore_mud_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`wellbore_mud_id`,`wlbNpdidWellbore`),
-  UNIQUE KEY `wellbore_mud_id` (`wellbore_mud_id`),
+  UNIQUE `wellbore_mud_id` (`wellbore_mud_id`),
   CONSTRAINT `wellbore_mud_ibfk_1` FOREIGN KEY (`wlbNpdidWellbore`) REFERENCES `wellbore_npdid_overview` (`wlbNpdidWellbore`)
 );
 
@@ -1500,7 +1500,7 @@ CREATE TABLE `wellbore_oil_sample` (
   `dateSyncNPD` date NOT NULL,
   `wellbore_oil_sample_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`wellbore_oil_sample_id`,`wlbNpdidWellbore`),
-  UNIQUE KEY `wellbore_oil_sample_id` (`wellbore_oil_sample_id`),
+  UNIQUE `wellbore_oil_sample_id` (`wellbore_oil_sample_id`),
   CONSTRAINT `wellbore_oil_sample_ibfk_1` FOREIGN KEY (`wlbNpdidWellbore`) REFERENCES `wellbore_npdid_overview` (`wlbNpdidWellbore`)
 );
 

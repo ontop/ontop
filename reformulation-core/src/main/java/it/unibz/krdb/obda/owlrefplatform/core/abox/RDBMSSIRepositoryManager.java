@@ -63,6 +63,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -924,8 +925,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -962,8 +963,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);			
 			}
 		}
@@ -994,8 +995,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1035,12 +1036,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type) {
+	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
 		Variable X = dfac.getVariable("X");
 
-		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-		Function head = dfac.getFunction(headPredicate, X);
+		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		//Function head = dfac.getFunction(headPredicate, X);
 
 		Function subjectTerm;
 		if (type == COL_TYPE.OBJECT) 
@@ -1051,17 +1052,17 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		Function body = dfac.getFunction(predicate, subjectTerm);
-		return dfac.getCQIE(head, body);
+		return Collections.singletonList(body);
 	}
 	
 	
-	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
+	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 
 		Variable X = dfac.getVariable("X");
 		Variable Y = dfac.getVariable("Y");
 
-		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		Function head = dfac.getFunction(headPredicate, X, Y);
+		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		//Function head = dfac.getFunction(headPredicate, X, Y);
 
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) 
@@ -1092,7 +1093,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 
 		Function body = dfac.getFunction(predicate, subjectTerm, objectTerm);
-		return dfac.getCQIE(head, body);
+		return Collections.singletonList(body);
 	}
 
 	

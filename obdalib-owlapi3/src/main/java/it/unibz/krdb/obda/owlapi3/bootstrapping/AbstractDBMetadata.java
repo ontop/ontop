@@ -25,10 +25,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.DBMetadataExtractor;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public abstract class AbstractDBMetadata
@@ -40,12 +41,11 @@ public abstract class AbstractDBMetadata
 	
 	protected DBMetadata getMetadata() throws Exception 
 	{
-		DBMetadata metadata = null;
-
-			Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
-					source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-			metadata = JDBCConnectionManager.getMetaData(conn);
-		
+		Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
+				source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), 
+				source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+		DBMetadata metadata = DBMetadataExtractor.createMetadata(conn);
+		DBMetadataExtractor.loadMetadata(metadata, conn, null);
 
 		return metadata;
 	}

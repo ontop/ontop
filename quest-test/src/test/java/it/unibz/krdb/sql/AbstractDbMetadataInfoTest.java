@@ -38,8 +38,10 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 		
 		try {
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = JDBCConnectionManager.getMetaData(conn);
-		} catch (SQLException e) { 
+			metadata = DBMetadataExtractor.createMetadata(conn);
+			DBMetadataExtractor.loadMetadata(metadata, conn, null);
+		} 
+		catch (SQLException e) { 
 			e.printStackTrace();
 		}
 	}

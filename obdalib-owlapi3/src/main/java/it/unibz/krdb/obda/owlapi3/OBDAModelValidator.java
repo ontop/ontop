@@ -22,12 +22,14 @@ package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 /***
  * Validates an OBDAModel (mappings) against the vocabulary of an ontology 
@@ -53,7 +55,7 @@ public class OBDAModelValidator {
 		 Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
 		 for (URI datasourceUri : mappingTable.keySet()) {
 			 for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
-				 CQIE tq = mapping.getTargetQuery();
+				 List<Function> tq = mapping.getTargetQuery();
 				 boolean bSuccess = validator.validate(tq);
 				 if (!bSuccess) {
 					 throw new Exception("Found an invalid target query: " + tq.toString());

@@ -11,7 +11,6 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -20,10 +19,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
+
 import java.io.File;
-import java.util.Set;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -75,49 +77,35 @@ private void setup()  throws Exception {
 	qst = connOWL.createStatement();
 }
 
-private TableDefinition defMeasTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(name);
-	Attribute attribute = null;
-	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null);
-	//It starts from 1 !!!
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("value", java.sql.Types.NUMERIC, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("sensor", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	return tableDefinition;
+private void defMeasTable(DBMetadata dbMetadata, String name) {
+	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("value"), java.sql.Types.NUMERIC, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), java.sql.Types.VARCHAR, null, false);
 }
 
-private TableDefinition defMessTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(name);
-	Attribute attribute = null;
-	//It starts from 1 !!!
-	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("eventtext", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	return tableDefinition;
+private void defMessTable(DBMetadata dbMetadata, String name) {
+	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("eventtext"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), java.sql.Types.VARCHAR, null, false);
 }
 
-private TableDefinition defStaticTable(String name){
-	TableDefinition tableDefinition = new TableDefinition(name);
-	Attribute attribute = null;
-	//It starts from 1 !!!
-	attribute = new Attribute("domain", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	attribute = new Attribute("range", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.addAttribute(attribute);
-	return tableDefinition;
+private void defStaticTable(DBMetadata dbMetadata, String name) {
+	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+	tableDefinition.addAttribute(idfac.createAttributeID("domain"), java.sql.Types.VARCHAR, null, false);
+	tableDefinition.addAttribute(idfac.createAttributeID("range"), java.sql.Types.VARCHAR, null, false);
 }
 private DBMetadata getMeta(){
-	DBMetadata dbMetadata = new DBMetadata("dummy class");
-	dbMetadata.add(defMeasTable("burner"));
-	dbMetadata.add(defMessTable("events"));
-	dbMetadata.add(defStaticTable("a_static"));
+	DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+
+	defMeasTable(dbMetadata, "burner");
+	defMessTable(dbMetadata, "events");
+	defStaticTable(dbMetadata, "a_static");
 	return dbMetadata;
 }
 

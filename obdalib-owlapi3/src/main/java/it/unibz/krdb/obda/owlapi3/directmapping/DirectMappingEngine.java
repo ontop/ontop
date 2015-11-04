@@ -32,14 +32,14 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
 import java.net.URI;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,8 +74,6 @@ public class DirectMappingEngine {
 	private DBMetadata metadata = null;
 	private String baseuri;
 	private int mapidx = 1;
-	
-	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	public DirectMappingEngine(String baseUri, int mapnr){
 		conMan = JDBCConnectionManager.getJDBCConnectionManager();
@@ -129,8 +127,11 @@ public class DirectMappingEngine {
 		//For each data source, enrich into the ontology
 		if (metadata == null) {
 			for (int i = 0; i < sourcelist.size(); i++) {
-				oe.enrichOntology(conMan.getMetaData(sourcelist.get(i)),
-						ontology);
+				Connection conn = conMan.getConnection(sourcelist.get(i));		
+				DBMetadata metadata = DBMetadataExtractor.createMetadata(conn);
+				// this operation is EXPENSIVE
+				DBMetadataExtractor.loadMetadata(metadata, conn, null);
+				oe.enrichOntology(metadata, ontology);
 			}
 		} else
 			oe.enrichOntology(this.metadata, ontology);
@@ -208,25 +209,29 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
+	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception {		
 		model.addSource(source);
-		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
+		Connection conn = conMan.getConnection(source);		
+		DBMetadata metadata = DBMetadataExtractor.createMetadata(conn);
+		// this operation is EXPENSIVE
+		DBMetadataExtractor.loadMetadata(metadata, conn, null);
+		insertMapping(metadata, model,source.getSourceID());
 	}
 	
 	
 	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws Exception{			
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
-		Collection<TableDefinition> tables = metadata.getTables();
+		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
-		for (TableDefinition td : tables) {
+		for (DatabaseRelationDefinition td : tables) {
 			model.addMappings(sourceUri, getMapping(td, metadata, baseuri));
 		}
 		model.addMappings(sourceUri, mappingAxioms);
 		for (URI uri : model.getMappings().keySet()) {
 			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
-				CQIE rule = mapping.getTargetQuery();
-				for (Function f : rule.getBody()) {
+				List<Function> rule = mapping.getTargetQuery();
+				for (Function f : rule) {
 					if (f.getArity() == 1)
 						model.getOntologyVocabulary().createClass(f.getFunctionSymbol().getName());
 					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
@@ -236,19 +241,6 @@ public class DirectMappingEngine {
 				}
 			}
 		}
-	}
-	
-	/***
-	 * generate a mapping axiom from a table of some database
-	 * 
-	 * @param table : the datadefinition from which mappings are extraced
-	 * @param source : datasource that the table may refer to, such as foreign keys
-	 * 
-	 *  @return a List of OBDAMappingAxiom-s
-	 * @throws Exception 
-	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
-		return getMapping(table,conMan.getMetaData(source),baseuri);
 	}
 	
 
@@ -262,21 +254,18 @@ public class DirectMappingEngine {
 	 *  @return a List of OBDAMappingAxiom-s
 	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) throws Exception {
+	public List<OBDAMappingAxiom> getMapping(RelationDefinition table, DBMetadata metadata, String baseUri) throws Exception {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-		DirectMappingAxiom dma=null;
 
-			dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
+		DirectMappingAxiom dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
 
-		dma.setbaseuri(baseUri);
-		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
-		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx,dma.getSQL(), dma.getCQ()));
+		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, dfac.getSQLQuery(dma.getSQL()), dma.getCQ()));
 		mapidx++;
 		
-		Map<String, CQIE> refAxioms = dma.getRefAxioms();
+		Map<String, List<Function>> refAxioms = dma.getRefAxioms();
 		for (String refSQL : refAxioms.keySet()) {
-			axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, refSQL, refAxioms.get(refSQL)));
+			axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, dfac.getSQLQuery(refSQL), refAxioms.get(refSQL)));
 			mapidx++;
 		}
 		
