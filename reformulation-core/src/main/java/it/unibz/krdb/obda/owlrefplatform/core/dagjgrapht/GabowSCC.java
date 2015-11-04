@@ -21,11 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
-import java.util.*;
-
-import org.jgrapht.*;
-
 import com.google.common.collect.ImmutableSet;
+import org.jgrapht.DirectedGraph;
+
+import java.util.*;
 
 
 /**

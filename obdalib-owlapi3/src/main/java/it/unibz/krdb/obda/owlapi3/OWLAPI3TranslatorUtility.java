@@ -21,20 +21,18 @@ package it.unibz.krdb.obda.owlapi3;
  */
 
 import it.unibz.krdb.obda.ontology.Ontology;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 /***
  * Translates an OWLOntology into ontop's internal ontology representation. 

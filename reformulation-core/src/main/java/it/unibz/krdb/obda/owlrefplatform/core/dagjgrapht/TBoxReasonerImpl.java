@@ -21,27 +21,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
-import it.unibz.krdb.obda.ontology.BinaryAxiom;
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Datatype;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Ontology;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
-
-import java.util.Collections;
-import java.util.Comparator;
-
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-import com.google.common.collect.ImmutableSet;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * TBoxReasonerImpl

@@ -24,10 +24,9 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 import java.util.Iterator;
-
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAxiom> {
 

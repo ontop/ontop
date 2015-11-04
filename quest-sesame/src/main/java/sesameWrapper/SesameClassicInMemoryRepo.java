@@ -22,12 +22,11 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import org.openrdf.query.Dataset;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
-
-import org.openrdf.query.Dataset;
 
 public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 	

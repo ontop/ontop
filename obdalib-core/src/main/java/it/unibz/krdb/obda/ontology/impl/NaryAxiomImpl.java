@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-
 import it.unibz.krdb.obda.ontology.NaryAxiom;
 
 public class NaryAxiomImpl<T> implements NaryAxiom<T> {

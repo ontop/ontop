@@ -32,9 +32,9 @@ package it.unibz.krdb.obda.ontology;
  *
  */
 
-import java.util.Collection;
-
 import it.unibz.krdb.obda.model.Predicate;
+
+import java.util.Collection;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification

@@ -26,13 +26,12 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 /**
  * A very simple example that shows how to generate triples in an N-Triple file,

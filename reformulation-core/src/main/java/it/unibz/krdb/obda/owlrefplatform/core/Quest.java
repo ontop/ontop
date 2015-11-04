@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 
 import com.google.common.collect.Lists;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;

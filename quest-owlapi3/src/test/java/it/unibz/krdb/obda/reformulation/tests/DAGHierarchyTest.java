@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-
+import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -31,13 +31,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.quest.dag.TestTBoxReasonerImpl_OnNamedDAG;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
-
 import junit.framework.TestCase;
+
+import java.util.Set;
 
 public class DAGHierarchyTest extends TestCase {
 	/**

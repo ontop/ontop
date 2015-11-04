@@ -21,10 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.Iterator;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
 
 public class Equivalences<T> implements Iterable<T> {
 	

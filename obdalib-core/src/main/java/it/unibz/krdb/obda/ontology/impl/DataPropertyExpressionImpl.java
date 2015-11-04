@@ -20,10 +20,6 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -31,6 +27,10 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification

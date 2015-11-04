@@ -22,18 +22,15 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.RelationJSQL;
+import net.sf.jsqlparser.JSQLParserException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import net.sf.jsqlparser.JSQLParserException;
 
 
 

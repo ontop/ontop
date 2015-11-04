@@ -28,21 +28,14 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URI;
-
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
-
 import sesameWrapper.SesameMaterializer;
+
+import java.io.*;
+import java.net.URI;
 
 /**
  * @deprecated Use {@code QuestOWLMaterialzerCMD}  instead

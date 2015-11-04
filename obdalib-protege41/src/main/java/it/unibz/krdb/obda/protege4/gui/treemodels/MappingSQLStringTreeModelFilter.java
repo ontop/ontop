@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.protege4.gui.treemodels;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.protege4.gui.treemodels.TreeModelFilter;
 
 /**
  * This filter receives a string in the constructor and returns true if any mapping contains the string in the body.

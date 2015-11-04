@@ -20,9 +20,9 @@ package it.unibz.krdb.obda.ontology;
 * #L%
 */
 
-import java.io.Serializable;
-
 import com.google.common.collect.ImmutableList;
+
+import java.io.Serializable;
 
 /**
  * Represents the following from OWL 2 QL Specification:

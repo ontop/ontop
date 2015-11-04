@@ -3,7 +3,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-
 import org.junit.Test;
 
 import java.io.FileNotFoundException;

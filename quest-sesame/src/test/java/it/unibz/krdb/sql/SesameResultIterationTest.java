@@ -1,16 +1,8 @@
 package it.unibz.krdb.sql;
 
-import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
-
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Scanner;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +14,16 @@ import org.openrdf.query.TupleQueryResult;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
 import sesameWrapper.RepositoryConnection;
 import sesameWrapper.SesameVirtualRepo;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import static org.junit.Assert.assertTrue;
 /**
  * Tests that user-applied constraints can be provided through 
  * sesameWrapper.SesameVirtualRepo 
