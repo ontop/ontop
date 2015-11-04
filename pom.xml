@@ -75,6 +75,7 @@
 		<module>quest-test</module>
 		<module>ontop-cli</module>
 
+		<module>ontop-docker-test-env</module>
 	</modules>
 
 	<profiles>
