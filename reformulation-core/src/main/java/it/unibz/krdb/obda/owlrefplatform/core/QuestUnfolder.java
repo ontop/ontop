@@ -22,12 +22,7 @@ import it.unibz.krdb.obda.parser.PreprocessProjection;
 import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.UniqueConstraint;
+import it.unibz.krdb.sql.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
@@ -58,6 +53,8 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
+	private Set<Predicate> dataPropertiesAndClassesMapped = new HashSet<>();
+	private Set<Predicate> objectPropertiesMapped = new HashSet<>();;
 	
 	/**
 	 * @throws SQLException

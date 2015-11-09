@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
-
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -34,7 +33,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sesameWrapper.SesameVirtualRepo;
 
 import java.io.File;

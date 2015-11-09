@@ -21,24 +21,12 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Term;
-
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-
-import it.unibz.krdb.sql.UniqueConstraint;
-
+import it.unibz.krdb.sql.*;
 import junit.framework.TestCase;
-
 
 import java.sql.Types;
 import java.util.Collections;

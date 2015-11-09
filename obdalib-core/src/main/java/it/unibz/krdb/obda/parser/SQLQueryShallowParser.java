@@ -3,10 +3,8 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

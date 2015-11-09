@@ -20,21 +20,10 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
-import it.unibz.krdb.obda.parser.AggregationVisitor;
-import it.unibz.krdb.obda.parser.AliasMapVisitor;
-import it.unibz.krdb.obda.parser.ColumnsVisitor;
-import it.unibz.krdb.obda.parser.JoinConditionVisitor;
-import it.unibz.krdb.obda.parser.ProjectionVisitor;
-import it.unibz.krdb.obda.parser.WhereClauseVisitor;
-import it.unibz.krdb.obda.parser.TableNameVisitor;
+import it.unibz.krdb.obda.parser.*;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -42,6 +31,10 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A structure to store the parsed SQL query string. It returns the information

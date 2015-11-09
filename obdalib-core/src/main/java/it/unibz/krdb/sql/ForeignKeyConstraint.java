@@ -20,11 +20,11 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Foreign Key constraints<br>

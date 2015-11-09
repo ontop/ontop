@@ -41,14 +41,7 @@ import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
-
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.ParserViewDefinition;
+import it.unibz.krdb.sql.*;
 
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalComboBoxButton;

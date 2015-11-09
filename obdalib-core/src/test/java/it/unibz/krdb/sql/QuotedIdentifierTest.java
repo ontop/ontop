@@ -1,14 +1,13 @@
 package it.unibz.krdb.sql;
 
-import static org.junit.Assert.*;
+import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
-import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class QuotedIdentifierTest {
 

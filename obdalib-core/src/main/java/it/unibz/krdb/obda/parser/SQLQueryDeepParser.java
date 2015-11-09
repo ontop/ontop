@@ -20,25 +20,21 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QualifiedAttributeID;
-import it.unibz.krdb.sql.QuotedID;
-import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.ParserViewDefinition;
+import it.unibz.krdb.sql.*;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.*;
-
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLQueryDeepParser {
 

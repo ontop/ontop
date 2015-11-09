@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.sql.QualifiedAttributeID;
-import it.unibz.krdb.sql.QuotedID;
 
 import java.util.*;
 

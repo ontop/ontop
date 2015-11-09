@@ -1,10 +1,10 @@
 package it.unibz.krdb.sql;
 
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-
-import org.junit.Test;
 
 public class TestDatabaseIdentifiers {
 

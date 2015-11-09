@@ -22,12 +22,11 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-
-import java.util.Properties;
-
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+
+import java.util.Properties;
 
 public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeOWLReasonerInfo {
 

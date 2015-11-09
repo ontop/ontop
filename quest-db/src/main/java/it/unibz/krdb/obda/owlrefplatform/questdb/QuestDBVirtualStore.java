@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -55,7 +54,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
-import java.util.Set;
 
 /***
  * A bean that holds all the data about a store, generates a store folder and

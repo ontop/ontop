@@ -21,7 +21,6 @@ package it.unibz.krdb.sql.api;
  */
 
 import it.unibz.krdb.sql.RelationID;
-
 import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class SelectJSQL {

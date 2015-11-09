@@ -26,14 +26,9 @@ import it.unibz.krdb.obda.parser.SQLQueryShallowParser;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import net.sf.jsqlparser.JSQLParserException;
+
+import java.util.*;
 
 
 

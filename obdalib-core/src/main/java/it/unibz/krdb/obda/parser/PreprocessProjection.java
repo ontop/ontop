@@ -1,22 +1,14 @@
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.*;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This visitor class replaces * in SELECT clause with the columns name

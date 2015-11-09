@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 
 import com.google.common.collect.Lists;
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -49,14 +48,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.ForeignKeyConstraint;
-import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.UniqueConstraint;
+import it.unibz.krdb.sql.*;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -71,11 +63,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 enum ConnClasses{

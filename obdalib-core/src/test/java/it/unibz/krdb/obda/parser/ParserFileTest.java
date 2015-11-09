@@ -28,19 +28,16 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
+import junit.framework.TestCase;
+import net.sf.jsqlparser.JSQLParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-import junit.framework.TestCase;
-import net.sf.jsqlparser.JSQLParserException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ParserFileTest extends TestCase {
 	private static final String ROOT = "src/test/resources/scenario/";

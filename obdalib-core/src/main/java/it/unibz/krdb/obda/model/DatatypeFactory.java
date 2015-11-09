@@ -1,10 +1,9 @@
 package it.unibz.krdb.obda.model;
 
-import java.util.List;
-
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import org.openrdf.model.URI;
 
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import java.util.List;
 
 public interface DatatypeFactory {
 

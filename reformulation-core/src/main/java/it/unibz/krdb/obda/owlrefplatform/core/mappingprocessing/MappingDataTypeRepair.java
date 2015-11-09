@@ -23,20 +23,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.*;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-
+import it.unibz.krdb.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class MappingDataTypeRepair {
 

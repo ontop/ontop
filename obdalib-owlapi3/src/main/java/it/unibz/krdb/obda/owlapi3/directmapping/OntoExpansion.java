@@ -20,11 +20,10 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  * #L%
  */
 
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 public class OntoExpansion {
 	

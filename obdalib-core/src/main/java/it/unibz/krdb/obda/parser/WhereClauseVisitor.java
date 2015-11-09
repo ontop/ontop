@@ -22,7 +22,9 @@ package it.unibz.krdb.obda.parser;
  */
 
 import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.api.*;
+import it.unibz.krdb.sql.api.AllComparison;
+import it.unibz.krdb.sql.api.AnyComparison;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;

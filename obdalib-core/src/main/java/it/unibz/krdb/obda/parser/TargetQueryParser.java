@@ -20,10 +20,10 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import java.util.List;
-
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.model.Function;
+
+import java.util.List;
 
 public interface TargetQueryParser {
 	

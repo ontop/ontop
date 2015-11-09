@@ -26,11 +26,10 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-
-import org.semanticweb.owlapi.model.OWLOntology;
 
 public abstract class AbstractDBMetadata
 {

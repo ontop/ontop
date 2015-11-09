@@ -23,19 +23,9 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.RelationDefinition;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.Collection;
-import java.util.List;
-
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 
 

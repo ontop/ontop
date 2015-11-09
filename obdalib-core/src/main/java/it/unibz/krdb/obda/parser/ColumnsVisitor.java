@@ -20,9 +20,6 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -30,6 +27,9 @@ import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Visitor to retrieve the list of columns of the given select statement. (SELECT... FROM).

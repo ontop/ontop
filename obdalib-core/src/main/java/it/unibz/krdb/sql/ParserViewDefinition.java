@@ -20,13 +20,9 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.base.Joiner;
+
+import java.util.*;
 
 /**
  * Represents a complex sub-query created by the SQL parser (not a database view!)

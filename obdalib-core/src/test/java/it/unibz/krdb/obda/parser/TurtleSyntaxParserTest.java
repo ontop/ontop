@@ -20,16 +20,14 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class TurtleSyntaxParserTest extends TestCase {
 

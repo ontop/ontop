@@ -26,15 +26,8 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QualifiedAttributeID;
-import it.unibz.krdb.sql.QuotedID;
-import it.unibz.krdb.sql.QuotedIDFactory;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.api.*;
+import it.unibz.krdb.sql.*;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
@@ -42,16 +35,9 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColDataType;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Mapping2DatalogConverter {
 

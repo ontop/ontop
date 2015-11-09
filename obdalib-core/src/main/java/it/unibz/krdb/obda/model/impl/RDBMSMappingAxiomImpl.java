@@ -20,12 +20,12 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 

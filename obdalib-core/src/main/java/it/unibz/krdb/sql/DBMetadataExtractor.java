@@ -21,21 +21,14 @@ package it.unibz.krdb.sql;
 */
 
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
+import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Retrieves the database metadata (table schema and database constraints) 

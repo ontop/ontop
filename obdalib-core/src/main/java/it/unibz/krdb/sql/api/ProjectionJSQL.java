@@ -20,16 +20,17 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
-import java.io.Serializable;
-
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Store the information about the Projection of the parsed query. (between SELECT... FROM)
  */
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProjectionJSQL implements Serializable {
 

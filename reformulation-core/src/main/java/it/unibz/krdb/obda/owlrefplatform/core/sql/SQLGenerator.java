@@ -33,16 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QualifiedAttributeID;
-import it.unibz.krdb.sql.QuotedID;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.ParserViewDefinition;
-
+import it.unibz.krdb.sql.*;
 import org.openrdf.model.Literal;
 
 import java.sql.Types;

@@ -22,16 +22,8 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QuotedID;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.ForeignKeyConstraint;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.UniqueConstraint;
+import it.unibz.krdb.sql.*;
 
 import java.util.*;
 

@@ -1,15 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
+import it.unibz.krdb.obda.model.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Variable;
 
 public class HomomorphismUtilities {
 

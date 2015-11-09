@@ -1,14 +1,14 @@
 package it.unibz.krdb.sql;
 
-import static org.junit.Assert.*;
-
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestImplicitDBConstraints {
 

@@ -200,7 +200,7 @@ public class MappingSameAs {
         Collection<OBDAMappingAxiom> results = new LinkedList<>();
         for (OBDAMappingAxiom mapping : mappings) {
             CQIE targetQuery = (CQIE) mapping.getTargetQuery();
-            List<Function> newbody = new LinkedList<>();
+            List<Function> newTargetBody = new LinkedList<>();
 
 
             for (Function atom : targetQuery.getBody()) {
@@ -210,7 +210,7 @@ public class MappingSameAs {
                     Predicate pred = fac.getObjectPropertyPredicate(p.getName());
                     //need to add also the inverse
                     Function inverseAtom = fac.getFunction(pred, atom.getTerm(1), atom.getTerm(0));
-                    newbody.add(inverseAtom);
+                    newTargetBody.add(inverseAtom);
 
 
 
@@ -218,8 +218,8 @@ public class MappingSameAs {
 
             }
             String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
-            CQIE newTargetQuery = fac.getCQIE(targetQuery.getHead(), newbody);
-            results.add(fac.getRDBMSMappingAxiom(newId, ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+//            CQIE newTargetQuery = fac.getCQIE(targetQuery.getHead(), newTargetBody);
+            results.add(fac.getRDBMSMappingAxiom(newId, mapping.getSourceQuery(), newTargetBody));
         }
         return results;
     }
