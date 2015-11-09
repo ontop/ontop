@@ -20,15 +20,19 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JSQLParserTest extends TestCase {
 	final static Logger log = LoggerFactory.getLogger(JSQLParserTest.class);
 
-	
 	public void test_1_1_1() {
 		final boolean result = parseJSQL("SELECT * FROM student");
 		printJSQL("test_1_1_1", result);
@@ -769,7 +773,9 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,false);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			queryP = new ParsedSQLQuery(input, false, idfac);
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -794,10 +800,7 @@ public class JSQLParserTest extends TestCase {
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
-				System.out.println("  GroupBy: " + queryP.getGroupByClause());
-				System.out.println("  SubSelect: "
-						+ (queryP.getSubSelects().isEmpty() ? "--" : queryP
-								.getSubSelects()));
+				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
 								.getJoinConditions()));
@@ -821,7 +824,10 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

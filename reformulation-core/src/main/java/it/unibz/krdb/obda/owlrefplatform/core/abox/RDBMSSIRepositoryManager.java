@@ -20,22 +20,62 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.BNode;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Store ABox assertions in the DB
@@ -885,8 +925,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -923,8 +963,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);			
 			}
 		}
@@ -955,8 +995,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -996,12 +1036,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type) {
+	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
 		Variable X = dfac.getVariable("X");
 
-		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-		Function head = dfac.getFunction(headPredicate, X);
+		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		//Function head = dfac.getFunction(headPredicate, X);
 
 		Function subjectTerm;
 		if (type == COL_TYPE.OBJECT) 
@@ -1012,17 +1052,17 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		Function body = dfac.getFunction(predicate, subjectTerm);
-		return dfac.getCQIE(head, body);
+		return Collections.singletonList(body);
 	}
 	
 	
-	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
+	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 
 		Variable X = dfac.getVariable("X");
 		Variable Y = dfac.getVariable("Y");
 
-		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		Function head = dfac.getFunction(headPredicate, X, Y);
+		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		//Function head = dfac.getFunction(headPredicate, X, Y);
 
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) 
@@ -1053,7 +1093,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 
 		Function body = dfac.getFunction(predicate, subjectTerm, objectTerm);
-		return dfac.getCQIE(head, body);
+		return Collections.singletonList(body);
 	}
 
 	

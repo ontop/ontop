@@ -39,6 +39,7 @@ import java.io.FileReader;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -136,7 +137,7 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
@@ -234,7 +235,7 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
@@ -340,7 +341,7 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
@@ -514,7 +515,7 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		model.addMapping(source2.getSourceID(), map1);
 		
@@ -609,12 +610,18 @@ try{
 //		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql1, fac.getCQIE(head, fac.getFunction(person, objectTerm)));
-		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getFunction(fn, objectTerm, firstNameVariable)));
-		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getFunction(ln, objectTerm, lastNameVariable)));
-		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getFunction(age, objectTerm, ageVariable)));
-		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
-		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getFunction(school, schoolUriVariable)));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql1), 
+								Collections.singletonList(fac.getFunction(person, objectTerm)));
+		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql2), 
+								Collections.singletonList(fac.getFunction(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql3), 
+								Collections.singletonList(fac.getFunction(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql4), 
+								Collections.singletonList(fac.getFunction(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql5), 
+								Collections.singletonList(fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql6), 
+								Collections.singletonList(fac.getFunction(school, schoolUriVariable)));
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);

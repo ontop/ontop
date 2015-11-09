@@ -20,8 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.RelationJSQL;
-import it.unibz.krdb.sql.api.TableJSQL;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.RelationID;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
@@ -32,29 +32,37 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Find all used tables within an select statement.
+ * Collects all table names in a select statement 
+ * (except the names introduced in WITH clauses)
+ * 
  */
-public class TableNameVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor, ItemsListVisitor, SelectItemVisitor {
 
-	/**
-	 * Store the table selected by the SQL query in RelationJSQL
-	 */
+public class TableNameVisitor {
+
+	// Store the table selected by the SQL query in TableJSQL
+	private final Map<RelationID, RelationID> tables = new HashMap<>();
 	
-	private ArrayList<RelationJSQL> tables;
+	private final QuotedIDFactory idfac;
+	private final List<RelationID> relations = new LinkedList<>();
 
-	/**
-	 * There are special names, that are not table names but are parsed as
-	 * tables. These names are collected here and are not included in the tables
-	 * - names anymore.
-	 */
-	private List<String> otherItemNames;
+	// There are special names that are not table names but are parsed as tables. 
+	// These names are collected here and are not included in the table names
+	private final Set<String> withTCEs = new HashSet<>();
 	
 	private boolean unsupported = false;
 
+
+	private boolean inSubSelect = false;
+	private Alias subSelectAlias = null;
+	
 
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
@@ -63,452 +71,462 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * @param deepParsing
 	 * @return
 	 */
-	public List<RelationJSQL> getTables(Select select, boolean deepParsing) throws JSQLParserException {
-		init();
+	public TableNameVisitor(Select select, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
+		this.idfac = idfac;
+		
  		if (select.getWithItemsList() != null) {
-			for (WithItem withItem : select.getWithItemsList()) {
-				withItem.accept(this);
-			}
+			for (WithItem withItem : select.getWithItemsList()) 
+				withItem.accept(selectVisitor);
 		}
-		select.getSelectBody().accept(this);
+		select.getSelectBody().accept(selectVisitor);
 		
-		if(unsupported && deepParsing) // used to throw exception for the currently unsupported methods
-			throw new JSQLParserException("Query not yet supported");
+		if (unsupported && deepParsing) // used to throw exception for the currently unsupported methods
+			throw new JSQLParserException(SQLQueryDeepParser.QUERY_NOT_SUPPORTED);
+	}
 		
+	public Map<RelationID, RelationID> getTables() {	
 		return tables;
 	}
 	
+	public List<RelationID> getRelations() {	
+		return relations;
+	}
 
-
-	@Override
-	public void visit(WithItem withItem) {
-		otherItemNames.add(withItem.getName().toLowerCase());
-		withItem.getSelectBody().accept(this);
+	private void unsupported(Object o) {
+		System.out.println(this.getClass() + " DOES NOT SUPPORT " + o);
+		unsupported = true;
 	}
 	
-	/*Visit the FROM clause to find tables
-	 * Visit the JOIN and WHERE clauses to check if nested queries are present
-	 * (non-Javadoc)
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
-	 */
-	@Override
-	public void visit(PlainSelect plainSelect) {
-		plainSelect.getFromItem().accept(this);
+	private final SelectVisitor selectVisitor = new SelectVisitor() {
+		/* Visit the FROM clause to find tables
+		 * Visit the JOIN and WHERE clauses to check if nested queries are present (non-Javadoc)
+		 * 
+		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+		 */
+		@Override
+		public void visit(PlainSelect plainSelect) {
+			plainSelect.getFromItem().accept(fromItemVisitor);
 
-        /** 
-         * When the mapping contains a DISTINCT we interpret it as  
-         * a HINT to create a subview. 
-         *
-         *  Thus we presume that the unusual use of DISTINCT here on done ON PURPOSE
-         * for obtaining this behavior. 
-         */
-        if (plainSelect.getDistinct() != null) {
-            unsupported = true;
-        }
+			// When the mapping contains a DISTINCT we interpret it as a HINT to create a SUBVIEW.
+			// Thus we presume that the unusual use of DISTINCT here is done ON PURPOSE for achieving this effect.
+			if (plainSelect.getDistinct() != null) 
+	            unsupported = true;
 
-		if (plainSelect.getJoins() != null) {
-			for (Join join : plainSelect.getJoins()) {
-				join.getRightItem().accept(this);
+			if (plainSelect.getJoins() != null) {
+				for (Join join : plainSelect.getJoins()) 
+					join.getRightItem().accept(fromItemVisitor);
+			}
+			if (plainSelect.getWhere() != null) 
+				plainSelect.getWhere().accept(expressionVisitor);
+			
+			for (SelectItem expr : plainSelect.getSelectItems()) 
+				expr.accept(selectItemVisitor);
+		}
+
+
+		/*
+		 * Visit UNION, INTERSECT, MINUM and EXCEPT to search for table names
+		 * 
+		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.SetOperationList)
+		 */
+		@Override
+		public void visit(SetOperationList list) {
+			unsupported(list);
+			for (PlainSelect plainSelect : list.getPlainSelects()) 
+				visit(plainSelect);
+		}
+
+		@Override
+		public void visit(WithItem withItem) {
+			withTCEs.add(withItem.getName().toLowerCase());
+			withItem.getSelectBody().accept(this);
+		}
+	};
+
+	private final FromItemVisitor fromItemVisitor = new FromItemVisitor() {
+
+		/*
+		 * Visit Table and store its value in the list of TableJSQL (non-Javadoc)
+		 * We maintain duplicate tables to retrieve the different aliases assigned
+		 * we use the class TableJSQL to handle quotes and user case choice if present
+		 * 
+		 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.schema.Table)
+		 */
+		
+		@Override
+		public void visit(Table table) {
+			if (!withTCEs.contains(table.getFullyQualifiedName().toLowerCase())) {
+				
+				RelationID relationId = idfac.createRelationID(table.getSchemaName(), table.getName());
+				relations.add(relationId);
+
+				if (inSubSelect && subSelectAlias != null) {
+					// ONLY SIMPLE SUBSELECTS, WITH ONE TABLE: see WhereClauseVisitor and ProjectionVisitor
+					RelationID subSelectAliasId = idfac.createRelationID(null, subSelectAlias.getName());
+					tables.put(subSelectAliasId, relationId);
+				}
+				else {
+					Alias as = table.getAlias();
+					RelationID aliasId = (as != null) ? idfac.createRelationID(null, as.getName()) : relationId;
+					tables.put(aliasId, relationId);
+				}
 			}
 		}
-		if (plainSelect.getWhere() != null) {
-			plainSelect.getWhere().accept(this);
-		}
-		
-		for (SelectItem expr : plainSelect.getSelectItems()){
-			expr.accept(this);
-		}
-	}
 
-	/*
-	 * Visit Table and store its value in the list of RelationJSQL(non-Javadoc)
-	 * We want to maintain duplicate tables to retrieve the different aliases assigned
-	 * we use the class TableJSQL to handle quotes and user case choice if present
-	 * @see net.sf.jsqlparser.statement.select.FromItemVisitor#visit(net.sf.jsqlparser.schema.Table)
-	 */
+		@Override
+		public void visit(SubSelect subSelect) {
+			visitSubSelect(subSelect);
+		}
+
+		@Override
+		public void visit(SubJoin subjoin) {
+			unsupported(subjoin);
+			subjoin.getLeft().accept(this);
+			subjoin.getJoin().getRightItem().accept(this);
+		}
+
+		@Override
+		public void visit(LateralSubSelect lateralSubSelect) {
+			unsupported(lateralSubSelect);
+			lateralSubSelect.getSubSelect().getSelectBody().accept(selectVisitor);
+		}
+
+		@Override
+		public void visit(ValuesList valuesList) {
+			unsupported(valuesList);
+		}
+	};
 	
-	@Override
-	public void visit(Table tableName) {
-		RelationJSQL relation=new RelationJSQL(new TableJSQL(tableName));
-		if (!otherItemNames.contains(tableName.getFullyQualifiedName().toLowerCase())) {
-			tables.add(relation);
-		}
-	}
-
-	@Override
-	public void visit(SubSelect subSelect) {
-		
+	
+	private void visitSubSelect(SubSelect subSelect) {
 		if (subSelect.getSelectBody() instanceof PlainSelect) {
-			
-			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
-			
+			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());	
 			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
-				unsupported = true;
+				unsupported(subSelect);	
+		} 
+		else
+			unsupported(subSelect);
+
+		inSubSelect = true;
+		subSelectAlias = subSelect.getAlias();
+		subSelect.getSelectBody().accept(selectVisitor);
+		subSelectAlias = null;
+		inSubSelect = false;
+	}
+	
+	private final SelectItemVisitor selectItemVisitor = new SelectItemVisitor() {
+		@Override
+		public void visit(AllColumns expr) {
+			//Do nothing!
+		}
+
+		@Override
+		public void visit(AllTableColumns arg0) {
+			//Do nothing!
+		}
+
+		@Override
+		public void visit(SelectExpressionItem expr) {
+			expr.getExpression().accept(expressionVisitor);
+		}
+	};
+
+	private final ExpressionVisitor expressionVisitor = new ExpressionVisitor() {
+	
+		/*
+		 * We do the same procedure for all Binary Expressions
+		 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Addition)
+		 */
+		@Override
+		public void visit(Addition addition) {
+			visitBinaryExpression(addition);
+		}
+
+		@Override
+		public void visit(AndExpression andExpression) {
+			visitBinaryExpression(andExpression);
+		}
+
+		@Override
+		public void visit(Between between) {
+			between.getLeftExpression().accept(this);
+			between.getBetweenExpressionStart().accept(this);
+			between.getBetweenExpressionEnd().accept(this);
+		}
+
+		@Override
+		public void visit(Column tableColumn) {
+			//it does nothing here, everything is good
+		}
+
+		@Override
+		public void visit(Division division) {
+			visitBinaryExpression(division);
+		}
+
+		@Override
+		public void visit(DoubleValue doubleValue) {
+		}
+
+		@Override
+		public void visit(EqualsTo equalsTo) {
+			visitBinaryExpression(equalsTo);
+		}
+
+		@Override
+		public void visit(Function function) {
+	        switch (function.getName().toLowerCase()) {
+	            case "regexp_like" :
+	            case "regexp_replace" :
+	            case "replace" :
+	            case "concat" :
+	            case "substr" : 
+	                for (Expression ex :function.getParameters().getExpressions()) 
+	                    ex.accept(this);
+	                break;
+
+	            default:
+	                unsupported(function);
+	                break;
+	        }
+		}
+
+		@Override
+		public void visit(GreaterThan greaterThan) {
+			visitBinaryExpression(greaterThan);
+		}
+
+		@Override
+		public void visit(GreaterThanEquals greaterThanEquals) {
+			visitBinaryExpression(greaterThanEquals);
+		}
+
+		@Override
+		public void visit(InExpression inExpression) {
+			inExpression.getLeftExpression().accept(this);
+			inExpression.getRightItemsList().accept(itemsListVisitor);
+		}
+
+		@Override
+		public void visit(IsNullExpression isNullExpression) {
+		}
+
+		@Override
+		public void visit(JdbcParameter jdbcParameter) {
+			unsupported(jdbcParameter);
+		}
+
+		@Override
+		public void visit(LikeExpression likeExpression) {
+			visitBinaryExpression(likeExpression);
+		}
+
+		@Override
+		public void visit(ExistsExpression existsExpression) {
+			existsExpression.getRightExpression().accept(this);
+		}
+
+		@Override
+		public void visit(LongValue longValue) {
+		}
+
+		@Override
+		public void visit(MinorThan minorThan) {
+			visitBinaryExpression(minorThan);
+		}
+
+		@Override
+		public void visit(MinorThanEquals minorThanEquals) {
+			visitBinaryExpression(minorThanEquals);
+		}
+
+		@Override
+		public void visit(Multiplication multiplication) {
+			visitBinaryExpression(multiplication);
+		}
+
+		@Override
+		public void visit(NotEqualsTo notEqualsTo) {
+			visitBinaryExpression(notEqualsTo);
+		}
+
+		@Override
+		public void visit(NullValue nullValue) {
+		}
+
+		@Override
+		public void visit(OrExpression orExpression) {
+			visitBinaryExpression(orExpression);
+		}
+
+		@Override
+		public void visit(Parenthesis parenthesis) {
+			parenthesis.getExpression().accept(this);
+		}
+
+		@Override
+		public void visit(StringValue stringValue) {
+		}
+
+		@Override
+		public void visit(Subtraction subtraction) {
+			visitBinaryExpression(subtraction);
+		}
+
+		private void visitBinaryExpression(BinaryExpression binaryExpression) {
+			binaryExpression.getLeftExpression().accept(this);
+			binaryExpression.getRightExpression().accept(this);
+		}
+
+		@Override
+		public void visit(DateValue dateValue) {
+		}
+
+		@Override
+		public void visit(TimestampValue timestampValue) {
+		}
+
+		@Override
+		public void visit(TimeValue timeValue) {
+		}
+
+
+		@Override
+		public void visit(CaseExpression caseExpression) {
+			unsupported(caseExpression);
+		}
+
+		@Override
+		public void visit(WhenClause whenClause) {
+			unsupported(whenClause);
+		}
+
+		@Override
+		public void visit(AllComparisonExpression allComparisonExpression) {
+			unsupported(allComparisonExpression);
+			allComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
+		}
+
+		@Override
+		public void visit(AnyComparisonExpression anyComparisonExpression) {
+			unsupported(anyComparisonExpression);
+			anyComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
+		}
+
+		@Override
+		public void visit(Concat concat) {
+			visitBinaryExpression(concat);
+		}
+
+		@Override
+		public void visit(Matches matches) {
+			unsupported(matches);
+			visitBinaryExpression(matches);
+		}
+
+		@Override
+		public void visit(BitwiseAnd bitwiseAnd) {
+			unsupported(bitwiseAnd);
+			visitBinaryExpression(bitwiseAnd);
+		}
+
+		@Override
+		public void visit(BitwiseOr bitwiseOr) {
+			unsupported(bitwiseOr);
+			visitBinaryExpression(bitwiseOr);
+		}
+
+		@Override
+		public void visit(BitwiseXor bitwiseXor) {
+			unsupported(bitwiseXor);
+			visitBinaryExpression(bitwiseXor);
+		}
+
+		@Override
+		public void visit(CastExpression cast) {
+			cast.getLeftExpression().accept(this);
+		}
+
+		@Override
+		public void visit(Modulo modulo) {
+			unsupported(modulo);
+			visitBinaryExpression(modulo);
+		}
+
+		@Override
+		public void visit(AnalyticExpression analytic) {
+			unsupported(analytic);
+		}
+
+		@Override
+		public void visit(ExtractExpression eexpr) {
+			unsupported(eexpr);
+		}
+
+		@Override
+		public void visit(IntervalExpression iexpr) {
+			unsupported(iexpr);
+		}
+
+	    @Override
+	    public void visit(JdbcNamedParameter jdbcNamedParameter) {
+			unsupported(jdbcNamedParameter);
+	    }
+
+		@Override
+		public void visit(OracleHierarchicalExpression arg0) {
+			unsupported(arg0);		
+		}
+
+		@Override
+		public void visit(RegExpMatchOperator rexpr) {
+//			unsupported = true;
+//			visitBinaryExpression(rexpr);
+		}
+
+
+		@Override
+		public void visit(SignedExpression arg0) {
+			System.out.println("WARNING: SignedExpression   not implemented ");
+			unsupported(arg0);
+		}
+
+		@Override
+		public void visit(JsonExpression arg0) {
+			// TODO Auto-generated method stub
 			
-		} else
-			unsupported = true;
-		subSelect.getSelectBody().accept(this);
-	}
-
-	/*
-	 * We do the same procedure for all Binary Expressions
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Addition)
-	 */
-	@Override
-	public void visit(Addition addition) {
-		visitBinaryExpression(addition);
-	}
-
-	@Override
-	public void visit(AndExpression andExpression) {
-		visitBinaryExpression(andExpression);
-	}
-
-	@Override
-	public void visit(Between between) {
-		between.getLeftExpression().accept(this);
-		between.getBetweenExpressionStart().accept(this);
-		between.getBetweenExpressionEnd().accept(this);
-	}
-
-	@Override
-	public void visit(Column tableColumn) {
-		//it does nothing here, everything is good
-	}
-
-	@Override
-	public void visit(Division division) {
-		visitBinaryExpression(division);
-	}
-
-	@Override
-	public void visit(DoubleValue doubleValue) {
-	}
-
-	@Override
-	public void visit(EqualsTo equalsTo) {
-		visitBinaryExpression(equalsTo);
-	}
-
-	@Override
-	public void visit(Function function) {
-        switch(function.getName().toLowerCase()){
-
-            case "regexp_like" :
-            case "regexp_replace" :
-            case "replace" :
-            case "concat" :
-
-                for(Expression ex :function.getParameters().getExpressions()) {
-                    ex.accept(this);
-
-                }
-
-                break;
-
-            default:
-                unsupported = true;
-
-                break;
-        }
-
-
-
-	}
-
-	@Override
-	public void visit(GreaterThan greaterThan) {
-		visitBinaryExpression(greaterThan);
-	}
-
-	@Override
-	public void visit(GreaterThanEquals greaterThanEquals) {
-		visitBinaryExpression(greaterThanEquals);
-	}
-
-	@Override
-	public void visit(InExpression inExpression) {
-		inExpression.getLeftExpression().accept(this);
-		inExpression.getRightItemsList().accept(this);
-	}
-
-	@Override
-	public void visit(IsNullExpression isNullExpression) {
-	}
-
-	@Override
-	public void visit(JdbcParameter jdbcParameter) {
-		unsupported = true;
-	}
-
-	@Override
-	public void visit(LikeExpression likeExpression) {
-		visitBinaryExpression(likeExpression);
-	}
-
-	@Override
-	public void visit(ExistsExpression existsExpression) {
-		existsExpression.getRightExpression().accept(this);
-	}
-
-	@Override
-	public void visit(LongValue longValue) {
-	}
-
-	@Override
-	public void visit(MinorThan minorThan) {
-		visitBinaryExpression(minorThan);
-	}
-
-	@Override
-	public void visit(MinorThanEquals minorThanEquals) {
-		visitBinaryExpression(minorThanEquals);
-	}
-
-	@Override
-	public void visit(Multiplication multiplication) {
-		visitBinaryExpression(multiplication);
-	}
-
-	@Override
-	public void visit(NotEqualsTo notEqualsTo) {
-		visitBinaryExpression(notEqualsTo);
-	}
-
-	@Override
-	public void visit(NullValue nullValue) {
-	}
-
-	@Override
-	public void visit(OrExpression orExpression) {
-		visitBinaryExpression(orExpression);
-	}
-
-	@Override
-	public void visit(Parenthesis parenthesis) {
-		parenthesis.getExpression().accept(this);
-	}
-
-	@Override
-	public void visit(StringValue stringValue) {
-	}
-
-	@Override
-	public void visit(Subtraction subtraction) {
-		visitBinaryExpression(subtraction);
-	}
-
-	public void visitBinaryExpression(BinaryExpression binaryExpression) {
-		binaryExpression.getLeftExpression().accept(this);
-		binaryExpression.getRightExpression().accept(this);
-	}
-
-	@Override
-	public void visit(ExpressionList expressionList) {
-		for (Expression expression : expressionList.getExpressions()) {
-			expression.accept(this);
 		}
 
-	}
-
-	@Override
-	public void visit(DateValue dateValue) {
-	}
-
-	@Override
-	public void visit(TimestampValue timestampValue) {
-	}
-
-	@Override
-	public void visit(TimeValue timeValue) {
-	}
-
-
-	@Override
-	public void visit(CaseExpression caseExpression) {
-		unsupported = true;
-	}
-
-
-	@Override
-	public void visit(WhenClause whenClause) {
-		unsupported = true;
-	}
-
-	@Override
-	public void visit(AllComparisonExpression allComparisonExpression) {
-		unsupported = true;
-		allComparisonExpression.getSubSelect().getSelectBody().accept(this);
-	}
-
-	@Override
-	public void visit(AnyComparisonExpression anyComparisonExpression) {
-		unsupported = true;
-		anyComparisonExpression.getSubSelect().getSelectBody().accept(this);
-	}
-
-	@Override
-	public void visit(SubJoin subjoin) {
-		unsupported = true;
-		subjoin.getLeft().accept(this);
-		subjoin.getJoin().getRightItem().accept(this);
-	}
-
-	@Override
-	public void visit(Concat concat) {
-		visitBinaryExpression(concat);
-	}
-
-	@Override
-	public void visit(Matches matches) {
-		unsupported = true;
-		visitBinaryExpression(matches);
-	}
-
-	@Override
-	public void visit(BitwiseAnd bitwiseAnd) {
-		unsupported = true;
-		visitBinaryExpression(bitwiseAnd);
-	}
-
-	@Override
-	public void visit(BitwiseOr bitwiseOr) {
-		unsupported = true;
-		visitBinaryExpression(bitwiseOr);
-	}
-
-	@Override
-	public void visit(BitwiseXor bitwiseXor) {
-		unsupported = true;
-		visitBinaryExpression(bitwiseXor);
-	}
-
-	@Override
-	public void visit(CastExpression cast) {
-		cast.getLeftExpression().accept(this);
-	}
-
-	@Override
-	public void visit(Modulo modulo) {
-		unsupported = true;
-		visitBinaryExpression(modulo);
-	}
-
-	@Override
-	public void visit(AnalyticExpression analytic) {
-		unsupported = true;
-	}
-
-	/*
-	 * Visit UNION, INTERSECT, MINUM and EXCEPT to search for table names
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.SetOperationList)
-	 */
-	@Override
-	public void visit(SetOperationList list) {
-		unsupported = true;
-		for (PlainSelect plainSelect : list.getPlainSelects()) {
-			visit(plainSelect);
+		@Override
+		public void visit(RegExpMySQLOperator arg0) {
+			// TODO Auto-generated method stub
+			
 		}
-	}
 
-	@Override
-	public void visit(ExtractExpression eexpr) {
-		unsupported = true;
-	}
-
-	@Override
-	public void visit(LateralSubSelect lateralSubSelect) {
-		unsupported = true;
-		lateralSubSelect.getSubSelect().getSelectBody().accept(this);
-	}
-
-	@Override
-	public void visit(MultiExpressionList multiExprList) {
-		unsupported = true;
-		for (ExpressionList exprList : multiExprList.getExprList()) {
-			exprList.accept(this);
+		@Override
+		public void visit(SubSelect subSelect) {
+			visitSubSelect(subSelect);
 		}
-	}
+	};
 
-	@Override
-	public void visit(ValuesList valuesList) {
-		unsupported = true;
-	}
+	
+	private final ItemsListVisitor itemsListVisitor = new ItemsListVisitor() {
+		@Override
+		public void visit(ExpressionList expressionList) {
+			for (Expression expression : expressionList.getExpressions()) 
+				expression.accept(expressionVisitor);
+		}
 
-	private void init() {
-		otherItemNames = new ArrayList<String>();
-		tables = new ArrayList<RelationJSQL>();
+		@Override
+		public void visit(MultiExpressionList multiExprList) {
+			unsupported(multiExprList);
+			for (ExpressionList exprList : multiExprList.getExprList()) 
+				exprList.accept(this);
+		}
 
-	}
-
-	@Override
-	public void visit(IntervalExpression iexpr) {
-		unsupported = true;
-	}
-
-    @Override
-    public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		unsupported = true;
-    }
-
-	@Override
-	public void visit(OracleHierarchicalExpression arg0) {
-		unsupported = true;
-		
-		
-	}
-
-	@Override
-	public void visit(RegExpMatchOperator rexpr) {
-//		unsupported = true;
-//		visitBinaryExpression(rexpr);
-	}
-
-
-
-	@Override
-	public void visit(SignedExpression arg0) {
-		System.out.println("WARNING: SignedExpression   not implemented ");
-
-		unsupported = true;
-		
-	}
-
-
-
-	@Override
-	public void visit(AllColumns expr) {
-		//Do nothing!
-	}
-
-
-
-	@Override
-	public void visit(AllTableColumns arg0) {
-		//Do nothing!
-		
-	}
-
-
-
-	@Override
-	public void visit(SelectExpressionItem expr) {
-		expr.getExpression().accept(this);
-	}
-
-
-
-	@Override
-	public void visit(JsonExpression arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public void visit(RegExpMySQLOperator arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+		@Override
+		public void visit(SubSelect subSelect) {
+			visitSubSelect(subSelect);
+		}
+	};
 }

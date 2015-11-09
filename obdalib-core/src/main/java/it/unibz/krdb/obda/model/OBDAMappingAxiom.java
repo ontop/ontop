@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.model;
  */
 
 import java.io.Serializable;
+import java.util.List;
 
 public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
@@ -28,9 +29,9 @@ public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
 	public OBDASQLQuery getSourceQuery();
 
-	public void setTargetQuery(CQIE query);
+	public void setTargetQuery(List<Function> query);
 
-	public CQIE getTargetQuery();
+	public List<Function> getTargetQuery();
 
 	public void setId(String id);
 

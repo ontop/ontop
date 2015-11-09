@@ -32,7 +32,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIter
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.utils.VersionInfo;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
@@ -111,7 +111,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 	
-	private ImplicitDBConstraints userConstraints = null;
+	private ImplicitDBConstraintsReader userConstraints = null;
 	
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
@@ -167,7 +167,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraints userConstraints) {
+			Properties preferences, ImplicitDBConstraintsReader userConstraints) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
@@ -202,7 +202,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraints userConstraints, 
+			Properties preferences, ImplicitDBConstraintsReader userConstraints, 
 			TMappingExclusionConfig excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
 		

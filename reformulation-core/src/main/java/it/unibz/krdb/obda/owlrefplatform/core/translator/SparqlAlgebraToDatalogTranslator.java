@@ -470,32 +470,29 @@ public class SparqlAlgebraToDatalogTranslator {
 			throw new RuntimeException("Unsupported query syntax");
 		}
 
-		Var subj = triple.getSubjectVar();
 		Var obj = triple.getObjectVar();
 		
-		// Subject node		
+		Var subj = triple.getSubjectVar();
 		Term sTerm = getOntopTerm(subj);
 		
 		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
-
 			Value o = obj.getValue();
-			// Object node
 			if (o == null) {
+				// object is a variable
 				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
 			} 
 			else if (o instanceof URI) {
+				// object is a URI of either a type of a class
 				URI objectUri = (URI)o; 
 				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
-				if (type != null) {
-					Predicate predicate = dtfac.getTypePredicate(type);
-					return ofac.getFunction(predicate, sTerm);
-				}
-	            else {
-	        		COL_TYPE subjectType = null; // are never changed
-					Predicate predicate = ofac.getPredicate(objectUri.stringValue(), new COL_TYPE[] { subjectType });
-					return ofac.getFunction(predicate, sTerm);
-				}
+				Predicate predicate;
+				if (type != null) 
+					predicate = dtfac.getTypePredicate(type);
+	            else 
+					predicate = ofac.getClassPredicate(objectUri.stringValue());
+				
+				return ofac.getFunction(predicate, sTerm);
 			}
 			else  
 				throw new RuntimeException("Unsupported query syntax");
@@ -507,6 +504,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p != null) {
         		COL_TYPE subjectType = null; // are never changed
 				COL_TYPE objectType = null;
+				// either an object or a datatype property
 				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { subjectType, objectType });
 				return ofac.getFunction(predicate, sTerm, oTerm);
 			} 

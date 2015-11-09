@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.protege4.utils;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
@@ -30,11 +31,28 @@ import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Insets;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextPane;
+import javax.swing.ListCellRenderer;
+import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import java.awt.*;
 
 public class OBDAMappingListRenderer implements ListCellRenderer {
 
@@ -422,7 +440,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	}
 
 	private void prepareTextPanes(OBDAMappingAxiom value, boolean selected) {
-		CQIE targetQuery = value.getTargetQuery();
+		List<Function> targetQuery = value.getTargetQuery();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);
 

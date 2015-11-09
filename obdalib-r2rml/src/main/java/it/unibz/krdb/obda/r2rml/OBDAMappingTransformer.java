@@ -72,7 +72,7 @@ public class OBDAMappingTransformer {
 	public List<Statement> getStatements(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
 		List<Statement> statements = new ArrayList<Statement>();
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		CQIE tquery = axiom.getTargetQuery();
+		List<Function> tquery = axiom.getTargetQuery();
 		
 		String random_number = IDGenerator.getNextUniqueID("");
 		
@@ -120,7 +120,7 @@ public class OBDAMappingTransformer {
 		statements.add(vf.createStatement(subjectNode, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));		
 
 		//Now we add the template!!
-		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
+		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);
 		
 		//add template subject
@@ -129,7 +129,7 @@ public class OBDAMappingTransformer {
 		
 		
 		//process target query
-		for (Function func : tquery.getBody()) {
+		for (Function func : tquery) {
 			random_number = IDGenerator.getNextUniqueID("");
 			Predicate pred = func.getFunctionSymbol();
 			
@@ -253,7 +253,7 @@ public class OBDAMappingTransformer {
 			PrefixManager prefixmng) {
 		
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		CQIE tquery = axiom.getTargetQuery();
+		List<Function> tquery = axiom.getTargetQuery();
 		
 		String random_number = IDGenerator.getNextUniqueID("");
 		
@@ -270,7 +270,7 @@ public class OBDAMappingTransformer {
 		LogicalTable lt = mfact.createR2RMLView(squery.getSQLQuery());
 		
 		//SubjectMap
-		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
+		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
@@ -278,7 +278,7 @@ public class OBDAMappingTransformer {
 		TriplesMap tm = mfact.createTriplesMap(lt, sm);
 		
 		//process target query
-		for (Function func : tquery.getBody()) {
+		for (Function func : tquery) {
 			random_number = IDGenerator.getNextUniqueID("");
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();

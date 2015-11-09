@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.model;
+package it.unibz.krdb.sql;
 
 /*
  * #%L
@@ -20,27 +20,32 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public interface OBDARDBMappingAxiom extends OBDAMappingAxiom {
+
+/**
+ * Factory for creating attribute and relation identifier from strings.
+ * It defines the rules of transforming unquoted and quoted identifiers.
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
+public interface QuotedIDFactory {
 
 	/**
-	 * Set the source query for this mapping axiom.
 	 * 
-	 * @param query
-	 *            a SQL Query object.
+	 * @param s possibly quoted (SQL rendering)
+	 * @return
 	 */
-	public void setSourceQuery(OBDASQLQuery query);
-
-	public OBDASQLQuery getSourceQuery();
+	
+	QuotedID createAttributeID(String s);
+	
 	
 	/**
-	 * Set the target query for this mapping axiom.
 	 * 
-	 * @param query
-	 *            a conjunctive query object;
+	 * @param schema null or a possibly quoted string (SQL rendering)
+	 * @param table a possibly quoted string (SQL rendering)
+	 * @return
 	 */
-	public void setTargetQuery(CQIE query);
-
-	public CQIE getTargetQuery();
-
-	public OBDARDBMappingAxiom clone();
+	
+	RelationID createRelationID(String schema, String table);	
 }

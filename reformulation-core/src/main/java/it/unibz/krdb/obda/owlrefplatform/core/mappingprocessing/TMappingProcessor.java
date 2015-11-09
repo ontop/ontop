@@ -98,7 +98,7 @@ public class TMappingProcessor {
 		 *            The new mapping for A/P
 		 */
 		public void mergeMappingsWithCQC(TMappingRule newRule) {
-		
+			
 			// Facts are just added
 			if (newRule.isFact()) {
 				rules.add(newRule);
@@ -118,11 +118,14 @@ public class TMappingProcessor {
 			while (mappingIterator.hasNext()) {
 
 				TMappingRule currentRule = mappingIterator.next(); 
+				// ROMAN (14 Oct 2015): quick fix, but one has to be more careful with variables in filters
+				if (currentRule.equals(newRule))
+					return;
 						
 				boolean couldIgnore = false;
 				
 				Substitution toNewRule = newRule.computeHomomorphsim(currentRule);
-				if ((toNewRule != null) && currentRule.isConditionsEmpty()) {
+				if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
 					if (newRule.databaseAtomsSize() < currentRule.databaseAtomsSize()) {
 						couldIgnore = true;
 					}
@@ -133,7 +136,7 @@ public class TMappingProcessor {
 				}
 				
 				Substitution fromNewRule = currentRule.computeHomomorphsim(newRule);		
-				if ((fromNewRule != null) && newRule.isConditionsEmpty()) {		
+				if ((fromNewRule != null) && checkConditions(currentRule, newRule, fromNewRule)) {		
 					// The existing query is more specific than the new query, so we
 					// need to add the new query and remove the old	 
 					mappingIterator.remove();
@@ -185,10 +188,7 @@ public class TMappingProcessor {
 							filterAtoms.add(TMappingRule.cloneList(econd));		
 					}
 
-					filterAtoms.add(newconditions);
-
-					
-					
+					filterAtoms.add(newconditions);	
 					
 	                mappingIterator.remove();
 	                
@@ -198,6 +198,22 @@ public class TMappingProcessor {
 				}				
 			}
 			rules.add(newRule);
+		}
+		
+		private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, Substitution toRule1) {
+			if (rule2.getConditions().size() == 0)
+				return true;
+			if (rule2.getConditions().size() > 1 || rule1.getConditions().size() != 1)
+				return false;
+			
+			List<Function> conjucntion1 = rule1.getConditions().get(0);
+			List<Function> conjunction2 = TMappingRule.cloneList(rule2.getConditions().get(0));
+			for (Function f : conjunction2)  {
+				SubstitutionUtilities.applySubstitution(f, toRule1);			
+				if (!conjucntion1.contains(f))
+					return false;
+			}
+			return true;
 		}
 	}
 
@@ -381,9 +397,8 @@ public class TMappingProcessor {
 		if (printouts)
 			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
 		
-		if(excludeFromTMappings == null){
+		if (excludeFromTMappings == null)
 			throw new NullPointerException("excludeFromTMappings");
-		}
 		
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<>();
 

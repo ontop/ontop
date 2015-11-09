@@ -43,10 +43,10 @@ public class TargetQueryRenderer {
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
 	 */
-	public static String encode(CQIE input, PrefixManager prefixManager) {
+	public static String encode(List<Function> input, PrefixManager prefixManager) {
 		
 		TurtleWriter turtleWriter = new TurtleWriter();
-		List<Function> body = ((CQIE) input).getBody();
+		List<Function> body = input;
 		for (Function atom : body) {
 			String subject, predicate, object = "";
 			String originalString = atom.getFunctionSymbol().toString();

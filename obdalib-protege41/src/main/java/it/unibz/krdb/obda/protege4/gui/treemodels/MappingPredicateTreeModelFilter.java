@@ -39,13 +39,12 @@ public class MappingPredicateTreeModelFilter extends TreeModelFilter<OBDAMapping
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		final CQIE headquery = object.getTargetQuery();
-		final List<Function> atoms = headquery.getBody();
+		final List<Function> atoms = object.getTargetQuery();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {
 			for (int i = 0; i < atoms.size(); i++) {
-				Function predicate = (Function) atoms.get(i);
+				Function predicate = atoms.get(i);
 				isMatch = isMatch || match(keyword.trim(), predicate);
 			}
 			if (isMatch) {

@@ -24,126 +24,116 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.Reference;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.ForeignKeyConstraint;
+import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 
 import java.util.*;
 
 public class DirectMappingAxiom {
-	protected DBMetadata metadata;
-	protected DataDefinition table;
-	protected String SQLString;
-	protected String baseuri;
-	private OBDADataFactory df;
+	private final DBMetadata metadata;
+	private final RelationDefinition table;
+	private String SQLString;
+	private final String baseuri;
+	private final OBDADataFactory df;
 	
-	public DirectMappingAxiom() {
-	}
-
-	public DirectMappingAxiom(String baseuri, DataDefinition dd,
-			DBMetadata obda_md, OBDADataFactory dfac) throws Exception {
+	public DirectMappingAxiom(String baseuri, RelationDefinition dd,
+			DBMetadata obda_md, OBDADataFactory dfac) {
 		this.table = dd;
-		this.SQLString = new String();
+		this.SQLString = "";
 		this.metadata = obda_md;
 		this.df = dfac;
-		if (baseuri != null)
-			this.baseuri = baseuri;
-		else
-		{
-			throw new Exception("Base uri must be specified!");
-		}
+		if (baseuri == null)
+			throw new IllegalArgumentException("Base uri must be specified!");
+		
+		this.baseuri = baseuri;
 	}
 
-	public DirectMappingAxiom(DirectMappingAxiom dmab) {
-		this.table = dmab.table;
-		this.SQLString = new String(dmab.getSQL());
-		this.baseuri = new String(dmab.getbaseuri());
-	}
 
 	public String getSQL() {
-		String SQLStringTemple = new String("SELECT * FROM %s");
+		String SQLStringTemple = "SELECT * FROM %s";
 
-		SQLString = String.format(SQLStringTemple, "\"" + this.table.getName()
-				+ "\"");
-		return new String(SQLString);
+		SQLString = String.format(SQLStringTemple, table.getID().getSQLRendering());
+		return SQLString;
 	}
 
-	public Map<String, CQIE> getRefAxioms() {
-		HashMap<String, CQIE> refAxioms = new HashMap<String, CQIE>();
-		Map<String, List<Attribute>> fks = ((TableDefinition) table)
-				.getForeignKeys();
-		if (fks.size() > 0) {
-			Set<String> keys = fks.keySet();
-			for (String key : keys) {
-				refAxioms.put(getRefSQL(key), getRefCQ(key));
-			}
+	public Map<String, List<Function>> getRefAxioms() {
+		HashMap<String, List<Function>> refAxioms = new HashMap<>();
+		List<ForeignKeyConstraint> fks = ((DatabaseRelationDefinition) table).getForeignKeys();
+		for (ForeignKeyConstraint fk : fks) {
+			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		}
 		return refAxioms;
 	}
 
-	private String getRefSQL(String key) {
-		TableDefinition tableDef = ((TableDefinition) table);
-		Map<String, List<Attribute>> fks = tableDef.getForeignKeys();
+	private String getRefSQL(ForeignKeyConstraint fk) {
+		DatabaseRelationDefinition tableDef = ((DatabaseRelationDefinition) table);
 
-		List<Attribute> pks = tableDef.getPrimaryKeys();
-		
-		String SQLStringTempl = new String("SELECT %s FROM %s WHERE %s");
+		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
 
-		String table = new String("\"" + this.table.getName() + "\"");
-		String Table = table;
+		RelationID table = this.table.getID();
+		String Table = table.getSQLRendering();
 		String Column = "";
 		String Condition = "";
-		String tableRef = "";
+		RelationID tableRef0 = null;
 		
-		if (pks.size() > 0) {
-		for (Attribute pk : pks)
-			Column += Table + ".\"" + pk.getName() + "\" AS "+this.table.getName()+"_"+pk.getName()+", ";
-		} else {
-			for (Attribute att : tableDef.getAttributes()) {
-				String attrName = att.getName();
-				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName() + "_" + attrName + ", ";
+		{
+			UniqueConstraint pk = tableDef.getPrimaryKey();
+			List<Attribute> attributes;		
+			if (pk != null) 
+				attributes = pk.getAttributes();
+			else 
+				attributes = tableDef.getAttributes();
+
+			for (Attribute att : attributes) {
+				QuotedID attrName = att.getID();
+				Column += table.getSQLRendering() + "." + attrName.getSQLRendering() + " AS " + 
+						   table.getTableName() + "_" + attrName.getName() + ", ";
 			}
 		}
 
 		// referring object
-		List<Attribute> attr = fks.get(key);
-		for (int i = 0; i < attr.size(); i++) {
-			Condition += table + ".\"" + attr.get(i).getName() + "\" = ";
+		int count = 0;
+		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
+			Condition += table + ".\"" + comp.getAttribute().getID().getName() + "\" = ";
 
 			// get referenced object
-			Reference ref = attr.get(i).getReference();
-			tableRef = ref.getTableReference();
-			if (i == 0)
-				Table += ", \"" + tableRef + "\"";
-			String columnRef = ref.getColumnReference();
-			Column += "\"" + tableRef + "\".\"" + columnRef + "\" AS "
-					+ tableRef + "_" + columnRef;
+			tableRef0 = comp.getReference().getRelation().getID();
+			if (count == 0)
+				Table += ", " + tableRef0.getSQLRendering();
+			QuotedID columnRef0 = comp.getReference().getID();
+			Column += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering() + " AS "
+					+ tableRef0.getTableName() + "_" + columnRef0.getName();
 
-			Condition += "\"" + tableRef + "\".\"" + columnRef + "\"";
+			Condition += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering();
 
-			if (i < attr.size() - 1) {
+			if (count < fk.getComponents().size() - 1) {
 				Column += ", ";
 				Condition += " AND ";
 			}
+			count++;
 		}
-		for (TableDefinition tdef : metadata.getTables()) {
-			if (tdef.getName().equals(tableRef)) {
-				int pknumber = tdef.getPrimaryKeys().size();
-				if (pknumber > 0) {
-					for (int i = 0; i < pknumber; i++) {
-						String pki = tdef.getPrimaryKeys().get(i).getName();
-						String refPki = "\"" + tableRef + "\".\"" + pki + "\"";
+		for (DatabaseRelationDefinition tdef : metadata.getDatabaseRelations()) {
+			if (tdef.getID().equals(tableRef0)) {
+				UniqueConstraint pk = tdef.getPrimaryKey();
+				if (pk != null) {
+					for (Attribute att : pk.getAttributes()) {
+						QuotedID attrName = att.getID();
+						String refPki = tableRef0.getSQLRendering() + "." + attrName.getSQLRendering();
 						if (!Column.contains(refPki))
-							Column += ", " + refPki + " AS " + tableRef + "_" + pki;
+							Column += ", " + refPki + " AS " + tableRef0.getTableName() + "_" + attrName.getName();
 					}
 				} 
 				else {
 					for (Attribute att : tdef.getAttributes()) {
-						String attrName = att.getName();
-						Column += ", \""+ tableRef + "\".\"" + attrName +
-								"\" AS " + tableRef+"_" + attrName;
+						QuotedID attrName = att.getID();
+						Column += ", " + tableRef0.getSQLRendering() + "." + attrName.getSQLRendering() +
+								" AS " + tableRef0.getTableName() + "_" + attrName.getName();
 					}
 				}
 			}
@@ -152,12 +142,12 @@ public class DirectMappingAxiom {
 		return String.format(SQLStringTempl, Column, Table, Condition);
 	}
 
-	public CQIE getCQ(){
-		Term sub = generateSubject((TableDefinition)table, false);
+	public List<Function> getCQ(){
+		Term sub = generateSubject((DatabaseRelationDefinition)table, false);
 		List<Function> atoms = new ArrayList<Function>();
 		
 		//Class Atom
-		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getName())), sub));
+		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID().getTableName())), sub));
 		
 		
 		//DataType Atoms
@@ -165,71 +155,61 @@ public class DirectMappingAxiom {
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			if (type == COL_TYPE.LITERAL) {
-				Variable objV = df.getVariable(att.getName());
+				Variable objV = df.getVariable(att.getID().getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
-								table.getName(), att.getName())), sub, objV));
+								table.getID().getTableName(), att.getID().getName())), sub, objV));
 			} 
 			else {
-				Function obj = df.getTypedTerm(df.getVariable(att.getName()), type);
+				Function obj = df.getTypedTerm(df.getVariable(att.getID().getName()), type);
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
-								table.getName(), att.getName())), sub, obj));
+								table.getID().getTableName(), att.getID().getName())), sub, obj));
 			}
 		}
 	
 		//To construct the head, there is no static field about this predicate
-		List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
-		for (Attribute att : table.getAttributes())
-			headTerms.add(df.getVariable(att.getName()));
+		//List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
+		//for (Attribute att : table.getAttributes())
+		//	headTerms.add(df.getVariable(att.getID().getName()));
 		
-		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
-		Function head = df.getFunction(headPredicate, headTerms);
+		//Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
+		//Function head = df.getFunction(headPredicate, headTerms);
 		
-		return df.getCQIE(head, atoms);
+		return atoms;
 	}
 
-	private CQIE getRefCQ(String fk) {
+	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
 
-		Term sub = generateSubject((TableDefinition) table, true);
-		Function atom = null;
+		Term sub = generateSubject((DatabaseRelationDefinition) table, true);
 
+		ForeignKeyConstraint.Component fkcomp = fk.getComponents().get(0);
+		
 		// Object Atoms
 		// Foreign key reference
-		for (Attribute att : table.getAttributes()) {
-			if (att.isForeignKey()) {
-				Reference ref = att.getReference();
-				if (ref.getReferenceName().equals(fk)) {
-					String pkTableReference = ref.getTableReference();
-					TableDefinition tdRef = (TableDefinition) metadata
-							.getDefinition(pkTableReference);
-					Term obj = generateSubject(tdRef, true);
+		DatabaseRelationDefinition tdRef = (DatabaseRelationDefinition) fkcomp.getReference().getRelation();
+		Term obj = generateSubject(tdRef, true);
 
-					String opURI = generateOPURI(table.getName(), att);
-					atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
+		String opURI = generateOPURI(table.getID().getTableName(), fkcomp.getAttribute());
+		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
-					// construct the head
-					Set<Variable> headTermsSet = new HashSet<>();
-					TermUtils.addReferencedVariablesTo(headTermsSet, atom);
-					
-					List<Term> headTerms = new ArrayList<>();
-					headTerms.addAll(headTermsSet);
+		// construct the head
+		//Set<Variable> headTermsSet = new HashSet<>();
+		//TermUtils.addReferencedVariablesTo(headTermsSet, atom);
+		
+		//List<Term> headTerms = new ArrayList<>();
+		//headTerms.addAll(headTermsSet);
 
-					Predicate headPredicate = df.getPredicate(
-							"http://obda.inf.unibz.it/quest/vocabulary#q",
-							headTerms.size());
-					Function head = df.getFunction(headPredicate, headTerms);
-					return df.getCQIE(head, atom);
-				}
-			}
-		}
-		return null;
+		//Predicate headPredicate = df.getPredicate(
+		//		"http://obda.inf.unibz.it/quest/vocabulary#q",
+		//		headTerms.size());
+		//Function head = df.getFunction(headPredicate, headTerms);
+		return Collections.singletonList(atom);
 	}
 
 	// Generate an URI for class predicate from a string(name of table)
 	private String generateClassURI(String table) {
-		return new String(baseuri + table);
-
+		return baseuri + table;
 	}
 
 	/*
@@ -238,8 +218,7 @@ public class DirectMappingAxiom {
 	 * Mapping Definition
 	 */
 	private String generateDPURI(String table, String column) {
-		return new String(baseuri + percentEncode(table) + "#"
-				+ percentEncode(column));
+		return baseuri + percentEncode(table) + "#" + percentEncode(column);
 	}
 
 	// Generate an URI for object property from a string(name of column)
@@ -249,7 +228,7 @@ public class DirectMappingAxiom {
 //			if (a.isForeignKey() && a.getReference().getTableReference().equals(foreignTable.getName()))
 //				columnsInFK += a.getName() + ";";
 //		columnsInFK = columnsInFK.substring(0, columnsInFK.length() - 1);
-		String columnsInFK = columns.getName();
+		String columnsInFK = columns.getID().getName();
 		return baseuri + percentEncode(table) + "#ref-"  + columnsInFK;
 	}
 
@@ -260,33 +239,32 @@ public class DirectMappingAxiom {
 	 * TODO replace URI predicate to BNode predicate for tables without PKs in
 	 * the following method after 'else'
 	 */
-	private Term generateSubject(TableDefinition td,
+	private Term generateSubject(DatabaseRelationDefinition td,
 			boolean ref) {
 		String tableName = "";
 		if (ref)
-			tableName = percentEncode(td.getName()) + "_";
-
-		if (td.getPrimaryKeys().size() > 0) {
-			List<Term> terms = new ArrayList<Term>();
-			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
-					.size())));
-			for (int i = 0; i < td.getPrimaryKeys().size(); i++) {
-				terms.add(df.getVariable(tableName
-						+ td.getPrimaryKeys().get(i).getName()));
-			}
+			tableName = percentEncode(td.getID().getTableName()) + "_";
+		
+		UniqueConstraint pk = td.getPrimaryKey();	
+		if (pk != null) {
+			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
+			terms.add(df.getConstantLiteral(subjectTemple(td)));
+			for (Attribute att : pk.getAttributes()) 
+				terms.add(df.getVariable(tableName + att.getID().getName()));
+			
 			return df.getUriTemplate(terms);
-
-		} else {
+		} 
+		else {
 			List<Term> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes()) 
-				vars.add(df.getVariable(tableName + att.getName()));
+				vars.add(df.getVariable(tableName + att.getID().getName()));
 
 			return df.getBNodeTemplate(vars);
 		}
 	}
 
 	
-	private String subjectTemple(TableDefinition td, int numPK) {
+	private String subjectTemple(DatabaseRelationDefinition td) {
 		/*
 		 * It is hard to generate a uniform temple since the number of PK
 		 * differs For example, the subject uri temple with one pk should be
@@ -294,13 +272,10 @@ public class DirectMappingAxiom {
 		 * more than one pk columns, there will be a ";" between column names
 		 */
 
-		String temp = new String(baseuri);
-		temp += percentEncode(td.getName());
-		temp += "/";
-		for (int i = 0; i < numPK; i++) {
+		String temp = baseuri + percentEncode(td.getID().getTableName()) + "/";
+		for (Attribute att : td.getPrimaryKey().getAttributes()) {
 			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
-			temp+=percentEncode(td.getPrimaryKeys().get(i).getName())+"={};";
-
+			temp+=percentEncode(att.getID().getName())+"={};";
 		}
 		// remove the last "." which is not neccesary
 		temp = temp.substring(0, temp.length() - 1);
@@ -308,19 +283,10 @@ public class DirectMappingAxiom {
 		return temp;
 	}
 
-	public String getbaseuri() {
-		return baseuri;
-	}
-
-	public void setbaseuri(String uri) {
-		if (uri != null)
-			baseuri = new String(uri);
-	}
-
 	/*
 	 * percent encoding for a String
 	 */
-	private String percentEncode(String pe) {
+	private static String percentEncode(String pe) {
 		pe = pe.replace("#", "%23");
 		pe = pe.replace(".", "%2E");
 		pe = pe.replace("-", "%2D");
@@ -343,7 +309,7 @@ public class DirectMappingAxiom {
 		pe = pe.replace("@", "%40");
 		pe = pe.replace("[", "%5B");
 		pe = pe.replace("]", "%5D");
-		return new String(pe);
+		return pe;
 	}
 
 }

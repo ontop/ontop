@@ -25,9 +25,15 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
+import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.QualifiedAttributeID;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.RelationID;
+import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.api.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -41,6 +47,8 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,27 +60,25 @@ public class Mapping2DatalogConverter {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public static List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms, DBMetadata dbMetadata) {
+	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
 		
-		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
-		
-		//DatalogProgram datalogProgram = factory.getDatalogProgram();
 		List<CQIE> datalogProgram = new LinkedList<CQIE>();
 		List<String> errorMessages = new ArrayList<>();
-		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
+		
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		
+		for (OBDAMappingAxiom mappingAxiom : mappings) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
-				CQIE targetQuery = mappingAxiom.getTargetQuery();
 
 				OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
 				// Parse the SQL query tree from the source query
-				ParsedSQLQuery parsedSQLQuery = sqlQueryParser.parseDeeply(sourceQuery.toString());
+				ParsedSQLQuery parsedSQLQuery = SQLQueryDeepParser.parse(dbMetadata, sourceQuery.toString());
 
 				// Create a lookup table for variable swapping
-				LookupTable lookupTable = createLookupTable(parsedSQLQuery, dbMetadata);
-
+				AttributeLookupTable lookupTable = createLookupTable(parsedSQLQuery, dbMetadata, idfac);
 
 				// Construct the body from the source query
 				List<Function> bodyAtoms = new ArrayList<>();
@@ -80,31 +86,40 @@ public class Mapping2DatalogConverter {
                 // For each table, creates an atom and adds it to the body
                 addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable, dbMetadata);
 
-                // For each function application in the select clause, create an atom and add it to the body
-                addFunctionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
-                
                 // For each join condition, creates an atom and adds it to the body
-                addJoinConditionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
+                List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
+                for (Expression condition : joinConditions) {
+                    Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable, idfac);
+                    Term atom = visitor.visitEx(condition);
+                    bodyAtoms.add((Function) atom);
+                }
 
-                // For each where clause, creates an atom and adds it to the body
-                addWhereClauseAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
+                // For the "where" clause, creates an atom and adds it to the body
+                Expression conditions = parsedSQLQuery.getWhereClause();
+                if (conditions != null) {
+                    Expression2FunctionConverter converter = new Expression2FunctionConverter(lookupTable, idfac);
+                    Function filterFunction =  converter.convert(conditions);
+                    bodyAtoms.add(filterFunction);
+                }
 
                 // For each body atom in the target query,
                 //  (1) renameVariables its variables and
                 //  (2) use it as the head atom of a new rule
-                for (Function atom : targetQuery.getBody()) {
-                    // Construct the head from the target query.
-                    Function head = createHeadAtom(atom, lookupTable);
+                List<Function> targetQuery = mappingAxiom.getTargetQuery();
+                for (Function atom : targetQuery) {
+                    // Construct the head from the target query 
+                	// (includes dealing with functions like concat as well).
+                    Function head = (Function)renameVariables(atom, lookupTable, idfac);
                     // Create a new rule from the new head and the body
                     CQIE rule = fac.getCQIE(head, bodyAtoms);
                     datalogProgram.add(rule);
                 }
-
-			} catch (Exception e) {
+			} 
+			catch (Exception e) {
 				errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
                         + " \n Description: " + e.getMessage()
                         + " \nMapping: [" + mappingAxiom.toString() + "]");
-
+				break;
 			}
 		}
 
@@ -122,80 +137,6 @@ public class Mapping2DatalogConverter {
 		return datalogProgram;
 	}
 
-    /**
-     * Creates the head atom from the target query.
-     *
-     * @param atom an atom from the body of the target query
-     * @param lookupTable
-     * @return a head atom
-     */
-    private static Function createHeadAtom(Function atom, LookupTable lookupTable) {
-        List<Term> terms = atom.getTerms();
-        List<Term> newTerms = new ArrayList<>();
-        for (Term term : terms) {
-            newTerms.add(renameVariables(term, lookupTable));
-        }
-        return fac.getFunction(atom.getFunctionSymbol(),
-                newTerms);
-    }
-
-    private static void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
-        // For the "where" clause
-        SelectionJSQL whereClause = parsedSQLQuery.getWhereClause();
-        if (whereClause != null) {
-            Expression conditions = whereClause.getRawConditions();
-
-            Expression2FunctionConverter converter = new Expression2FunctionConverter(lookupTable);
-            Function filterFunction =  converter.convert(conditions);
-
-            bodyAtoms.add(filterFunction);
-        }
-    }
-
-    /**
-     * For each join condition, creates an atom and adds it to the body
-     */
-    private static void addJoinConditionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
-        List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
-        for (Expression condition : joinConditions) {
-            Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
-            Term atom = visitor.visitEx(condition);
-            bodyAtoms.add((Function) atom);
-        }
-    }
-
-    /**
-     * For each function application in the select clause, create an atom and add it to the body
-     * @param bodyAtoms
-     *  will be extended
-     * @param parsedSQLQuery
-     * @param lookupTable
-     * @author Dag Hovland
-     *
-     * @link ConferenceConcatMySQLTest
-     *
-     */
-    private static void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
-    	ProjectionJSQL proj = parsedSQLQuery.getProjection();
-    	List<SelectExpressionItem> selects = proj.getColumnList();
-    	for(SelectExpressionItem select : selects){
-    		Expression select_expr = select.getExpression();
-    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat || select_expr instanceof StringValue || select_expr instanceof Parenthesis ){
-    			Alias alias = select.getAlias();
-    			if(alias == null){
-    				throw new JSQLParserException("The expression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");
-    			}
-    			String alias_name = alias.getName();
-    			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
-    			Term atom = visitor.visitEx(select_expr);
-    			String var = lookupTable.lookup(alias_name);
-    			Term datalog_alias = fac.getVariable(var);
-    			Function equalityTerm = fac.getFunctionEQ(datalog_alias, atom);
-
-    			bodyAtoms.add(equalityTerm);
-    		}
-    	}
-    }
 
     
     /**
@@ -205,34 +146,29 @@ public class Mapping2DatalogConverter {
      * @param parsedSQLQuery
      * @param lookupTable
      */
-    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
+    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, AttributeLookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
-        List<RelationJSQL> tables = parsedSQLQuery.getTables();
+        Map<RelationID, RelationID> tables = parsedSQLQuery.getTables();
 
-        for (RelationJSQL table : tables) {
-            // Construct the URI from the table name
-            String tableName = table.getFullName();
-
+        for (Map.Entry<RelationID, RelationID> entry : tables.entrySet()) {
+        	RelationID relationId = entry.getValue();
+           	RelationID aliasId = entry.getKey();
+                   	
             // Construct the predicate using the table name
-            int arity = dbMetadata.getDefinition(tableName).getAttributes().size();
-            Predicate predicate = fac.getPredicate(tableName, arity);
-
+            RelationDefinition td = dbMetadata.getRelation(relationId);
+            List<Term> terms = new ArrayList<>(td.getAttributes().size());
             // Swap the column name with a new variable from the lookup table
-            List<Term> terms = new ArrayList<>();
-            for (int i = 1; i <= arity; i++) {
-                String columnName = dbMetadata
-                        .getFullQualifiedAttributeName(tableName,
-                                table.getAlias(), i);
-                String termName = lookupTable.lookup(columnName);
-                if (termName == null) {
-                    throw new IllegalStateException("Column '" + columnName
-                            + "'was not found in the lookup table: ");
-                }
-                Variable var = fac.getVariable(termName);
-                terms.add(var);
+            for (Attribute attribute : td.getAttributes()) {
+            	Term term = lookupTable.get(new QualifiedAttributeID(aliasId, attribute.getID()));
+            	if (term == null)
+            		term = lookupTable.get(new QualifiedAttributeID(null, attribute.getID()));
+                if (term == null) 
+                    throw new IllegalStateException("Column '" + aliasId + "." + attribute.getID() + "'was not found in the lookup table: ");
+                
+                terms.add(term);
             }
             // Create an atom for a particular table
-            Function atom = fac.getFunction(predicate, terms);
+            Function atom = Relation2DatalogPredicate.getAtom(td, terms);
             bodyAtoms.add(atom);
         }
     }
@@ -242,177 +178,181 @@ public class Mapping2DatalogConverter {
      * Returns a new term by renaming variables occurring in the  {@code term}
      *  according to the {@code lookupTable}
      */
-    private static Term renameVariables(Term term, LookupTable lookupTable) {
-        Term result = null;
-
+    private static Term renameVariables(Term term, AttributeLookupTable lookupTable, QuotedIDFactory idfac) {
+ 
         if (term instanceof Variable) {
             Variable var = (Variable) term;
-            String varName = var.getName();
-            String termName = lookupTable.lookup(varName);
-            if (termName == null) {
+            String[] varNameComponents = var.getName().split("\\.");
+            String schemaName, tableName, attributeName;
+            if (varNameComponents.length == 1) {
+            	schemaName = tableName = null;
+            	attributeName = varNameComponents[0];		
+            }
+            else if (varNameComponents.length == 2) {
+            	schemaName = null;
+            	tableName = varNameComponents[0];
+            	attributeName = varNameComponents[1];
+            } 	
+            else if (varNameComponents.length == 3) {
+            	schemaName = varNameComponents[0];
+            	tableName = varNameComponents[1];
+            	attributeName = varNameComponents[2];
+            } 	
+            else
+            	throw new IllegalArgumentException("Wrong number of components in the column name " + var);
+
+            // ROMAN (26 Sep 2015)
+        	// HACKY WAY OF DEALING WITH VARIABLES THAT ARE CASE-SENSITIVE 
+            RelationID relationId;
+            if (tableName != null)
+            	relationId = idfac.createRelationID(quote(schemaName), quote(tableName));
+            else
+            	relationId = null;
+            QualifiedAttributeID a = new QualifiedAttributeID(relationId, 
+            						idfac.createAttributeID(quote(attributeName)));         
+            Term termR = lookupTable.get(a);
+            
+            if (termR == null) {
+                if (tableName != null)
+                	relationId = idfac.createRelationID(schemaName, tableName);
+                else
+                	relationId = null;
+                a = new QualifiedAttributeID(relationId, idfac.createAttributeID(attributeName));
+                termR = lookupTable.get(a);
+            }
+
+            // ROMAN (10 Oct 2015): hack for FQDN
+            if (termR == null)
+            	termR = lookupTable.get(new QualifiedAttributeID(null, 
+						idfac.createAttributeID(quote(attributeName))));
+            
+            if (termR == null)
+            	termR = lookupTable.get(new QualifiedAttributeID(null, 
+						idfac.createAttributeID(attributeName)));
+            
+            if (termR == null) {
                 String messageFormat = "Error in identifying column name \"%s\", " +
                         "please check the query source in the mappings.\n" +
                         "Possible reasons:\n" +
                         "1. The name is ambiguous, or\n" +
                         "2. The name is not defined in the database schema.";
-                final String msg = String.format(messageFormat, var);
+                final String msg = String.format(messageFormat, var) + "\n" + lookupTable;
                 throw new RuntimeException(msg);
             }
-            result = fac.getVariable(termName);
-
-        } else if (term instanceof Function) {
+            return termR;
+        } 
+        else if (term instanceof Function) {
             Function func = (Function) term;
             List<Term> terms = func.getTerms();
-            List<Term> newTerms = new ArrayList<>();
-            for (Term innerTerm : terms) {
-                newTerms.add(renameVariables(innerTerm, lookupTable));
-            }
-            result = fac.getFunction(func.getFunctionSymbol(), newTerms);
-        } else if (term instanceof Constant) {
-            result = term.clone();
+            List<Term> newTerms = new ArrayList<>(terms.size());
+            for (Term innerTerm : terms) 
+                newTerms.add(renameVariables(innerTerm, lookupTable, idfac));
+            
+            return fac.getFunction(func.getFunctionSymbol(), newTerms);
+        } 
+        else if (term instanceof Constant) {
+            return term.clone();
         }
-        return result;
+        throw new RuntimeException("Unknown term type");
     }
 
+    private static String quote(String s) {
+    	if (s == null)
+    		return s;
+    	return QuotedID.QUOTATION + s + QuotedID.QUOTATION;
+    }
+    
+    private static final class AttributeLookupTable {
+    	private final Map<QualifiedAttributeID, Term> lookupTable = new HashMap<>();
+    	
+    	void put(RelationID relationId, QuotedID attributeId, Term expression) {
+    		QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationId, attributeId);
+    		Term prev = lookupTable.put(qualifiedId, expression);
+    		if (prev != null && !prev.equals(expression)) {
+    			// System.err.println("DUPLICATE: " + prev + " AND " + expression + " FOR " + qualifiedId);
+    			// there is another expression for the same qualified attribute id
+    			// (i.e., ambiguous column name) 
+    			// reset the value to null to indicate the ambiguity
+    			// THIS DOES NOT MAKE MUCH SENSE BUT NEEDED FOR R2rmlJoinTest (WHICH HAS AMBIGUOUS REFS ANYWAY)
+    			// lookupTable.put(qualifiedId, null);
+    		}
+    	}
+    	
+    	Term get(QualifiedAttributeID qualifiedId) {
+    		return lookupTable.get(qualifiedId);
+    	}
+    	
+    	@Override
+		public String toString() {
+    		return lookupTable.toString();
+    	}
+    }
+    
     /**
      * Creates a lookupTable:
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
-     * (2) Assigns new variables to them
-     * in case of two table with the same column, the first table column processed will be assigned
       */
-    private static LookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata) throws JSQLParserException {
-		LookupTable lookupTable = new LookupTable();
+    private static AttributeLookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata, QuotedIDFactory idfac) throws JSQLParserException {
+    	AttributeLookupTable lookupTable = new AttributeLookupTable();
 
-		List<RelationJSQL> tables = queryParsed.getTables();
+		Map<RelationID, RelationID> tables = queryParsed.getTables();
 
 		// Collect all known column aliases
-		Map<String, String> aliasMap = queryParsed.getAliasMap();
+		Map<QuotedID, Expression> aliasMap = queryParsed.getAliasMap();
 		
-		int offset = 0; // the index offset
+		// assigned index number
+		int index = 0; 
 
-		for (RelationJSQL table : tables) {
+		for (Map.Entry<RelationID, RelationID> entry : tables.entrySet()) {
 			
-			String tableName = table.getTableName();
-			String fullName = table.getFullName();
-			String tableGivenName = table.getGivenName();
-			DataDefinition tableDefinition = dbMetadata.getDefinition(fullName);
+			RelationID relationId = entry.getValue();
+			RelationDefinition tableDefinition = dbMetadata.getRelation(relationId);
+            if (tableDefinition == null) 
+                throw new RuntimeException("Definition not found for table '" + relationId + "'.");
+            
+ 			for (Attribute attribute : tableDefinition.getAttributes()) {
 
-            if (tableDefinition == null) {
-                throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
-            }
+				Term var = fac.getVariable("t" + index);
+				QuotedID attributeId = attribute.getID();
 
-            int size = tableDefinition.getAttributes().size();
-
-			for (int i = 1; i <= size; i++) {
-				// assigned index number
-				int index = i + offset;
-				
-				// simple attribute name
-				String columnName = tableDefinition.getAttribute(i).getName();
-				
-				lookupTable.add(columnName, index);
-
-				String lowercaseColumn = columnName.toLowerCase();
-
-                // register the alias name, if any
-                if (aliasMap.containsKey(lowercaseColumn)) {
-					lookupTable.add(aliasMap.get(lowercaseColumn), columnName);
-				}
-
-				// attribute name with table name prefix
-				String tableColumnName = tableName + "." + columnName;
-				lookupTable.add(tableColumnName, index);
-
-				// attribute name with table name prefix
-				String tablecolumnname = tableColumnName.toLowerCase();
-
-                // register the alias name, if any
-				if (aliasMap.containsKey(tablecolumnname)) {
-					lookupTable.add(aliasMap.get(tablecolumnname),
-							tableColumnName);
-				}
-
-				// attribute name with table given name prefix
-				String givenTableColumnName = tableGivenName + "." + columnName;
-				lookupTable.add(givenTableColumnName, tableColumnName);
-
-				String giventablecolumnname = givenTableColumnName.toLowerCase();
-
-                // register the alias name, if any
-                if (aliasMap.containsKey(giventablecolumnname)) {
-					lookupTable.add(aliasMap.get(giventablecolumnname),
-							tableColumnName);
-				}
-
-				// full qualified attribute name
-				String qualifiedColumnName = dbMetadata.getFullQualifiedAttributeName(fullName, i);
-
-				lookupTable.add(qualifiedColumnName, tableColumnName);
-				String qualifiedcolumnname = qualifiedColumnName.toLowerCase();
-
-                // register the alias name, if any
-                if (aliasMap.containsKey(qualifiedcolumnname)) {
-					lookupTable.add(aliasMap.get(qualifiedcolumnname),
-							tableColumnName);
-				}
+				lookupTable.put(null, attributeId, var);
 
 				// full qualified attribute name using table alias
-				String tableAlias = table.getAlias();
-				if (tableAlias != null) {
-					String qualifiedColumnAlias = dbMetadata
-							.getFullQualifiedAttributeName(fullName,
-                                    tableAlias, i);
-					lookupTable.add(qualifiedColumnAlias, index);
-					String aliasColumnName = tableAlias.toLowerCase() + "." + lowercaseColumn;
-
-                    // register the alias name, if any
-                    if (aliasMap.containsKey(aliasColumnName)) {
-                        lookupTable.add(aliasMap.get(aliasColumnName), qualifiedColumnAlias);
-                    }
+				RelationID tableAlias = entry.getKey();
+				if (tableAlias != relationId) 
+					lookupTable.put(tableAlias, attributeId, var);
+				else {
+					lookupTable.put(relationId.getSchemalessID(), attributeId, var);
+					lookupTable.put(relationId, attributeId, var);
 				}
-				
-				//check if we do not have subselect with alias name assigned
-				for(SelectJSQL subSelect: queryParsed.getSubSelects()){
-					String subSelectAlias = subSelect.getAlias();
-					if (subSelectAlias != null) {
-						String aliasColumnName = subSelectAlias.toLowerCase()
-								+ "." + lowercaseColumn;
-						lookupTable.add(aliasColumnName, index);
 
-                        // register the alias name, if any
-						if (aliasMap.containsKey(aliasColumnName)) {
-							lookupTable.add(aliasMap.get(aliasColumnName), aliasColumnName);
-						}
-					}
-				}
+				index++;
 			}
-			offset += size;
 		}
-
-        for(String item:aliasMap.keySet()){
-            offset++;
-            String alias = aliasMap.get(item);
-            if(lookupTable.lookup(alias) == null){
-                lookupTable.add(item, offset);
-                lookupTable.add(alias, offset);
-            }
+	
+        for (Map.Entry<QuotedID, Expression> item : aliasMap.entrySet()) {
+ 			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable, idfac);
+			Term atom = visitor.visitEx(item.getValue());
+            lookupTable.put(null, item.getKey(), atom);
         }
-
-
+		
 		return lookupTable;
 	}
+      
 
     /**
      * This visitor class converts the SQL Expression to a Function
      */
     private static class Expression2FunctionConverter implements ExpressionVisitor {
 
-        private final LookupTable lookupTable;
+        private final AttributeLookupTable lookupTable;
+        private final QuotedIDFactory idfac; 
 
         private Term result;
 
-        public Expression2FunctionConverter(LookupTable lookupTable) {
+        public Expression2FunctionConverter(AttributeLookupTable lookupTable, QuotedIDFactory idfac) {
             this.lookupTable = lookupTable;
+        	this.idfac = idfac;
         }
 
         public Function convert(Expression expression){
@@ -428,13 +368,12 @@ public class Mapping2DatalogConverter {
             return this.result;
         }
 
-        public void visitBinaryExpression(BinaryExpression expression){
+        private void visitBinaryExpression(BinaryExpression expression){
             Expression left = expression.getLeftExpression();
             Expression right = expression.getRightExpression();
 
             Term t1 = visitEx(left);
-
-            if(t1 == null)
+            if (t1 == null)
                 throw new RuntimeException("Unable to find column name for variable: " +left);
 
             Term t2 = visitEx(right);
@@ -511,43 +450,41 @@ public class Mapping2DatalogConverter {
         }
 
         @Override
-        public void visit(net.sf.jsqlparser.expression.Function expression) {
-            net.sf.jsqlparser.expression.Function func = expression;
+        public void visit(net.sf.jsqlparser.expression.Function func) {
             if (func.getName().toLowerCase().equals("regexp_like")) {
 
                 List<Expression> expressions = func.getParameters().getExpressions();
                 if (expressions.size() == 2 || expressions.size() == 3) {
-
-                    Term t1; // first parameter is a source_string, generally a column
+                    // first parameter is a source_string, generally a column
                     Expression first = expressions.get(0);
-                    t1 = visitEx(first);
-
+                    Term t1 = visitEx(first);
                     if (t1 == null)
                         throw new RuntimeException("Unable to find column name for variable: "
                                 + first);
 
-                    Term t2; // second parameter is a pattern, so generally a regex string
+                    // second parameter is a pattern, so generally a regex string
                     Expression second = expressions.get(1);
-
-                    t2 = visitEx(second);
+                    Term t2 = visitEx(second);
 
                     /*
                      * Term t3 is optional for match_parameter in regexp_like
 			         */
                     Term t3;
-                    if(expressions.size() == 3){
+                    if (expressions.size() == 3){
                         Expression third = expressions.get(2);
                         t3 = visitEx(third);
-                    } else {
+                    } 
+                    else {
                         t3 = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
-                } else
+                } 
+                else
+                	throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
+            } 
+            else if (func.getName().toLowerCase().endsWith("replace")) {
 
-                throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
-            } else if (func.getName().toLowerCase().endsWith("replace")) {
-
-                List<Expression> expressions = expression.getParameters().getExpressions();
+                List<Expression> expressions = func.getParameters().getExpressions();
                 if (expressions.size() == 2 || expressions.size() == 3) {
 
                     Term t1; // first parameter is a function expression
@@ -559,10 +496,8 @@ public class Mapping2DatalogConverter {
                                 + first);
 
                     // second parameter is a string
-                    Term out_string;
                     Expression second = expressions.get(1);
-
-                    out_string = visitEx(second);
+                    Term out_string = visitEx(second);
                     
                     /*
                      * Term t3 is optional: no string means delete occurrences of second param
@@ -571,40 +506,38 @@ public class Mapping2DatalogConverter {
                     if (expressions.size() == 3) {
                         Expression third = expressions.get(2);
                         in_string = visitEx(third);
-                    } else {
+                    } 
+                    else {
                         in_string = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionReplace(t1, out_string, in_string);
-                } else
-
+                } 
+                else
                     throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+            }  
+            else if (func.getName().toLowerCase().endsWith("concat")){
 
-            }  else if (func.getName().toLowerCase().endsWith("concat")){
+                List<Expression> expressions = func.getParameters().getExpressions();
 
-                List<Expression> expressions = expression.getParameters().getExpressions();
-
-                int nParameters=expressions.size();
+                int nParameters = expressions.size();
                 Function topConcat = null;
-
 
                 for (int i= 0; i<nParameters; i+=2) {
 
-                    Term first_string, second_string;
-
-                    if(topConcat == null){
+                    if (topConcat == null){
 
                         Expression first = expressions.get(i);
-                        first_string = visitEx(first);
+                        Term first_string = visitEx(first);
 
                         Expression second = expressions.get(i+1);
-                        second_string = visitEx(second);
+                        Term second_string = visitEx(second);
 
                         topConcat = fac.getFunctionConcat(first_string, second_string);
                     }
-                    else{
+                    else {
 
                         Expression second = expressions.get(i);
-                        second_string = visitEx(second);
+                        Term second_string = visitEx(second);
 
                         topConcat = fac.getFunctionConcat(topConcat, second_string);
                     }
@@ -612,9 +545,9 @@ public class Mapping2DatalogConverter {
                 }
 
                 result = topConcat;
-
-            } else {
-                throw new UnsupportedOperationException("Unsupported expression " + expression);
+            } 
+            else {
+                throw new UnsupportedOperationException("Unsupported expression " + func);
             }
         }
 
@@ -668,7 +601,7 @@ public class Mapping2DatalogConverter {
             Expression inside = expression.getExpression();
 
             //Consider the case of NOT(...)
-            if(expression.isNot()){
+            if (expression.isNot()) {
                 result = fac.getFunctionNOT(visitEx(inside));
             } else {
                 result = visitEx(inside);
@@ -772,14 +705,12 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(IsNullExpression expression) {
-            Expression column = expression.getLeftExpression();
-            String columnName = column.toString();
-            String variableName = lookupTable.lookup(columnName);
-            if (variableName == null) {
+            Column column = (Column)expression.getLeftExpression();
+            Term var = getVariable(column);
+            if (var == null) {
                 throw new RuntimeException(
-                        "Unable to find column name for variable: " + columnName);
+                        "Unable to find column name for variable: " + column);
             }
-            Term var = fac.getVariable(variableName);
 
             if (!expression.isNot()) {
                 result = fac.getFunctionIsNull(var);
@@ -810,14 +741,16 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(Column expression) {
-            String termName = lookupTable.lookup(expression.toString());
+        	
+            Term term = getVariable(expression);
 
-            if (termName != null) {
+            if (term != null) {
                 /*
                  * If the termName is not null, create a variable
                  */
-                result = fac.getVariable(termName);
-            } else {
+                result = term;
+            } 
+            else {
                 // Constructs constant
                 // if the columns contains a boolean value
                 String columnName = expression.getColumnName();
@@ -830,13 +763,24 @@ public class Mapping2DatalogConverter {
                 	result = fac.getBooleanConstant(false);
                 }
                 else
-                    throw new RuntimeException(
-                            "Unable to find column name for variable: "
+                    throw new RuntimeException( "Unable to find column name for variable: "
                                     + columnName);
             }
 
         }
+        
 
+        private Term getVariable(Column expression) {
+        	QuotedID column = idfac.createAttributeID(expression.getColumnName());
+        	RelationID relation = null;
+        	if (expression.getTable().getName() != null)
+        		relation = idfac.createRelationID(expression.getTable().getSchemaName(), expression.getTable().getName());
+        	
+        	QualifiedAttributeID qa = new QualifiedAttributeID(relation, column);
+        	
+            return lookupTable.get(qa);
+        }
+        
         @Override
         public void visit(SubSelect subSelect) {
             throw new UnsupportedOperationException();
@@ -901,22 +845,22 @@ public class Mapping2DatalogConverter {
             // TODO
             Expression column = expression.getLeftExpression();
             String columnName = column.toString();
-            String variableName = lookupTable.lookup(columnName);
-            if (variableName == null) {
-                throw new RuntimeException(
-                        "Unable to find column name for variable: " + columnName);
-            }
-            Term var = fac.getVariable(variableName);
+        //    String variableName = lookupTable.lookup(columnName);
+        //    if (variableName == null) {
+        //        throw new RuntimeException(
+        //                "Unable to find column name for variable: " + columnName);
+        //    }
+        //    Term var = fac.getVariable(variableName);
 
-            ColDataType datatype = expression.getType();
+       //     ColDataType datatype = expression.getType();
 
 
 
-            Term var2 = null;
+        //    Term var2 = null;
 
             //first value is a column, second value is a datatype. It can  also have the size
 
-            result = fac.getFunctionCast(var, var2);
+        //    result = fac.getFunctionCast(var, var2);
 
         }
 
@@ -960,6 +904,4 @@ public class Mapping2DatalogConverter {
             visitBinaryExpression(regExpMySQLOperator);
         }
     }
-
-
 }

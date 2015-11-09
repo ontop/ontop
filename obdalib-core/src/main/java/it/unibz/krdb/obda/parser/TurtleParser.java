@@ -213,8 +213,8 @@ public class TurtleParser extends Parser {
 
 	// $ANTLR start "parse"
 	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:174:1: parse returns [CQIE value] : ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF ;
-	public final CQIE parse() throws RecognitionException {
-		CQIE value = null;
+	public final List<Function> parse() throws RecognitionException {
+		List<Function> value = null;
 
 
 		List<Function> t1 =null;
@@ -254,13 +254,13 @@ public class TurtleParser extends Parser {
 			state._fsp--;
 
 
-			      int arity = variableSet.size();
-			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+			      //int arity = variableSet.size();
+			      //List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
+			      //Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 			      
 			      // Create a new rule
 			      List<Function> triples = t1;
-			      value = dfac.getCQIE(head, triples);
+			      value = triples; // dfac.getCQIE(head, triples);
 			    
 			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:185:5: (t2= triplesStatement )*
 			loop2:
@@ -292,7 +292,7 @@ public class TurtleParser extends Parser {
 			      List<Function> additionalTriples = t2;
 			      if (additionalTriples != null) {
 			        // If there are additional triple statements then just add to the existing body
-			        List<Function> existingBody = value.getBody();
+			        List<Function> existingBody = value;
 			        existingBody.addAll(additionalTriples);
 			      }
 			    

@@ -20,8 +20,13 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -533,8 +538,7 @@ public class ParserTest extends TestCase {
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
-		assertFalse(result);
-
+		assertTrue(result);
 	}
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
@@ -678,7 +682,9 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 
 			return false;
@@ -702,7 +708,7 @@ public class ParserTest extends TestCase {
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
-				System.out.println("  GroupBy: " + queryP.getGroupByClause());
+				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
 								.getJoinConditions()));
