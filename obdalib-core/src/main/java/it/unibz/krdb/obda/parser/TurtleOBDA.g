@@ -378,22 +378,16 @@ private static boolean isRDFType(Term pred) {
  * PARSER RULES
  *------------------------------------------------------------------*/
 
-parse returns [CQIE value]
+parse returns [List<Function> value]
   : directiveStatement*
     t1=triplesStatement {
-      int arity = variableSet.size();
-      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
-      
-      // Create a new rule
-      List<Function> triples = $t1.value;
-      $value = dfac.getCQIE(head, triples);
+      $value =  $t1.value;
     }
       (t2=triplesStatement {
       List<Function> additionalTriples = $t2.value;
       if (additionalTriples != null) {
         // If there are additional triple statements then just add to the existing body
-        List<Function> existingBody = $value.getBody();
+        List<Function> existingBody = $value;
         existingBody.addAll(additionalTriples);
       }
     } )* EOF
