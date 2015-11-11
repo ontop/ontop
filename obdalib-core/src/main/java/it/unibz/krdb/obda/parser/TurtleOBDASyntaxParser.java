@@ -20,15 +20,16 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
+import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.util.List;
 import java.util.Map;
+
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
 
 public class TurtleOBDASyntaxParser implements TargetQueryParser {
 

@@ -1,8 +1,15 @@
-// $ANTLR 3.5.1 /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-10-21 11:38:12
+// $ANTLR 3.5.2 obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-11-10 14:55:23
 
 package it.unibz.krdb.obda.parser;
 
+import java.util.List;
+import java.util.Vector;
+
+
 import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
 @SuppressWarnings("all")
 public class TurtleOBDALexer extends Lexer {
@@ -130,15 +137,15 @@ public class TurtleOBDALexer extends Lexer {
 	public TurtleOBDALexer(CharStream input, RecognizerSharedState state) {
 		super(input,state);
 	}
-	@Override public String getGrammarFileName() { return "/Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g"; }
+	@Override public String getGrammarFileName() { return "obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g"; }
 
 	// $ANTLR start "T__77"
 	public final void mT__77() throws RecognitionException {
 		try {
 			int _type = T__77;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:44:7: ( 'a' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:44:9: 'a'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:44:7: ( 'a' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:44:9: 'a'
 			{
 			match('a'); 
 			}
@@ -157,8 +164,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BASE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:736:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:736:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:730:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:730:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
 				input.consume();
@@ -208,8 +215,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:738:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:738:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:732:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:732:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
 			{
 			if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
 				input.consume();
@@ -275,8 +282,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = FALSE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:740:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:740:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:734:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:734:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
 				input.consume();
@@ -334,8 +341,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = TRUE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:742:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:742:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:736:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:736:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
 				input.consume();
@@ -385,8 +392,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = REFERENCE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:744:10: ( '^^' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:744:16: '^^'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:738:10: ( '^^' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:738:16: '^^'
 			{
 			match("^^"); 
 
@@ -406,8 +413,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LTSIGN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:745:7: ( '<\"' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:745:16: '<\"'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:739:7: ( '<\"' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:739:16: '<\"'
 			{
 			match("<\""); 
 
@@ -427,8 +434,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RTSIGN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:746:7: ( '\">' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:746:16: '\">'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:740:7: ( '\">' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:740:16: '\">'
 			{
 			match("\">"); 
 
@@ -448,8 +455,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = SEMI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:747:5: ( ';' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:747:16: ';'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:741:5: ( ';' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:741:16: ';'
 			{
 			match(';'); 
 			}
@@ -468,8 +475,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PERIOD;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:748:7: ( '.' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:748:16: '.'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:742:7: ( '.' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:742:16: '.'
 			{
 			match('.'); 
 			}
@@ -488,8 +495,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = COMMA;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:749:6: ( ',' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:749:16: ','
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:743:6: ( ',' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:743:16: ','
 			{
 			match(','); 
 			}
@@ -508,8 +515,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LSQ_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:750:12: ( '[' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:750:16: '['
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:744:12: ( '[' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:744:16: '['
 			{
 			match('['); 
 			}
@@ -528,8 +535,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RSQ_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:751:12: ( ']' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:751:16: ']'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:745:12: ( ']' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:745:16: ']'
 			{
 			match(']'); 
 			}
@@ -548,8 +555,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LCR_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:752:12: ( '{' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:752:16: '{'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:746:12: ( '{' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:746:16: '{'
 			{
 			match('{'); 
 			}
@@ -568,8 +575,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RCR_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:753:12: ( '}' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:753:16: '}'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:747:12: ( '}' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:747:16: '}'
 			{
 			match('}'); 
 			}
@@ -588,8 +595,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:754:7: ( '(' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:754:16: '('
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:748:7: ( '(' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:748:16: '('
 			{
 			match('('); 
 			}
@@ -608,8 +615,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:755:7: ( ')' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:755:16: ')'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:749:7: ( ')' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:749:16: ')'
 			{
 			match(')'); 
 			}
@@ -628,8 +635,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUESTION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:756:9: ( '?' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:756:16: '?'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:750:9: ( '?' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:750:16: '?'
 			{
 			match('?'); 
 			}
@@ -648,8 +655,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOLLAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:757:7: ( '$' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:757:16: '$'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:751:7: ( '$' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:751:16: '$'
 			{
 			match('$'); 
 			}
@@ -668,8 +675,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUOTE_DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:758:13: ( '\"' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:758:16: '\"'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:752:13: ( '\"' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:752:16: '\"'
 			{
 			match('\"'); 
 			}
@@ -688,8 +695,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUOTE_SINGLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:759:13: ( '\\'' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:759:16: '\\''
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:753:13: ( '\\'' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:753:16: '\\''
 			{
 			match('\''); 
 			}
@@ -708,8 +715,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = APOSTROPHE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:760:11: ( '`' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:760:16: '`'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:754:11: ( '`' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:754:16: '`'
 			{
 			match('`'); 
 			}
@@ -728,8 +735,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = UNDERSCORE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:761:11: ( '_' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:761:16: '_'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:755:11: ( '_' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:755:16: '_'
 			{
 			match('_'); 
 			}
@@ -748,8 +755,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = MINUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:762:6: ( '-' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:762:16: '-'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:756:6: ( '-' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:756:16: '-'
 			{
 			match('-'); 
 			}
@@ -768,8 +775,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = ASTERISK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:763:9: ( '*' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:763:16: '*'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:757:9: ( '*' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:757:16: '*'
 			{
 			match('*'); 
 			}
@@ -788,8 +795,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = AMPERSAND;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:764:10: ( '&' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:764:16: '&'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:758:10: ( '&' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:758:16: '&'
 			{
 			match('&'); 
 			}
@@ -808,8 +815,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = AT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:765:3: ( '@' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:765:16: '@'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:759:3: ( '@' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:759:16: '@'
 			{
 			match('@'); 
 			}
@@ -828,8 +835,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = EXCLAMATION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:766:12: ( '!' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:766:16: '!'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:760:12: ( '!' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:760:16: '!'
 			{
 			match('!'); 
 			}
@@ -848,8 +855,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = HASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:767:5: ( '#' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:767:16: '#'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:761:5: ( '#' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:761:16: '#'
 			{
 			match('#'); 
 			}
@@ -868,8 +875,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PERCENT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:768:8: ( '%' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:768:16: '%'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:762:8: ( '%' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:762:16: '%'
 			{
 			match('%'); 
 			}
@@ -888,8 +895,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PLUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:769:5: ( '+' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:769:16: '+'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:763:5: ( '+' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:763:16: '+'
 			{
 			match('+'); 
 			}
@@ -908,8 +915,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = EQUALS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:770:7: ( '=' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:770:16: '='
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:764:7: ( '=' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:764:16: '='
 			{
 			match('='); 
 			}
@@ -928,8 +935,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = COLON;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:771:6: ( ':' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:771:16: ':'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:765:6: ( ':' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:765:16: ':'
 			{
 			match(':'); 
 			}
@@ -948,8 +955,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LESS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:772:5: ( '<' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:772:16: '<'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:766:5: ( '<' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:766:16: '<'
 			{
 			match('<'); 
 			}
@@ -968,8 +975,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = GREATER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:773:8: ( '>' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:773:16: '>'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:767:8: ( '>' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:767:16: '>'
 			{
 			match('>'); 
 			}
@@ -988,8 +995,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = SLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:774:6: ( '/' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:774:16: '/'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:768:6: ( '/' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:768:16: '/'
 			{
 			match('/'); 
 			}
@@ -1008,8 +1015,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_SLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:775:13: ( '//' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:775:16: '//'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:769:13: ( '//' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:769:16: '//'
 			{
 			match("//"); 
 
@@ -1029,8 +1036,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BACKSLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:776:10: ( '\\\\' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:776:16: '\\\\'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:770:10: ( '\\\\' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:770:16: '\\\\'
 			{
 			match('\\'); 
 			}
@@ -1049,8 +1056,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BLANK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:777:6: ( '[]' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:777:15: '[]'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:771:6: ( '[]' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:771:15: '[]'
 			{
 			match("[]"); 
 
@@ -1070,8 +1077,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BLANK_PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:778:13: ( '_:' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:778:16: '_:'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:772:13: ( '_:' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:772:16: '_:'
 			{
 			match("_:"); 
 
@@ -1091,8 +1098,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = TILDE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:779:6: ( '~' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:779:16: '~'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:773:6: ( '~' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:773:16: '~'
 			{
 			match('~'); 
 			}
@@ -1111,8 +1118,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = CARET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:780:6: ( '^' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:780:16: '^'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:774:6: ( '^' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:774:16: '^'
 			{
 			match('^'); 
 			}
@@ -1129,8 +1136,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ALPHA"
 	public final void mALPHA() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:783:3: ( 'a' .. 'z' | 'A' .. 'Z' | '\\u00C0' .. '\\u00D6' | '\\u00D8' .. '\\u00F6' | '\\u00F8' .. '\\u02FF' | '\\u0370' .. '\\u037D' | '\\u037F' .. '\\u1FFF' | '\\u200C' .. '\\u200D' | '\\u2070' .. '\\u218F' | '\\u2C00' .. '\\u2FEF' | '\\u3001' .. '\\uD7FF' | '\\uF900' .. '\\uFDCF' | '\\uFDF0' .. '\\uFFFD' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:777:3: ( 'a' .. 'z' | 'A' .. 'Z' | '\\u00C0' .. '\\u00D6' | '\\u00D8' .. '\\u00F6' | '\\u00F8' .. '\\u02FF' | '\\u0370' .. '\\u037D' | '\\u037F' .. '\\u1FFF' | '\\u200C' .. '\\u200D' | '\\u2070' .. '\\u218F' | '\\u2C00' .. '\\u2FEF' | '\\u3001' .. '\\uD7FF' | '\\uF900' .. '\\uFDCF' | '\\uFDF0' .. '\\uFFFD' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -1152,8 +1159,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "DIGIT"
 	public final void mDIGIT() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:799:3: ( '0' .. '9' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:793:3: ( '0' .. '9' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 				input.consume();
@@ -1175,8 +1182,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ALPHANUM"
 	public final void mALPHANUM() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:803:3: ( ALPHA | DIGIT )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:797:3: ( ALPHA | DIGIT )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -1198,8 +1205,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "CHAR"
 	public final void mCHAR() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:808:3: ( ALPHANUM | UNDERSCORE | MINUS | PERIOD )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:802:3: ( ALPHANUM | UNDERSCORE | MINUS | PERIOD )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -1223,10 +1230,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:3: ( ( DIGIT )+ )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:5: ( DIGIT )+
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:809:3: ( ( DIGIT )+ )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:809:5: ( DIGIT )+
 			{
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:5: ( DIGIT )+
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:809:5: ( DIGIT )+
 			int cnt1=0;
 			loop1:
 			while (true) {
@@ -1238,7 +1245,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt1) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 						input.consume();
@@ -1275,14 +1282,14 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:813:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* )
 			int alt12=3;
 			alt12 = dfa12.predict(input);
 			switch (alt12) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:813:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
 					{
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:5: ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:813:5: ( DIGIT )+
 					int cnt2=0;
 					loop2:
 					while (true) {
@@ -1294,7 +1301,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt2) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1317,7 +1324,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					mPERIOD(); 
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:19: ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:813:19: ( DIGIT )*
 					loop3:
 					while (true) {
 						int alt3=2;
@@ -1328,7 +1335,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt3) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1354,7 +1361,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:36: ( '-' | '+' )?
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:813:36: ( '-' | '+' )?
 					int alt4=2;
 					int LA4_0 = input.LA(1);
 					if ( (LA4_0=='+'||LA4_0=='-') ) {
@@ -1362,7 +1369,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					switch (alt4) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
 								input.consume();
@@ -1377,7 +1384,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					}
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:47: ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:813:47: ( DIGIT )*
 					loop5:
 					while (true) {
 						int alt5=2;
@@ -1388,7 +1395,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt5) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1409,11 +1416,11 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:820:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:814:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
 					{
 					mPERIOD(); 
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:820:12: ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:814:12: ( DIGIT )+
 					int cnt6=0;
 					loop6:
 					while (true) {
@@ -1425,7 +1432,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt6) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1454,7 +1461,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:820:29: ( '-' | '+' )?
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:814:29: ( '-' | '+' )?
 					int alt7=2;
 					int LA7_0 = input.LA(1);
 					if ( (LA7_0=='+'||LA7_0=='-') ) {
@@ -1462,7 +1469,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					switch (alt7) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
 								input.consume();
@@ -1477,7 +1484,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					}
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:820:40: ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:814:40: ( DIGIT )*
 					loop8:
 					while (true) {
 						int alt8=2;
@@ -1488,7 +1495,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt8) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1509,9 +1516,9 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:821:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
 					{
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:821:5: ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:5: ( DIGIT )+
 					int cnt9=0;
 					loop9:
 					while (true) {
@@ -1523,7 +1530,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt9) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1552,7 +1559,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:821:22: ( '-' | '+' )?
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:22: ( '-' | '+' )?
 					int alt10=2;
 					int LA10_0 = input.LA(1);
 					if ( (LA10_0=='+'||LA10_0=='-') ) {
@@ -1560,7 +1567,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					switch (alt10) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
 								input.consume();
@@ -1575,7 +1582,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					}
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:821:33: ( DIGIT )*
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:815:33: ( DIGIT )*
 					loop11:
 					while (true) {
 						int alt11=2;
@@ -1586,7 +1593,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt11) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1622,7 +1629,7 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:825:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
 			int alt16=2;
 			int LA16_0 = input.LA(1);
 			if ( ((LA16_0 >= '0' && LA16_0 <= '9')) ) {
@@ -1640,9 +1647,9 @@ public class TurtleOBDALexer extends Lexer {
 
 			switch (alt16) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:825:5: ( DIGIT )+ PERIOD ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:5: ( DIGIT )+ PERIOD ( DIGIT )+
 					{
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:825:5: ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:5: ( DIGIT )+
 					int cnt13=0;
 					loop13:
 					while (true) {
@@ -1654,7 +1661,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt13) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1677,7 +1684,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					mPERIOD(); 
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:825:19: ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:819:19: ( DIGIT )+
 					int cnt14=0;
 					loop14:
 					while (true) {
@@ -1689,7 +1696,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt14) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1713,11 +1720,11 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:826:5: PERIOD ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:820:5: PERIOD ( DIGIT )+
 					{
 					mPERIOD(); 
 
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:826:12: ( DIGIT )+
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:820:12: ( DIGIT )+
 					int cnt15=0;
 					loop15:
 					while (true) {
@@ -1729,7 +1736,7 @@ public class TurtleOBDALexer extends Lexer {
 
 						switch (alt15) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1768,8 +1775,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:830:3: ( PLUS INTEGER )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:830:5: PLUS INTEGER
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:824:3: ( PLUS INTEGER )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:824:5: PLUS INTEGER
 			{
 			mPLUS(); 
 
@@ -1791,8 +1798,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:834:3: ( MINUS INTEGER )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:834:5: MINUS INTEGER
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:828:3: ( MINUS INTEGER )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:828:5: MINUS INTEGER
 			{
 			mMINUS(); 
 
@@ -1814,8 +1821,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:838:3: ( PLUS DOUBLE )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:838:5: PLUS DOUBLE
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:832:3: ( PLUS DOUBLE )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:832:5: PLUS DOUBLE
 			{
 			mPLUS(); 
 
@@ -1837,8 +1844,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:842:3: ( MINUS DOUBLE )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:842:5: MINUS DOUBLE
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:836:3: ( MINUS DOUBLE )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:836:5: MINUS DOUBLE
 			{
 			mMINUS(); 
 
@@ -1860,8 +1867,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:846:3: ( PLUS DECIMAL )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:846:5: PLUS DECIMAL
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:840:3: ( PLUS DECIMAL )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:840:5: PLUS DECIMAL
 			{
 			mPLUS(); 
 
@@ -1883,8 +1890,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:850:3: ( MINUS DECIMAL )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:850:5: MINUS DECIMAL
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:844:3: ( MINUS DECIMAL )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:844:5: MINUS DECIMAL
 			{
 			mMINUS(); 
 
@@ -1906,12 +1913,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = VARNAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:854:3: ( ALPHA ( CHAR )* )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:854:5: ALPHA ( CHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:848:3: ( ALPHA ( CHAR )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:848:5: ALPHA ( CHAR )*
 			{
 			mALPHA(); 
 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:854:11: ( CHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:848:11: ( CHAR )*
 			loop17:
 			while (true) {
 				int alt17=2;
@@ -1922,7 +1929,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt17) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -1954,8 +1961,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ECHAR"
 	public final void mECHAR() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:858:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:858:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:852:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:852:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
 			{
 			match('\\'); 
 			if ( input.LA(1)=='\"'||input.LA(1)=='\''||input.LA(1)=='\\'||input.LA(1)=='b'||input.LA(1)=='f'||input.LA(1)=='n'||input.LA(1)=='r'||input.LA(1)=='t' ) {
@@ -1978,12 +1985,12 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "SCHEMA"
 	public final void mSCHEMA() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:861:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:861:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:855:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:855:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
 			{
 			mALPHA(); 
 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:861:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:855:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
 			loop18:
 			while (true) {
 				int alt18=2;
@@ -1994,7 +2001,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt18) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( input.LA(1)=='+'||(input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -2024,8 +2031,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "URI_PATH"
 	public final void mURI_PATH() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:863:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:857:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -2047,8 +2054,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID_START"
 	public final void mID_START() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:865:18: ( ( ALPHA | UNDERSCORE ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:859:18: ( ( ALPHA | UNDERSCORE ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -2070,8 +2077,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID_CORE"
 	public final void mID_CORE() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:867:17: ( ( ID_START | DIGIT ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:861:17: ( ( ID_START | DIGIT ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -2093,12 +2100,12 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID"
 	public final void mID() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:869:12: ( ID_START ( ID_CORE )* )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:869:14: ID_START ( ID_CORE )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:863:12: ( ID_START ( ID_CORE )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:863:14: ID_START ( ID_CORE )*
 			{
 			mID_START(); 
 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:869:23: ( ID_CORE )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:863:23: ( ID_CORE )*
 			loop19:
 			while (true) {
 				int alt19=2;
@@ -2109,7 +2116,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt19) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -2139,8 +2146,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "NAME_START_CHAR"
 	public final void mNAME_START_CHAR() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:871:25: ( ( ALPHA | UNDERSCORE ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:865:25: ( ( ALPHA | UNDERSCORE ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -2162,8 +2169,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "NAME_CHAR"
 	public final void mNAME_CHAR() throws RecognitionException {
 		try {
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:873:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH | PERCENT | EQUALS | SEMI ) )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:867:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH | PERCENT | EQUALS | SEMI ) )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 			{
 			if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 				input.consume();
@@ -2187,12 +2194,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NCNAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:876:3: ( NAME_START_CHAR ( NAME_CHAR )* )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:876:5: NAME_START_CHAR ( NAME_CHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:870:3: ( NAME_START_CHAR ( NAME_CHAR )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:870:5: NAME_START_CHAR ( NAME_CHAR )*
 			{
 			mNAME_START_CHAR(); 
 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:876:21: ( NAME_CHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:870:21: ( NAME_CHAR )*
 			loop20:
 			while (true) {
 				int alt20=2;
@@ -2203,7 +2210,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt20) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -2237,10 +2244,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NCNAME_EXT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:880:3: ( ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )* )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:880:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:874:3: ( ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:874:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
 			{
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:880:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:874:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
 			loop21:
 			while (true) {
 				int alt21=2;
@@ -2251,7 +2258,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt21) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= '{')||input.LA(1)=='}'||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -2285,12 +2292,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NAMESPACE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:884:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:884:5: NAME_START_CHAR ( NAME_CHAR )* COLON
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:878:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:878:5: NAME_START_CHAR ( NAME_CHAR )* COLON
 			{
 			mNAME_START_CHAR(); 
 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:884:21: ( NAME_CHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:878:21: ( NAME_CHAR )*
 			loop22:
 			while (true) {
 				int alt22=2;
@@ -2301,7 +2308,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt22) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -2337,10 +2344,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIXED_NAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:888:3: ( ( NCNAME )? COLON NCNAME_EXT )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:888:5: ( NCNAME )? COLON NCNAME_EXT
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:882:3: ( ( NCNAME )? COLON NCNAME_EXT )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:882:5: ( NCNAME )? COLON NCNAME_EXT
 			{
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:888:5: ( NCNAME )?
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:882:5: ( NCNAME )?
 			int alt23=2;
 			int LA23_0 = input.LA(1);
 			if ( ((LA23_0 >= 'A' && LA23_0 <= 'Z')||LA23_0=='_'||(LA23_0 >= 'a' && LA23_0 <= 'z')||(LA23_0 >= '\u00C0' && LA23_0 <= '\u00D6')||(LA23_0 >= '\u00D8' && LA23_0 <= '\u00F6')||(LA23_0 >= '\u00F8' && LA23_0 <= '\u02FF')||(LA23_0 >= '\u0370' && LA23_0 <= '\u037D')||(LA23_0 >= '\u037F' && LA23_0 <= '\u1FFF')||(LA23_0 >= '\u200C' && LA23_0 <= '\u200D')||(LA23_0 >= '\u2070' && LA23_0 <= '\u218F')||(LA23_0 >= '\u2C00' && LA23_0 <= '\u2FEF')||(LA23_0 >= '\u3001' && LA23_0 <= '\uD7FF')||(LA23_0 >= '\uF900' && LA23_0 <= '\uFDCF')||(LA23_0 >= '\uFDF0' && LA23_0 <= '\uFFFD')) ) {
@@ -2348,7 +2355,7 @@ public class TurtleOBDALexer extends Lexer {
 			}
 			switch (alt23) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:888:5: NCNAME
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:882:5: NCNAME
 					{
 					mNCNAME(); 
 
@@ -2377,11 +2384,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_QUOTE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:892:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:892:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:886:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:886:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
 			{
 			match('\''); 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:892:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:886:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop24:
 			while (true) {
 				int alt24=3;
@@ -2398,7 +2405,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt24) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:892:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:886:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2411,7 +2418,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:892:87: ECHAR
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:886:87: ECHAR
 					{
 					mECHAR(); 
 
@@ -2440,11 +2447,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_QUOTE_DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:904:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:904:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:898:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:898:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
 			{
 			match('\"'); 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:904:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:898:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop25:
 			while (true) {
 				int alt25=3;
@@ -2461,7 +2468,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt25) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:904:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:898:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2474,7 +2481,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:904:87: ECHAR
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:898:87: ECHAR
 					{
 					mECHAR(); 
 
@@ -2503,11 +2510,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:908:3: ( '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:908:5: '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:902:3: ( '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:902:5: '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>'
 			{
 			match('<'); 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:908:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:902:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop26:
 			while (true) {
 				int alt26=3;
@@ -2524,7 +2531,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt26) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:908:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:902:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2537,7 +2544,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:908:86: ECHAR
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:902:86: ECHAR
 					{
 					mECHAR(); 
 
@@ -2566,11 +2573,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_CURLY_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:912:3: ( '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}' )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:912:5: '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}'
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:906:3: ( '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}' )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:906:5: '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}'
 			{
 			match('{'); 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:912:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:906:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop27:
 			while (true) {
 				int alt27=3;
@@ -2587,7 +2594,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt27) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:912:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:906:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2600,7 +2607,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:912:86: ECHAR
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:906:86: ECHAR
 					{
 					mECHAR(); 
 
@@ -2629,8 +2636,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_URI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:916:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:916:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:910:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:910:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
 			{
 			mSCHEMA(); 
 
@@ -2638,7 +2645,7 @@ public class TurtleOBDALexer extends Lexer {
 
 			mDOUBLE_SLASH(); 
 
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:916:31: ( URI_PATH )*
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:910:31: ( URI_PATH )*
 			loop28:
 			while (true) {
 				int alt28=2;
@@ -2649,7 +2656,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt28) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:
 					{
 					if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
 						input.consume();
@@ -2683,10 +2690,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = WS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
 			{
-			// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+			// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
 			int cnt30=0;
 			loop30:
 			while (true) {
@@ -2711,21 +2718,21 @@ public class TurtleOBDALexer extends Lexer {
 				}
 				switch (alt30) {
 				case 1 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:6: ' '
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:6: ' '
 					{
 					match(' '); 
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:10: '\\t'
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:10: '\\t'
 					{
 					match('\t'); 
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:15: ( '\\n' | '\\r' ( '\\n' ) )
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:15: ( '\\n' | '\\r' ( '\\n' ) )
 					{
-					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:15: ( '\\n' | '\\r' ( '\\n' ) )
+					// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:15: ( '\\n' | '\\r' ( '\\n' ) )
 					int alt29=2;
 					int LA29_0 = input.LA(1);
 					if ( (LA29_0=='\n') ) {
@@ -2743,17 +2750,17 @@ public class TurtleOBDALexer extends Lexer {
 
 					switch (alt29) {
 						case 1 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:16: '\\n'
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:16: '\\n'
 							{
 							match('\n'); 
 							}
 							break;
 						case 2 :
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:21: '\\r' ( '\\n' )
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:21: '\\r' ( '\\n' )
 							{
 							match('\r'); 
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:25: ( '\\n' )
-							// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:919:26: '\\n'
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:25: ( '\\n' )
+							// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:913:26: '\\n'
 							{
 							match('\n'); 
 							}
@@ -2788,439 +2795,439 @@ public class TurtleOBDALexer extends Lexer {
 
 	@Override
 	public void mTokens() throws RecognitionException {
-		// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:8: ( T__77 | BASE | PREFIX | FALSE | TRUE | REFERENCE | LTSIGN | RTSIGN | SEMI | PERIOD | COMMA | LSQ_BRACKET | RSQ_BRACKET | LCR_BRACKET | RCR_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | MINUS | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | BLANK | BLANK_PREFIX | TILDE | CARET | INTEGER | DOUBLE | DECIMAL | INTEGER_POSITIVE | INTEGER_NEGATIVE | DOUBLE_POSITIVE | DOUBLE_NEGATIVE | DECIMAL_POSITIVE | DECIMAL_NEGATIVE | VARNAME | NCNAME | NCNAME_EXT | NAMESPACE | PREFIXED_NAME | STRING_WITH_QUOTE | STRING_WITH_QUOTE_DOUBLE | STRING_WITH_BRACKET | STRING_WITH_CURLY_BRACKET | STRING_URI | WS )
+		// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:8: ( T__77 | BASE | PREFIX | FALSE | TRUE | REFERENCE | LTSIGN | RTSIGN | SEMI | PERIOD | COMMA | LSQ_BRACKET | RSQ_BRACKET | LCR_BRACKET | RCR_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | MINUS | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | BLANK | BLANK_PREFIX | TILDE | CARET | INTEGER | DOUBLE | DECIMAL | INTEGER_POSITIVE | INTEGER_NEGATIVE | DOUBLE_POSITIVE | DOUBLE_NEGATIVE | DECIMAL_POSITIVE | DECIMAL_NEGATIVE | VARNAME | NCNAME | NCNAME_EXT | NAMESPACE | PREFIXED_NAME | STRING_WITH_QUOTE | STRING_WITH_QUOTE_DOUBLE | STRING_WITH_BRACKET | STRING_WITH_CURLY_BRACKET | STRING_URI | WS )
 		int alt31=62;
 		alt31 = dfa31.predict(input);
 		switch (alt31) {
 			case 1 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:10: T__77
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:10: T__77
 				{
 				mT__77(); 
 
 				}
 				break;
 			case 2 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:16: BASE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:16: BASE
 				{
 				mBASE(); 
 
 				}
 				break;
 			case 3 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:21: PREFIX
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:21: PREFIX
 				{
 				mPREFIX(); 
 
 				}
 				break;
 			case 4 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:28: FALSE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:28: FALSE
 				{
 				mFALSE(); 
 
 				}
 				break;
 			case 5 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:34: TRUE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:34: TRUE
 				{
 				mTRUE(); 
 
 				}
 				break;
 			case 6 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:39: REFERENCE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:39: REFERENCE
 				{
 				mREFERENCE(); 
 
 				}
 				break;
 			case 7 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:49: LTSIGN
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:49: LTSIGN
 				{
 				mLTSIGN(); 
 
 				}
 				break;
 			case 8 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:56: RTSIGN
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:56: RTSIGN
 				{
 				mRTSIGN(); 
 
 				}
 				break;
 			case 9 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:63: SEMI
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:63: SEMI
 				{
 				mSEMI(); 
 
 				}
 				break;
 			case 10 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:68: PERIOD
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:68: PERIOD
 				{
 				mPERIOD(); 
 
 				}
 				break;
 			case 11 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:75: COMMA
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:75: COMMA
 				{
 				mCOMMA(); 
 
 				}
 				break;
 			case 12 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:81: LSQ_BRACKET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:81: LSQ_BRACKET
 				{
 				mLSQ_BRACKET(); 
 
 				}
 				break;
 			case 13 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:93: RSQ_BRACKET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:93: RSQ_BRACKET
 				{
 				mRSQ_BRACKET(); 
 
 				}
 				break;
 			case 14 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:105: LCR_BRACKET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:105: LCR_BRACKET
 				{
 				mLCR_BRACKET(); 
 
 				}
 				break;
 			case 15 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:117: RCR_BRACKET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:117: RCR_BRACKET
 				{
 				mRCR_BRACKET(); 
 
 				}
 				break;
 			case 16 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:129: LPAREN
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:129: LPAREN
 				{
 				mLPAREN(); 
 
 				}
 				break;
 			case 17 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:136: RPAREN
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:136: RPAREN
 				{
 				mRPAREN(); 
 
 				}
 				break;
 			case 18 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:143: QUESTION
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:143: QUESTION
 				{
 				mQUESTION(); 
 
 				}
 				break;
 			case 19 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:152: DOLLAR
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:152: DOLLAR
 				{
 				mDOLLAR(); 
 
 				}
 				break;
 			case 20 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:159: QUOTE_DOUBLE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:159: QUOTE_DOUBLE
 				{
 				mQUOTE_DOUBLE(); 
 
 				}
 				break;
 			case 21 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:172: QUOTE_SINGLE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:172: QUOTE_SINGLE
 				{
 				mQUOTE_SINGLE(); 
 
 				}
 				break;
 			case 22 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:185: APOSTROPHE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:185: APOSTROPHE
 				{
 				mAPOSTROPHE(); 
 
 				}
 				break;
 			case 23 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:196: UNDERSCORE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:196: UNDERSCORE
 				{
 				mUNDERSCORE(); 
 
 				}
 				break;
 			case 24 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:207: MINUS
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:207: MINUS
 				{
 				mMINUS(); 
 
 				}
 				break;
 			case 25 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:213: ASTERISK
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:213: ASTERISK
 				{
 				mASTERISK(); 
 
 				}
 				break;
 			case 26 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:222: AMPERSAND
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:222: AMPERSAND
 				{
 				mAMPERSAND(); 
 
 				}
 				break;
 			case 27 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:232: AT
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:232: AT
 				{
 				mAT(); 
 
 				}
 				break;
 			case 28 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:235: EXCLAMATION
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:235: EXCLAMATION
 				{
 				mEXCLAMATION(); 
 
 				}
 				break;
 			case 29 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:247: HASH
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:247: HASH
 				{
 				mHASH(); 
 
 				}
 				break;
 			case 30 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:252: PERCENT
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:252: PERCENT
 				{
 				mPERCENT(); 
 
 				}
 				break;
 			case 31 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:260: PLUS
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:260: PLUS
 				{
 				mPLUS(); 
 
 				}
 				break;
 			case 32 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:265: EQUALS
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:265: EQUALS
 				{
 				mEQUALS(); 
 
 				}
 				break;
 			case 33 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:272: COLON
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:272: COLON
 				{
 				mCOLON(); 
 
 				}
 				break;
 			case 34 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:278: LESS
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:278: LESS
 				{
 				mLESS(); 
 
 				}
 				break;
 			case 35 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:283: GREATER
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:283: GREATER
 				{
 				mGREATER(); 
 
 				}
 				break;
 			case 36 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:291: SLASH
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:291: SLASH
 				{
 				mSLASH(); 
 
 				}
 				break;
 			case 37 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:297: DOUBLE_SLASH
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:297: DOUBLE_SLASH
 				{
 				mDOUBLE_SLASH(); 
 
 				}
 				break;
 			case 38 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:310: BACKSLASH
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:310: BACKSLASH
 				{
 				mBACKSLASH(); 
 
 				}
 				break;
 			case 39 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:320: BLANK
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:320: BLANK
 				{
 				mBLANK(); 
 
 				}
 				break;
 			case 40 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:326: BLANK_PREFIX
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:326: BLANK_PREFIX
 				{
 				mBLANK_PREFIX(); 
 
 				}
 				break;
 			case 41 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:339: TILDE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:339: TILDE
 				{
 				mTILDE(); 
 
 				}
 				break;
 			case 42 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:345: CARET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:345: CARET
 				{
 				mCARET(); 
 
 				}
 				break;
 			case 43 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:351: INTEGER
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:351: INTEGER
 				{
 				mINTEGER(); 
 
 				}
 				break;
 			case 44 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:359: DOUBLE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:359: DOUBLE
 				{
 				mDOUBLE(); 
 
 				}
 				break;
 			case 45 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:366: DECIMAL
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:366: DECIMAL
 				{
 				mDECIMAL(); 
 
 				}
 				break;
 			case 46 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:374: INTEGER_POSITIVE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:374: INTEGER_POSITIVE
 				{
 				mINTEGER_POSITIVE(); 
 
 				}
 				break;
 			case 47 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:391: INTEGER_NEGATIVE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:391: INTEGER_NEGATIVE
 				{
 				mINTEGER_NEGATIVE(); 
 
 				}
 				break;
 			case 48 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:408: DOUBLE_POSITIVE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:408: DOUBLE_POSITIVE
 				{
 				mDOUBLE_POSITIVE(); 
 
 				}
 				break;
 			case 49 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:424: DOUBLE_NEGATIVE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:424: DOUBLE_NEGATIVE
 				{
 				mDOUBLE_NEGATIVE(); 
 
 				}
 				break;
 			case 50 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:440: DECIMAL_POSITIVE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:440: DECIMAL_POSITIVE
 				{
 				mDECIMAL_POSITIVE(); 
 
 				}
 				break;
 			case 51 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:457: DECIMAL_NEGATIVE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:457: DECIMAL_NEGATIVE
 				{
 				mDECIMAL_NEGATIVE(); 
 
 				}
 				break;
 			case 52 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:474: VARNAME
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:474: VARNAME
 				{
 				mVARNAME(); 
 
 				}
 				break;
 			case 53 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:482: NCNAME
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:482: NCNAME
 				{
 				mNCNAME(); 
 
 				}
 				break;
 			case 54 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:489: NCNAME_EXT
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:489: NCNAME_EXT
 				{
 				mNCNAME_EXT(); 
 
 				}
 				break;
 			case 55 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:500: NAMESPACE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:500: NAMESPACE
 				{
 				mNAMESPACE(); 
 
 				}
 				break;
 			case 56 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:510: PREFIXED_NAME
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:510: PREFIXED_NAME
 				{
 				mPREFIXED_NAME(); 
 
 				}
 				break;
 			case 57 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:524: STRING_WITH_QUOTE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:524: STRING_WITH_QUOTE
 				{
 				mSTRING_WITH_QUOTE(); 
 
 				}
 				break;
 			case 58 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:542: STRING_WITH_QUOTE_DOUBLE
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:542: STRING_WITH_QUOTE_DOUBLE
 				{
 				mSTRING_WITH_QUOTE_DOUBLE(); 
 
 				}
 				break;
 			case 59 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:567: STRING_WITH_BRACKET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:567: STRING_WITH_BRACKET
 				{
 				mSTRING_WITH_BRACKET(); 
 
 				}
 				break;
 			case 60 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:587: STRING_WITH_CURLY_BRACKET
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:587: STRING_WITH_CURLY_BRACKET
 				{
 				mSTRING_WITH_CURLY_BRACKET(); 
 
 				}
 				break;
 			case 61 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:613: STRING_URI
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:613: STRING_URI
 				{
 				mSTRING_URI(); 
 
 				}
 				break;
 			case 62 :
-				// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:624: WS
+				// obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:1:624: WS
 				{
 				mWS(); 
 
@@ -3284,7 +3291,7 @@ public class TurtleOBDALexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "818:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* );";
+			return "812:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* );";
 		}
 	}
 
@@ -3331,7 +3338,7 @@ public class TurtleOBDALexer extends Lexer {
 		"\1\54\13\uffff\1\61\1\uffff\1\63\1\uffff\1\62\3\uffff\1\2\2\uffff\1\5"+
 		"\5\uffff\1\4\1\3";
 	static final String DFA31_specialS =
-		"\7\uffff\1\6\1\4\5\uffff\1\0\5\uffff\1\1\44\uffff\1\5\10\uffff\1\2\1\uffff"+
+		"\7\uffff\1\4\1\5\5\uffff\1\2\5\uffff\1\0\44\uffff\1\1\10\uffff\1\6\1\uffff"+
 		"\1\3\116\uffff}>";
 	static final String[] DFA31_transitionS = {
 			"\2\50\2\uffff\1\50\22\uffff\1\50\1\33\1\10\1\34\1\23\1\35\1\31\1\24\1"+
@@ -3820,16 +3827,6 @@ public class TurtleOBDALexer extends Lexer {
 			int _s = s;
 			switch ( s ) {
 					case 0 : 
-						int LA31_14 = input.LA(1);
-						s = -1;
-						if ( (LA31_14=='}') ) {s = 66;}
-						else if ( ((LA31_14 >= '\u0000' && LA31_14 <= '\t')||(LA31_14 >= '\u000B' && LA31_14 <= '\f')||(LA31_14 >= '\u000E' && LA31_14 <= '!')||LA31_14=='$'||(LA31_14 >= '&' && LA31_14 <= ',')||LA31_14==':'||LA31_14=='<'||LA31_14=='>'||LA31_14=='@'||(LA31_14 >= '[' && LA31_14 <= '^')||LA31_14=='`'||LA31_14=='|'||(LA31_14 >= '~' && LA31_14 <= '\u00BF')||LA31_14=='\u00D7'||LA31_14=='\u00F7'||(LA31_14 >= '\u0300' && LA31_14 <= '\u036F')||LA31_14=='\u037E'||(LA31_14 >= '\u2000' && LA31_14 <= '\u200B')||(LA31_14 >= '\u200E' && LA31_14 <= '\u206F')||(LA31_14 >= '\u2190' && LA31_14 <= '\u2BFF')||(LA31_14 >= '\u2FF0' && LA31_14 <= '\u3000')||(LA31_14 >= '\uD800' && LA31_14 <= '\uF8FF')||(LA31_14 >= '\uFDD0' && LA31_14 <= '\uFDEF')||(LA31_14 >= '\uFFFE' && LA31_14 <= '\uFFFF')) ) {s = 67;}
-						else if ( (LA31_14=='#'||LA31_14=='%'||(LA31_14 >= '-' && LA31_14 <= '9')||LA31_14==';'||LA31_14=='='||LA31_14=='?'||(LA31_14 >= 'A' && LA31_14 <= 'Z')||LA31_14=='_'||(LA31_14 >= 'a' && LA31_14 <= '{')||(LA31_14 >= '\u00C0' && LA31_14 <= '\u00D6')||(LA31_14 >= '\u00D8' && LA31_14 <= '\u00F6')||(LA31_14 >= '\u00F8' && LA31_14 <= '\u02FF')||(LA31_14 >= '\u0370' && LA31_14 <= '\u037D')||(LA31_14 >= '\u037F' && LA31_14 <= '\u1FFF')||(LA31_14 >= '\u200C' && LA31_14 <= '\u200D')||(LA31_14 >= '\u2070' && LA31_14 <= '\u218F')||(LA31_14 >= '\u2C00' && LA31_14 <= '\u2FEF')||(LA31_14 >= '\u3001' && LA31_14 <= '\uD7FF')||(LA31_14 >= '\uF900' && LA31_14 <= '\uFDCF')||(LA31_14 >= '\uFDF0' && LA31_14 <= '\uFFFD')) ) {s = 68;}
-						else s = 65;
-						if ( s>=0 ) return s;
-						break;
-
-					case 1 : 
 						int LA31_20 = input.LA(1);
 						s = -1;
 						if ( ((LA31_20 >= '\u0000' && LA31_20 <= '\t')||(LA31_20 >= '\u000B' && LA31_20 <= '\f')||(LA31_20 >= '\u000E' && LA31_20 <= '\uFFFF')) ) {s = 72;}
@@ -3837,13 +3834,21 @@ public class TurtleOBDALexer extends Lexer {
 						if ( s>=0 ) return s;
 						break;
 
-					case 2 : 
-						int LA31_66 = input.LA(1);
+					case 1 : 
+						int LA31_57 = input.LA(1);
 						s = -1;
-						if ( (LA31_66=='}') ) {s = 66;}
-						else if ( (LA31_66=='#'||LA31_66=='%'||(LA31_66 >= '-' && LA31_66 <= '9')||LA31_66==';'||LA31_66=='='||LA31_66=='?'||(LA31_66 >= 'A' && LA31_66 <= 'Z')||LA31_66=='_'||(LA31_66 >= 'a' && LA31_66 <= '{')||(LA31_66 >= '\u00C0' && LA31_66 <= '\u00D6')||(LA31_66 >= '\u00D8' && LA31_66 <= '\u00F6')||(LA31_66 >= '\u00F8' && LA31_66 <= '\u02FF')||(LA31_66 >= '\u0370' && LA31_66 <= '\u037D')||(LA31_66 >= '\u037F' && LA31_66 <= '\u1FFF')||(LA31_66 >= '\u200C' && LA31_66 <= '\u200D')||(LA31_66 >= '\u2070' && LA31_66 <= '\u218F')||(LA31_66 >= '\u2C00' && LA31_66 <= '\u2FEF')||(LA31_66 >= '\u3001' && LA31_66 <= '\uD7FF')||(LA31_66 >= '\uF900' && LA31_66 <= '\uFDCF')||(LA31_66 >= '\uFDF0' && LA31_66 <= '\uFFFD')) ) {s = 68;}
-						else if ( ((LA31_66 >= '\u0000' && LA31_66 <= '\t')||(LA31_66 >= '\u000B' && LA31_66 <= '\f')||(LA31_66 >= '\u000E' && LA31_66 <= '!')||LA31_66=='$'||(LA31_66 >= '&' && LA31_66 <= ',')||LA31_66==':'||LA31_66=='<'||LA31_66=='>'||LA31_66=='@'||(LA31_66 >= '[' && LA31_66 <= '^')||LA31_66=='`'||LA31_66=='|'||(LA31_66 >= '~' && LA31_66 <= '\u00BF')||LA31_66=='\u00D7'||LA31_66=='\u00F7'||(LA31_66 >= '\u0300' && LA31_66 <= '\u036F')||LA31_66=='\u037E'||(LA31_66 >= '\u2000' && LA31_66 <= '\u200B')||(LA31_66 >= '\u200E' && LA31_66 <= '\u206F')||(LA31_66 >= '\u2190' && LA31_66 <= '\u2BFF')||(LA31_66 >= '\u2FF0' && LA31_66 <= '\u3000')||(LA31_66 >= '\uD800' && LA31_66 <= '\uF8FF')||(LA31_66 >= '\uFDD0' && LA31_66 <= '\uFDEF')||(LA31_66 >= '\uFFFE' && LA31_66 <= '\uFFFF')) ) {s = 67;}
-						else s = 39;
+						if ( ((LA31_57 >= '\u0000' && LA31_57 <= '\t')||(LA31_57 >= '\u000B' && LA31_57 <= '\f')||(LA31_57 >= '\u000E' && LA31_57 <= '\uFFFF')) ) {s = 59;}
+						else s = 99;
+						if ( s>=0 ) return s;
+						break;
+
+					case 2 : 
+						int LA31_14 = input.LA(1);
+						s = -1;
+						if ( (LA31_14=='}') ) {s = 66;}
+						else if ( ((LA31_14 >= '\u0000' && LA31_14 <= '\t')||(LA31_14 >= '\u000B' && LA31_14 <= '\f')||(LA31_14 >= '\u000E' && LA31_14 <= '!')||LA31_14=='$'||(LA31_14 >= '&' && LA31_14 <= ',')||LA31_14==':'||LA31_14=='<'||LA31_14=='>'||LA31_14=='@'||(LA31_14 >= '[' && LA31_14 <= '^')||LA31_14=='`'||LA31_14=='|'||(LA31_14 >= '~' && LA31_14 <= '\u00BF')||LA31_14=='\u00D7'||LA31_14=='\u00F7'||(LA31_14 >= '\u0300' && LA31_14 <= '\u036F')||LA31_14=='\u037E'||(LA31_14 >= '\u2000' && LA31_14 <= '\u200B')||(LA31_14 >= '\u200E' && LA31_14 <= '\u206F')||(LA31_14 >= '\u2190' && LA31_14 <= '\u2BFF')||(LA31_14 >= '\u2FF0' && LA31_14 <= '\u3000')||(LA31_14 >= '\uD800' && LA31_14 <= '\uF8FF')||(LA31_14 >= '\uFDD0' && LA31_14 <= '\uFDEF')||(LA31_14 >= '\uFFFE' && LA31_14 <= '\uFFFF')) ) {s = 67;}
+						else if ( (LA31_14=='#'||LA31_14=='%'||(LA31_14 >= '-' && LA31_14 <= '9')||LA31_14==';'||LA31_14=='='||LA31_14=='?'||(LA31_14 >= 'A' && LA31_14 <= 'Z')||LA31_14=='_'||(LA31_14 >= 'a' && LA31_14 <= '{')||(LA31_14 >= '\u00C0' && LA31_14 <= '\u00D6')||(LA31_14 >= '\u00D8' && LA31_14 <= '\u00F6')||(LA31_14 >= '\u00F8' && LA31_14 <= '\u02FF')||(LA31_14 >= '\u0370' && LA31_14 <= '\u037D')||(LA31_14 >= '\u037F' && LA31_14 <= '\u1FFF')||(LA31_14 >= '\u200C' && LA31_14 <= '\u200D')||(LA31_14 >= '\u2070' && LA31_14 <= '\u218F')||(LA31_14 >= '\u2C00' && LA31_14 <= '\u2FEF')||(LA31_14 >= '\u3001' && LA31_14 <= '\uD7FF')||(LA31_14 >= '\uF900' && LA31_14 <= '\uFDCF')||(LA31_14 >= '\uFDF0' && LA31_14 <= '\uFFFD')) ) {s = 68;}
+						else s = 65;
 						if ( s>=0 ) return s;
 						break;
 
@@ -3858,6 +3863,15 @@ public class TurtleOBDALexer extends Lexer {
 						break;
 
 					case 4 : 
+						int LA31_7 = input.LA(1);
+						s = -1;
+						if ( (LA31_7=='\"') ) {s = 54;}
+						else if ( ((LA31_7 >= '\u0000' && LA31_7 <= '\t')||(LA31_7 >= '\u000B' && LA31_7 <= '\f')||(LA31_7 >= '\u000E' && LA31_7 <= '!')||(LA31_7 >= '#' && LA31_7 <= '\uFFFF')) ) {s = 56;}
+						else s = 55;
+						if ( s>=0 ) return s;
+						break;
+
+					case 5 : 
 						int LA31_8 = input.LA(1);
 						s = -1;
 						if ( (LA31_8=='>') ) {s = 57;}
@@ -3866,20 +3880,13 @@ public class TurtleOBDALexer extends Lexer {
 						if ( s>=0 ) return s;
 						break;
 
-					case 5 : 
-						int LA31_57 = input.LA(1);
-						s = -1;
-						if ( ((LA31_57 >= '\u0000' && LA31_57 <= '\t')||(LA31_57 >= '\u000B' && LA31_57 <= '\f')||(LA31_57 >= '\u000E' && LA31_57 <= '\uFFFF')) ) {s = 59;}
-						else s = 99;
-						if ( s>=0 ) return s;
-						break;
-
 					case 6 : 
-						int LA31_7 = input.LA(1);
+						int LA31_66 = input.LA(1);
 						s = -1;
-						if ( (LA31_7=='\"') ) {s = 54;}
-						else if ( ((LA31_7 >= '\u0000' && LA31_7 <= '\t')||(LA31_7 >= '\u000B' && LA31_7 <= '\f')||(LA31_7 >= '\u000E' && LA31_7 <= '!')||(LA31_7 >= '#' && LA31_7 <= '\uFFFF')) ) {s = 56;}
-						else s = 55;
+						if ( (LA31_66=='}') ) {s = 66;}
+						else if ( (LA31_66=='#'||LA31_66=='%'||(LA31_66 >= '-' && LA31_66 <= '9')||LA31_66==';'||LA31_66=='='||LA31_66=='?'||(LA31_66 >= 'A' && LA31_66 <= 'Z')||LA31_66=='_'||(LA31_66 >= 'a' && LA31_66 <= '{')||(LA31_66 >= '\u00C0' && LA31_66 <= '\u00D6')||(LA31_66 >= '\u00D8' && LA31_66 <= '\u00F6')||(LA31_66 >= '\u00F8' && LA31_66 <= '\u02FF')||(LA31_66 >= '\u0370' && LA31_66 <= '\u037D')||(LA31_66 >= '\u037F' && LA31_66 <= '\u1FFF')||(LA31_66 >= '\u200C' && LA31_66 <= '\u200D')||(LA31_66 >= '\u2070' && LA31_66 <= '\u218F')||(LA31_66 >= '\u2C00' && LA31_66 <= '\u2FEF')||(LA31_66 >= '\u3001' && LA31_66 <= '\uD7FF')||(LA31_66 >= '\uF900' && LA31_66 <= '\uFDCF')||(LA31_66 >= '\uFDF0' && LA31_66 <= '\uFFFD')) ) {s = 68;}
+						else if ( ((LA31_66 >= '\u0000' && LA31_66 <= '\t')||(LA31_66 >= '\u000B' && LA31_66 <= '\f')||(LA31_66 >= '\u000E' && LA31_66 <= '!')||LA31_66=='$'||(LA31_66 >= '&' && LA31_66 <= ',')||LA31_66==':'||LA31_66=='<'||LA31_66=='>'||LA31_66=='@'||(LA31_66 >= '[' && LA31_66 <= '^')||LA31_66=='`'||LA31_66=='|'||(LA31_66 >= '~' && LA31_66 <= '\u00BF')||LA31_66=='\u00D7'||LA31_66=='\u00F7'||(LA31_66 >= '\u0300' && LA31_66 <= '\u036F')||LA31_66=='\u037E'||(LA31_66 >= '\u2000' && LA31_66 <= '\u200B')||(LA31_66 >= '\u200E' && LA31_66 <= '\u206F')||(LA31_66 >= '\u2190' && LA31_66 <= '\u2BFF')||(LA31_66 >= '\u2FF0' && LA31_66 <= '\u3000')||(LA31_66 >= '\uD800' && LA31_66 <= '\uF8FF')||(LA31_66 >= '\uFDD0' && LA31_66 <= '\uFDEF')||(LA31_66 >= '\uFFFE' && LA31_66 <= '\uFFFF')) ) {s = 67;}
+						else s = 39;
 						if ( s>=0 ) return s;
 						break;
 			}
