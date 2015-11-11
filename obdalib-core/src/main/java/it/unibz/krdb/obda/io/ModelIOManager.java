@@ -91,7 +91,6 @@ public class ModelIOManager {
 
         // Register available parsers for target query
         register(new TurtleOBDASyntaxParser(prefixManager));
-        register(new TurtleSyntaxParser(prefixManager));
     }
     
     private void register(TargetQueryParser parser) {

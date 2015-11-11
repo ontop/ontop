@@ -27,11 +27,8 @@ import java.awt.Dimension;
 
 public class ConfigPanel extends javax.swing.JPanel {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 602382682995021070L;
-	private QuestPreferences preference;
+    private static final long serialVersionUID = 602382682995021070L;
+    private QuestPreferences preference;
 
     /**
      * The constructor.
@@ -46,18 +43,18 @@ public class ConfigPanel extends javax.swing.JPanel {
 
     private void setSelections(QuestPreferences preference) {
 
-        String value = (String) preference.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
-        if (value.equals(QuestConstants.UCQBASED)) {
-            cmbReformulationMethods.setSelectedIndex(0);
-        }
-        else if (value.equals(QuestConstants.PERFECTREFORMULATION)) {
-            cmbReformulationMethods.setSelectedIndex(1);
-        }
+//        String value = (String) preference.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
+//        if (value.equals(QuestConstants.UCQBASED)) {
+//            cmbReformulationMethods.setSelectedIndex(0);
+//        }
+//        else if (value.equals(QuestConstants.PERFECTREFORMULATION)) {
+//            cmbReformulationMethods.setSelectedIndex(1);
+//        }
 
         boolean bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.REWRITE);
         chkRewrite.setSelected(bChecked);
 
-        value = (String) preference.getCurrentValue(QuestPreferences.ABOX_MODE);
+        String value = (String) preference.getCurrentValue(QuestPreferences.ABOX_MODE);
         if (value.equals(QuestConstants.VIRTUAL)) {
             virtualModeSelected();
         }
@@ -149,8 +146,6 @@ public class ConfigPanel extends javax.swing.JPanel {
         labelNote = new javax.swing.JLabel();
         pnlReformulationMethods = new javax.swing.JPanel();
         chkRewrite = new javax.swing.JCheckBox();
-        lblReformulationTechnique = new javax.swing.JLabel();
-        cmbReformulationMethods = new javax.swing.JComboBox();
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
         pnlABoxConfiguration = new javax.swing.JPanel();
         radVirtualObda = new javax.swing.JRadioButton();
@@ -185,7 +180,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         pnlReformulationMethods.setRequestFocusEnabled(false);
         pnlReformulationMethods.setLayout(new java.awt.GridBagLayout());
 
-        chkRewrite.setText("Enable query rewriting (disable for best performance)");
+        chkRewrite.setText("Enable reasoning over anonymous individuals (tree-witness rewriting) ");
         chkRewrite.setToolTipText("Enable only if your application requires reasoning w.r.t. to existential constants in the queries");
         chkRewrite.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         chkRewrite.addActionListener(new java.awt.event.ActionListener() {
@@ -201,33 +196,6 @@ public class ConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
         pnlReformulationMethods.add(chkRewrite, gridBagConstraints);
-
-        lblReformulationTechnique.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblReformulationTechnique.setText("Reformulation Method: ");
-        lblReformulationTechnique.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        lblReformulationTechnique.setMinimumSize(new java.awt.Dimension(150, 30));
-        lblReformulationTechnique.setPreferredSize(new java.awt.Dimension(150, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(3, 5, 5, 5);
-        pnlReformulationMethods.add(lblReformulationTechnique, gridBagConstraints);
-
-        cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Quest's reformulation", "PerfectRef", " " }));
-        cmbReformulationMethods.setEnabled(false);
-        cmbReformulationMethods.setPreferredSize(new java.awt.Dimension(280, 20));
-        cmbReformulationMethods.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbReformulationMethodsActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(3, 5, 5, 5);
-        pnlReformulationMethods.add(cmbReformulationMethods, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -504,22 +472,11 @@ public class ConfigPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_chkRewriteActionPerformed
 
-    private void cmbReformulationMethodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbReformulationMethodsActionPerformed
-        javax.swing.JComboBox cb = (javax.swing.JComboBox) evt.getSource();
-        String optValue = (String) cb.getSelectedItem();
-        if (optValue.equals(QuestConstants.PERFECTREFORMULATION)) {
-            preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.PERFECTREFORMULATION);
-        } else {
-            preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-        }
-    }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup AboxMode;
     private javax.swing.JCheckBox chkObtainFromMappings;
     private javax.swing.JCheckBox chkObtainFromOntology;
     private javax.swing.JCheckBox chkRewrite;
-    private javax.swing.JComboBox cmbReformulationMethods;
     private javax.swing.ButtonGroup datalocationGroup;
     private javax.swing.Box.Filler filler2;
     private javax.swing.JPanel fillerPanel;
@@ -527,7 +484,6 @@ public class ConfigPanel extends javax.swing.JPanel {
     private javax.swing.JLabel lblDataLocation;
     private javax.swing.JLabel lblDataSource;
     private javax.swing.JLabel lblDataStrategy;
-    private javax.swing.JLabel lblReformulationTechnique;
     private javax.swing.ButtonGroup mapper;
     private javax.swing.ButtonGroup mappingMode;
     private javax.swing.JPanel pnlABoxConfiguration;
