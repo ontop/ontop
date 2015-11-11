@@ -27,11 +27,8 @@ import java.awt.Dimension;
 
 public class ConfigPanel extends javax.swing.JPanel {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 602382682995021070L;
-	private QuestPreferences preference;
+    private static final long serialVersionUID = 602382682995021070L;
+    private QuestPreferences preference;
 
     /**
      * The constructor.
