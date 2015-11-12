@@ -32,8 +32,11 @@ import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
+import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
 
 import java.util.*;
+
+import com.google.common.collect.ImmutableList;
 
 public class DirectMappingAxiom {
 	private final DBMetadata metadata;
@@ -179,12 +182,28 @@ public class DirectMappingAxiom {
         DatabaseRelationDefinition referencedRelation = fk.getReferencedRelation();
 		Term obj = generateSubject(referencedRelation, true);
 
-		String opURI = generateOPURI(relation.getID().getTableName(), fk.getAttributes());
+		String opURI = generateOPURI(relation.getID().getTableName(), getFKAttributes(fk));
 		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
 		return Collections.singletonList(atom);
 	}
 
+    /**
+     * return the source attributes of the FK
+     *
+     * @return list of attributes
+     */
+    private static List<Attribute> getFKAttributes(ForeignKeyConstraint fk) {
+
+        List<Attribute> attributes = new ArrayList<>(fk.getComponents().size());
+        for (Component component : fk.getComponents()) {
+            attributes.add(component.getAttribute());
+        }
+
+        return attributes;
+    }
+
+	
 	// Generate an URI for class predicate from a string(name of table)
 	private String generateClassURI(String table) {
 		return baseuri + table;

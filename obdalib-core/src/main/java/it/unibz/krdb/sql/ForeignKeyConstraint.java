@@ -195,20 +195,6 @@ public class ForeignKeyConstraint {
 		return relation;
 	}
 
-    /**
-     * return the source attributes of the FK
-     *
-     * @return list of attributes
-     */
-    public ImmutableList<Attribute> getAttributes() {
-
-        List<Attribute> attributes = new ArrayList<>();
-        for (Component component : components) {
-            attributes.add(component.getAttribute());
-        }
-
-        return ImmutableList.copyOf(attributes) ;
-    }
 
 
     @Override
