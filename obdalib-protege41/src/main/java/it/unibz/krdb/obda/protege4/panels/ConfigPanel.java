@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.protege4.panels;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
-import java.awt.Dimension;
+import java.awt.*;
 
 public class ConfigPanel extends javax.swing.JPanel {
 
