@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.TermUtils;
@@ -179,32 +180,41 @@ public class DirectMappingAxiom {
 		return atoms;
 	}
 
-	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
+	private CQIE getRefCQ(String fk) {
 
-		Term sub = generateSubject((DatabaseRelationDefinition) table, true);
+		Term sub = generateSubject((TableDefinition) table, true);
+		Function atom = null;
 
-		ForeignKeyConstraint.Component fkcomp = fk.getComponents().get(0);
-		
 		// Object Atoms
 		// Foreign key reference
-		DatabaseRelationDefinition tdRef = (DatabaseRelationDefinition) fkcomp.getReference().getRelation();
-		Term obj = generateSubject(tdRef, true);
+		for (Attribute att : table.getAttributes()) {
+			if (att.isForeignKey()) {
+				Reference ref = att.getReference();
+				if (ref.getReferenceName().equals(fk)) {
+					String pkTableReference = ref.getTableReference();
+					TableDefinition tdRef = (TableDefinition) metadata
+							.getDefinition(pkTableReference);
+					Term obj = generateSubject(tdRef, true);
 
-		String opURI = generateOPURI(table.getID().getTableName(), fkcomp.getAttribute());
-		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
+					String opURI = generateOPURI(table.getName(), att);
+					atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
-		// construct the head
-		//Set<Variable> headTermsSet = new HashSet<>();
-		//TermUtils.addReferencedVariablesTo(headTermsSet, atom);
-		
-		//List<Term> headTerms = new ArrayList<>();
-		//headTerms.addAll(headTermsSet);
+					// construct the head
+					Set<Variable> headTermsSet = new HashSet<>();
+					TermUtils.addReferencedVariablesTo(headTermsSet, atom);
+					
+					List<Term> headTerms = new ArrayList<>();
+					headTerms.addAll(headTermsSet);
 
-		//Predicate headPredicate = df.getPredicate(
-		//		"http://obda.inf.unibz.it/quest/vocabulary#q",
-		//		headTerms.size());
-		//Function head = df.getFunction(headPredicate, headTerms);
-		return Collections.singletonList(atom);
+					Predicate headPredicate = df.getPredicate(
+							"http://obda.inf.unibz.it/quest/vocabulary#q",
+							headTerms.size());
+					Function head = df.getFunction(headPredicate, headTerms);
+					return df.getCQIE(head, atom);
+				}
+			}
+		}
+		return null;
 	}
 
 	// Generate an URI for class predicate from a string(name of table)
@@ -228,7 +238,7 @@ public class DirectMappingAxiom {
 //			if (a.isForeignKey() && a.getReference().getTableReference().equals(foreignTable.getName()))
 //				columnsInFK += a.getName() + ";";
 //		columnsInFK = columnsInFK.substring(0, columnsInFK.length() - 1);
-		String columnsInFK = columns.getID().getName();
+		String columnsInFK = columns.getName();
 		return baseuri + percentEncode(table) + "#ref-"  + columnsInFK;
 	}
 

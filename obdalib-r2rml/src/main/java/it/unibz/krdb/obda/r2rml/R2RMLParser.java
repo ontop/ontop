@@ -159,14 +159,14 @@ public class R2RMLParser {
 
 		if (subj != null) {
 			// craete uri("...",var)
-			subjectAtom = getURIFunction((subj), joinCond);
+			subjectAtom = getTermTypeAtom((subj), termType, joinCond);
 		}
 
 		// process column declaration
 		subj = sMap.getColumn();
 		if (subj != null) {
 			// craete uri("...",var)
-			subjectAtom = getURIFunction((subj), joinCond);
+			subjectAtom = getTermTypeAtom((subj), termType, joinCond);
 		}
 
 		// process constant declaration

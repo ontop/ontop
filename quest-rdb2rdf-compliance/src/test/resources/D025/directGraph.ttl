@@ -1,0 +1,51 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@base <http://example.com/base/> .
+
+<People/ID=7> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <People> .
+<People/ID=7> <People#ID> 7 .
+<People/ID=7> <People#fname> "Bob" .
+<People/ID=7> <People#addr> 18 .
+<People/ID=7> <People#ref-addr> <Addresses/ID=18> .
+<People/ID=7> <People#deptName> "accounting" .
+<People/ID=7> <People#deptCity> "Cambridge" .
+<People/ID=7> <People#ref-deptName;deptCity> <Department/ID=23> .
+<People/ID=8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <People> .
+<People/ID=8> <People#ID> 8 .
+<People/ID=8> <People#fname> "Sue" .
+
+<Addresses/ID=18> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Addresses> .
+<Addresses/ID=18> <Addresses#ID> 18 .
+<Addresses/ID=18> <Addresses#city> "Cambridge" .
+<Addresses/ID=18> <Addresses#state> "MA" .
+
+<Department/ID=23> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Department> .
+<Department/ID=23> <Department#ID> 23 .
+<Department/ID=23> <Department#name> "accounting" .
+<Department/ID=23> <Department#city> "Cambridge" .
+<Department/ID=23> <Department#manager> 8; .
+<Department/ID=23> <Department#ref-manager> <People/ID=8> .
+
+_:c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Projects> .
+_:c <Projects#lead> 8 .
+_:c <Projects#ref-lead> <People/ID=8> .
+_:c <Projects#name> "pencil survey" .
+_:c <Projects#deptName> "accounting" .
+_:c <Projects#deptCity> "Cambridge" .
+_:c <Projects#ref-deptName;deptCity> <Department/ID=23> .
+
+_:d <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Projects> .
+_:d <Projects#lead> 8 .
+_:d <Projects#ref-lead> <People/ID=8> .
+_:d <Projects#name> "eraser survey" .
+_:d <Projects#deptName> "accounting" .
+_:d <Projects#deptCity> "Cambridge" .
+_:d <Projects#ref-deptName;deptCity> <Department/ID=23> .
+
+<TaskAssignments/worker=7;project=pencil%20survey> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <TaskAssignments> .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#worker> 7 .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#ref-worker> <People/ID=7> .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#project> "pencil survey" .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#deptName> "accounting" .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#deptCity> "Cambridge" .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#ref-deptName;deptCity> <Department/ID=23> .
+<TaskAssignments/worker=7;project=pencil%20survey> <TaskAssignments#ref-project;deptName;deptCity> _:c .
