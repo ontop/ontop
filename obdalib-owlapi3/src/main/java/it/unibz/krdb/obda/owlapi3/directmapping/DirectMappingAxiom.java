@@ -144,7 +144,7 @@ public class DirectMappingAxiom {
 
 	public List<Function> getCQ(){
 		Term sub = generateSubject((DatabaseRelationDefinition)table, false);
-		List<Function> atoms = new ArrayList<Function>();
+		List<Function> atoms = new ArrayList<>();
 
 		//Class Atom
 		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID().getTableName())), sub));
@@ -173,11 +173,11 @@ public class DirectMappingAxiom {
 
 	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
 
-
-        DatabaseRelationDefinition relation = fk.getReferencedRelation();
+        DatabaseRelationDefinition relation = fk.getRelation();
         Term sub = generateSubject(relation, true);
 
-		Term obj = generateSubject(relation, true);
+        DatabaseRelationDefinition referencedRelation = fk.getReferencedRelation();
+		Term obj = generateSubject(referencedRelation, true);
 
 		String opURI = generateOPURI(relation.getID().getTableName(), fk.getAttributes());
 		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
@@ -234,7 +234,7 @@ public class DirectMappingAxiom {
 
 		UniqueConstraint pk = td.getPrimaryKey();
 		if (pk != null) {
-			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
+			List<Term> terms = new ArrayList<>(pk.getAttributes().size() + 1);
 			terms.add(df.getConstantLiteral(subjectTemple(td)));
 			for (Attribute att : pk.getAttributes())
 				terms.add(df.getVariable(tableName + att.getID().getName()));
@@ -250,7 +250,22 @@ public class DirectMappingAxiom {
 		}
 	}
 
+    /**
+     *
+     *
+     * - If the table has a primary key, the row node is a relative IRI obtained by concatenating:
+     *   - the percent-encoded form of the table name,
+     *   - the SOLIDUS character '/',
+     *   - for each column in the primary key, in order:
+     *     - the percent-encoded form of the column name,
+     *     - a EQUALS SIGN character '=',
+     *     - the percent-encoded lexical form of the canonical RDF literal representation of the column value as defined in R2RML section 10.2 Natural Mapping of SQL Values [R2RML],
+     &     - if it is not the last column in the primary key, a SEMICOLON character ';'
+     * - If the table has no primary key, the row node is a fresh blank node that is unique to this row.
 
+     * @param td
+     * @return
+     */
 	private String subjectTemple(DatabaseRelationDefinition td) {
 		/*
 		 * It is hard to generate a uniform temple since the number of PK

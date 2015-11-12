@@ -259,7 +259,7 @@ public class DirectMappingEngine {
 
 		DirectMappingAxiom dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
 
-		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> axioms = new ArrayList<>();
 		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+mapidx, dfac.getSQLQuery(dma.getSQL()), dma.getCQ()));
 		mapidx++;
 		
