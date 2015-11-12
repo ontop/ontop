@@ -27,8 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -528,24 +530,27 @@ public class DBMetadataExtractor {
 		RelationID id = relation.getID();
 		// Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
 		try (ResultSet rs = md.getPrimaryKeys(null, id.getSchemaName(), id.getTableName())) {
-			UniqueConstraint.Builder builder = null;
+			Map<Integer, String> primaryKeyAttributes = new HashMap<>();
 			String currentName = null;
 			while (rs.next()) {
 				// TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-				RelationID id2 = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
-				
+				RelationID id2 = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));		
 				if (id2.equals(id)) {
-					if (builder == null) {
-						builder = UniqueConstraint.builder(relation);
-						currentName = rs.getString("PK_NAME"); // may be null
-					}
-					
-					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
-					builder.add(relation.getAttribute(attrId));
+					currentName = rs.getString("PK_NAME"); // may be null			
+					String attr = rs.getString("COLUMN_NAME");
+					int seq = rs.getShort("KEY_SEQ");
+					primaryKeyAttributes.put(seq, attr);
 				}
 			}
-			if (builder != null)
+			if (!primaryKeyAttributes.isEmpty()) {
+				// use the KEY_SEQ values to restore the correct order of attributes in the PK
+				UniqueConstraint.Builder builder = UniqueConstraint.builder(relation);
+				for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(primaryKeyAttributes.get(i));
+					builder.add(relation.getAttribute(attrId));
+				}
 				relation.addUniqueConstraint(builder.build(currentName, true));
+			}
 		} 
 	}
 	
