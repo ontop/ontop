@@ -42,7 +42,7 @@ import com.google.common.collect.ImmutableList;
 
 public class ForeignKeyConstraint {
 
-	public static final class Component {
+    public static final class Component {
 		private final Attribute attribute, reference;
 		
 		private Component(Attribute attribute, Attribute reference) {
@@ -57,7 +57,9 @@ public class ForeignKeyConstraint {
 		public Attribute getReference() {
 			return reference;
 		}
-	}
+
+
+    }
 	
 	public static final class Builder {
 		private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
@@ -192,8 +194,24 @@ public class ForeignKeyConstraint {
 	public DatabaseRelationDefinition getRelation() {
 		return relation;
 	}
-	
-	@Override
+
+    /**
+     * return the source attributes of the FK
+     *
+     * @return list of attributes
+     */
+    public ImmutableList<Attribute> getAttributes() {
+
+        List<Attribute> attributes = new ArrayList<>();
+        for (Component component : components) {
+            attributes.add(component.getAttribute());
+        }
+
+        return ImmutableList.copyOf(attributes) ;
+    }
+
+
+    @Override
 	public String toString() {
 		List<String> columns = new ArrayList<>(components.size());
 		List<String> refColumns = new ArrayList<>(components.size());

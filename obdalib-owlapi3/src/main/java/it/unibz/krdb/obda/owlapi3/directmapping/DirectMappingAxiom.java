@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  * #L%
  */
 
-import com.google.common.base.Joiner;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.TermUtils;
@@ -42,7 +41,7 @@ public class DirectMappingAxiom {
 	private String SQLString;
 	private final String baseuri;
 	private final OBDADataFactory df;
-	
+
 	public DirectMappingAxiom(String baseuri, RelationDefinition dd,
 			DBMetadata obda_md, OBDADataFactory dfac) {
 		this.table = dd;
@@ -51,7 +50,7 @@ public class DirectMappingAxiom {
 		this.df = dfac;
 		if (baseuri == null)
 			throw new IllegalArgumentException("Base uri must be specified!");
-		
+
 		this.baseuri = baseuri;
 	}
 
@@ -82,18 +81,18 @@ public class DirectMappingAxiom {
 		String Column = "";
 		String Condition = "";
 		RelationID tableRef0 = null;
-		
+
 		{
 			UniqueConstraint pk = tableDef.getPrimaryKey();
-			List<Attribute> attributes;		
-			if (pk != null) 
+			List<Attribute> attributes;
+			if (pk != null)
 				attributes = pk.getAttributes();
-			else 
+			else
 				attributes = tableDef.getAttributes();
 
 			for (Attribute att : attributes) {
 				QuotedID attrName = att.getID();
-				Column += table.getSQLRendering() + "." + attrName.getSQLRendering() + " AS " + 
+				Column += table.getSQLRendering() + "." + attrName.getSQLRendering() + " AS " +
 						   table.getTableName() + "_" + attrName.getName() + ", ";
 			}
 		}
@@ -129,7 +128,7 @@ public class DirectMappingAxiom {
 						if (!Column.contains(refPki))
 							Column += ", " + refPki + " AS " + tableRef0.getTableName() + "_" + attrName.getName();
 					}
-				} 
+				}
 				else {
 					for (Attribute att : tdef.getAttributes()) {
 						QuotedID attrName = att.getID();
@@ -139,18 +138,18 @@ public class DirectMappingAxiom {
 				}
 			}
 		}
-		
+
 		return String.format(SQLStringTempl, Column, Table, Condition);
 	}
 
 	public List<Function> getCQ(){
 		Term sub = generateSubject((DatabaseRelationDefinition)table, false);
 		List<Function> atoms = new ArrayList<Function>();
-		
+
 		//Class Atom
 		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID().getTableName())), sub));
-		
-		
+
+
 		//DataType Atoms
 		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
 		for (Attribute att : table.getAttributes()) {
@@ -160,7 +159,7 @@ public class DirectMappingAxiom {
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getID().getTableName(), att.getID().getName())), sub, objV));
-			} 
+			}
 			else {
 				Function obj = df.getTypedTerm(df.getVariable(att.getID().getName()), type);
 				atoms.add(df.getFunction(
@@ -168,53 +167,22 @@ public class DirectMappingAxiom {
 								table.getID().getTableName(), att.getID().getName())), sub, obj));
 			}
 		}
-	
-		//To construct the head, there is no static field about this predicate
-		//List<Term> headTerms = new ArrayList<>(table.getAttributes().size());
-		//for (Attribute att : table.getAttributes())
-		//	headTerms.add(df.getVariable(att.getID().getName()));
-		
-		//Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
-		//Function head = df.getFunction(headPredicate, headTerms);
-		
+
 		return atoms;
 	}
 
-	private CQIE getRefCQ(String fk) {
+	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
 
-		Term sub = generateSubject((TableDefinition) table, true);
-		Function atom = null;
 
-		// Object Atoms
-		// Foreign key reference
-		for (Attribute att : table.getAttributes()) {
-			if (att.isForeignKey()) {
-				Reference ref = att.getReference();
-				if (ref.getReferenceName().equals(fk)) {
-					String pkTableReference = ref.getTableReference();
-					TableDefinition tdRef = (TableDefinition) metadata
-							.getDefinition(pkTableReference);
-					Term obj = generateSubject(tdRef, true);
+        DatabaseRelationDefinition relation = fk.getReferencedRelation();
+        Term sub = generateSubject(relation, true);
 
-					String opURI = generateOPURI(table.getName(), att);
-					atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
+		Term obj = generateSubject(relation, true);
 
-					// construct the head
-					Set<Variable> headTermsSet = new HashSet<>();
-					TermUtils.addReferencedVariablesTo(headTermsSet, atom);
-					
-					List<Term> headTerms = new ArrayList<>();
-					headTerms.addAll(headTermsSet);
+		String opURI = generateOPURI(relation.getID().getTableName(), fk.getAttributes());
+		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
-					Predicate headPredicate = df.getPredicate(
-							"http://obda.inf.unibz.it/quest/vocabulary#q",
-							headTerms.size());
-					Function head = df.getFunction(headPredicate, headTerms);
-					return df.getCQIE(head, atom);
-				}
-			}
-		}
-		return null;
+		return Collections.singletonList(atom);
 	}
 
 	// Generate an URI for class predicate from a string(name of table)
@@ -231,21 +199,30 @@ public class DirectMappingAxiom {
 		return baseuri + percentEncode(table) + "#" + percentEncode(column);
 	}
 
-	// Generate an URI for object property from a string(name of column)
-	private String generateOPURI(String table, Attribute columns) {
-//		String columnsInFK = "";
-//		for (Attribute a : columns)
-//			if (a.isForeignKey() && a.getReference().getTableReference().equals(foreignTable.getName()))
-//				columnsInFK += a.getName() + ";";
-//		columnsInFK = columnsInFK.substring(0, columnsInFK.length() - 1);
-		String columnsInFK = columns.getName();
-		return baseuri + percentEncode(table) + "#ref-"  + columnsInFK;
-	}
+    /*
+     * Generate an URI for object property from a string(name of column)
+     *
+     * <http://www.w3.org/TR/rdb-direct-mapping/>
+     *
+     * Definition reference property IRI: the concatenation of:
+     *   - the percent-encoded form of the table name,
+     *   - the string '#ref-',
+     *   - for each column in the foreign key, in order:
+     *     - the percent-encoded form of the column name,
+     *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
+     */
+    private String generateOPURI(String table, List<Attribute> columns) {
+        StringBuilder columnsInFK = new StringBuilder();
+        for (Attribute a : columns)
+            columnsInFK.append(a.getID().getName()).append(";");
+        columnsInFK.setLength(columnsInFK.length() - 1);
+        return baseuri + percentEncode(table) + "#ref-" + columnsInFK;
+    }
 
 	/*
 	 * Generate the subject term of the table
-	 * 
-	 * 
+	 *
+	 *
 	 * TODO replace URI predicate to BNode predicate for tables without PKs in
 	 * the following method after 'else'
 	 */
@@ -254,26 +231,26 @@ public class DirectMappingAxiom {
 		String tableName = "";
 		if (ref)
 			tableName = percentEncode(td.getID().getTableName()) + "_";
-		
-		UniqueConstraint pk = td.getPrimaryKey();	
+
+		UniqueConstraint pk = td.getPrimaryKey();
 		if (pk != null) {
 			List<Term> terms = new ArrayList<Term>(pk.getAttributes().size() + 1);
 			terms.add(df.getConstantLiteral(subjectTemple(td)));
-			for (Attribute att : pk.getAttributes()) 
+			for (Attribute att : pk.getAttributes())
 				terms.add(df.getVariable(tableName + att.getID().getName()));
-			
+
 			return df.getUriTemplate(terms);
-		} 
+		}
 		else {
 			List<Term> vars = new ArrayList<>(td.getAttributes().size());
-			for (Attribute att : td.getAttributes()) 
+			for (Attribute att : td.getAttributes())
 				vars.add(df.getVariable(tableName + att.getID().getName()));
 
 			return df.getBNodeTemplate(vars);
 		}
 	}
 
-	
+
 	private String subjectTemple(DatabaseRelationDefinition td) {
 		/*
 		 * It is hard to generate a uniform temple since the number of PK
