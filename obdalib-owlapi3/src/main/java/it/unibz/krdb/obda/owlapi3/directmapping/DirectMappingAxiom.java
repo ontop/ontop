@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.RelationID;
@@ -35,17 +34,12 @@ import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
 import java.util.*;
 
 public class DirectMappingAxiom {
-	private final DBMetadata metadata;
 	private final DatabaseRelationDefinition table;
-	private String SQLString;
 	private final String baseuri;
 	private final OBDADataFactory df;
 
-	public DirectMappingAxiom(String baseuri, DatabaseRelationDefinition dd,
-			DBMetadata obda_md, OBDADataFactory dfac) {
+	public DirectMappingAxiom(String baseuri, DatabaseRelationDefinition dd, OBDADataFactory dfac) {
 		this.table = dd;
-		this.SQLString = "";
-		this.metadata = obda_md;
 		this.df = dfac;
 		if (baseuri == null)
 			throw new IllegalArgumentException("Base uri must be specified!");
@@ -55,24 +49,19 @@ public class DirectMappingAxiom {
 
 
 	public String getSQL() {
-		String SQLStringTemple = "SELECT * FROM %s";
-
-		SQLString = String.format(SQLStringTemple, table.getID().getSQLRendering());
-		return SQLString;
+		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
 	public Map<String, List<Function>> getRefAxioms() {
-		HashMap<String, List<Function>> refAxioms = new HashMap<>();
-		List<ForeignKeyConstraint> fks = table.getForeignKeys();
-		for (ForeignKeyConstraint fk : fks) {
+		Map<String, List<Function>> refAxioms = new HashMap<>();
+		for (ForeignKeyConstraint fk : table.getForeignKeys()) 
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
-		}
+		
 		return refAxioms;
 	}
 
 	private String getRefSQL(ForeignKeyConstraint fk) {
 
-		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
 		String Column = "";
 
 		{
@@ -83,32 +72,21 @@ public class DirectMappingAxiom {
 			else
 				attributes = table.getAttributes();
 
-			for (Attribute att : attributes) {
-				QuotedID attrName = att.getID();
-				Column += getFullyQualifiedColumnName(table.getID(), attrName) + " AS " +
-						getAlias(table.getID(), attrName) + ", ";
-			}
+			for (Attribute att : attributes) 
+				Column += getFullyQualifiedColumnNameWithAlias(table.getID(), att.getID());
 		}
 
-		String Table = table.getID().getSQLRendering();
 		String Condition = "";
-		// ROMAN: I'm not sure one tableRef is enough here in case of many foreign keys
-		RelationID tableRef0 = null;
+		final DatabaseRelationDefinition tableRef = fk.getReferencedRelation();
+		final String Table = table.getID().getSQLRendering() + ", " + tableRef.getID().getSQLRendering();
 		
 		// referring object
 		int count = 0;
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			Condition += getFullyQualifiedColumnName(table.getID(), comp.getAttribute().getID()) + " = ";
-
-			// get referenced object
-			tableRef0 = comp.getReference().getRelation().getID();
-			if (count == 0)
-				Table += ", " + tableRef0.getSQLRendering();
-			QuotedID columnRef0 = comp.getReference().getID();
-			Column += getFullyQualifiedColumnName(tableRef0, columnRef0) + " AS "
-					+ getAlias(tableRef0, columnRef0);
-
-			Condition += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering();
+			Column += getFullyQualifiedColumnNameWithAlias(tableRef.getID(), comp.getReference().getID());
+			
+			Condition += getFullyQualifiedColumnName(table.getID(), comp.getAttribute().getID()) + 
+							" = " + getFullyQualifiedColumnName(tableRef.getID(), comp.getReference().getID());
 
 			if (count < fk.getComponents().size() - 1) {
 				Column += ", ";
@@ -116,36 +94,33 @@ public class DirectMappingAxiom {
 			}
 			count++;
 		}
-		for (DatabaseRelationDefinition tdef : metadata.getDatabaseRelations()) {
-			if (tdef.getID().equals(tableRef0)) {
-				UniqueConstraint pk = tdef.getPrimaryKey();
-				if (pk != null) {
-					for (Attribute att : pk.getAttributes()) {
-						QuotedID attrName = att.getID();
-						String refPki = getFullyQualifiedColumnName(tableRef0, attrName);
-						if (!Column.contains(refPki))
-							Column += ", " + refPki + " AS " + getAlias(tableRef0, attrName);
-					}
+		{
+			UniqueConstraint pk = tableRef.getPrimaryKey();
+			if (pk != null) {
+				for (Attribute att : pk.getAttributes()) {
+					QuotedID attrName = att.getID();
+					String refPki = getFullyQualifiedColumnName(tableRef.getID(), attrName);
+					if (!Column.contains(refPki))
+						Column += ", " + getFullyQualifiedColumnNameWithAlias(tableRef.getID(), attrName);
 				}
-				else {
-					for (Attribute att : tdef.getAttributes()) {
-						QuotedID attrName = att.getID();
-						Column += ", " + getFullyQualifiedColumnName(tableRef0, attrName) +
-								" AS " + getAlias(tableRef0, attrName);
-					}
+			}
+			else {
+				for (Attribute att : tableRef.getAttributes()) {
+					QuotedID attrName = att.getID();
+					Column += ", " + getFullyQualifiedColumnNameWithAlias(tableRef.getID(), attrName);
 				}
 			}
 		}
-
-		return String.format(SQLStringTempl, Column, Table, Condition);
+		return String.format("SELECT %s FROM %s WHERE %s", Column, Table, Condition);
 	}
 
-	private static String getFullyQualifiedColumnName(RelationID tableId, QuotedID attrId) {
-		 return tableId.getSQLRendering() + "." + attrId.getSQLRendering();
+	private static String getFullyQualifiedColumnNameWithAlias(RelationID tableId, QuotedID attrId) {
+		 return getFullyQualifiedColumnName(tableId, attrId) + 
+				 " AS " + tableId.getTableName() + "_" + attrId.getName();
 	}
 	
-	private static String getAlias(RelationID tableId, QuotedID attrId) {
-		return tableId.getTableName() + "_" + attrId.getName();
+	private static String getFullyQualifiedColumnName(RelationID tableId, QuotedID attrId) {
+		 return tableId.getSQLRendering() + "." + attrId.getSQLRendering();
 	}
 	
 	public List<Function> getCQ() {
