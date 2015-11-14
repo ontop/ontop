@@ -33,13 +33,13 @@ import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
 
 import java.util.*;
 
+import com.google.common.base.Joiner;
+
 public class DirectMappingAxiom {
-	private final DatabaseRelationDefinition table;
 	private final String baseuri;
 	private final OBDADataFactory df;
 
-	public DirectMappingAxiom(String baseuri, DatabaseRelationDefinition dd, OBDADataFactory dfac) {
-		this.table = dd;
+	public DirectMappingAxiom(String baseuri, OBDADataFactory dfac) {
 		this.df = dfac;
 		if (baseuri == null)
 			throw new IllegalArgumentException("Base uri must be specified!");
@@ -48,103 +48,81 @@ public class DirectMappingAxiom {
 	}
 
 
-	public String getSQL() {
+	public String getSQL(DatabaseRelationDefinition table) {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public Map<String, List<Function>> getRefAxioms() {
+	public Map<String, List<Function>> getRefAxioms(DatabaseRelationDefinition table) {
 		Map<String, List<Function>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys()) 
-			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
+			refAxioms.put(getRefSQL(table, fk), getRefCQ(fk));
 		
 		return refAxioms;
 	}
 
-	private String getRefSQL(ForeignKeyConstraint fk) {
+	private String getRefSQL(DatabaseRelationDefinition table, ForeignKeyConstraint fk) {
 
-		String Column = "";
+		List<String> Columns = new LinkedList<>();
+		for (Attribute attr : getIdentifyingAttributes(table)) 
+			Columns.add(getFullyQualifiedColumnNameWithAlias(attr));
 
-		{
-			UniqueConstraint pk = table.getPrimaryKey();
-			List<Attribute> attributes;
-			if (pk != null)
-				attributes = pk.getAttributes();
-			else
-				attributes = table.getAttributes();
-
-			for (Attribute att : attributes) 
-				Column += getFullyQualifiedColumnNameWithAlias(table.getID(), att.getID());
-		}
-
-		String Condition = "";
-		final DatabaseRelationDefinition tableRef = fk.getReferencedRelation();
-		final String Table = table.getID().getSQLRendering() + ", " + tableRef.getID().getSQLRendering();
-		
-		// referring object
-		int count = 0;
+		List<String> Conditions = new LinkedList<>();	
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			Column += getFullyQualifiedColumnNameWithAlias(tableRef.getID(), comp.getReference().getID());
+			Columns.add(getFullyQualifiedColumnNameWithAlias(comp.getReference()));
 			
-			Condition += getFullyQualifiedColumnName(table.getID(), comp.getAttribute().getID()) + 
-							" = " + getFullyQualifiedColumnName(tableRef.getID(), comp.getReference().getID());
+			Conditions.add(getFullyQualifiedColumnName(comp.getAttribute()) + 
+							" = " + getFullyQualifiedColumnName(comp.getReference()));
+		}
+		
+		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) {
+			String refPki = getFullyQualifiedColumnNameWithAlias(attr);
+			if (!Columns.contains(refPki))
+				Columns.add(refPki);
+		}
 
-			if (count < fk.getComponents().size() - 1) {
-				Column += ", ";
-				Condition += " AND ";
-			}
-			count++;
-		}
-		{
-			UniqueConstraint pk = tableRef.getPrimaryKey();
-			if (pk != null) {
-				for (Attribute att : pk.getAttributes()) {
-					QuotedID attrName = att.getID();
-					String refPki = getFullyQualifiedColumnName(tableRef.getID(), attrName);
-					if (!Column.contains(refPki))
-						Column += ", " + getFullyQualifiedColumnNameWithAlias(tableRef.getID(), attrName);
-				}
-			}
-			else {
-				for (Attribute att : tableRef.getAttributes()) {
-					QuotedID attrName = att.getID();
-					Column += ", " + getFullyQualifiedColumnNameWithAlias(tableRef.getID(), attrName);
-				}
-			}
-		}
-		return String.format("SELECT %s FROM %s WHERE %s", Column, Table, Condition);
+		final String Table = table.getID().getSQLRendering() + ", " + fk.getReferencedRelation().getID().getSQLRendering();
+		
+		return String.format("SELECT %s FROM %s WHERE %s", 
+				Joiner.on(", ").join(Columns), Table, Joiner.on(" AND ").join(Conditions));
 	}
 
-	private static String getFullyQualifiedColumnNameWithAlias(RelationID tableId, QuotedID attrId) {
-		 return getFullyQualifiedColumnName(tableId, attrId) + 
-				 " AS " + tableId.getTableName() + "_" + attrId.getName();
+	private static List<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
+		UniqueConstraint pk = table.getPrimaryKey();
+		if (pk != null)
+			return pk.getAttributes();
+		else
+			return table.getAttributes();
 	}
 	
-	private static String getFullyQualifiedColumnName(RelationID tableId, QuotedID attrId) {
-		 return tableId.getSQLRendering() + "." + attrId.getSQLRendering();
+	private static String getFullyQualifiedColumnNameWithAlias(Attribute attr) {
+		 return getFullyQualifiedColumnName(attr) + 
+				 " AS " + attr.getRelation().getID().getTableName() + "_" + attr.getID().getName();
 	}
 	
-	public List<Function> getCQ() {
+	private static String getFullyQualifiedColumnName(Attribute attr) {
+		 return attr.getRelation().getID().getSQLRendering() + "." + attr.getID().getSQLRendering();
+	}
+	
+	public List<Function> getCQ(DatabaseRelationDefinition table) {
 		Term sub = generateSubject(table, false);
-		List<Function> atoms = new LinkedList<>();
+		List<Function> atoms = new ArrayList<>(table.getAttributes().size() + 1);
 
 		//Class Atom
 		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID())), sub));
-
 
 		//DataType Atoms
 		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
-			if (type == COL_TYPE.LITERAL) {
-				Variable objV = df.getVariable(att.getID().getName());
-				atoms.add(df.getFunction(
-						df.getDataPropertyPredicate(generateDPURI(table.getID(), att.getID())), sub, objV));
-			}
-			else {
-				Function obj = df.getTypedTerm(df.getVariable(att.getID().getName()), type);
-				atoms.add(df.getFunction(
-						df.getDataPropertyPredicate(generateDPURI(table.getID(), att.getID())), sub, obj));
-			}
+			Variable objV = df.getVariable(att.getID().getName());
+			Term obj;
+			if (type == COL_TYPE.LITERAL) 
+				obj = objV;
+			else 
+				obj = df.getTypedTerm(objV, type);
+			
+			atoms.add(df.getFunction(
+					df.getDataPropertyPredicate(generateDPURI(table.getID(), att.getID())), sub, obj));
 		}
 
 		return atoms;
