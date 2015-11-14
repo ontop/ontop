@@ -22,12 +22,10 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QuotedID;
-import it.unibz.krdb.sql.RelationDefinition;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
@@ -36,16 +34,14 @@ import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
 
 import java.util.*;
 
-import com.google.common.collect.ImmutableList;
-
 public class DirectMappingAxiom {
 	private final DBMetadata metadata;
-	private final RelationDefinition table;
+	private final DatabaseRelationDefinition table;
 	private String SQLString;
 	private final String baseuri;
 	private final OBDADataFactory df;
 
-	public DirectMappingAxiom(String baseuri, RelationDefinition dd,
+	public DirectMappingAxiom(String baseuri, DatabaseRelationDefinition dd,
 			DBMetadata obda_md, OBDADataFactory dfac) {
 		this.table = dd;
 		this.SQLString = "";
@@ -67,7 +63,7 @@ public class DirectMappingAxiom {
 
 	public Map<String, List<Function>> getRefAxioms() {
 		HashMap<String, List<Function>> refAxioms = new HashMap<>();
-		List<ForeignKeyConstraint> fks = ((DatabaseRelationDefinition) table).getForeignKeys();
+		List<ForeignKeyConstraint> fks = table.getForeignKeys();
 		for (ForeignKeyConstraint fk : fks) {
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		}
@@ -75,43 +71,42 @@ public class DirectMappingAxiom {
 	}
 
 	private String getRefSQL(ForeignKeyConstraint fk) {
-		DatabaseRelationDefinition tableDef = ((DatabaseRelationDefinition) table);
 
 		String SQLStringTempl = "SELECT %s FROM %s WHERE %s";
-
-		RelationID table = this.table.getID();
-		String Table = table.getSQLRendering();
 		String Column = "";
-		String Condition = "";
-		RelationID tableRef0 = null;
 
 		{
-			UniqueConstraint pk = tableDef.getPrimaryKey();
+			UniqueConstraint pk = table.getPrimaryKey();
 			List<Attribute> attributes;
 			if (pk != null)
 				attributes = pk.getAttributes();
 			else
-				attributes = tableDef.getAttributes();
+				attributes = table.getAttributes();
 
 			for (Attribute att : attributes) {
 				QuotedID attrName = att.getID();
-				Column += table.getSQLRendering() + "." + attrName.getSQLRendering() + " AS " +
-						   table.getTableName() + "_" + attrName.getName() + ", ";
+				Column += getFullyQualifiedColumnName(table.getID(), attrName) + " AS " +
+						getAlias(table.getID(), attrName) + ", ";
 			}
 		}
 
+		String Table = table.getID().getSQLRendering();
+		String Condition = "";
+		// ROMAN: I'm not sure one tableRef is enough here in case of many foreign keys
+		RelationID tableRef0 = null;
+		
 		// referring object
 		int count = 0;
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			Condition += table + ".\"" + comp.getAttribute().getID().getName() + "\" = ";
+			Condition += getFullyQualifiedColumnName(table.getID(), comp.getAttribute().getID()) + " = ";
 
 			// get referenced object
 			tableRef0 = comp.getReference().getRelation().getID();
 			if (count == 0)
 				Table += ", " + tableRef0.getSQLRendering();
 			QuotedID columnRef0 = comp.getReference().getID();
-			Column += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering() + " AS "
-					+ tableRef0.getTableName() + "_" + columnRef0.getName();
+			Column += getFullyQualifiedColumnName(tableRef0, columnRef0) + " AS "
+					+ getAlias(tableRef0, columnRef0);
 
 			Condition += tableRef0.getSQLRendering() + "." + columnRef0.getSQLRendering();
 
@@ -127,16 +122,16 @@ public class DirectMappingAxiom {
 				if (pk != null) {
 					for (Attribute att : pk.getAttributes()) {
 						QuotedID attrName = att.getID();
-						String refPki = tableRef0.getSQLRendering() + "." + attrName.getSQLRendering();
+						String refPki = getFullyQualifiedColumnName(tableRef0, attrName);
 						if (!Column.contains(refPki))
-							Column += ", " + refPki + " AS " + tableRef0.getTableName() + "_" + attrName.getName();
+							Column += ", " + refPki + " AS " + getAlias(tableRef0, attrName);
 					}
 				}
 				else {
 					for (Attribute att : tdef.getAttributes()) {
 						QuotedID attrName = att.getID();
-						Column += ", " + tableRef0.getSQLRendering() + "." + attrName.getSQLRendering() +
-								" AS " + tableRef0.getTableName() + "_" + attrName.getName();
+						Column += ", " + getFullyQualifiedColumnName(tableRef0, attrName) +
+								" AS " + getAlias(tableRef0, attrName);
 					}
 				}
 			}
@@ -145,12 +140,20 @@ public class DirectMappingAxiom {
 		return String.format(SQLStringTempl, Column, Table, Condition);
 	}
 
-	public List<Function> getCQ(){
-		Term sub = generateSubject((DatabaseRelationDefinition)table, false);
-		List<Function> atoms = new ArrayList<>();
+	private static String getFullyQualifiedColumnName(RelationID tableId, QuotedID attrId) {
+		 return tableId.getSQLRendering() + "." + attrId.getSQLRendering();
+	}
+	
+	private static String getAlias(RelationID tableId, QuotedID attrId) {
+		return tableId.getTableName() + "_" + attrId.getName();
+	}
+	
+	public List<Function> getCQ() {
+		Term sub = generateSubject(table, false);
+		List<Function> atoms = new LinkedList<>();
 
 		//Class Atom
-		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID().getTableName())), sub));
+		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID())), sub));
 
 
 		//DataType Atoms
@@ -160,14 +163,12 @@ public class DirectMappingAxiom {
 			if (type == COL_TYPE.LITERAL) {
 				Variable objV = df.getVariable(att.getID().getName());
 				atoms.add(df.getFunction(
-						df.getDataPropertyPredicate(generateDPURI(
-								table.getID().getTableName(), att.getID().getName())), sub, objV));
+						df.getDataPropertyPredicate(generateDPURI(table.getID(), att.getID())), sub, objV));
 			}
 			else {
 				Function obj = df.getTypedTerm(df.getVariable(att.getID().getName()), type);
 				atoms.add(df.getFunction(
-						df.getDataPropertyPredicate(generateDPURI(
-								table.getID().getTableName(), att.getID().getName())), sub, obj));
+						df.getDataPropertyPredicate(generateDPURI(table.getID(), att.getID())), sub, obj));
 			}
 		}
 
@@ -182,31 +183,15 @@ public class DirectMappingAxiom {
         DatabaseRelationDefinition referencedRelation = fk.getReferencedRelation();
 		Term obj = generateSubject(referencedRelation, true);
 
-		String opURI = generateOPURI(relation.getID().getTableName(), getFKAttributes(fk));
+		String opURI = generateOPURI(relation.getID(), fk);
 		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
 
 		return Collections.singletonList(atom);
 	}
 
-    /**
-     * return the source attributes of the FK
-     *
-     * @return list of attributes
-     */
-    private static List<Attribute> getFKAttributes(ForeignKeyConstraint fk) {
-
-        List<Attribute> attributes = new ArrayList<>(fk.getComponents().size());
-        for (Component component : fk.getComponents()) {
-            attributes.add(component.getAttribute());
-        }
-
-        return attributes;
-    }
-
-	
 	// Generate an URI for class predicate from a string(name of table)
-	private String generateClassURI(String table) {
-		return baseuri + table;
+	private String generateClassURI(RelationID tableId) {
+		return baseuri + tableId.getTableName();
 	}
 
 	/*
@@ -214,8 +199,8 @@ public class DirectMappingAxiom {
 	 * style should be "baseuri/tablename#columnname" as required in Direct
 	 * Mapping Definition
 	 */
-	private String generateDPURI(String table, String column) {
-		return baseuri + percentEncode(table) + "#" + percentEncode(column);
+	private String generateDPURI(RelationID tableId, QuotedID columnId) {
+		return baseuri + percentEncode(tableId.getTableName()) + "#" + percentEncode(columnId.getName());
 	}
 
     /*
@@ -230,12 +215,14 @@ public class DirectMappingAxiom {
      *     - the percent-encoded form of the column name,
      *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
      */
-    private String generateOPURI(String table, List<Attribute> columns) {
+    private String generateOPURI(RelationID tableId, ForeignKeyConstraint fk) {
         StringBuilder columnsInFK = new StringBuilder();
-        for (Attribute a : columns)
-            columnsInFK.append(a.getID().getName()).append(";");
-        columnsInFK.setLength(columnsInFK.length() - 1);
-        return baseuri + percentEncode(table) + "#ref-" + columnsInFK;
+
+ 		for (Component component : fk.getComponents())
+            columnsInFK.append(component.getAttribute().getID().getName()).append(";");
+        columnsInFK.setLength(columnsInFK.length() - 1); // remove the trailing ;
+        
+        return baseuri + percentEncode(tableId.getTableName()) + "#ref-" + columnsInFK;
     }
 
 	/*
@@ -245,8 +232,8 @@ public class DirectMappingAxiom {
 	 * TODO replace URI predicate to BNode predicate for tables without PKs in
 	 * the following method after 'else'
 	 */
-	private Term generateSubject(DatabaseRelationDefinition td,
-			boolean ref) {
+	private Term generateSubject(DatabaseRelationDefinition td, boolean ref) {
+		
 		String tableName = "";
 		if (ref)
 			tableName = percentEncode(td.getID().getTableName()) + "_";
@@ -296,7 +283,7 @@ public class DirectMappingAxiom {
 		String temp = baseuri + percentEncode(td.getID().getTableName()) + "/";
 		for (Attribute att : td.getPrimaryKey().getAttributes()) {
 			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
-			temp+=percentEncode(att.getID().getName())+"={};";
+			temp += percentEncode(att.getID().getName())+"={};";
 		}
 		// remove the last "." which is not neccesary
 		temp = temp.substring(0, temp.length() - 1);

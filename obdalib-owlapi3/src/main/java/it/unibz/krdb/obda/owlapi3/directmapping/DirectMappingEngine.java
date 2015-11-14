@@ -254,7 +254,7 @@ public class DirectMappingEngine {
 	 *  @return a List of OBDAMappingAxiom-s
 	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(RelationDefinition table, DBMetadata metadata, String baseUri) throws Exception {
+	public List<OBDAMappingAxiom> getMapping(DatabaseRelationDefinition table, DBMetadata metadata, String baseUri) throws Exception {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 		DirectMappingAxiom dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
