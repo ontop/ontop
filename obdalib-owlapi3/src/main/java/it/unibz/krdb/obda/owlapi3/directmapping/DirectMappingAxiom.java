@@ -165,38 +165,6 @@ public class DirectMappingAxiom {
         return baseuri + percentEncode(fk.getRelation().getID().getTableName()) + "#ref-" + Joiner.on(";").join(attributes);
     }
 
-	/*
-	 * Generate the subject term of the table
-	 *
-	 *
-	 * TODO replace URI predicate to BNode predicate for tables without PKs in
-	 * the following method after 'else'
-	 */
-	private Term generateSubject(DatabaseRelationDefinition td, boolean ref) {
-		
-		String varNamePrefix = "";
-		if (ref)
-			varNamePrefix = percentEncode(td.getID().getTableName()) + "_"; // ROMAN 15 Nov: why is this percent encoded?
-		                                                                // is this not the name of the alias?
-
-		UniqueConstraint pk = td.getPrimaryKey();
-		if (pk != null) {
-			List<Term> terms = new ArrayList<>(pk.getAttributes().size() + 1);
-			terms.add(df.getConstantLiteral(subjectTemplate(td)));
-			for (Attribute att : pk.getAttributes())
-				terms.add(df.getVariable(varNamePrefix + att.getID().getName()));
-
-			return df.getUriTemplate(terms);
-		}
-		else {
-			List<Term> vars = new ArrayList<>(td.getAttributes().size());
-			for (Attribute att : td.getAttributes())
-				vars.add(df.getVariable(varNamePrefix + att.getID().getName()));
-
-			return df.getBNodeTemplate(vars);
-		}
-	}
-
     /**
      * - If the table has a primary key, the row node is a relative IRI obtained by concatenating:
      *   - the percent-encoded form of the table name,
@@ -211,22 +179,39 @@ public class DirectMappingAxiom {
      * @param td
      * @return
      */
-	private String subjectTemplate(DatabaseRelationDefinition td) {
-		/*
-		 * It is hard to generate a uniform temple since the number of PK
-		 * differs For example, the subject uri temple with one pk should be
-		 * like: baseuri+tablename/PKcolumnname={}('col={}...) For table with
-		 * more than one pk columns, there will be a ";" between column names
-		 */
 
-		List<String> attributes = new ArrayList<>(td.getPrimaryKey().getAttributes().size());
-		for (Attribute att : td.getPrimaryKey().getAttributes()) 
-			attributes.add(percentEncode(att.getID().getName()) + "={}");
-
-		// ROMAN 15 Nov 2015: what if there is no PK?
+    private Term generateSubject(DatabaseRelationDefinition td, boolean ref) {
 		
-		return baseuri + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
+		String varNamePrefix = "";
+		if (ref)
+			varNamePrefix = percentEncode(td.getID().getTableName()) + "_"; // ROMAN 15 Nov: why is this percent encoded?
+		                                                                // is this not the name of the alias?
+
+		UniqueConstraint pk = td.getPrimaryKey();
+		if (pk != null) {
+			List<Term> terms = new ArrayList<>(pk.getAttributes().size() + 1);
+			
+			List<String> attributes = new ArrayList<>(pk.getAttributes().size());
+			for (Attribute att : pk.getAttributes()) 
+				attributes.add(percentEncode(att.getID().getName()) + "={}");
+			
+			String template = baseuri + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
+			terms.add(df.getConstantLiteral(template));
+			
+			for (Attribute att : pk.getAttributes())
+				terms.add(df.getVariable(varNamePrefix + att.getID().getName()));
+
+			return df.getUriTemplate(terms);
+		}
+		else {
+			List<Term> vars = new ArrayList<>(td.getAttributes().size());
+			for (Attribute att : td.getAttributes())
+				vars.add(df.getVariable(varNamePrefix + att.getID().getName()));
+
+			return df.getBNodeTemplate(vars);
+		}
 	}
+
 
 	/*
 	 * percent encoding for a String
