@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
@@ -55,35 +54,31 @@ public class DirectMappingAxiom {
 	public Map<String, List<Function>> getRefAxioms(DatabaseRelationDefinition table) {
 		Map<String, List<Function>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys()) 
-			refAxioms.put(getRefSQL(table, fk), getRefCQ(fk));
+			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		
 		return refAxioms;
 	}
 
-	private String getRefSQL(DatabaseRelationDefinition table, ForeignKeyConstraint fk) {
+	private String getRefSQL(ForeignKeyConstraint fk) {
 
-		List<String> Columns = new LinkedList<>();
-		for (Attribute attr : getIdentifyingAttributes(table)) 
-			Columns.add(getColumnNameWithAlias(attr));
+		Set<Object> columns = new LinkedHashSet<>(); // Set avoids duplicated and LinkedHashSet keeps the insertion order
+		for (Attribute attr : getIdentifyingAttributes(fk.getRelation())) 
+			columns.add(getColumnNameWithAlias(attr));
 
-		List<String> Conditions = new LinkedList<>();	
+		List<String> conditions = new ArrayList<>(fk.getComponents().size());	
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			Columns.add(getColumnNameWithAlias(comp.getReference()));
-			
-			Conditions.add(getColumnName(comp.getAttribute()) + 
-							" = " + getColumnName(comp.getReference()));
+			columns.add(getColumnNameWithAlias(comp.getReference()));	
+			conditions.add(getColumnName(comp.getAttribute()) + " = " + getColumnName(comp.getReference()));
 		}
 		
-		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) {
-			String refPki = getColumnNameWithAlias(attr);
-			if (!Columns.contains(refPki))
-				Columns.add(refPki);
-		}
+		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) 
+			columns.add(getColumnNameWithAlias(attr));
 
-		final String Table = table.getID().getSQLRendering() + ", " + fk.getReferencedRelation().getID().getSQLRendering();
+		final String tables = fk.getRelation().getID().getSQLRendering() + 
+							", " + fk.getReferencedRelation().getID().getSQLRendering();
 		
 		return String.format("SELECT %s FROM %s WHERE %s", 
-				Joiner.on(", ").join(Columns), Table, Joiner.on(" AND ").join(Conditions));
+				Joiner.on(", ").join(columns), tables, Joiner.on(" AND ").join(conditions));
 	}
 
 	private static List<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
@@ -104,10 +99,11 @@ public class DirectMappingAxiom {
 	}
 	
 	public List<Function> getCQ(DatabaseRelationDefinition table) {
-		Term sub = generateSubject(table, false);
+
 		List<Function> atoms = new ArrayList<>(table.getAttributes().size() + 1);
 
 		//Class Atom
+		Term sub = generateSubject(table, false);
 		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID())), sub));
 
 		//DataType Atoms
@@ -128,15 +124,10 @@ public class DirectMappingAxiom {
 	}
 
 	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
-
-        DatabaseRelationDefinition relation = fk.getRelation();
-        Term sub = generateSubject(relation, true);
-
-        DatabaseRelationDefinition referencedRelation = fk.getReferencedRelation();
-		Term obj = generateSubject(referencedRelation, true);
+        Term sub = generateSubject(fk.getRelation(), true);
+		Term obj = generateSubject(fk.getReferencedRelation(), true);
 
 		Function atom = df.getFunction(df.getObjectPropertyPredicate(generateOPURI(fk)), sub, obj);
-
 		return Collections.singletonList(atom);
 	}
 
@@ -183,9 +174,9 @@ public class DirectMappingAxiom {
 	 */
 	private Term generateSubject(DatabaseRelationDefinition td, boolean ref) {
 		
-		String tableName = "";
+		String varNamePrefix = "";
 		if (ref)
-			tableName = percentEncode(td.getID().getTableName()) + "_"; // ROMAN 15 Nov: why is this percent encoded?
+			varNamePrefix = percentEncode(td.getID().getTableName()) + "_"; // ROMAN 15 Nov: why is this percent encoded?
 		                                                                // is this not the name of the alias?
 
 		UniqueConstraint pk = td.getPrimaryKey();
@@ -193,14 +184,14 @@ public class DirectMappingAxiom {
 			List<Term> terms = new ArrayList<>(pk.getAttributes().size() + 1);
 			terms.add(df.getConstantLiteral(subjectTemplate(td)));
 			for (Attribute att : pk.getAttributes())
-				terms.add(df.getVariable(tableName + att.getID().getName()));
+				terms.add(df.getVariable(varNamePrefix + att.getID().getName()));
 
 			return df.getUriTemplate(terms);
 		}
 		else {
 			List<Term> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes())
-				vars.add(df.getVariable(tableName + att.getID().getName()));
+				vars.add(df.getVariable(varNamePrefix + att.getID().getName()));
 
 			return df.getBNodeTemplate(vars);
 		}
