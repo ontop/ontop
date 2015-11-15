@@ -64,18 +64,18 @@ public class DirectMappingAxiom {
 
 		List<String> Columns = new LinkedList<>();
 		for (Attribute attr : getIdentifyingAttributes(table)) 
-			Columns.add(getFullyQualifiedColumnNameWithAlias(attr));
+			Columns.add(getColumnNameWithAlias(attr));
 
 		List<String> Conditions = new LinkedList<>();	
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			Columns.add(getFullyQualifiedColumnNameWithAlias(comp.getReference()));
+			Columns.add(getColumnNameWithAlias(comp.getReference()));
 			
-			Conditions.add(getFullyQualifiedColumnName(comp.getAttribute()) + 
-							" = " + getFullyQualifiedColumnName(comp.getReference()));
+			Conditions.add(getColumnName(comp.getAttribute()) + 
+							" = " + getColumnName(comp.getReference()));
 		}
 		
 		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) {
-			String refPki = getFullyQualifiedColumnNameWithAlias(attr);
+			String refPki = getColumnNameWithAlias(attr);
 			if (!Columns.contains(refPki))
 				Columns.add(refPki);
 		}
@@ -94,13 +94,13 @@ public class DirectMappingAxiom {
 			return table.getAttributes();
 	}
 	
-	private static String getFullyQualifiedColumnNameWithAlias(Attribute attr) {
-		 return getFullyQualifiedColumnName(attr) + 
+	private static String getColumnNameWithAlias(Attribute attr) {
+		 return getColumnName(attr) + 
 				 " AS " + attr.getRelation().getID().getTableName() + "_" + attr.getID().getName();
 	}
 	
-	private static String getFullyQualifiedColumnName(Attribute attr) {
-		 return attr.getRelation().getID().getSQLRendering() + "." + attr.getID().getSQLRendering();
+	private static String getColumnName(Attribute attr) {
+		 return attr.getQualifiedID().getSQLRendering();
 	}
 	
 	public List<Function> getCQ(DatabaseRelationDefinition table) {
@@ -121,8 +121,7 @@ public class DirectMappingAxiom {
 			else 
 				obj = df.getTypedTerm(objV, type);
 			
-			atoms.add(df.getFunction(
-					df.getDataPropertyPredicate(generateDPURI(table.getID(), att.getID())), sub, obj));
+			atoms.add(df.getFunction(df.getDataPropertyPredicate(generateDPURI(att)), sub, obj));
 		}
 
 		return atoms;
@@ -136,15 +135,14 @@ public class DirectMappingAxiom {
         DatabaseRelationDefinition referencedRelation = fk.getReferencedRelation();
 		Term obj = generateSubject(referencedRelation, true);
 
-		String opURI = generateOPURI(relation.getID(), fk);
-		Function atom = df.getFunction(df.getObjectPropertyPredicate(opURI), sub, obj);
+		Function atom = df.getFunction(df.getObjectPropertyPredicate(generateOPURI(fk)), sub, obj);
 
 		return Collections.singletonList(atom);
 	}
 
 	// Generate an URI for class predicate from a string(name of table)
 	private String generateClassURI(RelationID tableId) {
-		return baseuri + tableId.getTableName();
+		return baseuri + tableId.getTableName(); // ROMAN 15 Nov 2015: need to percent encode?
 	}
 
 	/*
@@ -152,8 +150,8 @@ public class DirectMappingAxiom {
 	 * style should be "baseuri/tablename#columnname" as required in Direct
 	 * Mapping Definition
 	 */
-	private String generateDPURI(RelationID tableId, QuotedID columnId) {
-		return baseuri + percentEncode(tableId.getTableName()) + "#" + percentEncode(columnId.getName());
+	private String generateDPURI(Attribute attr) {
+		return baseuri + percentEncode(attr.getRelation().getID().getTableName()) + "#" + percentEncode(attr.getID().getName());
 	}
 
     /*
@@ -168,14 +166,12 @@ public class DirectMappingAxiom {
      *     - the percent-encoded form of the column name,
      *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
      */
-    private String generateOPURI(RelationID tableId, ForeignKeyConstraint fk) {
-        StringBuilder columnsInFK = new StringBuilder();
-
+    private String generateOPURI(ForeignKeyConstraint fk) {
+        List<String> attributes = new ArrayList<>(fk.getComponents().size());
  		for (Component component : fk.getComponents())
-            columnsInFK.append(component.getAttribute().getID().getName()).append(";");
-        columnsInFK.setLength(columnsInFK.length() - 1); // remove the trailing ;
+            attributes.add(component.getAttribute().getID().getName()); // ROMAN 15 Nov 2015: need to percent encode?
         
-        return baseuri + percentEncode(tableId.getTableName()) + "#ref-" + columnsInFK;
+        return baseuri + percentEncode(fk.getRelation().getID().getTableName()) + "#ref-" + Joiner.on(";").join(attributes);
     }
 
 	/*
@@ -189,12 +185,13 @@ public class DirectMappingAxiom {
 		
 		String tableName = "";
 		if (ref)
-			tableName = percentEncode(td.getID().getTableName()) + "_";
+			tableName = percentEncode(td.getID().getTableName()) + "_"; // ROMAN 15 Nov: why is this percent encoded?
+		                                                                // is this not the name of the alias?
 
 		UniqueConstraint pk = td.getPrimaryKey();
 		if (pk != null) {
 			List<Term> terms = new ArrayList<>(pk.getAttributes().size() + 1);
-			terms.add(df.getConstantLiteral(subjectTemple(td)));
+			terms.add(df.getConstantLiteral(subjectTemplate(td)));
 			for (Attribute att : pk.getAttributes())
 				terms.add(df.getVariable(tableName + att.getID().getName()));
 
@@ -210,8 +207,6 @@ public class DirectMappingAxiom {
 	}
 
     /**
-     *
-     *
      * - If the table has a primary key, the row node is a relative IRI obtained by concatenating:
      *   - the percent-encoded form of the table name,
      *   - the SOLIDUS character '/',
@@ -219,13 +214,13 @@ public class DirectMappingAxiom {
      *     - the percent-encoded form of the column name,
      *     - a EQUALS SIGN character '=',
      *     - the percent-encoded lexical form of the canonical RDF literal representation of the column value as defined in R2RML section 10.2 Natural Mapping of SQL Values [R2RML],
-     &     - if it is not the last column in the primary key, a SEMICOLON character ';'
+     *     - if it is not the last column in the primary key, a SEMICOLON character ';'
      * - If the table has no primary key, the row node is a fresh blank node that is unique to this row.
-
+     *
      * @param td
      * @return
      */
-	private String subjectTemple(DatabaseRelationDefinition td) {
+	private String subjectTemplate(DatabaseRelationDefinition td) {
 		/*
 		 * It is hard to generate a uniform temple since the number of PK
 		 * differs For example, the subject uri temple with one pk should be
@@ -233,15 +228,13 @@ public class DirectMappingAxiom {
 		 * more than one pk columns, there will be a ";" between column names
 		 */
 
-		String temp = baseuri + percentEncode(td.getID().getTableName()) + "/";
-		for (Attribute att : td.getPrimaryKey().getAttributes()) {
-			//temp += percentEncode("{" + td.getPrimaryKeys().get(i).getName()) + "};";
-			temp += percentEncode(att.getID().getName())+"={};";
-		}
-		// remove the last "." which is not neccesary
-		temp = temp.substring(0, temp.length() - 1);
-		// temp="\""+temp+"\"";
-		return temp;
+		List<String> attributes = new ArrayList<>(td.getPrimaryKey().getAttributes().size());
+		for (Attribute att : td.getPrimaryKey().getAttributes()) 
+			attributes.add(percentEncode(att.getID().getName()) + "={}");
+
+		// ROMAN 15 Nov 2015: what if there is no PK?
+		
+		return baseuri + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
 	}
 
 	/*
