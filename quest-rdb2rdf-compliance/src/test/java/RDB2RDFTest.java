@@ -243,18 +243,12 @@ public class RDB2RDFTest {
 
 		LAST_SQL_SCRIPT = sqlFile;
 
-		java.sql.Statement s = SQL_CONN.createStatement();
-
-		try {
-			String text = Resources.toString(url(sqlFile), Charsets.UTF_8);
-			s.execute(text);
-		}
-		catch (SQLException sqle) {
-			System.out.println("Exception in creating db from script");
-		}
-		finally {
-			s.close();
-		}
+        try (java.sql.Statement s = SQL_CONN.createStatement()) {
+            String text = Resources.toString(url(sqlFile), Charsets.UTF_8);
+            s.execute(text);
+        } catch (SQLException sqle) {
+            System.out.println("Exception in creating db from script");
+        }
 	}
 
 	protected Repository createRepository() throws Exception {
@@ -267,14 +261,11 @@ public class RDB2RDFTest {
 	}
 
 	protected static void clearDB() throws Exception {
-		java.sql.Statement s = SQL_CONN.createStatement();
-		try {
-			s.execute("DROP ALL OBJECTS DELETE FILES");
-		} catch (SQLException sqle) {
-			System.out.println("Table not found, not dropping");
-		} finally {
-			s.close();
-		}
+        try (java.sql.Statement s = SQL_CONN.createStatement()) {
+            s.execute("DROP ALL OBJECTS DELETE FILES");
+        } catch (SQLException sqle) {
+            System.out.println("Table not found, not dropping");
+        }
 	}
 
 	@AfterClass

@@ -78,7 +78,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         if(mappingFile.endsWith(".obda")){
             obdaModel = loadOBDA(mappingFile);
         } else {
-            obdaModel = loadR2RML(mappingFile, jdbcUrl, jdbcUserName, jdbcPassword, jdbcDriverClass);
+            obdaModel = loadR2RML(mappingFile, jdbcURL, jdbcUserName, jdbcPassword, jdbcDriverClass);
         }
         return obdaModel;
     }
@@ -93,7 +93,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     private OBDAModel loadR2RML(String r2rmlFile, String jdbcUrl, String username, String password, String driverClass) {
 
-        Preconditions.checkNotNull(jdbcUrl, "jdbcUrl is null");
+        Preconditions.checkNotNull(jdbcUrl, "jdbcURL is null");
         Preconditions.checkNotNull(password, "password is null");
         Preconditions.checkNotNull(username, "username is null");
         Preconditions.checkNotNull(driverClass, "driverClass is null");

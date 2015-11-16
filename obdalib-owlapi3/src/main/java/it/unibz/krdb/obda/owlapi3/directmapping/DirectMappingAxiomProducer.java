@@ -30,20 +30,27 @@ import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
 
-import java.util.*;
 
 import com.google.common.base.Joiner;
 
-public class DirectMappingAxiom {
-	private final String baseuri;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+public class DirectMappingAxiomProducer {
+
+	private final String baseIRI;
+
 	private final OBDADataFactory df;
 
-	public DirectMappingAxiom(String baseuri, OBDADataFactory dfac) {
+	public DirectMappingAxiomProducer(String baseIRI, OBDADataFactory dfac) {
 		this.df = dfac;
-		if (baseuri == null)
-			throw new IllegalArgumentException("Base uri must be specified!");
-
-		this.baseuri = baseuri;
+        this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 	}
 
 
@@ -65,7 +72,7 @@ public class DirectMappingAxiom {
 		for (Attribute attr : getIdentifyingAttributes(fk.getRelation())) 
 			columns.add(getColumnNameWithAlias(attr));
 
-		List<String> conditions = new ArrayList<>(fk.getComponents().size());	
+		List<String> conditions = new ArrayList<>(fk.getComponents().size());
 		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
 			columns.add(getColumnNameWithAlias(comp.getReference()));	
 			conditions.add(getColumnName(comp.getAttribute()) + " = " + getColumnName(comp.getReference()));
@@ -104,7 +111,7 @@ public class DirectMappingAxiom {
 
 		//Class Atom
 		Term sub = generateSubject(table, false);
-		atoms.add(df.getFunction(df.getClassPredicate(generateClassURI(table.getID())), sub));
+		atoms.add(df.getFunction(df.getClassPredicate(getTableIRI(table.getID())), sub));
 
 		//DataType Atoms
 		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
@@ -117,7 +124,7 @@ public class DirectMappingAxiom {
 			else 
 				obj = df.getTypedTerm(objV, type);
 			
-			atoms.add(df.getFunction(df.getDataPropertyPredicate(generateDPURI(att)), sub, obj));
+			atoms.add(df.getFunction(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}
 
 		return atoms;
@@ -127,28 +134,43 @@ public class DirectMappingAxiom {
         Term sub = generateSubject(fk.getRelation(), true);
 		Term obj = generateSubject(fk.getReferencedRelation(), true);
 
-		Function atom = df.getFunction(df.getObjectPropertyPredicate(generateOPURI(fk)), sub, obj);
+		Function atom = df.getFunction(df.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
 		return Collections.singletonList(atom);
 	}
 
-	// Generate an URI for class predicate from a string(name of table)
-	private String generateClassURI(RelationID tableId) {
-		return baseuri + tableId.getTableName(); // ROMAN 15 Nov 2015: need to percent encode?
+
+    /**
+     *
+     * table IRI:
+     *      the relative IRI consisting of the percent-encoded form of the table name.
+     *
+     * @return table IRI
+     */
+	private String getTableIRI(RelationID tableId) {
+		return baseIRI + percentEncode(tableId.getTableName());
 	}
 
-	/*
-	 * Generate an URI for datatype property from a string(name of column) The
-	 * style should be "baseuri/tablename#columnname" as required in Direct
-	 * Mapping Definition
-	 */
-	private String generateDPURI(Attribute attr) {
-		return baseuri + percentEncode(attr.getRelation().getID().getTableName()) + "#" + percentEncode(attr.getID().getName());
-	}
+    /**
+     * Generate an URI for datatype property from a string(name of column) The
+     * style should be "baseIRI/tablename#columnname" as required in Direct
+     * Mapping Definition
+     *
+     * A column in a table forms a literal property IRI:
+     *
+     * Definition literal property IRI: the concatenation of:
+     *   - the percent-encoded form of the table name,
+     *   - the hash character '#',
+     *   - the percent-encoded form of the column name.
+     */
+    private String getLiteralPropertyIRI(Attribute attr) {
+        return baseIRI + percentEncode(attr.getRelation().getID().getTableName())
+                + "#" + percentEncode(attr.getID().getName());
+    }
 
     /*
-     * Generate an URI for object property from a string(name of column)
+     * Generate an URI for object property from a string (name of column)
      *
-     * <http://www.w3.org/TR/rdb-direct-mapping/>
+     * A foreign key in a table forms a reference property IRI:
      *
      * Definition reference property IRI: the concatenation of:
      *   - the percent-encoded form of the table name,
@@ -157,12 +179,13 @@ public class DirectMappingAxiom {
      *     - the percent-encoded form of the column name,
      *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
      */
-    private String generateOPURI(ForeignKeyConstraint fk) {
+    private String getReferencePropertyIRI(ForeignKeyConstraint fk) {
         List<String> attributes = new ArrayList<>(fk.getComponents().size());
  		for (Component component : fk.getComponents())
-            attributes.add(component.getAttribute().getID().getName()); // ROMAN 15 Nov 2015: need to percent encode?
+            attributes.add(percentEncode(component.getAttribute().getID().getName()));
         
-        return baseuri + percentEncode(fk.getRelation().getID().getTableName()) + "#ref-" + Joiner.on(";").join(attributes);
+        return baseIRI + percentEncode(fk.getRelation().getID().getTableName())
+                + "#ref-" + Joiner.on(";").join(attributes);
     }
 
     /**
@@ -184,8 +207,7 @@ public class DirectMappingAxiom {
 		
 		String varNamePrefix = "";
 		if (ref)
-			varNamePrefix = percentEncode(td.getID().getTableName()) + "_"; // ROMAN 15 Nov: why is this percent encoded?
-		                                                                // is this not the name of the alias?
+			varNamePrefix = td.getID().getTableName() + "_";
 
 		UniqueConstraint pk = td.getPrimaryKey();
 		if (pk != null) {
@@ -195,7 +217,7 @@ public class DirectMappingAxiom {
 			for (Attribute att : pk.getAttributes()) 
 				attributes.add(percentEncode(att.getID().getName()) + "={}");
 			
-			String template = baseuri + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
+			String template = baseIRI + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
 			terms.add(df.getConstantLiteral(template));
 			
 			for (Attribute att : pk.getAttributes())
@@ -221,7 +243,6 @@ public class DirectMappingAxiom {
 		pe = pe.replace(".", "%2E");
 		pe = pe.replace("-", "%2D");
 		pe = pe.replace("/", "%2F");
-
 		pe = pe.replace(" ", "%20");
 		pe = pe.replace("!", "%21");
 		pe = pe.replace("$", "%24");

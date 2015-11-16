@@ -22,9 +22,9 @@ public abstract class OntopMappingOntologyRelatedCommand implements OntopCommand
             description = "password for the jdbc connection  (only for R2RML mapping)")
     protected String jdbcPassword;
 
-    @Option(type = OptionType.COMMAND, name = {"-l", "--url"}, title = "jdbcUrl",
-            description = "jdbcUrl for the jdbc connection  (only for R2RML mapping)")
-    protected String jdbcUrl;
+    @Option(type = OptionType.COMMAND, name = {"-l", "--url"}, title = "jdbcURL",
+            description = "jdbcURL for the jdbc connection  (only for R2RML mapping)")
+    protected String jdbcURL;
 
     @Option(type = OptionType.COMMAND, name = {"-d", "--driver-class"}, title = "jdbcDriver",
             description = "class name of the jdbc Driver (only for R2RML mapping)")
