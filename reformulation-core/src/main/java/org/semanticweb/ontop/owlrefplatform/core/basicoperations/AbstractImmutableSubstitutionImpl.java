@@ -9,7 +9,9 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,6 +64,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         else {
             return DATA_FACTORY.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
         }
+    }
+
+    @Override
+    public Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm) {
+        if (isEmpty())
+            return mutableFunctionalTerm;
+
+        List<Term> transformedSubTerms = new ArrayList<>();
+
+        for (Term subTerm : mutableFunctionalTerm.getTerms()) {
+            transformedSubTerms.add(applyToMutableTerm(subTerm));
+        }
+        Predicate functionSymbol = mutableFunctionalTerm.getFunctionSymbol();
+
+        return DATA_FACTORY.getFunction(functionSymbol, transformedSubTerms);
     }
 
     @Override
@@ -229,6 +246,26 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         return constructNewSubstitution(mapBuilder.build());
+    }
+
+
+    /**
+     * For backward compatibility with mutable terms (used in CQIE).
+     * TO BE REMOVED with the support for CQIE
+     */
+    private Term applyToMutableTerm(Term term) {
+        if (term instanceof Constant) {
+            return term;
+        }
+        else if (term instanceof Variable) {
+            return applyToVariable((Variable) term);
+        }
+        else if (term instanceof Function) {
+            return applyToMutableFunctionalTerm((Function)term);
+        }
+        else {
+            throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
+        }
     }
 
 }
