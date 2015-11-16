@@ -51,6 +51,19 @@ public class VariableGenerator {
     }
 
     /**
+     * Generates a new variable if a conflict is detected.
+     */
+    public Variable generateNewVariableIfConflicting(Variable previousVariable) {
+        Variable newVariable = previousVariable;
+        while(knownVariables.contains(newVariable)) {
+            newVariable = dataFactory.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
+        }
+
+        knownVariables.add(newVariable);
+        return newVariable;
+    }
+
+    /**
      * Generates a new non-conflicting variable.
      */
     public Variable generateNewVariable() {
