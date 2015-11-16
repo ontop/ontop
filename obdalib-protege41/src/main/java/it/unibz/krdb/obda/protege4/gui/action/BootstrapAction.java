@@ -162,8 +162,7 @@ public class BootstrapAction extends ProtegeAction {
 		public void run(String baseUri, OWLOntology currentOnto,
 				OBDAModel currentModel, OBDADataSource currentSource)
 				throws Exception {
-			dm = new DirectMappingBootstrapper(baseUri, currentOnto,
-					currentModel, currentSource);
+			dm = new DirectMappingBootstrapper(baseUri, currentOnto, currentModel, currentSource);
 		}
 
 		@Override

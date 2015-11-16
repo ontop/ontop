@@ -24,12 +24,13 @@ package it.unibz.krdb.sql;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -136,7 +137,7 @@ public class DBMetadataExtractor {
 		String productName = md.getDatabaseProductName();
 		
 		QuotedIDFactory idfac;
-		// Exareme driver does not support method supportsMixedCaseIdentifiers()
+		// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
 		if (md.supportsMixedCaseIdentifiers()) {
 			 //  MySQL
 			if (productName.contains("MySQL")) 
@@ -395,7 +396,7 @@ public class DBMetadataExtractor {
 	/**
 	 * Table list for DB2 database engine (not needed now -- use JDBC metadata instead)
 	 */
-	
+/*	
 	private static final RelationListProvider DB2RelationListProvider = new RelationListProvider() {
 		@Override
 		public String getQuery() {
@@ -410,12 +411,12 @@ public class DBMetadataExtractor {
 			return RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
 		}
 	};
-
+*/
 	
 	/**
 	 * Table list for MS SQL Server database engine (not needed now -- use JDBC metadata instead)
 	 */
-
+/*
 	private static final RelationListProvider MSSQLServerRelationListProvider = new RelationListProvider() {
 		@Override
 		public String getQuery() {
@@ -430,7 +431,7 @@ public class DBMetadataExtractor {
 			return RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
 		}
 	};
-	
+*/	
 	
 	
 	/**
@@ -484,6 +485,7 @@ public class DBMetadataExtractor {
 	 * Prints column names of a given table.
      *
 	 */
+/*		
 	private static void displayColumnNames(DatabaseMetaData dbMetadata, 
 			Connection connection, ResultSet rsColumns, 
 			String tableSchema, String tableName) throws SQLException {
@@ -516,7 +518,7 @@ public class DBMetadataExtractor {
 			}				
 		}
 	}
-	
+*/	
 	
 	
 
@@ -526,28 +528,29 @@ public class DBMetadataExtractor {
 	 */
 	private static void getPrimaryKey(DatabaseMetaData md, DatabaseRelationDefinition relation) throws SQLException {
 		RelationID id = relation.getID();
+		// Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
 		try (ResultSet rs = md.getPrimaryKeys(null, id.getSchemaName(), id.getTableName())) {
-			UniqueConstraint.Builder builder = null;
+			Map<Integer, String> primaryKeyAttributes = new HashMap<>();
 			String currentName = null;
 			while (rs.next()) {
-				if (rs.getShort("KEY_SEQ") == 1) {
-					if (builder != null)
-						relation.addUniqueConstraint(builder.build(currentName, true));
-
-					// TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-					// and so, no need to check whether TABLE_SCHEM and TABLE_NAME match
-					
-					builder = UniqueConstraint.builder(relation);
-					currentName = rs.getString("PK_NAME"); // may be null
-				}
-				
-				if (builder != null) {
-					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
-					builder.add(relation.getAttribute(attrId));
+				// TABLE_CAT is ignored for now; assume here that relation has a fully specified name
+				RelationID id2 = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));		
+				if (id2.equals(id)) {
+					currentName = rs.getString("PK_NAME"); // may be null			
+					String attr = rs.getString("COLUMN_NAME");
+					int seq = rs.getShort("KEY_SEQ");
+					primaryKeyAttributes.put(seq, attr);
 				}
 			}
-			if (builder != null)
+			if (!primaryKeyAttributes.isEmpty()) {
+				// use the KEY_SEQ values to restore the correct order of attributes in the PK
+				UniqueConstraint.Builder builder = UniqueConstraint.builder(relation);
+				for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(primaryKeyAttributes.get(i));
+					builder.add(relation.getAttribute(attrId));
+				}
 				relation.addUniqueConstraint(builder.build(currentName, true));
+			}
 		} 
 	}
 	
