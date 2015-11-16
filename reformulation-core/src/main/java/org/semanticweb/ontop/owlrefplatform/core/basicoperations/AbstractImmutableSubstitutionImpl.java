@@ -22,10 +22,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
-    /**
-     *
-     * TODO: what about anonymous variables?
-     */
     @Override
     public ImmutableTerm apply(ImmutableTerm term) {
         if (term instanceof Constant) {
