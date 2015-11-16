@@ -66,7 +66,18 @@ public class DirectMappingAxiomProducer {
 		return refAxioms;
 	}
 
-	private String getRefSQL(ForeignKeyConstraint fk) {
+
+    /***
+     * Definition reference triple: an RDF triple with:
+     * <p/>
+     * subject: the row node for the row.
+     * predicate: the reference property IRI for the columns.
+     * object: the row node for the referenced row.
+     *
+     * @param fk
+     * @return
+     */
+    private String getRefSQL(ForeignKeyConstraint fk) {
 
 		Set<Object> columns = new LinkedHashSet<>(); // Set avoids duplicated and LinkedHashSet keeps the insertion order
 		for (Attribute attr : getIdentifyingAttributes(fk.getRelation())) 
@@ -104,8 +115,16 @@ public class DirectMappingAxiomProducer {
 	private static String getColumnName(Attribute attr) {
 		 return attr.getQualifiedID().getSQLRendering();
 	}
-	
-	public List<Function> getCQ(DatabaseRelationDefinition table) {
+
+
+    /**
+     * Definition row graph: an RDF graph consisting of the following triples:
+     * <p/>
+     *   - the row type triple.
+     *   - a literal triple for each column in a table where the column value is non-NULL.
+     *
+     */
+    public List<Function> getCQ(DatabaseRelationDefinition table) {
 
 		List<Function> atoms = new ArrayList<>(table.getAttributes().size() + 1);
 
@@ -130,6 +149,12 @@ public class DirectMappingAxiomProducer {
 		return atoms;
 	}
 
+    /**
+     * Definition row graph: an RDF graph consisting of the following triples:
+     *
+     * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
+     *
+     */
 	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
         Term sub = generateSubject(fk.getRelation(), true);
 		Term obj = generateSubject(fk.getReferencedRelation(), true);
