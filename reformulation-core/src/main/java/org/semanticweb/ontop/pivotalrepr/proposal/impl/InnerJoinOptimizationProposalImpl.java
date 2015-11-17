@@ -18,7 +18,7 @@ public class InnerJoinOptimizationProposalImpl implements InnerJoinOptimizationP
     }
 
     @Override
-    public NodeCentricOptimizationResults castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults) results;
+    public NodeCentricOptimizationResults<InnerJoinNode> castResults(ProposalResults results) {
+        return (NodeCentricOptimizationResults<InnerJoinNode>) results;
     }
 }
