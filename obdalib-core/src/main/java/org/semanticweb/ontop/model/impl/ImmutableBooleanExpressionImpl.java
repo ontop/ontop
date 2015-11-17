@@ -40,6 +40,10 @@ public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl 
                 if (subTerm instanceof ImmutableBooleanExpression) {
                     listBuilder.addAll(((ImmutableBooleanExpression)subTerm).flatten());
                 }
+                else {
+                    throw new IllegalStateException("An AND-expression must be only composed of " +
+                            "ImmutableBooleanExpression(s), not of a " + subTerm);
+                }
             }
             return listBuilder.build();
         }
