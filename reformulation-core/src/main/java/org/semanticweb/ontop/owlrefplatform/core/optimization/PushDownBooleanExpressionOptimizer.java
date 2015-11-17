@@ -1,10 +1,15 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
+
+import java.util.Iterator;
 
 import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.*;
 import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
@@ -13,6 +18,12 @@ import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNa
  * TODO: explain
  */
 public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOptimizer {
+
+    /**
+     * TODO: explain
+     */
+    private static class NotSupportedCaseException extends Exception {
+    }
 
 
     @Override
@@ -100,8 +111,74 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     private Optional<PushDownBooleanExpressionProposal<? extends JoinOrFilterNode>> makeProposalForInnerJoin(
             IntermediateQuery currentQuery, InnerJoinNode currentNode) {
-        // TODO: implement it
-        return Optional.absent();
+
+        Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
+        if (!optionalNestedExpression.isPresent()) {
+            return Optional.absent();
+        }
+
+        ImmutableSet<ImmutableBooleanExpression> booleanExpressions = optionalNestedExpression.get().flatten();
+
+        ImmutableList<QueryNode> potentialTargetNodes = findCandidateTargetNodes(currentQuery, currentNode);
+
+        // TODO: continue
+        throw new RuntimeException("TODO: continue");
+
+    }
+
+    /**
+     * TODO: find a better name
+     *
+     * TODO: explain
+     */
+    private ImmutableList<QueryNode> findCandidateTargetNodes( IntermediateQuery currentQuery,
+                                                               InnerJoinNode currentNode) {
+        try {
+            ImmutableList.Builder<QueryNode> candidateListBuilder = ImmutableList.builder();
+
+            for (QueryNode childNode : currentQuery.getChildren(currentNode)) {
+                candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, childNode, false));
+            }
+            return candidateListBuilder.build();
+        } catch (NotSupportedCaseException e) {
+            return ImmutableList.of();
+        }
+    }
+
+    /**
+     * TODO: explain and clean
+     */
+    private ImmutableList<QueryNode> findCandidatesInSubTree(IntermediateQuery currentQuery,
+                                                             QueryNode node,
+                                                             boolean behindADelimiterNode)
+            throws NotSupportedCaseException {
+        if (node instanceof DataNode) {
+            if (behindADelimiterNode) {
+                return ImmutableList.of(node);
+            }
+            else {
+                throw new NotSupportedCaseException();
+            }
+        }
+
+        boolean childBehindDelimiter = behindADelimiterNode;
+
+        if ((node instanceof JoinOrFilterNode) && behindADelimiterNode) {
+            return ImmutableList.of(node);
+        }
+        /**
+         * Construction nodes or extensions
+         */
+        else if (node instanceof SubTreeDelimiterNode) {
+            childBehindDelimiter = true;
+        }
+
+        ImmutableList.Builder<QueryNode> candidateListBuilder = ImmutableList.builder();
+        for (QueryNode child : currentQuery.getChildren(node)) {
+            // Recursive call
+            candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, child, childBehindDelimiter));
+        }
+        return candidateListBuilder.build();
     }
 
     /**
