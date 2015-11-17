@@ -112,4 +112,9 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
             return false;
         }
     }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }
