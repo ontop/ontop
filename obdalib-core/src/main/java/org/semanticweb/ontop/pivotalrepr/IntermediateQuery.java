@@ -61,6 +61,11 @@ public interface IntermediateQuery {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
+     * May forbid the use of a StandardProposalExecutor.
+     */
+    ProposalResults applyProposal(QueryOptimizationProposal propagationProposal, boolean requireUsingInternalExecutor) throws InvalidQueryOptimizationProposalException, EmptyQueryException;
+
+    /**
      * TODO: find an exception to throw
      */
     void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;

@@ -53,6 +53,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm) {
+        return mutableFunctionalTerm;
+    }
+
+    @Override
     public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
         return booleanExpression;
     }

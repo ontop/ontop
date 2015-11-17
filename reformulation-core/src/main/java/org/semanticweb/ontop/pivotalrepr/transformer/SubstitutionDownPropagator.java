@@ -4,17 +4,51 @@ import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.SubQueryUnificationTools;
 
 /**
- * Propagates the substitution even to construction nodes.
+ * Propagates the substitution down even to construction nodes.
  *
  * However, the latter may throw a NewSubstitutionException.
  *
  */
-public class FullSubstitutionPropagator extends SubstitutionPropagator {
+public class SubstitutionDownPropagator extends SubstitutionPropagator<SubstitutionDownPropagator.UnificationException,
+        SubstitutionDownPropagator.NewSubstitutionException> {
 
-    public FullSubstitutionPropagator(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+    /**
+     * TODO: explain
+     */
+    public static class UnificationException extends QueryNodeTransformationException {
+        public UnificationException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * TODO: explain
+     */
+    public static class NewSubstitutionException extends QueryNodeTransformationException {
+        private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        private final QueryNode transformedNode;
+
+        protected NewSubstitutionException(ImmutableSubstitution<VariableOrGroundTerm> substitution,
+                                           QueryNode transformedNode) {
+            super("New substitution to propagate (" + substitution + ") and new node (" + transformedNode + ")");
+            this.substitution = substitution;
+            this.transformedNode = transformedNode;
+        }
+
+        public ImmutableSubstitution<VariableOrGroundTerm> getSubstitution() {
+            return substitution;
+        }
+
+        public QueryNode getTransformedNode() {
+            return transformedNode;
+        }
+    }
+
+    public SubstitutionDownPropagator(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
         super(substitution);
     }
 
@@ -55,5 +89,11 @@ public class FullSubstitutionPropagator extends SubstitutionPropagator {
         } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
             throw new UnificationException(e.getMessage());
         }
+    }
+
+    @Override
+    public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
+        return new LeftJoinNodeImpl(
+                transformOptionalBooleanExpression(leftJoinNode.getOptionalFilterCondition()));
     }
 }

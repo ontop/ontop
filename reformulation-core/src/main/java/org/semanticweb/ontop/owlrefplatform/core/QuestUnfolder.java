@@ -476,11 +476,6 @@ public class QuestUnfolder {
 	public UriTemplateMatcher getUriTemplateMatcher() {
 		return uriTemplateMatcher;
 	}
-	
-	public DatalogProgram unfold(DatalogProgram query) throws OBDAException {
-		return unfolder.unfold(query, OBDAVocabulary.QUEST_QUERY);
-	}
-
 
 	/***
 	 * Expands a SELECT * into a SELECT with all columns implicit in the *
