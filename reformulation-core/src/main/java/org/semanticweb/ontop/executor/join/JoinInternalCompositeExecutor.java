@@ -24,7 +24,7 @@ public class JoinInternalCompositeExecutor extends NodeCentricInternalCompositeE
         ImmutableList.Builder<NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> executorBuilder = ImmutableList.builder();
 
         executorBuilder.add(new JoinBooleanExpressionExecutor());
-        // executorBuilder.add(new RedundantSelfJoinExecutor());
+        executorBuilder.add(new RedundantSelfJoinExecutor());
 
         return executorBuilder.build();
     }

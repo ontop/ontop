@@ -38,6 +38,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * TODO: disable this test
+ */
 public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
 
 	DBMetadata metadata;

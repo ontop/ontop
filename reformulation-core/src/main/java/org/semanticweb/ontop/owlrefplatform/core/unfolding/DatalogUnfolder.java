@@ -2313,6 +2313,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return atom;
 	}
 
+
 	/**
 	 * This method returns the predicates that define two different templates
 	 */

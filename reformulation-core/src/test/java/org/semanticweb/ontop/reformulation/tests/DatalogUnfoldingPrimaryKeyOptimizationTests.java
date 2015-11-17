@@ -45,6 +45,9 @@ import com.google.common.collect.Multimap;
 
 import junit.framework.TestCase;
 
+/**
+ * TODO: disable this test
+ */
 public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
@@ -182,7 +185,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		query = fac.getCQIE(head, body);
 
 		input = fac.getDatalogProgram(Collections.singletonList(query));
-		output = unfolder.unfold(input, "q", QuestConstants.BUP, true, ArrayListMultimap.<Predicate, Integer>create());
+		output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
+				ArrayListMultimap.<Predicate, Integer>create());
 		System.out.println("input " + input);
 
 		atomcount = 0;

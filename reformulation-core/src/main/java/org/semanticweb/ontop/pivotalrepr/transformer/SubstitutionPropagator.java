@@ -12,43 +12,13 @@ import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
 /**
  * TODO: describe
  *
- * Abstract: does not define transform(ConstructionNode ...).
+ * Abstract: does not define:
+ *   - transform(ConstructionNode ...)
+ *   - transform(LeftJoinNode ...)
  *
  */
-public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTransformer<SubstitutionPropagator.UnificationException,
-        SubstitutionPropagator.NewSubstitutionException> {
-
-    /**
-     * TODO: explain
-     */
-    public static class NewSubstitutionException extends QueryNodeTransformationException {
-        private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
-        private final QueryNode transformedNode;
-
-        protected NewSubstitutionException(ImmutableSubstitution<VariableOrGroundTerm> substitution,
-                                           QueryNode transformedNode) {
-            super("New substitution to propagate (" + substitution + ") and new node (" + transformedNode + ")");
-            this.substitution = substitution;
-            this.transformedNode = transformedNode;
-        }
-
-        public ImmutableSubstitution<VariableOrGroundTerm> getSubstitution() {
-            return substitution;
-        }
-
-        public QueryNode getTransformedNode() {
-            return transformedNode;
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    public static class UnificationException extends QueryNodeTransformationException {
-        public UnificationException(String message) {
-            super(message);
-        }
-    }
+public abstract class SubstitutionPropagator<T1 extends QueryNodeTransformationException, T2 extends QueryNodeTransformationException>
+        implements HomogeneousQueryNodeTransformer<T1, T2> {
 
 
     private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
@@ -69,12 +39,6 @@ public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTran
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
         return new ExtensionalDataNodeImpl(transformDataAtom(extensionalDataNode.getAtom()));
-    }
-
-    @Override
-    public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
-        return new LeftJoinNodeImpl(
-                transformOptionalBooleanExpression(leftJoinNode.getOptionalFilterCondition()));
     }
 
     @Override
@@ -129,7 +93,7 @@ public abstract class SubstitutionPropagator implements HomogeneousQueryNodeTran
         return substitution.applyToDataAtom(atom);
     }
 
-    private Optional<ImmutableBooleanExpression> transformOptionalBooleanExpression(
+    protected Optional<ImmutableBooleanExpression> transformOptionalBooleanExpression(
             Optional<ImmutableBooleanExpression> optionalFilterCondition) {
         if (optionalFilterCondition.isPresent()) {
             return Optional.of(transformBooleanExpression(optionalFilterCondition.get()));
