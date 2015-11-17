@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.model;
 
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public interface ImmutableBooleanExpression extends BooleanExpression, ImmutableFunctionalTerm {
     @Override
@@ -10,5 +10,5 @@ public interface ImmutableBooleanExpression extends BooleanExpression, Immutable
     /**
      * Flattens AND expressions.
      */
-    ImmutableList<ImmutableBooleanExpression> flatten();
+    ImmutableSet<ImmutableBooleanExpression> flatten();
 }

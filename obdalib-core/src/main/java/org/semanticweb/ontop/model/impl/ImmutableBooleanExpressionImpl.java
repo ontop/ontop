@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 
 public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableBooleanExpression {
@@ -25,30 +26,30 @@ public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl 
      * Recursive
      */
     @Override
-    public ImmutableList<ImmutableBooleanExpression> flatten() {
+    public ImmutableSet<ImmutableBooleanExpression> flatten() {
 
         Predicate functionSymbol = getFunctionSymbol();
         /**
          * Only flattens AND expressions.
          */
         if (functionSymbol.equals(OBDAVocabulary.AND)) {
-            ImmutableList.Builder<ImmutableBooleanExpression> listBuilder = ImmutableList.builder();
+            ImmutableSet.Builder<ImmutableBooleanExpression> setBuilder = ImmutableSet.builder();
             for (ImmutableTerm subTerm : getImmutableTerms()) {
                 /**
                  * Recursive call
                  */
                 if (subTerm instanceof ImmutableBooleanExpression) {
-                    listBuilder.addAll(((ImmutableBooleanExpression)subTerm).flatten());
+                    setBuilder.addAll(((ImmutableBooleanExpression) subTerm).flatten());
                 }
                 else {
                     throw new IllegalStateException("An AND-expression must be only composed of " +
                             "ImmutableBooleanExpression(s), not of a " + subTerm);
                 }
             }
-            return listBuilder.build();
+            return setBuilder.build();
         }
         else {
-            return ImmutableList.of((ImmutableBooleanExpression)this);
+            return ImmutableSet.of((ImmutableBooleanExpression)this);
         }
     }
 }
