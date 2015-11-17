@@ -21,7 +21,11 @@ public class ImmutabilityTools {
         if (term instanceof Function) {
             if (term instanceof ImmutableFunctionalTerm) {
                 return (ImmutableTerm) term;
-            } else {
+            } else if (term instanceof BooleanExpression) {
+                BooleanExpression booleanExpression = (BooleanExpression) term;
+                return new ImmutableBooleanExpressionImpl(booleanExpression);
+            }
+            else {
                 Function functionalTerm = (Function) term;
                 return new ImmutableFunctionalTermImpl(functionalTerm);
             }
