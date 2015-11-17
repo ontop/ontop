@@ -483,6 +483,11 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                         + optionalSubstitution.get() + "\n Reason: " + e.getMessage());
             }
         }
-        return null;
+        /**
+         * No substitution to propagate
+         */
+        else {
+            return topJoinNode;
+        }
     }
 }
