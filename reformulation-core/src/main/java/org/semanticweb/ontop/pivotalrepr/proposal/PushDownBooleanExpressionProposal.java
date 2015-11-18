@@ -9,7 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
 /**
  * TODO: explain
  */
-public interface PushDownBooleanExpressionProposal<N extends JoinOrFilterNode> extends NodeCentricOptimizationProposal<N> {
+public interface PushDownBooleanExpressionProposal extends NodeCentricOptimizationProposal<JoinOrFilterNode> {
 
     /**
      * TODO: explain

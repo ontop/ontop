@@ -89,11 +89,11 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     private NextNodeAndQuery optimizeJoinOrFilter(IntermediateQuery currentQuery, JoinOrFilterNode currentNode)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> optionalProposal = makeProposal(
+        Optional<PushDownBooleanExpressionProposal> optionalProposal = makeProposal(
                 currentQuery, currentNode);
 
         if (optionalProposal.isPresent()) {
-            PushDownBooleanExpressionProposal<JoinOrFilterNode> proposal = optionalProposal.get();
+            PushDownBooleanExpressionProposal proposal = optionalProposal.get();
 
             // Applies the proposal and casts the results
             NodeCentricOptimizationResults<JoinOrFilterNode> results = proposal.castResults(
@@ -109,7 +109,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     /**
      * Routing method
      */
-    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> makeProposal(
+    private Optional<PushDownBooleanExpressionProposal> makeProposal(
             IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
         if (currentNode instanceof InnerJoinNode) {
             return makeProposalForInnerJoin(currentQuery, (InnerJoinNode) currentNode);
@@ -128,7 +128,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     /**
      * TODO: explain
      */
-    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> makeProposalForInnerJoin(
+    private Optional<PushDownBooleanExpressionProposal> makeProposalForInnerJoin(
             IntermediateQuery currentQuery, InnerJoinNode currentNode) {
 
         Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
@@ -156,14 +156,14 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         return buildProposal(currentNode, transferMapBuilder.build(), notTransferedExpressionBuilder.build());
     }
 
-    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> buildProposal(
+    private Optional<PushDownBooleanExpressionProposal> buildProposal(
             JoinOrFilterNode focusNode, ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
             ImmutableList<ImmutableBooleanExpression> notTransferedExpressions) {
         if (transferMap.isEmpty()) {
             return Optional.absent();
         }
         else {
-            PushDownBooleanExpressionProposal<JoinOrFilterNode> proposal = new PushDownBooleanExpressionProposalImpl<>(
+            PushDownBooleanExpressionProposal proposal = new PushDownBooleanExpressionProposalImpl(
                     focusNode, transferMap, notTransferedExpressions);
             return Optional.of(proposal);
         }
@@ -267,8 +267,8 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * Handle get replacing first child?
      *
      */
-    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> makeProposalForFilter(
-            IntermediateQuery currentQuery, FilterNode currentNode) {
+    private Optional<PushDownBooleanExpressionProposal> makeProposalForFilter(IntermediateQuery currentQuery,
+                                                                              FilterNode currentNode) {
         // TODO: implement it
         return Optional.absent();
     }

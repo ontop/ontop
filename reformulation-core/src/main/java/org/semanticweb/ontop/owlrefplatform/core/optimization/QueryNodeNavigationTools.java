@@ -51,6 +51,14 @@ public class QueryNodeNavigationTools {
         }
 
         /**
+         * Otherwise, if there is a replacing child: returns it
+         */
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        if (optionalReplacingChild.isPresent()) {
+            return new NextNodeAndQuery(optionalReplacingChild, query);
+        }
+
+        /**
          * Otherwise, if there is a next sibling: returns it
          */
         Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();

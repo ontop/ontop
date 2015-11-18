@@ -10,13 +10,13 @@ import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 
 
-public class PushDownBooleanExpressionProposalImpl<N extends JoinOrFilterNode> implements PushDownBooleanExpressionProposal<N> {
+public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExpressionProposal {
 
-    private final N focusNode;
+    private final JoinOrFilterNode focusNode;
     private final ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap;
     private final ImmutableList<ImmutableBooleanExpression> notTransferedExpressions;
 
-    public PushDownBooleanExpressionProposalImpl(N focusNode,
+    public PushDownBooleanExpressionProposalImpl(JoinOrFilterNode focusNode,
                                                  ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
                                                  ImmutableList<ImmutableBooleanExpression> notTransferedExpressions) {
         this.focusNode = focusNode;
@@ -25,12 +25,12 @@ public class PushDownBooleanExpressionProposalImpl<N extends JoinOrFilterNode> i
     }
 
     @Override
-    public NodeCentricOptimizationResults<N> castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults<N>) results;
+    public NodeCentricOptimizationResults<JoinOrFilterNode> castResults(ProposalResults results) {
+        return (NodeCentricOptimizationResults<JoinOrFilterNode>) results;
     }
 
     @Override
-    public N getFocusNode() {
+    public JoinOrFilterNode getFocusNode() {
         return focusNode;
     }
 

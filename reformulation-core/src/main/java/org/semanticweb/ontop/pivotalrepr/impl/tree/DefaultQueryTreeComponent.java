@@ -168,4 +168,9 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
                 return Optional.of(children.get(0));
         }
     }
+
+    @Override
+    public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
+        tree.insertParent(childNode, newParentNode);
+    }
 }
