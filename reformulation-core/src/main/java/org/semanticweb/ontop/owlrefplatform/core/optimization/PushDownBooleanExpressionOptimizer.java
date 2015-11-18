@@ -2,20 +2,25 @@ package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
 
-import java.util.Iterator;
 
 import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.*;
 import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 
 /**
  * TODO: explain
+ *
+ * BIAS: only interested in propagating boolean expressions behind SubTreeDelimiterNode(s).
+ *
  */
 public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOptimizer {
 
@@ -25,13 +30,27 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     private static class NotSupportedCaseException extends Exception {
     }
 
+    /**
+     * TODO: explain
+     */
+    private static class DelimiterTargetPair {
+        public final SubTreeDelimiterNode delimiterNode;
+        public final QueryNode targetNode;
+
+        private DelimiterTargetPair(SubTreeDelimiterNode delimiterNode, QueryNode targetNode) {
+            this.delimiterNode = delimiterNode;
+            this.targetNode = targetNode;
+        }
+    }
+
+
 
     @Override
     public IntermediateQuery optimize(final IntermediateQuery initialQuery) throws EmptyQueryException {
         try {
             return pushDownExpressions(initialQuery);
         } catch (InvalidQueryOptimizationProposalException e) {
-            throw new RuntimeException("TODO: unexcepted exception: " + e.getMessage());
+            throw new RuntimeException("TODO: unexpected exception: " + e.getMessage());
         }
     }
 
@@ -70,14 +89,14 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     private NextNodeAndQuery optimizeJoinOrFilter(IntermediateQuery currentQuery, JoinOrFilterNode currentNode)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        Optional<PushDownBooleanExpressionProposal<? extends JoinOrFilterNode>> optionalProposal = makeProposal(
+        Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> optionalProposal = makeProposal(
                 currentQuery, currentNode);
 
         if (optionalProposal.isPresent()) {
-            PushDownBooleanExpressionProposal<? extends JoinOrFilterNode> proposal = optionalProposal.get();
+            PushDownBooleanExpressionProposal<JoinOrFilterNode> proposal = optionalProposal.get();
 
             // Applies the proposal and casts the results
-            NodeCentricOptimizationResults<? extends JoinOrFilterNode> results = proposal.castResults(
+            NodeCentricOptimizationResults<JoinOrFilterNode> results = proposal.castResults(
                     currentQuery.applyProposal(proposal));
 
             return getNextNodeAndQuery(results);
@@ -90,7 +109,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     /**
      * Routing method
      */
-    private Optional<PushDownBooleanExpressionProposal<? extends JoinOrFilterNode>> makeProposal(
+    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> makeProposal(
             IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
         if (currentNode instanceof InnerJoinNode) {
             return makeProposalForInnerJoin(currentQuery, (InnerJoinNode) currentNode);
@@ -109,7 +128,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     /**
      * TODO: explain
      */
-    private Optional<PushDownBooleanExpressionProposal<? extends JoinOrFilterNode>> makeProposalForInnerJoin(
+    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> makeProposalForInnerJoin(
             IntermediateQuery currentQuery, InnerJoinNode currentNode) {
 
         Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
@@ -119,11 +138,55 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
         ImmutableSet<ImmutableBooleanExpression> booleanExpressions = optionalNestedExpression.get().flatten();
 
-        ImmutableList<QueryNode> potentialTargetNodes = findCandidateTargetNodes(currentQuery, currentNode);
+        ImmutableList<DelimiterTargetPair> potentialTargetNodes = findCandidateTargetNodes(currentQuery, currentNode);
 
-        // TODO: continue
-        throw new RuntimeException("TODO: continue");
+        ImmutableMultimap.Builder<QueryNode, ImmutableBooleanExpression> transferMapBuilder = ImmutableMultimap.builder();
+        ImmutableList.Builder<ImmutableBooleanExpression> notTransferedExpressionBuilder = ImmutableList.builder();
 
+        for (ImmutableBooleanExpression expression : booleanExpressions) {
+            ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(expression, potentialTargetNodes);
+            for (QueryNode targetNode : nodesForTransfer) {
+                transferMapBuilder.put(targetNode, expression);
+            }
+            if (nodesForTransfer.isEmpty()) {
+                notTransferedExpressionBuilder.add(expression);
+            }
+        }
+
+        return buildProposal(currentNode, transferMapBuilder.build(), notTransferedExpressionBuilder.build());
+    }
+
+    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> buildProposal(
+            JoinOrFilterNode focusNode, ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
+            ImmutableList<ImmutableBooleanExpression> notTransferedExpressions) {
+        if (transferMap.isEmpty()) {
+            return Optional.absent();
+        }
+        else {
+            PushDownBooleanExpressionProposal<JoinOrFilterNode> proposal = new PushDownBooleanExpressionProposalImpl<>(
+                    focusNode, transferMap, notTransferedExpressions);
+            return Optional.of(proposal);
+        }
+    }
+
+    /**
+     * TODO: explain
+     *
+     * Criterion: the delimiter node should contain all the variables used in the boolean expression.
+     */
+    private ImmutableList<QueryNode> selectNodesForTransfer(ImmutableBooleanExpression expression,
+                                                            ImmutableList<DelimiterTargetPair> potentialTargetPairs) {
+        ImmutableList.Builder<QueryNode> selectionBuilder = ImmutableList.builder();
+        for (DelimiterTargetPair pair : potentialTargetPairs) {
+            ImmutableSet<Variable> expressionVariables = expression.getVariables();
+            ImmutableSet<Variable> delimiterVariables = pair.delimiterNode.getProjectionAtom().getVariables();
+
+            if (delimiterVariables.containsAll(expressionVariables)) {
+                selectionBuilder.add(pair.targetNode);
+            }
+        }
+
+        return selectionBuilder.build();
     }
 
     /**
@@ -131,13 +194,14 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      *
      * TODO: explain
      */
-    private ImmutableList<QueryNode> findCandidateTargetNodes( IntermediateQuery currentQuery,
-                                                               InnerJoinNode currentNode) {
+    private ImmutableList<DelimiterTargetPair> findCandidateTargetNodes(IntermediateQuery currentQuery,
+                                                                        InnerJoinNode currentNode) {
         try {
-            ImmutableList.Builder<QueryNode> candidateListBuilder = ImmutableList.builder();
+            ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
 
             for (QueryNode childNode : currentQuery.getChildren(currentNode)) {
-                candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, childNode, false));
+                candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, childNode,
+                        Optional.<SubTreeDelimiterNode>absent()));
             }
             return candidateListBuilder.build();
         } catch (NotSupportedCaseException e) {
@@ -148,35 +212,51 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     /**
      * TODO: explain and clean
      */
-    private ImmutableList<QueryNode> findCandidatesInSubTree(IntermediateQuery currentQuery,
-                                                             QueryNode node,
-                                                             boolean behindADelimiterNode)
+    private ImmutableList<DelimiterTargetPair> findCandidatesInSubTree(IntermediateQuery currentQuery, QueryNode node,
+                                                                       final Optional<SubTreeDelimiterNode> optionalClosestDelimiterNode)
             throws NotSupportedCaseException {
+
+        /**
+         * First leaf case: ...
+         */
         if (node instanceof DataNode) {
-            if (behindADelimiterNode) {
-                return ImmutableList.of(node);
+            if (optionalClosestDelimiterNode.isPresent()) {
+                return ImmutableList.of(new DelimiterTargetPair(optionalClosestDelimiterNode.get(), node));
             }
             else {
                 throw new NotSupportedCaseException();
             }
         }
 
-        boolean childBehindDelimiter = behindADelimiterNode;
-
-        if ((node instanceof JoinOrFilterNode) && behindADelimiterNode) {
-            return ImmutableList.of(node);
-        }
         /**
-         * Construction nodes or extensions
+         * Second leaf case: ...
          */
-        else if (node instanceof SubTreeDelimiterNode) {
-            childBehindDelimiter = true;
+        if ((node instanceof JoinOrFilterNode) && optionalClosestDelimiterNode.isPresent()) {
+            return ImmutableList.of(new DelimiterTargetPair(optionalClosestDelimiterNode.get(), node));
         }
 
-        ImmutableList.Builder<QueryNode> candidateListBuilder = ImmutableList.builder();
+        /**
+         * Otherwise, looks at the children
+         */
+        Optional<SubTreeDelimiterNode> newOptionalClosestDelimiterNode;
+
+        /**
+         *     Updates the closest SubTreeDelimiterNode
+         */
+        if (node instanceof SubTreeDelimiterNode) {
+            newOptionalClosestDelimiterNode = Optional.of((SubTreeDelimiterNode)node);
+        }
+        else {
+            newOptionalClosestDelimiterNode = optionalClosestDelimiterNode;
+        }
+
+        /**
+         *    Gathers the pairs returned by the children
+         */
+        ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
         for (QueryNode child : currentQuery.getChildren(node)) {
             // Recursive call
-            candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, child, childBehindDelimiter));
+            candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, child, newOptionalClosestDelimiterNode));
         }
         return candidateListBuilder.build();
     }
@@ -187,7 +267,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * Handle get replacing first child?
      *
      */
-    private Optional<PushDownBooleanExpressionProposal<? extends JoinOrFilterNode>> makeProposalForFilter(
+    private Optional<PushDownBooleanExpressionProposal<JoinOrFilterNode>> makeProposalForFilter(
             IntermediateQuery currentQuery, FilterNode currentNode) {
         // TODO: implement it
         return Optional.absent();
