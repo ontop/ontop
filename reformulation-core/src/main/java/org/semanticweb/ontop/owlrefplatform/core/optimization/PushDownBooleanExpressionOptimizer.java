@@ -116,11 +116,13 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     private Optional<PushDownBooleanExpressionProposal> makeProposal(
             IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
-        if (currentNode instanceof InnerJoinNode) {
-            return makeProposalForInnerJoin(currentQuery, (InnerJoinNode) currentNode);
-        }
-        else if (currentNode instanceof FilterNode) {
-            return makeProposalForFilter(currentQuery, (FilterNode) currentNode);
+
+        /**
+         * Inner joins and filters
+         */
+        if ((currentNode instanceof InnerJoinNode)
+                || (currentNode instanceof FilterNode)) {
+            return makeProposalForFilterOrInnerJoin(currentQuery, currentNode);
         }
         /**
          * Left-join is not yet supported
@@ -132,9 +134,12 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
     /**
      * TODO: explain
+     *
+     * NOT FOR LJs!!!
+     *
      */
-    private Optional<PushDownBooleanExpressionProposal> makeProposalForInnerJoin(
-            IntermediateQuery currentQuery, InnerJoinNode currentNode) {
+    private Optional<PushDownBooleanExpressionProposal> makeProposalForFilterOrInnerJoin(
+            IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
 
         Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
         if (!optionalNestedExpression.isPresent()) {
@@ -200,7 +205,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * TODO: explain
      */
     private ImmutableList<DelimiterTargetPair> findCandidateTargetNodes(IntermediateQuery currentQuery,
-                                                                        InnerJoinNode currentNode) {
+                                                                        JoinOrFilterNode currentNode) {
         try {
             ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
 
@@ -264,18 +269,6 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, child, newOptionalClosestDelimiterNode));
         }
         return candidateListBuilder.build();
-    }
-
-    /**
-     * TODO: implement
-     *
-     * Handle get replacing first child?
-     *
-     */
-    private Optional<PushDownBooleanExpressionProposal> makeProposalForFilter(IntermediateQuery currentQuery,
-                                                                              FilterNode currentNode) {
-        // TODO: implement it
-        return Optional.absent();
     }
 
 }
