@@ -65,4 +65,9 @@ public interface QueryTreeComponent {
     Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException;
 
     Optional<QueryNode> getFirstChild(QueryNode node);
+
+    /**
+     * Inserts a new node between a node and its former parent (now grand-parent)
+     */
+    void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 }
