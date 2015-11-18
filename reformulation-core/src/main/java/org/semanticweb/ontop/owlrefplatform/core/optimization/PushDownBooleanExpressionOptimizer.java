@@ -46,7 +46,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
 
     @Override
-    public IntermediateQuery optimize(final IntermediateQuery initialQuery) throws EmptyQueryException {
+    public IntermediateQuery optimize(final IntermediateQuery initialQuery) {
         try {
             return pushDownExpressions(initialQuery);
         } catch (InvalidQueryOptimizationProposalException e) {
@@ -58,7 +58,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * TODO: explain
      */
     private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
         // Non-final
         Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
 
@@ -88,7 +88,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * TODO: explain
      */
     private NextNodeAndQuery optimizeJoinOrFilter(IntermediateQuery currentQuery, JoinOrFilterNode currentNode)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
         Optional<PushDownBooleanExpressionProposal> optionalProposal = makeProposal(
                 currentQuery, currentNode);
 
@@ -96,8 +96,13 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             PushDownBooleanExpressionProposal proposal = optionalProposal.get();
 
             // Applies the proposal and casts the results
-            NodeCentricOptimizationResults<JoinOrFilterNode> results = proposal.castResults(
-                    currentQuery.applyProposal(proposal));
+            NodeCentricOptimizationResults<JoinOrFilterNode> results;
+            try {
+                results = proposal.castResults(
+                        currentQuery.applyProposal(proposal));
+            } catch (EmptyQueryException e) {
+                throw new RuntimeException("Unexpected empty query exception while pushing down boolean expressions");
+            }
 
             return getNextNodeAndQuery(results);
         }
