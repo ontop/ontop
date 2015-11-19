@@ -10,7 +10,12 @@
 	<artifactId>ontop-protege4</artifactId>
 	<name>ontop-protege4</name>
 
-	<dependencies>
+    <properties>
+        <protege.version>5.0.0-beta-16</protege.version>
+    </properties>
+
+
+    <dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -138,18 +143,18 @@
 		
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
-		<dependency>
-			<groupId>edu.stanford.protege</groupId>
-			<artifactId>org.protege.editor.core.application</artifactId>
-			<version>4.3.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>edu.stanford.protege</groupId>
-			<artifactId>org.protege.editor.owl</artifactId>
-			<version>4.3.0</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>org.protege.editor.core.application</artifactId>
+            <version>${protege.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>org.protege.editor.owl</artifactId>
+            <version>${protege.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
 		<!-- transitive dependencies -->
 		<dependency>
