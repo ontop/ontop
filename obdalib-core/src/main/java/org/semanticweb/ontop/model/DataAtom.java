@@ -25,4 +25,6 @@ public interface DataAtom extends ImmutableFunctionalTerm {
      * Gets the arguments (variables and ground terms).
      */
     ImmutableList<VariableOrGroundTerm> getVariablesOrGroundTerms();
+
+    boolean containsGroundTerms();
 }
