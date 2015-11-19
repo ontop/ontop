@@ -41,7 +41,6 @@ import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -56,9 +55,8 @@ import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.pivotalrepr.MetadataForQueryOptimization;
 import org.semanticweb.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
-import org.semanticweb.ontop.sql.TableDefinition;
-import org.semanticweb.ontop.sql.api.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,13 +119,6 @@ public class Quest implements Serializable, IQuest {
      */
 	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
 
-	/**
-	 * This represents user-supplied constraints, i.e. primary
-	 * and foreign keys not present in the database metadata
-	 *
-	 * Can be useful for eliminating self-joins
-	 */
-	private final ImplicitDBConstraints userConstraints;
 
 	/*
 	 * Whether to apply the user-supplied database constraints given above
@@ -197,7 +188,7 @@ public class Quest implements Serializable, IQuest {
 
 	private QueryCache queryCache;
 
-	private DBMetadata metadata;
+	private DataSourceMetadata metadata;
 
 	private DBConnector dbConnector;
 
@@ -240,7 +231,6 @@ public class Quest implements Serializable, IQuest {
 				  @Assisted QuestPreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, QueryCache queryCache,
-				  @Nullable ImplicitDBConstraints userConstraints,
 				  TMappingExclusionConfig excludeFromTMappings) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
@@ -252,7 +242,6 @@ public class Quest implements Serializable, IQuest {
 		this.queryCache = queryCache;
 
 		inputOntology = tbox;
-		this.userConstraints = userConstraints;
 
 		// Not null (default value defined by the Guice module)
 		this.excludeFromTMappings = excludeFromTMappings;
@@ -588,8 +577,7 @@ public class Quest implements Serializable, IQuest {
 
 				URI sourceUri = obdaSource.getSourceID();
 				ImmutableList<OBDAMappingAxiom> originalMappings = inputOBDAModel.getMappings(sourceUri);
-				ImmutableList<OBDAMappingAxiom> translatedMappings =
-						vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
+				ImmutableList<OBDAMappingAxiom> translatedMappings = vocabularyValidator.replaceEquivalences(originalMappings);
 
 				Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
 				mappings.put(sourceUri, translatedMappings);
@@ -609,48 +597,31 @@ public class Quest implements Serializable, IQuest {
 			/**
 			 * if the metadata was not already set,
 			 * extracts DB metadata completely.
+			 *
+			 * Gets the mapping rules in the same time.
 			 */
-
+			ImmutableList<CQIE> mappingRules;
 			if (metadata == null) {
-				metadata = dbConnector.extractDBMetadata(unfoldingOBDAModel, userConstraints);
+				DBMetadataAndMappings dbMetadataAndMappings = dbConnector.extractDBMetadataAndMappings(unfoldingOBDAModel, sourceId);
+				metadata = dbMetadataAndMappings.getDataSourceMetadata();
+				mappingRules = dbMetadataAndMappings.getMappingRules();
 			}
 			/**
-			 * Otherwise, if partially configured, complete it by applying
-			 * the user-defined constraints.
+			 * Otherwise, complete the pre-defined metadata with possible user-defined information
+			 * (e.g. user-defined constraints).
+			 *
+			 * Gets the mapping rules afterwards.
 			 */
 			else {
-				//Adds keys from the text file
-				if (userConstraints != null) {
-					userConstraints.addConstraints(metadata);
-				}
+				dbConnector.completePredefinedMetadata(metadata);
+				mappingRules = dbConnector.extractMappings(unfoldingOBDAModel, sourceId, metadata);
 			}
 
 
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
-			if (printKeys) { 
-				// Prints all primary keys
-				log.debug("\n====== Primary keys ==========");
-				Collection<TableDefinition> table_list = metadata.getTables();
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					for (Attribute attr : dd.getPrimaryKeys()) {
-						log.debug(attr.getName() + ",");
-					}
-				}
-				// Prints all foreign keys
-				log.debug("\n====== Foreign keys ==========");
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-					for(String fkName : fkeys.keySet() ){
-						log.debug("(" + fkName + ":");
-						for(Attribute attr : fkeys.get(fkName)){
-							log.debug(attr.getName() + ",");
-						}
-						log.debug("),");
-					}
-				}		
+			if (printKeys) {
+				log.debug(metadata.printKeys());
 			}
 
             /*
@@ -670,7 +641,7 @@ public class Quest implements Serializable, IQuest {
 				dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource);
 			}
 
-			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, dbConnector, sourceId, nativeQLFactory);
+			unfolder = new QuestUnfolder(mappingRules, nativeQLFactory);
 
 			/***
 			 * T-Mappings and Fact mappings
@@ -689,7 +660,7 @@ public class Quest implements Serializable, IQuest {
 				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
 				// Davide> Option to disable T-Mappings (TODO: Test)
 				//if( tMappings ){
-				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
+				unfolder.applyTMappings(reformulationReasoner, true, metadata, dbConnector, excludeFromTMappings);
 				//}
 
 				
@@ -790,7 +761,7 @@ public class Quest implements Serializable, IQuest {
 		unfoldingOBDAModel = unfoldingOBDAModel.newModel(unfoldingOBDAModel.getSources(), mappings);
 
 		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
-										reformulationReasoner, metadata);
+										reformulationReasoner, dbConnector, metadata);
 	}
 
 	public void close() {
@@ -808,7 +779,8 @@ public class Quest implements Serializable, IQuest {
 		return dbConnector.getConnection();
 	}
 
-	public DBMetadata getMetaData() {
+	@Override
+	public DataSourceMetadata getMetaData() {
 		return metadata;
 	}
 

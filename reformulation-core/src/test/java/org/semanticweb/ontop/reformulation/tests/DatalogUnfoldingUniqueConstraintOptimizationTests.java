@@ -26,7 +26,6 @@ import com.google.common.collect.Multimap;
 import junit.framework.TestCase;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.sql.DBMetadata;
@@ -38,6 +37,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * TODO: disable this test
+ */
 public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
@@ -146,7 +148,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
+		Multimap<Predicate, List<Integer>> pkeys = metadata.extractPKs(unfoldingProgram.getRules());
 		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
         // q(m, n, p) :-  id(m, p), id1(n, p)

@@ -31,6 +31,11 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
+    /**
+     * Please use applyToFunctionalTerm() instead if you can.
+     */
+    Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm);
+
     ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression);
 
     /**
@@ -61,4 +66,5 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Returns a similar substitution that avoids (if possible) to substitute certain variables.
      */
     ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
+
 }

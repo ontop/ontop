@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.model.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 
@@ -21,7 +22,11 @@ public class ImmutabilityTools {
         if (term instanceof Function) {
             if (term instanceof ImmutableFunctionalTerm) {
                 return (ImmutableTerm) term;
-            } else {
+            } else if (term instanceof BooleanExpression) {
+                BooleanExpression booleanExpression = (BooleanExpression) term;
+                return new ImmutableBooleanExpressionImpl(booleanExpression);
+            }
+            else {
                 Function functionalTerm = (Function) term;
                 return new ImmutableFunctionalTermImpl(functionalTerm);
             }
@@ -102,4 +107,29 @@ public class ImmutabilityTools {
         return mutFunc;
 
     }
+
+    public static Optional<ImmutableBooleanExpression> foldBooleanExpressions(
+            ImmutableList<ImmutableBooleanExpression> conjunctionOfExpressions) {
+        final int size = conjunctionOfExpressions.size();
+        switch (size) {
+            case 0:
+                Optional.absent();
+            case 1:
+                return Optional.of(conjunctionOfExpressions.get(0));
+            case 2:
+                return Optional.of((ImmutableBooleanExpression) new ImmutableBooleanExpressionImpl(OBDAVocabulary.AND,
+                        conjunctionOfExpressions));
+            default:
+                // Non-final
+                ImmutableBooleanExpression cumulativeExpression = new ImmutableBooleanExpressionImpl(OBDAVocabulary.AND,
+                        conjunctionOfExpressions.get(0),
+                        conjunctionOfExpressions.get(1));
+                for (int i = 2; i < size; i++) {
+                    cumulativeExpression = new ImmutableBooleanExpressionImpl(OBDAVocabulary.AND,
+                            cumulativeExpression, conjunctionOfExpressions.get(i));
+                }
+                return Optional.of(cumulativeExpression);
+        }
+    }
+
 }

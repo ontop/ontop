@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.FilterNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.HeterogeneousQueryNodeTransformerImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.NodeTransformationProposalImpl;
 
 import static org.semanticweb.ontop.pivotalrepr.NodeTransformationProposedState.*;
@@ -13,7 +12,7 @@ import static org.semanticweb.ontop.pivotalrepr.NodeTransformationProposedState.
 /**
  * TODO: explain
  */
-public class ReactToChildDeletionTransformer extends HeterogeneousQueryNodeTransformerImpl {
+public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTransformer {
 
     private final IntermediateQuery query;
 
@@ -27,7 +26,7 @@ public class ReactToChildDeletionTransformer extends HeterogeneousQueryNodeTrans
     }
 
     @Override
-    public NodeTransformationProposal transform(TableNode tableNode){
+    public NodeTransformationProposal transform(ExtensionalDataNode extensionalDataNode){
         throw new UnsupportedOperationException("A TableNode is not expected to have a child");
     }
 
@@ -68,7 +67,7 @@ public class ReactToChildDeletionTransformer extends HeterogeneousQueryNodeTrans
     }
 
     @Override
-    public NodeTransformationProposal transform(OrdinaryDataNode ordinaryDataNode) {
+    public NodeTransformationProposal transform(IntensionalDataNode intensionalDataNode) {
         throw new UnsupportedOperationException("A OrdinaryDataNode is not expected to have a child");
     }
 

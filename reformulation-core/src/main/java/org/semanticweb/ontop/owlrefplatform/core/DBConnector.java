@@ -1,15 +1,17 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.nativeql.DBMetadataException;
-import org.semanticweb.ontop.sql.DBMetadata;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.util.List;
 
 /**
  * High-level component in charge of abstracting the interaction with the DB.
@@ -29,17 +31,6 @@ public interface DBConnector {
     void close();
 
     /**
-     * Extracts the schema from the DB and/or the mappings.
-     */
-    DBMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints)
-            throws DBMetadataException;
-
-    /**
-     * May expand the mappings by querying the DB.
-     */
-    OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException;
-
-    /**
      * Gets a direct QuestConnection.
      */
     IQuestConnection getNonPoolConnection() throws OBDAException;
@@ -48,4 +39,13 @@ public interface DBConnector {
      * Gets a QuestConnection usually coming from a connection pool.
      */
     IQuestConnection getConnection() throws OBDAException;
+
+    LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata);
+
+    DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId)
+            throws DBMetadataException, OBDAException;
+
+    ImmutableList<CQIE> extractMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
+
+    void completePredefinedMetadata(DataSourceMetadata metadata);
 }

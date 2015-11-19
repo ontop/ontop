@@ -35,10 +35,7 @@ import java.util.Map;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.parser.SQLQueryParser;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
@@ -51,8 +48,10 @@ import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
  *
  * TODO: see if we can make it immutable so that it can be shared between threads.
  *
+ * TODO: rename it into SQLDBMetadata.
+ *
  */
-public class DBMetadata implements Serializable {
+public class DBMetadata implements DataSourceMetadata, Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
@@ -334,12 +333,10 @@ public class DBMetadata implements Serializable {
      * The methods will return the following Multimap:
      *  { Tab0 -> { [col1, col2], [col4], [col5] } }
      *
-	 * 
-	 * @param metadata
+	 *
 	 * @param program
 	 */
-	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
-			List<CQIE> program) {
+	public Multimap<Predicate, List<Integer>> extractPKs(List<CQIE> program) {
 		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
@@ -353,7 +350,7 @@ public class DBMetadata implements Serializable {
 				// TODO Check this: somehow the new atom name is "Join" instead
 				// of table name.
 				String newAtomName = newAtomPredicate.toString();
-				DataDefinition def = metadata.getDefinition(newAtomName);
+				DataDefinition def = getDefinition(newAtomName);
 				if (def != null) {
                     // primary keys
 					List<Integer> pkeyIdx = new LinkedList<>();
@@ -418,4 +415,32 @@ public class DBMetadata implements Serializable {
         return vd;
     }
 
+	@Override
+	public String printKeys() {
+		StringBuilder strBuilder = new StringBuilder();
+		
+		// Prints all primary keys
+		strBuilder.append("\n====== Primary keys ==========\n");
+		Collection<TableDefinition> table_list = getTables();
+		for(TableDefinition dd : table_list){
+			strBuilder.append("\n" + dd.getName() + ":\n");
+			for (Attribute attr : dd.getPrimaryKeys()) {
+				strBuilder.append(attr.getName() + ",\n");
+			}
+		}
+		// Prints all foreign keys
+		strBuilder.append("\n====== Foreign keys ==========");
+		for(TableDefinition dd : table_list){
+			strBuilder.append("\n" + dd.getName() + ":\n");
+			Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
+			for(String fkName : fkeys.keySet() ){
+				strBuilder.append("(" + fkName + ":\n");
+				for(Attribute attr : fkeys.get(fkName)){
+					strBuilder.append(attr.getName() + ",\n");
+				}
+				strBuilder.append("),\n");
+			}
+		}
+		return strBuilder.toString();
+	}
 }

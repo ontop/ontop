@@ -3,12 +3,16 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutabilityTools;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
@@ -18,7 +22,8 @@ import static org.semanticweb.ontop.model.impl.GroundTermTools.isGroundTerm;
  */
 public class ImmutableSubstitutionTools {
 
-    private static ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
+    private static final ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
 
     /**
@@ -231,5 +236,32 @@ public class ImmutableSubstitutionTools {
             substitutionMapBuilder.put(entry.getKey(), value);
         }
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+    }
+
+    public static Optional<ImmutableBooleanExpression> convertIntoBooleanExpression(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+
+
+        List<ImmutableBooleanExpression> equalities = new ArrayList<>();
+
+        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : substitution.getImmutableMap().entrySet()) {
+            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ, entry.getKey(), entry.getValue()));
+        }
+
+        switch(equalities.size()) {
+            case 0:
+                return Optional.absent();
+            case 1:
+                return Optional.of(equalities.get(0));
+            default:
+                Iterator<ImmutableBooleanExpression> equalityIterator = equalities.iterator();
+                // Non-final
+                ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
+                while (equalityIterator.hasNext()) {
+                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, aggregateExpression,
+                            equalityIterator.next());
+                }
+                return Optional.of(aggregateExpression);
+        }
     }
 }

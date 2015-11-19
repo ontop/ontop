@@ -9,12 +9,7 @@ import org.semanticweb.ontop.model.*;
  * TODO: further explain
  *
  */
-public interface ConstructionNode extends QueryNode {
-
-    /**
-     * Data atom containing the projected variables
-     */
-    DataAtom getProjectionAtom();
+public interface ConstructionNode extends SubTreeDelimiterNode {
 
     /**
      * Projected variables --> transformed variable

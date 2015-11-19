@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
  */
 
 
+import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -31,28 +32,25 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.DataDefinition;
-import org.semanticweb.ontop.sql.TableDefinition;
-import org.semanticweb.ontop.sql.ViewDefinition;
+import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.sql.*;
 import org.semanticweb.ontop.sql.api.Attribute;
 
 import java.sql.Types;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.openrdf.model.Literal;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
@@ -62,7 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 
 /**
- * This class generates a SQL string from the datalog program coming from the
+ * This class generates an SQLExecutableQuery from the datalog program coming from the
  * unfolder.
  *
  * This class is NOT thread-safe (attributes values are query-dependent).
@@ -142,7 +140,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
 
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
@@ -170,18 +168,22 @@ public class SQLGenerator implements NativeQueryGenerator {
 	}
 
     @AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
+	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
         this(metadata, dataSource, null, preferences);
     }
 
 	@AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource,
 						 @Assisted SemanticIndexURIMap uriRefIds, QuestPreferences preferences) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		this.metadata = metadata;
+		if (!(metadata instanceof DBMetadata)) {
+			throw new IllegalArgumentException("Not a DBMetadata!");
+		}
+
+		this.metadata = (DBMetadata)metadata;
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, preferences);
 		this.dataTypePredicateUnifyTable = buildPredicateUnifyTable();
 
@@ -218,6 +220,12 @@ public class SQLGenerator implements NativeQueryGenerator {
         return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
                 isSI, uriRefIds);
     }
+
+	@Override
+	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+		// Empty string query
+		return new SQLExecutableQuery(signatureContainer, optionalConstructTemplate);
+	}
 
 	private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
 		return new ImmutableTable.Builder<Predicate, Predicate, Predicate>()
@@ -280,16 +288,17 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
 	 * method descriptions. Observe that the SQL itself will be done by
 	 * {@link #generateQuery(DatalogProgram, List, String, Map, List, Set)}
-	 *
-	 * @param queryProgram
+	 *  @param queryProgram
 	 *            This is an arbitrary Datalog Program. In this program ans
 	 *            predicates will be translated to Views.
 	 * @param signature
-	 *            The Select variables in the SPARQL query
+	 * @param optionalConstructTemplate
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram queryProgram,
-									  List<String> signature) throws OBDAException {
+	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+											  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
+
+		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
 
 		normalizeProgram(queryProgram);
 
@@ -346,15 +355,46 @@ public class SQLGenerator implements NativeQueryGenerator {
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
 			sql += modifier;
-			return sql;
+			return new SQLExecutableQuery(sql, signature, optionalConstructTemplate);
 		} else {
-			return generateQuery(queryProgram, signature, "", ruleIndex,
+			String sqlQuery = generateQuery(queryProgram, signature, "", ruleIndex,
 					ruleIndexByBodyPredicate, predicatesInBottomUp,
 					extensionalPredicates);
+			return new SQLExecutableQuery(sqlQuery, signature, optionalConstructTemplate);
 		}
 	}
 
-    @Override
+	/**
+	 * TODO: explain
+	 */
+	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
+		DatalogProgram unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+
+		log.debug("New Datalog query: \n" + unfolding.toString());
+
+		unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
+		log.debug("New flattened Datalog query: \n" + unfolding.toString());
+
+		log.debug("Pulling out equalities...");
+
+		//TODO: use Guice instead
+		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
+		List<CQIE> normalizedRules = new ArrayList<>();
+		for (CQIE rule: unfolding.getRules()) {
+			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+		}
+
+		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
+		unfolding = obdaDataFactory.getDatalogProgram(queryModifiers, normalizedRules);
+
+		log.debug("\n Partial evaluation ended.\n{}", unfolding);
+
+		return unfolding;
+
+	}
+
+	@Override
     public boolean hasDistinctResultSet() {
         return false;
     }

@@ -48,6 +48,8 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.IQuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -377,9 +379,24 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * SQL-specific! Please use getExecutableQuery() instead!
+	 */
+	@Deprecated
 	public String getUnfolding(String query) throws OWLException {
+		ExecutableQuery executableQuery = getExecutableQuery(query);
+		if (executableQuery instanceof SQLExecutableQuery) {
+			return ((SQLExecutableQuery) executableQuery).getSQL();
+		}
+		else {
+			throw new RuntimeException("This deprecated method (getUnfolding) presumes the use of SQL as a native query language. " +
+					"Please use getExecutableQuery() instead.");
+		}
+	}
+
+	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
 		try {
-			return st.unfoldAndGenerateTargetQuery(query).getNativeQueryString();
+			return st.unfoldAndGenerateTargetQuery(query);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}

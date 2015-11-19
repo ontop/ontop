@@ -3,12 +3,11 @@ package org.semanticweb.ontop.executor.renaming;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.QueryNodeVisitorImpl;
 
 /**
  * TODO: explain
  */
-public class PredicateRenamingChecker extends QueryNodeVisitorImpl {
+public class PredicateRenamingChecker implements QueryNodeVisitor {
 
     private final AtomPredicate forbiddenPredicate;
 
@@ -55,13 +54,13 @@ public class PredicateRenamingChecker extends QueryNodeVisitorImpl {
     }
 
     @Override
-    public void visit(OrdinaryDataNode ordinaryDataNode) throws AlreadyExistingPredicateException {
-        checkAtom(ordinaryDataNode.getAtom());
+    public void visit(IntensionalDataNode intensionalDataNode) throws AlreadyExistingPredicateException {
+        checkAtom(intensionalDataNode.getAtom());
     }
 
     @Override
-    public void visit(TableNode tableNode) throws AlreadyExistingPredicateException {
-        checkAtom(tableNode.getAtom());
+    public void visit(ExtensionalDataNode extensionalDataNode) throws AlreadyExistingPredicateException {
+        checkAtom(extensionalDataNode.getAtom());
     }
 
     @Override

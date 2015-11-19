@@ -4,6 +4,7 @@
 package org.semanticweb.ontop.sql;
 
 
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
 import org.semanticweb.ontop.sql.api.TableJSQL;
@@ -181,15 +182,35 @@ public class ImplicitDBConstraints {
 	 * Adds the parsed user-supplied constraints to the metadata
 	 * @param md
 	 */
-	public void addConstraints(DBMetadata md){
-		this.addFunctionalDependency(md);
-		this.addForeignKeys(md);
+	public void addConstraints(DataSourceMetadata metadata){
+		/**
+		 * TODO: refactor so as to support this case.
+		 */
+		if (metadata instanceof DBMetadata) {
+			DBMetadata md = (DBMetadata) metadata;
+			this.addFunctionalDependency(md);
+			this.addForeignKeys(md);
+		}
+		else {
+			log.debug("Non SQL DBMetadata detected (not supported YET). No DB constraints extracted. " +
+					"TODO: support it");
+		}
 	}
 	
 	/**
 	 * Inserts the user-supplied primary keys / unique valued columns into the metadata object
 	 */
-	public void addFunctionalDependency(DBMetadata md) {
+	public void addFunctionalDependency(DataSourceMetadata metadata) {
+		/**
+		 * TODO: support this case.
+		 */
+		if (!(metadata instanceof DBMetadata)) {
+			log.debug("Non SQL DBMetadata detected (not supported YET). No functional dependency extracted. " +
+					"TODO: support it");
+			return;
+		}
+		DBMetadata md = (DBMetadata) metadata;
+
 		for(String tableName : this.uniqueFD.keySet() ){
 			DataDefinition td = md.getDefinition(tableName);
 			if(td != null && td instanceof TableDefinition){

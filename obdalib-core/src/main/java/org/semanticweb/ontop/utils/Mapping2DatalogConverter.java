@@ -21,12 +21,12 @@ package org.semanticweb.ontop.utils;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.semanticweb.ontop.mapping.sql.LookupTable;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
@@ -40,6 +40,7 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.parser.SQLQueryParser;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 import org.semanticweb.ontop.sql.api.*;
 
 import java.util.ArrayList;
@@ -58,25 +59,30 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * SQL-specific Mapping2DatalogConverter.
+ * TODO: rename it.
+ */
 public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
     private final DBMetadata dbMetadata;
 
     @AssistedInject
-    private Mapping2DatalogConverter(@Assisted DBMetadata dbMetadata) {
-        this.dbMetadata = dbMetadata;
+    private Mapping2DatalogConverter(@Assisted DataSourceMetadata metadata) {
+        if (!(metadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("A SQL-specific Mapping2DatalogConverter expects a " +
+                    "SQL-specific DBMetadata object");
+        }
+        else {
+            this.dbMetadata = (DBMetadata) metadata;
+        }
     }
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
+	public ImmutableList<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		
@@ -144,7 +150,7 @@ public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 			throw  new IllegalArgumentException(msg);
 		}
 
-		return datalogProgram;
+		return ImmutableList.copyOf(datalogProgram);
 	}
 
     /**

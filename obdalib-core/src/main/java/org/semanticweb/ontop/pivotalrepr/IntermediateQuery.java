@@ -35,6 +35,8 @@ public interface IntermediateQuery {
      */
     Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
+    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child);
+
     /**
      * EXCLUDES the root of the sub-tree (currentNode).
      * TODO: find a better name
@@ -57,6 +59,11 @@ public interface IntermediateQuery {
      */
     ProposalResults applyProposal(QueryOptimizationProposal proposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
+
+    /**
+     * May forbid the use of a StandardProposalExecutor.
+     */
+    ProposalResults applyProposal(QueryOptimizationProposal propagationProposal, boolean requireUsingInternalExecutor) throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      * TODO: find an exception to throw

@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -100,7 +101,7 @@ public class QuestOWLExample {
 			/*
 			 * Print the query summary
 			 */
-			String sqlQuery = st.getUnfolding(sparqlQuery);
+			String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");

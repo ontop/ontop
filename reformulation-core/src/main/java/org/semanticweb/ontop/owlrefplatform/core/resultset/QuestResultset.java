@@ -29,7 +29,6 @@ import java.text.*;
 import java.util.HashMap;
 import java.util.*;
 
-import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
@@ -39,6 +38,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
+import org.semanticweb.ontop.model.DataSourceMetadata;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -92,7 +92,7 @@ public class QuestResultset implements TupleResultSet {
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
 
-		DBMetadata metadata = st.getQuestInstance().getMetaData();
+		DataSourceMetadata metadata = st.getQuestInstance().getMetaData();
 		vendor =  metadata.getDriverName();
 		isOracle = vendor.contains("Oracle");
 		version = metadata.getDriverVersion();

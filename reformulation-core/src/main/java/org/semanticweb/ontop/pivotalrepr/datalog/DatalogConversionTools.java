@@ -10,8 +10,8 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import org.semanticweb.ontop.pivotalrepr.DataNode;
-import org.semanticweb.ontop.pivotalrepr.impl.OrdinaryDataNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 
 import java.util.Collection;
 
@@ -29,10 +29,10 @@ public class DatalogConversionTools {
     public static DataNode createDataNode(DataAtom dataAtom, Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
-            return new TableNodeImpl(dataAtom);
+            return new ExtensionalDataNodeImpl(dataAtom);
         }
 
-        return new OrdinaryDataNodeImpl(dataAtom);
+        return new IntensionalDataNodeImpl(dataAtom);
     }
 
 
@@ -45,7 +45,13 @@ public class DatalogConversionTools {
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
-        AtomPredicate atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
+        AtomPredicate atomPredicate;
+        if (datalogAtomPredicate instanceof AtomPredicate) {
+            atomPredicate = (AtomPredicate) datalogAtomPredicate;
+        }
+        else {
+            atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
+        }
 
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();

@@ -1,9 +1,9 @@
 package org.semanticweb.ontop.owlrefplatform.owlapi3;
 
+import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 
-import java.io.File;
 import java.util.List;
 
 /***
@@ -59,7 +59,11 @@ public interface IQuestOWLStatement {
 
 	String getRewriting(String query) throws OWLException;
 
+	ExecutableQuery getExecutableQuery(String query) throws OWLException;
+
+	@Deprecated
 	String getUnfolding(String query) throws OWLException;
+
 
 	// Davide> Benchmarking
 	long getUnfoldingTime();

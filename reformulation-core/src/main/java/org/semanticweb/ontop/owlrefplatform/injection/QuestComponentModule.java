@@ -32,7 +32,6 @@ public class QuestComponentModule extends OBDAAbstractModule {
     protected void configure() {
         configurePreferences();
 
-        bindImplicitDBConstraints();
         bindTMappingExclusionConfig();
 
         Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(IQuest.class,
@@ -41,14 +40,6 @@ public class QuestComponentModule extends OBDAAbstractModule {
         install(componentFactoryModule);
         bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(QueryCache.class);
-    }
-
-    private void bindImplicitDBConstraints() {
-        ImplicitDBConstraints dbContraints = (ImplicitDBConstraints) getPreferences().get(QuestPreferences.DB_CONSTRAINTS);
-        if (dbContraints == null)
-            bind(ImplicitDBConstraints.class).toProvider(Providers.<ImplicitDBConstraints>of(null));
-        else
-            bind(ImplicitDBConstraints.class).toInstance(dbContraints);
     }
 
     private void bindTMappingExclusionConfig() {

@@ -121,7 +121,7 @@ public class JoinElminationMappingTest extends TestCase {
 				"PREFIX : <http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#> \n" +
 				"SELECT ?x WHERE {?x :R ?y. ?y a :A}";
 		try {
-			System.out.println("\n\nSQL:\n" + st.getUnfolding(query));
+			System.out.println("\n\nSQL:\n" + st.getExecutableQuery(query));
 			QuestOWLResultSet rs = st.executeTuple(query);
 			rs.nextRow();
 		} catch (Exception e) {

@@ -7,19 +7,17 @@ public interface HeterogeneousQueryNodeTransformer<P extends NodeTransformationP
 
     P transform(FilterNode filterNode);
 
-    P transform(TableNode tableNode);
+    P transform(ExtensionalDataNode extensionalDataNode);
 
     P transform(LeftJoinNode leftJoinNode);
 
     P transform(UnionNode unionNode);
 
-    P transform(OrdinaryDataNode ordinaryDataNode);
+    P transform(IntensionalDataNode intensionalDataNode);
 
     P transform(InnerJoinNode innerJoinNode);
 
     P transform(ConstructionNode constructionNode);
 
     P transform(GroupNode groupNode);
-
-    P transform(NonStandardNode nonStandardNode);
 }

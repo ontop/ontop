@@ -16,7 +16,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
  * TODO: propose an optimized version that "extracts" the relevant variables from the bindings.
  *
  */
-public class BindingTransferTransformer extends HomogeneousQueryNodeTransformerImpl {
+public class BindingTransferTransformer implements HomogeneousQueryNodeTransformer {
 
     private final ImmutableSubstitution<ImmutableTerm> transferredBindings;
 
@@ -32,8 +32,8 @@ public class BindingTransferTransformer extends HomogeneousQueryNodeTransformerI
     }
 
     @Override
-    public TableNode transform(TableNode tableNode) {
-        return tableNode;
+    public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
+        return extensionalDataNode;
     }
 
     @Override
@@ -47,8 +47,8 @@ public class BindingTransferTransformer extends HomogeneousQueryNodeTransformerI
     }
 
     @Override
-    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) {
-        return ordinaryDataNode;
+    public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
+        return intensionalDataNode;
     }
 
     @Override

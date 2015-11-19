@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -36,10 +37,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.execution.TargetQueryExecutionException;
+import org.semanticweb.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -47,7 +45,6 @@ import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import org.semanticweb.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -55,14 +52,14 @@ import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
 import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
+import org.semanticweb.ontop.pivotalrepr.QueryNode;
+import org.semanticweb.ontop.pivotalrepr.UnionNode;
 import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Multimap;
-
-import javax.annotation.Nullable;
 
 
 /**
@@ -99,7 +96,7 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	private DatalogProgram programAfterRewriting;
 
-	private DatalogProgram programAfterUnfolding;
+	private IntermediateQuery queryAfterUnfolding;
 
 	/**
 	 * Index function symbols (predicate) that have multiple types.
@@ -157,14 +154,14 @@ public abstract class QuestStatement implements IQuestStatement {
 		private boolean error;
 		private boolean executingTargetQuery;
 		private ResultSet resultSet;
-		private SesameConstructTemplate constructTemplate;
+		private Optional<SesameConstructTemplate> optionalConstructTemplate;
 
 		protected QueryExecutionThread(String sparqlQuery, QueryType queryType, CountDownLatch monitor,
-									   @Nullable SesameConstructTemplate constructTemplate) {
+									   Optional<SesameConstructTemplate> optionalConstructTemplate) {
 			this.sparqlQuery = sparqlQuery;
 			this.queryType = queryType;
 			this.monitor = monitor;
-			this.constructTemplate = constructTemplate;
+			this.optionalConstructTemplate = optionalConstructTemplate;
 			this.exception = null;
 			this.error = false;
 			this.resultSet = null;
@@ -183,7 +180,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			return exception;
 		}
 
-		public void cancel() throws TargetQueryExecutionException {
+		public void cancel() throws NativeQueryExecutionException {
 			canceled = true;
 			if (!executingTargetQuery) {
 				this.stop();
@@ -201,9 +198,9 @@ public abstract class QuestStatement implements IQuestStatement {
 				/**
 				 * Extracts the target query from the cache or computes it.
 				 */
-				TargetQuery targetQuery = queryCache.getTargetQuery(sparqlQuery);
-				if (targetQuery == null) {
-					targetQuery = unfoldAndGenerateTargetQuery(sparqlQuery, constructTemplate);
+				ExecutableQuery executableQuery = queryCache.getTargetQuery(sparqlQuery);
+				if (executableQuery == null) {
+					executableQuery = unfoldAndGenerateTargetQuery(sparqlQuery, optionalConstructTemplate);
 				}
 
 				/**
@@ -214,24 +211,24 @@ public abstract class QuestStatement implements IQuestStatement {
 					executingTargetQuery = true;
 					switch (queryType) {
 						case ASK:
-							resultSet = executeBooleanQuery(targetQuery);
+							resultSet = executeBooleanQuery(executableQuery);
 							break;
 						case SELECT:
-							resultSet = executeSelectQuery(targetQuery);
+							resultSet = executeSelectQuery(executableQuery);
 							break;
 						case CONSTRUCT:
-							resultSet = executeConstructQuery(targetQuery);
+							resultSet = executeConstructQuery(executableQuery);
 							break;
 						case DESCRIBE:
-							resultSet = executeDescribeQuery(targetQuery);
+							resultSet = executeDescribeQuery(executableQuery);
 							break;
 					}
-				} catch (TargetQueryExecutionException e) {
+				} catch (NativeQueryExecutionException e) {
 						exception = e;
 						error = true;
 						log.error(e.getMessage(), e);
 
-						throw new OBDAException("Error executing the target query: \n" + e.getMessage() + "\nTarget query:\n " + targetQuery, e);
+						throw new OBDAException("Error executing the target query: \n" + e.getMessage() + "\nTarget query:\n " + executableQuery, e);
 				}
 				log.debug("Execution finished.\n");
 			} catch (Exception e) {
@@ -249,36 +246,36 @@ public abstract class QuestStatement implements IQuestStatement {
 	/**
 	 * TODO: describe
 	 */
-	protected abstract TupleResultSet executeSelectQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException;
+	protected abstract TupleResultSet executeSelectQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException, OBDAException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract TupleResultSet executeBooleanQuery(TargetQuery targetQuery) throws TargetQueryExecutionException;
+	protected abstract TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeDescribeQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
-		return executeGraphQuery(targetQuery, true);
+	protected GraphResultSet executeDescribeQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException, OBDAException {
+		return executeGraphQuery(executableQuery, true);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeConstructQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
-		return executeGraphQuery(targetQuery, false);
+	protected GraphResultSet executeConstructQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException, OBDAException {
+		return executeGraphQuery(executableQuery, false);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract GraphResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws TargetQueryExecutionException, OBDAException;
+	protected abstract GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults) throws NativeQueryExecutionException, OBDAException;
 
 	/**
 	 * Cancel the processing of the target query.
 	 */
-	protected abstract void cancelTargetQueryStatement() throws TargetQueryExecutionException;
+	protected abstract void cancelTargetQueryStatement() throws NativeQueryExecutionException;
 
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
@@ -312,18 +309,18 @@ public abstract class QuestStatement implements IQuestStatement {
 			return resultSet;
 		} else if (SPARQLQueryUtility.isConstructQuery(pq)) {
 
-			SesameConstructTemplate constructTemplate;
+			Optional<SesameConstructTemplate> optionalConstructTemplate;
 			// Here we need to get the template for the CONSTRUCT query results
 			try {
-				constructTemplate = new SesameConstructTemplate(strquery);
+				optionalConstructTemplate = Optional.of(new SesameConstructTemplate(strquery));
 			} catch (MalformedQueryException e) {
 				e.printStackTrace();
-				constructTemplate = null;
+				optionalConstructTemplate = Optional.absent();
 			}
 			
 			// Here we replace CONSTRUCT query with SELECT query
 			String selectSparqlQuery = SPARQLQueryUtility.getSelectFromConstruct(strquery);
-			ResultSet resultSet = executeInThread(selectSparqlQuery, QueryType.CONSTRUCT, constructTemplate);
+			ResultSet resultSet = executeInThread(selectSparqlQuery, QueryType.CONSTRUCT, optionalConstructTemplate);
 			return resultSet;
 
 		} else if (SPARQLQueryUtility.isDescribeQuery(pq)) {
@@ -363,15 +360,15 @@ public abstract class QuestStatement implements IQuestStatement {
 				// the uri as subject, and collect the results
 				// in one graphresultset
 				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
-				SesameConstructTemplate constructTemplate;
+				Optional<SesameConstructTemplate> optionalConstructTemplate;
 				try {
-					constructTemplate = new SesameConstructTemplate(str);
+					optionalConstructTemplate = Optional.of(new SesameConstructTemplate(str));
 				} catch (MalformedQueryException e) {
 					e.printStackTrace();
-					constructTemplate = null;
+					optionalConstructTemplate = Optional.absent();
 				}
 				str = SPARQLQueryUtility.getSelectFromConstruct(str);
-				ResultSet resultSet = executeInThread(str, QueryType.DESCRIBE, constructTemplate);
+				ResultSet resultSet = executeInThread(str, QueryType.DESCRIBE, optionalConstructTemplate);
 				if (describeResultSet == null) {
 					// just for the first time
 					describeResultSet = (QuestGraphResultSet) resultSet;
@@ -392,15 +389,15 @@ public abstract class QuestStatement implements IQuestStatement {
 			for (String constant : constants) {
 				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
 
-				SesameConstructTemplate constructTemplate;
+				Optional<SesameConstructTemplate> optionalConstructTemplate;
 				try {
-					constructTemplate = new SesameConstructTemplate(str);
+					optionalConstructTemplate = Optional.of(new SesameConstructTemplate(str));
 				} catch (MalformedQueryException e) {
 					e.printStackTrace();
-					constructTemplate = null;
+					optionalConstructTemplate = Optional.absent();
 				}
 				str = SPARQLQueryUtility.getSelectFromConstruct(str);
-				ResultSet resultSet = executeInThread(str, QueryType.DESCRIBE, constructTemplate);
+				ResultSet resultSet = executeInThread(str, QueryType.DESCRIBE, optionalConstructTemplate);
 				if (describeResultSet == null) {
 					// just for the first time
 					describeResultSet = (QuestGraphResultSet) resultSet;
@@ -460,7 +457,7 @@ public abstract class QuestStatement implements IQuestStatement {
 
 
 
-	private DatalogProgram getUnfolding(DatalogProgram query) throws OBDAException {
+	private IntermediateQuery getUnfolding(DatalogProgram query) throws OBDAException, EmptyQueryException {
 
 		log.debug("Start the partial evaluation process...");
 
@@ -529,47 +526,15 @@ public abstract class QuestStatement implements IQuestStatement {
 				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 				
-				
-				unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
-
-				log.debug("New Datalog query: \n" + unfolding.toString());
-
-				unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
-				log.debug("New flattened Datalog query: \n" + unfolding.toString());
-
+				return intermediateQuery;
 				
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
 			}
-			/**
-			 * No solution.
-			 */
-			catch (EmptyQueryException e) {
-
-				log.debug("Empty query --> no solution.");
-				/**
-				 * TODO: should we really return an empty datalog program?
-				 */
-				return ofac.getDatalogProgram();
-			}
 		}
-
-		log.debug("Pulling out equalities...");
-
-		//TODO: use Guice instead
-		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
-
-		List<CQIE> normalizedRules = new ArrayList<>();
-		for (CQIE rule: unfolding.getRules()) {
-			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+		else {
+			throw new EmptyQueryException();
 		}
-
-		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
-		unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
-
-		log.debug("\n Partial evaluation ended.\n{}", unfolding);
-
-		return unfolding;
 	}
 
 	/**
@@ -592,30 +557,23 @@ public abstract class QuestStatement implements IQuestStatement {
 	}
 
 
-	private TargetQuery generateTargetQuery(DatalogProgram datalogQuery, ImmutableList<String> signature,
-											@Nullable SesameConstructTemplate constructTemplate) throws OBDAException {
-		String nativeQueryString;
-		if (datalogQuery.getRules().isEmpty()) {
-			nativeQueryString = "";
-		}
-		else {
-			log.debug("Producing the native query string...");
+	private ExecutableQuery generateTargetQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+											Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
+		log.debug("Producing the native query string...");
 
-			// query = DatalogNormalizer.normalizeDatalogProgram(query);
-			nativeQueryString = queryGenerator.generateSourceQuery(datalogQuery, signature);
+		ExecutableQuery executableQuery = queryGenerator.generateSourceQuery(intermediateQuery, signature, optionalConstructTemplate);
 
-			log.debug("Resulting native query: \n{}", nativeQueryString);
-		}
+		log.debug("Resulting native query: \n{}", executableQuery);
 
-		return new TargetQuery(nativeQueryString, signature, constructTemplate);
+		return executableQuery;
 	}
 
 	/**
 	 * Internal method to start a new query execution thread.
 	 */
-	private ResultSet executeInThread(String sparqlQuery, QueryType queryType, SesameConstructTemplate constructTemplate) throws OBDAException {
+	private ResultSet executeInThread(String sparqlQuery, QueryType queryType, Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 		CountDownLatch monitor = new CountDownLatch(1);
-		executionthread = new QueryExecutionThread(sparqlQuery, queryType, monitor, constructTemplate);
+		executionthread = new QueryExecutionThread(sparqlQuery, queryType, monitor, optionalConstructTemplate);
 		executionthread.start();
 		try {
 			monitor.await();
@@ -710,19 +668,20 @@ public abstract class QuestStatement implements IQuestStatement {
 	 *
 	 */
 	@Override
-	public TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException {
-		return unfoldAndGenerateTargetQuery(sparqlQuery, null);
+	public ExecutableQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException {
+		return unfoldAndGenerateTargetQuery(sparqlQuery, Optional.<SesameConstructTemplate>absent());
 	}
 
-	protected TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery, @Nullable SesameConstructTemplate constructTemplate) throws OBDAException {
+	protected ExecutableQuery unfoldAndGenerateTargetQuery(String sparqlQuery,
+													   Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 
 		/**
 		 * Looks for the target query in the cache.
 		 * If found, returns it immediately.
 		 */
-		TargetQuery targetQuery = queryCache.getTargetQuery(sparqlQuery);
-		if (targetQuery != null)
-			return targetQuery;
+		ExecutableQuery executableQuery = queryCache.getTargetQuery(sparqlQuery);
+		if (executableQuery != null)
+			return executableQuery;
 
 		/**
 		 * However, computes this target query.
@@ -775,12 +734,19 @@ public abstract class QuestStatement implements IQuestStatement {
 
 
 			final long startTime = System.currentTimeMillis();
-			programAfterUnfolding = getUnfolding(programAfterRewriting);
+			queryAfterUnfolding = getUnfolding(programAfterRewriting);
 			unfoldingTime = System.currentTimeMillis() - startTime;
 
 
-			targetQuery = generateTargetQuery(programAfterUnfolding, signatureContainer, constructTemplate);
-			queryCache.cacheTargetQuery(sparqlQuery, targetQuery);
+			executableQuery = generateTargetQuery(queryAfterUnfolding, signatureContainer, optionalConstructTemplate);
+			queryCache.cacheTargetQuery(sparqlQuery, executableQuery);
+
+		}
+		/**
+		 * TODO: throw an exception when is empty
+		 */
+		catch (EmptyQueryException e) {
+			return queryGenerator.generateEmptyQuery(signatureContainer, optionalConstructTemplate);
 		}
 		catch (Exception e1) {
 			log.debug(e1.getMessage(), e1);
@@ -789,7 +755,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			obdaException.setStackTrace(e1.getStackTrace());
 			throw obdaException;
 		}
-		return targetQuery;
+		return executableQuery;
 	}
 
 
@@ -869,34 +835,44 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	@Override
 	public int getUCQSizeAfterUnfolding() {
-		if( programAfterUnfolding.getRules() != null )
-			return programAfterUnfolding.getRules().size();
-		else return 0;
-	}
-
-	public int getMinQuerySizeAfterUnfolding() {
-		int toReturn = Integer.MAX_VALUE;
-		List<CQIE> rules = programAfterUnfolding.getRules();
-		for (CQIE rule : rules) {
-			int querySize = getBodySize(rule.getBody());
-			if (querySize < toReturn) {
-				toReturn = querySize;
+		Optional<QueryNode> optionalviceRoot =
+				queryAfterUnfolding.getFirstChild(queryAfterUnfolding.getRootConstructionNode());
+		if (optionalviceRoot.isPresent()) {
+			QueryNode viceRoot = optionalviceRoot.get();
+			if (viceRoot instanceof UnionNode) {
+				return queryAfterUnfolding.getChildren(viceRoot).size();
+			} else {
+				return 1;
 			}
 		}
-		return (toReturn == Integer.MAX_VALUE) ? 0 : toReturn;
+		else {
+			throw new RuntimeException("Inconsistent intermediate query: must have more than one node");
+		}
 	}
 
-	public int getMaxQuerySizeAfterUnfolding() {
-		int toReturn = Integer.MIN_VALUE;
-		List<CQIE> rules = programAfterUnfolding.getRules();
-		for (CQIE rule : rules) {
-			int querySize = getBodySize(rule.getBody());
-			if (querySize > toReturn) {
-				toReturn = querySize;
-			}
-		}
-		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
-	}
+//	public int getMinQuerySizeAfterUnfolding() {
+//		int toReturn = Integer.MAX_VALUE;
+//		List<CQIE> rules = queryAfterUnfolding.getRules();
+//		for (CQIE rule : rules) {
+//			int querySize = getBodySize(rule.getBody());
+//			if (querySize < toReturn) {
+//				toReturn = querySize;
+//			}
+//		}
+//		return (toReturn == Integer.MAX_VALUE) ? 0 : toReturn;
+//	}
+//
+//	public int getMaxQuerySizeAfterUnfolding() {
+//		int toReturn = Integer.MIN_VALUE;
+//		List<CQIE> rules = queryAfterUnfolding.getRules();
+//		for (CQIE rule : rules) {
+//			int querySize = getBodySize(rule.getBody());
+//			if (querySize > toReturn) {
+//				toReturn = querySize;
+//			}
+//		}
+//		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
+//	}
 
 	private static int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;

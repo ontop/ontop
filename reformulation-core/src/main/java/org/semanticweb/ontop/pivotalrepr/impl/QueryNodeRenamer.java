@@ -10,7 +10,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 /**
  * Renames query nodes according to one renaming substitution.
  */
-public class QueryNodeRenamer extends HomogeneousQueryNodeTransformerImpl {
+public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final InjectiveVar2VarSubstitution renamingSubstitution;
@@ -26,8 +26,8 @@ public class QueryNodeRenamer extends HomogeneousQueryNodeTransformerImpl {
     }
 
     @Override
-    public TableNode transform(TableNode tableNode) {
-        return new TableNodeImpl(renameDataAtom(tableNode.getAtom()));
+    public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
+        return new ExtensionalDataNodeImpl(renameDataAtom(extensionalDataNode.getAtom()));
     }
 
     @Override
@@ -42,8 +42,8 @@ public class QueryNodeRenamer extends HomogeneousQueryNodeTransformerImpl {
     }
 
     @Override
-    public OrdinaryDataNode transform(OrdinaryDataNode ordinaryDataNode) {
-        return new OrdinaryDataNodeImpl(renameDataAtom(ordinaryDataNode.getAtom()));
+    public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
+        return new IntensionalDataNodeImpl(renameDataAtom(intensionalDataNode.getAtom()));
     }
 
     @Override

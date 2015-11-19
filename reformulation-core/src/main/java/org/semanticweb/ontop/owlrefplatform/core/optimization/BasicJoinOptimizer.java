@@ -15,7 +15,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProp
  *
  * Top-down exploration.
  */
-public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
+public class BasicJoinOptimizer extends TopDownOptimizer {
 
     /**
      * TODO: explain
@@ -58,7 +58,7 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    private static Optional<QueryNode> getNextNodeFromOptimizationResults(NodeCentricOptimizationResults optimizationResults) {
+    private Optional<QueryNode> getNextNodeFromOptimizationResults(NodeCentricOptimizationResults optimizationResults) {
         IntermediateQuery query = optimizationResults.getResultingQuery();
 
         /**
@@ -98,38 +98,4 @@ public class BasicJoinOptimizer implements IntermediateQueryOptimizer {
             }
         }
     }
-
-    private static Optional<QueryNode> getNaturalNextNode(IntermediateQuery currentQuery, QueryNode freshlyExploredNode) {
-        Optional<QueryNode> optionalFirstChild = currentQuery.getFirstChild(freshlyExploredNode);
-        if (optionalFirstChild.isPresent()) {
-            return optionalFirstChild;
-        }
-        else {
-            return getNextNodeSameOrUpperLevel(currentQuery, freshlyExploredNode);
-        }
-    }
-
-    /**
-     * Assumes a top-down exploration.
-     *
-     * DOES NOT LOOK DOWN (the sub-tree of the initialAlreadyExploredNode is supposed to have already been explored)
-     *
-     */
-    private static Optional<QueryNode> getNextNodeSameOrUpperLevel(final IntermediateQuery query, final QueryNode initialAlreadyExploredNode) {
-        Optional<QueryNode> optionalAlreadyExploredNode = Optional.of(initialAlreadyExploredNode);
-
-        while(optionalAlreadyExploredNode.isPresent()) {
-            QueryNode currentAlreadyExploredNode = optionalAlreadyExploredNode.get();
-
-            Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAlreadyExploredNode);
-            if (optionalNextSibling.isPresent()) {
-                return optionalNextSibling;
-            }
-            else {
-                optionalAlreadyExploredNode = query.getParent(currentAlreadyExploredNode);
-            }
-        }
-        return Optional.absent();
-    }
-
 }

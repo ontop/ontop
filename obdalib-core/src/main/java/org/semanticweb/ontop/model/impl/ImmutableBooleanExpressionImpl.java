@@ -1,10 +1,8 @@
 package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.BooleanExpression;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.ImmutableBooleanExpression;
-import org.semanticweb.ontop.model.ImmutableTerm;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.*;
 
 public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableBooleanExpression {
     protected ImmutableBooleanExpressionImpl(BooleanOperationPredicate functor, ImmutableTerm... terms) {
@@ -22,5 +20,36 @@ public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl 
     @Override
     public ImmutableBooleanExpression clone() {
         return this;
+    }
+
+    /**
+     * Recursive
+     */
+    @Override
+    public ImmutableSet<ImmutableBooleanExpression> flatten() {
+
+        Predicate functionSymbol = getFunctionSymbol();
+        /**
+         * Only flattens AND expressions.
+         */
+        if (functionSymbol.equals(OBDAVocabulary.AND)) {
+            ImmutableSet.Builder<ImmutableBooleanExpression> setBuilder = ImmutableSet.builder();
+            for (ImmutableTerm subTerm : getImmutableTerms()) {
+                /**
+                 * Recursive call
+                 */
+                if (subTerm instanceof ImmutableBooleanExpression) {
+                    setBuilder.addAll(((ImmutableBooleanExpression) subTerm).flatten());
+                }
+                else {
+                    throw new IllegalStateException("An AND-expression must be only composed of " +
+                            "ImmutableBooleanExpression(s), not of a " + subTerm);
+                }
+            }
+            return setBuilder.build();
+        }
+        else {
+            return ImmutableSet.of((ImmutableBooleanExpression)this);
+        }
     }
 }

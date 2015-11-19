@@ -6,8 +6,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
+import org.semanticweb.ontop.executor.expression.PushDownExpressionExecutor;
 import org.semanticweb.ontop.executor.join.JoinInternalCompositeExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
+import org.semanticweb.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -69,7 +71,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         INTERNAL_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>of(
                 SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class,
                 InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class,
-                ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class);
+                ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class,
+                SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class,
+                PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
     }
 
 
@@ -132,7 +136,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * TODO: make this extensible by using Guice as a dependency-injection solution for loading arbitrary ProposalExecutor
      */
     @Override
-    public ProposalResults applyProposal(QueryOptimizationProposal proposal)
+    public ProposalResults applyProposal(QueryOptimizationProposal proposal, boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         /**
@@ -141,18 +145,20 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          */
         Class<?>[] proposalClassHierarchy = proposal.getClass().getInterfaces();
 
-        /**
-         * First look for a standard executor
-         */
-        for (Class proposalClass : proposalClassHierarchy) {
-            if (STD_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                StandardProposalExecutor executor;
-                try {
-                    executor = STD_EXECUTOR_CLASSES.get(proposalClass).newInstance();
-                } catch (InstantiationException | IllegalAccessException e ) {
-                    throw new RuntimeException(e.getMessage());
+        if (!requireUsingInternalExecutor) {
+            /**
+             * First look for a standard executor
+             */
+            for (Class proposalClass : proposalClassHierarchy) {
+                if (STD_EXECUTOR_CLASSES.containsKey(proposalClass)) {
+                    StandardProposalExecutor executor;
+                    try {
+                        executor = STD_EXECUTOR_CLASSES.get(proposalClass).newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new RuntimeException(e.getMessage());
+                    }
+                    return executor.apply(proposal, this);
                 }
-                return executor.apply(proposal, this);
             }
         }
 
@@ -173,13 +179,36 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 return executor.apply(proposal, this, treeComponent);
             }
         }
-        throw new RuntimeException("No executor found for a proposal of the type " + proposal.getClass());
+
+        if (requireUsingInternalExecutor) {
+            throw new RuntimeException("No INTERNAL executor found for a proposal of the type " + proposal.getClass());
+        }
+        else {
+            throw new RuntimeException("No executor found for a proposal of the type " + proposal.getClass());
+        }
+    }
+
+    @Override
+    public ProposalResults applyProposal(QueryOptimizationProposal propagationProposal)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+        return applyProposal(propagationProposal, false);
     }
 
     @Override
     public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                       QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);
+    }
+
+    @Override
+    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child) {
+        Optional<QueryNode> optionalParent = getParent(child);
+        if (optionalParent.isPresent()) {
+            return getOptionalPosition(optionalParent.get(), child);
+        }
+        else {
+            return Optional.absent();
+        }
     }
 
     @Override
@@ -222,12 +251,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * TODO: explain
          */
-        List<OrdinaryDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
+        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
         if (localDataNodes.isEmpty())
             throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootConstructionNode().getProjectionAtom());
 
 
-        for (OrdinaryDataNode localDataNode : localDataNodes) {
+        for (IntensionalDataNode localDataNode : localDataNodes) {
             // TODO: make it be incremental
             ImmutableSet<Variable> localVariables = VariableCollector.collectVariables(this);
 
@@ -266,13 +295,13 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      *
      * TODO: explain
      */
-    private ImmutableList<OrdinaryDataNode> findOrdinaryDataNodes(DataAtom subsumingDataAtom)
+    private ImmutableList<IntensionalDataNode> findOrdinaryDataNodes(DataAtom subsumingDataAtom)
             throws InconsistentIntermediateQueryException {
-        ImmutableList.Builder<OrdinaryDataNode> listBuilder = ImmutableList.builder();
+        ImmutableList.Builder<IntensionalDataNode> listBuilder = ImmutableList.builder();
         try {
             for(QueryNode node : treeComponent.getNodesInBottomUpOrder()) {
-                if (node instanceof OrdinaryDataNode) {
-                    OrdinaryDataNode dataNode = (OrdinaryDataNode) node;
+                if (node instanceof IntensionalDataNode) {
+                    IntensionalDataNode dataNode = (IntensionalDataNode) node;
                     if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getAtom()))
                         listBuilder.add(dataNode);
                 }

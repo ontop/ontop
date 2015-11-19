@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 
 import java.io.File;
@@ -113,7 +114,7 @@ public class TestSQLBlankLines {
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = st.getUnfolding(query);
+		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\\n\\n(.*)");
 		assertFalse(m);
 	}

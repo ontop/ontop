@@ -2,7 +2,6 @@ package org.semanticweb.ontop.executor.join;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
-import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -11,12 +10,14 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
-import org.semanticweb.ontop.pivotalrepr.impl.TableNodeImpl;
+import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 
 /**
  * TODO: explain
@@ -128,6 +129,9 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
+        // By default, keep the former (non-final)
+        InnerJoinNode newTopJoinNode = topJoinNode;
+
         /**
          * Tries to optimize if there are data nodes
          */
@@ -144,10 +148,11 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                applyOptimization(treeComponent, highLevelProposal.getFocusNode(), concreteProposal);
+                newTopJoinNode = applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(),
+                        concreteProposal);
             }
         }
-        return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
+        return new NodeCentricOptimizationResultsImpl<>(query, newTopJoinNode);
     }
 
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
@@ -421,8 +426,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     }
 
     private DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
-        if (previousDataNode instanceof TableNode) {
-            return new TableNodeImpl(newDataAtom);
+        if (previousDataNode instanceof ExtensionalDataNode) {
+            return new ExtensionalDataNodeImpl(newDataAtom);
         }
         else {
             throw new IllegalArgumentException("Unexpected type of data node: " + previousDataNode);
@@ -432,8 +437,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     /**
      * Assumes that the data atoms are leafs
      */
-    private static void applyOptimization(QueryTreeComponent treeComponent, InnerJoinNode topJoinNode,
-                                          ConcreteProposal proposal) {
+    private static InnerJoinNode applyOptimization(IntermediateQuery query, QueryTreeComponent treeComponent,
+                                                   InnerJoinNode topJoinNode, ConcreteProposal proposal) {
         for (DataNode nodeToRemove : proposal.getDataNodesToRemove()) {
             treeComponent.removeSubTree(nodeToRemove);
         }
@@ -447,11 +452,42 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution = proposal.getOptionalSubstitution();
         if (optionalSubstitution.isPresent()) {
-            /**
-             * TODO: propagate the substitution
-             */
-            throw new RuntimeException("TODO: propagate the substitution to the upper construction node " +
-                    "and the surroundings");
+
+            // TODO: filter the non-bound variables from the substitution before propagating!!!
+
+            SubstitutionPropagationProposal propagationProposal = new SubstitutionPropagationProposalImpl(topJoinNode,
+                    optionalSubstitution.get());
+
+            // Forces the use of an internal executor (the treeComponent must remain the same).
+            try {
+                NodeCentricOptimizationResults results = propagationProposal.castResults(query.applyProposal(
+                        propagationProposal, true));
+
+                Optional<QueryNode> optionalNewJoinNode = results.getOptionalNewNode();
+                if (optionalNewJoinNode.isPresent()) {
+                    QueryNode newNode = optionalNewJoinNode.get();
+                    if (newNode instanceof InnerJoinNode) {
+                        return (InnerJoinNode) newNode;
+                    }
+                    else {
+                        throw new RuntimeException("Not a inner join returned after the substitution propagation");
+                    }
+                }
+                else {
+                    throw new RuntimeException("No focus node returned after the substitution propagation");
+                }
+
+
+            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
+                throw new RuntimeException("Internal error: not able to propagate the substitution "
+                        + optionalSubstitution.get() + "\n Reason: " + e.getMessage());
+            }
+        }
+        /**
+         * No substitution to propagate
+         */
+        else {
+            return topJoinNode;
         }
     }
 }
