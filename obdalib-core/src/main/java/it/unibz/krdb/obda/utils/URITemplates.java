@@ -23,16 +23,11 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.exception.InvalidPrefixWritingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A utility class for URI templates
@@ -106,7 +101,15 @@ public class URITemplates {
 
 	
 	public static String getUriTemplateString(Function uriFunction) {
-		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
+		ValueConstant term = null;
+
+		try {
+			term = (ValueConstant) uriFunction.getTerm(0);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
+
 		String template = term.getValue();
 		List<Variable> varlist = new LinkedList<>();
 		TermUtils.addReferencedVariablesTo(varlist, uriFunction);

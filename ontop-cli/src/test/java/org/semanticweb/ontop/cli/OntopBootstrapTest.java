@@ -24,5 +24,17 @@ public class OntopBootstrapTest {
         Ontop.main(argv);
     }
 
-
+    @Test
+    public void testOntopBootstrapR2RML (){
+        String[] argv = {"bootstrap",
+                "-b", "http://www.example.org/",
+                "-m", "src/test/resources/npd.ttl",
+                "-t", "src/test/resources/npd.owl",
+                "-l", "jdbc:postgresql://10.7.20.39/npd_no_spatial",
+                "-u", "postgres",
+                "-p", "postgres",
+                "-d", "org.postgresql.Driver"
+        };
+        Ontop.main(argv);
+    }
 }

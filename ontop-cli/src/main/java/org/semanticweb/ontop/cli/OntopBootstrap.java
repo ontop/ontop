@@ -6,10 +6,12 @@ import com.github.rvesse.airline.OptionType;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.krdb.obda.r2rml.R2RMLWriter;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Objects;
 
 @Command(name = "bootstrap",
@@ -34,11 +36,31 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
             File obdaFile = new File(mappingFile);
             DirectMappingBootstrapper dm = new DirectMappingBootstrapper(
                     baseIRI, jdbcURL, jdbcUserName, jdbcPassword, jdbcDriverClass);
-            OBDAModel model = dm.getModel();
+
+            /**
+             * exports ontology
+             */
             OWLOntology onto = dm.getOntology();
-            ModelIOManager mng = new ModelIOManager(model);
-            mng.save(obdaFile);
             onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));
+
+            /**
+             * exports mappings
+             */
+            OBDAModel model = dm.getModel();
+
+            if(this.mappingFile.endsWith(".obda")){
+                ModelIOManager mng = new ModelIOManager(model);
+                mng.save(obdaFile);
+            } else if(this.mappingFile.endsWith(".ttl")){
+                URI sourceID = model.getSources().iterator().next().getSourceID();
+                R2RMLWriter writer = new R2RMLWriter(model, sourceID, onto);
+                writer.write(obdaFile);
+            } else {
+                throw new IllegalArgumentException("the mappings file should end with .obda or .ttl");
+            }
+
+
+
 
         } catch (Exception e) {
             System.err.println("Error occurred during bootstrapping: "
