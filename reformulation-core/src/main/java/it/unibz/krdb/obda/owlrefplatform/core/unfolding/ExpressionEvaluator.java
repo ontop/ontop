@@ -218,7 +218,8 @@ public class ExpressionEvaluator {
 			}
 			// TODO (R): year, date and time are not covered?
 		}
-		if (p.getName().toString().equals("QUEST_OBJECT_PROPERTY_ASSERTION")) {
+		if (p.getName().toString().toUpperCase().contains("QUEST_OBJECT_PROPERTY_ASSERTION")) {
+			// ROMAN (26 Sep 2015): what exactly is the meaning of this check?
 			setRegexFlag(true);
 		}
 		return expr;

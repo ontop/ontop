@@ -69,9 +69,9 @@ public class R2rmlCheckerTest {
     final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
 	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_test_a.ttl";
 
-	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
-	private List<Predicate> emptyRolesObda = new ArrayList<Predicate>();
-	private List<Predicate> emptyConceptsR2rml = new ArrayList<Predicate>();
+	private List<Predicate> emptyConceptsObda = new ArrayList<>();
+	private List<Predicate> emptyRolesObda = new ArrayList<>();
+	private List<Predicate> emptyConceptsR2rml = new ArrayList<>();
 	private List<Predicate> emptyRolesR2rml = new ArrayList<Predicate>();
 
 	private QuestOWL reasonerOBDA;
@@ -157,11 +157,10 @@ public class R2rmlCheckerTest {
 		for (OClass cl : onto.getVocabulary().getClasses()) {
 			String concept = cl.getName();
 					
-//			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()
-//					+ ">", reasonerOBDA.getConnection());
+			int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", reasonerOBDA.getConnection());
 			int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", reasonerR2rml.getConnection());
 
-//			assertEquals(conceptOBDA, conceptR2rml);
+			assertEquals(conceptOBDA, conceptR2rml);
 		}
 
 		log.debug("Comparing object properties");

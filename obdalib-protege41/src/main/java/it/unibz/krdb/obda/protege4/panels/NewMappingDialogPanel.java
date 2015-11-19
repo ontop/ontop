@@ -23,12 +23,11 @@ package it.unibz.krdb.obda.protege4.panels;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
@@ -57,6 +56,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
@@ -203,7 +203,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void insertMapping(String target, String source) {
-		CQIE targetQuery = parse(target);
+		List<Function> targetQuery = parse(target);
 		if (targetQuery != null) {
 			final boolean isValid = validator.validate(targetQuery);
 			if (isValid) {
@@ -215,7 +215,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					OBDASQLQuery body = dataFactory.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
-					OBDARDBMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
+					OBDAMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
 					System.out.println(newmapping.toString()+" \n");
 
 					if (mapping == null) {
@@ -610,7 +610,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	private OBDAMappingAxiom mapping;
 
-	private CQIE parse(String query) {
+	private List<Function> parse(String query) {
 		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager());
 		try {
 			return textParser.parse(query);
@@ -650,7 +650,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
-		CQIE targetQuery = mapping.getTargetQuery();
+		List<Function> targetQuery = mapping.getTargetQuery();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		txtTargetQuery.setText(trgQuery);
 	}

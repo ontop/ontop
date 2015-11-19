@@ -21,17 +21,17 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.parser.SQLQueryParser;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ViewDefinition;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.obda.parser.SQLQueryShallowParser;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-import it.unibz.krdb.sql.api.RelationJSQL;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.jsqlparser.JSQLParserException;
 
@@ -45,18 +45,6 @@ import net.sf.jsqlparser.JSQLParserException;
  */
 public class MappingParser {
 	
-	private List<OBDAMappingAxiom> mappingList;
-	private SQLQueryParser sqlQueryParser;
-	private List<ParsedMapping> parsedMappings;
-	private List<RelationJSQL> realTables; // Tables that are not view definitions
-	
-	public MappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
-		this.mappingList = mappingAxioms;
-		this.sqlQueryParser = new SQLQueryParser(conn);
-		this.parsedMappings = this.parseMappings();
-	}
-
-
 
     /**
 	 * Called by Quest when fetching non-full metadata
@@ -65,66 +53,18 @@ public class MappingParser {
 	 * @return The tables (same as getTables)
 	 * @throws JSQLParserException 
 	 */
-	public List<RelationJSQL> getRealTables() throws JSQLParserException{
-		if(this.realTables == null){
-			List<RelationJSQL> _realTables = this.getTables();
-//			List<RelationJSQL> removeThese = new ArrayList<>();
-//			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
-//				for(RelationJSQL rel : _realTables){
-//					if(rel.getFullName().equals(vd.getName()))
-//						removeThese.add(rel);
-//				}
-//			}
-//			for(RelationJSQL remRel : removeThese){
-//				_realTables.remove(remRel);
-//			}
-			this.realTables = _realTables;
-		}
-		return this.realTables;
-	}
-	
-	/**
-	 * Returns the list of parsed mapping objects.
-	 * "Parsed" only means that sql part is parsed
-	 * Called by Quest.setuprepository
-	 * 
-	 * @return
-	 */
-	public List<ParsedMapping> getParsedMappings(){
-		return parsedMappings;
-	}
-	
-	public List<RelationJSQL> getTables() throws JSQLParserException{
-		List<RelationJSQL> tables = new ArrayList<>();
-		for(ParsedMapping pm : parsedMappings){
-			ParsedSQLQuery query = pm.getSourceQueryParsed();
-			List<RelationJSQL> queryTables = query.getTables();
-			for(RelationJSQL table : queryTables){
-				if (!(tables.contains(table))){
-					tables.add(table);
-				}
-			}
-		}
-		return tables;
-	}
-	
-
-	
-	/**
-	 * 	Parses the mappingList (Actually, only the source sql is parsed.)
-	 * This is necessary to separate the parsing, such that this can be done before the
-	 * table schema extraction
-	 * 
-	 * @return List of parsed mappings
-	 */
-	private ArrayList<ParsedMapping> parseMappings() {
-		LinkedList<String> errorMessage = new LinkedList<String>();
-		ArrayList<ParsedMapping> parsedMappings = new ArrayList<ParsedMapping>();
-		for (OBDAMappingAxiom axiom : this.mappingList) {
+	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<OBDAMappingAxiom> mappings) throws JSQLParserException{
+		List<String> errorMessage = new LinkedList<>();
+		Set<RelationID> tables = new HashSet<>();
+		for (OBDAMappingAxiom axiom : mappings) {
 			try {
-				ParsedMapping parsed = new ParsedMapping(axiom, sqlQueryParser);
-				parsedMappings.add(parsed);
-			} catch (Exception e) {
+				OBDASQLQuery sourceQuery = axiom.getSourceQuery();
+				ParsedSQLQuery sourceQueryParsed = SQLQueryShallowParser.parse(idfac, sourceQuery.toString());
+				List<RelationID> queryTables = sourceQueryParsed.getRelations();
+				for (RelationID table : queryTables) 
+					tables.add(table);
+			} 
+			catch (Exception e) {
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
 						+ e.getMessage() + " \nMapping: [" + axiom.toString() + "]");
 				
@@ -136,12 +76,21 @@ public class MappingParser {
 				errors.append(error + "\n");
 			}
 			final String msg = "There was an error parsing the following mappings. Please correct the issue(s) to continue.\n" + errors.toString();
-			RuntimeException r = new RuntimeException(msg);
-			throw r;
+			throw new RuntimeException(msg);
 		}
-		return parsedMappings;
-				
+		return tables;
+		
+//		Set<RelationID> realTables = getTables();
+//			List<RelationJSQL> removeThese = new ArrayList<>();
+//			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
+//				for(RelationJSQL rel : realTables){
+//					if(rel.getFullName().equals(vd.getName()))
+//						removeThese.add(rel);
+//				}
+//			}
+//			for(RelationJSQL remRel : removeThese){
+//				realTables.remove(remRel);
+//			}
+//		return realTables;
 	}
-	
-
 }

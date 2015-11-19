@@ -11,6 +11,6 @@ driverClass	com.mysql.jdbc.Driver
 [MappingDeclaration] @collection [[
 mappingId	test
 target		:period{CVE_PER} a :Period ; :yStart {AINICIO} ; :yEnd {ATERMINO} . 
-source		SELECT DISTINCT AINICIO || '-' || ATERMINO AS CVE_PER, AINICIO, ATERMINO FROM RHPROFSNI
+source		SELECT  AINICIO || '-' || ATERMINO AS CVE_PER, AINICIO, ATERMINO FROM RHPROFSNI
 ]]
 

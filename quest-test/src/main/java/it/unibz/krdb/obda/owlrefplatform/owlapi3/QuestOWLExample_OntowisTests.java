@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -261,7 +261,7 @@ public class QuestOWLExample_OntowisTests {
 
 		if (manualKeys){
 			System.out.println();
-			ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
+			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
 			factory.setImplicitDBConstraints(constr);
 		}
 		/*

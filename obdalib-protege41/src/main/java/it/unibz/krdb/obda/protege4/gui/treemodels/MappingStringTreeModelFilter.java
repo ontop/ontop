@@ -54,10 +54,9 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 			}
 
 			// Check in the Mapping Target Query
-			final CQIE headquery = object.getTargetQuery();
-			final List<Function> atoms = headquery.getBody();
+			final List<Function> atoms = object.getTargetQuery();
 			for (int i = 0; i < atoms.size(); i++) {
-				Function predicate = (Function) atoms.get(i);
+				Function predicate = atoms.get(i);
 				isMatch = isMatch || MappingHeadVariableTreeModelFilter.match(keyword.trim(), predicate);
 			}
 			if (isMatch) {

@@ -165,8 +165,7 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		CQIE query = null;
-		query = textParser.parse(text);
+		List<Function> query = textParser.parse(text);
 
 		if (query == null) {
 			invalid = true;
@@ -338,7 +337,7 @@ public class QueryPainter {
 		PrefixManager man = apic.getPrefixManager();
 
 		String input = doc.getText(0, doc.getLength());
-		CQIE current_query = parse(input);
+		List<Function> current_query = parse(input);
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
@@ -373,7 +372,7 @@ public class QueryPainter {
 			doc.setCharacterAttributes(pos, 1, black, false);
 			pos = input.indexOf(":", pos + 1);
 		}
-		for (Function atom : current_query.getBody()) {
+		for (Function atom : current_query) {
 			Predicate predicate = atom.getFunctionSymbol();
 			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());
 			if (validator.isClass(predicate)) {
@@ -418,7 +417,7 @@ public class QueryPainter {
 		tasks.clear();
 	}
 
-	private CQIE parse(String query) {
+	private List<Function> parse(String query) {
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

@@ -20,21 +20,31 @@ package it.unibz.krdb.obda.owlapi3.bootstrapping;
  * #L%
  */
 
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-public class DirectMappingBootstrapper extends AbstractDBMetadata{
-	
-	
-	public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver) throws Exception{
+import java.sql.SQLException;
+
+public class DirectMappingBootstrapper {
+
+
+    private OWLOntology onto;
+    private OBDAModel model;
+    private OBDADataSource source;
+
+
+    public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver) throws Exception{
 		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
 		OBDADataSource source = fact.getJDBCDataSource(url, user, password, driver);
 		//create empty ontology and model, add source to model
@@ -42,22 +52,26 @@ public class DirectMappingBootstrapper extends AbstractDBMetadata{
 		OWLOntology onto = mng.createOntology(IRI.create(baseuri));
 		OBDAModel model = fact.getOBDAModel();
 		model.addSource(source);
-		getOntologyAndDirectMappings(baseuri, onto, model, source);
+		bootstrapOntologyAndDirectMappings(baseuri, onto, model, source);
 	}
 
-	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
-		getOntologyAndDirectMappings(baseUri, ontology, model, source);
-	}
-	
-	public DirectMappingBootstrapper(DBMetadata metadata, String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
-		getOntologyAndDirectMappings(metadata, baseUri, ontology, model, source);
+	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception {
+		bootstrapOntologyAndDirectMappings(baseUri, ontology, model, source);
 	}
 
-	/***
+    private void bootstrapOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws DuplicateMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+        this.source = source;
+        DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size());
+        this.model =  engine.extractMappings(model, source);
+        this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
+    }
+
+
+    /***
 	 * Creates an OBDA model using direct mappings
 	 */
 	public OBDAModel getModel() {
-		return getOBDAModel();
+		return this.model;
 	}
 
 	/***
@@ -65,7 +79,7 @@ public class DirectMappingBootstrapper extends AbstractDBMetadata{
 	 * previous one and just renders the file.
 	 */
 	public OWLOntology getOntology() {
-		return getOWLOntology();
+		return this.onto;
 	}
 
 }

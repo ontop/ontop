@@ -20,18 +20,21 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
+import java.util.ArrayList;
+import java.util.List;
+
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 
-public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDARDBMappingAxiom {
+public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 
 	private static final long serialVersionUID = 5793656631843898419L;
 	
 	private OBDASQLQuery sourceQuery;
-	private CQIE targetQuery;
+	private List<Function> targetQuery;
 
-	protected RDBMSMappingAxiomImpl(String id, OBDASQLQuery sourceQuery, CQIE targetQuery) {
+	protected RDBMSMappingAxiomImpl(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
@@ -43,7 +46,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public void setTargetQuery(CQIE query) {
+	public void setTargetQuery(List<Function> query) {
 		this.targetQuery = query;
 	}
 
@@ -53,13 +56,17 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public CQIE getTargetQuery() {
+	public List<Function> getTargetQuery() {
 		return targetQuery;
 	}
 
 	@Override
-	public OBDARDBMappingAxiom clone() {
-		OBDARDBMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(),targetQuery.clone());
+	public OBDAMappingAxiom clone() {
+		List<Function> newbody = new ArrayList<>(targetQuery.size());
+		for (Function f : targetQuery)
+			newbody.add((Function)f.clone());
+		
+		OBDAMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(), newbody);
 		return clone;
 	}
 	

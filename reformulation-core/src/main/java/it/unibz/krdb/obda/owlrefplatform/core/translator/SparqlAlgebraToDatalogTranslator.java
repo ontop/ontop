@@ -462,32 +462,29 @@ public class SparqlAlgebraToDatalogTranslator {
 			throw new RuntimeException("Unsupported query syntax");
 		}
 
-		Var subj = triple.getSubjectVar();
 		Var obj = triple.getObjectVar();
 		
-		// Subject node		
+		Var subj = triple.getSubjectVar();
 		Term sTerm = getOntopTerm(subj);
 		
 		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
-
 			Value o = obj.getValue();
-			// Object node
 			if (o == null) {
+				// object is a variable
 				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
 			} 
 			else if (o instanceof URI) {
+				// object is a URI of either a type of a class
 				URI objectUri = (URI)o; 
 				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
-				if (type != null) {
-					Predicate predicate = dtfac.getTypePredicate(type);
-					return ofac.getFunction(predicate, sTerm);
-				}
-	            else {
-	        		COL_TYPE subjectType = null; // are never changed
-					Predicate predicate = ofac.getPredicate(objectUri.stringValue(), new COL_TYPE[] { subjectType });
-					return ofac.getFunction(predicate, sTerm);
-				}
+				Predicate predicate;
+				if (type != null) 
+					predicate = dtfac.getTypePredicate(type);
+	            else 
+					predicate = ofac.getClassPredicate(objectUri.stringValue());
+				
+				return ofac.getFunction(predicate, sTerm);
 			}
 			else  
 				throw new RuntimeException("Unsupported query syntax");
@@ -499,6 +496,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p != null) {
         		COL_TYPE subjectType = null; // are never changed
 				COL_TYPE objectType = null;
+				// either an object or a datatype property
 				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { subjectType, objectType });
 				return ofac.getFunction(predicate, sTerm, oTerm);
 			} 
@@ -588,7 +586,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		int length = encodedURI.length();
 		StringBuilder strBuilder = new StringBuilder(length+20);
 		
-		char[] codeBuffer = new char[2];
+		char[] codeBuffer = new char[3];
 		
 		for (int ci = 0; ci < length; ci++) {
 			char c = encodedURI.charAt(ci);
@@ -608,8 +606,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			 */
 
 			// First we get the 2 chars next to %
-			codeBuffer[0] = encodedURI.charAt(ci + 1);
-			codeBuffer[1] = encodedURI.charAt(ci + 2);
+			codeBuffer[0] = '%';
+			codeBuffer[1] = encodedURI.charAt(ci + 1);
+			codeBuffer[2] = encodedURI.charAt(ci + 2);
 
 			// now we check if they match any of our escape codes, if
 			// they do the char to be inserted is put in codeBuffer
@@ -650,12 +649,14 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (code.equals("%2B")) {
 				strBuilder.append('+');
 			} else if (code.equals("%22")) {
-				strBuilder.append('\'');
+				strBuilder.append("''");
 			} else if (code.equals("%2F")) {
 				strBuilder.append('/');
 			} else {
 				// This was not an escape code, so we just append the
 				// characters and continue;
+				log.warn("Error decoding an encoded URI from the query. Problematic code: {}", code);
+				log.warn("Problematic URI: {}", encodedURI);
 				strBuilder.append(codeBuffer);
 			}
 			ci += 2;

@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
-import it.unibz.krdb.sql.api.Attribute;
+
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -34,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import sesameWrapper.SesameVirtualRepo;
 
 import java.io.File;
@@ -53,7 +54,7 @@ public class OracleSesameLIMITTest  {
 
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String r2rmlfile = "resources/oraclesql/o.ttl";
-
+	
 	/*
 	 * 	prepare ontop for rewriting and unfolding steps 
 	 */
@@ -116,19 +117,17 @@ public class OracleSesameLIMITTest  {
 		conn.close();
 	}
 
-	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = null;
-		//It starts from 1 !!!
-		attribute = new Attribute("country_name", java.sql.Types.VARCHAR, false, null);
-		tableDefinition.addAttribute(attribute);
-		return tableDefinition;
+	private void defTable(DBMetadata dbMetadata, String schema, String name) {
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(schema, name));
+		tableDefinition.addAttribute(idfac.createAttributeID("country_name"), java.sql.Types.VARCHAR, null, false);
 	}
 	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = new DBMetadata(driver_class);
-		dbMetadata.add(defTable("hr.countries"));
-		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.add(new TableDefinition("dual"));
+		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata(driver_class);
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		defTable(dbMetadata, "hr", "countries");
+		defTable(dbMetadata, "HR", "countries");
+		dbMetadata.createDatabaseRelation(idfac.createRelationID(null, "dual"));
 		return dbMetadata;
 	}
 
