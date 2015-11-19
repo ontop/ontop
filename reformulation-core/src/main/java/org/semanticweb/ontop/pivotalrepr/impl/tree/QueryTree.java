@@ -40,4 +40,6 @@ public interface QueryTree {
     void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode);
+
+    void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 }

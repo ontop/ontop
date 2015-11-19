@@ -11,6 +11,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     private final Optional<QueryNode> optionalNextSibling;
     private final Optional<N> optionalNewNode;
     private final Optional<QueryNode> optionalClosestAncestor;
+    private final Optional<QueryNode> optionalReplacingChild;
 
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               N newNode) {
@@ -18,10 +19,11 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
         this.optionalNextSibling = query.getNextSibling(newNode);
         this.optionalNewNode = Optional.of(newNode);
         this.optionalClosestAncestor = query.getParent(newNode);
+        this.optionalReplacingChild = Optional.absent();
     }
 
     /**
-     * When the focus node has been removed.
+     * When the focus node has been removed and not declared as been replaced by its first child.
      *
      */
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
@@ -31,6 +33,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
         this.optionalNextSibling = optionalNextSibling;
         this.optionalNewNode = Optional.absent();
         this.optionalClosestAncestor = optionalClosestAncestor;
+        this.optionalReplacingChild = Optional.absent();
 
         /**
          * Checks the closest ancestor is the parent of the next sibling
@@ -43,6 +46,22 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
             }
         }
 
+    }
+
+    /**
+     * The replacing child IS NOT OPTIONAL (Optional is here just to avoid confusion with other constructors).
+     * TODO: should we refactor it?
+     */
+    public NodeCentricOptimizationResultsImpl(IntermediateQuery query, Optional<QueryNode> optionalReplacingChild) {
+        super(query);
+        this.optionalReplacingChild = optionalReplacingChild;
+        this.optionalNextSibling = Optional.absent();
+        this.optionalNewNode = Optional.absent();
+        this.optionalClosestAncestor = Optional.absent();
+
+        if (!optionalReplacingChild.isPresent()) {
+            throw new IllegalArgumentException("A replacing child must be given (not optional in practise)");
+        }
     }
 
     /**
@@ -70,5 +89,10 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     @Override
     public Optional<QueryNode> getOptionalClosestAncestor() {
         return optionalClosestAncestor;
+    }
+
+    @Override
+    public Optional<QueryNode> getOptionalReplacingChild() {
+        return optionalReplacingChild;
     }
 }

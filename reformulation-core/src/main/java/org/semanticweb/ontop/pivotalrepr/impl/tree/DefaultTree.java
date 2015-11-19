@@ -261,6 +261,28 @@ public class DefaultTree implements QueryTree {
         return childrenRelation.getOptionalPosition(childTreeNode);
     }
 
+    @Override
+    public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
+        TreeNode childTreeNode = accessTreeNode(childNode);
+
+        Optional<QueryNode> optionalFormerParent = getParent(childNode);
+        if (!optionalFormerParent.isPresent()) {
+            throw new IllegalTreeUpdateException("Inserting a parent to the current root is not supported");
+        }
+        QueryNode formerParentNode = optionalFormerParent.get();
+        TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
+
+        Optional<ArgumentPosition> optionalPosition = getOptionalPosition(formerParentNode, childNode);
+
+        // Does not delete the child node, just disconnect it from its parent
+        removeChild(formerParentTreeNode, childTreeNode);
+
+        // Adds the new parent (must be new)
+        addChild(formerParentNode, newParentNode, optionalPosition, true, false);
+
+        addChild(newParentNode, childNode, Optional.<ArgumentPosition>absent(), false, false);
+    }
+
     /**
      * Low-level
      */

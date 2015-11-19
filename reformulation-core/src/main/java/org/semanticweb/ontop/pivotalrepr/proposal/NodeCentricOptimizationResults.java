@@ -22,8 +22,12 @@ public interface NodeCentricOptimizationResults<N extends QueryNode> extends Pro
     /**
      * TODO: explain
      *
-     * No ob
-     *
      */
     Optional<QueryNode> getOptionalClosestAncestor();
+
+    /**
+     * When the focus node is officially replaced by one
+     * of its children
+     */
+    Optional<QueryNode> getOptionalReplacingChild();
 }

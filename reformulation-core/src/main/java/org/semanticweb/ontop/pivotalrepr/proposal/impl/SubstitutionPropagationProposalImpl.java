@@ -24,8 +24,8 @@ public class SubstitutionPropagationProposalImpl implements SubstitutionPropagat
     }
 
     @Override
-    public NodeCentricOptimizationResults castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults) results;
+    public NodeCentricOptimizationResults<QueryNode> castResults(ProposalResults results) {
+        return (NodeCentricOptimizationResults<QueryNode>) results;
     }
 
     @Override
