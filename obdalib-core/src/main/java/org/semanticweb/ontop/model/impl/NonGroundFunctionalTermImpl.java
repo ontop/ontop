@@ -6,6 +6,8 @@ import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.NonGroundFunctionalTerm;
 import org.semanticweb.ontop.model.Predicate;
 
+import static org.semanticweb.ontop.model.impl.GroundTermTools.checkNonGroundTermConstraint;
+
 /**
  * Constraint: should contain at least one variable
  */
@@ -16,7 +18,7 @@ public class NonGroundFunctionalTermImpl extends ImmutableFunctionalTermImpl imp
     }
 
     protected NonGroundFunctionalTermImpl(Predicate functor, ImmutableTerm... terms) {
-        super(functor, terms);
+        super(functor, ImmutableList.copyOf(terms));
         checkNonGroundTermConstraint(this);
     }
 
@@ -25,9 +27,8 @@ public class NonGroundFunctionalTermImpl extends ImmutableFunctionalTermImpl imp
         checkNonGroundTermConstraint(this);
     }
 
-    private static void checkNonGroundTermConstraint(NonGroundFunctionalTerm term) throws IllegalArgumentException {
-        if (term.getVariables().isEmpty()) {
-            throw new IllegalArgumentException("A NonGroundFunctionalTerm must contain at least one variable");
-        }
+    @Override
+    public boolean isGround() {
+        return false;
     }
 }

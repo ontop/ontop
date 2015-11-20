@@ -76,6 +76,11 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
+	public boolean isGround() {
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return name;
 	}

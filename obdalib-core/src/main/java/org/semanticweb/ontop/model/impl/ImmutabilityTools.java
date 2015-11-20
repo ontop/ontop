@@ -24,11 +24,11 @@ public class ImmutabilityTools {
                 return (ImmutableTerm) term;
             } else if (term instanceof BooleanExpression) {
                 BooleanExpression booleanExpression = (BooleanExpression) term;
-                return new ImmutableBooleanExpressionImpl(booleanExpression);
+                return DATA_FACTORY.getImmutableBooleanExpression(booleanExpression);
             }
             else {
                 Function functionalTerm = (Function) term;
-                return new ImmutableFunctionalTermImpl(functionalTerm);
+                return DATA_FACTORY.getImmutableFunctionalTerm(functionalTerm);
             }
         }
         /**
@@ -47,10 +47,6 @@ public class ImmutabilityTools {
         else {
             throw new IllegalArgumentException("Not a variable nor a ground term: " + term);
         }
-    }
-
-    public static ImmutableBooleanExpression convertIntoImmutableBooleanExpression(BooleanExpression expression) {
-        return new ImmutableBooleanExpressionImpl(expression);
     }
 
     /**
@@ -117,16 +113,20 @@ public class ImmutabilityTools {
             case 1:
                 return Optional.of(conjunctionOfExpressions.get(0));
             case 2:
-                return Optional.of((ImmutableBooleanExpression) new ImmutableBooleanExpressionImpl(OBDAVocabulary.AND,
+                return Optional.of(DATA_FACTORY.getImmutableBooleanExpression(
+                        OBDAVocabulary.AND,
                         conjunctionOfExpressions));
             default:
                 // Non-final
-                ImmutableBooleanExpression cumulativeExpression = new ImmutableBooleanExpressionImpl(OBDAVocabulary.AND,
+                ImmutableBooleanExpression cumulativeExpression = DATA_FACTORY.getImmutableBooleanExpression(
+                        OBDAVocabulary.AND,
                         conjunctionOfExpressions.get(0),
                         conjunctionOfExpressions.get(1));
                 for (int i = 2; i < size; i++) {
-                    cumulativeExpression = new ImmutableBooleanExpressionImpl(OBDAVocabulary.AND,
-                            cumulativeExpression, conjunctionOfExpressions.get(i));
+                    cumulativeExpression =  DATA_FACTORY.getImmutableBooleanExpression(
+                            OBDAVocabulary.AND,
+                            cumulativeExpression,
+                            conjunctionOfExpressions.get(i));
                 }
                 return Optional.of(cumulativeExpression);
         }

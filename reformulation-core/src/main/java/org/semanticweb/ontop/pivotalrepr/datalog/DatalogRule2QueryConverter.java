@@ -11,13 +11,12 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter.InvalidDatalogProgramException;
 import org.semanticweb.ontop.pivotalrepr.impl.*;
 import org.semanticweb.ontop.pivotalrepr.impl.ConstructionNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.jgrapht.JgraphtIntermediateQueryBuilder;
+
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableBooleanExpression;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl.splitLeftJoinSubAtoms;
 import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.*;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.convertFromDatalogDataAtom;
@@ -99,6 +98,7 @@ public class DatalogRule2QueryConverter {
     }
 
 
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Optional<ArgumentPosition> NO_POSITION = Optional.absent();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
@@ -242,7 +242,7 @@ public class DatalogRule2QueryConverter {
     private static Optional<ImmutableBooleanExpression> createFilterExpression(List<Function> booleanAtoms) {
         if (booleanAtoms.isEmpty())
             return Optional.absent();
-        return Optional.of(convertIntoImmutableBooleanExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
+        return Optional.of(DATA_FACTORY.getImmutableBooleanExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
     }
 
     /**

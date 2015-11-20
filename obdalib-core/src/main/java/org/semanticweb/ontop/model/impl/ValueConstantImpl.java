@@ -111,6 +111,11 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
+	public boolean isGround() {
+		return true;
+	}
+
+	@Override
 	public String getValue() {
 		return value;
 	}

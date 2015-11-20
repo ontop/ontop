@@ -193,13 +193,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments) {
-		return new ImmutableBooleanExpressionImpl(functor, arguments);
+		return getImmutableBooleanExpression(functor, ImmutableList.copyOf(arguments));
 	}
 
 	@Override
 	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
-																	ImmutableList<ImmutableTerm> arguments) {
-		return new ImmutableBooleanExpressionImpl(functor, arguments);
+																	ImmutableList<? extends ImmutableTerm> arguments) {
+		if (GroundTermTools.areGroundTerms(arguments)) {
+			return new GroundBooleanExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments);
+		}
+		else {
+			return new NonGroundBooleanExpressionImpl(functor, arguments);
+		}
+	}
+
+	@Override
+	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanExpression booleanExpression) {
+		if (GroundTermTools.isGroundTerm(booleanExpression)) {
+			return new GroundBooleanExpressionImpl(booleanExpression);
+		}
+		else {
+			return new NonGroundBooleanExpressionImpl(booleanExpression);
+		}
 	}
 
 	@Override
@@ -218,18 +233,29 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
 		}
 
-		// Default constructor
-		return new ImmutableFunctionalTermImpl(functor, terms);
+		if (GroundTermTools.areGroundTerms(terms)) {
+			return new GroundFunctionalTermImpl(functor, terms);
+		}
+		else {
+			// Default constructor
+			return new NonGroundFunctionalTermImpl(functor, terms);
+		}
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
-		if (functor instanceof BooleanOperationPredicate) {
-			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		return getImmutableFunctionalTerm(functor, ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public ImmutableTerm getImmutableFunctionalTerm(Function functionalTerm) {
+		if (GroundTermTools.isGroundTerm(functionalTerm)) {
+			return new GroundFunctionalTermImpl(functionalTerm);
+		}
+		else {
+			return new NonGroundFunctionalTermImpl(functionalTerm);
 		}
 
-		// Default constructor
-		return new ImmutableFunctionalTermImpl(functor, terms);
 	}
 
 	@Override
@@ -244,12 +270,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms) {
-		return new DataAtomImpl(predicate, terms);
+		if (GroundTermTools.areGroundTerms(terms)) {
+			return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)terms);
+		}
+		else {
+			return new NonGroundDataAtomImpl(predicate, terms);
+		}
 	}
 
 	@Override
 	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
-		return new DataAtomImpl(predicate, terms);
+		return getDataAtom(predicate, ImmutableList.copyOf(terms));
 	}
 
 	@Override
