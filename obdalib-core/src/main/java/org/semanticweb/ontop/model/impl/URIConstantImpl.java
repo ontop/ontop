@@ -69,6 +69,11 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
+	public boolean isGround() {
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "<" + iristr + ">";
 	}

@@ -35,7 +35,6 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUti
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
-import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmutableBooleanExpression;
 import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertToMutableBooleanExpression;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
@@ -416,7 +415,7 @@ public class ExpressionEvaluator {
 				+ evaluatedFunctionalTerm);
 			}
 
-			return Optional.of(convertIntoImmutableBooleanExpression(
+			return Optional.of(fac.getImmutableBooleanExpression(
                     fac.getBooleanExpression((BooleanOperationPredicate) predicate,
                             evaluatedFunctionalTerm.getTerms())));
 		}

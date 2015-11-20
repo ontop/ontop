@@ -1,7 +1,5 @@
 package org.semanticweb.ontop.model;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * Term that is guaranteed to be immutable.
  *
@@ -14,4 +12,6 @@ public interface ImmutableTerm extends Term {
      */
     @Override
     ImmutableTerm clone();
+
+    boolean isGround();
 }

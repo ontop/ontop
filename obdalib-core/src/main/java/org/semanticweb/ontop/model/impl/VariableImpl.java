@@ -72,6 +72,11 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	}
 
 	@Override
+	public boolean isGround() {
+		return false;
+	}
+
+	@Override
 	public int compareTo(Variable other) {
 		return other.hashCode() - hashCode() ;
 	}

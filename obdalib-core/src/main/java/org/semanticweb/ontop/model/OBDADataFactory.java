@@ -123,13 +123,17 @@ public interface OBDADataFactory extends Serializable {
 	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments);
 
 	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
-															 ImmutableList<ImmutableTerm> arguments);
+															 ImmutableList<? extends ImmutableTerm> arguments);
+
+	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanExpression booleanExpression);
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
+
+	public ImmutableTerm getImmutableFunctionalTerm(Function functionalTerm);
 
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 
@@ -345,7 +349,4 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Function function, Function function2, Function LjoinCondition);
-
-
-
 }

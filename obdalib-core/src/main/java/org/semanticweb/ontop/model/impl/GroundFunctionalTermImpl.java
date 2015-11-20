@@ -28,4 +28,9 @@ public class GroundFunctionalTermImpl extends ImmutableFunctionalTermImpl implem
     public ImmutableList<GroundTerm> getGroundTerms() {
         return (ImmutableList<GroundTerm>)(ImmutableList<?>)getTerms();
     }
+
+    @Override
+    public boolean isGround() {
+        return true;
+    }
 }

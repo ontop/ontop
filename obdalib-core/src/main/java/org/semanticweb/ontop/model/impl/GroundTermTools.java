@@ -3,6 +3,7 @@ package org.semanticweb.ontop.model.impl;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 
+import java.util.Collection;
 import java.util.List;
 
 public class GroundTermTools {
@@ -42,8 +43,8 @@ public class GroundTermTools {
      * Returns true if is a ground term (even if it is not explicitly typed as such).
      */
     public static boolean isGroundTerm(Term term) {
-        if (term instanceof GroundTerm)
-            return true;
+        if (term instanceof ImmutableTerm)
+            return ((ImmutableTerm) term).isGround();
 
         if (term instanceof Function) {
             return ((Function)term).getVariables().isEmpty();
@@ -52,4 +53,18 @@ public class GroundTermTools {
         return false;
     }
 
+    public static boolean areGroundTerms(Collection<? extends ImmutableTerm> terms) {
+        for (ImmutableTerm term : terms) {
+            if (!term.isGround()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void checkNonGroundTermConstraint(NonGroundFunctionalTerm term) throws IllegalArgumentException {
+        if (term.getVariables().isEmpty()) {
+            throw new IllegalArgumentException("A NonGroundFunctionalTerm must contain at least one variable");
+        }
+    }
 }

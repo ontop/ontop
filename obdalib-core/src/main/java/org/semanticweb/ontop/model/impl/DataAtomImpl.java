@@ -1,11 +1,8 @@
 package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.VariableOrGroundTerm;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
-import org.semanticweb.ontop.model.AtomPredicate;
-import org.semanticweb.ontop.model.DataAtom;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAtom {
+public abstract class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAtom {
 
     private final AtomPredicate predicate;
 
@@ -51,6 +48,16 @@ public class DataAtomImpl extends ImmutableFunctionalTermImpl implements DataAto
     @Override
     public ImmutableList<VariableOrGroundTerm> getVariablesOrGroundTerms() {
         return (ImmutableList<VariableOrGroundTerm>)(ImmutableList<?>)getImmutableTerms();
+    }
+
+    @Override
+    public boolean containsGroundTerms() {
+        for (ImmutableTerm term : getImmutableTerms()) {
+            if (term.isGround()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

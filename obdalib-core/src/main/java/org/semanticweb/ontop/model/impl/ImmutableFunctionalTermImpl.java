@@ -11,7 +11,7 @@ import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmu
 /**
  * Immutable implementation
  */
-public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
+public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
         implements ImmutableFunctionalTerm {
 
     private final ImmutableList<ImmutableTerm> terms;
@@ -22,9 +22,7 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
     private String string;
 
     protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableTerm... terms) {
-        super(functor);
-        this.terms = ImmutableList.<ImmutableTerm>builder().add(terms).build();
-        string = null;
+        this(functor, ImmutableList.<ImmutableTerm>builder().add(terms).build());
     }
 
     protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableList<? extends ImmutableTerm> terms) {
@@ -34,7 +32,7 @@ public class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
         string = null;
     }
 
-    public ImmutableFunctionalTermImpl(Function functionalTermToClone) {
+    protected ImmutableFunctionalTermImpl(Function functionalTermToClone) {
         this(functionalTermToClone.getFunctionSymbol(), convertTerms(functionalTermToClone));
     }
 

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 
-public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableBooleanExpression {
+public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableBooleanExpression {
     protected ImmutableBooleanExpressionImpl(BooleanOperationPredicate functor, ImmutableTerm... terms) {
         super(functor, terms);
     }
@@ -13,7 +13,7 @@ public class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl 
         super(functor, terms);
     }
 
-    public ImmutableBooleanExpressionImpl(BooleanExpression expression) {
+    protected ImmutableBooleanExpressionImpl(BooleanExpression expression) {
         super(expression);
     }
 
