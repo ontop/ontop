@@ -56,8 +56,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     private IntermediateQuery optimizeQuery(IntermediateQuery query) throws EmptyQueryException {
         Tree<ConstructionNodeUpdate> initialConstructionTree = extractConstructionTree(query);
 
-        VariableGenerator variableGenerator = new VariableGenerator(
-                (Set<Variable>)(Set<?>)VariableCollector.collectVariables(query));
+        VariableGenerator variableGenerator = new VariableGenerator(VariableCollector.collectVariables(query));
 
         Tree<ConstructionNodeUpdate> proposedConstructionTree = proposeOptimizedTree(initialConstructionTree,
                 variableGenerator);
