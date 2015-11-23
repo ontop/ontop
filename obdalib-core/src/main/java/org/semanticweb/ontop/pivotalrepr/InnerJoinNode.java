@@ -1,6 +1,9 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-public interface InnerJoinNode extends JoinLikeNode {
+import com.google.common.base.Optional;
+import org.semanticweb.ontop.model.ImmutableBooleanExpression;
+
+public interface InnerJoinNode extends CommutativeJoinNode {
 
     @Override
     InnerJoinNode clone();
@@ -8,4 +11,7 @@ public interface InnerJoinNode extends JoinLikeNode {
     @Override
     InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
+
+    @Override
+    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableBooleanExpression> newOptionalFilterCondition);
 }

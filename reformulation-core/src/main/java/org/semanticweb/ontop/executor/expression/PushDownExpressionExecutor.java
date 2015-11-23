@@ -122,11 +122,9 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
         Optional<ImmutableBooleanExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
                 newExpressions);
 
-        if (formerNode instanceof InnerJoinNode) {
-            return Optional.of((JoinOrFilterNode) new InnerJoinNodeImpl(optionalExpression));
-        }
-        else if (formerNode instanceof LeftJoinNode) {
-            return Optional.of((JoinOrFilterNode) new LeftJoinNodeImpl(optionalExpression));
+        if (formerNode instanceof JoinLikeNode) {
+            JoinOrFilterNode newNode = ((JoinLikeNode)formerNode).changeOptionalFilterCondition(optionalExpression);
+            return Optional.of(newNode);
         }
         else if (formerNode instanceof FilterNode) {
             if (optionalExpression.isPresent()) {

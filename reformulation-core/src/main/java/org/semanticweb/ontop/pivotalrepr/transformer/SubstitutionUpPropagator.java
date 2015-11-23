@@ -128,7 +128,7 @@ public class SubstitutionUpPropagator extends SubstitutionPropagator<Substitutio
     /**
      * TODO: explain
      */
-    private boolean isFromRightBranch(QueryNode descendantNode, BinaryAsymmetricOperatorNode ancestorNode, IntermediateQuery query) {
+    private boolean isFromRightBranch(QueryNode descendantNode, NonCommutativeOperatorNode ancestorNode, IntermediateQuery query) {
 
         Optional<QueryNode> optionalCurrentNode = Optional.of(descendantNode);
 
@@ -137,7 +137,7 @@ public class SubstitutionUpPropagator extends SubstitutionPropagator<Substitutio
             Optional<QueryNode> optionalAncestor = query.getParent(currentNode);
 
             if (optionalAncestor.isPresent() && (optionalAncestor.get() == ancestorNode)) {
-                Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestorNode, currentNode);
+                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestorNode, currentNode);
                 if (optionalPosition.isPresent()) {
                     switch(optionalPosition.get()) {
                         case LEFT:

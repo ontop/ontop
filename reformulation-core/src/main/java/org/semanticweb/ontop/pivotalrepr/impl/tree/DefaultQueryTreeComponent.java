@@ -2,7 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -93,7 +93,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                        QueryNode childNode) {
         return tree.getOptionalPosition(parentNode, childNode);
     }
@@ -126,7 +126,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
-                                      Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                                      Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
         tree.replaceNodesByOneNode(queryNodes, replacingNode, parentNode, optionalPosition);
     }
@@ -134,7 +134,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,
-                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+                         Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         tree.addChild(parentNode, childNode, optionalPosition, true, canReplace);
     }

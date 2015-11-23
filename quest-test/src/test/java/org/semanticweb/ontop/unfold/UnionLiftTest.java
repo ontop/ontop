@@ -33,7 +33,7 @@ import org.semanticweb.ontop.pivotalrepr.UnionLiftProposalExecutor;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 
 import static org.junit.Assert.assertEquals;
-import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition.*;
+import static org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
 
 
 public class UnionLiftTest {

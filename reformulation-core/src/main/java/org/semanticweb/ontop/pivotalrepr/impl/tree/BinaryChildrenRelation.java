@@ -2,8 +2,8 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 
@@ -18,7 +18,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
 
 
     protected BinaryChildrenRelation(TreeNode parent) {
-        if (!(parent.getQueryNode() instanceof BinaryAsymmetricOperatorNode)) {
+        if (!(parent.getQueryNode() instanceof NonCommutativeOperatorNode)) {
             throw new IllegalArgumentException("The StandardChildrenRelation requires " +
                     "BinaryAsymmetricOperatorNode as parents");
         }

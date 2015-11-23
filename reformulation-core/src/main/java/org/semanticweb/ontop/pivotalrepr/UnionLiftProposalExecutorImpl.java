@@ -38,7 +38,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
         for (QueryNode subNode : query.getChildren(parentNode)) {
 
-            Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition
+            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition
                     = query.getOptionalPosition(parentNode, subNode);
 
             QueryNode newSubNode = subNode.acceptNodeTransformer(queryNodeCloner);
@@ -110,10 +110,10 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
                 if(parent == inputQuery.getRootConstructionNode()){
                     movingUp = false;
                 } else {
-                    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition
+                    Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition
                             = inputQuery.getOptionalPosition(parent, current);
                     if(parent instanceof LeftJoinNode && optionalPosition.isPresent()
-                            && optionalPosition.get().equals(BinaryAsymmetricOperatorNode.ArgumentPosition.RIGHT)){
+                            && optionalPosition.get().equals(NonCommutativeOperatorNode.ArgumentPosition.RIGHT)){
                         movingUp = false;
                     } else {
                         current = parent;

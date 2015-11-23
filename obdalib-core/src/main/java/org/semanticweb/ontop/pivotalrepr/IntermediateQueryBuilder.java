@@ -20,14 +20,14 @@ public interface IntermediateQueryBuilder {
     /**
      * When the parent is a BinaryAsymetricOperatorNode.
      */
-    void addChild(QueryNode parentNode, QueryNode child, BinaryAsymmetricOperatorNode.ArgumentPosition position)
+    void addChild(QueryNode parentNode, QueryNode child, NonCommutativeOperatorNode.ArgumentPosition position)
             throws IntermediateQueryBuilderException;
 
     /**
      * For commodity
      */
     void addChild(QueryNode parentNode, QueryNode child,
-                  Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                  Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
             throws IntermediateQueryBuilderException;
 
 

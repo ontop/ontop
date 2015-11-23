@@ -42,7 +42,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     public void addChild(QueryNode parentNode, QueryNode childNode) throws IntermediateQueryBuilderException {
         checkEditMode();
 
-        if (parentNode instanceof BinaryAsymmetricOperatorNode) {
+        if (parentNode instanceof NonCommutativeOperatorNode) {
             throw new IntermediateQueryBuilderException("A position is required for adding a child " +
                     "to a BinaryAsymetricOperatorNode");
         }
@@ -60,7 +60,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,
-                         BinaryAsymmetricOperatorNode.ArgumentPosition position)
+                         NonCommutativeOperatorNode.ArgumentPosition position)
             throws IntermediateQueryBuilderException {
         checkEditMode();
 
@@ -78,7 +78,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode child,
-                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                         Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
             throws IntermediateQueryBuilderException {
         if (optionalPosition.isPresent()) {
             addChild(parentNode, child, optionalPosition.get());

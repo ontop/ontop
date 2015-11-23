@@ -199,13 +199,13 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                       QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);
     }
 
     @Override
-    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child) {
+    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child) {
         Optional<QueryNode> optionalParent = getParent(child);
         if (optionalParent.isPresent()) {
             return getOptionalPosition(optionalParent.get(), child);
