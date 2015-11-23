@@ -108,7 +108,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
 
         for (VariableGroundTermPair pair : pairs ) {
             booleanExpressionBuilder.add(DATA_FACTORY.getImmutableBooleanExpression(
-                    OBDAVocabulary.AND, pair.variable, pair.groundTerm));
+                    OBDAVocabulary.EQ, pair.variable, pair.groundTerm));
         }
         Optional<ImmutableBooleanExpression> optionalFoldExpression = ImmutabilityTools.foldBooleanExpressions(
                 booleanExpressionBuilder.build());
