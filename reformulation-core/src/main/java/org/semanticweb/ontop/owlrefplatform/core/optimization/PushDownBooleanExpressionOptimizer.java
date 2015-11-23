@@ -69,7 +69,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             final QueryNode currentNode = optionalCurrentNode.get();
 
             /**
-             * InnerJoinNode, LeftJoinNode or FilterNode
+             * InnerJoinNode, LeftJoinNode, FilterNode or some extensions
              */
             if (currentNode instanceof JoinOrFilterNode) {
                 NextNodeAndQuery nextNodeAndQuery = optimizeJoinOrFilter(currentQuery, (JoinOrFilterNode) currentNode);
@@ -118,11 +118,11 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
 
         /**
-         * Inner joins and filters
+         * Commutative joins and filters
          */
-        if ((currentNode instanceof InnerJoinNode)
+        if ((currentNode instanceof CommutativeJoinNode)
                 || (currentNode instanceof FilterNode)) {
-            return makeProposalForFilterOrInnerJoin(currentQuery, currentNode);
+            return makeProposalForFilterOrCommutativeJoin(currentQuery, currentNode);
         }
         /**
          * Left-join is not yet supported
@@ -138,7 +138,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * NOT FOR LJs!!!
      *
      */
-    private Optional<PushDownBooleanExpressionProposal> makeProposalForFilterOrInnerJoin(
+    private Optional<PushDownBooleanExpressionProposal> makeProposalForFilterOrCommutativeJoin(
             IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
 
         Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
@@ -254,7 +254,16 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
          *     Updates the closest SubTreeDelimiterNode
          */
         if (node instanceof SubTreeDelimiterNode) {
-            newOptionalClosestDelimiterNode = Optional.of((SubTreeDelimiterNode)node);
+            SubTreeDelimiterNode delimiterNode = (SubTreeDelimiterNode) node;
+            newOptionalClosestDelimiterNode = Optional.of(delimiterNode);
+
+            /**
+             * Special case: some delimiter nodes are ALSO BE COMMUTATIVE JOINS
+             * (in some extensions of Ontop)
+             */
+            if (node instanceof CommutativeJoinNode) {
+                return ImmutableList.of(new DelimiterTargetPair(delimiterNode, delimiterNode));
+            }
         }
         else {
             newOptionalClosestDelimiterNode = optionalClosestDelimiterNode;

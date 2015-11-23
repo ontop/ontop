@@ -9,4 +9,5 @@ import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 public interface JoinOrFilterNode extends QueryNode {
 
     public Optional<ImmutableBooleanExpression> getOptionalFilterCondition();
+
 }

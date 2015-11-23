@@ -17,4 +17,9 @@ public interface FilterNode extends JoinOrFilterNode {
      * Not optional for a FilterNode.
      */
     ImmutableBooleanExpression getFilterCondition();
+
+    /**
+     * Returns a new FilterNode (immutable).
+     */
+    FilterNode changeFilterCondition(ImmutableBooleanExpression newFilterCondition);
 }
