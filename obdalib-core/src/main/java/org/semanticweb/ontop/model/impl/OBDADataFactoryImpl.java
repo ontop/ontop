@@ -274,13 +274,37 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)terms);
 		}
 		else {
-			return new NonGroundDataAtomImpl(predicate, terms);
+			// Non-final
+			boolean noGroundTerm = true;
+			for (VariableOrGroundTerm term : terms) {
+				noGroundTerm = !term.isGround();
+				if (!noGroundTerm) {
+					break;
+				}
+			}
+
+			if (noGroundTerm) {
+				return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)terms);
+			}
+			else {
+				return new NonGroundDataAtomImpl(predicate, terms);
+			}
 		}
 	}
 
 	@Override
 	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
 		return getDataAtom(predicate, ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms) {
+		return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms) {
+		return new VariableOnlyDataAtomImpl(predicate, terms);
 	}
 
 	@Override

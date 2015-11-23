@@ -40,8 +40,12 @@ public interface OBDADataFactory extends Serializable {
 	
 	public CQIE getCQIE(Function head, List<Function> body);
 	
-	public CQIE getFreshCQIECopy(CQIE rule);	
-	
+	public CQIE getFreshCQIECopy(CQIE rule);
+
+
+	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms);
+
+	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms);
 
 	public OBDADataSource getDataSource(URI id);
 
