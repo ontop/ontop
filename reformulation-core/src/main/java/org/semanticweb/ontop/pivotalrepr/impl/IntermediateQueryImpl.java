@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import org.semanticweb.ontop.executor.expression.PushDownExpressionExecutor;
+import org.semanticweb.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import org.semanticweb.ontop.executor.join.JoinInternalCompositeExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.executor.substitution.SubstitutionPropagationExecutor;
@@ -68,12 +69,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>> INTERNAL_EXECUTOR_CLASSES;
     static {
-        INTERNAL_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>of(
-                SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class,
-                InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class,
-                ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class,
-                SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class,
-                PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+                internalExecutorMapBuilder = ImmutableMap.builder();
+        internalExecutorMapBuilder.put(SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class);
+        internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class);
+        internalExecutorMapBuilder.put(ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class);
+        internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
+        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
+        internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
+        INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
 
