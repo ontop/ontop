@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * Collects all the variables found in the nodes.
+ *
+ * TODO: refactor it NOT AS A QueryNodeVisitor
+ * but by calling queryNode.getVariables()
  */
 public class VariableCollector implements QueryNodeVisitor {
 
