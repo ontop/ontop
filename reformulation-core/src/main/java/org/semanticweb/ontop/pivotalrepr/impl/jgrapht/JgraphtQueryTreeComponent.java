@@ -7,7 +7,7 @@ import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -191,7 +191,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Deprecated
     public void setChildrenNodes(QueryNode parentNode, List<QueryNode> allChildrenNodes) throws IllegalTreeException {
-        boolean isAsymmetric = (parentNode instanceof BinaryAsymmetricOperatorNode);
+        boolean isAsymmetric = (parentNode instanceof NonCommutativeOperatorNode);
 
         if (isAsymmetric && allChildrenNodes.size() != 2) {
             throw new IllegalTreeException("A BinaryAsymmetricOperatorNode requires two children, " +
@@ -352,15 +352,15 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode, QueryNode parentNode,
-                                      Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                                      Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
         addChild(parentNode, replacingNode, optionalPosition, true);
-        if (replacingNode instanceof BinaryAsymmetricOperatorNode) {
+        if (replacingNode instanceof NonCommutativeOperatorNode) {
             throw new RuntimeException("Using a BinaryAsymmetricOperatorNode as a replacingNode is not yet supported");
         }
 
         for(QueryNode nodeToRemove : nodesToRemove) {
-            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof BinaryAsymmetricOperatorNode);
+            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof NonCommutativeOperatorNode);
 
             for (QueryNode child : getCurrentSubNodesOf(nodeToRemove)) {
                 if (!nodesToRemove.contains(child)) {
@@ -379,7 +379,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode child,
-                         Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+                         Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         if (optionalPosition.isPresent()) {
             addChild(parentNode, child, optionalPosition.get());
@@ -444,7 +444,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
 
-        if (parentNode instanceof BinaryAsymmetricOperatorNode) {
+        if (parentNode instanceof NonCommutativeOperatorNode) {
             throw new IllegalTreeUpdateException("A position is required for adding a child " +
                     "to a BinaryAsymetricOperatorNode");
         }
@@ -461,7 +461,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     private void addChild(QueryNode parentNode, QueryNode childNode,
-                         BinaryAsymmetricOperatorNode.ArgumentPosition position)
+                         NonCommutativeOperatorNode.ArgumentPosition position)
             throws IllegalTreeUpdateException {
 
         if (!queryDAG.addVertex(childNode)) {
@@ -561,7 +561,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     private static Collection<LabeledEdge> sortEdgesIfNecessary(Set<LabeledEdge> edges, QueryNode parentNode) {
-        if (parentNode instanceof BinaryAsymmetricOperatorNode) {
+        if (parentNode instanceof NonCommutativeOperatorNode) {
             List<LabeledEdge> edgeList = new ArrayList<>(edges);
             Collections.sort(edgeList);
             return edgeList;

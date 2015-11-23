@@ -4,8 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.*;
 
-import java.util.List;
-
 /**
  * Mutable component used for internal implementations of IntermediateQuery.
  */
@@ -33,7 +31,7 @@ public interface QueryTreeComponent {
      */
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 
-    Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                QueryNode childNode);
 
     /**
@@ -52,14 +50,14 @@ public interface QueryTreeComponent {
      * TODO: explain
      */
     void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
-                               Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition)
+                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException;
 
     /**
      * Please consider using an IntermediateQueryBuilder instead of this tree component.
      */
     void addChild(QueryNode parentNode, QueryNode childNode,
-                  Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition,
+                  Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
                   boolean canReplacePreviousChildren) throws IllegalTreeUpdateException;
 
     Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException;

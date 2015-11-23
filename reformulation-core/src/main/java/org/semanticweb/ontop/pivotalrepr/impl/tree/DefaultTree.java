@@ -2,8 +2,8 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.ArgumentPosition;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
@@ -92,7 +92,7 @@ public class DefaultTree implements QueryTree {
     }
 
     private static ChildrenRelation createChildrenRelation(TreeNode parentTreeNode) {
-        if (parentTreeNode.getQueryNode() instanceof BinaryAsymmetricOperatorNode) {
+        if (parentTreeNode.getQueryNode() instanceof NonCommutativeOperatorNode) {
             return new BinaryChildrenRelation(parentTreeNode);
         }
         else {
@@ -226,14 +226,14 @@ public class DefaultTree implements QueryTree {
     @Override
     public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode,
                                       QueryNode parentNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
-        if (replacingNode instanceof BinaryAsymmetricOperatorNode) {
+        if (replacingNode instanceof NonCommutativeOperatorNode) {
             throw new RuntimeException("Having a BinaryAsymmetricOperatorNode replacing node is not yet supported");
         }
         addChild(parentNode, replacingNode, optionalPosition, true, true);
 
 
         for(QueryNode nodeToRemove : nodesToRemove) {
-            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof BinaryAsymmetricOperatorNode);
+            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof NonCommutativeOperatorNode);
 
             TreeNode treeNodeToRemove = accessTreeNode(nodeToRemove);
 

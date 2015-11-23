@@ -2,7 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode;
+import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 import java.util.LinkedList;
@@ -17,7 +17,7 @@ public class StandardChildrenRelation implements ChildrenRelation {
     private final TreeNode parent;
 
     protected StandardChildrenRelation(TreeNode parent) {
-        if (parent.getQueryNode() instanceof BinaryAsymmetricOperatorNode) {
+        if (parent.getQueryNode() instanceof NonCommutativeOperatorNode) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept " +
                     "BinaryAsymmetricOperatorNode as parents");
         }
@@ -41,7 +41,7 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition,
+    public void addChild(TreeNode childNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
                          boolean canReplace) {
         if (optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept argument positions");
@@ -79,7 +79,7 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
+    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
         return Optional.absent();
     }
 }

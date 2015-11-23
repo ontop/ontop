@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-public interface LeftJoinNode extends JoinLikeNode, BinaryAsymmetricOperatorNode {
+public interface LeftJoinNode extends JoinLikeNode, NonCommutativeOperatorNode {
 
     @Override
     LeftJoinNode clone();

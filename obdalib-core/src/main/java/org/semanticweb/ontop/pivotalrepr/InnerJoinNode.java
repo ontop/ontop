@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-public interface InnerJoinNode extends JoinLikeNode {
+public interface InnerJoinNode extends CommutativeJoinNode {
 
     @Override
     InnerJoinNode clone();

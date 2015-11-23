@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl.splitLeftJoinSubAtoms;
-import static org.semanticweb.ontop.pivotalrepr.BinaryAsymmetricOperatorNode.*;
+import static org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.*;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogConversionTools.createDataNode;
 

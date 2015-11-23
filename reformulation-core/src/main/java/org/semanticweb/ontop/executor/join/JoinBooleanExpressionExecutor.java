@@ -2,7 +2,6 @@ package org.semanticweb.ontop.executor.join;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -82,7 +81,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
 
         try {
             QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
-            Optional<BinaryAsymmetricOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
+            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
             treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode, optionalPosition);
 
         } catch (IllegalTreeUpdateException | IllegalTreeException e) {
