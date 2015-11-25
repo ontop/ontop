@@ -11,6 +11,7 @@ import org.semanticweb.ontop.model.DataAtom;
  *
  */
 public interface SubTreeDelimiterNode extends QueryNode {
+
     /**
      * Data atom containing the projected variables
      */

@@ -19,7 +19,8 @@ import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNa
 /**
  * TODO: explain
  *
- * BIAS: only interested in propagating boolean expressions behind SubTreeDelimiterNode(s).
+ * BIAS: only interested in propagating boolean expressions behind SubTreeDelimiterNode(s) EXCEPT in one case.
+ * TODO: re-explain this bias
  *
  */
 public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOptimizer {
@@ -205,13 +206,22 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * TODO: explain
      */
     private ImmutableList<DelimiterTargetPair> findCandidateTargetNodes(IntermediateQuery currentQuery,
-                                                                        JoinOrFilterNode currentNode) {
-        try {
-            ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
+                                                                        JoinOrFilterNode sourceNode) {
+        Optional<DelimiterCommutativeJoinNode> optionalDelimiterSource;
+        if (sourceNode instanceof DelimiterCommutativeJoinNode) {
+            optionalDelimiterSource = Optional.of((DelimiterCommutativeJoinNode)sourceNode);
+        }
+        else {
+            optionalDelimiterSource = Optional.absent();
+        }
 
-            for (QueryNode childNode : currentQuery.getChildren(currentNode)) {
+        ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
+        try {
+            for (QueryNode childNode : currentQuery.getChildren(sourceNode)) {
                 candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, childNode,
-                        Optional.<SubTreeDelimiterNode>absent()));
+                        Optional.<SubTreeDelimiterNode>absent(),
+                        optionalDelimiterSource
+                        ));
             }
             return candidateListBuilder.build();
         } catch (NotSupportedCaseException e) {
@@ -221,9 +231,12 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
     /**
      * TODO: explain and clean
+     *
+     *
      */
     private ImmutableList<DelimiterTargetPair> findCandidatesInSubTree(IntermediateQuery currentQuery, QueryNode node,
-                                                                       final Optional<SubTreeDelimiterNode> optionalClosestDelimiterNode)
+                                                                       final Optional<SubTreeDelimiterNode> optionalClosestDelimiterNode,
+                                                                       Optional<DelimiterCommutativeJoinNode> optionalDelimiterSource)
             throws NotSupportedCaseException {
 
         /**
@@ -232,6 +245,12 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         if (node instanceof DataNode) {
             if (optionalClosestDelimiterNode.isPresent()) {
                 return ImmutableList.of(new DelimiterTargetPair(optionalClosestDelimiterNode.get(), node));
+            }
+            /**
+             * TODO: explain
+             */
+            else if (optionalDelimiterSource.isPresent()) {
+                return ImmutableList.of(new DelimiterTargetPair(optionalDelimiterSource.get(), node));
             }
             else {
                 throw new NotSupportedCaseException();
@@ -275,7 +294,8 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
         for (QueryNode child : currentQuery.getChildren(node)) {
             // Recursive call
-            candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, child, newOptionalClosestDelimiterNode));
+            candidateListBuilder.addAll(findCandidatesInSubTree(currentQuery, child, newOptionalClosestDelimiterNode,
+                    optionalDelimiterSource));
         }
         return candidateListBuilder.build();
     }
