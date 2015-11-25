@@ -109,7 +109,7 @@ public class ImmutabilityTools {
         final int size = conjunctionOfExpressions.size();
         switch (size) {
             case 0:
-                Optional.absent();
+                return Optional.absent();
             case 1:
                 return Optional.of(conjunctionOfExpressions.get(0));
             case 2:
