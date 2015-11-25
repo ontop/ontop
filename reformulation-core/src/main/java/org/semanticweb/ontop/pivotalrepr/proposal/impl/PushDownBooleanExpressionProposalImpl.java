@@ -14,14 +14,14 @@ public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExp
 
     private final JoinOrFilterNode focusNode;
     private final ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap;
-    private final ImmutableList<ImmutableBooleanExpression> notTransferedExpressions;
+    private final ImmutableList<ImmutableBooleanExpression> toKeepExpressions;
 
     public PushDownBooleanExpressionProposalImpl(JoinOrFilterNode focusNode,
                                                  ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
-                                                 ImmutableList<ImmutableBooleanExpression> notTransferedExpressions) {
+                                                 ImmutableList<ImmutableBooleanExpression> toKeepExpressions) {
         this.focusNode = focusNode;
         this.transferMap = transferMap;
-        this.notTransferedExpressions = notTransferedExpressions;
+        this.toKeepExpressions = toKeepExpressions;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExp
     }
 
     @Override
-    public ImmutableList<ImmutableBooleanExpression> getNotTransferedExpressions() {
-        return notTransferedExpressions;
+    public ImmutableList<ImmutableBooleanExpression> getExpressionsToKeep() {
+        return toKeepExpressions;
     }
 }

@@ -152,30 +152,46 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         ImmutableList<DelimiterTargetPair> potentialTargetNodes = findCandidateTargetNodes(currentQuery, currentNode);
 
         ImmutableMultimap.Builder<QueryNode, ImmutableBooleanExpression> transferMapBuilder = ImmutableMultimap.builder();
-        ImmutableList.Builder<ImmutableBooleanExpression> notTransferedExpressionBuilder = ImmutableList.builder();
+        ImmutableList.Builder<ImmutableBooleanExpression> toKeepExpressionBuilder = ImmutableList.builder();
 
         for (ImmutableBooleanExpression expression : booleanExpressions) {
             ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(expression, potentialTargetNodes);
+
+            /**
+             * TODO: explain
+             *
+             * TODO: find a better name
+             *
+             * Non-final
+             */
+            boolean requireACopyInTheOriginalNode = false;
+
             for (QueryNode targetNode : nodesForTransfer) {
-                transferMapBuilder.put(targetNode, expression);
+                if (targetNode != currentNode)
+                    transferMapBuilder.put(targetNode, expression);
+                else
+                    requireACopyInTheOriginalNode = true;
             }
-            if (nodesForTransfer.isEmpty()) {
-                notTransferedExpressionBuilder.add(expression);
+            /**
+             * TODO: explain the special case where the current is also "a target"
+             */
+            if (requireACopyInTheOriginalNode || nodesForTransfer.isEmpty()) {
+                toKeepExpressionBuilder.add(expression);
             }
         }
 
-        return buildProposal(currentNode, transferMapBuilder.build(), notTransferedExpressionBuilder.build());
+        return buildProposal(currentNode, transferMapBuilder.build(), toKeepExpressionBuilder.build());
     }
 
     private Optional<PushDownBooleanExpressionProposal> buildProposal(
             JoinOrFilterNode focusNode, ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
-            ImmutableList<ImmutableBooleanExpression> notTransferedExpressions) {
+            ImmutableList<ImmutableBooleanExpression> toKeepExpressions) {
         if (transferMap.isEmpty()) {
             return Optional.absent();
         }
         else {
             PushDownBooleanExpressionProposal proposal = new PushDownBooleanExpressionProposalImpl(
-                    focusNode, transferMap, notTransferedExpressions);
+                    focusNode, transferMap, toKeepExpressions);
             return Optional.of(proposal);
         }
     }
@@ -250,7 +266,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
              * TODO: explain
              */
             else if (optionalDelimiterSource.isPresent()) {
-                return ImmutableList.of(new DelimiterTargetPair(optionalDelimiterSource.get(), node));
+                return ImmutableList.of(new DelimiterTargetPair((DataNode)node, optionalDelimiterSource.get()));
             }
             else {
                 throw new NotSupportedCaseException();
