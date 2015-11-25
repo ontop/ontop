@@ -38,7 +38,7 @@ public abstract class SubstitutionPropagator<T1 extends QueryNodeTransformationE
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return new ExtensionalDataNodeImpl(transformDataAtom(extensionalDataNode.getAtom()));
+        return new ExtensionalDataNodeImpl(transformDataAtom(extensionalDataNode.getProjectionAtom()));
     }
 
     @Override
@@ -48,7 +48,7 @@ public abstract class SubstitutionPropagator<T1 extends QueryNodeTransformationE
 
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
-        return new IntensionalDataNodeImpl(transformDataAtom(intensionalDataNode.getAtom()));
+        return new IntensionalDataNodeImpl(transformDataAtom(intensionalDataNode.getProjectionAtom()));
     }
 
     @Override

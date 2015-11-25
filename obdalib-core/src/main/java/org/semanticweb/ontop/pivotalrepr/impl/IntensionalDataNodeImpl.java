@@ -18,7 +18,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
 
     @Override
     public IntensionalDataNode clone() {
-        return new IntensionalDataNodeImpl(getAtom());
+        return new IntensionalDataNodeImpl(getProjectionAtom());
     }
 
     @Override
@@ -34,6 +34,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
 
     @Override
     public String toString() {
-        return INTENSIONAL_DATA_NODE_STR + " " + getAtom();
+        return INTENSIONAL_DATA_NODE_STR + " " + getProjectionAtom();
     }
 }

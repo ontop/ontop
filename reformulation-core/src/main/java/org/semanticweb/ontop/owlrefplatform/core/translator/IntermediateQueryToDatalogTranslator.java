@@ -161,7 +161,7 @@ public class IntermediateQueryToDatalogTranslator {
 			
 					
 		} else if (node instanceof DataNode) {
-			DataAtom atom = ((DataNode)node).getAtom();
+			DataAtom atom = ((DataNode)node).getProjectionAtom();
 			Function mutAt = convertToMutableFunction(atom);
 			body.add(mutAt);
 			return body;

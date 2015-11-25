@@ -44,7 +44,7 @@ public class GroundTermRemovalFromDataNodeReshaper implements IntermediateQueryO
         for (QueryNode node : query.getNodesInTopDownOrder()) {
             if (node instanceof DataNode) {
                 DataNode dataNode = (DataNode) node;
-                if (dataNode.getAtom().containsGroundTerms()) {
+                if (dataNode.getProjectionAtom().containsGroundTerms()) {
                     dataNodesToSimplifyBuilder.add(dataNode);
                 }
             }
