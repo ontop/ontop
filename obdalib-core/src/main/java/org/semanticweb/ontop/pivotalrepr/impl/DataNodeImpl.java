@@ -15,7 +15,7 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
     }
 
     @Override
-    public DataAtom getAtom() {
+    public DataAtom getProjectionAtom() {
         return atom;
     }
 }

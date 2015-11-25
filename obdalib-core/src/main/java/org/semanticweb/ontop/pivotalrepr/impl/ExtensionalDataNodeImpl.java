@@ -23,7 +23,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
 
     @Override
     public ExtensionalDataNode clone() {
-        return new ExtensionalDataNodeImpl(getAtom());
+        return new ExtensionalDataNodeImpl(getProjectionAtom());
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
 
     @Override
     public String toString() {
-        return EXTENSIONAL_NODE_STR + " " + getAtom();
+        return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
     }
 
 }

@@ -42,12 +42,12 @@ public class VariableCollector implements QueryNodeVisitor {
 
     @Override
     public void visit(IntensionalDataNode intensionalDataNode) {
-        collectFromAtom(intensionalDataNode.getAtom());
+        collectFromAtom(intensionalDataNode.getProjectionAtom());
     }
 
     @Override
     public void visit(ExtensionalDataNode extensionalDataNode) {
-        collectFromAtom(extensionalDataNode.getAtom());
+        collectFromAtom(extensionalDataNode.getProjectionAtom());
     }
 
     @Override

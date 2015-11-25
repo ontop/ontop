@@ -266,7 +266,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
             try {
                 IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
-                            localDataNode.getAtom(), localVariables);
+                            localDataNode.getProjectionAtom(), localVariables);
 
                 ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
                 ConstructionNode localSubTreeRootNode = subQueryRootNode.clone();
@@ -306,7 +306,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             for(QueryNode node : treeComponent.getNodesInBottomUpOrder()) {
                 if (node instanceof IntensionalDataNode) {
                     IntensionalDataNode dataNode = (IntensionalDataNode) node;
-                    if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getAtom()))
+                    if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getProjectionAtom()))
                         listBuilder.add(dataNode);
                 }
             }

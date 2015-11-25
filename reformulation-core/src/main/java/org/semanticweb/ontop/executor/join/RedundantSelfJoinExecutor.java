@@ -239,7 +239,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
         for (ImmutableList<Integer> primaryKeyPositions : collectionOfPrimaryKeyPositions) {
             for (DataNode dataNode : dataNodes) {
-                groupingMapBuilder.put(extractPrimaryKeyArguments(dataNode.getAtom(), primaryKeyPositions), dataNode);
+                groupingMapBuilder.put(extractPrimaryKeyArguments(dataNode.getProjectionAtom(), primaryKeyPositions), dataNode);
             }
         }
         return groupingMapBuilder.build();
@@ -282,7 +282,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 ImmutableSubstitution<VariableOrGroundTerm> mergedSubstitution = optionalMergedSubstitution.get();
 
                 for (DataNode keptDataNode : predicateProposal.getKeptDataNodes()) {
-                    DataAtom previousDataAtom = keptDataNode.getAtom();
+                    DataAtom previousDataAtom = keptDataNode.getProjectionAtom();
                     DataAtom newDataAtom = mergedSubstitution.applyToDataAtom(previousDataAtom);
 
                     /**
@@ -366,9 +366,9 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         UnmodifiableIterator<DataNode> nodeIterator = redundantNodes.iterator();
 
         // Non-final
-        DataAtom accumulatedAtom = nodeIterator.next().getAtom();
+        DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
         while (nodeIterator.hasNext()) {
-            DataAtom newAtom = nodeIterator.next().getAtom();
+            DataAtom newAtom = nodeIterator.next().getProjectionAtom();
             // May throw an exception
             accumulatedSubstitution = updateSubstitution(accumulatedSubstitution, accumulatedAtom, newAtom);
             accumulatedAtom = accumulatedSubstitution.applyToDataAtom(accumulatedAtom);
@@ -419,7 +419,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         for (QueryNode node : siblings) {
             if (node instanceof DataNode) {
                 DataNode dataNode = (DataNode) node;
-                mapBuilder.put(dataNode.getAtom().getPredicate(), dataNode);
+                mapBuilder.put(dataNode.getProjectionAtom().getPredicate(), dataNode);
             }
         }
         return mapBuilder.build();
