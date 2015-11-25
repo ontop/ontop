@@ -40,7 +40,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
         }
 
         Optional<JoinOrFilterNode> optionalNewFocusNode = updateFocusNode(treeComponent, focusNode,
-                proposal.getNotTransferedExpressions());
+                proposal.getExpressionsToKeep());
         if (optionalNewFocusNode.isPresent()) {
             return new NodeCentricOptimizationResultsImpl<>(query, optionalNewFocusNode.get());
         }
