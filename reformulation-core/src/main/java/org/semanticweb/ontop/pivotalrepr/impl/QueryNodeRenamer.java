@@ -27,7 +27,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return new ExtensionalDataNodeImpl(renameDataAtom(extensionalDataNode.getAtom()));
+        return new ExtensionalDataNodeImpl(renameDataAtom(extensionalDataNode.getProjectionAtom()));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
-        return new IntensionalDataNodeImpl(renameDataAtom(intensionalDataNode.getAtom()));
+        return new IntensionalDataNodeImpl(renameDataAtom(intensionalDataNode.getProjectionAtom()));
     }
 
     @Override

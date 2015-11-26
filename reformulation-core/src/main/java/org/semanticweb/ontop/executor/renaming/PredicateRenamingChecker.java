@@ -55,12 +55,12 @@ public class PredicateRenamingChecker implements QueryNodeVisitor {
 
     @Override
     public void visit(IntensionalDataNode intensionalDataNode) throws AlreadyExistingPredicateException {
-        checkAtom(intensionalDataNode.getAtom());
+        checkAtom(intensionalDataNode.getProjectionAtom());
     }
 
     @Override
     public void visit(ExtensionalDataNode extensionalDataNode) throws AlreadyExistingPredicateException {
-        checkAtom(extensionalDataNode.getAtom());
+        checkAtom(extensionalDataNode.getProjectionAtom());
     }
 
     @Override

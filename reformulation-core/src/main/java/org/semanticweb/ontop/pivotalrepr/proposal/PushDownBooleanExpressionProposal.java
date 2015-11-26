@@ -19,7 +19,6 @@ public interface PushDownBooleanExpressionProposal extends NodeCentricOptimizati
 
     /**
      * TODO: explain
-     * TODO: find a better name
      */
-    ImmutableList<ImmutableBooleanExpression> getNotTransferedExpressions();
+    ImmutableList<ImmutableBooleanExpression> getExpressionsToKeep();
 }

@@ -120,7 +120,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
         ImmutableList.Builder<VariableGroundTermPair> pairBuilder = ImmutableList.builder();
         ImmutableList.Builder<VariableOrGroundTerm> newArgumentBuilder = ImmutableList.builder();
 
-        for (VariableOrGroundTerm argument : dataNode.getAtom().getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm argument : dataNode.getProjectionAtom().getVariablesOrGroundTerms()) {
             if (argument.isGround()) {
                 Variable newVariable = variableGenerator.generateNewVariable();
                 pairBuilder.add(new VariableGroundTermPair(newVariable, (GroundTerm) argument));
@@ -146,7 +146,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
     }
 
     protected DataNode generateDataNode(DataNode formerDataNode, ImmutableList<VariableOrGroundTerm> arguments) {
-        DataAtom dataAtom = DATA_FACTORY.getDataAtom(formerDataNode.getAtom().getPredicate(), arguments);
+        DataAtom dataAtom = DATA_FACTORY.getDataAtom(formerDataNode.getProjectionAtom().getPredicate(), arguments);
         if (formerDataNode instanceof ExtensionalDataNode) {
             return new ExtensionalDataNodeImpl(dataAtom);
         }
