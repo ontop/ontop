@@ -27,7 +27,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -35,14 +38,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.sql.Connection;
 import java.util.Properties;
 
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class ValuesTestVirtual extends TestCase {
+
+public class ValuesTestVirtual {
 
 	private OBDADataFactory fac;
-	private Connection conn;
+	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
@@ -50,9 +55,12 @@ public class ValuesTestVirtual extends TestCase {
 
 	final String owlfile = "src/test/resources/person.owl";
 	final String obdafile = "src/test/resources/person.obda";
+	private QuestOWL reasoner;
+	private static final String PREFIX = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> ";
 
-	@Override
-	public void setUp() throws Exception {
+
+
+	public ValuesTestVirtual() throws Exception {
 
 		fac = OBDADataFactoryImpl.getInstance();
 		
@@ -65,161 +73,17 @@ public class ValuesTestVirtual extends TestCase {
 		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-		
-	}
-
-	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
 
-		factory.setPreferenceHolder(p);
+		factory.setPreferenceHolder(new QuestPreferences());
 
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
-		String prefix = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> ";
-
-		String query1 = prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"   ?p a :Person ; :name ?name . " +
-				"}";
-		String query2 = prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"   ?p a :Person ; :name ?name . " +
-				"   FILTER ( ?name = \"Alice\" ) " +
-				"}";
-		String query3 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ." +
-				"  VALUES ?name { \"Alice\" } " +
-				"}";
-		String query4 = prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"   ?p a :Person ; :name ?name . " +
-				"   FILTER ( ?name = \"Alice\" || ?name = \"Bob\" ) " +
-				"}";
-		String query5 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ." +
-				"  VALUES ?name { \"Alice\" \"Bob\" } " +
-				"}";
-		String query6 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"  FILTER ( ?name  = \"Alice\" && ?age = 18 ) " +
-				"}";
-		String query7 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"  VALUES (?name ?age) { (\"Alice\" 18) } " +
-				"}";
-		String query8 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ." +
-				"  VALUES ?name { \"Nobody\" } " +
-				"}";
-		String query9 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"  VALUES (?name ?age) { (\"Alice\" UNDEF) } " +
-				"}";
-		String query10 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"  VALUES (?name ?age) { (\"Mark\" UNDEF) } " +
-				"}";
-		String query11 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"  VALUES (?name ?age) { " +
-				"     (\"Alice\" 18) " +
-				"     (\"Bob\" 19) " +
-				"  } " +
-				"}";
-		String query12 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  VALUES (?name ?age) { " +
-				"     (\"Alice\" 18) " +
-				"     (\"Bob\" 19) " +
-				"  } " +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"}";
-		String query13 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ." +
-				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" } " +
-				"}";
-		String query14 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ." +
-				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" \"Mark\" } " +
-				"}";
-		String query15 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ." +
-				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" \"Mark\" \"Nobody\" } " +
-				"}";
-		String query16 =  prefix +
-				"SELECT * " +
-				"WHERE {" +
-				"  ?p a :Person ; :name ?name ; :age ?age ; :mbox ?mbox ." +
-				"  VALUES (?name ?age ?mbox) { " +
-				"     (\"Alice\" 18 \"alice@example.org\" ) " +
-				"     (\"Bob\" 19 \"bob@example.org\" ) " +
-				"     (\"Eve\" 20 \"eve@example.org\" ) " +
-				"  } " +
-				"}";
-		
-		try {
-			executeQueryAssertResults(query1, st, 4);
-			executeQueryAssertResults(query2, st, 1);
-			executeQueryAssertResults(query3, st, 1);
-			executeQueryAssertResults(query4, st, 2);
-			executeQueryAssertResults(query5, st, 2);
-			executeQueryAssertResults(query6, st, 1);
-			executeQueryAssertResults(query7, st, 1);
-			executeQueryAssertResults(query8, st, 0);
-			executeQueryAssertResults(query9, st, 1);
-			executeQueryAssertResults(query10, st, 0);
-			executeQueryAssertResults(query11, st, 2);
-			executeQueryAssertResults(query12, st, 2);
-			executeQueryAssertResults(query13, st, 3);
-			executeQueryAssertResults(query14, st, 4);
-			executeQueryAssertResults(query15, st, 4);
-			executeQueryAssertResults(query16, st, 3);
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
+		conn = reasoner.getConnection();
 	}
 	
 	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
@@ -238,10 +102,229 @@ public class ValuesTestVirtual extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 
-	public void testLeftJoin() throws Exception {
+	private void runTest(String query, int expectedRows) throws Exception {
+		QuestOWLStatement st = conn.createStatement();
 
-		QuestPreferences p = new QuestPreferences();
-		runTests(p);
+		try {
+			executeQueryAssertResults(query, st, expectedRows);
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+				assertTrue(false);
+			}
+			conn.close();
+			reasoner.dispose();
+		}
+
+	}
+
+	@Test
+	public void testQ01() throws Exception {
+		String query1 = PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"   ?p a :Person ; :name ?name . " +
+				"}";
+		runTest(query1, 4);
+	}
+
+	@Test
+	public void testQ02() throws Exception {
+		String query2 = PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"   ?p a :Person ; :name ?name . " +
+				"   FILTER ( ?name = \"Alice\" ) " +
+				"}";
+		runTest(query2, 1);
+	}
+
+	@Test
+	public void testQ03() throws Exception {
+		String query3 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" } " +
+				"}";
+		runTest(query3, 1);
+	}
+
+	@Test
+	public void testQ04() throws Exception {
+		String query4 = PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"   ?p a :Person ; :name ?name . " +
+				"   FILTER ( ?name = \"Alice\" || ?name = \"Bob\" ) " +
+				"}";
+		runTest(query4, 2);
+	}
+
+	@Test
+	public void testQ05() throws Exception {
+		String query5 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" } " +
+				"}";
+		runTest(query5, 2);
+	}
+
+	@Test
+	public void testQ06() throws Exception {
+		String query6 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ." +
+				"  FILTER ( ?name  = \"Alice\" && ?age = 18 ) " +
+				"}";
+		runTest(query6, 1);
+	}
+
+	@Test
+	public void testQ07() throws Exception {
+		String query7 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ." +
+				"  VALUES (?name ?age) { (\"Alice\" 18) } " +
+				"}";
+		runTest(query7, 1);
+	}
+
+	@Test
+	public void testQ08() throws Exception {
+		String query8 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Nobody\" } " +
+				"}";
+		runTest(query8, 0);
+	}
+
+	@Test
+	public void testQ09() throws Exception {
+		String query9 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ." +
+				"  VALUES (?name ?age) { (\"Alice\" UNDEF) } " +
+				"}";
+		runTest(query9, 1);
+	}
+
+	@Test
+	public void testQ10() throws Exception {
+		String query10 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ." +
+				"  VALUES (?name ?age) { (\"Mark\" UNDEF) } " +
+				"}";
+		runTest(query10, 0);
+	}
+
+	@Test
+	public void testQ11() throws Exception {
+		String query11 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ." +
+				"  VALUES (?name ?age) { " +
+				"     (\"Alice\" 18) " +
+				"     (\"Bob\" 19) " +
+				"  } " +
+				"}";
+		runTest(query11, 2);
+	}
+
+
+	/**
+	 * Not yet supported
+	 */
+	@Ignore
+	@Test
+	public void testQ12() throws Exception {
+		String query12 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  VALUES (?name ?age) { " +
+				"     (\"Alice\" 18) " +
+				"     (\"Bob\" 19) " +
+				"  } " +
+				"  ?p a :Person ; :name ?name ; :age ?age ." +
+				"}";
+		runTest(query12, 2);
+	}
+
+	@Test
+	public void testQ12b() throws Exception {
+		String query12 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  VALUES (?name ?age) { " +
+				"     (\"Alice\" 18) " +
+				"     (\"Bob\" 19) " +
+				"  } " +
+				"  { ?p a :Person ; :name ?name ; :age ?age . }" +
+				"}";
+		runTest(query12, 2);
+	}
+
+	@Test
+	public void testQ13() throws Exception {
+		String query13 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" } " +
+				"}";
+		runTest(query13, 3);
+	}
+
+	@Test
+	public void testQ14() throws Exception {
+		String query14 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" \"Mark\" } " +
+				"}";
+		runTest(query14, 4);
+	}
+
+	@Test
+	public void testQ15() throws Exception {
+		String query15 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" \"Mark\" \"Nobody\" } " +
+				"}";
+		runTest(query15, 4);
+	}
+
+	@Test
+	public void testQ16() throws Exception {
+		String query16 =  PREFIX +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ; :mbox ?mbox ." +
+				"  VALUES (?name ?age ?mbox) { " +
+				"     (\"Alice\" 18 \"alice@example.org\" ) " +
+				"     (\"Bob\" 19 \"bob@example.org\" ) " +
+				"     (\"Eve\" 20 \"eve@example.org\" ) " +
+				"  } " +
+				"}";
+		runTest(query16, 3);
 	}
 
 }
