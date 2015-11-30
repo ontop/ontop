@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.reformulation.owlapi3;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.owlapi3.swrl.SWRLAPITranslator;
-import it.unibz.krdb.obda.quest.dag.S_NewGraphTest;
 
 import java.io.File;
 import java.util.ArrayList;

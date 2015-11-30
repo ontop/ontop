@@ -9,6 +9,11 @@ password	obdaps83
 driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
+mappingId	Countries_dual
+target		:{country_name} a :Country .
+source		select 'Italy' AS country_name FROM dual
+
+
 mappingId	Countries
 target		:Country-{country_name} a :Country . 
 source		select country_name FROM hr.countries

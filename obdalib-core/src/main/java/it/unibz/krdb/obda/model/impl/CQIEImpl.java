@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
@@ -54,8 +53,6 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String SPACE = " ";
 	private static final String COMMA = ",";
 	private static final String INV_IMPLIES = ":-";
-
-	private OBDAQueryModifiers modifiers = null;
 
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(Function head, List<Function> body) {		
@@ -216,29 +213,11 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return modifiers;
-	}
-
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		this.modifiers = modifiers;
-		listChanged();
-	}
-
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Function atom : body)
-			for (Term t : atom.getTerms()) {
-				for (Variable v : t.getReferencedVariables())
-					vars.add(v);
-			}
+		for (Function atom : body) {
+			TermUtils.addReferencedVariablesTo(vars, atom);
+		}
 		return vars;
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
 	}
 }

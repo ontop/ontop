@@ -24,39 +24,38 @@ import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 
+import java.util.List;
 import java.util.Vector;
+
+// TODO: move to a more appropriate package
 
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
-	/** The OBDA model for validating the target query */
-	private OBDAModel obdaModel;
+	// the ontology vocabulary of the OBDA model
+	private final ImmutableOntologyVocabulary voc;
 
 	/** Data factory **/
-	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
-	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 	/** List of invalid predicates */
 	private Vector<String> invalidPredicates = new Vector<String>();
 
-	public TargetQueryValidator(OBDAModel obdaModel) {
-		this.obdaModel = obdaModel;
+	public TargetQueryValidator(ImmutableOntologyVocabulary voc) {
+		this.voc = voc;
 	}
 	
 	@Override
-	public boolean validate(CQIE targetQuery) {
+	public boolean validate(List<Function> targetQuery) {
 		// Reset the invalid list
 		invalidPredicates.clear();
 
 		// Get the predicates in the target query.
-		for (Function atom : targetQuery.getBody()) {
+		for (Function atom : targetQuery) {
 			Predicate p = atom.getFunctionSymbol();
 
 			boolean isClass = isClass(p);
@@ -102,17 +101,17 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	@Override
 	public boolean isClass(Predicate predicate) {
-		return obdaModel.isDeclaredClass(ofac.createClass(predicate.getName()));
+		return voc.containsClass(predicate.getName());
 	}
 	
 	@Override
 	public boolean isObjectProperty(Predicate predicate) {
-		return obdaModel.isDeclaredObjectProperty(ofac.createObjectProperty(predicate.getName()));
+		return voc.containsObjectProperty(predicate.getName());
 	}
 
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
-		return obdaModel.isDeclaredDataProperty(ofac.createDataProperty(predicate.getName()));
+		return voc.containsDataProperty(predicate.getName());
 	}
 	
 	@Override

@@ -20,6 +20,8 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import java.sql.Connection;
+
 import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDAException;
 
@@ -37,6 +39,10 @@ public class QuestDBConnection implements OBDAConnection {
 
 	}
 
+	public Connection getConnection() {
+		return conn.getConnection();
+	}
+	
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
 		return new QuestDBStatement(conn.createStatement());

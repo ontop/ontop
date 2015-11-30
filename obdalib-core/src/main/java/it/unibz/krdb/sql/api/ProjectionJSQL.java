@@ -44,8 +44,8 @@ public class ProjectionJSQL implements Serializable {
 	/**
 	 * Collection of columns for this projection.
 	 */
-	private ArrayList<SelectExpressionItem> selectList;
-	private ArrayList<SelectExpressionItem> selectDistinctList; //for the cases with DISTINCT ON
+	private final List<SelectExpressionItem> selectList = new ArrayList<SelectExpressionItem>();
+	private final List<SelectExpressionItem> selectDistinctList = new ArrayList<SelectExpressionItem>(); //for the cases with DISTINCT ON
 	private AllColumns allcolumns; //for the cases as SELECT *
 	private AllTableColumns tablecolumns; //for the cases as SELECT table.*
 	
@@ -54,10 +54,8 @@ public class ProjectionJSQL implements Serializable {
 	 */
 
 	public ProjectionJSQL() {
-		selectList = new ArrayList<SelectExpressionItem>();
-		selectDistinctList = new ArrayList<SelectExpressionItem>();
-		allcolumns=null;
-		tablecolumns=null;
+		allcolumns = null;
+		tablecolumns = null;
 	}
 
 	public void setType(int value) {
@@ -83,15 +81,12 @@ public class ProjectionJSQL implements Serializable {
 	 *            The input column object.
 	 */
 	public void add(SelectExpressionItem column, boolean distinctOn) {
-		
-		if (distinctOn){
-			
+		if (distinctOn) {
 			this.setType(ProjectionJSQL.SELECT_DISTINCT_ON);
 			selectDistinctList.add(column);
 		}
 		else{
-		
-		selectList.add(column);
+			selectList.add(column);
 		}
 	}
 
@@ -112,7 +107,7 @@ public class ProjectionJSQL implements Serializable {
 	 *            The AllTableColumns object.
 	 */
 	public void add(AllTableColumns column) {
-		tablecolumns =column;
+		tablecolumns = column;
 	}
 	
 	/**
@@ -126,59 +121,28 @@ public class ProjectionJSQL implements Serializable {
 	}
 
 	/**
-	 * Updates the column list in this projection. Any existing columns are
-	 * replaced by the new list.
-	 * 
-	 * @param columns
-	 *            The new column list.
-	 */
-	public void update(List<SelectExpressionItem> columns) {
-		selectList.clear();
-		addAll(columns);
-	}
-
-	/**
 	 * Retrieves all columns that are mentioned in the SELECT clause.
 	 */
 	public List<SelectExpressionItem> getColumnList() {
 		return selectList;
 	}
 	
-	/**
-	 * Retrieves all column names that are mentioned in the SELECT clause.
-	 */
-	public ArrayList<String> getColumnNameList() {
-		ArrayList<String> result = new ArrayList<String>();
-		for (SelectExpressionItem column : getColumnList()) {
-			result.add(column.getExpression().toString());
-		}
-		return result;
-	}
 	
-
-	/**
-	 * Retrieves the number of columns this projection has.
-	 */
-	public int size() {
-		return selectList.size();
-	}
 
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder(getType());
 
 		boolean bNeedComma = false;
-		boolean bParenthesis= true;
+		boolean bParenthesis = true;
 		
-		for (SelectExpressionItem column : selectDistinctList) 
-		{
-			
+		for (SelectExpressionItem column : selectDistinctList) {
 			if (bNeedComma) {
 				str.append(",");
 			}
 			str.append(" ");
 			
-			if (bParenthesis){
+			if (bParenthesis) {
 				str.append("(");
 				bParenthesis = false;
 			}
@@ -187,15 +151,13 @@ public class ProjectionJSQL implements Serializable {
 			bNeedComma = true;
 		}
 		
-		if(!selectDistinctList.isEmpty())
-		{
+		if(!selectDistinctList.isEmpty()) {
 			str.append(")");
 			bNeedComma = false;
 		}
 			
 
 		for (SelectExpressionItem column : selectList) {
-
 			if (bNeedComma) {
 				str.append(",");
 			}
@@ -204,32 +166,11 @@ public class ProjectionJSQL implements Serializable {
 			bNeedComma = true;
 		}
 		
-		
-			if(allcolumns!=null)
-				str.append(" *");
-			if( tablecolumns!=null)
-				str.append(" "+tablecolumns.getTable()+".*");
+		if (allcolumns != null)
+			str.append(" *");
+		if (tablecolumns != null)
+			str.append(" "+ tablecolumns.getTable() + ".*");
 		
 		return str.append(" from").toString();
-	}
-	
-	/**
-	 * Checks if the name can be found in the projection. The name can be a
-	 * column name or an alias.
-	 * 
-	 * @param name
-	 * 			A column name or an alias.
-	 * @return Returns true if the name is in the projection or false, otherwise.
-	 */
-	public boolean contains(String name) {
-		for (SelectExpressionItem column : getColumnList()) {
-			if (column.getExpression().toString().equalsIgnoreCase(name)) {
-				return true;
-			}
-			if (column.getAlias().getName().equalsIgnoreCase(name)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	}	
 }

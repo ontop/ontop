@@ -23,17 +23,13 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class FunctionalTermImpl implements Function, ListListener {
 
@@ -118,16 +114,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	@Override
-	public Set<Variable> getVariables() {
-		HashSet<Variable> variables = new LinkedHashSet<Variable>();
-		for (Term t : terms) {
-			for (Variable v : t.getReferencedVariables())
-				variables.add(v);
-		}
-		return variables;
-	}
-
-	@Override
 	public Predicate getFunctionSymbol() {
 		return functor;
 	}
@@ -200,16 +186,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	@Override
-	public Set<Variable> getReferencedVariables() {
-		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Term t : terms) {
-			for (Variable v : t.getReferencedVariables())
-				vars.add(v);
-		}
-		return vars;
-	}
-
-	@Override
 	public Term getTerm(int index) {
 		return terms.get(index);
 	}
@@ -259,6 +235,11 @@ public class FunctionalTermImpl implements Function, ListListener {
 	@Override
 	public boolean isArithmeticFunction() {
 		return this.functor.isArithmeticPredicate();
+	}
+
+	@Override
+	public boolean isDateTimeFunction(){
+		return this.functor.isDateTimePredicate();
 	}
 
 	@Override

@@ -119,7 +119,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager man = new ModelIOManager(model);
 			man.load(f);
-			QuestMaterializer mat = new QuestMaterializer(model, prefs);
+			QuestMaterializer mat = new QuestMaterializer(model, prefs, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
@@ -150,15 +150,12 @@ public class QuestOWLMaterializerTest extends TestCase {
 			man.load(f);
 			
 			// read onto 
-			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  OWLAPI3TranslatorUtility.translate(owl_onto);
+			Ontology onto =  OWLAPI3TranslatorUtility.loadOntologyFromFile("src/test/resources/test/materializer/MaterializeTest.owl");
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());
 			
-			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
+			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;

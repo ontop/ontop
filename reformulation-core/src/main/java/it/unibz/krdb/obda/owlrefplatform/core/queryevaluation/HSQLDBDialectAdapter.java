@@ -24,12 +24,13 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class HSQLDBDialectAdapter implements SQLDialectAdapter {
+public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 
@@ -46,35 +47,6 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 		return sql.toString();
 	}
 
-	@Override
-	public String strreplace(String str, char oldchar, char newchar) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strreplace(String str, int start, int end, String with) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strindexOf(String str, char ch) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String strindexOf(String str, String strsr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {
@@ -101,25 +73,24 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 //		return name;
 	}
 
-	@Override
-	public String sqlSlice(long limit, long offset) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	@Override
 	public String sqlOrderBy(List<OrderCondition> conditions, String viewname) {
-		String sql = "ORDER BY ";
-		boolean needComma = false;
-		for (OrderCondition c : conditions) {
-			if (needComma) {
-				sql += ", ";
+		String sql = "";
+		if(!conditions.isEmpty()) {
+			sql = "ORDER BY ";
+			boolean needComma = false;
+			for (OrderCondition c : conditions) {
+				if (needComma) {
+					sql += ", ";
+				}
+				sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
+				if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
+					sql += " DESC";
+				}
+				needComma = true;
 			}
-			sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
-			if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
-				sql += " DESC";
-			}
-			needComma = true;
 		}
 		return sql;
 	}
@@ -137,15 +108,66 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
 					+ pattern.toLowerCase() + "%'";
 		}
 		return columnname + " LIKE " + "'%" + pattern + "%'";
+	}
+
+	@Override
+	public String strUuid(){
+		return "UUID()";
+	}
+
+	@Override
+	public String uuid(){
+		return strConcat(new String[]{"'urn:uuid:'","UUID()"});
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s, 0)";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "SUBSTRING(%1$s, 1, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, CHAR_LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "INSTR(%1$s,%2$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,INSTR(%s,%s)-1)", str, str, before);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+//		sign return 1 if positive number, 0 if 0 and -1 if negative number
+//		it will return everything after the value if it is present or it will return an empty string if it is not present
+		return String.format("SUBSTRING(%s,LOCATE(%s,%s) + LENGTH(%s), SIGN(LOCATE(%s,%s)) * LENGTH(%s))",
+				str, after, str , after , after, str, str);
+	}
+
+	@Override
+	public String dateTZ(String str) {
+		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'" , String.format("EXTRACT(TIMEZONE_MINUTE FROM %s) ",str)});
 	}
 
 	@Override
@@ -173,9 +195,10 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 *
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this inherited implementation is OK
 		

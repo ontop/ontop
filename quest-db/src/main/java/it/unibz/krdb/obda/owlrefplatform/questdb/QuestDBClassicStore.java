@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
@@ -36,6 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +45,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
@@ -86,10 +89,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Set<OWLOntology> closure;
 
-	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
-		this(name, tboxFile, null);
-	}
-
+	private Quest questInstance;	
+	
 	public QuestDBClassicStore(String name, java.net.URI tboxFile, QuestPreferences config) throws Exception {
 		super(name);
 		Ontology tbox = readOntology(tboxFile.toASCIIString());
@@ -100,7 +101,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		super(name);
 		Ontology tbox = null;
 		if (tboxFile == null) {
-			tbox = ofac.createOntology();
+			OntologyVocabulary voc = ofac.createVocabulary();
+			tbox = ofac.createOntology(voc);
 		} else {
 			tbox = readOntology(tboxFile);
 		}
@@ -108,7 +110,6 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 	
 	private Ontology readOntology(String tboxFile) throws Exception {
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		File f = new File(tboxFile);
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
 		man.addIRIMapper(iriMapper);
@@ -120,7 +121,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		}
 		closure = man.getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(closure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 	}
 
 
@@ -155,7 +156,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure);
+			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getVocabulary());
 			EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 			
@@ -166,9 +167,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			obdaModelForMaterialization.declareAll(tbox.getVocabulary());
+			obdaModelForMaterialization.getOntologyVocabulary().merge(tbox.getVocabulary());
 			
-			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
+			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 			int count = st.insertData(assertionIter, 5000, 500);
 			materializer.disconnect();
@@ -177,7 +178,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 //		st.createIndexes();
 		st.close();
 		if (!conn.getAutoCommit())
-		conn.commit();
+			conn.commit();
 		
 		questInstance.updateSemanticIndexMappings();
 
@@ -204,15 +205,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private Ontology getTBox(Dataset dataset) throws Exception {
 		// Merge default and named graphs to filter duplicates
-		Set<URI> graphURIs = new HashSet<URI>();
+		Set<URI> graphURIs = new HashSet<>();
 		graphURIs.addAll(dataset.getDefaultGraphs());
 		graphURIs.addAll(dataset.getNamedGraphs());
 
-		Ontology result = ofac.createOntology();
-
+		OntologyVocabulary vb = ofac.createVocabulary();
+		
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(graphURI, graphURI);
-			result.getVocabulary().merge(o.getVocabulary());
+			vb.merge(o.getVocabulary());
 			
 			// TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
 			
@@ -221,6 +222,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			//for (SubClassOfAxiom ax : result.getSubClassAxioms()) 
 			//	result.add(ax);	
 		}
+		Ontology result = ofac.createOntology(vb);
+
 		return result;
 	}
 
@@ -251,16 +254,11 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	public class RDFTBoxReader extends RDFHandlerBase {
-		private Ontology ontology = null;
 		private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		private OntologyVocabulary vb = ofac.createVocabulary();
 
 		public Ontology getOntology() {
-			return ontology;
-		}
-
-		@Override
-		public void startRDF() throws RDFHandlerException {
-			ontology = ofac.createOntology();
+			return ofac.createOntology(vb);
 		}
 
 		@Override
@@ -269,30 +267,33 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
 				String dataProperty = pred.stringValue();
-				ontology.getVocabulary().createDataProperty(dataProperty);
+				vb.createDataProperty(dataProperty);
 			} 
 			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
 				String className = obj.stringValue();
-				ontology.getVocabulary().createClass(className);
+				vb.createClass(className);
 			} 
 			else {
 				String objectProperty = pred.stringValue();
-				ontology.getVocabulary().createObjectProperty(objectProperty);
+				vb.createObjectProperty(objectProperty);
 			}
 
-		/*
-		 * ROMAN: this code does nothing because	getTBoxAxiom is null
+		/* Roman 10/08/15: recover?
 			Axiom axiom = getTBoxAxiom(st);
-			if (axiom == null) {
-				return;
-			}
 			ontology.addAssertionWithCheck(axiom);
 		*/
 		}
 
-		public Object getTBoxAxiom(Statement st) {
-			return null;
-		}
-
 	}
+
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+
+	@Override
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
+		return questInstance.getSemanticIndexRepository();
+	}
+
 }

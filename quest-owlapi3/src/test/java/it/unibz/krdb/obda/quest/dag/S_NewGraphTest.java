@@ -23,15 +23,11 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,20 +39,15 @@ public class S_NewGraphTest  extends TestCase{
 		String classowlfile = "src/test/resources/dag-tests-1.owl";
 		String roleowlfile = "src/test/resources/test/dag/test-role-hierarchy.owl";
 		
-		 String owlfile =
-		 "src/test/resources/test/stockexchange-unittest.owl";
+		String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 		log.info("Loading ontology");
 
 		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(roleowlfile)));
-
 		log.info("Translating");
-
-		Ontology o = OWLAPI3TranslatorUtility.translate(ontology);
+		Ontology o = OWLAPI3TranslatorUtility.loadOntologyFromFile(roleowlfile);
 
 		log.info("Generating graph");
-		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
+		TBoxReasonerImpl r = (TBoxReasonerImpl)TBoxReasonerImpl.create(o);
 		
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());
@@ -83,13 +74,12 @@ public class S_NewGraphTest  extends TestCase{
 //		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
 //		}
 		log.info("Get named dag");
-		NamedDAG namedDAG = new NamedDAG(r);
-		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");
 		System.out.println(r.getClassDAG());
 		System.out.println(r.getObjectPropertyDAG());
-		System.out.println(namedDAG);
+		System.out.println(SemanticIndexBuilder.getNamedDAG(r.getClassDAG()));
+		System.out.println(SemanticIndexBuilder.getNamedDAG(r.getObjectPropertyDAG()));
 		
 //		log.info("See relations named DAG");
 //		TBoxReasonerImpl tbox2= new TBoxReasonerImpl(dag);

@@ -101,6 +101,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -137,6 +138,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		st.close();
@@ -158,7 +160,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		QuestOWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
-		StringBuilder bf = new StringBuilder(query);
 		try {
 			
 			/*
@@ -186,13 +187,13 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			throw e;
 		} finally {
 			try {
-
-			} catch (Exception e) {
 				st.close();
+			} catch (Exception e) {
 				throw e;
+			} finally {
+				conn.close();
+				reasoner.dispose();
 			}
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 
@@ -201,7 +202,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}
@@ -211,7 +211,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);

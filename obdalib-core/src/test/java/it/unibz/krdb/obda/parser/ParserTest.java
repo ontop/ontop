@@ -20,6 +20,10 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
 
@@ -59,11 +63,11 @@ public class ParserTest extends TestCase {
 
 	}
 
+	// Does not parse SELECT DISTINCT (on purpose restriction)
 	public void test_1_3_1() {
 		final boolean result = parseJSQL("SELECT DISTINCT name FROM student");
 		printJSQL("test_1_3_1", result);
-		assertTrue(result);
-
+		assertFalse(result);
 	}
 
 	public void test_1_3_2() {
@@ -73,10 +77,11 @@ public class ParserTest extends TestCase {
 
 	}
 
+	// Does not parse SELECT DISTINCT (on purpose restriction)
 	public void test_1_3_3() {
 		final boolean result = parseJSQL("select DISTINCT ON (name,age,year) name,age FROM student");
 		printJSQL("test_1_3_1", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 
@@ -514,20 +519,26 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for concat
+
 	public void test_7_1() {
 		final boolean result = parseJSQL("SELECT ('ID-' || student.id) as sid FROM student");
 		printJSQL("test_7_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
+
+    public void test_7_1_b() {
+        final boolean result = parseJSQL("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
+        printJSQL("test_7_1", result);
+        assertTrue(result);
+
+    }
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for operation
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
-		assertFalse(result);
-
+		assertTrue(result);
 	}
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
@@ -655,6 +666,13 @@ public class ParserTest extends TestCase {
 
 	}
 
+    public void test_13() {
+        final boolean result = parseJSQL("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
+        printJSQL("test_13", result);
+        assertTrue(result);
+
+    }
+
 	private String queryText;
 
 	ParsedSQLQuery queryP;
@@ -664,7 +682,9 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 
 			return false;
@@ -688,7 +708,7 @@ public class ParserTest extends TestCase {
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
-				System.out.println("  GroupBy: " + queryP.getGroupByClause());
+				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
 								.getJoinConditions()));

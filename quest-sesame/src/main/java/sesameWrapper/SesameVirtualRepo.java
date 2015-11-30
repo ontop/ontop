@@ -26,16 +26,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -130,7 +128,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 * 
 	 * @param userConstraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints){
 		if(userConstraints == null)
 			throw new NullPointerException();
 		if(this.isinitialized)
@@ -155,7 +153,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		}
 	}
 	
-	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraints userConstraints) throws Exception
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraintsReader userConstraints) throws Exception
 	{
 		if (mappingFile == null) {
 			//if we have no mappings 
@@ -222,5 +220,6 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public String getType() {
 		return QuestConstants.VIRTUAL;
 	}
+
 
 }

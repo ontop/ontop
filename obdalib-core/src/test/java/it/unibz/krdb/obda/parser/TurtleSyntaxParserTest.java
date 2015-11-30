@@ -20,8 +20,12 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.SimplePrefixManager;
+import java.util.List;
+
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;
@@ -180,13 +184,54 @@ public class TurtleSyntaxParserTest extends TestCase {
 		final boolean result = parse("ex:Person/{id}/ ex:hasFather ex:Person/123/ .");
 		assertTrue(result);
 	}
-	
+
+	//multiple triples with different subjects
+	public void test_9_1(){
+		final boolean result = compareCQIE(":S_{id} a :Student ; :fname {first_name} ; :hasCourse :C_{course_id}  .\n" +
+				":C_{course_id} a :Course ; :hasProfessor :P_{id} . \n" +
+				":P_{id} a :Professor ; :teaches :C_{course_id} .\n" +
+				"{first_name} a :Name . ", 8);
+				assertTrue(result);
+
+	}
+
+
+	public void test_9_2(){
+		final boolean result = compareCQIE("{idEmigrante} a  :E21_Person ; :P131_is_identified_by {nome} ; :P11i_participated_in {numCM} .\n" +
+				"{nome} a :E82_Actor_Appellation ; :P3_has_note {nome}^^xsd:string .\n" +
+				"{numCM} a :E9_Move .", 6);
+		assertTrue(result);
+
+	}
+
+		//Test for value constant
+	public void test10() {
+		final boolean result = parse(":Person-{id} a :Person ; :age 25 ; :hasDegree true ; :averageGrade 28.3 .");
+		assertTrue(result);
+	}
+
+	private boolean compareCQIE(String input, int countBody) {
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
+		parser.setPrefixManager(getPrefixManager());
+		List<Function> mapping;
+		try {
+			mapping = parser.parse(input);
+		} catch (TargetQueryParserException e) {
+			log.debug(e.getMessage());
+			return false;
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+			return false;
+		}
+		return mapping.size()==countBody;
+	}
 	private boolean parse(String input) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
 		parser.setPrefixManager(getPrefixManager());
-
+		List<Function> mapping;
 		try {
-			parser.parse(input);
+			mapping = parser.parse(input);
+			log.debug("mapping " + mapping);
 		} catch (TargetQueryParserException e) {
 			log.debug(e.getMessage());
 			return false;

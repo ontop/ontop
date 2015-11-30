@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+quest:		http://obda.org/quest#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	file:/Users/elem/git/ontop/obdalib-r2rml/src/test/resources/mapping-northwind.ttl
+connectionUrl	jdbc:mysql://10.7.20.39/northwind
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-1308227722
+target		<http://www.optique-project.eu/resource/employeesLocation/{EmployeeID}> a <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> {PostalCode}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> {Country}^^xsd:string ; rdfs:label "adres : {Address} \\{city:\\} {City}{Country}something"@en-us ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> {Address}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> {Region}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> {City}^^xsd:string .
+source		SELECT * FROM northwind.Employees
+]]
+

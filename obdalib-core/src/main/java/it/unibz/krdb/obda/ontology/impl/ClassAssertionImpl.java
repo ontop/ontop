@@ -24,6 +24,15 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
 
+/**
+ * Represents ClassAssertion from OWL 2 QL Specification
+ * 
+ * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public class ClassAssertionImpl implements ClassAssertion {
 
 	private static final long serialVersionUID = 5689712345023046811L;

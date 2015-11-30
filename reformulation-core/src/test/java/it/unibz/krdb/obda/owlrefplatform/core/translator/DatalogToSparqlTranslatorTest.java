@@ -630,14 +630,14 @@ public class DatalogToSparqlTranslatorTest {
 		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
 		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
 		
-		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2);
-		
 		OBDAQueryModifiers modifiers = new OBDAQueryModifiers();
 		modifiers.setDistinct();
 		modifiers.setLimit(100);
 		modifiers.setOffset(20);
 		modifiers.addOrderCondition(a, OrderCondition.ORDER_DESCENDING);
-		datalog.setQueryModifiers(modifiers);
+
+		DatalogProgram datalog = createDatalogProgram(modifiers, query, rule1, rule2);
+		
 		
 		// Translate the datalog and display the returned SPARQL string
 		translateAndDisplayOutput("Query Modifiers", datalog);
@@ -655,11 +655,16 @@ public class DatalogToSparqlTranslatorTest {
 		return dataFactory.getFunction(rulePredicate, vars);
 	}
 
+	private DatalogProgram createDatalogProgram(OBDAQueryModifiers modifiers, CQIE... queryAndRules) {
+		List<CQIE> program = Arrays.asList(queryAndRules);
+		return dataFactory.getDatalogProgram(modifiers, program);
+	}
+
 	private DatalogProgram createDatalogProgram(CQIE... queryAndRules) {
 		List<CQIE> program = Arrays.asList(queryAndRules);
 		return dataFactory.getDatalogProgram(program);
 	}
-
+	
 	private void translateAndDisplayOutput(String title, DatalogProgram datalog) {
 		final String sparqlOutput = datalogTranslator.translate(datalog);
 		StringBuilder sb = new StringBuilder();

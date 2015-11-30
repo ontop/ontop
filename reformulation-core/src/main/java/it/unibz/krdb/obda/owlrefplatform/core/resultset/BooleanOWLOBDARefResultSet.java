@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -56,7 +55,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 		this.st = st;
 		try {
 			isTrue = set.next();
-			valueConstant = this.fac.getConstantLiteral(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+			valueConstant = fac.getBooleanConstant(isTrue);
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getMessage());
 		}

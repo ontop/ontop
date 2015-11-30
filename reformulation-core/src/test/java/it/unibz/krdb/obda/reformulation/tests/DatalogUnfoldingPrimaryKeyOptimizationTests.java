@@ -20,24 +20,31 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
+
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Predicate;
+
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
 
-import java.sql.Types;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import it.unibz.krdb.sql.UniqueConstraint;
 
 import junit.framework.TestCase;
+
+
+import java.sql.Types;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 
 public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
@@ -47,23 +54,25 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DatalogProgram unfoldingProgram;
 
+	
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata();
-		TableDefinition table = new TableDefinition("TABLE");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
-		metadata.add(table);
+		metadata = DBMetadataExtractor.createDummyMetadata();
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		
+		DatabaseRelationDefinition table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, false);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col1"))));
 		
-		table = new TableDefinition("TABLE2");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
-		metadata.add(table);
+		table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, false);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col1"))));
 
 		unfoldingProgram = fac.getDatalogProgram();
 
@@ -129,8 +138,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
-		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		DatalogUnfolder unfolder = QuestUnfolder.createDatalogUnfolder(unfoldingProgram.getRules(), metadata);
 
 		LinkedList<Term> headterms = new LinkedList<Term>();
 		headterms.add(fac.getVariable("m"));
@@ -145,7 +153,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("id"), fac.getVariable("m"), fac.getVariable("p")));
 		CQIE query = fac.getCQIE(head, body);
 
-		DatalogProgram input = fac.getDatalogProgram(query);
+		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
 		DatalogProgram output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 
@@ -174,7 +182,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s2"), fac.getVariable("o")));
 		query = fac.getCQIE(head, body);
 
-		input = fac.getDatalogProgram(query);
+		input = fac.getDatalogProgram(Collections.singletonList(query));
 		output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 

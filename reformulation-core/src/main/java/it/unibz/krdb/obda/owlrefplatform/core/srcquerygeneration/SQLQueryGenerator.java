@@ -22,11 +22,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A general interface which should be use to implement new source query
@@ -49,5 +47,5 @@ public interface SQLQueryGenerator extends Serializable {
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
 
-	void setUriMap(SemanticIndexURIMap uriRefIds);
+	public boolean hasDistinctResultSet() ;
 }

@@ -20,11 +20,9 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 
-public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
+public class SQLQueryImpl implements OBDASQLQuery {
 
 	private static final long serialVersionUID = -1910293716786132196L;
 	
@@ -55,20 +53,5 @@ public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 	@Override
 	public int hashCode() {
 		return this.toString().hashCode();
-	}
-
-	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return new OBDAQueryModifiers();
-	}
-
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		// NO-OP
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return false;
 	}
 }

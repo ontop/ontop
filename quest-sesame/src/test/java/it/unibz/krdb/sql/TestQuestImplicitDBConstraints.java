@@ -5,22 +5,15 @@ package it.unibz.krdb.sql;
 
 import static org.junit.Assert.*;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 
-import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
-import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.*;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -28,8 +21,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -37,10 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Properties;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -71,7 +60,6 @@ public class TestQuestImplicitDBConstraints {
 
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
-
 
 	
 	public void start_reasoner(String owlfile, String obdafile, String sqlfile) throws Exception {
@@ -144,7 +132,7 @@ public class TestQuestImplicitDBConstraints {
 	@Test
 	public void testNoSelfJoinElim() throws Exception {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
-		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -163,7 +151,7 @@ public class TestQuestImplicitDBConstraints {
 	@Test
 	public void testForeignKeysNoSelfJoinElim() throws Exception {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
-		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -184,9 +172,9 @@ public class TestQuestImplicitDBConstraints {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		
 		// Parsing user constraints
-		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
 		factory.setImplicitDBConstraints(userConstraints);
-		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -206,9 +194,9 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
 		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create);
 		// Parsing user constraints
-		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
 		factory.setImplicitDBConstraints(userConstraints);
-		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -233,7 +221,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysTablesNOUc() throws Exception {
 		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create);
 		
-		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -243,7 +231,6 @@ public class TestQuestImplicitDBConstraints {
 		
 		
 		String sql = st.getUnfolding(query);
-		System.out.println(sql);
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
@@ -259,9 +246,9 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysTablesWithUC() throws Exception {
 		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create);
 		// Parsing user constraints
-		ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(fk_keyfile);
+		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(fk_keyfile));
 		factory.setImplicitDBConstraints(userConstraints);
-		this.reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -271,7 +258,6 @@ public class TestQuestImplicitDBConstraints {
 		
 		
 		String sql = st.getUnfolding(query);
-		System.out.println(sql);
 		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
 		

@@ -26,13 +26,13 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -46,15 +46,14 @@ public class ThetaGenerationTest extends TestCase {
 	OBDADataFactory termFactory =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
-	//IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private Vector<SingletonSubstitution> getMGUAsVector(Substitution mgu) {
 		Vector<SingletonSubstitution> computedmgu = new Vector<>();
 		if (mgu == null) {
 			computedmgu = null;
 		} else {
-			for (VariableImpl var : mgu.keySet()) {
-				computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
+			for (Map.Entry<Variable,Term> m : mgu.getMap().entrySet()) {
+				computedmgu.add(new SingletonSubstitution(m.getKey(), m.getValue()));
 			}
 		}
 		return computedmgu;
@@ -657,14 +656,10 @@ public class ThetaGenerationTest extends TestCase {
 		Term t2 = termFactory.getVariable("y");
 
 		Predicate pred1 = predFactory.getClassPredicate("A");
-		List<Term> terms1 = new Vector<Term>();
-		terms1.add(t2);
-		Function atom1 = tfac.getFunction(pred1, terms1);
+		Function atom1 = tfac.getFunction(pred1, t2);
 
 		Predicate pred2 = predFactory.getClassPredicate("A");
-		List<Term> terms2 = new Vector<Term>();
-		terms2.add(ot);
-		Function atom2 = tfac.getFunction(pred2, terms2);
+		Function atom2 = tfac.getFunction(pred2, ot);
 
 		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
@@ -899,11 +894,12 @@ public class ThetaGenerationTest extends TestCase {
 	}
 
 	//A(#),A(#)
-	public void test_32(){
+	// ROMAN: removed the test which does not make any sense without anonymous variables
+	public void non_test_32(){
 
 		try {
-			Term t1 = termFactory.getVariableNondistinguished();
-			Term t2 = termFactory.getVariableNondistinguished();
+			Term t1 = termFactory.getVariable("w1");
+			Term t2 = termFactory.getVariable("w2");
 
 			Predicate pred1 = predFactory.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -924,12 +920,13 @@ public class ThetaGenerationTest extends TestCase {
 
 	}
 
-	//A(x),A(#)
-	public void test_33(){
+	//A(x),A(#) 
+	// ROMAN: removed the test which does not make any sense without anonymous variables
+	public void non_test_33(){
 
 		try {
 			Term t1 = termFactory.getVariable("x");
-			Term t2 = termFactory.getVariableNondistinguished();
+			Term t2 = termFactory.getVariable("w1");
 
 			Predicate pred1 = predFactory.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();

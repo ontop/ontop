@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.protege4.gui.component;
 
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.DatatypeFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;

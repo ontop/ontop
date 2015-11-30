@@ -1,27 +1,22 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
 
 //import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
+
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class InteractiveExample {
 
@@ -32,8 +27,8 @@ public class InteractiveExample {
 	 * Please use the pre-bundled H2 server from the above link
 	 * 
 	 */
-	final String owlfile = "src/main/resources/example/npd-v2-ql_a.owl";
-	final String obdafile = "src/main/resources/example/npd-v2-ql_a.obda";
+	final String owlfile = "src/main/resources/example/npd_no_spatial_db2.owl";
+	final String obdafile = "src/main/resources/example/npd_no_spatial_db2.obda";
 	
 	// Exclude from T-Mappings
 	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";

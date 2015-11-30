@@ -23,4 +23,10 @@ public class CQContainmentCheckSyntactic implements CQContainmentCheck {
 		return true;
 	}
 
+	
+	@Override
+	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
+		throw new RuntimeException("Unimplemented method");
+	}
+
 }

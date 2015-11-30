@@ -20,6 +20,7 @@ package sesameWrapper;
  * #L%
  */
 
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
@@ -52,24 +53,24 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexManager {
 
-	Connection conn = null;
+	private final Connection conn;
 
-	private TBoxReasoner reasoner;
+	private final TBoxReasoner reasoner;
+	private final ImmutableOntologyVocabulary voc;
 
-	private RDBMSSIRepositoryManager dataRepository = null;
+	private final RDBMSSIRepositoryManager dataRepository;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
+		voc = ontologyClosure.getVocabulary();
 
-		TBoxReasoner ontoReasoner = new TBoxReasonerImpl(ontologyClosure);
-		// generate a new TBox with a simpler vocabulary
-		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
+		reasoner = TBoxReasonerImpl.create(ontologyClosure, true);
 			
-		dataRepository = new RDBMSSIRepositoryManager();
-		dataRepository.setTBox(reasoner);
+		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
+		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");
 	}
@@ -82,11 +83,19 @@ public class SemanticIndexManager {
 
 	public void setupRepository(boolean drop) throws SQLException {
 
-		dataRepository.createDBSchema(conn, drop);
-		dataRepository.insertMetadata(conn);
+		if (drop) {
+			log.debug("Droping existing tables");
+			try {
+				dataRepository.dropDBSchema(conn);
+			}
+			catch (SQLException e) {
+				log.debug(e.getMessage(), e);
+			}
+		}
+		
+		dataRepository.createDBSchemaAndInsertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
-
 	}
 	
 	public void dropRepository() throws SQLException {
@@ -100,7 +109,7 @@ public class SemanticIndexManager {
 
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology));
+		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology), voc);
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
 		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);
 
@@ -148,8 +157,6 @@ public class SemanticIndexManager {
 
 		Thread t2 = new Thread() {
 
-			int result;
-
 			@Override
 			public void run() {
 				try {
@@ -158,7 +165,7 @@ public class SemanticIndexManager {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				log.info("Loaded {} items into the DB.", result);
+				log.info("Loaded {} items into the DB.", val[0]);
 
 			}
 

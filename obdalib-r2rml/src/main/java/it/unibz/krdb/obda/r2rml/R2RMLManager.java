@@ -25,29 +25,14 @@ package it.unibz.krdb.obda.r2rml;
  * Class responsible of parsing R2RML mappings from file or from an RDF Model
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import eu.optique.api.mapping.Join;
+import eu.optique.api.mapping.PredicateObjectMap;
+import eu.optique.api.mapping.RefObjectMap;
+import eu.optique.api.mapping.TriplesMap;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -56,11 +41,11 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
-import eu.optique.api.mapping.Join;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.RefObjectMap;
-import eu.optique.api.mapping.TriplesMap;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
 public class R2RMLManager {
 	
@@ -72,7 +57,7 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file) {
+	public R2RMLManager(String file) throws Exception {
 		this(new File(file));
 	}
 	
@@ -80,8 +65,8 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file) {
-		try {
+	public R2RMLManager(File file) throws Exception {
+
 			myModel = new LinkedHashModel();			
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
@@ -90,9 +75,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			r2rmlParser = new R2RMLParser();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 	
 	/**
@@ -159,9 +142,9 @@ public class R2RMLManager {
 	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm);
 		List<Function> body = getMappingTripleAtoms(tm);
-		Function head = getHeadAtom(body);
-		CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), sourceQuery, targetQuery);
+		//Function head = getHeadAtom(body);
+		//CQIE targetQuery = fac.getCQIE(head, body);
+		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), fac.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -211,15 +194,15 @@ public class R2RMLManager {
 				body.add(bodyAtom);
 			}
 
-			Function head = getHeadAtom(body);
-			CQIE targetQuery = fac.getCQIE(head, body);
+			//Function head = getHeadAtom(body);
+			//CQIE targetQuery = fac.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
 				throw new Exception("Could not create source query for join in "+tm.toString());
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), sourceQuery, targetQuery);
+			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), fac.getSQLQuery(sourceQuery), body);
 			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}
@@ -233,17 +216,18 @@ public class R2RMLManager {
 	 * @param body
 	 * @return
 	 */
+/*	
 	private Function getHeadAtom(List<Function> body) {
-		Set<Variable> vars = new HashSet<Variable>();
+		Set<Variable> vars = new HashSet<>();
 		for (Function bodyAtom : body) {
-			 vars.addAll(bodyAtom.getReferencedVariables());
+			TermUtils.addReferencedVariablesTo(vars, bodyAtom);
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
 		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
-	
+*/	
 	/**
 	 * Get OBDA mapping body terms from R2RML TriplesMap
 	 * @param tm
@@ -274,16 +258,14 @@ public class R2RMLManager {
 			//get object atom
 			Term objectAtom = r2rmlParser.getObjectAtom(pom);
 			
-		
-			
 			if (objectAtom == null) {
 				// skip, object is a join
 				continue;
 			}
 			
 			// construct the atom, add it to the body
-			List<Term> terms = new ArrayList<Term>();
-			terms.add(subjectAtom);
+			//List<Term> terms = new ArrayList<Term>();
+			//terms.add(subjectAtom);
 			
 			
 			for (Predicate bodyPred : bodyPredicates) {
@@ -293,39 +275,40 @@ public class R2RMLManager {
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
 					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
 					// if object is a predicate
-					if (objectAtom.getReferencedVariables().isEmpty()) { 	
+					Set<Variable> vars = new HashSet<>();
+					TermUtils.addReferencedVariablesTo(vars, objectAtom);
+					if (vars.isEmpty()) { 	
 						Function funcObjectAtom = (Function) objectAtom;
 						Term term0 = funcObjectAtom.getTerm(0);
-						if(term0 instanceof Function){
+						if (term0 instanceof Function) {
 							Function constPred = (Function) term0;
 							Predicate newpred = constPred.getFunctionSymbol();
-							Function newAtom = fac.getFunction(newpred, subjectAtom);
-							body.add(newAtom);
+							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(bodyAtom);
 						}
 						else if (term0 instanceof ValueConstant) {							
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = fac.getPredicate(predName, 1);
-							Function newAtom = fac.getFunction(newpred, subjectAtom);
-							body.add(newAtom);
+							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(bodyAtom);
 						} 
-						else {
+						else 
 							throw new IllegalStateException();
-						}
 					}
-					else{ // if object is a variable
+					else { // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
-						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-						terms.add(rdftype);
-						terms.add(objectAtom);
-						body.add(fac.getFunction(newpred, terms));
+						//terms.add(rdftype);
+						//terms.add(objectAtom);
+						Function bodyAtom = fac.getTripleAtom(subjectAtom, rdftype, objectAtom);
+						body.add(bodyAtom); // fac.getFunction(newpred, terms)
 					}
 				} 
 				else {
 					// create predicate(subject, object) and add it to the body
-					terms.add(objectAtom);
-					Function bodyAtom = fac.getFunction(bodyPred, terms);
+					Function bodyAtom = fac.getFunction(bodyPred, subjectAtom, objectAtom);
 					body.add(bodyAtom);
 				}
 			}
@@ -333,10 +316,11 @@ public class R2RMLManager {
 			//treat predicates that contain a variable (column or template declarations)
 			for (Function predFunction : bodyURIPredicates) {
 				//create triple(subj, predURIFunction, objAtom) terms
-				Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-				terms.add(predFunction);
-				terms.add(objectAtom);
-				body.add(fac.getFunction(newpred, terms));
+				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+				//terms.add(predFunction);
+				//terms.add(objectAtom);
+				Function bodyAtom = fac.getTripleAtom(subjectAtom, predFunction, objectAtom);
+				body.add(bodyAtom);   // objectAtom
 			}
 		}
 		return body;

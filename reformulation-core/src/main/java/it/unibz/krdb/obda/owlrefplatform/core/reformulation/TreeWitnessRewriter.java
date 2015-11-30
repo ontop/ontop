@@ -26,11 +26,15 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
@@ -60,15 +64,17 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TBoxReasoner reasoner;
+	private ImmutableOntologyVocabulary voc;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
 	
 	private Collection<TreeWitnessGenerator> generators;
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
+	public void setTBox(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
+		this.voc = voc;
 		
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
 		
@@ -96,6 +102,13 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		return fac.getFunction(predicate, arguments);
 	}
 	
+	private int freshVarIndex = 0;
+	
+	private Variable getFreshVariable() {
+		freshVarIndex++;
+		return fac.getVariable("twr" + freshVarIndex); 
+	}
+	
 	/*
 	 * returns atoms E of a given collection of tree witness generators; 
 	 * the `free' variable of the generators is replaced by the term r0;
@@ -103,8 +116,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
 		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
-		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
-		Term x = fac.getVariableNondistinguished(); 
+		List<Function> genAtoms = new ArrayList<>(concepts.size());
 		
 		for (ClassExpression con : concepts) {
 			log.debug("  BASIC CONCEPT: {}", con);
@@ -112,9 +124,15 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			if (con instanceof OClass) {
 				atom = fac.getFunction(((OClass)con).getPredicate(), r0);
 			}
-			else {
+			else if (con instanceof ObjectSomeValuesFrom) {
 				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
-				atom = (!some.isInverse()) ?  fac.getFunction(some.getPredicate(), r0, x) : fac.getFunction(some.getPredicate(), x, r0);  						 
+				atom = (!some.isInverse()) ?  
+						fac.getFunction(some.getPredicate(), r0, getFreshVariable()) : 
+							fac.getFunction(some.getPredicate(), getFreshVariable(), r0);  						 
+			}
+			else {
+				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
+				atom = fac.getFunction(some.getPredicate(), r0, getFreshVariable());
 			}
 			genAtoms.add(atom);
 		}
@@ -129,15 +147,16 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	
 	private List<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  DatalogProgram edgeDP) {
 		
-		List<CQIE> outputRules = new LinkedList<CQIE>();	
+		List<CQIE> outputRules = new LinkedList<>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, voc, generators);
 
 		if (cc.hasNoFreeTerms()) {  
-			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {
-				outputRules.add(fac.getCQIE(headAtom, a)); 
-			}
+			if (!cc.isDegenerate() || cc.getLoop() != null) 
+				for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
+					outputRules.add(fac.getCQIE(headAtom, a)); 
+				}
 		}
 
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
@@ -265,7 +284,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 		double startime = System.currentTimeMillis();
 		
-		List<CQIE> outputRules = new LinkedList<CQIE>();
+		List<CQIE> outputRules = new LinkedList<>();
 		DatalogProgram ccDP = null;
 		DatalogProgram edgeDP = fac.getDatalogProgram();
 
@@ -315,8 +334,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		if (outputRules.size() > 1) 
 			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
-		DatalogProgram output = fac.getDatalogProgram(outputRules);
-		QueryUtils.copyQueryModifiers(dp, output);
+		DatalogProgram output = fac.getDatalogProgram(dp.getQueryModifiers(), outputRules);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

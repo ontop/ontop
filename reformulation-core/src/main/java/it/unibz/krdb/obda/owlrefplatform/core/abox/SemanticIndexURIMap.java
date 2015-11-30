@@ -5,23 +5,17 @@ import java.util.HashMap;
 public class SemanticIndexURIMap {
 	
 	// Semantic Index URI reference structures
-	private final HashMap<String, Integer> uriIds = new HashMap<String, Integer> (100000);
-	private final HashMap <Integer, String> uriMap2 = new HashMap<Integer, String> (100000);
+	private final HashMap<String, Integer> uriIds = new HashMap<> (100000);
+	private final HashMap <Integer, String> uriMap2 = new HashMap<> (100000);
 	
-	private int maxURIId = -1;
 	
-	public int idOfURI(String uri) {
-		Integer existingID = uriIds.get(uri);
-		if (existingID == null)
-		{
-			existingID = maxURIId + 1;
-			
-			uriIds.put(uri, existingID);
-			uriMap2.put(existingID, uri);
-			
-			maxURIId += 1;		
-		}
-		return existingID;
+	/**
+	 * set(uri, id) is used only by RDBMSSIRepository
+	 * 
+	 */
+	void set(String uri, int id) {
+		uriIds.put(uri, id);
+		uriMap2.put(id, uri);
 	}
 
 	/***

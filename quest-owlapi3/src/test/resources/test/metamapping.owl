@@ -73,8 +73,9 @@
 
     <!-- http://it.unibz.krdb/obda/test/simple#U -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U"/>
-    
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U">
+    <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
 
 
     <!-- 

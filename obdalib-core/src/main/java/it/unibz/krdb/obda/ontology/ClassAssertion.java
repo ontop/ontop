@@ -22,17 +22,13 @@ package it.unibz.krdb.obda.ontology;
 
 import it.unibz.krdb.obda.model.ObjectConstant;
 
-/***
- * Represents ClassAssertion in the OWL 2 QL specification
+/**
+ * Represents ClassAssertion from OWL 2 QL Specification
  * 
- * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
+ * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
  * 
- * 
- * A data assertion for a class, 
- *    e.g., Person(mariano), where mariano is an object identifier.
- * 
- * These also correspond to rdf:type assertions, 
- *    e.g., :mariano rdf:type :Person.
+ * @author Roman Kontchakov
+ *
  */
 
 public interface ClassAssertion extends Assertion {

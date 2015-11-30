@@ -11,8 +11,10 @@
     ( 
       :date :date-bgp
       :date-str :date-str-bgp
-      :timestamp 
+      :timestamp
 	  :timestamp-str
+	  :timestamptz
+
     ) .
 
 ## >>> This test should fail!
@@ -81,3 +83,16 @@
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .
+
+:timestamptz rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <timestamptz.rq> ] ;
+    mf:result <timestamp_tz.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> .
+
+
+

@@ -79,12 +79,12 @@ class TurtleWriter {
 		subjectToPredicates.put(subject, predicateList);
 
 		// Predicate to Objects map
-		ArrayList<String> objectList = predicateToObjects.get(predicate);
+		ArrayList<String> objectList = predicateToObjects.get(predicate + "_" + subject); // predicate that appears in 2 different subjects should not have all objects assigned  to both subjects
 		if (objectList == null) {
 			objectList = new ArrayList<String>();
 		}
 		objectList.add(object);
-		predicateToObjects.put(predicate, objectList);
+		predicateToObjects.put(predicate + "_" + subject, objectList);
 	}
 
 	// Utility method to insert the predicate
@@ -118,7 +118,7 @@ class TurtleWriter {
 				semiColonSeparator = true;
 
 				boolean commaSeparator = false;
-				for (String object : predicateToObjects.get(predicate)) {
+				for (String object : predicateToObjects.get(predicate+ "_" + subject)) {
 					if (commaSeparator) {
 						sb.append(" , ");
 					}

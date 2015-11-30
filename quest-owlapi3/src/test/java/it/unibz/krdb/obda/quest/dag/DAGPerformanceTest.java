@@ -133,13 +133,12 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
-		Ontology o = t.translate(ont);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasoner reasoner= new TBoxReasonerImpl(o);
+		TBoxReasoner reasoner= TBoxReasonerImpl.create(o);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -224,15 +223,14 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
-		Ontology o = t.translate(ont);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasoner  reasoner = new TBoxReasonerImpl(o);
+		TBoxReasoner  reasoner = TBoxReasonerImpl.create(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -321,15 +319,14 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
-		Ontology o = t.translate(ont);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasoner  reasoner= new TBoxReasonerImpl(o);
+		TBoxReasoner  reasoner= TBoxReasonerImpl.create(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 

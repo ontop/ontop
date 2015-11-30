@@ -33,42 +33,42 @@ public class SemanticIndexRange implements Serializable {
 
 	private static final long serialVersionUID = 8420832314126437803L;
 	
-	private List<Interval> intervals = new LinkedList<Interval>();
+	private List<Interval> intervals = new LinkedList<>();
+	private int index;
 
-    public SemanticIndexRange(int start, int end) {
-        intervals.add(new Interval(start, end));
-    }
+	
+	/**
+	 * creates a Semantic Index range with the specified index 
+	 * and a singleton interval [index, index]
+	 * 
+	 * @param index
+	 */
+	public SemanticIndexRange(int index) {
+		this.index = index;
+		intervals.add(new Interval(index, index));
+	}
+	
+		
+    public void addRange(List<Interval> other) {
+        intervals.addAll(other);
 
-    public SemanticIndexRange addRange(SemanticIndexRange other) {
-
-        if (this.intervals == other.intervals)
-            return this;
-
-        for (Interval it : other.intervals) {
-            this.intervals.add(it);
-        }
-        merge();
-        return this;
-    }
-
-    /**
-     * Sort in ascending order and collapse overlapping intervals
-     */
-    private void merge() {
+        /**
+         * Sort in ascending order and collapse overlapping intervals
+         */
 
         Collections.sort(intervals);
-        List<Interval> new_intervals = new LinkedList<Interval>();
+        List<Interval> new_intervals = new LinkedList<>();
 
-        int min = intervals.get(0).start;
-        int max = intervals.get(0).end;
+        int min = intervals.get(0).getStart();
+        int max = intervals.get(0).getEnd();
 
         for (int i = 1; i < intervals.size(); ++i) {
             Interval item = intervals.get(i);
-            if (item.end > max + 1 && item.start > max + 1) {
+            if (item.getEnd() > max + 1 && item.getStart() > max + 1) {
                 new_intervals.add(new Interval(min, max));
-                min = item.start;
+                min = item.getStart();
             }
-            max = (max > item.end) ? max : item.end;
+            max = (max > item.getEnd()) ? max : item.getEnd();
         }
         new_intervals.add(new Interval(min, max));
         intervals = new_intervals;
@@ -76,16 +76,11 @@ public class SemanticIndexRange implements Serializable {
 
     @Override
     public boolean equals(Object other) {
-
-        if (other == null)
-            return false;
-        if (other == this)
-            return true;
-        if (this.getClass() != other.getClass())
-            return false;
-        SemanticIndexRange otherRange = (SemanticIndexRange) other;
-
-        return this.intervals.equals(otherRange.intervals);
+        if (other instanceof SemanticIndexRange) {
+        	SemanticIndexRange otherRange = (SemanticIndexRange) other;
+        	return this.intervals.equals(otherRange.intervals);
+        }
+        return false;
     }
 
     @Override
@@ -96,30 +91,31 @@ public class SemanticIndexRange implements Serializable {
     public List<Interval> getIntervals() {
         return intervals;
     }
+    
+    public int getIndex() {
+    	return index;
+    }
 
     public boolean contained(SemanticIndexRange other) {
         boolean[] otherContained = new boolean[other.intervals.size()];
-        for (int i = 0; i < otherContained.length; ++i) {
+        for (int i = 0; i < otherContained.length; ++i) 
             otherContained[i] = false;
-        }
 
-        for (Interval it1 : this.intervals) {
-
+        for (Interval it1 : intervals) {
             for (int i = 0; i < other.intervals.size(); ++i) {
                 Interval it2 = other.intervals.get(i);
-                if ((it1.start <= it2.start) && (it1.end >= it2.end)) {
+                if ((it1.getStart() <= it2.getStart()) && (it1.getEnd() >= it2.getEnd())) {
                     otherContained[i] = true;
                 }
             }
-
         }
 
-        for (boolean it : otherContained) {
-            if (!it) {
+        for (boolean it : otherContained) 
+            if (!it) 
                 return false;
-            }
-        }
+      
         return true;
     }
 
+	
 }

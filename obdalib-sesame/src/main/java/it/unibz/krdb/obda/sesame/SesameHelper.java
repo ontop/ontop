@@ -35,11 +35,11 @@ public class SesameHelper {
 			return value;
 		}
 		else if (literal.getType() == COL_TYPE.OBJECT) {
-			Literal value = fact.createLiteral(literal.getValue(), dtfac.getDataTypeURI(COL_TYPE.STRING));
+			Literal value = fact.createLiteral(literal.getValue(), dtfac.getDatatypeURI(COL_TYPE.STRING));
 			return value;
 		}	
 		else {
-			URI datatype = dtfac.getDataTypeURI(literal.getType());
+			URI datatype = dtfac.getDatatypeURI(literal.getType());
 			if (datatype == null)
 				throw new RuntimeException("Found unknown TYPE for constant: " + literal + " with COL_TYPE="+ literal.getType());
 			

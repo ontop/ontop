@@ -21,15 +21,61 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  */
 
 import java.sql.Types;
+import java.util.regex.Pattern;
 
 public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+
+    @Override
+    public String MD5(String str){
+    	return String.format("MD5(%s)", str);
+    }
+    
+    @Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s FROM %s FOR %s)", str, start, end);
+	} 
+    
+    @Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
+		}
+    
+    @Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";	
+	} 
+    
+    @Override
+	public String strContainsOperator(){
+		return "POSITION(%2$s IN %1$s) > 0";		
+	}
+    
+    @Override
+	public String strAfter(String str, String after) {
+//SIGN return a double precision, we need to cast to numeric to avoid conversion exception while using substring
+		return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
+				str, after, str , after , after, str, str);
+
+	}
+
+    @Override
+    public String dateTZ(String str){
+    	return strConcat(new String[]{String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'",String.format("EXTRACT(TIMEZONE_MINUTE FROM %s)", str) });
+    }
+
+	@Override
+	public String dateNow(){
+		return "NOW()";
+	}
+    
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
+		if (limit < 0 ) {
 			if (offset < 0) {
 				// If both limit and offset is not specified.
-				return "LIMIT 0";
+				return "";
 			} else {
 				// if the limit is not specified
 				return String.format("LIMIT ALL\nOFFSET %d", offset);
@@ -43,7 +89,22 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
+	@Override //trick to support uuid
+	public String strUuid() {
+		return "md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'|| md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String rand() {
+		return "RANDOM()";
+	}
+
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
@@ -61,9 +122,12 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 */
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//An ARE can begin with embedded options: a sequence (?n)  specifies options affecting the rest of the RE. 
 		//n is newline-sensitive matching
 		String flags = "";
@@ -76,6 +140,19 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		return columnname + " ~" + ((caseinSensitive)? "* " : " ") + "'"+ ((multiLine && dotAllMode)? "(?n)" : flags) + pattern + "'";
 	}
 
+    @Override
+    public String strReplace(String str, String oldstr, String newstr) {
+
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
+
 	@Override
 	public String getDummyTable() {
 		return "SELECT 1";
@@ -85,6 +162,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";
 	}
+
 	/***
 	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
 	 * The method will strip any fractional seconds found in the date time
@@ -93,9 +171,10 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param v
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');

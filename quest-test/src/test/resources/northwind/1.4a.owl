@@ -1,0 +1,1170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+<rdf:Description rdf:about="http://www.w3.org/2002/07/owl#Ontology">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#geoLocation">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#domain_class">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#range_class">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#data_values">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#max_value">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#min_value">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#temporal">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1901"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CustomerDemographics</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/CustomerTypeID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CustomerDemographics.CustomerTypeID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CustomerDemographics.CustomerTypeID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/CustomerDesc">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CustomerDemographics.CustomerDesc</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CustomerDemographics.CustomerDesc</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers/Phone">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Phone"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.Phone</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.Phone</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers/ContactTitle">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/ContactTitle"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.ContactTitle</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.ContactTitle</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers/ContactName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/ContactName"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.ContactName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.ContactName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers/CompanyName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/CompanyName"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.CompanyName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.CompanyName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers/Fax">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Fax"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.Fax</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.Fax</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1902"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1903"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Customers/CustomerID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.CustomerID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers.CustomerID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/ProductID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.ProductID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.ProductID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/QuantityPerUnit">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.QuantityPerUnit</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.QuantityPerUnit</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/UnitsInStock">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.UnitsInStock</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.UnitsInStock</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/Discontinued">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.Discontinued</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.Discontinued</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/UnitsOnOrder">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.UnitsOnOrder</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.UnitsOnOrder</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/UnitPrice">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/decimal/UnitPrice"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.UnitPrice</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.UnitPrice</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/ReorderLevel">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.ReorderLevel</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.ReorderLevel</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/ProductName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.ProductName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.ProductName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products/SupplierID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.SupplierID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products.SupplierID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Products">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1921"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1922"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1923"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1924"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/ProductID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.ProductID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.ProductID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/OrderID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.OrderID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.OrderID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Quantity">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.Quantity</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.Quantity</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/UnitPrice">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/decimal/UnitPrice"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.UnitPrice</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.UnitPrice</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Discount">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.Discount</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails.Discount</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1909"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1910"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1911"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1912"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1913"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OrderDetails</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/EmployeeID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.EmployeeID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.EmployeeID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/FirstName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.FirstName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.FirstName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/PhotoPath">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.PhotoPath</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.PhotoPath</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/HireDate">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.HireDate</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.HireDate</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/ReportsTo">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.ReportsTo</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.ReportsTo</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/Title">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Title</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Title</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/Photo">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Photo</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Photo</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/HomePhone">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.HomePhone</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.HomePhone</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/Extension">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Extension</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Extension</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1904"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1905"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1906"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1907"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1908"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/TitleOfCourtesy">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.TitleOfCourtesy</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.TitleOfCourtesy</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/Salary">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Salary</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Salary</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/BirthDate">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.BirthDate</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.BirthDate</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/LastName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.LastName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.LastName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Employees/Notes">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Notes</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Notes</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/OrderDate">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.OrderDate</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.OrderDate</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/OrderID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.OrderID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.OrderID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/Freight">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.Freight</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.Freight</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/ShippedDate">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.ShippedDate</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.ShippedDate</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipVia">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.ShipVia</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.ShipVia</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/CustomerID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.CustomerID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.CustomerID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/EmployeeID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.EmployeeID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.EmployeeID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/RequiredDate">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.RequiredDate</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.RequiredDate</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.ShipName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders.ShipName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Orders">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1914"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1915"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1916"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1917"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1918"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1919"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1920"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Orders</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Shippers">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1927"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1928"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Shippers/Phone">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Phone"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers.Phone</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers.Phone</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Shippers/CompanyName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/CompanyName"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers.CompanyName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers.CompanyName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Shippers/ShipperID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers.ShipperID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shippers.ShipperID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Territories/TerritoryDescription">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories.TerritoryDescription</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories.TerritoryDescription</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Territories">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1931"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1932"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1933"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Territories/TerritoryID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories.TerritoryID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories.TerritoryID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Territories/RegionID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories.RegionID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories.RegionID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/CustomerCustomerDemo/Customers_has_CustomerDemographics">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<inverseOf xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerCustomerDemo/CustomerDemographics_has_Customers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">From many to many table: CustomerCustomerDemo</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Customers_has_CustomerDemographics</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/CustomerCustomerDemo/CustomerDemographics_has_Customers">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">From many to many table: CustomerCustomerDemo</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CustomerDemographics_has_Customers</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/EmployeeTerritories/Territories_has_Employees">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">From many to many table: EmployeeTerritories</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Territories_has_Employees</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/EmployeeTerritories/Employees_has_Territories">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<inverseOf xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/EmployeeTerritories/Territories_has_Employees"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">From many to many table: EmployeeTerritories</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees_has_Territories</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Region/RegionDescription">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Region.RegionDescription</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Region.RegionDescription</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Region/RegionID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Region.RegionID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Region.RegionID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Region">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1925"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1926"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Region</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/HomePage">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.HomePage</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.HomePage</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/ContactTitle">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/ContactTitle"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.ContactTitle</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.ContactTitle</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Fax">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Fax"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.Fax</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.Fax</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/SupplierID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.SupplierID</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.SupplierID</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/CompanyName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/CompanyName"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.CompanyName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.CompanyName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1929"/>
+	<subClassOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:nodeID="node19berbm9lx1930"/>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/ContactName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/ContactName"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.ContactName</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.ContactName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Phone">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<subPropertyOf xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Phone"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.Phone</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Suppliers.Phone</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Address">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'Address' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Address</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/City">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'City' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">City</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/CompanyName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'CompanyName' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CompanyName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/ContactName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'ContactName' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ContactName</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/ContactTitle">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'ContactTitle' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ContactTitle</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Country">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'Country' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Country</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Fax">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'Fax' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fax</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Phone">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'Phone' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Phone</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/PostalCode">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'PostalCode' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PostalCode</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Region">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'Region' and range datatype 'string'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Region</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/northwind/super_dProp/decimal/UnitPrice">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Super property grouping properties with name 'UnitPrice' and range datatype 'decimal'</comment>
+	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UnitPrice</label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://eu.optique.ontology/annotations#hidden">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AnnotationProperty"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Ontology"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company.Location">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Company"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Orders.ShipToLocation">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Employees.Location">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/dmo/annotation/Location"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Products.CategoryDescription">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Products.CategoryID">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Products.CategoryName">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.optique-project.eu/resource/northwind/dmo/annotation/Products.CategoryPicture">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
+	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1901">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/CustomerTypeID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1902">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers/CompanyName"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1903">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers/CustomerID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1904">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees/ReportsTo"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1905">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees/LastName"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1906">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees/FirstName"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1907">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees/EmployeeID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1908">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees/Notes"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1909">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/ProductID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1910">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Discount"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1911">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/OrderID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1912">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Quantity"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1913">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/UnitPrice"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1914">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/RequiredDate"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1915">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/EmployeeID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1916">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/OrderDate"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1917">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/ShippedDate"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1918">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/CustomerID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Customers"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1919">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipVia"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1920">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Orders/OrderID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1921">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products/SupplierID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1922">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products/Discontinued"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1923">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products/ProductID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1924">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Products/ProductName"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1925">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region/RegionID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1926">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region/RegionDescription"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1927">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers/ShipperID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1928">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Shippers/CompanyName"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1929">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/CompanyName"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1930">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Suppliers/SupplierID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1931">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories/TerritoryDescription"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1932">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories/RegionID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Region"/>
+</rdf:Description>
+
+<rdf:Description rdf:nodeID="node19berbm9lx1933">
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+	<onProperty xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Territories/TerritoryID"/>
+	<someValuesFrom xmlns="http://www.w3.org/2002/07/owl#" rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+</rdf:Description>
+
+</rdf:RDF>

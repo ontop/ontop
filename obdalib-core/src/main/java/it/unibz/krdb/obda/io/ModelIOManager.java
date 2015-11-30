@@ -26,37 +26,26 @@ import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.exception.UnsupportedTagException;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.parser.TargetQueryParser;
-import it.unibz.krdb.obda.parser.TargetQueryParserException;
-import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
-import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
-import it.unibz.krdb.obda.parser.UnparsableTargetQueryException;
+import it.unibz.krdb.obda.parser.*;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class manages saving and loading an OBDA file.
@@ -102,7 +91,6 @@ public class ModelIOManager {
 
         // Register available parsers for target query
         register(new TurtleOBDASyntaxParser(prefixManager));
-        register(new TurtleSyntaxParser(prefixManager));
     }
     
     private void register(TargetQueryParser parser) {
@@ -163,7 +151,7 @@ public class ModelIOManager {
     /**
      * The load/read operation.
      * 
-     * @param fileLocation
+     * @param file
      *          The target file object from which the model is loaded.
      * @throws IOException
      * @throws InvalidPredicateDeclarationException
@@ -282,10 +270,10 @@ public class ModelIOManager {
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
             
-            OBDAQuery targetQuery = mapping.getTargetQuery();
+            List<Function> targetQuery = mapping.getTargetQuery();
             writer.write(Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
             
-            OBDAQuery sourceQuery = mapping.getSourceQuery();
+            OBDASQLQuery sourceQuery = mapping.getSourceQuery();
             writer.write(Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
@@ -293,11 +281,11 @@ public class ModelIOManager {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(OBDAQuery query) {
+    private String printTargetQuery(List<Function> query) {
     	return TargetQueryRenderer.encode(query, prefixManager);
     }
     
-    private String printSourceQuery(OBDAQuery query) {
+    private String printSourceQuery(OBDASQLQuery query) {
     	String sourceString = SourceQueryRenderer.encode(query);
     	String toReturn = convertTabToSpaces(sourceString);
     	return toReturn.replaceAll("\n", "\n\t\t\t");
@@ -337,6 +325,18 @@ public class ModelIOManager {
             } else if (parameter.equals(Label.password.name())) {
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, inputParamter);
             } else if (parameter.equals(Label.driverClass.name())) {
+                // Class.forName was added for old fashion JDBC drivers (e.g., MonetDB driver).
+                // Otherwise, it won't work for these drivers
+                try {
+                    Class.forName(inputParamter);
+                } catch (ClassNotFoundException e) {
+                    //e.printStackTrace();
+                    /**
+                     * This is harmless when you do not need to do query answering
+                     */
+                    log.warn("JDBC driver \"{}\" is not available on the class path! Query answering service will be unavailable!", inputParamter );
+
+                }
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);
             } else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", parameter, lineNumber);
@@ -352,7 +352,7 @@ public class ModelIOManager {
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
-        CQIE targetQuery = null;
+        List<Function> targetQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
         
@@ -441,8 +441,8 @@ public class ModelIOManager {
         }
     }
 
-	private CQIE loadTargetQuery(String targetString) throws UnparsableTargetQueryException {
-        Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<TargetQueryParser, TargetQueryParserException>();
+	private List<Function> loadTargetQuery(String targetString) throws UnparsableTargetQueryException {
+        Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
 		for (TargetQueryParser parser : getParsers()) {
             try {
             	return parser.parse(targetString);
@@ -472,9 +472,10 @@ public class ModelIOManager {
         list.add(indicator);
     }
 
-    private void saveMapping(URI dataSourceUri, String mappingId, String sourceQuery, CQIE targetQuery) {
+    private void saveMapping(URI dataSourceUri, String mappingId, String sourceQuery, List<Function> targetQuery) {
         try {
-            OBDAMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(mappingId, sourceQuery, targetQuery);
+            OBDAMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(mappingId, 
+            		dataFactory.getSQLQuery(sourceQuery), targetQuery);
             model.addMapping(dataSourceUri, mapping);
         } catch (DuplicateMappingException e) {
             // NO-OP: Ignore it as duplicates won't be loaded to the model

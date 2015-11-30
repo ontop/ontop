@@ -463,9 +463,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		}
 	}
 	
-	public void updateStatus(int rows) {
+	public void updateStatus(long result) {
 		Double time = Double.valueOf(execTime / 1000);
-		String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, rows);
+		String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
 		Runnable time_setter = new ExecTimeSetter(s);
 		SwingUtilities.invokeLater(time_setter);
 	}
