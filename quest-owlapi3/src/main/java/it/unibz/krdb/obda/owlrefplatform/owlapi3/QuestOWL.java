@@ -37,6 +37,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.impl.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
 import org.semanticweb.owlapi.util.Version;
@@ -1866,7 +1867,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		public Collection<OWLDataProperty> getParents(OWLDataProperty child) {
 			Set<OWLDataProperty> properties = new HashSet<OWLDataProperty>();
-			for (OWLDataPropertyExpression prop : child.getSuperProperties(getRootOntology().getImportsClosure())) {
+            for (OWLDataPropertyExpression prop : EntitySearcher.getSuperProperties(child,getRootOntology().getImportsClosure())) {
 				properties.add(prop.asOWLDataProperty());
 			}
 			return properties;
@@ -1874,7 +1875,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		public Collection<OWLDataProperty> getChildren(OWLDataProperty parent) {
 			Set<OWLDataProperty> properties = new HashSet<OWLDataProperty>();
-			for (OWLDataPropertyExpression prop : parent.getSubProperties(getRootOntology().getImportsClosure())) {
+			for (OWLDataPropertyExpression prop : EntitySearcher.getSubProperties(parent, getRootOntology().getImportsClosure())) {
 				properties.add(prop.asOWLDataProperty());
 			}
 			return properties;

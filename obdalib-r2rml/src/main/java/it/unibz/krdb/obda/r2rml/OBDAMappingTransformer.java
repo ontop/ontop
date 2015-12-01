@@ -37,8 +37,10 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 /**
@@ -343,7 +345,8 @@ public class OBDAMappingTransformer {
                             obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
                             //set the datatype for the typed literal
 
-                            Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            //Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            Collection<OWLDataRange> ranges = EntitySearcher.getRanges(dataProperty, ontology);
                             //assign the datatype if present
                             if (ranges.size() == 1) {
                                 IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();

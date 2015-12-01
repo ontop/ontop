@@ -12,9 +12,10 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
@@ -33,22 +34,22 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
             title = "output", description = "output file (default) or directory (for --separate-files)")
     protected String outputFile;
 
-    protected static OWLOntologyFormat getOntologyFormat(String format) throws Exception {
-		OWLOntologyFormat ontoFormat;
+    protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
+		OWLDocumentFormat ontoFormat;
 
 		if(format == null){
-			ontoFormat = new RDFXMLOntologyFormat();
+			ontoFormat = new RDFXMLDocumentFormat();
 		}
 		else {
 		switch (format) {
 			case "rdfxml":
-				ontoFormat = new RDFXMLOntologyFormat();
+				ontoFormat = new RDFXMLDocumentFormat();
 				break;
 			case "owlxml":
-				ontoFormat = new OWLXMLOntologyFormat();
+				ontoFormat = new OWLXMLDocumentFormat();
 				break;
 			case "turtle":
-				ontoFormat = new TurtleOntologyFormat();
+				ontoFormat = new TurtleDocumentFormat();
 				break;
 			default:
 				throw new Exception("Unknown format: " + format);
@@ -59,7 +60,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 
-        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI();
+        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI().get();
         System.err.println("Ontology " + ontologyIRI);
 
         Set<OWLDeclarationAxiom> declarationAxioms = ontology.getAxioms(AxiomType.DECLARATION);

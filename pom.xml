@@ -131,7 +131,7 @@
 		<license.licenseName>apache_v2</license.licenseName>
 		<license.roots>src/main/java,src/test/java</license.roots>
 		<sesame.version>2.7.10</sesame.version>
-		<owlapi.version>3.4.10</owlapi.version>
+		<owlapi.version>4.1.3</owlapi.version>
 	</properties>
 
 	<build>

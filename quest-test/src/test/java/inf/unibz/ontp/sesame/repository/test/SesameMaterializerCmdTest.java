@@ -45,7 +45,8 @@ import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
+
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -267,7 +268,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());
-		manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
+		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));
 		
 		assertEquals(27, materializer.getTriplesCount());
 		assertEquals(3, materializer.getVocabularySize());
@@ -299,7 +300,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());
-		manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
+		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));	
 		
 		assertEquals(51, materializer.getTriplesCount());
 		assertEquals(5, materializer.getVocabularySize());

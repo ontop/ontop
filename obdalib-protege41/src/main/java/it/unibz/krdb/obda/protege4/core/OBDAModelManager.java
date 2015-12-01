@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.protege4.core;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
@@ -173,12 +174,14 @@ public class OBDAModelManager implements Disposable {
 			for (int idx = 0; idx < changes.size(); idx++) {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
-					IRI newiri = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
+					Optional<IRI> optionalNewIRI = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
 
-					if (newiri == null)
-						continue;
+                    if(!optionalNewIRI.isPresent())
+                        return;
 
-					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI();
+                    IRI newiri = optionalNewIRI.get();
+
+					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI().get();
 
 					log.debug("Ontology ID changed");
 					log.debug("Old ID: {}", oldiri);
@@ -320,13 +323,18 @@ public class OBDAModelManager implements Disposable {
 		OWLOntology ontology = owlEditorKit.getOWLModelManager().getActiveOntology();
 		if (ontology != null) {
 			OWLOntologyID ontologyID = ontology.getOntologyID();
-			IRI ontologyIRI = ontologyID.getOntologyIRI();
-			URI uri = null;
-			if (ontologyIRI != null) {
-				uri = ontologyIRI.toURI();
-			} else {
-				uri = URI.create(ontologyID.toString());
-			}
+
+            Optional<IRI> optionalOntologyIRI = ontologyID.getOntologyIRI();
+
+            URI uri;
+
+            if(optionalOntologyIRI.isPresent()){
+                uri = optionalOntologyIRI.get().toURI();
+            } else {
+                uri = URI.create(ontologyID.toString());
+
+            }
+
 			return obdamodels.get(uri);
 		}
 		return null;
@@ -383,12 +391,12 @@ public class OBDAModelManager implements Disposable {
 		String defaultPrefix = prefixManager.getDefaultPrefix();
 		if (defaultPrefix == null) {
 			OWLOntologyID ontologyID = activeOntology.getOntologyID();
-			defaultPrefix = ontologyID.getOntologyIRI().toURI().toString();
+			defaultPrefix = ontologyID.getOntologyIRI().get().toURI().toString();
 		}
 		activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
 
 		// Add the model
-		URI modelUri = activeOntology.getOntologyID().getOntologyIRI().toURI();
+		URI modelUri = activeOntology.getOntologyID().getOntologyIRI().get().toURI();
 		obdamodels.put(modelUri, activeOBDAModel);
 	}
 
@@ -463,7 +471,7 @@ public class OBDAModelManager implements Disposable {
 				String defaultPrefix = prefixManager.getDefaultPrefix();
 				if (defaultPrefix == null) {
 					OWLOntologyID ontologyID = ontology.getOntologyID();
-					defaultPrefix = ontologyID.getOntologyIRI().toURI().toString();
+					defaultPrefix = ontologyID.getOntologyIRI().get().toURI().toString();
 				}
 				activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
 
@@ -504,7 +512,7 @@ public class OBDAModelManager implements Disposable {
 					File obdaFile = new File(URI.create(obdaDocumentIri));
 					File queryFile = new File(URI.create(queryDocumentIri));
 					File dbprefsFile = new File(URI.create(dbprefsDocumentIri));
-					IRI ontologyIRI = activeOntology.getOntologyID().getOntologyIRI();
+					IRI ontologyIRI = activeOntology.getOntologyID().getOntologyIRI().get();
 
 					activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, ontologyIRI.toString());
 					if (obdaFile.exists()) {
