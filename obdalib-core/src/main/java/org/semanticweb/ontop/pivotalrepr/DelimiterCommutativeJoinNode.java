@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import org.semanticweb.ontop.model.DistinctVariableDataAtom;
+
 /**
  * TODO: find a better name
  *
@@ -9,4 +11,10 @@ package org.semanticweb.ontop.pivotalrepr;
  *
  */
 public interface DelimiterCommutativeJoinNode extends CommutativeJoinNode, SubTreeDelimiterNode {
+
+    /**
+     * TODO: specialize it further (no variable duplication)
+     */
+    @Override
+    DistinctVariableDataAtom getProjectionAtom();
 }
