@@ -41,4 +41,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
         return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
     }
 
+    @Override
+    public DataNode newAtom(DataAtom newAtom) {
+        return new ExtensionalDataNodeImpl(newAtom);
+    }
 }

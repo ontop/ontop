@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
@@ -152,6 +153,10 @@ public interface OBDADataFactory extends Serializable {
 	 * Beware: a DataAtom is immutable
 	 */
 	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms);
+
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, ImmutableSet<Variable> distinctVariables);
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, ImmutableList<Variable> distinctVariables);
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, Variable ... distinctVariables);
 
 
 	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);

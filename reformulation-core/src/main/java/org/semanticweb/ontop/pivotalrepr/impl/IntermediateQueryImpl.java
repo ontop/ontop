@@ -9,6 +9,7 @@ import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import org.semanticweb.ontop.executor.expression.PushDownExpressionExecutor;
 import org.semanticweb.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import org.semanticweb.ontop.executor.join.JoinInternalCompositeExecutor;
+import org.semanticweb.ontop.executor.pullout.PullOutVariableExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import org.semanticweb.ontop.model.DataAtom;
@@ -77,6 +78,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
+        internalExecutorMapBuilder.put(PullOutVariableProposal.class, PullOutVariableExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -292,6 +294,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
         throw new InconsistentIntermediateQueryException("The node " + node
                 + " has no ancestor that is a ConstructionNode");
+    }
+
+    @Override
+    public Variable generateNewVariable() {
+        return treeComponent.generateNewVariable();
+    }
+
+    @Override
+    public Variable generateNewVariable(Variable formerVariable) {
+        return treeComponent.generateNewVariable(formerVariable);
     }
 
     /**
