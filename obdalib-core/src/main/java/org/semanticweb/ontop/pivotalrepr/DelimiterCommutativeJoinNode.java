@@ -13,8 +13,13 @@ import org.semanticweb.ontop.model.DistinctVariableDataAtom;
 public interface DelimiterCommutativeJoinNode extends CommutativeJoinNode, SubTreeDelimiterNode {
 
     /**
-     * TODO: specialize it further (no variable duplication)
+     * Specialization
      */
     @Override
     DistinctVariableDataAtom getProjectionAtom();
+
+    /**
+     * Returns a new DelimiterCommutativeJoinNode
+     */
+    DelimiterCommutativeJoinNode newAtom(DistinctVariableDataAtom newAtom);
 }
