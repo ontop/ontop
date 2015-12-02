@@ -34,7 +34,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public DatatypeFactory getDatatypeFactory();
 
-	public CQIE getCQIE(Function head, Function... body );
+	public CQIE getCQIE(Function head, Function... body);
 	
 	public CQIE getCQIE(Function head, List<Function> body);
 	
@@ -378,21 +378,22 @@ public interface OBDADataFactory extends Serializable {
 	public Variable getVariable(String name);
 	
 	
-
+	/* OBDA mapping axioms */
 	
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, CQIE targetQuery);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, CQIE targetQuery);
-
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, CQIE targetQuery);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
 
+	/* SPARQL meta-predicates */
 	
-	public Function getSPARQLJoin(Term t1, Term t2);
+	public Function getSPARQLJoin(Function t1, Function t2);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);
+	public Function getSPARQLLeftJoin(Function t1, Function t2);
 
+	/* time functions */
+	
 	Predicate getDataTypePredicateGeosparql();
 	public Function getFunctionNow();
 
@@ -409,6 +410,4 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionTZ(Term arg);
 
 	public Function getFunctionMonth(Term arg);
-
-	
 }

@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://travis-ci.org/ontop/ontop)
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Maven Central](https://img.shields.io/maven-central/v/it.unibz.inf.ontop/ontop.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22it.unibz.inf.ontop%22)
 Ontop-Spatial
 ==================
 

@@ -20,6 +20,10 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
@@ -28,6 +32,8 @@ public class OBDAVocabulary {
 	/*GeoSPARQL namespaces*/
 	
 	public static final String GEOSPARQL_FUNCTION_NS = "<http://www.opengis.net/def/function/geosparql/";
+	
+	public static final String GEOSPARQL_RELATION_NS = "http://www.opengis.net/ont/geosparql#";
 	/* Constants */
 
 	public static final ValueConstant NULL = new ValueConstantImpl("null",
@@ -126,9 +132,24 @@ public class OBDAVocabulary {
 	public static final String sfEnvelope = "SF-ENVELOPE";
 	public static final String sfBoundary = "SF-BOUNDARY";
 	public static final String sfGetSRID = "SF-SRID";
+	
+	/* Geosparql topological relations */
+	
+	public static final String geoEquals = GEOSPARQL_RELATION_NS + "sfEquals";
+	public static final String geoDisjoint = GEOSPARQL_RELATION_NS + "sfDisjoint";
+	public static final String geoIntersects = GEOSPARQL_RELATION_NS + "sfIntersects";
+	public static final String geoTouches = GEOSPARQL_RELATION_NS + "sfTouches";
+	public static final String geoCrosses = GEOSPARQL_RELATION_NS + "sfCrosses";
+	public static final String geoWithin = GEOSPARQL_RELATION_NS + "sfWithin";
+	public static final String geoContains = GEOSPARQL_RELATION_NS + "sfContains";
+	public static final String geoOverlaps = GEOSPARQL_RELATION_NS + "sfOverlaps";
+	
 
 
 	public static final String strGeomFromWKT = "GEOMFROMWKT";
+	
+	public static final String asWKTPredicate = GEOSPARQL_RELATION_NS+"asWKT";
+	public static final String defaultGeomPredicate = GEOSPARQL_RELATION_NS+"hasGeometry";
 	
 	/* Boolean predicates */
 
@@ -378,7 +399,6 @@ public class OBDAVocabulary {
 			"regex", 3);
 	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
 			"like", 2);
-	
 	
 
 }

@@ -21,13 +21,15 @@ package it.unibz.krdb.obda.io;
  */
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 
+import java.util.List;
 import java.util.Vector;
 
 public interface TargetQueryVocabularyValidator {
 
-	public boolean validate(CQIE targetQuery);
+	public boolean validate(List<Function> targetQuery);
 
 	public Vector<String> getInvalidPredicates();
 

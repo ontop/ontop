@@ -40,7 +40,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -136,7 +137,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param userConstraints - User-supplied database constraints (or null)
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, ImplicitDBConstraints userConstraints) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, ImplicitDBConstraintsReader userConstraints) throws Exception {
 
 		super(name);
 
@@ -200,8 +201,16 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		//obtain datasource
 		OBDADataSource source = getDataSourceFromConfig(config);
 		//obtain obdaModel
-		R2RMLReader reader = new R2RMLReader(mappings);
-		OBDAModel obdaModel = reader.readModel(source.getSourceID());
+		OBDAModel obdaModel;
+		if (mappings != null) {
+			R2RMLReader reader = new R2RMLReader(mappings);
+			obdaModel = reader.readModel(source.getSourceID());
+		}
+		else {
+			String baseIRI = Objects.requireNonNull(config.getProperty(QuestPreferences.BASE_IRI), "Base IRI is requires for direct mappings");
+			DirectMappingEngine dm = new DirectMappingEngine(baseIRI, 0);
+			obdaModel = dm.extractMappings(source);
+		}
 		//add data source to model
 		obdaModel.addSource(source);
 		//OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
@@ -262,7 +271,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	 * 
 	 * @param userConstraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints){
 		if(userConstraints == null)
 			throw new NullPointerException();
 		if(this.isinitalized)

@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 
+import java.util.List;
 import java.util.Vector;
 
 // TODO: move to a more appropriate package
@@ -49,12 +50,12 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 	
 	@Override
-	public boolean validate(CQIE targetQuery) {
+	public boolean validate(List<Function> targetQuery) {
 		// Reset the invalid list
 		invalidPredicates.clear();
 
 		// Get the predicates in the target query.
-		for (Function atom : targetQuery.getBody()) {
+		for (Function atom : targetQuery) {
 			Predicate p = atom.getFunctionSymbol();
 
 			boolean isClass = isClass(p);

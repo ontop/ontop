@@ -188,9 +188,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		//  possible that there is still some EQ(...) 
 		for (CQIE query : workingSet)
 			EQNormalizer.enforceEqualities(query);
-
+		
+		
 		DatalogProgram result = termFactory.getDatalogProgram(inputquery.getQueryModifiers());
 		result.appendRule(workingSet);
+		
+		for (CQIE query : workingSet)
+			GeosparqlRIFImpl.applyRIFrules(query, result);
+
 
 		return result;
 	}

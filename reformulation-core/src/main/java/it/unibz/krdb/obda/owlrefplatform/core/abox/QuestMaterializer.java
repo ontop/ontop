@@ -207,8 +207,8 @@ public class QuestMaterializer {
             for (URI uri : this.model.getMappings().keySet()){
                 for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
                 {
-                    CQIE rule = axiom.getTargetQuery();
-                    for (Function f: rule.getBody())
+                    List<Function> rule = axiom.getTargetQuery();
+                    for (Function f: rule)
                         vocabulary.add(f.getFunctionSymbol());
                 }
             }

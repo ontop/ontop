@@ -41,7 +41,7 @@ import java.io.File;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated
- * correctly. Especially, that the unquoted identifers are treated as uppercase, and
+ * correctly. Especially, that the unquoted identifiers are treated as uppercase, and
  * that the case of quoted identifiers is not changed
  */
 public class OracleIdentifierTest extends TestCase {

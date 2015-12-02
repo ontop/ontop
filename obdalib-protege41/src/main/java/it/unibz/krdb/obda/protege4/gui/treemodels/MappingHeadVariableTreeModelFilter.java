@@ -41,8 +41,7 @@ public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMapp
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		final CQIE headquery = object.getTargetQuery();
-		final List<Function> atoms = headquery.getBody();
+		final List<Function> atoms = object.getTargetQuery();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

@@ -188,45 +188,40 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			else {
 				databaseAtoms.add(atom);
 			}
-				
-		if (databaseAtoms.size() != 2) {
+
+		if (databaseAtoms.size() < 2) {
 			oneAtomQs++;
 			return query;
 		}
 		
 		collectVariables(groundTerms, query.getHead());
 		
-		// ONE PARTICUALR CASE ONLY
 		CQIE db = fac.getCQIE(query.getHead(), databaseAtoms);
 		
-		if (checkRedundant(db, groundTerms, Collections.singletonList(databaseAtoms.get(0)), databaseAtoms.get(1))) {
-			System.out.println("  REDUNDANT " + ++redundantCounter + ": " + databaseAtoms.get(1) + " IN " + query);
-			query.getBody().remove(databaseAtoms.get(1));
-			return query;
-		}
-		
-		if (checkRedundant(db, groundTerms, Collections.singletonList(databaseAtoms.get(1)), databaseAtoms.get(0))) {
-			System.out.println("  REDUNDANT " + ++redundantCounter + ": " + databaseAtoms.get(0) + " IN " + query);
-			query.getBody().remove(databaseAtoms.get(0));
-			return query;
+		for (int i = 0; i < databaseAtoms.size(); i++) {
+			Function atomToBeRemoved = databaseAtoms.get(i);
+			if (checkRedundant(db, groundTerms, atomToBeRemoved)) {
+				System.out.println("  REDUNDANT " + ++redundantCounter + ": " + atomToBeRemoved + " IN " + query);
+				query.getBody().remove(atomToBeRemoved);
+				databaseAtoms.remove(atomToBeRemoved);
+				i--;
+			}
 		}
 		
 		twoAtomQs++;
 		return query;
 	}
 	
-	private boolean checkRedundant(CQIE db, Set<Term> groundTerms, List<Function> atomsToLeave, Function atomToRemove) {
-		if (containsConstants(atomToRemove)) {
-			//System.err.println("CONSTANTS: " + databaseAtoms.get(0) + " IN " + query);
-			return false;
-		}
+	private boolean checkRedundant(CQIE db, Set<Term> groundTerms, Function atomToBeRemoved) {
+		List<Function> atomsToLeave = new ArrayList<>(db.getBody().size() - 1);
+		Set<Term> variablesInAtomsToLeave = new HashSet<>();
+		for (Function a: db.getBody()) 
+			if (a != atomToBeRemoved) {
+				atomsToLeave.add(a);
+				collectVariables(variablesInAtomsToLeave, a);
+			}
 		
-		
-		// other atoms' variables
-		Set<Term> v1 = new HashSet<>();
-		for (Function a : atomsToLeave)
-			collectVariables(v1, a);
-		if (!v1.containsAll(groundTerms)) {
+		if (!variablesInAtomsToLeave.containsAll(groundTerms)) {
 			return false;
 		}
 
@@ -250,6 +245,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				terms.addAll(((Function)t).getTerms());
 		}		
 	}
+/*	
 	private static boolean containsConstants(Function atom) {
 		Deque<Term> terms = new LinkedList<>(atom.getTerms());
 		while (!terms.isEmpty()) {
@@ -261,7 +257,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		}		
 		return false;
 	}
-	
+*/	
 	@Override
 	public String toString() {
 		if (dependencies != null)

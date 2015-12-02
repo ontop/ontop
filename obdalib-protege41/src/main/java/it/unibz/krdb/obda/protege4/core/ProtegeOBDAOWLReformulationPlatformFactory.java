@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.protege4.core;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
+import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 
 import java.util.Properties;
 
@@ -56,7 +56,7 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 	 * 
 	 * @param uc The user-supplied database constraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints uc) {
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader uc) {
 		if(uc == null)
 			throw new NullPointerException();
 		factory.setImplicitDBConstraints(uc);

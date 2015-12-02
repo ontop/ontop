@@ -4786,4 +4786,8 @@ source		SELECT wlbNpdidWellbore,wlbCoreNumber FROM wellbore_core
 mappingId	Mapping:NPD:Manual13
 target		npd:licence/{A.prlNpdidLicence}/task/{A.prlTaskRefID} npdv:dependsOnTask npd:licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID} .
 source		SELECT prlNpdidLicence,prlTaskID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID
+
+mappingId	Mapping:NPD:ManualDavide3
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coreIntervalUOM {wlbCoreIntervalUom}^^xsd:string . 
+source		SELECT wlbNpdidWellbore, wlbCoreNumber, wlbCoreIntervalUom FROM wellbore_core
 ]]

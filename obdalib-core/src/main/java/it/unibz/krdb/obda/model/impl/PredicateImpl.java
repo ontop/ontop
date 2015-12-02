@@ -33,6 +33,8 @@ public class PredicateImpl implements Predicate {
 	private int identifier = -1;
 	private COL_TYPE[] types = null;
 
+	//constant: change the constructor again to public? 
+	
 	protected PredicateImpl(String name, int arity, COL_TYPE[] types) {
 		this.name = name;
 		this.identifier = name.hashCode();
