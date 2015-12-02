@@ -36,4 +36,9 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     public String toString() {
         return INTENSIONAL_DATA_NODE_STR + " " + getProjectionAtom();
     }
+
+    @Override
+    public DataNode newAtom(DataAtom newAtom) {
+        return new IntensionalDataNodeImpl(newAtom);
+    }
 }
