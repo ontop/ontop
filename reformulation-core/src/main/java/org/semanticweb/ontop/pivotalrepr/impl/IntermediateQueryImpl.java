@@ -294,6 +294,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 + " has no ancestor that is a ConstructionNode");
     }
 
+    @Override
+    public Variable generateNewVariable() {
+        return treeComponent.generateNewVariable();
+    }
+
+    @Override
+    public Variable generateNewVariable(Variable formerVariable) {
+        return treeComponent.generateNewVariable(formerVariable);
+    }
+
     /**
      * Finds ordinary data nodes.
      *
