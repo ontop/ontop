@@ -23,14 +23,14 @@ public abstract class SubstitutionPropagatorImpl<T1 extends QueryNodeTransformat
         implements SubstitutionPropagator<T1, T2> {
 
 
-    private final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+    private final ImmutableSubstitution<? extends VariableOrGroundTerm> substitution;
 
-    public SubstitutionPropagatorImpl(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+    public SubstitutionPropagatorImpl(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
         this.substitution = substitution;
     }
 
     @Override
-    public ImmutableSubstitution<VariableOrGroundTerm>  getSubstitution() {
+    public ImmutableSubstitution<? extends VariableOrGroundTerm>  getSubstitution() {
         return substitution;
     }
 

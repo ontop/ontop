@@ -18,8 +18,9 @@ public interface DelimiterCommutativeJoinNode extends CommutativeJoinNode, SubTr
     @Override
     DistinctVariableDataAtom getProjectionAtom();
 
-    /**
-     * Returns a new DelimiterCommutativeJoinNode
-     */
-    DelimiterCommutativeJoinNode newAtom(DistinctVariableDataAtom newAtom);
+
+    @Override
+    DelimiterCommutativeJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException, NotNeededNodeException;
+
 }

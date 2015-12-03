@@ -14,7 +14,7 @@ import org.semanticweb.ontop.pivotalrepr.transformer.UnificationException;
 public class SubstitutionDownPropagatorImpl extends SubstitutionPropagatorImpl<UnificationException,
         NewSubstitutionException> implements SubstitutionDownPropagator {
 
-    public SubstitutionDownPropagatorImpl(ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+    public SubstitutionDownPropagatorImpl(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
         super(substitution);
     }
 

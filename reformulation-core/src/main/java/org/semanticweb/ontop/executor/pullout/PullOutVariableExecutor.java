@@ -17,6 +17,8 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PullOutVariableProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
+import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
 
 
 /**
@@ -59,7 +61,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
             throws InvalidQueryOptimizationProposalException {
         try {
             return pullOut(proposal, query, treeComponent);
-        } catch (IllegalTreeUpdateException e) {
+        } catch (IllegalTreeUpdateException | QueryNodeTransformationException | NotNeededNodeException e) {
             throw new RuntimeException("Unexpected exception: " + e.getMessage());
         }
     }
@@ -70,7 +72,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
     private NodeCentricOptimizationResults<SubTreeDelimiterNode> pullOut(PullOutVariableProposal proposal,
                                                                          IntermediateQuery query,
                                                                          QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, IllegalTreeUpdateException {
+            throws InvalidQueryOptimizationProposalException, IllegalTreeUpdateException, QueryNodeTransformationException, NotNeededNodeException {
         SubTreeDelimiterNode originalFocusNode = proposal.getFocusNode();
         ImmutableMap<Integer, VariableRenaming> renamingMap = generateRenamingMap(originalFocusNode, proposal.getIndexes(),
                 query);
@@ -218,16 +220,17 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      * Can be overloaded.
      */
     protected FocusNodeUpdate generateNewFocusNodeAndSubstitution(SubTreeDelimiterNode originalFocusNode,
-                                                                  ImmutableMap<Integer, VariableRenaming> renamingMap) {
+                                                                  ImmutableMap<Integer, VariableRenaming> renamingMap)
+            throws QueryNodeTransformationException, NotNeededNodeException {
 
         if (originalFocusNode instanceof ConstructionNode) {
-            return generateNewFocusConstructionNode((ConstructionNode)originalFocusNode, renamingMap);
+            return generateUpdate4ConstructionNode((ConstructionNode) originalFocusNode, renamingMap);
         }
         else if (originalFocusNode instanceof DataNode) {
-            return generateNewFocusDataNode((DataNode) originalFocusNode, renamingMap);
+            return generateUpdate4DataNode((DataNode) originalFocusNode, renamingMap);
         }
         else if (originalFocusNode instanceof DelimiterCommutativeJoinNode) {
-            return generateNewFocusDelimiterCommutativeJoinNode((DelimiterCommutativeJoinNode) originalFocusNode, renamingMap);
+            return generateUpdate4DelimiterCommutativeJoinNode((DelimiterCommutativeJoinNode) originalFocusNode, renamingMap);
         }
         else {
             throw new RuntimeException("Unsupported type of SubtreeDelimiterNode: " + originalFocusNode.getClass());
@@ -238,15 +241,15 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
     /**
      * TODO: implement it
      */
-    private FocusNodeUpdate generateNewFocusConstructionNode(ConstructionNode originalConstructionNode,
-                                                             ImmutableMap<Integer, VariableRenaming> renamingMap) {
+    private FocusNodeUpdate generateUpdate4ConstructionNode(ConstructionNode originalConstructionNode,
+                                                            ImmutableMap<Integer, VariableRenaming> renamingMap) {
         throw new RuntimeException("TODO: support pulling variables out of construction nodes");
     }
 
     /**
      * TODO: explain
      */
-    private FocusNodeUpdate generateNewFocusDataNode(DataNode originalDataNode, ImmutableMap<Integer, VariableRenaming> renamingMap) {
+    private FocusNodeUpdate generateUpdate4DataNode(DataNode originalDataNode, ImmutableMap<Integer, VariableRenaming> renamingMap) {
 
         DataAtom newAtom = generateNewStandardDataAtom(originalDataNode, renamingMap);
         DataNode newDataNode = originalDataNode.newAtom(newAtom);
@@ -292,25 +295,9 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
     /**
      * TODO: explain
      */
-    private FocusNodeUpdate generateNewFocusDelimiterCommutativeJoinNode(DelimiterCommutativeJoinNode originalFocusNode,
-                                                                         ImmutableMap<Integer, VariableRenaming> renamingMap) {
-        DistinctVariableDataAtom formerAtom = originalFocusNode.getProjectionAtom();
-        ImmutableList<Variable> formerArguments = formerAtom.getVariablesOrGroundTerms();
-
-        ImmutableList.Builder<Variable> newArgumentBuilder = ImmutableList.builder();
-
-        for (int i = 0; i < formerArguments.size(); i++) {
-            if (renamingMap.containsKey(i)) {
-                VariableRenaming variableRenaming = renamingMap.get(i);
-                newArgumentBuilder.add(variableRenaming.newVariable);
-            }
-            else {
-                newArgumentBuilder.add(formerArguments.get(i));
-            }
-        }
-        DistinctVariableDataAtom newAtom = DATA_FACTORY.getDistinctVariableDataAtom(formerAtom.getPredicate(),
-                    newArgumentBuilder.build());
-        DelimiterCommutativeJoinNode newNode = originalFocusNode.newAtom(newAtom);
+    private FocusNodeUpdate generateUpdate4DelimiterCommutativeJoinNode(DelimiterCommutativeJoinNode originalFocusNode,
+                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap)
+            throws QueryNodeTransformationException, NotNeededNodeException {
 
         /**
          * Generates an injective substitution to be propagated
@@ -321,7 +308,10 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
         }
         InjectiveVar2VarSubstitution substitution = new InjectiveVar2VarSubstitutionImpl(variableBuilder.build());
 
-        return new FocusNodeUpdate(newNode, Optional.of(substitution), convertIntoEqualities(renamingMap));
+        SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(substitution);
+        DelimiterCommutativeJoinNode newFocusNode = originalFocusNode.acceptNodeTransformer(propagator);
+
+        return new FocusNodeUpdate(newFocusNode, Optional.of(substitution), convertIntoEqualities(renamingMap));
     }
 
 

@@ -10,5 +10,5 @@ import org.semanticweb.ontop.pivotalrepr.QueryNodeTransformationException;
  */
 public interface SubstitutionPropagator<T1 extends QueryNodeTransformationException, T2 extends QueryNodeTransformationException>
         extends HomogeneousQueryNodeTransformer<T1, T2> {
-    ImmutableSubstitution<VariableOrGroundTerm> getSubstitution();
+    ImmutableSubstitution<? extends VariableOrGroundTerm> getSubstitution();
 }

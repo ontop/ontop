@@ -83,7 +83,7 @@ public class SubstitutionUpPropagatorImpl extends SubstitutionPropagatorImpl<Sto
 
         ImmutableSet<Variable> projectedVariables = constructionNode.getProjectionAtom().getVariables();
 
-        for (Map.Entry<Variable, VariableOrGroundTerm> entry : getSubstitution().getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : getSubstitution().getImmutableMap().entrySet()) {
             Variable replacedVariable = entry.getKey();
             if (projectedVariables.contains(replacedVariable)) {
                 if (boundVariables.contains(replacedVariable)) {
