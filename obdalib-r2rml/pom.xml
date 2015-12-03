@@ -48,14 +48,15 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
 		</dependency>
-  			<!-- Optique R2RML API -->
+
+        <!-- Optique R2RML API -->
 		<dependency>
-			<groupId>org.optique-project</groupId>
+			<groupId>eu.optique-project</groupId>
 			<artifactId>r2rml-api</artifactId>
 		</dependency>
 	
 		<dependency>
-			<groupId>org.optique-project</groupId>
+			<groupId>eu.optique-project</groupId>
 			<artifactId>r2rml-api-sesame-bridge</artifactId>
 		</dependency>
 

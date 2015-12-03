@@ -537,15 +537,15 @@
 			
 			<!-- Optique R2RML API -->
 			<dependency>
-				<groupId>org.optique-project</groupId>
+				<groupId>eu.optique-project</groupId>
 				<artifactId>r2rml-api</artifactId>
-				<version>0.1.3</version>
+				<version>0.2</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.optique-project</groupId>
+				<groupId>eu.optique-project</groupId>
 				<artifactId>r2rml-api-sesame-bridge</artifactId>
-				<version>0.1.3</version>
+				<version>0.2</version>
 			</dependency>
 
 			<dependency>
