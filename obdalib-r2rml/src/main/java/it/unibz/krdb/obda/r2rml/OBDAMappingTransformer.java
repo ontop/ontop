@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.r2rml;
 
 import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -265,7 +266,7 @@ public class OBDAMappingTransformer {
 			mapping_id = "http://example.org/" + mapping_id;
 		Resource mainNode = vf.createURI(mapping_id);
 
-		R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
 		
 		//Table
