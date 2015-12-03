@@ -14,8 +14,11 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2Va
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
+import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
+import org.semanticweb.ontop.pivotalrepr.transformer.UnificationException;
+import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
+import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionPropagatorImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -186,14 +189,14 @@ public class SubQueryUnificationTools {
                  * New substitution
                  * TODO: further explain
                  */
-            } catch (SubstitutionDownPropagator.NewSubstitutionException e) {
+            } catch (NewSubstitutionException e) {
                 optionalNewChild = Optional.of(e.getTransformedNode());
-                propagatorForChild = new SubstitutionDownPropagator(e.getSubstitution());
+                propagatorForChild = new SubstitutionDownPropagatorImpl(e.getSubstitution());
             }
             /**
              * Unification rejected by a sub-construction node.
              */
-            catch(SubstitutionDownPropagator.UnificationException e) {
+            catch(UnificationException e) {
                 throw new SubQueryUnificationException(e.getMessage());
             }
             /**
@@ -310,7 +313,7 @@ public class SubQueryUnificationTools {
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution,
                 newOptionalQueryModifiers);
         return new ConstructionNodeUnification(newConstructionNode,
-                new SubstitutionDownPropagator(substitutionToPropagate));
+                new SubstitutionDownPropagatorImpl(substitutionToPropagate));
     }
 
     /**
