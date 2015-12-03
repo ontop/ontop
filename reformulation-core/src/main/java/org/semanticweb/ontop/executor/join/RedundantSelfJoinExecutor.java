@@ -138,8 +138,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         if (!initialMap.isEmpty()) {
 
             // TODO: explain
-            ImmutableSet<Variable> variablesToKeep = VariableCollector.collectVariables(
-                    query.getClosestConstructionNode(topJoinNode));
+            ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getVariables();
 
             Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
                     query.getMetadata().getPrimaryKeys());

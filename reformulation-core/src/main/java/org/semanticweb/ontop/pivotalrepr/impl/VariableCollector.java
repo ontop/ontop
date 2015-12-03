@@ -13,100 +13,19 @@ import java.util.List;
  * TODO: refactor it NOT AS A QueryNodeVisitor
  * but by calling queryNode.getVariables()
  */
-public class VariableCollector implements QueryNodeVisitor {
-
-    private final ImmutableSet.Builder<Variable> collectedVariableBuilder;
-
-    private VariableCollector() {
-        collectedVariableBuilder = ImmutableSet.builder();
-    }
+public class VariableCollector {
 
     public static ImmutableSet<Variable> collectVariables(IntermediateQuery query) {
         return collectVariables(query.getNodesInBottomUpOrder());
     }
 
     public static ImmutableSet<Variable> collectVariables(List<QueryNode> nodes) {
-        VariableCollector collector = new VariableCollector();
+        ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
         for (QueryNode node : nodes) {
-            node.acceptVisitor(collector);
+            collectedVariableBuilder.addAll(node.getVariables());
         }
-        return collector.collectedVariableBuilder.build();
+        return collectedVariableBuilder.build();
     }
 
-    public static ImmutableSet<Variable> collectVariables(QueryNode node) {
-        VariableCollector collector = new VariableCollector();
-        node.acceptVisitor(collector);
-        return collector.collectedVariableBuilder.build();
-    }
-
-    @Override
-    public void visit(IntensionalDataNode intensionalDataNode) {
-        collectFromAtom(intensionalDataNode.getProjectionAtom());
-    }
-
-    @Override
-    public void visit(ExtensionalDataNode extensionalDataNode) {
-        collectFromAtom(extensionalDataNode.getProjectionAtom());
-    }
-
-    @Override
-    public void visit(GroupNode groupNode) {
-        for (NonGroundTerm term : groupNode.getGroupingTerms()) {
-            if (term instanceof Variable) {
-                collectedVariableBuilder.add((Variable)term);
-            }
-            else {
-                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm) term).getVariables());
-            }
-        }
-    }
-
-    @Override
-    public void visit(InnerJoinNode innerJoinNode) {
-        // Collects nothing
-    }
-
-    @Override
-    public void visit(LeftJoinNode leftJoinNode) {
-        // Collects nothing
-    }
-
-    @Override
-    public void visit(FilterNode filterNode) {
-        // Collects nothing
-    }
-
-    @Override
-    public void visit(ConstructionNode constructionNode) {
-
-        collectFromAtom(constructionNode.getProjectionAtom());
-        collectFromSubstitution(constructionNode.getSubstitution());
-    }
-
-    @Override
-    public void visit(UnionNode unionNode) {
-        // Collects nothing
-    }
-
-    private void collectFromAtom(DataAtom atom) {
-        for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
-            if (term instanceof Variable)
-                collectedVariableBuilder.add((Variable)term);
-        }
-    }
-
-    private void collectFromSubstitution(ImmutableSubstitution<ImmutableTerm> substitution) {
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
-
-        collectedVariableBuilder.addAll(substitutionMap.keySet());
-        for (ImmutableTerm term : substitutionMap.values()) {
-            if (term instanceof Variable) {
-                collectedVariableBuilder.add((Variable)term);
-            }
-            else if (term instanceof ImmutableFunctionalTerm) {
-                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm)term).getVariables());
-            }
-        }
-    }
 }

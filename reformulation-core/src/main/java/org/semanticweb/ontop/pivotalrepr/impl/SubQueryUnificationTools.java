@@ -531,7 +531,7 @@ public class SubQueryUnificationTools {
          * Removes all the variables that are not used in the construction node.
          * Said differently, computes the intersection.
          */
-        variableSet.retainAll(VariableCollector.collectVariables(constructionNode));
+        variableSet.retainAll(constructionNode.getVariables());
 
         return variableSet.isEmpty();
 

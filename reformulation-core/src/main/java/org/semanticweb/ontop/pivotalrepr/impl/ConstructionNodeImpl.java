@@ -3,6 +3,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -68,6 +69,30 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
+
+        for (VariableOrGroundTerm term : dataAtom.getVariablesOrGroundTerms()) {
+            if (term instanceof Variable)
+                collectedVariableBuilder.add((Variable)term);
+        }
+
+        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
+
+        collectedVariableBuilder.addAll(substitutionMap.keySet());
+        for (ImmutableTerm term : substitutionMap.values()) {
+            if (term instanceof Variable) {
+                collectedVariableBuilder.add((Variable)term);
+            }
+            else if (term instanceof ImmutableFunctionalTerm) {
+                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm)term).getVariables());
+            }
+        }
+
+        return collectedVariableBuilder.build();
     }
 
     @Override

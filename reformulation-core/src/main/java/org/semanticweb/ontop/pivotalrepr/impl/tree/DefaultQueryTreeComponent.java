@@ -200,6 +200,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
      * To be called every time a new node is added to the tree component.
      */
     private void collectPossiblyNewVariables(QueryNode newNode) {
-        variableGenerator.registerAdditionalVariables(VariableCollector.collectVariables(newNode));
+        variableGenerator.registerAdditionalVariables(newNode.getVariables());
     }
 }
