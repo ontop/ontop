@@ -11,9 +11,12 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionUpPropagator;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionUpPropagator.StopPropagationException;
+import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
+import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionUpPropagatorImpl;
+import org.semanticweb.ontop.pivotalrepr.transformer.StopPropagationException;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -49,7 +52,7 @@ public class SubstitutionPropagationExecutor
                                                   ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
                                                   QueryTreeComponent treeComponent) {
 
-        SubstitutionDownPropagator propagator = new SubstitutionDownPropagator(substitutionToPropagate);
+        SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(substitutionToPropagate);
         try {
             QueryNode newFocusNode = originalFocusNode.acceptNodeTransformer(propagator);
             treeComponent.replaceNode(originalFocusNode, newFocusNode);
@@ -71,7 +74,7 @@ public class SubstitutionPropagationExecutor
     private static void propagateDown(final QueryNode focusNode, final ImmutableSubstitution<VariableOrGroundTerm> originalSubstitutionToPropagate,
                                final IntermediateQuery query, final QueryTreeComponent treeComponent) {
 
-        final SubstitutionDownPropagator propagator = new SubstitutionDownPropagator(originalSubstitutionToPropagate);
+        final SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(originalSubstitutionToPropagate);
 
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
         nodesToVisit.addAll(query.getChildren(focusNode));
@@ -88,7 +91,7 @@ public class SubstitutionPropagationExecutor
             /**
              * Recursive call for the sub-tree of the sub-node
              */
-            catch (SubstitutionDownPropagator.NewSubstitutionException e) {
+            catch (NewSubstitutionException e) {
                 QueryNode newSubNode = e.getTransformedNode();
                 treeComponent.replaceNode(formerSubNode, newSubNode);
 
@@ -118,7 +121,7 @@ public class SubstitutionPropagationExecutor
     private static void propagateUp(QueryNode focusNode, ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
                              IntermediateQuery query, QueryTreeComponent treeComponent) {
 
-        SubstitutionUpPropagator propagator = new SubstitutionUpPropagator(query, focusNode, substitutionToPropagate);
+        SubstitutionUpPropagator propagator = new SubstitutionUpPropagatorImpl(query, focusNode, substitutionToPropagate);
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
 
         Optional<QueryNode> optionalParent = query.getParent(focusNode);
