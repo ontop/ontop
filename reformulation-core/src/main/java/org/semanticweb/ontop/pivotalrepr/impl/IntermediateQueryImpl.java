@@ -263,8 +263,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
         for (IntensionalDataNode localDataNode : localDataNodes) {
-            // TODO: make it be incremental
-            ImmutableSet<Variable> localVariables = VariableCollector.collectVariables(this);
+
+            ImmutableSet<Variable> localVariables = treeComponent.getKnownVariables();
 
             try {
                 IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,

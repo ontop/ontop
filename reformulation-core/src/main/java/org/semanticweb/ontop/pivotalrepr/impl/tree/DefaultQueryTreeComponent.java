@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.VariableGenerator;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
@@ -194,6 +195,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public Variable generateNewVariable(Variable formerVariable) {
         return variableGenerator.generateNewVariableFromVar(formerVariable);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return variableGenerator.getKnownVariables();
     }
 
     /**

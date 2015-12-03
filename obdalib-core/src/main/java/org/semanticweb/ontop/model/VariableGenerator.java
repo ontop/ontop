@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.model;
 
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
@@ -82,5 +83,12 @@ public class VariableGenerator {
 
         knownVariables.add(newVariable);
         return newVariable;
+    }
+
+    /**
+     * Instant snapshot of variable it knows.
+     */
+    public ImmutableSet<Variable> getKnownVariables() {
+        return ImmutableSet.copyOf(knownVariables);
     }
 }

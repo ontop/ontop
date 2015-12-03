@@ -453,6 +453,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         throw new RuntimeException("TODO: support generateNewVariable()");
     }
 
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        throw new RuntimeException("TODO: support getKnownVariables()");
+    }
+
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
 
         if (parentNode instanceof NonCommutativeOperatorNode) {

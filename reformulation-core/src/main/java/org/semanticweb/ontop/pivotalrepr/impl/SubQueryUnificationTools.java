@@ -246,7 +246,7 @@ public class SubQueryUnificationTools {
      */
     private static InjectiveVar2VarSubstitution computeRenamingSubstitution(IntermediateQuery subQuery,
                                                                             ImmutableSet<Variable> reservedVariables) {
-        ImmutableSet<Variable> subQueryVariables = VariableCollector.collectVariables(subQuery);
+        ImmutableSet<Variable> subQueryVariables = VariableCollector.collectVariables(subQuery.getNodesInTopDownOrder());
         ImmutableSet<Variable> allKnownVariables = ImmutableSet.<Variable>builder()
                 .addAll(reservedVariables)
                 .addAll(subQueryVariables)
