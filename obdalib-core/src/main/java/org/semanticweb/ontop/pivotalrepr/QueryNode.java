@@ -1,5 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.Variable;
+
 /**
  * Immutable.
  *
@@ -43,4 +46,9 @@ public interface QueryNode extends Cloneable {
      *
      */
     NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
+
+    /**
+     * Set of variables mentioned in the node.
+     */
+    ImmutableSet<Variable> getVariables();
 }

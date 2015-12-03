@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
 
@@ -82,4 +83,9 @@ public interface QueryTreeComponent {
      *
      */
     Variable generateNewVariable(Variable formerVariable);
+
+    /**
+     * All the possibly already allocated variables
+     */
+    ImmutableSet<Variable> getKnownVariables();
 }

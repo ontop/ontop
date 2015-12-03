@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,25 +36,25 @@ public class PartialUnion<T extends ImmutableTerm> {
      */
     private final Set<Variable> conflictingVariables;
     private final Map<Variable, T> substitutionMap;
-    private final VariableGenerator variableGenerator;
+    private final IntermediateQuery query;
 
     /**
      * Bootstrap. Then use newPartialUnion().
      */
-    public PartialUnion(ImmutableSubstitution<T> substitution, VariableGenerator variableGenerator) {
+    public PartialUnion(ImmutableSubstitution<T> substitution, IntermediateQuery query) {
         conflictingVariables = ImmutableSet.of();
-        this.variableGenerator = variableGenerator;
+        this.query = query;
         substitutionMap = replaceTargetVariables(substitution.getImmutableMap());
     }
 
     private PartialUnion(ImmutableSubstitution<T> substitution1,
                         ImmutableSubstitution<T> substitution2,
                         ImmutableSet<Variable> alreadyConflictingVariables,
-                        VariableGenerator variableGenerator) {
+                        IntermediateQuery query) {
 
         substitutionMap = new HashMap<>();
         conflictingVariables = new HashSet<>(alreadyConflictingVariables);
-        this.variableGenerator = variableGenerator;
+        this.query = query;
 
         loadOneSubstitutionEntries(substitution1, substitution2, false);
         loadOneSubstitutionEntries(substitution2, substitution1, true);
@@ -125,21 +126,21 @@ public class PartialUnion<T extends ImmutableTerm> {
      * TODO: explain
      */
     private T replaceVariablesInTerm(T term) {
-        return (T) replaceVariablesInTerm(term, variableGenerator);
+        return (T) replaceVariablesInTerm(term, query);
     }
 
-    private static ImmutableTerm replaceVariablesInTerm(ImmutableTerm term, VariableGenerator variableGenerator) {
+    private static ImmutableTerm replaceVariablesInTerm(ImmutableTerm term, IntermediateQuery query) {
         if (isGroundTerm(term)) {
             return term;
         }
         else if (term instanceof Variable) {
-            return variableGenerator.generateNewVariable();
+            return query.generateNewVariable();
         }
         /**
          * Non-ground functional term
          */
         else if (term instanceof ImmutableFunctionalTerm) {
-            return replaceAllVariables((ImmutableFunctionalTerm) term, variableGenerator);
+            return replaceAllVariables((ImmutableFunctionalTerm) term, query);
         }
         else {
             throw new IllegalArgumentException("Unknown term: " + term);
@@ -150,13 +151,13 @@ public class PartialUnion<T extends ImmutableTerm> {
      * The functional term must non-ground (maybe not explicitly typed as such)
      */
     private static NonGroundFunctionalTerm replaceAllVariables(ImmutableFunctionalTerm nonGroundFunctionalTerm,
-                                                               VariableGenerator variableGenerator) {
+                                                               IntermediateQuery query) {
         ImmutableList.Builder<ImmutableTerm> subTermBuilder = ImmutableList.builder();
         for (ImmutableTerm subTerm : nonGroundFunctionalTerm.getImmutableTerms()) {
             /**
              * Indirectly recursive call
              */
-            subTermBuilder.add(replaceVariablesInTerm(subTerm, variableGenerator));
+            subTermBuilder.add(replaceVariablesInTerm(subTerm, query));
         }
         return DATA_FACTORY.getNonGroundFunctionalTerm(nonGroundFunctionalTerm.getFunctionSymbol(),
                 subTermBuilder.build());
@@ -173,7 +174,7 @@ public class PartialUnion<T extends ImmutableTerm> {
 
     public PartialUnion<T> newPartialUnion(ImmutableSubstitution<T> additionalSubstitution) {
         return new PartialUnion<>(getPartialUnionSubstitution(), additionalSubstitution, getConflictingVariables(),
-                variableGenerator);
+                query);
     }
 
     /**

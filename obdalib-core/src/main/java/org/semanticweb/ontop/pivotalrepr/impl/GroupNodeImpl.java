@@ -1,7 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.ImmutableFunctionalTerm;
 import org.semanticweb.ontop.model.NonGroundTerm;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
@@ -40,6 +43,21 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
+
+        for (NonGroundTerm term : groupingTerms) {
+            if (term instanceof Variable) {
+                collectedVariableBuilder.add((Variable)term);
+            }
+            else {
+                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm) term).getVariables());
+            }
+        }
+        return collectedVariableBuilder.build();
     }
 
     @Override
