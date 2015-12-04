@@ -404,7 +404,7 @@ public class QuestStatement implements OBDAStatement {
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules(), HashMultimap.<Predicate, List<Integer>>create());
 			removeNonAnswerQueries(program);
 
-			program = unfolder.unfold(program, OBDAVocabulary.QUEST_QUERY);
+			program = unfolder.unfold(program);
 
 			log.debug("Flattened program: \n{}", program);
 		} 
@@ -463,7 +463,7 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	private static void removeNonAnswerQueries(DatalogProgram program) {
-		List<CQIE> toRemove = new LinkedList<CQIE>();
+		List<CQIE> toRemove = new LinkedList<>();
 		for (CQIE rule : program.getRules()) {
 			Predicate headPredicate = rule.getHead().getFunctionSymbol();
 			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {

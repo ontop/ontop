@@ -44,9 +44,7 @@ import java.util.*;
  * 
  * @author mariano
  */
-public class DatalogUnfolder implements UnfoldingMechanism {
-
-	private static final long serialVersionUID = 6088558456135748487L;
+public class DatalogUnfolder {
 
 	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
@@ -170,10 +168,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * with respect to the program given when this unfolder was initialized. The goal for
 	 * this partial evaluation is the predicate <b>ans1</b>
 	 * 
-	 * @param targetPredicate IS IGNORED
 	 */
-	@Override
-	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
+	public DatalogProgram unfold(DatalogProgram inputquery) {
 
 		List<CQIE> workingSet = new LinkedList<>();
 		for (CQIE query : inputquery.getRules()) 
@@ -188,7 +184,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		//  possible that there is still some EQ(...) 
 		for (CQIE query : workingSet) {
 			EQNormalizer.enforceEqualities(query);
-			UniqueConstraintOptimizer.seltJoinElimination(query, primaryKeys);
+			UniqueConstraintOptimizer.selfJoinElimination(query, primaryKeys);
 		}
 			
 		DatalogProgram result = termFactory.getDatalogProgram(inputquery.getQueryModifiers());

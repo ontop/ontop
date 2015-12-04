@@ -15,7 +15,7 @@ import com.google.common.collect.Multimap;
 
 public class UniqueConstraintOptimizer {
 
-	public static void seltJoinElimination(CQIE query, Multimap<Predicate, List<Integer>> primaryKeys) {
+	public static void selfJoinElimination(CQIE query, Multimap<Predicate, List<Integer>> primaryKeys) {
 
 		List<Function> body = query.getBody();
 		
@@ -27,10 +27,8 @@ public class UniqueConstraintOptimizer {
 			round++;
 			
 			Iterator<Function> it = body.iterator();
-			
 			while (it.hasNext()) {
-				Function currentAtom = it.next();
-			
+				Function currentAtom = it.next();		
 				if (!currentAtom.isDataFunction())
 					continue;
 
