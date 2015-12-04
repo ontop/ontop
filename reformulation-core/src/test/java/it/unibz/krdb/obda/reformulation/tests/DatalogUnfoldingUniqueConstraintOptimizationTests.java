@@ -165,7 +165,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
-		DatalogProgram output = unfolder.unfold(input, "q");
+		DatalogProgram output = unfolder.unfold(input);
 		System.out.println("input " + input);
 
 		int atomcount = 0;
