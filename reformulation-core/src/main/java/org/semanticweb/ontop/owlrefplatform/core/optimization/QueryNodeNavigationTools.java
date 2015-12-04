@@ -8,6 +8,9 @@ import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults
 
 public class QueryNodeNavigationTools {
 
+    /**
+     * Next node and updated query
+     */
     public static class NextNodeAndQuery {
         private final Optional<QueryNode> optionalNextNode;
         private final IntermediateQuery nextQuery;
@@ -19,6 +22,27 @@ public class QueryNodeNavigationTools {
 
         public Optional<QueryNode> getOptionalNextNode() {
             return optionalNextNode;
+        }
+
+        public IntermediateQuery getNextQuery() {
+            return nextQuery;
+        }
+    }
+
+    /**
+     * Updated node and query
+     */
+    public static class UpdatedNodeAndQuery<N extends QueryNode> {
+        private final N updatedQuery;
+        private final IntermediateQuery nextQuery;
+
+        public UpdatedNodeAndQuery(N updatedNode, IntermediateQuery nextQuery) {
+            this.updatedQuery = updatedNode;
+            this.nextQuery = nextQuery;
+        }
+
+        public N getUpdatedNode() {
+            return updatedQuery;
         }
 
         public IntermediateQuery getNextQuery() {
