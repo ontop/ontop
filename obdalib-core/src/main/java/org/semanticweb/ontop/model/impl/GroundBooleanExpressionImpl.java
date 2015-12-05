@@ -21,8 +21,8 @@ public class GroundBooleanExpressionImpl extends ImmutableBooleanExpressionImpl 
     }
 
     @Override
-    public ImmutableList<GroundTerm> getGroundTerms() {
-        return (ImmutableList<GroundTerm>)(ImmutableList<?>) getImmutableTerms();
+    public ImmutableList<? extends GroundTerm> getImmutableTerms() {
+        return (ImmutableList<? extends GroundTerm>)super.getImmutableTerms();
     }
 
     @Override

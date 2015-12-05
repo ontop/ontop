@@ -468,8 +468,8 @@ public class SubQueryUnificationTools {
         // ImmutableMap.Builder<Variable, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
         Map<Variable, VariableOrGroundTerm> substitutionMap = new HashMap<>();
 
-        ImmutableList<? extends VariableOrGroundTerm> originalArgs = originalAtom.getVariablesOrGroundTerms();
-        ImmutableList<? extends VariableOrGroundTerm> newArgs = newAtom.getVariablesOrGroundTerms();
+        ImmutableList<? extends VariableOrGroundTerm> originalArgs = originalAtom.getImmutableTerms();
+        ImmutableList<? extends VariableOrGroundTerm> newArgs = newAtom.getImmutableTerms();
 
         for (int i = 0; i < originalArgs.size(); i++) {
             VariableOrGroundTerm originalArg = originalArgs.get(i);
@@ -521,7 +521,7 @@ public class SubQueryUnificationTools {
         /**
          * First put the target variables
          */
-        for (VariableOrGroundTerm term : targetAtom.getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm term : targetAtom.getImmutableTerms()) {
             if (term instanceof Variable)
                 variableSet.add((Variable)term);
         }

@@ -117,7 +117,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
         ImmutableList.Builder<VariableGroundTermPair> pairBuilder = ImmutableList.builder();
         ImmutableList.Builder<VariableOrGroundTerm> newArgumentBuilder = ImmutableList.builder();
 
-        for (VariableOrGroundTerm argument : dataNode.getProjectionAtom().getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm argument : dataNode.getProjectionAtom().getImmutableTerms()) {
             if (argument.isGround()) {
                 Variable newVariable = query.generateNewVariable();
                 pairBuilder.add(new VariableGroundTermPair(newVariable, (GroundTerm) argument));

@@ -196,7 +196,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
                                                                         IntermediateQuery query)
             throws InvalidQueryOptimizationProposalException {
         ImmutableMap.Builder<Integer, VariableRenaming> mapBuilder = ImmutableMap.builder();
-        ImmutableList<? extends VariableOrGroundTerm> arguments = focusNode.getProjectionAtom().getVariablesOrGroundTerms();
+        ImmutableList<? extends VariableOrGroundTerm> arguments = focusNode.getProjectionAtom().getImmutableTerms();
 
         for (Integer index : indexes) {
             VariableOrGroundTerm argument = arguments.get(index);
@@ -276,7 +276,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
     private DataAtom generateNewStandardDataAtom(SubTreeDelimiterNode originalFocusNode,
                                                  ImmutableMap<Integer, VariableRenaming> renamingMap) {
         DataAtom formerAtom = originalFocusNode.getProjectionAtom();
-        ImmutableList<? extends VariableOrGroundTerm> formerArguments = formerAtom.getVariablesOrGroundTerms();
+        ImmutableList<? extends VariableOrGroundTerm> formerArguments = formerAtom.getImmutableTerms();
 
         ImmutableList.Builder<VariableOrGroundTerm> newArgumentBuilder = ImmutableList.builder();
 

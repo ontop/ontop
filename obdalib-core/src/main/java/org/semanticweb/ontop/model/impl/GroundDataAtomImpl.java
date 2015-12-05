@@ -27,7 +27,7 @@ public class GroundDataAtomImpl extends DataAtomImpl implements GroundFunctional
     }
 
     @Override
-    public ImmutableList<GroundTerm> getGroundTerms() {
-        return (ImmutableList<GroundTerm>)(ImmutableList<?>)getImmutableTerms();
+    public ImmutableList<? extends GroundTerm> getImmutableTerms() {
+        return (ImmutableList<GroundTerm>)super.getImmutableTerms();
     }
 }

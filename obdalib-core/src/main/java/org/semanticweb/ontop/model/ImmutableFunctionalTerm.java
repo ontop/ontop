@@ -21,7 +21,7 @@ public interface ImmutableFunctionalTerm extends Function, ImmutableTerm {
     @Override
     public ImmutableList<Term> getTerms();
 
-    public ImmutableList<ImmutableTerm> getImmutableTerms();
+    public ImmutableList<? extends ImmutableTerm> getImmutableTerms();
 
     @Override
     ImmutableTerm getTerm(int index);

@@ -46,8 +46,8 @@ public abstract class DataAtomImpl extends ImmutableFunctionalTermImpl implement
     }
 
     @Override
-    public ImmutableList<? extends VariableOrGroundTerm> getVariablesOrGroundTerms() {
-        return (ImmutableList<? extends VariableOrGroundTerm>)(ImmutableList<?>)getImmutableTerms();
+    public ImmutableList<? extends VariableOrGroundTerm> getImmutableTerms() {
+        return (ImmutableList<? extends VariableOrGroundTerm>)super.getImmutableTerms();
     }
 
     @Override
@@ -66,7 +66,7 @@ public abstract class DataAtomImpl extends ImmutableFunctionalTermImpl implement
     }
 
     protected static boolean hasDuplicates(DataAtom atom) {
-        ImmutableList<? extends VariableOrGroundTerm> termList = atom.getVariablesOrGroundTerms();
+        ImmutableList<? extends VariableOrGroundTerm> termList = atom.getImmutableTerms();
         Set<VariableOrGroundTerm> termSet = new HashSet<>(termList);
 
         return termSet.size() < termList.size();

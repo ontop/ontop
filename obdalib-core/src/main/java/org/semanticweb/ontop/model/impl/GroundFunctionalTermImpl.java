@@ -10,7 +10,7 @@ import static org.semanticweb.ontop.model.impl.GroundTermTools.castIntoGroundTer
 
 public class GroundFunctionalTermImpl extends ImmutableFunctionalTermImpl implements GroundFunctionalTerm {
 
-    protected GroundFunctionalTermImpl(ImmutableList<GroundTerm> terms, Predicate functor) {
+    protected GroundFunctionalTermImpl(ImmutableList<? extends GroundTerm> terms, Predicate functor) {
         super(functor, terms);
     }
 
@@ -25,8 +25,8 @@ public class GroundFunctionalTermImpl extends ImmutableFunctionalTermImpl implem
 
 
     @Override
-    public ImmutableList<GroundTerm> getGroundTerms() {
-        return (ImmutableList<GroundTerm>)(ImmutableList<?>)getTerms();
+    public ImmutableList<? extends GroundTerm> getImmutableTerms() {
+        return (ImmutableList<? extends GroundTerm>)super.getImmutableTerms();
     }
 
     @Override

@@ -21,10 +21,8 @@ public interface DataAtom extends ImmutableFunctionalTerm {
 
     boolean hasSamePredicateAndArity(DataAtom otherAtom);
 
-    /**
-     * Gets the arguments (variables and ground terms).
-     */
-    ImmutableList<? extends VariableOrGroundTerm> getVariablesOrGroundTerms();
+    @Override
+    ImmutableList<? extends VariableOrGroundTerm> getImmutableTerms();
 
     boolean containsGroundTerms();
 }

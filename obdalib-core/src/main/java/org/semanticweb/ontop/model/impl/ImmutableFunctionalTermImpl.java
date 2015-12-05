@@ -14,7 +14,7 @@ import static org.semanticweb.ontop.model.impl.ImmutabilityTools.convertIntoImmu
 public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTermImpl
         implements ImmutableFunctionalTerm {
 
-    private final ImmutableList<ImmutableTerm> terms;
+    private final ImmutableList<? extends ImmutableTerm> terms;
 
     /**
      * Lazy cache for toString()
@@ -28,7 +28,7 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
     protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableList<? extends ImmutableTerm> terms) {
         super(functor);
         // No problem since the list is immutable
-        this.terms = (ImmutableList<ImmutableTerm>)terms;
+        this.terms = terms;
         string = null;
     }
 
@@ -56,7 +56,7 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
     }
 
     @Override
-    public ImmutableList<ImmutableTerm> getImmutableTerms() {
+    public ImmutableList<? extends ImmutableTerm> getImmutableTerms() {
         return terms;
     }
 

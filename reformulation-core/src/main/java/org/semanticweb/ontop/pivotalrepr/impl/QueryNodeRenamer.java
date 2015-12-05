@@ -85,7 +85,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     private DataAtom renameDataAtom(DataAtom atom) {
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
-        for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm term : atom.getImmutableTerms()) {
             argListBuilder.add(renamingSubstitution.applyToVariableOrGroundTerm(term));
         }
         return DATA_FACTORY.getDataAtom(atom.getPredicate(), argListBuilder.build());

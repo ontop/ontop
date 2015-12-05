@@ -271,8 +271,8 @@ public class ImmutableUnificationTools {
             return Optional.absent();
         }
 
-        ImmutableList<ImmutableTerm> sourceChildren = sourceTerm.getImmutableTerms();
-        ImmutableList<ImmutableTerm> targetChildren = targetTerm.getImmutableTerms();
+        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceTerm.getImmutableTerms();
+        ImmutableList<? extends ImmutableTerm> targetChildren = targetTerm.getImmutableTerms();
 
         int childNb = sourceChildren.size();
         if (targetChildren.size() != childNb) {
