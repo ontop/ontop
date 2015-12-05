@@ -18,7 +18,6 @@ import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.UnificationException;
 import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionPropagatorImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -468,8 +467,8 @@ public class SubQueryUnificationTools {
         // ImmutableMap.Builder<Variable, VariableOrGroundTerm> mapBuilder = ImmutableMap.builder();
         Map<Variable, VariableOrGroundTerm> substitutionMap = new HashMap<>();
 
-        ImmutableList<? extends VariableOrGroundTerm> originalArgs = originalAtom.getVariablesOrGroundTerms();
-        ImmutableList<? extends VariableOrGroundTerm> newArgs = newAtom.getVariablesOrGroundTerms();
+        ImmutableList<? extends VariableOrGroundTerm> originalArgs = originalAtom.getArguments();
+        ImmutableList<? extends VariableOrGroundTerm> newArgs = newAtom.getArguments();
 
         for (int i = 0; i < originalArgs.size(); i++) {
             VariableOrGroundTerm originalArg = originalArgs.get(i);
@@ -521,7 +520,7 @@ public class SubQueryUnificationTools {
         /**
          * First put the target variables
          */
-        for (VariableOrGroundTerm term : targetAtom.getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm term : targetAtom.getArguments()) {
             if (term instanceof Variable)
                 variableSet.add((Variable)term);
         }

@@ -45,7 +45,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         ImmutableList.Builder<ImmutableTerm> subTermsBuilder = ImmutableList.builder();
 
-        for (ImmutableTerm subTerm : functionalTerm.getImmutableTerms()) {
+        for (ImmutableTerm subTerm : functionalTerm.getArguments()) {
             subTermsBuilder.add(apply(subTerm));
         }
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
@@ -97,7 +97,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
          * Throws a ConversionException if this cast is impossible.
          */
         ImmutableList.Builder<VariableOrGroundTerm> argBuilder = ImmutableList.builder();
-        for (ImmutableTerm subTerm : newFunctionalTerm.getImmutableTerms()) {
+        for (ImmutableTerm subTerm : newFunctionalTerm.getArguments()) {
             if (!(subTerm instanceof VariableOrGroundTerm))
                 throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
             argBuilder.add((VariableOrGroundTerm)subTerm);

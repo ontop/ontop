@@ -7,9 +7,6 @@ import com.google.common.collect.ImmutableList;
  */
 public interface VariableOnlyDataAtom extends NonGroundDataAtom {
 
-    /**
-     * Gets the arguments (variables and ground terms).
-     */
     @Override
-    ImmutableList<Variable> getVariablesOrGroundTerms();
+    ImmutableList<Variable> getArguments();
 }

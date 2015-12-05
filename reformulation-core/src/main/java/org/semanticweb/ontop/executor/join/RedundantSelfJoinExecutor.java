@@ -11,7 +11,6 @@ import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosi
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -250,7 +249,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     private static ImmutableList<VariableOrGroundTerm> extractPrimaryKeyArguments(DataAtom atom,
                                                                                   ImmutableList<Integer> primaryKeyPositions) {
         ImmutableList.Builder<VariableOrGroundTerm> listBuilder = ImmutableList.builder();
-        int atomLength = atom.getImmutableTerms().size();
+        int atomLength = atom.getArguments().size();
 
         for (Integer keyIndex : primaryKeyPositions) {
             if (keyIndex > atomLength) {

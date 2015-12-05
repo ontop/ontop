@@ -25,7 +25,7 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
     @Override
     public ImmutableSet<Variable> getVariables() {
         ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
-        for (VariableOrGroundTerm term : atom.getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm term : atom.getArguments()) {
             if (term instanceof Variable)
                 variableBuilder.add((Variable)term);
         }
