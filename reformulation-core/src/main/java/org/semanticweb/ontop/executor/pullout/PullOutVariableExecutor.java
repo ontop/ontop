@@ -7,6 +7,7 @@ import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.ImmutabilityTools;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
@@ -265,7 +266,8 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
 
         ImmutableList.Builder<ImmutableBooleanExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            DATA_FACTORY.getFunctionEQ(renaming.originalVariable, renaming.newVariable);
+            equalityBuilder.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ,
+                    renaming.originalVariable, renaming.newVariable));
         }
         return ImmutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();
     }
