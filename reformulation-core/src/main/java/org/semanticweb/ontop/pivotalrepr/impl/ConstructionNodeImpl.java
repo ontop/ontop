@@ -7,8 +7,13 @@ import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
+import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
+import org.semanticweb.ontop.pivotalrepr.transformer.StopPropagationException;
+import org.semanticweb.ontop.pivotalrepr.transformer.UnificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -118,6 +123,87 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         return newSubstitution;
 
+    }
+
+    /**
+     * TODO: explain
+     */
+    @Override
+    public SubstitutionResults<ConstructionNode> applyAscendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            QueryNode descendantNode, IntermediateQuery query) {
+        ImmutableMap<Variable, ImmutableTerm> formerNodeSubstitutionMap = getSubstitution()
+                .getImmutableMap();
+        ImmutableSet<Variable> boundVariables = formerNodeSubstitutionMap.keySet();
+
+        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
+        newSubstitutionMapBuilder.putAll(formerNodeSubstitutionMap);
+
+        ImmutableSet<Variable> projectedVariables = getProjectionAtom().getVariables();
+
+        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : substitution.getImmutableMap().entrySet()) {
+            Variable replacedVariable = entry.getKey();
+            if (projectedVariables.contains(replacedVariable)) {
+                if (boundVariables.contains(replacedVariable)) {
+                    throw new RuntimeException(
+                            "Inconsistent query: an already bound has been also found in the sub-tree: "
+                                    + replacedVariable);
+                }
+                else {
+                    newSubstitutionMapBuilder.put(replacedVariable, entry.getValue());
+                }
+            }
+        }
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
+                newSubstitutionMapBuilder.build());
+
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(getProjectionAtom(),
+                newSubstitution, getOptionalModifiers());
+
+        /**
+         * Stops to propagate the substitution
+         */
+        return new SubstitutionResultsImpl<>(newConstructionNode);
+    }
+
+    /**
+     * TODO: explain
+     */
+    @Override
+    public SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
+            throws QueryNodeSubstitutionException {
+        DataAtom newProjectionAtom = substitution.applyToDataAtom(getProjectionAtom());
+
+        try {
+            /**
+             * TODO: explain why it makes sense (interface)
+             */
+            SubQueryUnificationTools.ConstructionNodeUnification constructionNodeUnification =
+                    SubQueryUnificationTools.unifyConstructionNode(this, newProjectionAtom);
+
+            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
+            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
+                    constructionNodeUnification.getSubstitutionPropagator().getSubstitution();
+
+            /**
+             * If the substitution has changed, throws the new substitution
+             * and the new construction node so that the "client" can continue
+             * with the new substitution (for the children nodes).
+             */
+            if (!getSubstitution().equals(newSubstitutionToPropagate)) {
+                return new SubstitutionResultsImpl<>(newConstructionNode, newSubstitutionToPropagate);
+            }
+
+            /**
+             * Otherwise, continues with the current substitution
+             */
+            return new SubstitutionResultsImpl<>(newConstructionNode, substitution);
+
+        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+            throw new QueryNodeSubstitutionException(e.getMessage());
+        }
     }
 
     @Override

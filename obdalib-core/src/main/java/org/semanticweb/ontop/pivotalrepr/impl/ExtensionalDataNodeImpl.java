@@ -1,8 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.DataAtom;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 /**
@@ -39,12 +39,25 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
     }
 
     @Override
+    public SubstitutionResults<ExtensionalDataNode> applyAscendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            QueryNode descendantNode, IntermediateQuery query) {
+        return applySubstitution((ExtensionalDataNode) this, substitution);
+    }
+
+    @Override
+    public SubstitutionResults<ExtensionalDataNode> applyDescendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+        return applySubstitution((ExtensionalDataNode)this, substitution);
+    }
+
+    @Override
     public String toString() {
         return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
     }
 
     @Override
-    public DataNode newAtom(DataAtom newAtom) {
+    public ExtensionalDataNode newAtom(DataAtom newAtom) {
         return new ExtensionalDataNodeImpl(newAtom);
     }
 }

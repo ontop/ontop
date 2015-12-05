@@ -54,8 +54,7 @@ public class SubstitutionUpPropagatorImpl extends SubstitutionPropagatorImpl<Sto
      */
     private LeftJoinNode integrateSubstitutionAsLeftJoinCondition(LeftJoinNode leftJoinNode) {
         // Ok because the substitution is guaranteed not being empty.
-        ImmutableBooleanExpression newEqualities = ImmutableSubstitutionTools.convertIntoBooleanExpression(
-                getSubstitution()).get();
+        ImmutableBooleanExpression newEqualities = getSubstitution().convertIntoBooleanExpression().get();
 
         Optional<ImmutableBooleanExpression> optionalFormerCondition = leftJoinNode.getOptionalFilterCondition();
         ImmutableBooleanExpression newFilterCondition;

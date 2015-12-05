@@ -4,7 +4,9 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.JoinOrFilterNode;
 
 public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements JoinOrFilterNode {
@@ -36,5 +38,11 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
         else {
             return ImmutableSet.of();
         }
+    }
+
+    protected ImmutableBooleanExpression transformBooleanExpression(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            ImmutableBooleanExpression booleanExpression) {
+        return substitution.applyToBooleanExpression(booleanExpression);
     }
 }
