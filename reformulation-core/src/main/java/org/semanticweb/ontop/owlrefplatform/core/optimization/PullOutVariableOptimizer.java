@@ -161,7 +161,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         ImmutableList.Builder<Integer> variableIndexListBuilder = ImmutableList.builder();
 
         DataAtom dataAtom = delimiterNode.getProjectionAtom();
-        ImmutableList<? extends VariableOrGroundTerm> arguments = dataAtom.getImmutableTerms();
+        ImmutableList<? extends VariableOrGroundTerm> arguments = dataAtom.getArguments();
 
         for (int i=0; i < arguments.size(); i++) {
             VariableOrGroundTerm argument = arguments.get(i);

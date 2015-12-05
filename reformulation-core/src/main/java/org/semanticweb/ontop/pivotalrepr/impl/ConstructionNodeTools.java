@@ -351,7 +351,7 @@ public class ConstructionNodeTools {
     private static DataAtom computeNewDataAtom(DataAtom projectionAtom, ImmutableSet<Variable> variablesToRemove,
                                                ImmutableSet<Variable> newVariablesToProject) {
         // Mutable
-        List<VariableOrGroundTerm> newArguments = new LinkedList<>(projectionAtom.getImmutableTerms());
+        List<VariableOrGroundTerm> newArguments = new LinkedList<>(projectionAtom.getArguments());
         newArguments.removeAll(variablesToRemove);
         for (Variable newVariable : newVariablesToProject) {
             if (!newArguments.contains(newVariable)) {

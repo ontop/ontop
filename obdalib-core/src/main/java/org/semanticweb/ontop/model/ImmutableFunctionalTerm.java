@@ -15,13 +15,16 @@ import java.util.Set;
 public interface ImmutableFunctionalTerm extends Function, ImmutableTerm {
 
     /**
-     * Please use getImmutableTerms() instead
+     * Please use getArguments() instead
      */
     @Deprecated
     @Override
-    public ImmutableList<Term> getTerms();
+    ImmutableList<Term> getTerms();
 
-    public ImmutableList<? extends ImmutableTerm> getImmutableTerms();
+    /**
+     * Immutable version of getTerms().
+     */
+    ImmutableList<? extends ImmutableTerm> getArguments();
 
     @Override
     ImmutableTerm getTerm(int index);

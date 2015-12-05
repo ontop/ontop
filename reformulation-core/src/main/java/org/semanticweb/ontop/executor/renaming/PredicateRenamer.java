@@ -64,7 +64,7 @@ public class PredicateRenamer implements HomogeneousQueryNodeTransformer {
          */
         if (currentPredicate.equals(formerPredicate)) {
             DataAtom newDataAtom = DATA_FACTORY.getDataAtom(newPredicate,
-                    formerNode.getProjectionAtom().getImmutableTerms());
+                    formerNode.getProjectionAtom().getArguments());
 
             return new ConstructionNodeImpl(newDataAtom, formerNode.getSubstitution(),
                     formerNode.getOptionalModifiers());

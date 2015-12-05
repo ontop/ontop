@@ -2,11 +2,8 @@ package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.ImmutableFunctionalTermImpl;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -46,13 +43,13 @@ public abstract class DataAtomImpl extends ImmutableFunctionalTermImpl implement
     }
 
     @Override
-    public ImmutableList<? extends VariableOrGroundTerm> getImmutableTerms() {
-        return (ImmutableList<? extends VariableOrGroundTerm>)super.getImmutableTerms();
+    public ImmutableList<? extends VariableOrGroundTerm> getArguments() {
+        return (ImmutableList<? extends VariableOrGroundTerm>)super.getArguments();
     }
 
     @Override
     public boolean containsGroundTerms() {
-        for (ImmutableTerm term : getImmutableTerms()) {
+        for (ImmutableTerm term : getArguments()) {
             if (term.isGround()) {
                 return true;
             }
@@ -66,7 +63,7 @@ public abstract class DataAtomImpl extends ImmutableFunctionalTermImpl implement
     }
 
     protected static boolean hasDuplicates(DataAtom atom) {
-        ImmutableList<? extends VariableOrGroundTerm> termList = atom.getImmutableTerms();
+        ImmutableList<? extends VariableOrGroundTerm> termList = atom.getArguments();
         Set<VariableOrGroundTerm> termSet = new HashSet<>(termList);
 
         return termSet.size() < termList.size();

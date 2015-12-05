@@ -22,7 +22,7 @@ public interface DataAtom extends ImmutableFunctionalTerm {
     boolean hasSamePredicateAndArity(DataAtom otherAtom);
 
     @Override
-    ImmutableList<? extends VariableOrGroundTerm> getImmutableTerms();
+    ImmutableList<? extends VariableOrGroundTerm> getArguments();
 
     boolean containsGroundTerms();
 }

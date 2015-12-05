@@ -75,7 +75,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public ImmutableSet<Variable> getVariables() {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
-        for (VariableOrGroundTerm term : dataAtom.getImmutableTerms()) {
+        for (VariableOrGroundTerm term : dataAtom.getArguments()) {
             if (term instanceof Variable)
                 collectedVariableBuilder.add((Variable)term);
         }

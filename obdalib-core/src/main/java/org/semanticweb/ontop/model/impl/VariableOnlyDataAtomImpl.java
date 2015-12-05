@@ -15,7 +15,7 @@ public class VariableOnlyDataAtomImpl extends NonGroundDataAtomImpl implements V
     }
 
     @Override
-    public ImmutableList<Variable> getImmutableTerms() {
-        return (ImmutableList<Variable>)super.getImmutableTerms();
+    public ImmutableList<Variable> getArguments() {
+        return (ImmutableList<Variable>)super.getArguments();
     }
 }

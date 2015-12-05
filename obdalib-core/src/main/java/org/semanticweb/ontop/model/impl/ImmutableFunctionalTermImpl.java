@@ -56,7 +56,7 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
     }
 
     @Override
-    public ImmutableList<? extends ImmutableTerm> getImmutableTerms() {
+    public ImmutableList<? extends ImmutableTerm> getArguments() {
         return terms;
     }
 

@@ -8,5 +8,5 @@ import com.google.common.collect.ImmutableList;
 public interface VariableOnlyDataAtom extends NonGroundDataAtom {
 
     @Override
-    ImmutableList<Variable> getImmutableTerms();
+    ImmutableList<Variable> getArguments();
 }

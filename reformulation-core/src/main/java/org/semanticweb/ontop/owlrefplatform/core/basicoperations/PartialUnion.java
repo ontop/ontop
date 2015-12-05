@@ -153,7 +153,7 @@ public class PartialUnion<T extends ImmutableTerm> {
     private static NonGroundFunctionalTerm replaceAllVariables(ImmutableFunctionalTerm nonGroundFunctionalTerm,
                                                                IntermediateQuery query) {
         ImmutableList.Builder<ImmutableTerm> subTermBuilder = ImmutableList.builder();
-        for (ImmutableTerm subTerm : nonGroundFunctionalTerm.getImmutableTerms()) {
+        for (ImmutableTerm subTerm : nonGroundFunctionalTerm.getArguments()) {
             /**
              * Indirectly recursive call
              */

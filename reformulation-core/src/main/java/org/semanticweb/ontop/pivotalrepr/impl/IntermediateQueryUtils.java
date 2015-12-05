@@ -67,7 +67,7 @@ public class IntermediateQueryUtils {
         DataAtom headAtom = createTopProjectionAtom(firstDefinition.getRootConstructionNode().getProjectionAtom());
         AtomPredicate normalPredicate = headAtom.getPredicate();
         AtomPredicate subQueryPredicate = createSubQueryPredicate(predicateDefinitions, normalPredicate);
-        DataAtom subQueryAtom = DATA_FACTORY.getDataAtom(subQueryPredicate, headAtom.getImmutableTerms());
+        DataAtom subQueryAtom = DATA_FACTORY.getDataAtom(subQueryPredicate, headAtom.getArguments());
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -128,7 +128,7 @@ public class IntermediateQueryUtils {
         ImmutableList.Builder<Variable> argBuilder = ImmutableList.builder();
 
         VariableDispatcher variableDispatcher = new VariableDispatcher();
-        for (VariableOrGroundTerm argument : firstRuleProjectionAtom.getImmutableTerms()) {
+        for (VariableOrGroundTerm argument : firstRuleProjectionAtom.getArguments()) {
             /**
              * Variable: keeps it if not already used in the atom or rename it otherwise.
              */
