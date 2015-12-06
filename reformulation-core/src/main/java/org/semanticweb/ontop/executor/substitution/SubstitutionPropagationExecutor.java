@@ -19,13 +19,13 @@ import java.util.Queue;
 /**
  * TODO: explain
  */
-public class SubstitutionPropagationExecutor
-        implements NodeCentricInternalExecutor<QueryNode, SubstitutionPropagationProposal> {
+public class SubstitutionPropagationExecutor<N extends QueryNode>
+        implements NodeCentricInternalExecutor<N, SubstitutionPropagationProposal<N>> {
 
     @Override
-    public NodeCentricOptimizationResults<QueryNode> apply(SubstitutionPropagationProposal proposal,
-                                                           IntermediateQuery query,
-                                                           QueryTreeComponent treeComponent)
+    public NodeCentricOptimizationResults<N> apply(SubstitutionPropagationProposal<N> proposal,
+                                                   IntermediateQuery query,
+                                                   QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
         try {
             return applySubstitution(proposal, query, treeComponent);
@@ -39,18 +39,18 @@ public class SubstitutionPropagationExecutor
      * TODO: explain
      *
      */
-    private NodeCentricOptimizationResults<QueryNode> applySubstitution(SubstitutionPropagationProposal proposal,
+    private NodeCentricOptimizationResults<N> applySubstitution(SubstitutionPropagationProposal<N> proposal,
                                                                         IntermediateQuery query,
                                                                         QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException {
-        QueryNode originalFocusNode = proposal.getFocusNode();
+        N originalFocusNode = proposal.getFocusNode();
         ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate = proposal.getSubstitution();
 
         propagateUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
         propagateDown(originalFocusNode, substitutionToPropagate, query, treeComponent);
 
 
-        QueryNode newQueryNode = propagateToFocusNode(originalFocusNode, substitutionToPropagate, treeComponent);
+        N newQueryNode = propagateToFocusNode(originalFocusNode, substitutionToPropagate, treeComponent);
 
         /**
          * The substitution is supposed
@@ -60,9 +60,9 @@ public class SubstitutionPropagationExecutor
 
 
 
-    private static QueryNode propagateToFocusNode(QueryNode originalFocusNode,
-                                                  ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
-                                                  QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
+    private static <N extends QueryNode> N propagateToFocusNode(N originalFocusNode,
+                                          ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
+                                          QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
 
         SubstitutionResults<? extends QueryNode> substitutionResults =
                 originalFocusNode.applyDescendentSubstitution(substitutionToPropagate);
@@ -70,7 +70,7 @@ public class SubstitutionPropagationExecutor
         if (optionalNewFocusNode.isPresent()) {
             QueryNode newFocusNode = optionalNewFocusNode.get();
             treeComponent.replaceNode(originalFocusNode, newFocusNode);
-            return newFocusNode;
+            return (N) newFocusNode;
         }
         /**
          * TODO: should we handle this case properly?

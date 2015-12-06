@@ -7,13 +7,13 @@ import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 
-public class SubstitutionPropagationProposalImpl implements SubstitutionPropagationProposal {
+public class SubstitutionPropagationProposalImpl<T extends QueryNode> implements SubstitutionPropagationProposal<T> {
 
-    private final QueryNode focusNode;
+    private final T focusNode;
     private final ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate;
 
     public SubstitutionPropagationProposalImpl(
-            QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate) {
+            T focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate) {
         this.focusNode = focusNode;
         this.substitutionToPropagate = substitutionToPropagate;
     }
@@ -24,12 +24,12 @@ public class SubstitutionPropagationProposalImpl implements SubstitutionPropagat
     }
 
     @Override
-    public NodeCentricOptimizationResults<QueryNode> castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults<QueryNode>) results;
+    public NodeCentricOptimizationResults<T> castResults(ProposalResults results) {
+        return (NodeCentricOptimizationResults<T>) results;
     }
 
     @Override
-    public QueryNode getFocusNode() {
+    public T getFocusNode() {
         return focusNode;
     }
 }
