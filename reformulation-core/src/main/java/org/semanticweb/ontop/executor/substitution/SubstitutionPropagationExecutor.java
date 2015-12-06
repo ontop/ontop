@@ -12,9 +12,6 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -65,19 +62,21 @@ public class SubstitutionPropagationExecutor
 
     private static QueryNode propagateToFocusNode(QueryNode originalFocusNode,
                                                   ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
-                                                  QueryTreeComponent treeComponent) {
+                                                  QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
 
-        SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(substitutionToPropagate);
-        try {
-            QueryNode newFocusNode = originalFocusNode.acceptNodeTransformer(propagator);
+        SubstitutionResults<? extends QueryNode> substitutionResults =
+                originalFocusNode.applyDescendentSubstitution(substitutionToPropagate);
+        Optional<? extends QueryNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
+        if (optionalNewFocusNode.isPresent()) {
+            QueryNode newFocusNode = optionalNewFocusNode.get();
             treeComponent.replaceNode(originalFocusNode, newFocusNode);
             return newFocusNode;
         }
         /**
-         * No exception is expected.
+         * TODO: should we handle this case properly?
          */
-        catch (QueryNodeTransformationException | NotNeededNodeException e) {
-            throw new RuntimeException("Unexpected exception: " + e.getMessage());
+        else {
+            throw new RuntimeException("The focus node was not expected to become not needed anymore ");
         }
     }
 
@@ -86,10 +85,10 @@ public class SubstitutionPropagationExecutor
      *
      * TODO: explain
      */
-    private static void propagateDown(final QueryNode focusNode, final ImmutableSubstitution<VariableOrGroundTerm> originalSubstitutionToPropagate,
-                               final IntermediateQuery query, final QueryTreeComponent treeComponent) {
-
-        final SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(originalSubstitutionToPropagate);
+    private static void propagateDown(final QueryNode focusNode,
+                                      final ImmutableSubstitution<? extends VariableOrGroundTerm> currentSubstitutionToPropagate,
+                                      final IntermediateQuery query, final QueryTreeComponent treeComponent)
+            throws QueryNodeSubstitutionException {
 
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
         nodesToVisit.addAll(query.getChildren(focusNode));
@@ -97,33 +96,81 @@ public class SubstitutionPropagationExecutor
         while (!nodesToVisit.isEmpty()) {
             QueryNode formerSubNode = nodesToVisit.poll();
 
-            try {
-                QueryNode newSubNode = formerSubNode.acceptNodeTransformer(propagator);
+            SubstitutionResults<? extends QueryNode> substitutionResults =
+                    formerSubNode.applyDescendentSubstitution(currentSubstitutionToPropagate);
 
-                nodesToVisit.addAll(query.getChildren(formerSubNode));
-                treeComponent.replaceNode(formerSubNode, newSubNode);
+            Optional<? extends QueryNode> optionalNewSubNode = substitutionResults.getOptionalNewNode();
+            Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution
+                    = substitutionResults.getSubstitutionToPropagate();
+
+            /**
+             * Still a substitution to propagate
+             */
+            if (optionalNewSubstitution.isPresent()) {
+                ImmutableSubstitution<? extends VariableOrGroundTerm> newSubstitution = optionalNewSubstitution.get();
+
+                /**
+                 * No substitution change
+                 */
+                if (newSubstitution.equals(currentSubstitutionToPropagate)) {
+                    /**
+                     * Normal case: applies the same substitution to the children
+                     */
+                    if (optionalNewSubNode.isPresent()) {
+                        QueryNode newSubNode = optionalNewSubNode.get();
+
+                        nodesToVisit.addAll(query.getChildren(formerSubNode));
+                        treeComponent.replaceNode(formerSubNode, newSubNode);
+                    }
+                    /**
+                     * The sub-node is not needed anymore
+                     */
+                    else {
+                        nodesToVisit.addAll(query.getChildren(formerSubNode));
+                        try {
+                            treeComponent.removeOrReplaceNodeByUniqueChildren(formerSubNode);
+                        }
+                        catch (IllegalTreeUpdateException e1) {
+                            throw new RuntimeException(e1.getMessage());
+                        }
+                    }
+                }
+                /**
+                 * New substitution: applies it to the children
+                 */
+                else if (optionalNewSubNode.isPresent())  {
+
+                    QueryNode newSubNode = optionalNewSubNode.get();
+                    treeComponent.replaceNode(formerSubNode, newSubNode);
+
+                    // Recursive call
+                    propagateDown(newSubNode, newSubstitution, query, treeComponent);
+                }
+                /**
+                 * Unhandled case: new substitution to apply to the children of
+                 * a not-needed node.
+                 *
+                 * TODO: should we handle this case
+                 */
+                else {
+                    throw new RuntimeException("Unhandled case: new substitution to apply to the children of " +
+                            "a not-needed node.");
+                }
             }
             /**
-             * Recursive call for the sub-tree of the sub-node
+             * Stops the propagation
              */
-            catch (NewSubstitutionException e) {
-                QueryNode newSubNode = e.getTransformedNode();
-                treeComponent.replaceNode(formerSubNode, newSubNode);
+            else {
+                if (optionalNewSubNode.isPresent()) {
+                    QueryNode newSubNode = optionalNewSubNode.get();
+                    treeComponent.replaceNode(formerSubNode, newSubNode);
+                }
+                else {
+                    throw new RuntimeException("Unhandled case: the stopping node for the propagation" +
+                            "is not needed anymore. Should we support it?");
+                }
+            }
 
-                // Recursive call
-                propagateDown(newSubNode, e.getSubstitution(), query, treeComponent);
-            }
-            catch (NotNeededNodeException e) {
-                nodesToVisit.addAll(query.getChildren(formerSubNode));
-                try {
-                    treeComponent.removeOrReplaceNodeByUniqueChildren(formerSubNode);
-                }
-                catch (IllegalTreeUpdateException e1) {
-                    throw new RuntimeException(e1.getMessage());
-                }
-            } catch (QueryNodeTransformationException e) {
-                throw new RuntimeException("Unexpected exception: " + e.getMessage());
-            }
         }
     }
 
