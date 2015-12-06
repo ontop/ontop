@@ -9,9 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import org.semanticweb.ontop.pivotalrepr.transformer.BindingTransferTransformer;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionLiftPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.impl.BasicBindingTransferTransformer;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionLiftPropagatorImpl;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -28,8 +26,12 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
             applyBindingTransfer(bindingTransfer, treeComponent);
         }
 
-        for (ConstructionNodeUpdate update : proposal.getNodeUpdates()) {
-            applyConstructionNodeUpdate(update, treeComponent);
+        try {
+            for (ConstructionNodeUpdate update : proposal.getNodeUpdates()) {
+                applyConstructionNodeUpdate(update, treeComponent);
+            }
+        } catch (QueryNodeSubstitutionException e) {
+            throw new RuntimeException("Unexpected exception: " + e.getLocalizedMessage());
         }
 
         return new ProposalResultsImpl(query);
@@ -87,7 +89,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
      * TODO: explain
      */
     private void applyConstructionNodeUpdate(ConstructionNodeUpdate update, QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, QueryNodeSubstitutionException {
         QueryNode formerNode = update.getFormerNode();
 
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution =
@@ -128,9 +130,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
      */
     private static void propagateSubstitutionToSubTree(ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
                                                        QueryNode rootNode, QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException {
-        SubstitutionLiftPropagator propagator = new SubstitutionLiftPropagatorImpl(substitutionToPropagate);
-
+            throws InvalidQueryOptimizationProposalException, QueryNodeSubstitutionException {
 
         Queue<QueryNode> descendantNodeToTransform = new LinkedList<>();
         // Starts with the children of the root
@@ -147,24 +147,42 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
                 continue;
             }
 
-            try {
-                // May throw an exception
-                QueryNode newDescendantNode = descendantNode.acceptNodeTransformer(propagator);
+            // May throw an exception
+            SubstitutionResults<? extends QueryNode> substitutionResults =
+                    descendantNode.applyDescendentSubstitution(substitutionToPropagate);
 
-                /**
-                 * If no exception has been thrown...
-                 *   - adds its children to the queue
-                 *   - replaces the node if a transformed one has been returned
-                 */
+            Optional<? extends QueryNode> optionalNewDescendantNode = substitutionResults.getOptionalNewNode();
+            Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution
+                    = substitutionResults.getSubstitutionToPropagate();
+
+            /**
+             * TODO: handle these cases
+             */
+            if (!optionalNewSubstitution.isPresent()
+                    || substitutionToPropagate.equals(optionalNewSubstitution.get())) {
+                throw new RuntimeException("Stopping the propagation or changing the substitution " +
+                        "is not supported yet. TO BE DONE");
+            }
+
+            /**
+             * Standard case:
+             *   - adds its children to the queue
+             *   - replaces the node if a transformed one has been returned
+             */
+            if (optionalNewDescendantNode.isPresent()) {
+                QueryNode newDescendantNode = optionalNewDescendantNode.get();
                 descendantNodeToTransform.addAll(treeComponent.getCurrentSubNodesOf(descendantNode));
 
                 if (!newDescendantNode.equals(descendantNode)) {
                     treeComponent.replaceNode(descendantNode, newDescendantNode);
                 }
             }
-            catch (QueryNodeTransformationException e) {
-                throw new InvalidQueryOptimizationProposalException(e.getMessage());
-            } catch (NotNeededNodeException e) {
+            /**
+             * Current node is not needed anymore
+             *
+             * TODO: handle this case
+             */
+            else {
                 throw new RuntimeException("TODO: handle this case (substitution propagated after lifting" +
                         "some bindings)");
             }

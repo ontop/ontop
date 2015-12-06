@@ -9,9 +9,9 @@ import org.semanticweb.ontop.pivotalrepr.SubstitutionResults;
 
 public class SubstitutionResultsImpl<T extends QueryNode> implements SubstitutionResults<T> {
     private final Optional<T> optionalNewNode;
-    private final Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitution;
+    private final Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalSubstitution;
 
-    public SubstitutionResultsImpl(T newNode, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    public SubstitutionResultsImpl(T newNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.of(substitution);
     }
@@ -39,7 +39,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     }
 
     @Override
-    public Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate() {
+    public Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> getSubstitutionToPropagate() {
         return optionalSubstitution;
     }
 }

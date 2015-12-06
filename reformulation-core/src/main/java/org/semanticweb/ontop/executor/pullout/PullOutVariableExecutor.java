@@ -18,8 +18,6 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PullOutVariableProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
 
 
 /**
@@ -298,8 +296,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      * TODO: explain
      */
     private FocusNodeUpdate generateUpdate4DelimiterCommutativeJoinNode(DelimiterCommutativeJoinNode originalFocusNode,
-                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap)
-            throws QueryNodeTransformationException, NotNeededNodeException {
+                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap) {
 
         /**
          * Generates an injective substitution to be propagated
@@ -310,10 +307,24 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
         }
         InjectiveVar2VarSubstitution substitution = new InjectiveVar2VarSubstitutionImpl(variableBuilder.build());
 
-        SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(substitution);
-        DelimiterCommutativeJoinNode newFocusNode = originalFocusNode.acceptNodeTransformer(propagator);
+        SubstitutionResults<? extends DelimiterCommutativeJoinNode> substitutionResults =
+                originalFocusNode.applyDescendentSubstitution(substitution);
 
-        return new FocusNodeUpdate(newFocusNode, Optional.of(substitution), convertIntoEqualities(renamingMap));
+        Optional<? extends DelimiterCommutativeJoinNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
+        Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution =
+                substitutionResults.getSubstitutionToPropagate();
+
+        if (!optionalNewFocusNode.isPresent()) {
+            throw new IllegalStateException("A DelimiterCommutativeJoinNode should remain needed " +
+                    "after applying a substitution");
+        }
+        else if ((!optionalNewSubstitution.isPresent()) || (substitution.equals(optionalNewSubstitution.get()))) {
+            throw new IllegalStateException("This var-2-var substitution is not expected to be changed" +
+                    "after being applied to a DelimiterCommutativeJoinNode.");
+        }
+
+        return new FocusNodeUpdate(optionalNewFocusNode.get(), Optional.of(substitution),
+                convertIntoEqualities(renamingMap));
     }
 
 
