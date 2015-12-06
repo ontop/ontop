@@ -9,9 +9,9 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import org.semanticweb.ontop.pivotalrepr.transformer.BindingTransferTransformer;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionLiftPropagator;
+import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.impl.BasicBindingTransferTransformer;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionLiftPropagatorImpl;
+import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -129,7 +129,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
     private static void propagateSubstitutionToSubTree(ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
                                                        QueryNode rootNode, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
-        SubstitutionLiftPropagator propagator = new SubstitutionLiftPropagatorImpl(substitutionToPropagate);
+        SubstitutionDownPropagator propagator = new SubstitutionDownPropagatorImpl(substitutionToPropagate);
 
 
         Queue<QueryNode> descendantNodeToTransform = new LinkedList<>();
