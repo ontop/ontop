@@ -15,7 +15,6 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationRe
 import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
 import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionDownPropagator;
 import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionUpPropagatorImpl;
 
 import java.util.LinkedList;
 import java.util.Queue;
