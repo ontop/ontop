@@ -35,7 +35,7 @@ public class SubstitutionDownPropagatorImpl extends SubstitutionPropagatorImpl<U
 
             ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
             ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
-                    constructionNodeUnification.getSubstitutionPropagator().getSubstitution();
+                    constructionNodeUnification.getSubstitutionToPropagate();
 
             /**
              * If the substitution has changed, throws the new substitution

@@ -7,9 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
-import org.semanticweb.ontop.pivotalrepr.transformer.StopPropagationException;
-import org.semanticweb.ontop.pivotalrepr.transformer.UnificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,7 +182,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
             ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
             ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
-                    constructionNodeUnification.getSubstitutionPropagator().getSubstitution();
+                    constructionNodeUnification.getSubstitutionToPropagate();
 
             /**
              * If the substitution has changed, throws the new substitution

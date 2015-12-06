@@ -14,10 +14,6 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.InjectiveVar2Va
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import org.semanticweb.ontop.pivotalrepr.transformer.NewSubstitutionException;
-import org.semanticweb.ontop.pivotalrepr.transformer.SubstitutionPropagator;
-import org.semanticweb.ontop.pivotalrepr.transformer.UnificationException;
-import org.semanticweb.ontop.pivotalrepr.transformer.impl.SubstitutionDownPropagatorImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,20 +93,21 @@ public class SubQueryUnificationTools {
      */
     public static class ConstructionNodeUnification {
         private final ConstructionNode unifiedNode;
-        private final SubstitutionPropagator substitutionPropagator;
+        private final ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate;
 
-        protected ConstructionNodeUnification(ConstructionNode unifiedNode,
-                                              SubstitutionPropagator newPropagator) {
+        protected ConstructionNodeUnification(
+                ConstructionNode unifiedNode,
+                ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate) {
             this.unifiedNode = unifiedNode;
-            this.substitutionPropagator = newPropagator;
+            this.substitutionToPropagate = substitutionToPropagate;
         }
 
         public final ConstructionNode getUnifiedNode() {
             return unifiedNode;
         }
 
-        public final SubstitutionPropagator getSubstitutionPropagator() {
-            return substitutionPropagator;
+        public final ImmutableSubstitution<VariableOrGroundTerm> getSubstitutionToPropagate() {
+            return substitutionToPropagate;
         }
     }
 
@@ -149,7 +146,7 @@ public class SubQueryUnificationTools {
              * TODO: explain
              */
             queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, rootUnification.unifiedNode,
-                    rootUnification.substitutionPropagator, renamer);
+                    rootUnification.substitutionToPropagate, renamer);
 
             return queryBuilder.build();
 
@@ -170,46 +167,45 @@ public class SubQueryUnificationTools {
                                                                 IntermediateQuery originalSubQuery,
                                                                 QueryNode originalParentNode,
                                                                 QueryNode unifiedParentNode,
-                                                                SubstitutionPropagator substitutionPropagator,
+                                                                ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
                                                                 QueryNodeRenamer renamer)
             throws IntermediateQueryBuilderException, SubQueryUnificationException {
         for(QueryNode originalChild : originalSubQuery.getChildren(originalParentNode)) {
-            Optional<QueryNode> optionalNewChild;
-            SubstitutionPropagator propagatorForChild;
+
+            QueryNode renamedChild;
             try {
-                QueryNode newChild = originalChild
-                        .acceptNodeTransformer(renamer)
-                        .acceptNodeTransformer(substitutionPropagator);
-                optionalNewChild = Optional.of(newChild);
+                renamedChild = originalChild.acceptNodeTransformer(renamer);
+            } catch (QueryNodeTransformationException | NotNeededNodeException e) {
+                throw new RuntimeException("Unexcepted exception while renaming a node: " + e.getLocalizedMessage());
+            }
 
-                propagatorForChild = substitutionPropagator;
+            Optional<? extends QueryNode> optionalNewChild;
+            Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalSubstitutionForChild;
 
-                /**
-                 * New substitution
-                 * TODO: further explain
-                 */
-            } catch (NewSubstitutionException e) {
-                optionalNewChild = Optional.of(e.getTransformedNode());
-                propagatorForChild = new SubstitutionDownPropagatorImpl(e.getSubstitution());
+            try {
+                SubstitutionResults<? extends QueryNode> substitutionResults =
+                        renamedChild.applyDescendentSubstitution(substitution);
+
+                optionalNewChild = substitutionResults.getOptionalNewNode();
+                optionalSubstitutionForChild = substitutionResults.getSubstitutionToPropagate();
+
             }
             /**
              * Unification rejected by a sub-construction node.
              */
-            catch(UnificationException e) {
+            catch(QueryNodeSubstitutionException e) {
                 throw new SubQueryUnificationException(e.getMessage());
             }
+
             /**
-             * No new child because not needed anymore.
-             */ catch(NotNeededNodeException e) {
-                optionalNewChild = Optional.absent();
-                propagatorForChild = substitutionPropagator;
-            }
-            /**
-             * Unexpected
+             * Stopping the propagation
+             * TODO: support this case
              */
-            catch (QueryNodeTransformationException e) {
-                throw new RuntimeException("Unexpected: " + e.getLocalizedMessage());
+            if (!optionalSubstitutionForChild.isPresent()) {
+                throw new RuntimeException("Stopping the propagation to children is not yet supported. TO BE DONE");
             }
+
+
             Optional<ArgumentPosition> optionalPosition = originalSubQuery.getOptionalPosition(originalParentNode,
                     originalChild);
 
@@ -234,7 +230,7 @@ public class SubQueryUnificationTools {
 
             // Recursive call
             queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, nextOriginalParent, nextNewParent,
-                    propagatorForChild, renamer);
+                    optionalSubstitutionForChild.get(), renamer);
         }
         return queryBuilder;
     }
@@ -311,8 +307,7 @@ public class SubQueryUnificationTools {
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(targetAtom, newConstructionNodeSubstitution,
                 newOptionalQueryModifiers);
-        return new ConstructionNodeUnification(newConstructionNode,
-                new SubstitutionDownPropagatorImpl(substitutionToPropagate));
+        return new ConstructionNodeUnification(newConstructionNode, substitutionToPropagate);
     }
 
     /**
