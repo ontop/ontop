@@ -10,16 +10,16 @@ import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposa
 public class SubstitutionPropagationProposalImpl implements SubstitutionPropagationProposal {
 
     private final QueryNode focusNode;
-    private final ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate;
+    private final ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate;
 
-    public SubstitutionPropagationProposalImpl(QueryNode focusNode,
-                                               ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate) {
+    public SubstitutionPropagationProposalImpl(
+            QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate) {
         this.focusNode = focusNode;
         this.substitutionToPropagate = substitutionToPropagate;
     }
 
     @Override
-    public ImmutableSubstitution<VariableOrGroundTerm> getSubstitution() {
+    public ImmutableSubstitution<? extends VariableOrGroundTerm> getSubstitution() {
         return substitutionToPropagate;
     }
 

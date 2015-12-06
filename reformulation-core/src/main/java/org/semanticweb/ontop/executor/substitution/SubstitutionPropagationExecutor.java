@@ -44,7 +44,7 @@ public class SubstitutionPropagationExecutor
                                                                         QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException {
         QueryNode originalFocusNode = proposal.getFocusNode();
-        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = proposal.getSubstitution();
+        ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate = proposal.getSubstitution();
 
         propagateUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
         propagateDown(originalFocusNode, substitutionToPropagate, query, treeComponent);
@@ -61,7 +61,7 @@ public class SubstitutionPropagationExecutor
 
 
     private static QueryNode propagateToFocusNode(QueryNode originalFocusNode,
-                                                  ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
+                                                  ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
                                                   QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
 
         SubstitutionResults<? extends QueryNode> substitutionResults =
@@ -180,7 +180,7 @@ public class SubstitutionPropagationExecutor
      * TODO: explain
      *
      */
-    private static void propagateUp(QueryNode focusNode, ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
+    private static void propagateUp(QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
                              IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
 
