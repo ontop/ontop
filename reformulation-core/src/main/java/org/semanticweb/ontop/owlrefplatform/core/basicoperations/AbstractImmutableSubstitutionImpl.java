@@ -8,11 +8,9 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
@@ -242,6 +240,37 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         return constructNewSubstitution(mapBuilder.build());
+    }
+
+    @Override
+    public  Optional<ImmutableBooleanExpression> convertIntoBooleanExpression() {
+        return convertIntoBooleanExpression(this);
+    }
+
+    protected static Optional<ImmutableBooleanExpression> convertIntoBooleanExpression(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+
+        List<ImmutableBooleanExpression> equalities = new ArrayList<>();
+
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ, entry.getKey(), entry.getValue()));
+        }
+
+        switch(equalities.size()) {
+            case 0:
+                return Optional.absent();
+            case 1:
+                return Optional.of(equalities.get(0));
+            default:
+                Iterator<ImmutableBooleanExpression> equalityIterator = equalities.iterator();
+                // Non-final
+                ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
+                while (equalityIterator.hasNext()) {
+                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, aggregateExpression,
+                            equalityIterator.next());
+                }
+                return Optional.of(aggregateExpression);
+        }
     }
 
 

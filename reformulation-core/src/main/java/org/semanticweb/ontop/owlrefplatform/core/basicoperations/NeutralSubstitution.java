@@ -89,6 +89,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public Optional<ImmutableBooleanExpression> convertIntoBooleanExpression() {
+        return AbstractImmutableSubstitutionImpl.convertIntoBooleanExpression(this);
+    }
+
+    @Override
     public final ImmutableMap<Variable, Term> getMap() {
         return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) getImmutableMap();
     }

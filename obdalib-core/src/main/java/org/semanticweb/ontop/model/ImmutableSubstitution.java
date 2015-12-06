@@ -67,4 +67,5 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
 
+    Optional<ImmutableBooleanExpression> convertIntoBooleanExpression();
 }

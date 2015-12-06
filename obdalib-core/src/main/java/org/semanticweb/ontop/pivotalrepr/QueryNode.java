@@ -1,7 +1,9 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 
 /**
  * Immutable.
@@ -51,4 +53,19 @@ public interface QueryNode extends Cloneable {
      * Set of variables mentioned in the node.
      */
     ImmutableSet<Variable> getVariables();
+
+    /**
+     * Applies a substitution coming from below
+     */
+    SubstitutionResults<? extends QueryNode> applyAscendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            QueryNode descendantNode, IntermediateQuery query)
+            throws QueryNodeSubstitutionException;
+
+    /**
+     * Applies a substitution coming from above
+     */
+    SubstitutionResults<? extends QueryNode> applyDescendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
+            throws QueryNodeSubstitutionException;
 }

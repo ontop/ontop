@@ -237,31 +237,4 @@ public class ImmutableSubstitutionTools {
         }
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
     }
-
-    public static Optional<ImmutableBooleanExpression> convertIntoBooleanExpression(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
-
-
-        List<ImmutableBooleanExpression> equalities = new ArrayList<>();
-
-        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ, entry.getKey(), entry.getValue()));
-        }
-
-        switch(equalities.size()) {
-            case 0:
-                return Optional.absent();
-            case 1:
-                return Optional.of(equalities.get(0));
-            default:
-                Iterator<ImmutableBooleanExpression> equalityIterator = equalities.iterator();
-                // Non-final
-                ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
-                while (equalityIterator.hasNext()) {
-                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, aggregateExpression,
-                            equalityIterator.next());
-                }
-                return Optional.of(aggregateExpression);
-        }
-    }
 }
