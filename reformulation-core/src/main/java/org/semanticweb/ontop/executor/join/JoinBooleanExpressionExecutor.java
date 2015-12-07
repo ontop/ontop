@@ -48,7 +48,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
             ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
                     optionalParent.get(), optionalNextSibling);
 
-            ReactToChildDeletionResults deletionResults = reactionProposal.castResults(query.applyProposal(reactionProposal));
+            ReactToChildDeletionResults deletionResults = query.applyProposal(reactionProposal);
 
             return new NodeCentricOptimizationResultsImpl<>(deletionResults.getResultingQuery(),
                     deletionResults.getOptionalNextSibling(), Optional.of(deletionResults.getClosestRemainingAncestor()));

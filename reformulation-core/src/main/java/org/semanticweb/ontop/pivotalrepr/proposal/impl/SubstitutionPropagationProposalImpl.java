@@ -24,11 +24,6 @@ public class SubstitutionPropagationProposalImpl<T extends QueryNode> implements
     }
 
     @Override
-    public NodeCentricOptimizationResults<T> castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults<T>) results;
-    }
-
-    @Override
     public T getFocusNode() {
         return focusNode;
     }

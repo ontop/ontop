@@ -22,11 +22,6 @@ public class PullOutVariableProposalImpl  implements PullOutVariableProposal {
     }
 
     @Override
-    public NodeCentricOptimizationResults<SubTreeDelimiterNode> castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults<SubTreeDelimiterNode>)results;
-    }
-
-    @Override
     public SubTreeDelimiterNode getFocusNode() {
         return focusNode;
     }
