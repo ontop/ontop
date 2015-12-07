@@ -19,6 +19,8 @@ import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults
 import org.semanticweb.ontop.pivotalrepr.proposal.PullOutVariableProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 
+import static org.semanticweb.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionDown;
+
 
 /**
  * TODO: explain
@@ -85,12 +87,10 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
         propagateUpNewEqualities(query, treeComponent, focusNodeUpdate.newFocusNode, focusNodeUpdate.newEqualities);
 
         if (focusNodeUpdate.optionalSubstitution.isPresent()) {
-            throw new RuntimeException("TODO: support the propagation of "
-                    + focusNodeUpdate.optionalSubstitution.get());
+            propagateSubstitutionDown(focusNodeUpdate.newFocusNode, focusNodeUpdate.optionalSubstitution.get(), treeComponent);
         }
-        else {
-            return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
-        }
+
+        return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
     }
 
     /**

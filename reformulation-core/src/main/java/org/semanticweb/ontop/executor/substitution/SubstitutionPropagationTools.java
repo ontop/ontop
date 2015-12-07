@@ -29,9 +29,9 @@ public class SubstitutionPropagationTools {
      * Returns the updated tree component
      *
      */
-    public static QueryTreeComponent propagateDown(final QueryNode focusNode,
-                                     final ImmutableSubstitution<? extends VariableOrGroundTerm> currentSubstitutionToPropagate,
-                                     final QueryTreeComponent treeComponent)
+    public static QueryTreeComponent propagateSubstitutionDown(final QueryNode focusNode,
+                                                               final ImmutableSubstitution<? extends VariableOrGroundTerm> currentSubstitutionToPropagate,
+                                                               final QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException {
 
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
@@ -88,7 +88,7 @@ public class SubstitutionPropagationTools {
                     treeComponent.replaceNode(formerSubNode, newSubNode);
 
                     // Recursive call
-                    propagateDown(newSubNode, newSubstitution, treeComponent);
+                    propagateSubstitutionDown(newSubNode, newSubstitution, treeComponent);
                 }
                 /**
                  * Unhandled case: new substitution to apply to the children of
@@ -127,8 +127,8 @@ public class SubstitutionPropagationTools {
      * Returns the updated tree component
      *
      */
-    public static QueryTreeComponent propagateUp(QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
-                                                  IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
+    public static QueryTreeComponent propagateSubstitutionUp(QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
+                                                             IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
 
         Optional<QueryNode> optionalParent = query.getParent(focusNode);
