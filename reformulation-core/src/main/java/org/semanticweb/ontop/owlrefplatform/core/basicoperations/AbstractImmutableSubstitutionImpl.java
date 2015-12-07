@@ -104,6 +104,29 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return DATA_FACTORY.getDataAtom(predicate, argBuilder.build());
     }
 
+    @Override
+    public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
+            throws ConversionException {
+        DataAtom newDataAtom = applyToDataAtom(dataAtom);
+
+        if (newDataAtom instanceof DistinctVariableDataAtom) {
+            return (DistinctVariableDataAtom) newDataAtom;
+        }
+
+        /**
+         * Checks if new data atom can be converted into a DistinctVariableDataAtom
+         */
+        if (newDataAtom.getArguments().size() == newDataAtom.getVariables().size()) {
+            return DATA_FACTORY.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
+                    (ImmutableList<Variable>)newDataAtom.getArguments());
+        }
+        else {
+            throw new ConversionException("The substitution has transformed a DistinctVariableDataAtom into" +
+                    "a non-DistinctVariableDataAtom: " + newDataAtom);
+        }
+    }
+
+
     /**
      *" "this o g"
      *
