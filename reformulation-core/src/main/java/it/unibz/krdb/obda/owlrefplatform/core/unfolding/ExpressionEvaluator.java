@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -79,20 +78,21 @@ public class ExpressionEvaluator {
 	}
 
 	public boolean evaluateExpressions(CQIE q) {
-		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
-			Function atom = q.getBody().get(atomidx);
+		List<Function> body = q.getBody();
+		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
+			Function atom = body.get(atomidx);
 			Term newatom = eval(atom);
 			if (newatom == OBDAVocabulary.TRUE) {
-				q.getBody().remove(atomidx);
+				body.remove(atomidx);
 				atomidx -= 1;
 				continue;
 			} else if (newatom == OBDAVocabulary.FALSE) {
 				return true;
 			}
-			q.getBody().remove(atomidx);
-			q.getBody().add(atomidx, (Function)newatom);
+			body.set(atomidx, (Function) newatom);
 		}
-		return false;
+		
+		return ComparisonsSatisfiability.unsatisfiable(q);
 	}
 
 	public Term eval(Term expr) {
@@ -242,17 +242,17 @@ public class ExpressionEvaluator {
 		} else if (pred == OBDAVocabulary.EQ) {
 			return evalEqNeq(term, true);
 		} else if (pred == OBDAVocabulary.GT) {
-			return term;
+			return evalGtLt(term, true);
 		} else if (pred == OBDAVocabulary.GTE) {
-			return term;
+			return evalGteLte(term, true);
 		} else if (pred == OBDAVocabulary.IS_NOT_NULL) {
 			return evalIsNullNotNull(term, false);
 		} else if (pred == OBDAVocabulary.IS_NULL) {
 			return evalIsNullNotNull(term, true);
 		} else if (pred == OBDAVocabulary.LT) {
-			return term;
+			return evalGtLt(term, false);
 		} else if (pred == OBDAVocabulary.LTE) {
-			return term;
+			return evalGteLte(term, false);
 		} else if (pred == OBDAVocabulary.NEQ) {
 			return evalEqNeq(term, false);
 		} else if (pred == OBDAVocabulary.NOT) {
@@ -286,6 +286,81 @@ public class ExpressionEvaluator {
 		}
 	}
 
+	private Term evalGteLte(Function term, boolean isgte){
+		Term t1 = term.getTerm(0),
+			 t2 = term.getTerm(1);
+		/*
+		 * Remove '# =< #' or '# >= #'
+		 */ 
+		if (evalEqNeq(term, true) == OBDAVocabulary.TRUE)
+			return OBDAVocabulary.TRUE;
+		
+		if (t1 instanceof Constant && t2 instanceof Constant) {
+			Term result = evalGtLt(term, isgte);
+			if (result instanceof ValueConstant) {
+				return result;
+			}
+		}
+		
+		return term;
+	}
+	
+	private Term evalGtLt(Function term, boolean isgt){
+		Term t1 = term.getTerm(0),
+			 t2 = term.getTerm(1);
+		
+		/*
+		 * Remove '# < #' or '# > #'
+		 */
+		if (evalEqNeq(term, true) == OBDAVocabulary.TRUE) {
+			return OBDAVocabulary.FALSE;
+		}
+		
+		if (t1 instanceof Constant && t2 instanceof Constant) {
+			Constant c1 = (Constant) t1,
+					 c2 = (Constant) t2;
+			
+			if (c1.getType() == null || c2.getType() == null) {
+				return term;
+			}
+			
+			// Normalize less-than (<) to greater-than (>)
+			if (!isgt) {
+				Constant tmp = c1; c1 = c2; c2 = tmp;
+				isgt = true;
+			}
+			
+			Predicate p1 = dtfac.getTypePredicate(c1.getType()),
+			          p2 = dtfac.getTypePredicate(c2.getType());
+			
+			if (dtfac.isInteger(p1) && dtfac.isInteger(p2)) {
+				return fac.getBooleanConstant(
+						Long.parseLong(c1.getValue())
+				      > Long.parseLong(c2.getValue())
+				);
+			} else if (dtfac.isInteger(p1) && dtfac.isFloat(p2)) {
+				return fac.getBooleanConstant(
+						Long.parseLong(c1.getValue())
+				      > Double.parseDouble(c2.getValue())
+				);
+			} else if (dtfac.isFloat(p1) && dtfac.isInteger(p2)) {
+				return fac.getBooleanConstant(
+						Double.parseDouble(c1.getValue())
+				      > Long.parseLong(c2.getValue())
+				);
+			} else if (dtfac.isFloat(p1) && dtfac.isFloat(p2)) {
+				return fac.getBooleanConstant(
+						Double.parseDouble(c1.getValue())
+				      > Double.parseDouble(c2.getValue())
+				);
+			}
+			
+			// TODO extend to non-numeric comparisons? 
+		}
+		
+		return term;
+	}
+	
 	private Term evalNonBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.SPARQL_STR) {
@@ -496,9 +571,8 @@ public class ExpressionEvaluator {
 		return (dtfac.isInteger(pred) || dtfac.isFloat(pred));
 	}
 	
-	private boolean isNumeric(ValueConstant constant) {
-		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = dtfac.getDatatype(constantValue);
+	private boolean isNumeric(Constant constant) {
+		Predicate.COL_TYPE type = constant.getType();
 		if (type != null) {
 			Predicate p = dtfac.getTypePredicate(type);
 			return isNumeric(p);
@@ -732,16 +806,47 @@ public class ExpressionEvaluator {
 		 */
 		Term eval1 = teval1 instanceof Function ? teval1 : teval2;
 		Term eval2 = teval1 instanceof Function ? teval2 : teval1;
-
+		
 		if (eval1 instanceof Variable || eval2 instanceof Variable) {
-			// no - op
+			if (eval1 instanceof Variable &&
+				eval2 instanceof Variable &&
+				eval1.equals(eval2)){
+				return fac.getBooleanConstant(eq);
+			}
 		} 
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
 			if (eval1.equals(eval2)) 
 				return fac.getBooleanConstant(eq);
 			else 
 				return fac.getBooleanConstant(!eq);
+			/*
+			 * FIXME (acondolu)
+			 * is the followin code necessary?
+			 * (?) How to treat the equality when the two constants have different
+			 * datatypes? Should they be cast? For example, the case Eq(1, 1.0) ?
+			 * The code above looks for syntactic equality.
+			 
+			 Constant c1 = (Constant) eval1,
+					 c2 = (Constant) eval2;
+			if (c1.getType() == null || c2.getType() == null) {
+				return term;
+			}
 			
+			Predicate p1 = dtfac.getTypePredicate(c1.getType()),
+			          p2 = dtfac.getTypePredicate(c2.getType());
+			
+			if (dtfac.isInteger(p1) && dtfac.isInteger(p2)) {
+				return fac.getBooleanConstant(eq == (
+						Long.parseLong(c1.getValue())
+				     == Long.parseLong(c2.getValue())
+				));
+			} else if (dtfac.isFloat(p1) && dtfac.isFloat(p2)) {
+				return fac.getBooleanConstant(eq == (
+						Double.parseDouble(c1.getValue())
+				     == Double.parseDouble(c2.getValue())
+				));
+			}
+			*/
 		} 
 		else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;
@@ -956,7 +1061,7 @@ public class ExpressionEvaluator {
 				return eval2;
 			} else {
 				/*
-				 * Its an Or, and the first was true, so it doesn't matter whats
+				 * It's an Or, and the first was true, so it doesn't matter what's
 				 * next.
 				 */
 				return OBDAVocabulary.TRUE;
@@ -967,16 +1072,11 @@ public class ExpressionEvaluator {
 				return fac.getBooleanConstant(!and);
 			} 
 			else if (eval2 == OBDAVocabulary.FALSE) {
-				// TODO: check whether the two FALSE were INTENDED
-				//if (and) {
-					return OBDAVocabulary.FALSE;
-				//} else {
-				//	return OBDAVocabulary.FALSE;
-				//}
+				return OBDAVocabulary.FALSE;
 			} else if (and) {
 				/*
-				 * Its an And, and the first was false, so it doesn't matter
-				 * whats next.
+				 * It's an And, and the first was false, so it doesn't matter
+				 * what's next.
 				 */
 				return OBDAVocabulary.FALSE;
 			} else {
@@ -984,7 +1084,7 @@ public class ExpressionEvaluator {
 			}
 		}
 		/*
-		 * None of the subnodes evaluated to true or false, we have functions
+		 * None of the sub-nodes evaluated to true or false, we have functions
 		 * that need to be evaluated
 		 */
 		// TODO check if we can further optimize this
