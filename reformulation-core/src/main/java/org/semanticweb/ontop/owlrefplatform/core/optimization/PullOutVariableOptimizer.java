@@ -10,7 +10,6 @@ import org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigatio
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PullOutVariableProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PullOutVariableProposalImpl;
 
@@ -80,14 +79,15 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     /**
      * TODO: explain
      */
-    private NextNodeAndQuery optimizeJoinLikeNodeChildren(IntermediateQuery initialQuery,
-                                                                                     JoinLikeNode initialJoinLikeNode)
+    private NextNodeAndQuery optimizeJoinLikeNodeChildren(IntermediateQuery initialQuery, JoinLikeNode initialJoinLikeNode)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         // Non-final variables
         IntermediateQuery currentQuery = initialQuery;
         QueryNode currentJoinLikeNode = initialJoinLikeNode;
         Optional<QueryNode> optionalCurrentChildNode = currentQuery.getFirstChild(initialJoinLikeNode);
+
+        int startIndex = getStartIndex(initialQuery, Optional.of((QueryNode)initialJoinLikeNode));
 
         Set<Variable> alreadySeenVariables = new HashSet<>();
 
@@ -104,7 +104,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                  * May update alreadySeenVariables (append-only)!!
                  */
                 Optional<PullOutVariableProposal> optionalProposal = buildProposal((SubTreeDelimiterNode) childNode,
-                        alreadySeenVariables);
+                        alreadySeenVariables, startIndex);
 
                 /**
                  * Applies the proposal and extracts the next node (and query)
@@ -138,6 +138,16 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     }
 
     /**
+     * TODO: explain!!!!
+     *
+     * By default, returns 0 (checks all the arguments)
+     *
+     */
+    protected int getStartIndex(IntermediateQuery query, Optional<QueryNode> optionalParentNode) {
+        return 0;
+    }
+
+    /**
      * TODO: explain
      *
      * By default, does nothing
@@ -145,7 +155,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      * Can be overwritten (useful for extensions).
      *
      */
-    protected UpdatedNodeAndQuery<JoinLikeNode> optimizeJoinLikeNode(IntermediateQuery initialQuery,
+    private UpdatedNodeAndQuery<JoinLikeNode> optimizeJoinLikeNode(IntermediateQuery initialQuery,
                                                                      JoinLikeNode initialJoinLikeNode) {
         return new UpdatedNodeAndQuery<>(initialJoinLikeNode, initialQuery);
     }
@@ -155,14 +165,15 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      *
      * TODO: explain it further
      */
-    protected Optional<PullOutVariableProposal> buildProposal(SubTreeDelimiterNode delimiterNode,
-                                                            Set<Variable> alreadySeenVariables) {
+    private Optional<PullOutVariableProposal> buildProposal(SubTreeDelimiterNode delimiterNode,
+                                                            Set<Variable> alreadySeenVariables,
+                                                            int startIndex) {
         ImmutableList.Builder<Integer> variableIndexListBuilder = ImmutableList.builder();
 
         DataAtom dataAtom = delimiterNode.getProjectionAtom();
         ImmutableList<? extends VariableOrGroundTerm> arguments = dataAtom.getArguments();
 
-        for (int i=0; i < arguments.size(); i++) {
+        for (int i=startIndex; i < arguments.size(); i++) {
             VariableOrGroundTerm argument = arguments.get(i);
             if (argument instanceof Variable) {
                 Variable variable = (Variable) argument;
@@ -190,10 +201,13 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      *
      */
-    protected NextNodeAndQuery optimizeDataNode(IntermediateQuery currentQuery, DataNode currentNode)
+    private NextNodeAndQuery optimizeDataNode(IntermediateQuery currentQuery, DataNode currentNode)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-            Optional<PullOutVariableProposal> optionalProposal = buildProposal(currentNode, new HashSet<Variable>());
+        int startIndex = getStartIndex(currentQuery, currentQuery.getParent(currentNode));
+
+        Optional<PullOutVariableProposal> optionalProposal = buildProposal(currentNode, new HashSet<Variable>(), startIndex);
+
         if (optionalProposal.isPresent()) {
             PullOutVariableProposal proposal = optionalProposal.get();
             NodeCentricOptimizationResults<SubTreeDelimiterNode> results = currentQuery.applyProposal(proposal);
