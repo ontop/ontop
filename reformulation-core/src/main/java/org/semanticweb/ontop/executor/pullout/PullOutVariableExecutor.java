@@ -84,7 +84,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
 
         treeComponent.replaceNode(originalFocusNode, focusNodeUpdate.newFocusNode);
 
-        propagateUpNewEqualities(query, treeComponent, focusNodeUpdate.newFocusNode, focusNodeUpdate.newEqualities);
+        propagateUpNewEqualities(treeComponent, focusNodeUpdate.newFocusNode, focusNodeUpdate.newEqualities);
 
         if (focusNodeUpdate.optionalSubstitution.isPresent()) {
             propagateSubstitutionDown(focusNodeUpdate.newFocusNode, focusNodeUpdate.optionalSubstitution.get(), treeComponent);
@@ -99,7 +99,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      * TODO: make this code more better by not relying that much on instance checking!
      *
      */
-    private void propagateUpNewEqualities(IntermediateQuery query, QueryTreeComponent treeComponent,
+    private void propagateUpNewEqualities(QueryTreeComponent treeComponent,
                                           SubTreeDelimiterNode newFocusNode, ImmutableBooleanExpression newEqualities)
             throws IllegalTreeUpdateException, InvalidQueryOptimizationProposalException {
 
