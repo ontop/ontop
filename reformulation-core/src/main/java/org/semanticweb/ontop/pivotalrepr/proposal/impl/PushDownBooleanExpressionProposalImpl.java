@@ -25,11 +25,6 @@ public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExp
     }
 
     @Override
-    public NodeCentricOptimizationResults<JoinOrFilterNode> castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults<JoinOrFilterNode>) results;
-    }
-
-    @Override
     public JoinOrFilterNode getFocusNode() {
         return focusNode;
     }

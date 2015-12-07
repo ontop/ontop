@@ -34,9 +34,9 @@ public class BasicJoinOptimizer extends TopDownOptimizer {
 
             if (currentNode instanceof InnerJoinNode) {
                 InnerJoinOptimizationProposal joinProposal = new InnerJoinOptimizationProposalImpl((InnerJoinNode) currentNode);
-                NodeCentricOptimizationResults optimizationResults;
+                NodeCentricOptimizationResults<InnerJoinNode> optimizationResults;
                 try {
-                    optimizationResults = joinProposal.castResults(currentQuery.applyProposal(joinProposal));
+                    optimizationResults = currentQuery.applyProposal(joinProposal);
                 } catch (InvalidQueryOptimizationProposalException e) {
                     throw new RuntimeException(e.getMessage());
                 }

@@ -113,8 +113,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                 if (optionalProposal.isPresent()) {
                     PullOutVariableProposal proposal = optionalProposal.get();
 
-                    NodeCentricOptimizationResults<SubTreeDelimiterNode> results = proposal.castResults(
-                            currentQuery.applyProposal(proposal));
+                    NodeCentricOptimizationResults<SubTreeDelimiterNode> results = currentQuery.applyProposal(proposal);
 
                     currentQuery = results.getResultingQuery();
                     optionalCurrentChildNode = results.getOptionalNextSibling();
@@ -197,9 +196,9 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             Optional<PullOutVariableProposal> optionalProposal = buildProposal(currentNode, new HashSet<Variable>());
         if (optionalProposal.isPresent()) {
             PullOutVariableProposal proposal = optionalProposal.get();
-            ProposalResults results = currentQuery.applyProposal(proposal);
+            NodeCentricOptimizationResults<SubTreeDelimiterNode> results = currentQuery.applyProposal(proposal);
 
-            return getNextNodeAndQuery(proposal.castResults(results));
+            return getNextNodeAndQuery(results);
 
         }
         else {
