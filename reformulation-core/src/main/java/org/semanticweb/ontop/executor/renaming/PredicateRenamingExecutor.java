@@ -11,7 +11,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 /**
  * TODO: explain
  */
-public class PredicateRenamingExecutor implements StandardProposalExecutor<PredicateRenamingProposal> {
+public class PredicateRenamingExecutor implements StandardProposalExecutor<PredicateRenamingProposal, ProposalResults> {
 
     @Override
     public ProposalResults apply(PredicateRenamingProposal proposal, IntermediateQuery inputQuery)

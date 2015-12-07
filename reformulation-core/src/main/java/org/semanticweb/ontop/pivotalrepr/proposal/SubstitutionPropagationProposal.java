@@ -8,7 +8,7 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
  * Proposal to apply a substitution to a focus node and to propagate it down and up.
  *
  */
-public interface SubstitutionPropagationProposal extends NodeCentricOptimizationProposal<QueryNode> {
+public interface SubstitutionPropagationProposal<T extends QueryNode> extends NodeCentricOptimizationProposal<T> {
 
     ImmutableSubstitution<? extends VariableOrGroundTerm> getSubstitution();
 

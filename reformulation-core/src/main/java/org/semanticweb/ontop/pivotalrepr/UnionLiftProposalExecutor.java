@@ -1,6 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 
-public interface UnionLiftProposalExecutor extends StandardProposalExecutor<UnionLiftProposal> {
+import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
+
+public interface UnionLiftProposalExecutor extends StandardProposalExecutor<UnionLiftProposal, ProposalResults> {
 
 }

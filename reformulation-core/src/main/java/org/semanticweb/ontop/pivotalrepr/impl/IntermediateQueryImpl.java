@@ -142,7 +142,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * TODO: make this extensible by using Guice as a dependency-injection solution for loading arbitrary ProposalExecutor
      */
     @Override
-    public ProposalResults applyProposal(QueryOptimizationProposal proposal, boolean requireUsingInternalExecutor)
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
+                                                       boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         /**
@@ -157,7 +158,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
              */
             for (Class proposalClass : proposalClassHierarchy) {
                 if (STD_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                    StandardProposalExecutor executor;
+                    StandardProposalExecutor<P, R> executor;
                     try {
                         executor = STD_EXECUTOR_CLASSES.get(proposalClass).newInstance();
                     } catch (InstantiationException | IllegalAccessException e) {
@@ -173,7 +174,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          */
         for (Class proposalClass : proposalClassHierarchy) {
             if (INTERNAL_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                InternalProposalExecutor executor;
+                InternalProposalExecutor<P, R> executor;
                 try {
                     executor = INTERNAL_EXECUTOR_CLASSES.get(proposalClass).newInstance();
                 } catch (InstantiationException | IllegalAccessException e ) {
@@ -195,7 +196,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ProposalResults applyProposal(QueryOptimizationProposal propagationProposal)
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
         return applyProposal(propagationProposal, false);
     }

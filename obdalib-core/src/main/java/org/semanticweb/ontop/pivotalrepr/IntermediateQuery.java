@@ -58,13 +58,15 @@ public interface IntermediateQuery {
      * In principle, the proposal could be carefully checked, beware!
      *
      */
-    ProposalResults applyProposal(QueryOptimizationProposal proposal)
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      * May forbid the use of a StandardProposalExecutor.
      */
-    ProposalResults applyProposal(QueryOptimizationProposal propagationProposal, boolean requireUsingInternalExecutor) throws InvalidQueryOptimizationProposalException, EmptyQueryException;
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
+                                                                                        boolean requireUsingInternalExecutor)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      * TODO: find an exception to throw

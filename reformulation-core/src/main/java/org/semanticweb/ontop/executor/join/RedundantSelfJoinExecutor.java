@@ -453,23 +453,16 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
             // TODO: filter the non-bound variables from the substitution before propagating!!!
 
-            SubstitutionPropagationProposal propagationProposal = new SubstitutionPropagationProposalImpl(topJoinNode,
-                    optionalSubstitution.get());
+            SubstitutionPropagationProposal<InnerJoinNode> propagationProposal = new SubstitutionPropagationProposalImpl<>(
+                    topJoinNode, optionalSubstitution.get());
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {
-                NodeCentricOptimizationResults results = propagationProposal.castResults(query.applyProposal(
-                        propagationProposal, true));
+                NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(propagationProposal, true);
 
-                Optional<QueryNode> optionalNewJoinNode = results.getOptionalNewNode();
+                Optional<InnerJoinNode> optionalNewJoinNode = results.getOptionalNewNode();
                 if (optionalNewJoinNode.isPresent()) {
-                    QueryNode newNode = optionalNewJoinNode.get();
-                    if (newNode instanceof InnerJoinNode) {
-                        return (InnerJoinNode) newNode;
-                    }
-                    else {
-                        throw new RuntimeException("Not a inner join returned after the substitution propagation");
-                    }
+                    return optionalNewJoinNode.get();
                 }
                 else {
                     throw new RuntimeException("No focus node returned after the substitution propagation");
