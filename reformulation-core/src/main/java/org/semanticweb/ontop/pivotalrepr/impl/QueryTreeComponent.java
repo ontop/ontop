@@ -2,6 +2,8 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 /**
@@ -68,4 +70,22 @@ public interface QueryTreeComponent {
      * Inserts a new node between a node and its former parent (now grand-parent)
      */
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
+
+    /**
+     * Returns a variable that is not used in the intermediate query.
+     */
+    Variable generateNewVariable();
+
+    /**
+     * Returns a variable that is not used in the intermediate query.
+     *
+     * The new variable always differs from the former one.
+     *
+     */
+    Variable generateNewVariable(Variable formerVariable);
+
+    /**
+     * All the possibly already allocated variables
+     */
+    ImmutableSet<Variable> getKnownVariables();
 }

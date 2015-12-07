@@ -2,12 +2,13 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.Variable;
 
 import java.util.Map;
+
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.isInjective;
 
 public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements InjectiveVar2VarSubstitution {
     private final boolean isEmpty;
@@ -23,11 +24,9 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
          * Injectivity constraint
          */
         if (!isEmpty) {
-            ImmutableSet<Variable> valueSet = ImmutableSet.copyOf(substitutionMap.values());
-            if (valueSet.size() < substitutionMap.keySet().size()) {
+            if (!isInjective(substitutionMap)) {
                 throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
             }
-
         }
     }
 

@@ -31,11 +31,6 @@ public class ReactToChildDeletionProposalImpl implements ReactToChildDeletionPro
     }
 
     @Override
-    public ReactToChildDeletionResults castResults(ProposalResults results) {
-        return (ReactToChildDeletionResults) results;
-    }
-
-    @Override
     public Optional<QueryNode> getOptionalNextSibling() {
         return optionalNextSibling;
     }

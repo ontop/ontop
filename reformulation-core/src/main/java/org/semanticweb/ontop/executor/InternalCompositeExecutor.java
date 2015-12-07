@@ -12,7 +12,7 @@ import java.util.Iterator;
 /**
  * TODO: explain
  */
-public abstract class InternalCompositeExecutor<P extends QueryOptimizationProposal, R extends ProposalResults>
+public abstract class InternalCompositeExecutor<P extends QueryOptimizationProposal<R>, R extends ProposalResults>
         implements InternalProposalExecutor<P, R> {
 
     @Override

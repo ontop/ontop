@@ -6,7 +6,7 @@ import org.semanticweb.ontop.pivotalrepr.DataNode;
 /**
  * TODO: explain
  */
-public interface GroundTermRemovalFromDataNodeProposal extends QueryOptimizationProposal {
+public interface GroundTermRemovalFromDataNodeProposal extends QueryOptimizationProposal<ProposalResults> {
 
     /**
      * TODO: find a better name

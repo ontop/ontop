@@ -3,11 +3,14 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -71,6 +74,30 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public ImmutableSet<Variable> getVariables() {
+        ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
+
+        for (VariableOrGroundTerm term : dataAtom.getArguments()) {
+            if (term instanceof Variable)
+                collectedVariableBuilder.add((Variable)term);
+        }
+
+        ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
+
+        collectedVariableBuilder.addAll(substitutionMap.keySet());
+        for (ImmutableTerm term : substitutionMap.values()) {
+            if (term instanceof Variable) {
+                collectedVariableBuilder.add((Variable)term);
+            }
+            else if (term instanceof ImmutableFunctionalTerm) {
+                collectedVariableBuilder.addAll(((ImmutableFunctionalTerm)term).getVariables());
+            }
+        }
+
+        return collectedVariableBuilder.build();
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution() {
         if (substitution.isEmpty())
             return substitution;
@@ -93,6 +120,87 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         return newSubstitution;
 
+    }
+
+    /**
+     * TODO: explain
+     */
+    @Override
+    public SubstitutionResults<ConstructionNode> applyAscendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            QueryNode descendantNode, IntermediateQuery query) {
+        ImmutableMap<Variable, ImmutableTerm> formerNodeSubstitutionMap = getSubstitution()
+                .getImmutableMap();
+        ImmutableSet<Variable> boundVariables = formerNodeSubstitutionMap.keySet();
+
+        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
+        newSubstitutionMapBuilder.putAll(formerNodeSubstitutionMap);
+
+        ImmutableSet<Variable> projectedVariables = getProjectionAtom().getVariables();
+
+        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : substitution.getImmutableMap().entrySet()) {
+            Variable replacedVariable = entry.getKey();
+            if (projectedVariables.contains(replacedVariable)) {
+                if (boundVariables.contains(replacedVariable)) {
+                    throw new RuntimeException(
+                            "Inconsistent query: an already bound has been also found in the sub-tree: "
+                                    + replacedVariable);
+                }
+                else {
+                    newSubstitutionMapBuilder.put(replacedVariable, entry.getValue());
+                }
+            }
+        }
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
+                newSubstitutionMapBuilder.build());
+
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(getProjectionAtom(),
+                newSubstitution, getOptionalModifiers());
+
+        /**
+         * Stops to propagate the substitution
+         */
+        return new SubstitutionResultsImpl<>(newConstructionNode);
+    }
+
+    /**
+     * TODO: explain
+     */
+    @Override
+    public SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
+            throws QueryNodeSubstitutionException {
+        DataAtom newProjectionAtom = substitution.applyToDataAtom(getProjectionAtom());
+
+        try {
+            /**
+             * TODO: explain why it makes sense (interface)
+             */
+            SubQueryUnificationTools.ConstructionNodeUnification constructionNodeUnification =
+                    SubQueryUnificationTools.unifyConstructionNode(this, newProjectionAtom);
+
+            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
+            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
+                    constructionNodeUnification.getSubstitutionToPropagate();
+
+            /**
+             * If the substitution has changed, throws the new substitution
+             * and the new construction node so that the "client" can continue
+             * with the new substitution (for the children nodes).
+             */
+            if (!getSubstitution().equals(newSubstitutionToPropagate)) {
+                return new SubstitutionResultsImpl<>(newConstructionNode, newSubstitutionToPropagate);
+            }
+
+            /**
+             * Otherwise, continues with the current substitution
+             */
+            return new SubstitutionResultsImpl<>(newConstructionNode, substitution);
+
+        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+            throw new QueryNodeSubstitutionException(e.getMessage());
+        }
     }
 
     @Override

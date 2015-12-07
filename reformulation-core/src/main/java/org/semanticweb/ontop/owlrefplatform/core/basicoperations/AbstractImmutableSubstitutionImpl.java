@@ -8,11 +8,9 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.AtomPredicate;
 import org.semanticweb.ontop.model.DataAtom;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
@@ -45,7 +43,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         ImmutableList.Builder<ImmutableTerm> subTermsBuilder = ImmutableList.builder();
 
-        for (ImmutableTerm subTerm : functionalTerm.getImmutableTerms()) {
+        for (ImmutableTerm subTerm : functionalTerm.getArguments()) {
             subTermsBuilder.add(apply(subTerm));
         }
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
@@ -97,7 +95,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
          * Throws a ConversionException if this cast is impossible.
          */
         ImmutableList.Builder<VariableOrGroundTerm> argBuilder = ImmutableList.builder();
-        for (ImmutableTerm subTerm : newFunctionalTerm.getImmutableTerms()) {
+        for (ImmutableTerm subTerm : newFunctionalTerm.getArguments()) {
             if (!(subTerm instanceof VariableOrGroundTerm))
                 throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
             argBuilder.add((VariableOrGroundTerm)subTerm);
@@ -105,6 +103,29 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
         return DATA_FACTORY.getDataAtom(predicate, argBuilder.build());
     }
+
+    @Override
+    public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
+            throws ConversionException {
+        DataAtom newDataAtom = applyToDataAtom(dataAtom);
+
+        if (newDataAtom instanceof DistinctVariableDataAtom) {
+            return (DistinctVariableDataAtom) newDataAtom;
+        }
+
+        /**
+         * Checks if new data atom can be converted into a DistinctVariableDataAtom
+         */
+        if (newDataAtom.getArguments().size() == newDataAtom.getVariables().size()) {
+            return DATA_FACTORY.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
+                    (ImmutableList<Variable>)newDataAtom.getArguments());
+        }
+        else {
+            throw new ConversionException("The substitution has transformed a DistinctVariableDataAtom into" +
+                    "a non-DistinctVariableDataAtom: " + newDataAtom);
+        }
+    }
+
 
     /**
      *" "this o g"
@@ -242,6 +263,37 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         return constructNewSubstitution(mapBuilder.build());
+    }
+
+    @Override
+    public  Optional<ImmutableBooleanExpression> convertIntoBooleanExpression() {
+        return convertIntoBooleanExpression(this);
+    }
+
+    protected static Optional<ImmutableBooleanExpression> convertIntoBooleanExpression(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+
+        List<ImmutableBooleanExpression> equalities = new ArrayList<>();
+
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ, entry.getKey(), entry.getValue()));
+        }
+
+        switch(equalities.size()) {
+            case 0:
+                return Optional.absent();
+            case 1:
+                return Optional.of(equalities.get(0));
+            default:
+                Iterator<ImmutableBooleanExpression> equalityIterator = equalities.iterator();
+                // Non-final
+                ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
+                while (equalityIterator.hasNext()) {
+                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, aggregateExpression,
+                            equalityIterator.next());
+                }
+                return Optional.of(aggregateExpression);
+        }
     }
 
 

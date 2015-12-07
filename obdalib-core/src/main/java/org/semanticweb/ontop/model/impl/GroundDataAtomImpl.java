@@ -23,11 +23,11 @@ public class GroundDataAtomImpl extends DataAtomImpl implements GroundFunctional
 
     @Override
     public boolean containsGroundTerms() {
-        return !getImmutableTerms().isEmpty();
+        return !getArguments().isEmpty();
     }
 
     @Override
-    public ImmutableList<GroundTerm> getGroundTerms() {
-        return (ImmutableList<GroundTerm>)(ImmutableList<?>)getImmutableTerms();
+    public ImmutableList<? extends GroundTerm> getArguments() {
+        return (ImmutableList<GroundTerm>)super.getArguments();
     }
 }

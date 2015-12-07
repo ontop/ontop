@@ -68,6 +68,12 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
+            throws ConversionException {
+        return dataAtom;
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
         return (ImmutableSubstitution<ImmutableTerm>)g;
     }
@@ -86,6 +92,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     @Override
     public ImmutableSubstitution<ImmutableTerm> orientate(ImmutableSet<Variable> variablesToTryToKeep) {
         return this;
+    }
+
+    @Override
+    public Optional<ImmutableBooleanExpression> convertIntoBooleanExpression() {
+        return AbstractImmutableSubstitutionImpl.convertIntoBooleanExpression(this);
     }
 
     @Override

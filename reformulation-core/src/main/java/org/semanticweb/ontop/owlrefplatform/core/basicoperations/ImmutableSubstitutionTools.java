@@ -3,6 +3,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
@@ -170,8 +171,8 @@ public class ImmutableSubstitutionTools {
             }
         }
 
-        ImmutableList<ImmutableTerm> sourceChildren = sourceFunctionalTerm.getImmutableTerms();
-        ImmutableList<ImmutableTerm> targetChildren = targetFunctionalTerm.getImmutableTerms();
+        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getArguments();
+        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getArguments();
 
         /**
          * Arity equality
@@ -238,30 +239,12 @@ public class ImmutableSubstitutionTools {
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
     }
 
-    public static Optional<ImmutableBooleanExpression> convertIntoBooleanExpression(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    public static boolean isInjective(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+        return isInjective(substitution.getImmutableMap());
+    }
 
-
-        List<ImmutableBooleanExpression> equalities = new ArrayList<>();
-
-        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ, entry.getKey(), entry.getValue()));
-        }
-
-        switch(equalities.size()) {
-            case 0:
-                return Optional.absent();
-            case 1:
-                return Optional.of(equalities.get(0));
-            default:
-                Iterator<ImmutableBooleanExpression> equalityIterator = equalities.iterator();
-                // Non-final
-                ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
-                while (equalityIterator.hasNext()) {
-                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, aggregateExpression,
-                            equalityIterator.next());
-                }
-                return Optional.of(aggregateExpression);
-        }
+    public static boolean isInjective(Map<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
+        ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
+        return valueSet.size() == substitutionMap.keySet().size();
     }
 }

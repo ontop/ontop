@@ -121,8 +121,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             // Applies the proposal and casts the results
             NodeCentricOptimizationResults<JoinOrFilterNode> results;
             try {
-                results = proposal.castResults(
-                        currentQuery.applyProposal(proposal));
+                results = currentQuery.applyProposal(proposal);
             } catch (EmptyQueryException e) {
                 throw new RuntimeException("Unexpected empty query exception while pushing down boolean expressions");
             }
