@@ -18,9 +18,9 @@ public interface JoinLikeNode extends JoinOrFilterNode {
     @Override
     SubstitutionResults<? extends JoinLikeNode> applyAscendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode descendantNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
 
     @Override
     SubstitutionResults<? extends JoinLikeNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) throws QueryNodeSubstitutionException;
 }
