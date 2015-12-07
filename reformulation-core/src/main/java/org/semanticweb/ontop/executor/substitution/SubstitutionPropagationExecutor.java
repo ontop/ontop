@@ -3,21 +3,16 @@ package org.semanticweb.ontop.executor.substitution;
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
-import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
-import static org.semanticweb.ontop.executor.substitution.SubstitutionPropagationTools.propagateDown;
-import static org.semanticweb.ontop.executor.substitution.SubstitutionPropagationTools.propagateUp;
+import static org.semanticweb.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionDown;
+import static org.semanticweb.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionUp;
 
 /**
  * TODO: explain
@@ -49,8 +44,8 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         N originalFocusNode = proposal.getFocusNode();
         ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate = proposal.getSubstitution();
 
-        propagateUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
-        propagateDown(originalFocusNode, substitutionToPropagate, treeComponent);
+        propagateSubstitutionUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
+        propagateSubstitutionDown(originalFocusNode, substitutionToPropagate, treeComponent);
 
 
         N newQueryNode = propagateToFocusNode(originalFocusNode, substitutionToPropagate, treeComponent);
