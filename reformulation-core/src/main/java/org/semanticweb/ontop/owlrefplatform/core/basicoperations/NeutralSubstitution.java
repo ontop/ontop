@@ -68,6 +68,12 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
+            throws ConversionException {
+        return dataAtom;
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
         return (ImmutableSubstitution<ImmutableTerm>)g;
     }

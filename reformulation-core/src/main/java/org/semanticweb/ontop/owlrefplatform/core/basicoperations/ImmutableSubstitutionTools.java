@@ -3,6 +3,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import org.semanticweb.ontop.model.*;
@@ -236,5 +237,14 @@ public class ImmutableSubstitutionTools {
             substitutionMapBuilder.put(entry.getKey(), value);
         }
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+    }
+
+    public static boolean isInjective(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+        return isInjective(substitution.getImmutableMap());
+    }
+
+    public static boolean isInjective(Map<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
+        ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
+        return valueSet.size() == substitutionMap.keySet().size();
     }
 }

@@ -22,7 +22,7 @@ public interface SubTreeDelimiterNode extends QueryNode {
     @Override
     SubstitutionResults<? extends SubTreeDelimiterNode> applyAscendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode descendantNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
 
     @Override
     SubstitutionResults<? extends SubTreeDelimiterNode> applyDescendentSubstitution(

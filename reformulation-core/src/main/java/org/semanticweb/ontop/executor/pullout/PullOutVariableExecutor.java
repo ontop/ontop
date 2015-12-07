@@ -60,7 +60,8 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
             throws InvalidQueryOptimizationProposalException {
         try {
             return pullOut(proposal, query, treeComponent);
-        } catch (IllegalTreeUpdateException | QueryNodeTransformationException | NotNeededNodeException e) {
+        } catch (IllegalTreeUpdateException | QueryNodeTransformationException | NotNeededNodeException
+                | QueryNodeSubstitutionException e) {
             throw new RuntimeException("Unexpected exception: " + e.getMessage());
         }
     }
@@ -71,7 +72,8 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
     private NodeCentricOptimizationResults<SubTreeDelimiterNode> pullOut(PullOutVariableProposal proposal,
                                                                          IntermediateQuery query,
                                                                          QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, IllegalTreeUpdateException, QueryNodeTransformationException, NotNeededNodeException {
+            throws InvalidQueryOptimizationProposalException, IllegalTreeUpdateException, QueryNodeTransformationException,
+            NotNeededNodeException, QueryNodeSubstitutionException {
         SubTreeDelimiterNode originalFocusNode = proposal.getFocusNode();
         ImmutableMap<Integer, VariableRenaming> renamingMap = generateRenamingMap(originalFocusNode, proposal.getIndexes(),
                 query);
@@ -220,7 +222,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      */
     protected FocusNodeUpdate generateNewFocusNodeAndSubstitution(SubTreeDelimiterNode originalFocusNode,
                                                                   ImmutableMap<Integer, VariableRenaming> renamingMap)
-            throws QueryNodeTransformationException, NotNeededNodeException {
+            throws QueryNodeTransformationException, NotNeededNodeException, QueryNodeSubstitutionException {
 
         if (originalFocusNode instanceof ConstructionNode) {
             return generateUpdate4ConstructionNode((ConstructionNode) originalFocusNode, renamingMap);
@@ -296,7 +298,8 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      * TODO: explain
      */
     private FocusNodeUpdate generateUpdate4DelimiterCommutativeJoinNode(DelimiterCommutativeJoinNode originalFocusNode,
-                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap) {
+                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap)
+            throws QueryNodeSubstitutionException {
 
         /**
          * Generates an injective substitution to be propagated
@@ -318,7 +321,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
             throw new IllegalStateException("A DelimiterCommutativeJoinNode should remain needed " +
                     "after applying a substitution");
         }
-        else if ((!optionalNewSubstitution.isPresent()) || (substitution.equals(optionalNewSubstitution.get()))) {
+        else if ((!optionalNewSubstitution.isPresent()) || (!substitution.equals(optionalNewSubstitution.get()))) {
             throw new IllegalStateException("This var-2-var substitution is not expected to be changed" +
                     "after being applied to a DelimiterCommutativeJoinNode.");
         }

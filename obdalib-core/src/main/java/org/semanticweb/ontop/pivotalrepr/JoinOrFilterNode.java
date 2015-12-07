@@ -15,10 +15,10 @@ public interface JoinOrFilterNode extends QueryNode {
     @Override
     SubstitutionResults<? extends JoinOrFilterNode> applyAscendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode descendantNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
 
     @Override
     SubstitutionResults<? extends JoinOrFilterNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) throws QueryNodeSubstitutionException;
 
 }
