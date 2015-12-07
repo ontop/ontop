@@ -47,6 +47,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
 
+    DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
+            throws ConversionException;
+
     /**
      * Returns "f o g" where f is this substitution
      */
@@ -67,4 +70,5 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
 
+    Optional<ImmutableBooleanExpression> convertIntoBooleanExpression();
 }

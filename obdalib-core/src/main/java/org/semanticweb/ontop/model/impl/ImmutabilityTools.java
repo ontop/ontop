@@ -132,4 +132,9 @@ public class ImmutabilityTools {
         }
     }
 
+    public static Optional<ImmutableBooleanExpression> foldBooleanExpressions(
+           ImmutableBooleanExpression... conjunctionOfExpressions) {
+        return foldBooleanExpressions(ImmutableList.copyOf(conjunctionOfExpressions));
+    }
+
 }

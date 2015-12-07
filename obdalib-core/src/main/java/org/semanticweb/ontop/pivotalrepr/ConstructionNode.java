@@ -41,4 +41,13 @@ public interface ConstructionNode extends SubTreeDelimiterNode {
      *
      */
     ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution();
+
+    @Override
+    SubstitutionResults<ConstructionNode> applyAscendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            QueryNode descendantNode, IntermediateQuery query);
+
+    @Override
+    SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) throws QueryNodeSubstitutionException;
 }

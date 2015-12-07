@@ -30,6 +30,7 @@ import java.util.UUID;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
@@ -295,6 +296,23 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
 		return getDataAtom(predicate, ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
+																ImmutableSet<Variable> distinctVariables) {
+		return new DistinctVariableDataAtomImpl(predicate, distinctVariables);
+	}
+
+	@Override
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
+																ImmutableList<Variable> distinctVariables) {
+		return new DistinctVariableDataAtomImpl(predicate, distinctVariables);
+	}
+
+	@Override
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, Variable... distinctVariables) {
+		return new DistinctVariableDataAtomImpl(predicate, distinctVariables);
 	}
 
 	@Override

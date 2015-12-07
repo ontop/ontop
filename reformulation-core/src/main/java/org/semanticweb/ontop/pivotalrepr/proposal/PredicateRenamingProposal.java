@@ -8,7 +8,7 @@ import org.semanticweb.ontop.model.AtomPredicate;
  * Not really an "optimization", but a reshaping.
  *
  */
-public interface PredicateRenamingProposal extends QueryOptimizationProposal {
+public interface PredicateRenamingProposal extends QueryOptimizationProposal<ProposalResults> {
 
     AtomPredicate getFormerPredicate();
 

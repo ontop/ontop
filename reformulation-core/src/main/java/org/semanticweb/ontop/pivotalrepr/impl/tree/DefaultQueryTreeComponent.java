@@ -2,6 +2,9 @@ package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.VariableGenerator;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
@@ -9,6 +12,7 @@ import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeException;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
+import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,16 +22,21 @@ import java.util.Queue;
 
 /**
  * TODO: describe
+ *
+ * Every time a node is added, please call the method collectPossiblyNewVariables()!
  */
 public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     private final QueryTree tree;
+    private final VariableGenerator variableGenerator;
 
     /**
      * TODO: explain
      */
     protected DefaultQueryTreeComponent(QueryTree tree) {
         this.tree = tree;
+        this.variableGenerator = new VariableGenerator(
+                VariableCollector.collectVariables(tree.getNodesInTopDownOrder()));
     }
 
     @Override
@@ -57,6 +66,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
+        collectPossiblyNewVariables(replacingNode);
         tree.replaceNode(previousNode, replacingNode);
     }
 
@@ -128,6 +138,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
                                       Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
+        collectPossiblyNewVariables(replacingNode);
         tree.replaceNodesByOneNode(queryNodes, replacingNode, parentNode, optionalPosition);
     }
 
@@ -136,6 +147,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     public void addChild(QueryNode parentNode, QueryNode childNode,
                          Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
+        collectPossiblyNewVariables(childNode);
         tree.addChild(parentNode, childNode, optionalPosition, true, canReplace);
     }
 
@@ -171,6 +183,29 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
+        collectPossiblyNewVariables(newParentNode);
         tree.insertParent(childNode, newParentNode);
+    }
+
+    @Override
+    public Variable generateNewVariable() {
+        return variableGenerator.generateNewVariable();
+    }
+
+    @Override
+    public Variable generateNewVariable(Variable formerVariable) {
+        return variableGenerator.generateNewVariableFromVar(formerVariable);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return variableGenerator.getKnownVariables();
+    }
+
+    /**
+     * To be called every time a new node is added to the tree component.
+     */
+    private void collectPossiblyNewVariables(QueryNode newNode) {
+        variableGenerator.registerAdditionalVariables(newNode.getVariables());
     }
 }

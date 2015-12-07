@@ -71,12 +71,9 @@ public class GroundTermRemovalFromDataNodeExecutor implements
             throws InvalidQueryOptimizationProposalException {
         ImmutableMultimap.Builder<JoinOrFilterNode, VariableGroundTermPair> multimapBuilder = ImmutableMultimap.builder();
 
-        VariableGenerator variableGenerator = new VariableGenerator(VariableCollector.collectVariables(query));
-
-
         for (DataNode dataNode : dataNodesToSimplify) {
             Optional<JoinOrFilterNode> optionalReceivingNode = findClosestJoinOrFilterNode(query, dataNode);
-            PairExtraction pairExtraction = extractPairs(dataNode, variableGenerator);
+            PairExtraction pairExtraction = extractPairs(dataNode, query);
 
             // Replaces the data node by another one without ground term
             treeComponent.replaceNode(dataNode, pairExtraction.newDataNode);
@@ -115,14 +112,14 @@ public class GroundTermRemovalFromDataNodeExecutor implements
         return optionalFoldExpression.get();
     }
 
-    private PairExtraction extractPairs(DataNode dataNode, VariableGenerator variableGenerator)
+    private PairExtraction extractPairs(DataNode dataNode, IntermediateQuery query)
             throws InvalidQueryOptimizationProposalException {
         ImmutableList.Builder<VariableGroundTermPair> pairBuilder = ImmutableList.builder();
         ImmutableList.Builder<VariableOrGroundTerm> newArgumentBuilder = ImmutableList.builder();
 
-        for (VariableOrGroundTerm argument : dataNode.getProjectionAtom().getVariablesOrGroundTerms()) {
+        for (VariableOrGroundTerm argument : dataNode.getProjectionAtom().getArguments()) {
             if (argument.isGround()) {
-                Variable newVariable = variableGenerator.generateNewVariable();
+                Variable newVariable = query.generateNewVariable();
                 pairBuilder.add(new VariableGroundTermPair(newVariable, (GroundTerm) argument));
                 newArgumentBuilder.add(newVariable);
             }

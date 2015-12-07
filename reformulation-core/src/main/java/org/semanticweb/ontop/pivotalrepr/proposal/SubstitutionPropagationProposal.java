@@ -5,13 +5,11 @@ import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 
 /**
- * TODO: explain
- *
- * The substitution is expected to have already been
+ * Proposal to apply a substitution to a focus node and to propagate it down and up.
  *
  */
-public interface SubstitutionPropagationProposal extends NodeCentricOptimizationProposal<QueryNode> {
+public interface SubstitutionPropagationProposal<T extends QueryNode> extends NodeCentricOptimizationProposal<T> {
 
-    ImmutableSubstitution<VariableOrGroundTerm> getSubstitution();
+    ImmutableSubstitution<? extends VariableOrGroundTerm> getSubstitution();
 
 }

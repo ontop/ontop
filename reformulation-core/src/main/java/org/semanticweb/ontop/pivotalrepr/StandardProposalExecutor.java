@@ -6,8 +6,9 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
-public interface StandardProposalExecutor<T extends QueryOptimizationProposal> extends ProposalExecutor<T> {
+public interface StandardProposalExecutor<P extends QueryOptimizationProposal<R>, R extends ProposalResults>
+        extends ProposalExecutor<P, R> {
 
-    ProposalResults apply (T proposal, IntermediateQuery inputQuery) throws InvalidQueryOptimizationProposalException;
+    R apply (P proposal, IntermediateQuery inputQuery) throws InvalidQueryOptimizationProposalException;
 
 }

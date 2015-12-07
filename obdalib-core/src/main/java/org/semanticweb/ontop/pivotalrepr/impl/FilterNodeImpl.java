@@ -3,6 +3,8 @@ package org.semanticweb.ontop.pivotalrepr.impl;
 
 import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
+import org.semanticweb.ontop.model.ImmutableSubstitution;
+import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.pivotalrepr.*;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
@@ -41,6 +43,22 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public FilterNode changeFilterCondition(ImmutableBooleanExpression newFilterCondition) {
         return new FilterNodeImpl(newFilterCondition);
+    }
+
+    @Override
+    public SubstitutionResults<FilterNode> applyAscendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            QueryNode descendantNode, IntermediateQuery query) {
+        return applyDescendentSubstitution(substitution);
+    }
+
+    @Override
+    public SubstitutionResults<FilterNode> applyDescendentSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+        ImmutableBooleanExpression newFilterCondition = transformBooleanExpression(substitution, getFilterCondition());
+        FilterNode newNode = new FilterNodeImpl(newFilterCondition);
+
+        return new SubstitutionResultsImpl<>(newNode, substitution);
     }
 
     @Override

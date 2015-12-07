@@ -16,9 +16,4 @@ public class InnerJoinOptimizationProposalImpl implements InnerJoinOptimizationP
     public InnerJoinNode getFocusNode() {
         return topJoinNode;
     }
-
-    @Override
-    public NodeCentricOptimizationResults<InnerJoinNode> castResults(ProposalResults results) {
-        return (NodeCentricOptimizationResults<InnerJoinNode>) results;
-    }
 }

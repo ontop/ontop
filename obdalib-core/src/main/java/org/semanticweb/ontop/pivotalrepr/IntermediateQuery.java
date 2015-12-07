@@ -2,6 +2,7 @@ package org.semanticweb.ontop.pivotalrepr;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
 
 /**
@@ -57,13 +58,15 @@ public interface IntermediateQuery {
      * In principle, the proposal could be carefully checked, beware!
      *
      */
-    ProposalResults applyProposal(QueryOptimizationProposal proposal)
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      * May forbid the use of a StandardProposalExecutor.
      */
-    ProposalResults applyProposal(QueryOptimizationProposal propagationProposal, boolean requireUsingInternalExecutor) throws InvalidQueryOptimizationProposalException, EmptyQueryException;
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
+                                                                                        boolean requireUsingInternalExecutor)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      * TODO: find an exception to throw
@@ -75,4 +78,19 @@ public interface IntermediateQuery {
      * Returns itself if is a ConstructionNode or its first ancestor that is a construction node otherwise.
      */
     ConstructionNode getClosestConstructionNode(QueryNode node);
+
+    /**
+     * Returns a variable that is not used in the intermediate query.
+     */
+    Variable generateNewVariable();
+
+    /**
+     * Returns a variable that is not used in the intermediate query.
+     *
+     * The new variable always differs from the former one.
+     *
+     */
+    Variable generateNewVariable(Variable formerVariable);
+
+
 }

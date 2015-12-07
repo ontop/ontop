@@ -34,7 +34,7 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
          */
         if (functionSymbol.equals(OBDAVocabulary.AND)) {
             ImmutableSet.Builder<ImmutableBooleanExpression> setBuilder = ImmutableSet.builder();
-            for (ImmutableTerm subTerm : getImmutableTerms()) {
+            for (ImmutableTerm subTerm : getArguments()) {
                 /**
                  * Recursive call
                  */

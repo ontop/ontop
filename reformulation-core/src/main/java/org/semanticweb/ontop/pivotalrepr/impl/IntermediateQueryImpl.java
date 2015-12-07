@@ -9,6 +9,7 @@ import org.semanticweb.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import org.semanticweb.ontop.executor.expression.PushDownExpressionExecutor;
 import org.semanticweb.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import org.semanticweb.ontop.executor.join.JoinInternalCompositeExecutor;
+import org.semanticweb.ontop.executor.pullout.PullOutVariableExecutor;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.semanticweb.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import org.semanticweb.ontop.model.DataAtom;
@@ -77,6 +78,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
+        internalExecutorMapBuilder.put(PullOutVariableProposal.class, PullOutVariableExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -140,7 +142,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * TODO: make this extensible by using Guice as a dependency-injection solution for loading arbitrary ProposalExecutor
      */
     @Override
-    public ProposalResults applyProposal(QueryOptimizationProposal proposal, boolean requireUsingInternalExecutor)
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
+                                                       boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         /**
@@ -155,7 +158,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
              */
             for (Class proposalClass : proposalClassHierarchy) {
                 if (STD_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                    StandardProposalExecutor executor;
+                    StandardProposalExecutor<P, R> executor;
                     try {
                         executor = STD_EXECUTOR_CLASSES.get(proposalClass).newInstance();
                     } catch (InstantiationException | IllegalAccessException e) {
@@ -171,7 +174,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          */
         for (Class proposalClass : proposalClassHierarchy) {
             if (INTERNAL_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                InternalProposalExecutor executor;
+                InternalProposalExecutor<P, R> executor;
                 try {
                     executor = INTERNAL_EXECUTOR_CLASSES.get(proposalClass).newInstance();
                 } catch (InstantiationException | IllegalAccessException e ) {
@@ -193,7 +196,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ProposalResults applyProposal(QueryOptimizationProposal propagationProposal)
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
         return applyProposal(propagationProposal, false);
     }
@@ -261,8 +264,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
         for (IntensionalDataNode localDataNode : localDataNodes) {
-            // TODO: make it be incremental
-            ImmutableSet<Variable> localVariables = VariableCollector.collectVariables(this);
+
+            ImmutableSet<Variable> localVariables = treeComponent.getKnownVariables();
 
             try {
                 IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
@@ -292,6 +295,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         }
         throw new InconsistentIntermediateQueryException("The node " + node
                 + " has no ancestor that is a ConstructionNode");
+    }
+
+    @Override
+    public Variable generateNewVariable() {
+        return treeComponent.generateNewVariable();
+    }
+
+    @Override
+    public Variable generateNewVariable(Variable formerVariable) {
+        return treeComponent.generateNewVariable(formerVariable);
     }
 
     /**

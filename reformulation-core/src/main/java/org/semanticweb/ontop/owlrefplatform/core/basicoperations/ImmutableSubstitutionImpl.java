@@ -5,9 +5,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Wrapper above a ImmutableMap<Variable, ImmutableTerm> map.
@@ -61,4 +62,5 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
         return new ImmutableSubstitutionImpl<>(map);
     }
+
 }

@@ -11,7 +11,6 @@ import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosi
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
-import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -138,8 +137,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         if (!initialMap.isEmpty()) {
 
             // TODO: explain
-            ImmutableSet<Variable> variablesToKeep = VariableCollector.collectVariables(
-                    query.getClosestConstructionNode(topJoinNode));
+            ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getVariables();
 
             Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
                     query.getMetadata().getPrimaryKeys());
@@ -251,7 +249,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     private static ImmutableList<VariableOrGroundTerm> extractPrimaryKeyArguments(DataAtom atom,
                                                                                   ImmutableList<Integer> primaryKeyPositions) {
         ImmutableList.Builder<VariableOrGroundTerm> listBuilder = ImmutableList.builder();
-        int atomLength = atom.getImmutableTerms().size();
+        int atomLength = atom.getArguments().size();
 
         for (Integer keyIndex : primaryKeyPositions) {
             if (keyIndex > atomLength) {
@@ -455,23 +453,16 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
             // TODO: filter the non-bound variables from the substitution before propagating!!!
 
-            SubstitutionPropagationProposal propagationProposal = new SubstitutionPropagationProposalImpl(topJoinNode,
-                    optionalSubstitution.get());
+            SubstitutionPropagationProposal<InnerJoinNode> propagationProposal = new SubstitutionPropagationProposalImpl<>(
+                    topJoinNode, optionalSubstitution.get());
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {
-                NodeCentricOptimizationResults results = propagationProposal.castResults(query.applyProposal(
-                        propagationProposal, true));
+                NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(propagationProposal, true);
 
-                Optional<QueryNode> optionalNewJoinNode = results.getOptionalNewNode();
+                Optional<InnerJoinNode> optionalNewJoinNode = results.getOptionalNewNode();
                 if (optionalNewJoinNode.isPresent()) {
-                    QueryNode newNode = optionalNewJoinNode.get();
-                    if (newNode instanceof InnerJoinNode) {
-                        return (InnerJoinNode) newNode;
-                    }
-                    else {
-                        throw new RuntimeException("Not a inner join returned after the substitution propagation");
-                    }
+                    return optionalNewJoinNode.get();
                 }
                 else {
                     throw new RuntimeException("No focus node returned after the substitution propagation");

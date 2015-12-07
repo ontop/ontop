@@ -56,10 +56,8 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
     private IntermediateQuery optimizeQuery(IntermediateQuery query) throws EmptyQueryException {
         Tree<ConstructionNodeUpdate> initialConstructionTree = extractConstructionTree(query);
 
-        VariableGenerator variableGenerator = new VariableGenerator(VariableCollector.collectVariables(query));
-
         Tree<ConstructionNodeUpdate> proposedConstructionTree = proposeOptimizedTree(initialConstructionTree,
-                variableGenerator);
+                query);
 
         return applyProposal(query, proposedConstructionTree);
     }
@@ -135,7 +133,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      *
      */
     private static Tree<ConstructionNodeUpdate> proposeOptimizedTree(Tree<ConstructionNodeUpdate> initialConstructionTree,
-                                                                     VariableGenerator variableGenerator) {
+                                                                     IntermediateQuery query) {
 
         /**
          * Non-final variable (will be re-assigned) multiple times.
@@ -159,7 +157,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
              * Main operation: updates the current node and its children.
              */
             if (currentZipper.hasChildren()) {
-                currentZipper = optimizeCurrentNode(currentZipper, variableGenerator);
+                currentZipper = optimizeCurrentNode(currentZipper, query);
             }
 
             /**
@@ -193,10 +191,9 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      *
      */
     private static TreeZipper<ConstructionNodeUpdate> optimizeCurrentNode(TreeZipper<ConstructionNodeUpdate> currentZipper,
-                                                                          VariableGenerator variableGenerator) {
+                                                                          IntermediateQuery query) {
 
-        Option<ImmutableSubstitution<ImmutableTerm>> optionalSubstitutionToLift = liftBindings(currentZipper,
-                variableGenerator);
+        Option<ImmutableSubstitution<ImmutableTerm>> optionalSubstitutionToLift = liftBindings(currentZipper, query);
         if (optionalSubstitutionToLift.isNone()) {
             return currentZipper;
         }
@@ -213,7 +210,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      */
     private static Option<ImmutableSubstitution<ImmutableTerm>> liftBindings(TreeZipper<ConstructionNodeUpdate> currentZipper,
-                                                                             VariableGenerator variableGenerator) {
+                                                                             IntermediateQuery query) {
 
         final Option<TreeZipper<ConstructionNodeUpdate>> optionalFirstChildZipper = currentZipper.firstChild();
         if (optionalFirstChildZipper.isNone()) {
@@ -224,7 +221,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
                 .getMostRecentConstructionNode().getSubstitution();
 
         // Non-final
-        PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution, variableGenerator);
+        PartialUnion<ImmutableTerm> currentUnion = new PartialUnion<>(firstChildSubstitution, query);
         // Non-final
         Option<TreeZipper<ConstructionNodeUpdate>> optionalChildZipper = firstChild.right();
 
