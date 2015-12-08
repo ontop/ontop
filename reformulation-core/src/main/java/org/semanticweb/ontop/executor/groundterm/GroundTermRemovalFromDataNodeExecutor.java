@@ -90,7 +90,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
                 ImmutableBooleanExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
                 FilterNode newFilterNode = new FilterNodeImpl(joiningCondition);
                 try {
-                    treeComponent.insertParent(dataNode, newFilterNode);
+                    treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
                 } catch (IllegalTreeUpdateException e) {
                     throw new RuntimeException("Unexpected exception: " + e);
                 }
@@ -170,7 +170,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
         while (optionalAncestor.isPresent()) {
             QueryNode ancestor = optionalAncestor.get();
 
-            if ((ancestor instanceof InnerJoinNode )
+            if ((ancestor instanceof CommutativeJoinNode)
                     || (ancestor instanceof FilterNode)) {
                 return Optional.of((JoinOrFilterNode) ancestor);
             }
@@ -236,13 +236,10 @@ public class GroundTermRemovalFromDataNodeExecutor implements
     protected JoinOrFilterNode generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                          ImmutableBooleanExpression newExpression) {
         if (formerNode instanceof FilterNode) {
-            return new FilterNodeImpl(newExpression);
+            return ((FilterNode)formerNode).changeFilterCondition(newExpression);
         }
-        else if (formerNode instanceof InnerJoinNode) {
-            return new InnerJoinNodeImpl(Optional.of(newExpression));
-        }
-        else if (formerNode instanceof LeftJoinNode) {
-            return new LeftJoinNodeImpl(Optional.of(newExpression));
+        else if (formerNode instanceof JoinLikeNode) {
+            return ((JoinLikeNode)formerNode).changeOptionalFilterCondition(Optional.of(newExpression));
         }
         else {
             throw new RuntimeException("This type of query node is not supported: " + formerNode.getClass());
