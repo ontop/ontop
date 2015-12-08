@@ -3,12 +3,13 @@ package org.semanticweb.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.AtomPredicate;
+import org.semanticweb.ontop.model.GroundDataAtom;
 import org.semanticweb.ontop.model.GroundFunctionalTerm;
 import org.semanticweb.ontop.model.GroundTerm;
 
-public class GroundDataAtomImpl extends DataAtomImpl implements GroundFunctionalTerm {
+public class GroundDataAtomImpl extends DataAtomImpl implements GroundDataAtom {
 
-    protected GroundDataAtomImpl(AtomPredicate predicate, ImmutableList<GroundTerm> groundTerms) {
+    protected GroundDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends GroundTerm> groundTerms) {
         super(predicate, groundTerms);
     }
 
@@ -28,6 +29,6 @@ public class GroundDataAtomImpl extends DataAtomImpl implements GroundFunctional
 
     @Override
     public ImmutableList<? extends GroundTerm> getArguments() {
-        return (ImmutableList<GroundTerm>)super.getArguments();
+        return (ImmutableList<? extends GroundTerm>)super.getArguments();
     }
 }
