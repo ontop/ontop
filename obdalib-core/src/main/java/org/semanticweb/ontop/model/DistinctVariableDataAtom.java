@@ -1,7 +1,9 @@
 package org.semanticweb.ontop.model;
 
 /**
- * VariableOnlyDataAtom where each argument is different from the others
+ * Data atom where the variables are unique.
+ * Still accepts ground terms.
+ *
  */
-public interface DistinctVariableDataAtom extends VariableOnlyDataAtom {
+public interface DistinctVariableDataAtom extends DataAtom {
 }
