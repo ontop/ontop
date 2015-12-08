@@ -30,13 +30,15 @@ import java.util.UUID;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.IDGenerator;
 import org.semanticweb.ontop.utils.JdbcTypeMapper;
+
+import static org.semanticweb.ontop.model.impl.DataAtomTools.areVariablesDistinct;
+import static org.semanticweb.ontop.model.impl.DataAtomTools.isVariableOnly;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
@@ -270,26 +272,18 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms) {
-		if (GroundTermTools.areGroundTerms(terms)) {
-			return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)terms);
+	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
+		/**
+		 * NB: A GroundDataAtom is a DistinctVariableDataAtom
+		 */
+		if(areVariablesDistinct(arguments)) {
+			return getDistinctVariableDataAtom(predicate, arguments);
+		}
+		else if (isVariableOnly(arguments)) {
+			return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
 		}
 		else {
-			// Non-final
-			boolean noGroundTerm = true;
-			for (VariableOrGroundTerm term : terms) {
-				noGroundTerm = !term.isGround();
-				if (!noGroundTerm) {
-					break;
-				}
-			}
-
-			if (noGroundTerm) {
-				return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)terms);
-			}
-			else {
-				return new NonGroundDataAtomImpl(predicate, terms);
-			}
+			return new NonGroundDataAtomImpl(predicate, arguments);
 		}
 	}
 
@@ -300,29 +294,36 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-																ImmutableSet<Variable> distinctVariables) {
-		return new DistinctVariableDataAtomImpl(predicate, distinctVariables);
+																ImmutableList<? extends VariableOrGroundTerm> arguments) {
+		if (isVariableOnly(arguments)) {
+			return new DistinctVariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
+		}
+		else if (GroundTermTools.areGroundTerms(arguments)) {
+			return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)arguments);
+		}
+		else {
+			return new NonGroundDistinctVariableDataAtomImpl(predicate, arguments);
+		}
 	}
 
 	@Override
-	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-																ImmutableList<Variable> distinctVariables) {
-		return new DistinctVariableDataAtomImpl(predicate, distinctVariables);
+	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm... arguments) {
+		return getDistinctVariableDataAtom(predicate, ImmutableList.copyOf(arguments));
 	}
 
 	@Override
-	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, Variable... distinctVariables) {
-		return new DistinctVariableDataAtomImpl(predicate, distinctVariables);
+	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
+		return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
 	}
 
 	@Override
-	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms) {
-		return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(terms));
-	}
-
-	@Override
-	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms) {
-		return new VariableOnlyDataAtomImpl(predicate, terms);
+	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
+		if (areVariablesDistinct(arguments)) {
+			return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
+		}
+		else {
+			return new VariableOnlyDataAtomImpl(predicate, arguments);
+		}
 	}
 
 	@Override
