@@ -22,6 +22,11 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
         return this;
     }
 
+    @Override
+    public BooleanOperationPredicate getFunctionSymbol() {
+        return (BooleanOperationPredicate) super.getFunctionSymbol();
+    }
+
     /**
      * Recursive
      */

@@ -11,4 +11,7 @@ public interface ImmutableBooleanExpression extends BooleanExpression, Immutable
      * Flattens AND expressions.
      */
     ImmutableSet<ImmutableBooleanExpression> flatten();
+
+    @Override
+    public BooleanOperationPredicate getFunctionSymbol();
 }
