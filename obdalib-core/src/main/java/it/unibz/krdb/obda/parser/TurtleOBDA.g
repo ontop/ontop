@@ -288,13 +288,20 @@ private class ColumnString implements FormatString {
 	
 	//this function returns nested concats 
 	//in case of more than two terms need to be concatted
-	private Function getNestedConcat(String str){
+	private Term getNestedConcat(String str){
 	   ArrayList<Term> terms = new ArrayList<Term>();
 	   terms = addToTermsList(str);
+	   if(terms.size() == 1){
+	      Variable v = (Variable) terms.get(0);
+          variableSet.add(v);
+          return v;
+	   }
+
 	   Function f = dfac.getFunctionConcat(terms.get(0),terms.get(1));
            for(int j=2;j<terms.size();j++){
               f = dfac.getFunctionConcat(f,terms.get(j));
            }
+
 	   return f;
 	}
 
@@ -586,7 +593,8 @@ concat returns [Function value]
 literal returns [Term value]
   : stringLiteral (AT language)? {
        Term lang = $language.value;
-       if (($stringLiteral.value) instanceof Function){
+       Term literal = $stringLiteral.value;
+       if (literal instanceof Function){
           Function f = (Function)$stringLiteral.value;
           if (lang != null){
              value = dfac.getTypedTerm(f,lang);
@@ -594,12 +602,20 @@ literal returns [Term value]
              value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
           }       
        }else{
+
+       //if variable we cannot assign a datatype yet
+       if (literal instanceof Variable)
+       {
+            value = dfac.getTypedTerm(literal, COL_TYPE.LITERAL);
+       }
+       else{
           ValueConstant constant = (ValueConstant)$stringLiteral.value;
           if (lang != null) {
 	     value = dfac.getTypedTerm(constant, lang);
           } else {
       	     value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
           }
+       }
        }
     }
   | dataTypeString { $value = $dataTypeString.value; }

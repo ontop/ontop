@@ -27,7 +27,8 @@ import java.io.Serializable;
  * Represents 
  * 		- ClassAssertion, 
  * 		- ObjectPropertyAssertion 
- * 		- and DataPropertyAssertion 
+ * 		- DataPropertyAssertion 
+ * 	    - AnnotationAssertion
  * from the OWL 2 QL Specification.
  * 
  * No implementation.

@@ -104,7 +104,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL }); 
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 	}
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
@@ -633,10 +633,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	 * <p>
 	 * This method can be used to generate "fresh" rules from a datalog program
 	 * so that it can be used during a resolution step.
-	 * 
-	 * @param rule
-	 * @param suffix
+	 * suffix
 	 *            The integer that will be apended to every variable name
+	 * @param rule
 	 * @return
 	 */
 	@Override

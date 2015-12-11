@@ -30,11 +30,20 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	
 	public DataPropertyExpression createDataProperty(String uri);
 
+	/**
+	 * declare annotation property
+	 *
+	 * @param uri property name
+	 * @return property object
+	 */
+
+	public AnnotationProperty createAnnotationProperty(String uri);
+
 
 	/**
 	 * remove class from the vocabulary
 	 * 
-	 * @param uri property name
+	 * @param classname uri name
 	 */
 	
 	public void removeClass(String classname);
@@ -42,7 +51,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	/**
 	 * remove object property from the vocabulary
 	 * 
-	 * @param uri property name
+	 * @param property uri name
 	 */
 	
 	public void removeObjectProperty(String property);
@@ -50,10 +59,18 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	/**
 	 * remove data property from the vocabulary
 	 * 
-	 * @param uri property name
+	 * @param property uri name
 	 */
 	
 	public void removeDataProperty(String property);
+
+	/**
+	 * remove annotation property from the vocabulary
+	 *
+	 * @param property uri name
+	 */
+
+	public void removeAnnotationProperty(String property);
 	
 	
 	/**

@@ -20,17 +20,11 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.ontology.AssertionFactory;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.*;
+
 
 /**
  * factory for ABox assertions 
@@ -95,6 +89,18 @@ public class AssertionFactoryImpl implements AssertionFactory {
 	public DataPropertyAssertion createDataPropertyAssertion(String propertyName, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
 		DataPropertyExpression dpe = new DataPropertyExpressionImpl(propertyName);
 		return ofac.createDataPropertyAssertion(dpe, o1, o2);
+	}
+
+	/**
+	 * creates an annotation property assertion (without checking any vocabulary)
+	 *
+	 *
+	 */
+
+	@Override
+	public AnnotationAssertion createAnnotationAssertion(String propertyName, ObjectConstant o, Constant v)  {
+		AnnotationProperty ap = new AnnotationPropertyImpl(propertyName);
+		return ofac.createAnnotationAssertion(ap);
 	}
 
 }

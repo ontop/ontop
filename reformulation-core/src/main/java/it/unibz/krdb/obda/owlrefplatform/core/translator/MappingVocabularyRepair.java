@@ -20,30 +20,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatatypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import it.unibz.krdb.obda.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
@@ -91,6 +74,10 @@ public class MappingVocabularyRepair {
 		
 		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
 			urimap.put(p.getName(), p.getPredicate());
+
+		for (AnnotationProperty p : vocabulary.getAnnotationProperties())
+			urimap.put(p.getName(), p.getPredicate());
+
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
@@ -143,7 +130,10 @@ public class MappingVocabularyRepair {
 								}
 							} 
 							else  {
-								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
+//								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
+//								System.err.println("Treated as a data property");
+//								Predicate pred = dfac.getDataPropertyPredicate(p.getName());
+//								newatom = dfac.getFunction(pred, getNormalTerm(t1), t2);
 								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName());
 							}
 						}
@@ -166,7 +156,7 @@ public class MappingVocabularyRepair {
 						if (predicate.isObjectProperty()) {
 							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));							
 						}
-						else {
+						else { //could be both data or annotation property (treated both as data property)
 							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));							
 						}
 					}
@@ -174,7 +164,7 @@ public class MappingVocabularyRepair {
 						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());			
 				}
 
-				newbody.add(newatom);
+ 				newbody.add(newatom);
 			} //end for
 			
 			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), 

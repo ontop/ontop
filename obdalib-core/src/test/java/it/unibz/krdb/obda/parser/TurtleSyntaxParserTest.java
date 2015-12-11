@@ -20,16 +20,15 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class TurtleSyntaxParserTest extends TestCase {
 
@@ -69,12 +68,38 @@ public class TurtleSyntaxParserTest extends TestCase {
 		final boolean result = parse(":Person-{id} <http://example.org/testcase#hasFather> <http://example.org/testcase#Person-12> .");
 		assertTrue(result);
 	}
-	
-	public void test_3_1() {
+
+	@Test
+	public void test_3_1_variable() {
 		final boolean result = parse(":Person-{id} :firstName {fname} .");
 		assertTrue(result);
 	}
-	
+
+	@Test
+	public void test_3_1_new_literal() {
+		final boolean result = parse(":Person-{id} :firstName \"{fname}\" .");
+		assertTrue(result);
+	}
+
+	@Test //if we do not want a literal it should be written without quotes
+	public void test_3_1_string() {
+		final boolean result = parse(":Person-{id} :firstName \"{fname}\"^^xsd:string .");
+		assertFalse(result);
+	}
+
+	@Test
+	public void test_3_1_new_iri() {
+		final boolean result = parse(":Person-{id} :firstName <{fname}> .");
+		assertTrue(result);
+	}
+
+	@Test
+	public void test_3_concat() {
+		final boolean result = parse(":Person-{id} :firstName \"hello {fname}\"^^xsd:string .");
+		assertTrue(result);
+	}
+
+	@Test
 	public void test_3_2() {
 		final boolean result = parse(":Person-{id} :firstName {fname}^^xsd:string .");
 		assertTrue(result);
