@@ -100,6 +100,12 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 
 	@Test
+	public void test_3_concat_number() {
+		final boolean result = parse(":Person-{id} :firstName \"hello {fname}\"^^xsd:double .");
+		assertTrue(result);
+	}
+
+	@Test
 	public void test_3_2() {
 		final boolean result = parse(":Person-{id} :firstName {fname}^^xsd:string .");
 		assertTrue(result);
