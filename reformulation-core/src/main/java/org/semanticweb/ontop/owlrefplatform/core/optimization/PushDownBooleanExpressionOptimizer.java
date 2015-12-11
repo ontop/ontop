@@ -177,7 +177,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         /**
          * Decomposes the boolean expressions as much as possible (conjunction)
          */
-        ImmutableSet<ImmutableBooleanExpression> booleanExpressions = optionalNestedExpression.get().flatten();
+        ImmutableSet<ImmutableBooleanExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
 
         /**
          * Finds a DelimiterTargetPair for each child sub-tree of the current node

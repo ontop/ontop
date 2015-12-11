@@ -31,20 +31,29 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
      * Recursive
      */
     @Override
-    public ImmutableSet<ImmutableBooleanExpression> flatten() {
+    public ImmutableSet<ImmutableBooleanExpression> flattenAND() {
+        return flatten(OBDAVocabulary.AND);
+    }
 
-        Predicate functionSymbol = getFunctionSymbol();
+    @Override
+    public ImmutableSet<ImmutableBooleanExpression> flattenOR() {
+        return flatten(OBDAVocabulary.OR);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableBooleanExpression> flatten(BooleanOperationPredicate operator) {
+
         /**
-         * Only flattens AND expressions.
+         * Only flattens OR expressions.
          */
-        if (functionSymbol.equals(OBDAVocabulary.AND)) {
+        if (getFunctionSymbol().equals(operator)) {
             ImmutableSet.Builder<ImmutableBooleanExpression> setBuilder = ImmutableSet.builder();
             for (ImmutableTerm subTerm : getArguments()) {
                 /**
                  * Recursive call
                  */
                 if (subTerm instanceof ImmutableBooleanExpression) {
-                    setBuilder.addAll(((ImmutableBooleanExpression) subTerm).flatten());
+                    setBuilder.addAll(((ImmutableBooleanExpression) subTerm).flatten(operator));
                 }
                 else {
                     throw new IllegalStateException("An AND-expression must be only composed of " +
