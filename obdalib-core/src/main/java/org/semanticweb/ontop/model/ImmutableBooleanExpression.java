@@ -10,5 +10,20 @@ public interface ImmutableBooleanExpression extends BooleanExpression, Immutable
     /**
      * Flattens AND expressions.
      */
-    ImmutableSet<ImmutableBooleanExpression> flatten();
+    ImmutableSet<ImmutableBooleanExpression> flattenAND();
+
+    /**
+     * Flattens OR expressions.
+     */
+    ImmutableSet<ImmutableBooleanExpression> flattenOR();
+
+    /**
+     * Generalization of flattening (AND, OR, etc.).
+     *
+     * It is the responsibility of the caller to make sure such a flattening makes sense.
+     */
+    ImmutableSet<ImmutableBooleanExpression> flatten(BooleanOperationPredicate operator);
+
+    @Override
+    public BooleanOperationPredicate getFunctionSymbol();
 }
