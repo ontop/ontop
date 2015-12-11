@@ -17,7 +17,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeR
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.parser.PreprocessProjection;
 import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
 import it.unibz.krdb.obda.utils.MappingSplitter;
@@ -41,7 +40,7 @@ import java.util.*;
 public class QuestUnfolder {
 
 	/* The active unfolding engine */
-	private UnfoldingMechanism unfolder;
+	private DatalogUnfolder unfolder;
 
 	/* As unfolding OBDAModel, but experimental */
 	private List<CQIE> unfoldingProgram;
@@ -385,7 +384,7 @@ public class QuestUnfolder {
 	}
 	
 	public DatalogProgram unfold(DatalogProgram query) throws OBDAException {
-		return unfolder.unfold(query, OBDAVocabulary.QUEST_QUERY);
+		return unfolder.unfold(query);
 	}
 
 
