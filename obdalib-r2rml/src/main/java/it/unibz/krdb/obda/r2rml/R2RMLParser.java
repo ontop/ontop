@@ -60,7 +60,7 @@ public class R2RMLParser {
 	 * empty constructor
 	 */
 	public R2RMLParser() {
-        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+        mapManager = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
 	}
