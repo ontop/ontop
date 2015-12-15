@@ -32,7 +32,7 @@ import static junit.framework.TestCase.assertTrue;
 
 /**
  * Test syntax of the parser.
- * Added new extension. Define if the mapping column contains a dataproperty ("{column}")
+ * Added new extension. Define if the mapping column contains a data property with rdfs:Literal ("{column}")
  * or an object property (<{column}>)
  * @link {it.unibz.krdb.obda.parser.TurtleOBDA.g}
  * */
@@ -98,7 +98,7 @@ public class TurtleSyntaxParserTest  {
 	@Test
 	public void test_3_1_new_string() {
 		final boolean result = parse(":Person-{id} :firstName \"{fname}\"^^xsd:string .");
-		assertTrue(result);
+		assertFalse(result);
 	}
 
 	@Test

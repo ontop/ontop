@@ -23,11 +23,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
- * Class to test if annotation can be treated as data property
+ * Class to test if annotation property can be treated as data property
  *
-
+ *
  */
 public class AnnotationTest {
+
     private OBDADataFactory fac;
 
     Logger log = LoggerFactory.getLogger(this.getClass());
@@ -62,20 +63,19 @@ public class AnnotationTest {
 
         QuestPreferences p = new QuestPreferences();
 
-//
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
-                "SELECT  ?d " +
+                "SELECT  ?r " +
                 " ?movie \n" +
-                "WHERE {?movie dc:description ?d . \n" +
+                "WHERE {?movie dc:description ?r . \n" +
 
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
-        assertEquals(444090, results);
+        String results = runTestQuery(p, queryBind);
+        assertEquals("<http://www.imdb.com/title/Bästisar>", results);
     }
 
     @Test
@@ -83,20 +83,19 @@ public class AnnotationTest {
 
         QuestPreferences p = new QuestPreferences();
 
-//
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
-                "SELECT  ?d " +
+                "SELECT  ?r " +
                 " ?movie \n" +
-                "WHERE {?movie dc:date ?d . \n" +
+                "WHERE {?movie dc:date ?r . \n" +
 
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
-        assertEquals(443300, results);
+        String results = runTestQuery(p, queryBind);
+        assertEquals("\"2006\"", results);
     }
 
     @Test
@@ -104,20 +103,19 @@ public class AnnotationTest {
 
         QuestPreferences p = new QuestPreferences();
 
-//
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
-                "SELECT  ?d " +
+                "SELECT  ?r " +
                 " ?movie \n" +
-                "WHERE {?movie dbpedia:gross ?d . \n" +
+                "WHERE {?movie dbpedia:gross ?r . \n" +
 
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
-        assertEquals(112576, results);
+        String results = runTestQuery(p, queryBind);
+        assertEquals("\"$446,237 (Worldwide)\"^^xsd:string", results);
     }
 
 
@@ -126,41 +124,39 @@ public class AnnotationTest {
 
         QuestPreferences p = new QuestPreferences();
 
-//
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
-                "SELECT  ?d " +
+                "SELECT  ?r " +
                 " ?movie \n" +
-                "WHERE {?movie mo:belongsToGenre ?d . \n" +
+                "WHERE {?movie mo:belongsToGenre ?r . \n" +
 
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
-        assertEquals(876722, results);
+        String results = runTestQuery(p, queryBind);
+        assertEquals("\"389486\"^^xsd:integer", results);
     }
 
-    @Test
+    @Test //no check is executed to verify that the value is a valid uri
     public void testNewSyntaxUri() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
 
-//
         String queryBind = "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
-                "SELECT  ?d " +
+                "SELECT  ?r " +
                 " ?movie \n" +
-                "WHERE {?movie mo:hasMaleActor ?d . \n" +
+                "WHERE {?movie mo:hasMaleActor ?r . \n" +
 
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
-        assertEquals(7530011, results);
+        String results = runTestQuery(p, queryBind);
+        assertEquals("<1>", results);
     }
 
     @Test
@@ -168,23 +164,22 @@ public class AnnotationTest {
 
         QuestPreferences p = new QuestPreferences();
 
-//
         String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
-                "SELECT  ?d " +
+                "SELECT  ?r " +
                 " ?movie \n" +
-                "WHERE {?movie dbpedia:productionStartYear ?d . \n" +
+                "WHERE {?movie dbpedia:productionStartYear ?r . \n" +
 
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
-        assertEquals(1062036, results);
+        String results = runTestQuery(p, queryBind);
+        assertEquals("\"2006\"^^xsd:int", results);
     }
 
-    private int runTestQuery(Properties p, String query) throws Exception {
+    private String runTestQuery(Properties p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -207,24 +202,25 @@ public class AnnotationTest {
         long end = System.nanoTime();
 
         double time = (end - start) / 1000;
-
+        String result = "";
         int count = 0;
                 while (res.nextRow()) {
                     count += 1;
                     if(count == 1) {
                     for (int i = 1; i <= res.getColumnCount(); i++) {
-                         log.debug("Example result" + res.getSignature().get(i-1) + "=" + res.getOWLObject(i));
+                         log.debug("Example result " + res.getSignature().get(i-1) + " = " + res.getOWLObject(i));
 
                       }
+                        result = res.getOWLObject("r").toString();
                     }
                 }
-                log.debug("Total result: {}", count);
+                log.debug("Total results: {}", count);
 
                 assertFalse(count == 0);
 
         log.debug("Elapsed time: {} ms", time);
 
-        return count;
+        return result;
 
 
 
