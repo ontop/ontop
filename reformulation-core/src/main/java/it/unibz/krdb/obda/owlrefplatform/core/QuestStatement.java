@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
@@ -401,10 +402,8 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules(), HashMultimap.<Predicate, List<Integer>>create());
-			removeNonAnswerQueries(program);
-
-			program = unfolder.unfold(program);
+			SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener(program);
+			program = unfolder.flatten();
 
 			log.debug("Flattened program: \n{}", program);
 		} 
