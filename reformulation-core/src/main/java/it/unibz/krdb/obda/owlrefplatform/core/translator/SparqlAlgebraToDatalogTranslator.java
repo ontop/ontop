@@ -696,17 +696,14 @@ public class SparqlAlgebraToDatalogTranslator {
 	private Term getConcat(List<ValueExpr> values) {
         Iterator<ValueExpr> iterator = values.iterator();
 
-        ValueExpr first = iterator.next();
-        Term topConcat = getExpression(first);
+        Term topConcat = getExpression(iterator.next());
         
         if (!iterator.hasNext())
             throw new UnsupportedOperationException("Wrong number of arguments (found " + values.size() + 
             					", at least 1) of SQL function CONCAT");
  	  	
         while (iterator.hasNext()) {
-            ValueExpr second = iterator.next();
-            Term second_string = getExpression(second);
-
+            Term second_string = getExpression(iterator.next());
             topConcat = ofac.getFunctionConcat(topConcat, second_string);                	
         }
         
@@ -718,20 +715,15 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		switch (args.size()){
 			case 2 :
-				ValueExpr string = args.get(0);
-				ValueExpr start = args.get(1);
-				Term str = getExpression(string);
-				Term st = getExpression(start);
+				Term str = getExpression(args.get(0));
+				Term st = getExpression(args.get(1));
 				term  = ofac.getFunctionSubstring(str, st);
 				break;
 
 			case 3 :
-				string = args.get(0);
-				start = args.get(1);
-				ValueExpr end = args.get(2);
-				str = getExpression(string);
-				st = getExpression(start);
-				Term en = getExpression(end);
+				str = getExpression(args.get(0));
+				st = getExpression(args.get(1));
+				Term en = getExpression(args.get(2));
 				term = ofac.getFunctionSubstring(str, st, en);
 				break;
 			default:
@@ -749,22 +741,16 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	private Term getReplace(List<ValueExpr> expressions) {
         if (expressions.size() == 2 || expressions.size() == 3) {
-
             // first parameter is a function expression
-            ValueExpr first = expressions.get(0);
-            Term t1 = getExpression(first);
+            Term t1 = getExpression(expressions.get(0));
 
             // second parameter is a string
-            ValueExpr second = expressions.get(1);
-            Term out_string = getExpression(second);
+            Term out_string = getExpression(expressions.get(1));
 
-            /*
-             * Term t3 is optional: no string means delete occurrences of second param
-	         */
+            // Term t3 is optional: no string means delete occurrences of second param
             Term in_string;
             if (expressions.size() == 3) {
-                ValueExpr third = expressions.get(2);
-                in_string = getExpression(third);
+                in_string = getExpression(expressions.get(2));
             } 
             else {
                 in_string = ofac.getConstantLiteral("");
@@ -838,14 +824,19 @@ public class SparqlAlgebraToDatalogTranslator {
     		return fun;   		
     	}
     	
+    	// these are all special cases with **variable** number of arguments
+  
         switch(expr.getURI()){
          
+        	// at least one argument 
             case "http://www.w3.org/2005/xpath-functions#concat":
                 return getConcat(expr.getArgs());
 
+            // 3 or 4 arguments (ROMAN 16 Dec 2015): check the actual implementation
             case "http://www.w3.org/2005/xpath-functions#replace":
                 return getReplace(expr.getArgs());
                 
+            // 2 or 3 arguments    
             case "http://www.w3.org/2005/xpath-functions#substring":
             	return getSubstring(expr.getArgs()); 
             	
@@ -959,14 +950,30 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
+	
+	private static final ImmutableMap<Compare.CompareOp, BooleanOperationPredicate> relationalOperations = 
+			new ImmutableMap.Builder<Compare.CompareOp, BooleanOperationPredicate>()
+				.put(Compare.CompareOp.EQ, OBDAVocabulary.EQ)
+				.put(Compare.CompareOp.GE, OBDAVocabulary.GTE)
+				.put(Compare.CompareOp.GT, OBDAVocabulary.GT)
+				.put(Compare.CompareOp.LE, OBDAVocabulary.LTE)
+				.put(Compare.CompareOp.LT, OBDAVocabulary.LT)
+				.put(Compare.CompareOp.NE, OBDAVocabulary.NEQ)
+				.build();
 
+	private static final ImmutableMap<MathExpr.MathOp, NumericalOperationPredicate> numericalOperations = 
+			new ImmutableMap.Builder<MathExpr.MathOp, NumericalOperationPredicate>()
+			.put(MathExpr.MathOp.PLUS, OBDAVocabulary.ADD)
+			.put(MathExpr.MathOp.MINUS, OBDAVocabulary.SUBTRACT)
+			.put(MathExpr.MathOp.MULTIPLY, OBDAVocabulary.MULTIPLY)
+			.put(MathExpr.MathOp.DIVIDE, OBDAVocabulary.DIVIDE)
+			.build();
+			
+	
 	private Term getBinaryExpression(BinaryValueOperator expr) {
 		
-		ValueExpr arg1 = expr.getLeftArg(); // get the first argument
-		Term term1 = getExpression(arg1);
-		
-		ValueExpr arg2 = expr.getRightArg(); // get the second argument
-		Term term2 = getExpression(arg2);
+		Term term1 = getExpression(expr.getLeftArg());
+		Term term2 = getExpression(expr.getRightArg());
 		
 		if (expr instanceof And) {
 			return ofac.getFunctionAND(term1, term2);
@@ -984,33 +991,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
 		}
 		else if (expr instanceof Compare) {
-			switch (((Compare) expr).getOperator()) {
-				case EQ:
-					return ofac.getFunctionEQ(term1, term2);
-				case GE:
-					return ofac.getFunctionGTE(term1, term2);
-				case GT:
-					return ofac.getFunctionGT(term1, term2);
-				case LE:
-					return ofac.getFunctionLTE(term1, term2);
-				case LT:
-					return ofac.getFunctionLT(term1, term2);
-				case NE:
-					return ofac.getFunctionNEQ(term1, term2);
-			}
+			BooleanOperationPredicate p = relationalOperations.get(((Compare) expr).getOperator());
+			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof MathExpr) {
-			switch (((MathExpr)expr).getOperator()) {
-				case PLUS:
-					return ofac.getFunctionAdd(term1, term2);
-				case MINUS:
-					return ofac.getFunctionSubstract(term1, term2);
-				case MULTIPLY: 
-					return ofac.getFunctionMultiply(term1, term2);
-				case DIVIDE:
-					// TODO: NOT SUPPORTED?
-					break;
-			}
+			NumericalOperationPredicate p = numericalOperations.get(((MathExpr)expr).getOperator());
+			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof LangMatches) {
 			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));

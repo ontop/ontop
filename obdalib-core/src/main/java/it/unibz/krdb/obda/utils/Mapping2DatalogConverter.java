@@ -53,6 +53,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 public class Mapping2DatalogConverter {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -62,7 +64,7 @@ public class Mapping2DatalogConverter {
 	 */
 	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
 		
-		List<CQIE> datalogProgram = new LinkedList<CQIE>();
+		List<CQIE> datalogProgram = new LinkedList<>();
 		List<String> errorMessages = new ArrayList<>();
 		
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
@@ -339,6 +341,22 @@ public class Mapping2DatalogConverter {
 		return lookupTable;
 	}
       
+    
+	private static final ImmutableMap<String, OperationPredicate> operations = 
+			new ImmutableMap.Builder<String, OperationPredicate>()
+				.put("=", OBDAVocabulary.EQ)
+				.put(">=", OBDAVocabulary.GTE)
+				.put(">", OBDAVocabulary.GT)
+				.put("<=", OBDAVocabulary.LTE)
+				.put("<", OBDAVocabulary.LT)
+				.put("<>", OBDAVocabulary.NEQ)
+				.put("!=", OBDAVocabulary.NEQ)
+				.put("+", OBDAVocabulary.ADD)
+				.put("-", OBDAVocabulary.SUBTRACT)
+				.put("*", OBDAVocabulary.MULTIPLY)
+				.put("/", OBDAVocabulary.DIVIDE)
+				.build();
+
 
     /**
      * This visitor class converts the SQL Expression to a Function
@@ -378,43 +396,21 @@ public class Mapping2DatalogConverter {
 
             Term t2 = visitEx(right);
 
+            Function compositeTerm;
+            
             //get boolean operation
             String op = expression.getStringExpression();
-            Function compositeTerm;
-            switch (op) {
-                case "=":
-                    compositeTerm = fac.getFunctionEQ(t1, t2);
-                    break;
-                case ">":
-                    compositeTerm = fac.getFunctionGT(t1, t2);
-                    break;
-                case "<":
-                    compositeTerm = fac.getFunctionLT(t1, t2);
-                    break;
-                case ">=":
-                    compositeTerm = fac.getFunctionGTE(t1, t2);
-                    break;
-                case "<=":
-                    compositeTerm = fac.getFunctionLTE(t1, t2);
-                    break;
-                case "<>":
-                case "!=":
-                    compositeTerm = fac.getFunctionNEQ(t1, t2);
-                    break;
+            Predicate p = operations.get(op);
+            if (p != null) {
+            	compositeTerm = fac.getFunction(p, t1, t2);
+            }
+            else {
+                switch (op) {
                 case "AND":
                     compositeTerm = fac.getFunctionAND(t1, t2);
                     break;
                 case "OR":
                     compositeTerm = fac.getFunctionOR(t1, t2);
-                    break;
-                case "+":
-                    compositeTerm = fac.getFunctionAdd(t1, t2);
-                    break;
-                case "-":
-                    compositeTerm = fac.getFunctionSubstract(t1, t2);
-                    break;
-                case "*":
-                    compositeTerm = fac.getFunctionMultiply(t1, t2);
                     break;
                 case "LIKE":
                     compositeTerm = fac.getFunctionLike(t1, t2);
@@ -439,8 +435,8 @@ public class Mapping2DatalogConverter {
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown operator: " + op);
+                }
             }
-
             result = compositeTerm;
         }
 

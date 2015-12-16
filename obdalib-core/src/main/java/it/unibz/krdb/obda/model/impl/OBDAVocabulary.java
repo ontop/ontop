@@ -38,12 +38,14 @@ public class OBDAVocabulary {
 
 	public static final Predicate MINUS = new NumericalOperationPredicateImpl(
 			"minus", 1); // TODO (ROMAN): check -- never used
-	public static final Predicate ADD = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate ADD = new NumericalOperationPredicateImpl(
 			"add", 2);
-	public static final Predicate SUBTRACT = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate SUBTRACT = new NumericalOperationPredicateImpl(
 			"subtract", 2);
-	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate MULTIPLY = new NumericalOperationPredicateImpl(
 			"multiply", 2);
+	public static final NumericalOperationPredicate DIVIDE = new NumericalOperationPredicateImpl(
+			"divide", 2);
 	public static final OperationPredicate ABS = new NumericalOperationPredicateImpl(
 			"abs", 1);
 	public static final OperationPredicate ROUND = new NumericalOperationPredicateImpl(

@@ -157,15 +157,6 @@ public interface OBDADataFactory extends Serializable {
 	/*
 	 * Numerical arithmethic functions
 	 */
-
-	public Function getFunctionMinus(Term term1);
-
-	public Function getFunctionAdd(Term term1, Term term2);
-
-	public Function getFunctionSubstract(Term term1, Term term2);
-
-	public Function getFunctionMultiply(Term term1, Term term2);
-	
 	
 	public Function getFunctionRand();
 	

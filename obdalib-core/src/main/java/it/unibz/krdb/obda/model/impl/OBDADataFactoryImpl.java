@@ -399,26 +399,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
 	}
 	
-	@Override
-	public Function getFunctionMinus(Term term1) {
-		return getFunction(OBDAVocabulary.MINUS, term1);
-	}
-
-	@Override
-	public Function getFunctionAdd(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.ADD, term1, term2);
-	}
-
-	@Override
-	public Function getFunctionSubstract(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SUBTRACT, term1, term2);
-	}
-
-	@Override
-	public Function getFunctionMultiply(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
-	}
-
     @Override
     public Function getFunctionConcat(Term term1, Term term2) {
         return getFunction(OBDAVocabulary.CONCAT, term1, term2);
