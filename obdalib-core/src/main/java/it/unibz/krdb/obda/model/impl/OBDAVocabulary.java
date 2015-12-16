@@ -44,15 +44,15 @@ public class OBDAVocabulary {
 			"subtract", 2);
 	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl(
 			"multiply", 2);
-	public static final Predicate ABS = new NumericalOperationPredicateImpl(
+	public static final OperationPredicate ABS = new NumericalOperationPredicateImpl(
 			"abs", 1);
-	public static final Predicate ROUND = new NumericalOperationPredicateImpl(
+	public static final OperationPredicate ROUND = new NumericalOperationPredicateImpl(
 			"round", 1);
-	public static final Predicate CEIL = new NumericalOperationPredicateImpl(
+	public static final OperationPredicate CEIL = new NumericalOperationPredicateImpl(
 			"ceil", 1);
-	public static final Predicate FLOOR = new NumericalOperationPredicateImpl(
+	public static final OperationPredicate FLOOR = new NumericalOperationPredicateImpl(
 			"floor", 1);
-	public static final Predicate RAND = new NumericalOperationPredicateImpl(
+	public static final OperationPredicate RAND = new NumericalOperationPredicateImpl(
 			"RAND", 0);
 
 
@@ -212,9 +212,9 @@ public class OBDAVocabulary {
 			"datatype", 1);
 	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl(
 			"lang" , 1 );
-	public static final Predicate UUID = new NonBooleanOperationPredicateImpl(
+	public static final OperationPredicate UUID = new NonBooleanOperationPredicateImpl(
 			"UUID", 0);
-	public static final Predicate STRUUID = new NonBooleanOperationPredicateImpl(
+	public static final OperationPredicate STRUUID = new NonBooleanOperationPredicateImpl(
 			"STRUUID", 0);
 
 	/* SPARQL built-in predicates */

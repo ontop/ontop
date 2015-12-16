@@ -20,6 +20,6 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public interface NonBooleanOperationPredicate extends BuiltinPredicate {
+public interface NonBooleanOperationPredicate extends BuiltinPredicate, OperationPredicate {
 	// NO-OP
 }

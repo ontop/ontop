@@ -309,62 +309,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
-	public Function getFunctionStrStarts(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.STR_STARTS, term1, term2);
-	}
-	
-	@Override
-	public Function getFunctionStrEnds(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.STR_ENDS, term1, term2);
-	}
-	
-	@Override
-	public Function getFunctionContains(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.CONTAINS, term1, term2);
-	}
-	
-	@Override
-	public Function getFunctionEncodeForUri(Term term1) {
-		return getFunction(OBDAVocabulary.ENCODE_FOR_URI, term1);
-	}
-	@Override
-	public Function getFunctionAbs(Term term1){
-		return getFunction(OBDAVocabulary.ABS, term1);
-	}
-
-	@Override
-	public Function getFunctionCeil(Term term1){
-	return getFunction(OBDAVocabulary.CEIL, term1);
-	}
-	@Override
-	public Function getFunctionFloor(Term term1){
-	return getFunction(OBDAVocabulary.FLOOR, term1);
-	}
-	@Override
-	public Function getFunctionRound(Term term1){
-	return getFunction(OBDAVocabulary.ROUND, term1);
-	}
-	@Override
-	public Function getFunctionSHA1(Term term1){
-		return getFunction(OBDAVocabulary.SHA1, term1);
-
-	}
-	@Override
-	public Function getFunctionSHA256(Term term1){
-		return getFunction(OBDAVocabulary.SHA256, term1);
-
-	}
-	@Override
-	public Function getFunctionSHA512(Term term1){
-		return getFunction(OBDAVocabulary.SHA512, term1);
-
-	}
-	@Override
-	public Function getFunctionMD5(Term term1){
-		return getFunction(OBDAVocabulary.MD5, term1);
-
-	}
-	@Override
 	public Function getFunctionRand(){
 	return getFunction(OBDAVocabulary.RAND);
 	}
@@ -377,44 +321,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionstrUUID(){
 		return getFunction(OBDAVocabulary.STRUUID);
 	}
-	@Override
-	public Function getFunctionNow(){
-		return getFunction(OBDAVocabulary.NOW);
-		}
-	
-	@Override
-	public Function getFunctionYear(Term arg){
-		return getFunction(OBDAVocabulary.YEAR, arg);
-		}
-	
-	@Override
-	public Function getFunctionDay(Term arg){
-		return getFunction(OBDAVocabulary.DAY, arg);
-		}
-	
-	@Override
-	public Function getFunctionMonth(Term arg){
-		return getFunction(OBDAVocabulary.MONTH, arg);
-		}
-	
-	@Override
-	public Function getFunctionMinutes(Term arg){
-		return getFunction(OBDAVocabulary.MINUTES, arg);
-		}
-	@Override
-	public Function getFunctionSeconds(Term arg){
-		return getFunction(OBDAVocabulary.SECONDS, arg);
-		}
-	
-	@Override
-	public Function getFunctionTZ(Term arg){
-		return getFunction(OBDAVocabulary.TZ, arg);
-		}
-	
-	@Override
-	public Function getFunctionHours(Term arg){
-		return getFunction(OBDAVocabulary.HOURS, arg);
-		}
 
 //	@Override
 //	public Function getANDFunction(List<Term> terms) {
@@ -532,27 +438,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionSubstring(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.SUBSTR, term1, term2);
 	}
-    
-    @Override
-    public Function getFunctionUpper(Term term) {
-        return getFunction(OBDAVocabulary.UCASE, term);
-    } 
-    
-    @Override
-    public Function getFunctionLower(Term term) {
-        return getFunction(OBDAVocabulary.LCASE, term);
-    } 
-    
-    
-    @Override
-    public Function getFunctionStrBefore(Term term1, Term term2){
-    	return getFunction(OBDAVocabulary.STRBEFORE, term1, term2); 
-    } 
-    @Override
-	public Function getFunctionStrAfter(Term term1, Term term2){
-    	return getFunction(OBDAVocabulary.STRAFTER, term1, term2);
-    } 
-    
+        
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
