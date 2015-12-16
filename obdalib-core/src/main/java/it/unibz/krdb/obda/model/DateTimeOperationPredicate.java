@@ -26,6 +26,6 @@ package it.unibz.krdb.obda.model;
  * See test {@link it.unibz.krdb.obda.reformulation.tests.BindTestWithFunctions}
  * Created by Sarah on 14/09/15.
  */
-public interface DateTimeOperationPredicate extends OperationPredicate{
+public interface DateTimeOperationPredicate extends OperationPredicate {
     // NO-OP
 }

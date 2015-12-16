@@ -84,57 +84,21 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isClass() {
-		if (arity == 1 && types[0] == COL_TYPE.OBJECT) {
-			return true;
-		}
-		return false;
+		return (arity == 1 && types[0] == COL_TYPE.OBJECT);
 	}
 
 	@Override
 	public boolean isObjectProperty() {
-		if (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.OBJECT) {
-			return true;
-		}
-		return false;
+		return (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.OBJECT); 
 	}
 
 	@Override
 	public boolean isDataProperty() {
-		if (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.LITERAL) {
-			return true;
-		}
-		return false;
+		return (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.LITERAL); 
 	}
-
-	@Override
-	public boolean isDataPredicate() {
-		return (!(isBooleanPredicate() || isAlgebraPredicate() || isArithmeticPredicate() || isDataTypePredicate()));
-	}
-
-	private boolean isBooleanPredicate() {
-		return this instanceof BooleanOperationPredicate;
-	}
-	
-	private boolean isArithmeticPredicate() {
-		return this instanceof NumericalOperationPredicate;
-	}
-
-	@Override
-	public boolean isAlgebraPredicate() {
-		return this instanceof AlgebraOperatorPredicate;
-	}
-
-	@Override
-	public boolean isDataTypePredicate() {
-		return this instanceof DatatypePredicate;
-	}
-
 
     @Override
 	public boolean isTriplePredicate() {
-		if (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName())) {
-			return true;
-		}
-		return false;
+		return (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName()));
 	}
 }

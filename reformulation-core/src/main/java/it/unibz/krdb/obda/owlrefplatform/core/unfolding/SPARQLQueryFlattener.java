@@ -87,14 +87,15 @@ public class SPARQLQueryFlattener {
 	}
 
 	private final void collectPredicates(Set<Predicate> predicates, Function atom) {
-		Predicate pred = atom.getFunctionSymbol();
-		if (pred instanceof AlgebraOperatorPredicate) {
+		if (atom.isAlgebraFunction()) {
 			for (Term innerTerm : atom.getTerms()) 
 				if (innerTerm instanceof Function)
 					collectPredicates(predicates, (Function) innerTerm);
 		} 
-		else if (!(atom.isBooleanFunction()))
+		else if (!(atom.isBooleanFunction())) {
+			Predicate pred = atom.getFunctionSymbol();
 			predicates.add(pred);
+		}
 	}
 
 	/***

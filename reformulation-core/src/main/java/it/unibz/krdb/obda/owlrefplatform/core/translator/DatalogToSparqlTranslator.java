@@ -289,8 +289,7 @@ public class DatalogToSparqlTranslator {
 	private void printGraphPattern(CQIE query, DatalogProgram datalog, StringBuilder sb, int indentLevel) {
 		List<Function> queryBody = query.getBody();
 		for (Function graph : queryBody) {
-			Predicate graphPredicate = graph.getFunctionSymbol();
-			if (graphPredicate.isAlgebraPredicate()) {
+			if (graph.isAlgebraFunction()) {
 				printJoinExpression(graph, datalog, sb, indentLevel);
 			} else if (graph.isBooleanFunction()) {
 				printBooleanFilter(graph, sb, indentLevel);

@@ -184,7 +184,7 @@ public class MappingDataTypeRepair {
                         insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
             } 
-            else if (functionSymbol.isDataTypePredicate()) {
+            else if (function.isDataTypeFunction()) {
 
                 Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());

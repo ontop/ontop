@@ -519,17 +519,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * getTableDefinitions on the nested term list.
 	 */
 	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
-		Predicate predicate = atom.getFunctionSymbol();
-		if (atom.isDataFunction()
-				|| predicate instanceof NumericalOperationPredicate
-				|| predicate instanceof DatatypePredicate) {
+		if (atom.isBooleanFunction()
+				|| atom.isArithmeticFunction()
+				|| atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
-		} else if (predicate instanceof AlgebraOperatorPredicate) {
+		} 
+		else if (atom.isAlgebraFunction()) {
 			List<Function> innerTerms = new LinkedList<Function>();
 			for (Term innerTerm : atom.getTerms()) {
 				innerTerms.add((Function) innerTerm);
 			}
+			Predicate predicate = atom.getFunctionSymbol();
 			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
 				return getTableDefinitions(innerTerms, index, false, false, indent + INDENT);
 			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
@@ -816,7 +817,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the column(s) with the actual value(s)
 			 */
-			if (function instanceof DatatypePredicate) {
+			if (ov.isDataTypeFunction()) {
 				/*
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
@@ -1391,7 +1392,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Predicate functionSymbol = function.getFunctionSymbol();
 		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof DatatypePredicate) {
+		if (function.isDataTypeFunction()) {
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
@@ -1461,7 +1462,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 			
-		} else if (functionSymbol instanceof NumericalOperationPredicate) {
+		} 
+		else if (function.isArithmeticFunction()) {
 			String expressionFormat = getNumericalOperatorString(functionSymbol);
 			String leftOp = getSQLString(term1, index, true);
 				if (isUnary(function)){
@@ -1803,7 +1805,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (atom.isBooleanFunction()) {
 				return;
 			} 
-			else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {
+			else if (atom.isAlgebraFunction()) {
 				List<Term> lit = atom.getTerms();
 				for (Term subatom : lit) {
 					if (subatom instanceof Function) {

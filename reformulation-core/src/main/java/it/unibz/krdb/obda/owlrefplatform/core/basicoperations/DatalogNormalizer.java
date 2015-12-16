@@ -504,7 +504,7 @@ public class DatalogNormalizer {
 		 */
 		for (int focusBranch = 0; focusBranch < currentLevelAtoms.size(); focusBranch++) {
 			Function atom = (Function) currentLevelAtoms.get(focusBranch);
-			if (!(atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate))
+			if (!(atom.isAlgebraFunction()))
 				continue;
 			// System.out
 			// .println("======================== INTO ALGEBRA =====================");

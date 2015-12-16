@@ -117,6 +117,7 @@ public interface Predicate extends Cloneable, Serializable {
 	 */
 	public Predicate clone();
 
+	
 	boolean isClass();
 
 	boolean isObjectProperty();
@@ -125,11 +126,5 @@ public interface Predicate extends Cloneable, Serializable {
 	
 	
 	
-	boolean isDataPredicate();
-	
-	boolean isAlgebraPredicate();
-	
-	boolean isDataTypePredicate();
-
 	boolean isTriplePredicate();
 }

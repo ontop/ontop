@@ -212,7 +212,8 @@ public class OBDAMappingTransformer {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-					}else if (objectPred instanceof DatatypePredicate) {
+					}
+					else if (objectPred instanceof DatatypePredicate) {
 						Term objectTerm = ((Function) object).getTerm(0);
 
 						if (objectTerm instanceof Variable) {
@@ -357,16 +358,19 @@ public class OBDAMappingTransformer {
                     //we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
-				} else if (object instanceof Function) { //we create a template
+				} 
+ 				else if (object instanceof Function) { //we create a template
 					//check if uritemplate
- 					Predicate objectPred = ((Function) object).getFunctionSymbol();
+ 					Function o = (Function) object;
+ 					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
 						//obm.setTemplate(mfact.createTemplate(objectURI));
 						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-					}else if (objectPred.isDataTypePredicate()) {
+					}
+					else if (o.isDataTypeFunction()) {
 						Term objectTerm = ((Function) object).getTerm(0);
 						
 						if (objectTerm instanceof Variable) {

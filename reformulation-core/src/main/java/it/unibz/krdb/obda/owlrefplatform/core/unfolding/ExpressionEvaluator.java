@@ -142,11 +142,14 @@ public class ExpressionEvaluator {
 		}
 		if (expr.isBooleanFunction()) {
 			return evalBoolean(expr);
-		} else if (p instanceof NonBooleanOperationPredicate) {
+		} 
+		else if (p instanceof NonBooleanOperationPredicate) {
 			return evalNonBoolean(expr);
-		} else if (p instanceof NumericalOperationPredicate) {
+		} 
+		else if (expr.isArithmeticFunction()) {
 			return evalNumericalOperation(expr);
-		} else if (p instanceof DatatypePredicate) {
+		} 
+		else if (expr.isDataTypeFunction()) {
 			if (dtfac.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
@@ -326,8 +329,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
-			Predicate predicate = function.getFunctionSymbol();
-			return fac.getBooleanConstant(predicate instanceof DatatypePredicate);
+			return fac.getBooleanConstant(function.isDataTypeFunction());
 		} 
 		else {
 			return term;
@@ -382,7 +384,7 @@ public class ExpressionEvaluator {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
-			if (predicate instanceof DatatypePredicate) {
+			if (function.isDataTypeFunction()) {
 				if (dtfac.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return fac.getTypedTerm(
 							fac.getVariable(parameter.toString()), COL_TYPE.LITERAL);
@@ -520,12 +522,12 @@ public class ExpressionEvaluator {
 			return emptyconstant;
 		} 
 		Function function = (Function) innerTerm;
-		Predicate predicate = function.getFunctionSymbol();
 
-		if (!(predicate instanceof DatatypePredicate)) {
+		if (!function.isDataTypeFunction()) {
 			return null;
 		}
 
+		Predicate predicate = function.getFunctionSymbol();
 		//String datatype = predicate.toString();
 		if (!dtfac.isLiteral(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
 			return emptyconstant;
@@ -696,8 +698,7 @@ public class ExpressionEvaluator {
 		
 		if (term.getTerm(0) instanceof Function) {
 			Function t1 = (Function) term.getTerm(0);
-			Predicate p1 = t1.getFunctionSymbol();
-			if (!(p1 instanceof DatatypePredicate)) {
+			if (!(t1.isDataTypeFunction())) {
 				teval1 = eval(term.getTerm(0));
 				if (teval1 == null) {
 					return OBDAVocabulary.FALSE;
@@ -753,7 +754,7 @@ public class ExpressionEvaluator {
 					throw new RuntimeException("Unsupported type: " + pred1);
 				}
 			} 
-			else if (pred1 instanceof NumericalOperationPredicate) {
+			else if (f1.isArithmeticFunction()) {
 				return term;
 			}
 			

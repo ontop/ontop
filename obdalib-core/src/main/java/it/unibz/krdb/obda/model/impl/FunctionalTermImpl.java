@@ -20,7 +20,9 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DateTimeOperationPredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
@@ -223,7 +225,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public boolean isDataFunction() {
-		return this.functor.isDataPredicate();
+		return (!(isBooleanFunction() || isAlgebraFunction() || isArithmeticFunction() || isDataTypeFunction()));
 	}
 
 	@Override
@@ -233,7 +235,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public boolean isAlgebraFunction() {
-		return this.functor.isAlgebraPredicate();
+		return functor instanceof AlgebraOperatorPredicate;
 	}
 
 	@Override
@@ -253,6 +255,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	
 	@Override
 	public boolean isDataTypeFunction() {
-		return this.functor.isDataTypePredicate();
+		return functor instanceof DatatypePredicate;
 	}
 }

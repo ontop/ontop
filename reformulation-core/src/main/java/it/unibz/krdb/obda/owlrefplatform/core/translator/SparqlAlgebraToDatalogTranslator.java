@@ -1009,12 +1009,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term output = term;
 		if (term instanceof Function) {
 			Function f = (Function) term;
-			Predicate functor = f.getFunctionSymbol();
-			if (functor instanceof DatatypePredicate) {
+			if (f.isDataTypeFunction()) {
 				Term functionTerm = f.getTerm(0);
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
-					output = ofac.getFunction(functor, 
+					output = ofac.getFunction(f.getFunctionSymbol(), 
 							 ofac.getConstantLiteral(c.getValue().toLowerCase(), 
 							 c.getType()));
 				}
