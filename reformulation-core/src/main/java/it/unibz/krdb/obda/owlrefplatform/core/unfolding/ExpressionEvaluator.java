@@ -54,7 +54,7 @@ import java.util.Set;
 
 public class ExpressionEvaluator {
 
-	private UriTemplateMatcher uriTemplateMatcher;
+	private final UriTemplateMatcher uriTemplateMatcher;
 	
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
@@ -62,7 +62,7 @@ public class ExpressionEvaluator {
 	
 	private boolean regexFlag = false;
 
-	public void setUriTemplateMatcher(UriTemplateMatcher matcher) {
+	public ExpressionEvaluator(UriTemplateMatcher matcher) {
 		uriTemplateMatcher = matcher;
 	}
 	

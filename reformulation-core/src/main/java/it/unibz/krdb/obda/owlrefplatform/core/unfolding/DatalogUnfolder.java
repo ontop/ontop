@@ -65,10 +65,14 @@ public class DatalogUnfolder {
 	 */
 	private final Set<Predicate> extensionalPredicates = new HashSet<>();
 
+	// LeftJoinUnfoldingTest only
+	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram) {
 		this(unfoldingProgram, HashMultimap.<Predicate, List<Integer>>create());
 	}
 
+	// QuestUnfilder only 
+	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
 		this.primaryKeys = primaryKeys;
 		

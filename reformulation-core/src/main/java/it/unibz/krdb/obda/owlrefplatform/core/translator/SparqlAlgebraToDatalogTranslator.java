@@ -1363,7 +1363,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @return
 	 */
 	
-	public List<String> getSignature(ParsedQuery query) {
+	public static List<String> getSignature(ParsedQuery query) {
 		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
 			TupleExpr te = query.getTupleExpr();
 			List<String> signatureContainer = new ArrayList<>(te.getBindingNames());

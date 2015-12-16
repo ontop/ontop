@@ -47,7 +47,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
-import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
@@ -298,6 +297,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		this.applyUserConstraints = true;
 	}
 
+	protected void cacheSQL(String strquery, ParsedQuery pq, List<String> signature, String sql) {
+		signaturecache.put(strquery, signature);
+		sesameQueryCache.put(strquery, pq);
+		querycache.put(strquery, sql);
+	}
+	
 	protected String getCachedSQL(String query) {
 		return querycache.get(query);
 	}
@@ -306,18 +311,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return querycache.containsKey(query);
 	}
 
-	protected void cacheSQL(String strquery, String sql) {
-		querycache.put(strquery, sql);
+	protected List<String> getCachedSignature(String strquery) {
+		return signaturecache.get(strquery);
 	}
 	
-	// TODO: replace by a couple of methods to get/set values
-	protected Map<String, List<String>> getSignatureCache() {
-		return signaturecache;
-	}
-	// TODO: replace by a couple of methods to get/set value 
-	// Note, however, that this one is never read (only put in QuestStatement)
-	protected Map<String, ParsedQuery> getSesameQueryCache() {
-		return sesameQueryCache;
+	protected ParsedQuery getSesameQueryCache(String strquery) {
+		return sesameQueryCache.get(strquery);
 	}
 	
 	
@@ -344,8 +343,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 	public ExpressionEvaluator getExpressionEvaluator() {
-		ExpressionEvaluator evaluator = new ExpressionEvaluator();
-		evaluator.setUriTemplateMatcher(unfolder.getUriTemplateMatcher());		
+		ExpressionEvaluator evaluator = new ExpressionEvaluator(unfolder.getUriTemplateMatcher());
 		return evaluator;
 	}
 	
