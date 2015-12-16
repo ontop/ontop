@@ -63,8 +63,8 @@ public class GroundTermTools {
     }
 
     public static void checkNonGroundTermConstraint(NonGroundFunctionalTerm term) throws IllegalArgumentException {
-        if (term.getVariables().isEmpty()) {
-            throw new IllegalArgumentException("A NonGroundFunctionalTerm must contain at least one variable");
+        if ((!term.getArguments().isEmpty()) && term.getVariables().isEmpty()) {
+            throw new IllegalArgumentException("A NonGroundFunctionalTerm must contain at least one variable: " + term);
         }
     }
 }
