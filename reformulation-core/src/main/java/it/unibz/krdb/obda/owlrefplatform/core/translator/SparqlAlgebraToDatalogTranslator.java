@@ -204,21 +204,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		List<Term> varList = new ArrayList<>(vars);
 		return varList;
 	}
-
-	private static List<Term> getUnionOfVariables(Function a1, Function a2) {
-		// take the union of the *sets* of variables
-		Set<Term> vars = new HashSet<>();
-		for (Term t : a1.getTerms())
-			if (t instanceof Variable)
-				vars.add(t);
-		for (Term t : a2.getTerms())
-			if (t instanceof Variable)
-				vars.add(t);
-		// order is chosen arbitrarily but this is not a problem
-		// because it is chosen once and for all
-		List<Term> varList = new ArrayList<>(vars);
-		return varList;
-	}
 	
 	
 	private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, Function... body) {
@@ -271,21 +256,12 @@ public class SparqlAlgebraToDatalogTranslator {
 	/**
 	 * EXPR_1 UNION EXPR_2
 	 * 
-	 * adds the following rules
+	 * adds the following two rules
 	 * 
-	 * ans_i(X * NULL_1) :- ans_{i.0}(X_1)
-	 * ans_i(X * NULL_2) :- ans_{i.1}(X_2)
+	 * ans_i(X * X_1 * NULL_2) :- ans_{i.0}(X * X_1)
+	 * ans_i(X * NULL_1 * X_2) :- ans_{i.1}(X * X_2)
 	 * 
-		 * Adding the UNION to the program, i.e., two rules Note, we need to
-		 * make null any head variables that do not appear in the body of the
-		 * components of the union, e.g,
-		 * 
-		 * q(x,y,z) <- Union(R(x,y), R(x,z))
-		 * 
-		 * results in
-		 * 
-		 * q(x,y,null) :- ... R(x,y) ... 
-		 * q(x,null,z) :- ... R(x,z) ...
+	 * where NULL_i is the padding of X_i with NULLs 
 	 * 
 	 * @param union
 	 * @param pr
@@ -342,7 +318,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function leftAtom = translateTupleExpr(join.getLeftArg(), pr, newHeadName + "0");
 		Function rightAtom = translateTupleExpr(join.getRightArg(), pr, newHeadName + "1");
 
-		List<Term> varList = getUnionOfVariables(leftAtom, rightAtom);
+		List<Term> varList = getUnion(getVariables(leftAtom), getVariables(rightAtom));
 		CQIE rule = createRule(pr, newHeadName, varList, leftAtom, rightAtom);
 		return rule.getHead();
 	}
@@ -372,7 +348,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			joinTerms.add((Function) getExpression(filter));
 		}
 		
-		List<Term> varList = getUnionOfVariables(leftAtom, rightAtom);
+		List<Term> varList = getUnion(getVariables(leftAtom), getVariables(rightAtom));
 		CQIE rule = createRule(pr, newHeadName, varList, joinAtom);
 		return rule.getHead();
 	}
@@ -694,8 +670,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	private Term getConcat(List<ValueExpr> values) {
+		
         Iterator<ValueExpr> iterator = values.iterator();
-
         Term topConcat = getExpression(iterator.next());
         
         if (!iterator.hasNext())
@@ -711,55 +687,41 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getSubstring(List<ValueExpr> args) {
-		Term term = null;
 
-		switch (args.size()){
-			case 2 :
-				Term str = getExpression(args.get(0));
-				Term st = getExpression(args.get(1));
-				term  = ofac.getFunctionSubstring(str, st);
-				break;
-
-			case 3 :
-				str = getExpression(args.get(0));
-				st = getExpression(args.get(1));
-				Term en = getExpression(args.get(2));
-				term = ofac.getFunctionSubstring(str, st, en);
-				break;
-			default:
-				throw new UnsupportedOperationException("Wrong number of arguments (found "
-						+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
-
+		if (args.size() == 2) {
+			Term str = getExpression(args.get(0));
+			Term st = getExpression(args.get(1));
+			return ofac.getFunctionSubstring(str, st);
 		}
-
-		return term;
+		else if (args.size() == 3) {
+			Term str = getExpression(args.get(0));
+			Term st = getExpression(args.get(1));
+			Term en = getExpression(args.get(2));
+			return ofac.getFunctionSubstring(str, st, en);
+		}
+		else 
+			throw new UnsupportedOperationException("Wrong number of arguments (found "
+					+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
 	}
+		
 	
-	
-
-	
-	
-	private Term getReplace(List<ValueExpr> expressions) {
-        if (expressions.size() == 2 || expressions.size() == 3) {
-            // first parameter is a function expression
-            Term t1 = getExpression(expressions.get(0));
-
-            // second parameter is a string
-            Term out_string = getExpression(expressions.get(1));
-
-            // Term t3 is optional: no string means delete occurrences of second param
-            Term in_string;
-            if (expressions.size() == 3) {
-                in_string = getExpression(expressions.get(2));
-            } 
-            else {
-                in_string = ofac.getConstantLiteral("");
-            }
-
+	private Term getReplace(List<ValueExpr> args) {
+		
+		if (args.size() == 2) {
+            Term t1 = getExpression(args.get(0));
+            Term out_string = getExpression(args.get(1));
+            Term in_string = ofac.getConstantLiteral("");
             return ofac.getFunctionReplace(t1, out_string, in_string);
-        } 
+		}
+		else if (args.size() == 3) {
+            Term t1 = getExpression(args.get(0));
+            Term out_string = getExpression(args.get(1));
+            Term in_string = getExpression(args.get(2));
+            return ofac.getFunctionReplace(t1, out_string, in_string);
+		}
         else
-            throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");		
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+            		+ args.size() + ", only 2 or 3 supported) to sql function REPLACE");		
 	}
 	
 	// XPath 1.0 functions (XPath 1.1 has variants with more arguments)

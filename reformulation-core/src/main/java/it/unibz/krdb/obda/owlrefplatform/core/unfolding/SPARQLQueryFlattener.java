@@ -1,7 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -177,9 +175,7 @@ public class SPARQLQueryFlattener {
 			EQNormalizer.enforceEqualities(query);
 		}
 			
-		DatalogProgram result = termFactory.getDatalogProgram(modifiers);
-		result.appendRule(workingSet);
-
+		DatalogProgram result = termFactory.getDatalogProgram(modifiers, workingSet);
 		return result;
 	}
 
@@ -387,7 +383,7 @@ public class SPARQLQueryFlattener {
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else 
-				result = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
+				result = Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
 		} 
 		else {
 			// Note, in this step result may get new CQIEs inside
@@ -397,8 +393,8 @@ public class SPARQLQueryFlattener {
 
 		if (result == null) {
 			// this is the case for second atom in left join generating more
-			// than one rull, we
-			// must reutrn an empty result i ndicating its already a partial
+			// than one rule, we
+			// must return an empty result indicating its already a partial
 			// evaluation.
 			result = Collections.emptyList();
 		} 
@@ -406,7 +402,7 @@ public class SPARQLQueryFlattener {
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else 
-				result = generateNullBindingsForLeftJoin(focusAtom, rule, termidx);
+				result = Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
 		}
 		return result;
 	}
@@ -431,37 +427,23 @@ public class SPARQLQueryFlattener {
 	 * @return a new query with the nested joins.
 	 */
 	private CQIE foldJOIN(CQIE rule) {
-		// Checking if the rule has more that 1 data atom, otherwise we do
-		// nothing. Now we count, and at the same time collect the atoms we
-		// will need to manipulate in 2 temporal lists.
-
-		// Data atoms in the list will be folded, boolean atoms will be
-		// added to the body in the end
-
+		
 		List<Function> dataAtomsList = new LinkedList<>();
 		List<Function> otherAtomsList = new LinkedList<>();
 
-		for (Function subAtom : rule.getBody()) {
-			if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) 
-				dataAtomsList.add(subAtom);
+		for (Function a : rule.getBody()) {
+			if (a.isDataFunction() || a.isAlgebraFunction()) 
+				dataAtomsList.add(a);
 			else 
-				otherAtomsList.add(subAtom);
+				otherAtomsList.add(a);
 		}
 
-		// This mapping can be transformed into a normal join with ON
-		// conditions. Doing so.
-		
-		Function foldedJoinAtom = null;
-
-		while (dataAtomsList.size() > 1) {
-			Function atom0 = dataAtomsList.remove(0);
-			Function atom1 = dataAtomsList.remove(0);
-			foldedJoinAtom = termFactory.getSPARQLJoin(atom0, atom1);
-			dataAtomsList.add(0, foldedJoinAtom);
-		}
-
-		if (foldedJoinAtom == null) 
+		if (dataAtomsList.size() <= 1) 
 			return rule;
+		
+		Function foldedJoinAtom = dataAtomsList.remove(0);
+		for (Function a : dataAtomsList)
+			foldedJoinAtom = termFactory.getSPARQLJoin(foldedJoinAtom, a);
 		
 		otherAtomsList.add(0, foldedJoinAtom);
 		
@@ -471,9 +453,9 @@ public class SPARQLQueryFlattener {
 	
 	/***
 	 * Helper method for resolveDataAtom. Do not use anywhere else. This method
-	 * returns a list with all the succesfull resolutions againts focusAtom. It
-	 * will return a list with 0 ore more elements that result from successfull
-	 * resolution steps, or null if there are more than 1 successfull resoluiton
+	 * returns a list with all the successful resolutions against focusAtom. It
+	 * will return a list with 0 ore more elements that result from successful
+	 * resolution steps, or null if there are more than 1 successful resolution
 	 * steps but focusAtom is the second atom of a left join (that is,
 	 * isSecondAtomOfLeftJoin is true).
 	 * 
@@ -495,11 +477,10 @@ public class SPARQLQueryFlattener {
 	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, 
 			List<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
 
-		List<CQIE> candidateMatches = new LinkedList<>(rulesDefiningTheAtom);
 		List<CQIE> result = new LinkedList<>();
 
 		int rulesGeneratedSoFar = 0;
-		for (CQIE candidateRule : candidateMatches) {
+		for (CQIE candidateRule : rulesDefiningTheAtom) {
 
 			/* getting a rule with unique variables */
 			CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
@@ -542,10 +523,6 @@ public class SPARQLQueryFlattener {
 			 * DONE WITH BASIC RESOLUTION STEP
 			 */
 
-			/***
-			 * DONE OPTIMIZING RETURN THE RESULT
-			 */
-
 			rulesGeneratedSoFar += 1;
 
 			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
@@ -568,7 +545,7 @@ public class SPARQLQueryFlattener {
 		return result;
 	}
 
-	private List<CQIE> generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
+	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
 		log.debug("Empty evaluation - Data Function {}", focusLiteral);
 
@@ -621,9 +598,7 @@ public class SPARQLQueryFlattener {
 		// LJ data argument
 		SubstitutionUtilities.applySubstitution(freshRule, unifier, false); // in-place unification
 		
-		List<CQIE> result = new LinkedList<>();
-		result.add(freshRule);
-		return result;
+		return freshRule;
 	}
 	
 	private static void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
