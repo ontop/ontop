@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.model;
  */
 
 /**
- * Made for string functions in the select part of the source sql of mappings. 
+ * Support for SPARQL string functions. 
  *
  *
  * See test {@link it.unibz.krdb.obda.reformulation.tests.ComplexSelectMappingVirtualABoxTest}

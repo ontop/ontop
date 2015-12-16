@@ -144,7 +144,7 @@ public class QuestUnfolder {
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();
-				if (newAtomPredicate instanceof BooleanOperationPredicate) 
+				if (newatom.isBooleanFunction()) 
 					continue;
 				
 				if (pkeys.containsKey(newAtomPredicate))

@@ -46,15 +46,15 @@ public class OBDAVocabulary {
 			"multiply", 2);
 	public static final NumericalOperationPredicate DIVIDE = new NumericalOperationPredicateImpl(
 			"divide", 2);
-	public static final OperationPredicate ABS = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate ABS = new NumericalOperationPredicateImpl(
 			"abs", 1);
-	public static final OperationPredicate ROUND = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate ROUND = new NumericalOperationPredicateImpl(
 			"round", 1);
-	public static final OperationPredicate CEIL = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate CEIL = new NumericalOperationPredicateImpl(
 			"ceil", 1);
-	public static final OperationPredicate FLOOR = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate FLOOR = new NumericalOperationPredicateImpl(
 			"floor", 1);
-	public static final OperationPredicate RAND = new NumericalOperationPredicateImpl(
+	public static final NumericalOperationPredicate RAND = new NumericalOperationPredicateImpl(
 			"RAND", 0);
 
 

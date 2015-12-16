@@ -123,19 +123,13 @@ public interface Predicate extends Cloneable, Serializable {
 
 	boolean isDataProperty();
 	
-	boolean isDataPredicate();
 	
-	boolean isBooleanPredicate();
+	
+	boolean isDataPredicate();
 	
 	boolean isAlgebraPredicate();
 	
-	boolean isArithmeticPredicate();
-	
 	boolean isDataTypePredicate();
 
-    boolean isStringOperationPredicate();
-
 	boolean isTriplePredicate();
-
-	boolean isDateTimePredicate();
 }

@@ -422,7 +422,7 @@ public class TreeWitnessSet {
 			if (properties == null) {
 				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 				for (Function a : edge.getBAtoms()) {
-					if (a.getFunctionSymbol() instanceof BooleanOperationPredicateImpl) {
+					if (a.isBooleanFunction()) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
 						properties.setToBottom();
 						break;

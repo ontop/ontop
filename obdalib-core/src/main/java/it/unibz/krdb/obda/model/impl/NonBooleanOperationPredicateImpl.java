@@ -31,7 +31,7 @@ public class NonBooleanOperationPredicateImpl extends PredicateImpl implements N
 	}
 
 	@Override
-	public NonBooleanOperationPredicateImpl clone() {
+	public NonBooleanOperationPredicate clone() {
 		return this;
 	}
 }

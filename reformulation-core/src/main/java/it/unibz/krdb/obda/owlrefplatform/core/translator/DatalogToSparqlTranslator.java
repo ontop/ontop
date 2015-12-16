@@ -135,10 +135,11 @@ public class DatalogToSparqlTranslator {
 			final Term object = (isClass(function) ? getPredicate(function) : getObject(function));
 
 			// Check the function symbols
-			if (functionSymbol.isArithmeticPredicate()) {
+			if (function.isArithmeticFunction()) {
 				final String expressionGraph = printTripleGraph(toSparql(subject), getArithmeticSymbol(functionSymbol), toSparql(object));
 				sb.append(enclosedBrackets(expressionGraph));
-			} else if (functionSymbol.isBooleanPredicate()) {
+			} 
+			else if (function.isBooleanFunction()) {
 				final String expressionGraph = printTripleGraph(toSparql(subject), getBooleanSymbol(functionSymbol), toSparql(object));
 				if (functionSymbol.equals(OBDAVocabulary.AND) || functionSymbol.equals(OBDAVocabulary.OR)) {
 					sb.append(enclosedBrackets(expressionGraph));
@@ -291,7 +292,7 @@ public class DatalogToSparqlTranslator {
 			Predicate graphPredicate = graph.getFunctionSymbol();
 			if (graphPredicate.isAlgebraPredicate()) {
 				printJoinExpression(graph, datalog, sb, indentLevel);
-			} else if (graphPredicate.isBooleanPredicate()) {
+			} else if (graph.isBooleanFunction()) {
 				printBooleanFilter(graph, sb, indentLevel);
 			} else {
 				printGraph(graph, datalog, sb, indentLevel);

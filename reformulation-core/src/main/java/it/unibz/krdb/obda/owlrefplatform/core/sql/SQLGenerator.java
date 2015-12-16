@@ -520,7 +520,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
 		Predicate predicate = atom.getFunctionSymbol();
-		if (predicate instanceof BooleanOperationPredicate
+		if (atom.isDataFunction()
 				|| predicate instanceof NumericalOperationPredicate
 				|| predicate instanceof DatatypePredicate) {
 			// These don't participate in the FROM clause
@@ -847,7 +847,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			}
-			else if (function instanceof StringOperationPredicate || function instanceof DateTimeOperationPredicate) {
+			else if (ov.isStringFunction() || ov.isDateTimeFunction()) {
 				// Functions returning string values
 				mainColumn = getSQLString(ov, index, false);
 			}
@@ -858,8 +858,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 mainColumn = sqladapter.strUuid();
 			 	}
 			}
-
-            else if (function.isArithmeticPredicate()){
+            else if (ov.isArithmeticFunction()){
             	String expressionFormat = getNumericalOperatorString(function);
             	if (isBinary(ov)) {
             		Term right = ov.getTerm(1);
@@ -867,14 +866,17 @@ public class SQLGenerator implements SQLQueryGenerator {
                     String leftOp = getSQLString(left, index, true);
             		String rightOp = getSQLString(right, index, true);
             		mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
-              	}
-                
+              	}          
             	else if (isUnary(ov)) {
             		Term left = ov.getTerm(0);
                     String leftOp = getSQLString(left, index, true);
                     mainColumn = String.format("(" + expressionFormat + ")", leftOp);
-            	} else { mainColumn = expressionFormat; }
-            } else {
+            	} 
+            	else { 
+            		mainColumn = expressionFormat; 
+            	}
+            } 
+            else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -934,7 +936,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             }
 
         }
-        else if (pred1.isStringOperationPredicate()) {
+        else if (func1.isStringFunction()) {
 
             if(pred1.equals(OBDAVocabulary.CONCAT)) {
                 Term concat1 = func1.getTerm(0);
@@ -1019,7 +1021,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				type = COL_TYPE.OBJECT;
 			} else if (function instanceof BNodePredicate) {
 				type = COL_TYPE.BNODE;
-			} else if (function.isStringOperationPredicate() || function instanceof NonBooleanOperationPredicate) {
+			} else if (ov.isStringFunction() || function instanceof NonBooleanOperationPredicate) {
 
 
 				if (function.equals(OBDAVocabulary.CONCAT)) {
@@ -1399,7 +1401,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else 	{
 				return getSQLStringForTemplateFunction(function, index);
 			}
-		} else if (functionSymbol.isBooleanPredicate() ) {
+		} 
+		else if (function.isBooleanFunction()) {
 			// atoms of the form EQ(x,y)
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			if (isUnary(function)) {
@@ -1797,7 +1800,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * @param atom
 		 */
 		private void generateViewsIndexVariables(Function atom) {
-			if (atom.getFunctionSymbol() instanceof BooleanOperationPredicate) {
+			if (atom.isBooleanFunction()) {
 				return;
 			} 
 			else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {

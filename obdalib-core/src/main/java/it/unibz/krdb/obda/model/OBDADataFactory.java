@@ -123,14 +123,6 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm);
-
-	public Function getFunctionGT(Term firstTerm, Term secondTerm);
-
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm);
-
-	public Function getFunctionLT(Term firstTerm, Term secondTerm);
-
 	public Function getFunctionNEQ(Term firstTerm, Term secondTerm);
 
 	public Function getFunctionNOT(Term term);
@@ -153,24 +145,11 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
-
-	/*
-	 * Numerical arithmethic functions
-	 */
-	
-	public Function getFunctionRand();
-	
-	public Function getFunctionUUID();
-
-	public Function getFunctionstrUUID();
-
 	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
     
  // added by Nika: 
-    
-    public Function getFunctionLength(Term term1); 
     
 	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
 

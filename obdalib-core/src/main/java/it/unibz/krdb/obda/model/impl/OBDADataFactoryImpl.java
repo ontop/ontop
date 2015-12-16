@@ -274,26 +274,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GTE, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Function getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GT, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LTE, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Function getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LT, firstTerm, secondTerm);
-	}
-
-	@Override
 	public Function getFunctionNEQ(Term firstTerm, Term secondTerm) {
 		return getFunction(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
@@ -308,20 +288,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.AND, term1, term2);
 	}
 	
-	@Override
-	public Function getFunctionRand(){
-	return getFunction(OBDAVocabulary.RAND);
-	}
-	@Override
-	public Function getFunctionUUID(){
-		return getFunction(OBDAVocabulary.UUID);
-		}
-
-	@Override
-	public Function getFunctionstrUUID(){
-		return getFunction(OBDAVocabulary.STRUUID);
-	}
-
 //	@Override
 //	public Function getANDFunction(List<Term> terms) {
 //		if (terms.size() < 2) {
@@ -404,11 +370,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
         return getFunction(OBDAVocabulary.CONCAT, term1, term2);
     }
 
-    @Override
-    public Function getFunctionLength(Term term1) {
-        return getFunction(OBDAVocabulary.STRLEN, term1);
-    } //added by Nika
-    
     @Override
     public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
         return getFunction(OBDAVocabulary.SUBSTR, term1, term2, term3);

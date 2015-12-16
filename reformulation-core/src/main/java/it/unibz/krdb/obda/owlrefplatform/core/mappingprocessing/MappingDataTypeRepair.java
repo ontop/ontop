@@ -165,7 +165,7 @@ public class MappingDataTypeRepair {
              if present or the information from the database will be used.
              */
 
-            else if (functionSymbol.isStringOperationPredicate() || functionSymbol.isArithmeticPredicate()) {
+            else if (function.isStringFunction() || function.isArithmeticFunction()) {
 
             	Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());

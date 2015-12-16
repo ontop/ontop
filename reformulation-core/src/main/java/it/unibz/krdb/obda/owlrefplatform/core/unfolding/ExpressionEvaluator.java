@@ -140,7 +140,7 @@ public class ExpressionEvaluator {
 			}
 			return expr;
 		}
-		if (p instanceof BooleanOperationPredicate) {
+		if (expr.isBooleanFunction()) {
 			return evalBoolean(expr);
 		} else if (p instanceof NonBooleanOperationPredicate) {
 			return evalNonBoolean(expr);
@@ -464,9 +464,10 @@ public class ExpressionEvaluator {
 					return null;
 				}
 			}
-		} else if (predicate instanceof NonBooleanOperationPredicate){
-			return null;
-		}
+			else if (predicate instanceof NonBooleanOperationPredicate){
+				return null;
+			}
+		} 
 		return null;
 	}
 	

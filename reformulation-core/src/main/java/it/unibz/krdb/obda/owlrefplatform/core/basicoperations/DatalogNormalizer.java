@@ -576,7 +576,7 @@ public class DatalogNormalizer {
 			Function atom = (Function) l;
 			// System.out
 			// .println(atom.getFunctionSymbol().getClass() + " " + atom);
-			if (!(atom.getFunctionSymbol() instanceof BooleanOperationPredicate))
+			if (!(atom.isBooleanFunction()))
 				continue;
 			Set<Variable> variables = new HashSet<>();
 			TermUtils.addReferencedVariablesTo(variables, atom); 

@@ -25,10 +25,11 @@ import it.unibz.krdb.obda.model.DateTimeOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 
 /**
- * Made for sparql date time functions .
+ * Support for SPARQL date and time functions.
  * See test {@link it.unibz.krdb.obda.reformulation.tests.BindTestWithFunctions}
  * Created by Sarah on 14/09/15.
  */
+
 public class DateTimeOperationPredicateImpl extends PredicateImpl implements DateTimeOperationPredicate {
 
 

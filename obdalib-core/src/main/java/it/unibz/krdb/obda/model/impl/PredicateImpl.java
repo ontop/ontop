@@ -111,13 +111,11 @@ public class PredicateImpl implements Predicate {
 		return (!(isBooleanPredicate() || isAlgebraPredicate() || isArithmeticPredicate() || isDataTypePredicate()));
 	}
 
-	@Override
-	public boolean isBooleanPredicate() {
+	private boolean isBooleanPredicate() {
 		return this instanceof BooleanOperationPredicate;
 	}
 	
-	@Override
-	public boolean isArithmeticPredicate() {
+	private boolean isArithmeticPredicate() {
 		return this instanceof NumericalOperationPredicate;
 	}
 
@@ -131,11 +129,6 @@ public class PredicateImpl implements Predicate {
 		return this instanceof DatatypePredicate;
 	}
 
-    @Override
-    public boolean isStringOperationPredicate() {
-        return this instanceof StringOperationPredicate;
-    }
-
 
     @Override
 	public boolean isTriplePredicate() {
@@ -143,10 +136,5 @@ public class PredicateImpl implements Predicate {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public boolean isDateTimePredicate() {
-		return this instanceof DateTimeOperationPredicate;
 	}
 }
