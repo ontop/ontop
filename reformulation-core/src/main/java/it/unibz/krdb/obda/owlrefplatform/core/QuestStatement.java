@@ -157,7 +157,7 @@ public class QuestStatement implements OBDAStatement {
 
 			try {
 
-				if (!questInstance.hasCachedSQL(strquery)) {
+				if (!questInstance.isInCache(strquery)) {
 					getUnfolding(strquery);
 				}
 				
@@ -579,7 +579,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// Check the cache first if the system has processed the query string
 		// before
-		if (questInstance.hasCachedSQL(strquery)) {
+		if (questInstance.isInCache(strquery)) {
 			// Obtain immediately the SQL string from cache
 			sql = questInstance.getCachedSQL(strquery);
 
@@ -881,16 +881,7 @@ public class QuestStatement implements OBDAStatement {
 	 * @throws SQLException
 	 */
 	public int insertData(Iterator<Assertion> data,  int commit, int batch) throws SQLException {
-		
 		int result = questInstance.getSemanticIndexRepository().insertData(conn.getConnection(), data, commit, batch);
-
-		try {
-			questInstance.updateSemanticIndexMappings();
-		} 
-		catch (Exception e) {
-			log.error("Error updating semantic index mappings after insert.", e);
-		}
-
 		return result;
 	}
 	

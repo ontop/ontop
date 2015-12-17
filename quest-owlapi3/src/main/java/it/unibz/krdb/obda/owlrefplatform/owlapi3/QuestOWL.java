@@ -335,7 +335,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (!conn.getAutoCommit())
 				conn.commit();
 				
-				questInstance.updateSemanticIndexMappings();
+				//questInstance.updateSemanticIndexMappings();
 			} else {
 				// VIRTUAL MODE - NO-OP
 			}

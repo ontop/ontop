@@ -55,6 +55,7 @@ import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
@@ -75,7 +76,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class Quest implements Serializable, RepositoryChangedListener {
+public class Quest implements Serializable {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
@@ -198,16 +199,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * are used by the statements
 	 */
 
-	private final Map<String, String> querycache = new ConcurrentHashMap<String, String>();
-
-	private final Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
-
-	private final Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
-
-//	private final Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
-//	private final Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
-//	private final Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
-
+	private static final class QueryCacheRecord {
+		private final ParsedQuery pq;
+		private final List<String> signature;
+		private final String sql;
+		
+		QueryCacheRecord(ParsedQuery pq, List<String> signature, String sql) {
+			this.pq = pq;
+			this.signature = signature;
+			this.sql = sql;
+		}
+	}
+	
+	private final Map<String, QueryCacheRecord> queryCache = new ConcurrentHashMap<>();
+	
+	
 	private DBMetadata metadata;
 
 
@@ -298,25 +304,23 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 	protected void cacheSQL(String strquery, ParsedQuery pq, List<String> signature, String sql) {
-		signaturecache.put(strquery, signature);
-		sesameQueryCache.put(strquery, pq);
-		querycache.put(strquery, sql);
+		queryCache.put(strquery, new QueryCacheRecord(pq, signature, sql));
 	}
 	
 	protected String getCachedSQL(String query) {
-		return querycache.get(query);
+		return queryCache.get(query).sql;
 	}
 	
-	protected boolean hasCachedSQL(String query) {
-		return querycache.containsKey(query);
+	protected boolean isInCache(String query) {
+		return queryCache.containsKey(query);
 	}
 
-	protected List<String> getCachedSignature(String strquery) {
-		return signaturecache.get(strquery);
+	protected List<String> getCachedSignature(String query) {
+		return queryCache.get(query).signature;
 	}
 	
-	protected ParsedQuery getSesameQueryCache(String strquery) {
-		return sesameQueryCache.get(strquery);
+	protected ParsedQuery getCachedSesameQuery(String query) {
+		return queryCache.get(query).pq;
 	}
 	
 	
@@ -347,28 +351,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return evaluator;
 	}
 	
+	
+	// used only once, in QuestStatement
 	public SparqlAlgebraToDatalogTranslator getSparqlAlgebraToDatalogTranslator() {
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), getUriMap());	
 		return translator;
 	}
 	
-	// used only once
+	// used only once, in QuestStatement
 	public VocabularyValidator getVocabularyValidator() {
 		return vocabularyValidator;
 	}
 
-//	protected Map<String, Query> getJenaQueryCache() {
-//		return jenaQueryCache;
-//	}
-//	protected Map<String, Boolean> getIsBooleanCache() {
-//		return isbooleancache;
-//	}
-//	protected Map<String, Boolean> getIsConstructCache() {
-//		return isconstructcache;
-//	}
-//	public Map<String, Boolean> getIsDescribeCache() {
-//		return isdescribecache;
-//	}
 
 	private void loadOBDAModel(OBDAModel model) {
 
@@ -575,7 +569,18 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				setupConnectionPool();
 
 				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
-				dataRepository.addRepositoryChangedListener(this);
+				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
+					@Override
+					public void repositoryChanged() {
+						queryCache.clear();
+						try {
+							unfolder.updateSemanticIndexMappings(dataRepository.getMappings(), reformulationReasoner);
+						} 
+						catch (Exception e) {
+							log.error("Error updating Semantic Index mappings", e);
+						}
+					}
+				});
 
 				if (inmemory) {
 
@@ -792,12 +797,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 
-	public void updateSemanticIndexMappings() throws OBDAException {
-		/* Setting up the OBDA model */
-		unfolder.updateSemanticIndexMappings(dataRepository.getMappings(), reformulationReasoner);
-	}
-
-
 
 
 
@@ -922,11 +921,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	
 	public DBMetadata getMetaData() {
 		return metadata;
-	}
-
-	public void repositoryChanged() {
-		// clear cache
-		this.querycache.clear();
 	}
 
 	public SemanticIndexURIMap getUriMap() {

@@ -176,7 +176,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (!conn.getAutoCommit())
 			conn.commit();
 		
-		questInstance.updateSemanticIndexMappings();
+		//questInstance.updateSemanticIndexMappings();
 
 		log.debug("Store {} has been created successfully", name);
 	}
