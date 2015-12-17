@@ -75,8 +75,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param uriRef is used only in the Semantic Index mode
 	 */
 	
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef) {
-		uriTemplateMatcher = templateMatcher;
+	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher uriTemplateMatcher, SemanticIndexURIMap uriRef) {
+		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = uriRef;
 	}
 	
