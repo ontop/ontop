@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.*;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.utils.VersionInfo;
@@ -315,10 +314,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure, questInstance.getVocabulary());
-					EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
-					
-					int count = st.insertData(aBoxNormalIter, 5000, 500);
+					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {

@@ -94,19 +94,19 @@ public class SparqlAlgebraToDatalogTranslator {
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
 
-		List<Term> vars;
+		List<Term> answerVariables;
 		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
 			Set<String> signature = te.getBindingNames();
-			vars = new ArrayList<>(signature.size());
+			answerVariables = new ArrayList<>(signature.size());
 			for (String vs : signature) 
-				vars.add(ofac.getVariable(vs));
+				answerVariables.add(ofac.getVariable(vs));
 		}
 		else
-			vars = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
+			answerVariables = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
 		
 		DatalogProgram result = ofac.getDatalogProgram();
 		Function bodyAtom = translateTupleExpr(te, result, OBDAVocabulary.QUEST_QUERY + "0");
-		createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom); // appends rule to the result
+		createRule(result, OBDAVocabulary.QUEST_QUERY, answerVariables, bodyAtom); // appends rule to the result
 		
 		return result;
 	}

@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
@@ -441,18 +440,6 @@ public class QuestStatement implements OBDAStatement {
 		program.removeRules(toRemove);
 	}
 
-	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
-		if (query.getRules().size() == 0) {
-			return "";
-		}
-		log.debug("Producing the SQL string...");
-
-		// query = DatalogNormalizer.normalizeDatalogProgram(query);
-		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(query, signature);
-
-		log.debug("Resulting SQL: \n{}", sql);
-		return sql;
-	}
 
 	/**
 	 * The method executes select or ask queries by starting a new quest
@@ -639,12 +626,18 @@ public class QuestStatement implements OBDAStatement {
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
 				unfoldingTime = System.currentTimeMillis() - startTime;
 
-				
-				List<String> signatureContainer = SparqlAlgebraToDatalogTranslator.getSignature(query);
+				List<String> signature = SparqlAlgebraToDatalogTranslator.getSignature(query);
 
-				sql = getSQL(programAfterUnfolding, signatureContainer);
+				if (programAfterUnfolding.getRules().size() > 0) {
+					log.debug("Producing the SQL string...");
+					sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(programAfterUnfolding, signature);
+					log.debug("Resulting SQL: \n{}", sql);
+				}
+				else
+					sql = "";
+				
 				// cacheQueryAndProperties(strquery, sql);
-				questInstance.cacheSQL(strquery, query, signatureContainer, sql);
+				questInstance.cacheSQL(strquery, query, signature, sql);
 			} 
 			catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -888,25 +881,8 @@ public class QuestStatement implements OBDAStatement {
 	 * @throws SQLException
 	 */
 	public int insertData(Iterator<Assertion> data,  int commit, int batch) throws SQLException {
-		int result = -1;
-
-		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getReasoner());
-
-//		if (!useFile) {
-
-			result = questInstance.getSemanticIndexRepository().insertData(conn.getConnection(), newData, commit, batch);
-//		} else {
-			//try {
-				// File temporalFile = new File("quest-copy.tmp");
-				// FileOutputStream os = new FileOutputStream(temporalFile);
-				// ROMAN: this called DOES NOTHING
-				// result = (int) questInstance.getSemanticIndexRepository().loadWithFile(conn.conn, newData);
-				// os.close();
-
-			//} catch (IOException e) {
-			//	log.error(e.getMessage());
-			//}
-//		}
+		
+		int result = questInstance.getSemanticIndexRepository().insertData(conn.getConnection(), data, commit, batch);
 
 		try {
 			questInstance.updateSemanticIndexMappings();
