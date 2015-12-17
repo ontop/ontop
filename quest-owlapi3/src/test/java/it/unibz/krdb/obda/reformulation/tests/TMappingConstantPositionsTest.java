@@ -143,7 +143,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
-		System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
+		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
 		
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();

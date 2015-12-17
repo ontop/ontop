@@ -98,20 +98,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
 
-
-	private boolean generatingREPLACE = true;
-	private boolean distinctResultSet = false;
+	private final boolean generatingREPLACE;
+	private final boolean distinctResultSet;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
-	private boolean isSI = false;
-	private SemanticIndexURIMap uriRefIds;
+	
+	private final boolean isSI;
+	private final SemanticIndexURIMap uriRefIds;
 	
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
 		this.sqladapter = sqladapter;
+		this.distinctResultSet = false;
+		this.generatingREPLACE = true;
+		this.isSI = false;
+		this.uriRefIds = null;
 	}
 
 	/**
@@ -123,12 +127,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, SemanticIndexURIMap uriid) {
-		this(metadata, sqladapter);
+		this.metadata = metadata;
+		this.sqladapter = sqladapter;
 		this.generatingREPLACE = sqlGenerateReplace;
 		this.distinctResultSet = distinctResultSet;
 		if (uriid != null) {
 			this.isSI = true;
 			this.uriRefIds = uriid;
+		}
+		else {
+			this.isSI = false;
+			this.uriRefIds = null;
 		}
 	}
 

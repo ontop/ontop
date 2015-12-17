@@ -360,14 +360,10 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			//Query jenaquery = QueryFactory.create(query);
 			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 			
-			//SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
-			//List<String> signatureContainer = tr.getSignature(pq);
-			
-			return st.getRewriting(pq/*, signatureContainer*/);
+			return st.questInstance.getEngine().getRewriting(pq);
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);
@@ -376,7 +372,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	public String getUnfolding(String query) throws OWLException {
 		try {
-			return st.getUnfolding(query);
+			return st.questInstance.getEngine().getSQL(query);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
