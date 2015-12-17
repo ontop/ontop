@@ -171,7 +171,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
         cmdRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
         cmdRemove.setText("Remove");
-        cmdRemove.setToolTipText("Remove the selected datasource");
+        cmdRemove.setToolTipText("Remove the selected query");
         cmdRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdRemove.setContentAreaFilled(false);
         cmdRemove.setIconTextGap(5);
@@ -192,7 +192,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
         cmdAdd.setIcon(IconLoader.getImageIcon("images/plus.png"));
         cmdAdd.setText("Add");
-        cmdAdd.setToolTipText("Remove the selected datasource");
+        cmdAdd.setToolTipText("Add a new query");
         cmdAdd.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdAdd.setContentAreaFilled(false);
         cmdAdd.setIconTextGap(4);
