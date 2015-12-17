@@ -158,30 +158,6 @@ public class SPARQLQueryFlattener {
 	 * with respect to the program given when this unfolder was initialized. The goal for
 	 * this partial evaluation is the predicate <b>ans1</b>
 	 * 
-	 */
-	public DatalogProgram flatten() {
-
-		List<CQIE> workingSet = new LinkedList<>();
-		for (CQIE query : inputQueryRules)  {
-			workingSet.add(query);
-			EQNormalizer.enforceEqualities(query);
-		}
-
-		computePartialEvaluation(workingSet);	
-		
-		// We need to enforce equality again, because at this point it is 
-		//  possible that there is still some EQ(...) 
-		for (CQIE query : workingSet) {
-			EQNormalizer.enforceEqualities(query);
-		}
-			
-		DatalogProgram result = termFactory.getDatalogProgram(modifiers, workingSet);
-		return result;
-	}
-
-
-
-	/***
 	 * This method assumes that the inner term (termidx) of term is a data atom,
 	 * or a nested atom.
 	 * <p>
@@ -198,18 +174,22 @@ public class SPARQLQueryFlattener {
 	 * 
 	 * otherwise it does nothing (i.e., variables, constants, etc cannot be
 	 * resolved against rule
-	 * 
-
-	 * @return
 	 */
-	private void computePartialEvaluation(List<CQIE> workingList) {
+	
+	public DatalogProgram flatten() {
 
-		ListIterator<CQIE> iterator = workingList.listIterator();
+		List<CQIE> workingSet = new LinkedList<>();
+		for (CQIE query : inputQueryRules)  {
+			workingSet.add(query);
+			EQNormalizer.enforceEqualities(query);
+		}
+
+		ListIterator<CQIE> iterator = workingSet.listIterator();
 		
 		while (iterator.hasNext()) {
 			CQIE rule = iterator.next(); 
 
-			List<CQIE> result = computePartialEvaluation(rule.getBody(), rule, new Stack<Integer>(), false);
+			List<CQIE> result = computePartialEvaluation(rule.getBody(), rule, new Stack<Integer>());
 
 			if (result == null) {
 				// if the result is null the rule is logically empty
@@ -222,7 +202,7 @@ public class SPARQLQueryFlattener {
 				// move to the previous position
 				iterator.remove();
 				for (CQIE newquery : result) 
-					if (!workingList.contains(newquery)) {
+					if (!workingSet.contains(newquery)) {
 						iterator.add(newquery);
 						iterator.previous();
 					}
@@ -230,15 +210,24 @@ public class SPARQLQueryFlattener {
 			// otherwise, the result is empty and so,
 			// this rule is already a partial evaluation
 		}
+		
+		// We need to enforce equality again, because at this point it is 
+		//  possible that there is still some EQ(...) 
+		for (CQIE query : workingSet) {
+			EQNormalizer.enforceEqualities(query);
+		}
+			
+		DatalogProgram result = termFactory.getDatalogProgram(modifiers, workingSet);
+		return result;
 	}
 
 	/***
 	 * Goes through each term, and recursively each inner term trying to resolve
 	 * each atom. Returns an empty list if the partial evaluation is completed
 	 * (no atoms can be resolved and each atom is a leaf atom), null if there is
-	 * at least one atom that is not leaf and cant be resolved, or a list with
+	 * at least one atom that is not leaf and cannot be resolved, or a list with
 	 * one or more queries if there was one atom that could be resolved against
-	 * one or more rules. The list containts the result of the resolution steps
+	 * one or more rules. The list contains the result of the resolution steps
 	 * against those rules.
 	 * 
 	 * @param currentTerms
@@ -247,8 +236,43 @@ public class SPARQLQueryFlattener {
 	 * @return
 	 */
 
-	private List<CQIE> computePartialEvaluation(List<Function> atoms, CQIE rule, Stack<Integer> termidx,
-			boolean parentIsLeftJoin) {
+	private List<CQIE> computePartialEvaluation(List<Function> atoms, CQIE rule, Stack<Integer> termidx) {
+
+		for (int atomIdx = 0; atomIdx < atoms.size(); atomIdx++) {
+			termidx.push(atomIdx);
+
+			Function atom = atoms.get(atomIdx);
+
+			if (atom.isDataFunction()) {
+				// This is a data atom, it should be unfolded with the usual resolution algorithm.
+				
+				List<CQIE> result = resolveDataAtom(atom, rule, termidx, false, false);
+				if (result == null || !result.isEmpty())
+					return result;
+			}			
+			else if (atom.isAlgebraFunction()) {
+				// These may contain data atoms that need to be unfolded, we need to recursively unfold each term.
+				
+				List<Function> innerTerms = new ArrayList<>(3);
+				for (Term t : atom.getTerms())
+					innerTerms.add((Function)t);
+				
+				List<CQIE> result;
+				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) 
+					result = computePartialEvaluationInLeftJoin(innerTerms, rule, termidx);
+				else
+					result = computePartialEvaluation(innerTerms, rule, termidx);
+					
+				if (result == null || !result.isEmpty())
+					return result;
+			} 			
+			termidx.pop();
+		}
+
+		return Collections.emptyList();
+	}
+
+	private List<CQIE> computePartialEvaluationInLeftJoin(List<Function> atoms, CQIE rule, Stack<Integer> termidx) {
 
 		int nonBooleanAtomCounter = 0;
 
@@ -259,51 +283,32 @@ public class SPARQLQueryFlattener {
 
 			if (atom.isDataFunction()) {
 				nonBooleanAtomCounter += 1;
-
-				/*
-				 * This is a data atom, it should be unfolded with the usual
-				 * resolution algorithm.
-				 */
-
-				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2 && parentIsLeftJoin;
-				List<CQIE> result = resolveDataAtom(atom, rule, termidx, parentIsLeftJoin,
-						isLeftJoinSecondArgument);
-
-				if (result == null)
-					return null;
-
-				if (!result.isEmpty())
+				
+				// This is a data atom, it should be unfolded with the usual resolution algorithm.
+				
+				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2;
+				List<CQIE> result = resolveDataAtom(atom, rule, termidx, true, isLeftJoinSecondArgument);
+				if (result == null || !result.isEmpty())
 					return result;
 			}			
 			else if (atom.isAlgebraFunction()) {
 				nonBooleanAtomCounter += 1;
-				/*
-				 * These may contain data atoms that need to be unfolded, we
-				 * need to recursively unfold each term.
-				 */
-				Predicate predicate = atom.getFunctionSymbol();
-				boolean focusAtomIsLeftJoin = predicate == OBDAVocabulary.SPARQL_LEFTJOIN;
+				
+				// These may contain data atoms that need to be unfolded, we need to recursively unfold each term.
 				
 				List<Function> innerTerms = new ArrayList<>(3);
 				for (Term t : atom.getTerms())
 					innerTerms.add((Function)t);
 				
-				List<CQIE> result = computePartialEvaluation(innerTerms, rule, termidx, focusAtomIsLeftJoin);
+				List<CQIE> result;
+				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) 
+					result = computePartialEvaluationInLeftJoin(innerTerms, rule, termidx);
+				else
+					result = computePartialEvaluation(innerTerms, rule, termidx);
 
-				if (result == null)
-					return null;
-
-				if (!result.isEmpty()) 
+				if (result == null || !result.isEmpty())
 					return result;
 			} 			
-			// ROMAN: commented out because this condition can never be satisfied -- see PredicateImpl.isDataPredicate() 				
-			//else {
-			//	if (!focusLiteral.isBooleanFunction() && 
-			//			!focusLiteral.isArithmeticFunction() && 
-			//			!focusLiteral.isDataTypeFunction()) 					
-			//		throw new IllegalArgumentException("Error during unfolding," + 
-			//			"trying to unfold a non-algebra/non-data function. Offending atom: " + focusLiteral);
-			//}
 			termidx.pop();
 		}
 
@@ -343,11 +348,11 @@ public class SPARQLQueryFlattener {
 	 * @param atomindx
 	 *            The location of the focustAtom in the currentlist
 	 * @return <ul>
-	 *         <li>null if there is no s whose head unifies with a, we return
-	 *         null. </li><li>An empty list if the atom a is <strong>extensional
+	 *         <li>null if there is no s whose head unifies with a, we return null.</li>
+	 *         <li>empty list if the atom a is <strong>extensional
 	 *         predicate (those that have no defining rules)</strong> or the
-	 *         second data atom in a left join </li><li>a list with one ore more
-	 *         rules otherwise</li>
+	 *         second data atom in a left join</li>
+	 *         <li>a list with one ore more rules otherwise</li>
 	 *         <ul>
 	 * 
 	 * @see UnifierUtilities
@@ -372,39 +377,34 @@ public class SPARQLQueryFlattener {
 		 */
 
 		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
-
-		/*
-		 * If there are none, the atom is logically empty, careful, LEFT JOIN
-		 * alert!
-		 */
-
-		List<CQIE> result = null;
 		if (rulesDefiningTheAtom == null) {
+			// If there are none, the atom is logically empty, careful, LEFT JOIN alert!
 			if (!isSecondAtomInLeftJoin)
 				return null;
 			else 
-				result = Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
+				return Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
 		} 
 		else {
 			// Note, in this step result may get new CQIEs inside
-			result = generateResolutionResult(focusAtom, rule, termidx, rulesDefiningTheAtom, isLeftJoin,
+			List<CQIE> result = generateResolutionResult(focusAtom, rule, termidx, rulesDefiningTheAtom, isLeftJoin,
 					isSecondAtomInLeftJoin);
-		}
-
-		if (result == null) {
-			// this is the case for second atom in left join generating more
-			// than one rule, we
-			// must return an empty result indicating its already a partial
-			// evaluation.
-			result = Collections.emptyList();
-		} 
-		else if (result.size() == 0) {
-			if (!isSecondAtomInLeftJoin)
-				return null;
+			
+			if (result == null) {
+				// this is the case for second atom in left join generating more
+				// than one rule, we
+				// must return an empty result indicating its already a partial
+				// evaluation.
+				return Collections.emptyList();
+			} 
+			else if (result.size() == 0) {
+				if (!isSecondAtomInLeftJoin)
+					return null;
+				else 
+					return Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
+			}
 			else 
-				result = Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
+				return result;
 		}
-		return result;
 	}
 
 	/***
@@ -452,8 +452,7 @@ public class SPARQLQueryFlattener {
 	}
 	
 	/***
-	 * Helper method for resolveDataAtom. Do not use anywhere else. This method
-	 * returns a list with all the successful resolutions against focusAtom. It
+	 * The list with all the successful resolutions against focusAtom. It
 	 * will return a list with 0 ore more elements that result from successful
 	 * resolution steps, or null if there are more than 1 successful resolution
 	 * steps but focusAtom is the second atom of a left join (that is,
@@ -465,15 +464,8 @@ public class SPARQLQueryFlattener {
 	 * {@link #resolveDataAtom(it.unibz.krdb.obda.model.Function, it.unibz.krdb.obda.model.CQIE, java.util.Stack, int[], boolean, boolean)}  which is
 	 * the caller method. The job of interpreting correctly the output of this
 	 * method is done in the caller.
-	 * 
-	 * 
-	 * @param focusAtom
-	 * @param rule
-	 * @param termidx
-	 * @param rulesDefiningTheAtom
-	 * @param isSecondAtomOfLeftJoin
-	 * @return
 	 */
+
 	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, 
 			List<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
 
@@ -482,36 +474,27 @@ public class SPARQLQueryFlattener {
 		int rulesGeneratedSoFar = 0;
 		for (CQIE candidateRule : rulesDefiningTheAtom) {
 
-			/* getting a rule with unique variables */
+			// getting a rule with unique variables 
 			CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
-
 			Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
 			if (mgu == null) {
 				// Failed attempt 
 				continue;
 			}
 
-			/*
-			 * We have a matching rule, now we prepare for the resolution step
-			 */
-
+			// We have a matching rule, now we prepare for the resolution step
 			// if we are in a left join, we need to make sure the fresh rule
 			// has only one data atom
 			if (isLeftJoin) {
 				freshRule = foldJOIN(freshRule);
 			}
 
-			/*
-			 * generating the new body of the rule
-			 */
-
+			// generating the new body of the rule
 			CQIE partialEvalution = rule.clone();
-			/*
-			 * locating the list that contains the current Function (either body
-			 * or inner term) and replacing the current atom, with the body of
-			 * the matching rule.
-			 */
 
+			// locating the list that contains the current Function (either body
+			// or inner term) and replacing the current atom, with the body of
+			// the matching rule.
 			List<Function> innerAtoms = getNestedList(termidx, partialEvalution);
 
 			innerAtoms.remove((int) termidx.peek());
@@ -526,17 +509,14 @@ public class SPARQLQueryFlattener {
 			rulesGeneratedSoFar += 1;
 
 			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
-				/*
-				 * We had disjunction on the second atom of the leftjoin, that is,
-				 * more than two rules that unified. LeftJoin is not
-				 * distributable on the right component, hence, we cannot simply
-				 * generate 2 rules for the second atom.
-				 * 
-				 * The rules must be untouched, no partial evaluation is
-				 * possible. We must return the original rule.
-				 */
+				// We had disjunction on the second atom of the leftjoin, that is,
+				// more than two rules that unified. LeftJoin is not
+				// distributable on the right component, hence, we cannot simply
+				// generate 2 rules for the second atom.
+				// 
+				// The rules must be untouched, no partial evaluation is
+				// possible. We must return the original rule.
 				return null;
-
 			}
 
 			result.add(partialEvalution);
@@ -601,20 +581,19 @@ public class SPARQLQueryFlattener {
 		return freshRule;
 	}
 	
-	private static void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
-			Stack<Integer> termidx) {
-		Function parentFunction = null;
+	private static void replaceInnerLJ(CQIE rule, List<Function> replacementTerms, Stack<Integer> termidx) {
+		
 		if (termidx.size() > 1) {
 			/*
 			 * Its a nested term
 			 */
+			Function parentFunction = null;
 			Term nestedTerm = null;
 			for (int y = 0; y < termidx.size() - 1; y++) {
 				int i = termidx.get(y);
 				if (nestedTerm == null)
 					nestedTerm = rule.getBody().get(i);
-				else
-				{
+				else {
 					parentFunction = (Function) nestedTerm;
 					nestedTerm = ((Function) nestedTerm).getTerm(i);
 				}
@@ -631,9 +610,9 @@ public class SPARQLQueryFlattener {
 			newTerms.addAll(replacementTerms);
 			newTerms.addAll(tempTerms);
 			parentFunction.updateTerms(newTerms);
-		} else {
+		} 
+		else 
 			throw new RuntimeException("Unexpected OPTIONAL condition!");
-		}
 	}
 
 
