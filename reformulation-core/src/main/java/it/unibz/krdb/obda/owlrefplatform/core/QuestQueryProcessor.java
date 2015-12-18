@@ -78,25 +78,17 @@ public class QuestQueryProcessor {
 	}
 	
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq) throws OBDAException {
-		DatalogProgram program;
-		try {
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
-			program = translator.translate(pq);
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
+		
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
+		DatalogProgram program = translator.translate(pq);
 
-			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
+		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener(program);
-			program = unfolder.flatten();
-
-			log.debug("Flattened program: \n{}", program);
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-			OBDAException ex = new OBDAException(e.getMessage());
-			ex.setStackTrace(e.getStackTrace());
-			throw ex;
-		}
+		SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener(program);
+		program = unfolder.flatten();
+		log.debug("Flattened program: \n{}", program);
+			
 		log.debug("Replacing equivalences...");
 		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
 		for (CQIE query : program.getRules()) {
@@ -113,30 +105,69 @@ public class QuestQueryProcessor {
 	
 	
 	public String getSQL(ParsedQuery pq) throws OBDAException {
+			
+		String cachedSQL = translatedSQLCache.get(pq);
+		if (cachedSQL != null)
+			return cachedSQL;
 		
-		DatalogProgram program = translateAndPreProcess(pq);
 		try {
 			// log.debug("Input query:\n{}", strquery);
-
+			
+			DatalogProgram program = translateAndPreProcess(pq);
 			for (CQIE q : program.getRules()) 
 				DatalogNormalizer.unfoldJoinTrees(q);
+			log.debug("Normalized program: \n{}", program);
 
-				log.debug("Normalized program: \n{}", program);
-
-			/*
-			 * Empty unfolding, constructing an empty result set
-			 */
 			if (program.getRules().size() < 1) 
 				throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 			log.debug("Start the rewriting process...");
 
 			//final long startTime0 = System.currentTimeMillis();
-			DatalogProgram programAfterRewriting = getOptimizedRewriting(program);
+			for (CQIE cq : program.getRules())
+				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+			DatalogProgram programAfterRewriting = rewriter.rewrite(program);
+			for (CQIE cq : programAfterRewriting.getRules())
+				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+			
 			//rewritingTime = System.currentTimeMillis() - startTime0;
 
 			//final long startTime = System.currentTimeMillis();
-			DatalogProgram programAfterUnfolding = getUnfolding(programAfterRewriting);
+			log.debug("Start the partial evaluation process...");
+
+			DatalogProgram programAfterUnfolding = unfolder.unfold(programAfterRewriting);
+			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
+
+			List<CQIE> toRemove = new LinkedList<>();
+			for (CQIE rule : programAfterUnfolding.getRules()) {
+				Predicate headPredicate = rule.getHead().getFunctionSymbol();
+				if (!headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+					toRemove.add(rule);
+				}
+			}
+			programAfterUnfolding.removeRules(toRemove);
+			log.debug("Irrelevant rules removed: \n{}", programAfterUnfolding);
+
+			ExpressionEvaluator evaluator = new ExpressionEvaluator(unfolder.getUriTemplateMatcher());
+			evaluator.evaluateExpressions(programAfterUnfolding);
+			
+			/*
+				UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
+				for (CQIE cq : unfolding.getRules())
+					ucq.add(cq);
+				
+				List<CQIE> rules = new ArrayList<>(unfolding.getRules());
+				unfolding.removeRules(rules); 
+				
+				for (CQIE cq : ucq.asCQIE()) {
+					unfolding.appendRule(cq);
+				}
+				log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+			 
+			 */
+
+			log.debug("Boolean expression evaluated: \n{}", programAfterUnfolding);
+			log.debug("Partial evaluation ended.");
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 
 			List<String> signature = getQuerySignature(pq);
@@ -153,59 +184,32 @@ public class QuestQueryProcessor {
 			translatedSQLCache.put(pq, sql);
 			return sql;
 		} 
-		catch (Exception e1) {
-			log.debug(e1.getMessage(), e1);
-
-			OBDAException obdaException = new OBDAException("Error rewriting and unfolding into SQL\n" + e1.getMessage());
-			obdaException.setStackTrace(e1.getStackTrace());
-			throw obdaException;
-		}	
+		catch (Exception e) {
+			log.debug(e.getMessage(), e);
+			e.printStackTrace();
+			OBDAException ex = new OBDAException("Error rewriting and unfolding into SQL\n" +  e.getMessage());
+			ex.setStackTrace(e.getStackTrace());
+			throw ex;
+		}
 	}
-	
-
-	/***
-	 * Returns the SQL query for a given SPARQL query. In the process, the
-	 * signature of the query will be set into the query container and the jena
-	 * Query object created (or cached) will be set as jenaQueryContainer[0] so
-	 * that it can be used in other process after getUnfolding.
-	 * 
-	 * If the query is not already cached, it will be cached in this process.
-	 * 
-	 * @param strquery
-	 * @return
-	 * @throws Exception
-	 */
-	public String getSQL(String sparql) throws Exception {
-		ParsedQuery pq = getParsedQuery(sparql);
-		String sql = getSQL(pq);
-		return sql;
-	}
-	
-	
-	private DatalogProgram getOptimizedRewriting(DatalogProgram cqie) throws OBDAException {
-		// Query optimization w.r.t Sigma rules
-		for (CQIE cq : cqie.getRules())
-			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-		cqie = rewriter.rewrite(cqie);
-		for (CQIE cq : cqie.getRules())
-			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-		return cqie;
-	}
-	
-	public DatalogProgram getRewriting(DatalogProgram cqie) throws OBDAException {
-		return rewriter.rewrite(cqie);
-	}
+		
 
 	/**
 	 * Returns the final rewriting of the given query
 	 */
-	public String getRewriting(ParsedQuery query) throws Exception {
-		// TODO FIX to limit to SPARQL input and output
-
-		DatalogProgram program = translateAndPreProcess(query);
-
-		DatalogProgram rewriting = getRewriting(program);
-		return DatalogProgramRenderer.encode(rewriting);
+	public String getRewriting(ParsedQuery query) throws OBDAException {
+		try {
+			DatalogProgram program = translateAndPreProcess(query);
+			DatalogProgram rewriting = rewriter.rewrite(program);
+			return DatalogProgramRenderer.encode(rewriting);
+		}
+		catch (Exception e) {
+			log.debug(e.getMessage(), e);
+			e.printStackTrace();
+			OBDAException ex = new OBDAException("Error rewriting\n" +  e.getMessage());
+			ex.setStackTrace(e.getStackTrace());
+			throw ex;
+		}
 	}
 	
 	
@@ -234,7 +238,7 @@ public class QuestQueryProcessor {
 			DatalogProgram initialProgram = translateAndPreProcess(query);
 			
 			// Perform the query rewriting
-			DatalogProgram programAfterRewriting = getRewriting(initialProgram);
+			DatalogProgram programAfterRewriting = rewriter.rewrite(initialProgram);
 			
 			// Translate the output datalog program back to SPARQL string
 			// TODO Re-enable the prefix manager using Sesame prefix manager
@@ -242,62 +246,12 @@ public class QuestQueryProcessor {
 			DatalogToSparqlTranslator datalogTranslator = new DatalogToSparqlTranslator();
 			return datalogTranslator.translate(programAfterRewriting);
 		} 
-		catch (MalformedQueryException e) {
-			throw new OBDAException(e);
+		catch (Exception e) {
+			log.debug(e.getMessage(), e);
+			e.printStackTrace();
+			OBDAException ex = new OBDAException("Error rewriting\n" +  e.getMessage());
+			ex.setStackTrace(e.getStackTrace());
+			throw ex;
 		}
 	}
-
-	
-	
-	
-	private DatalogProgram getUnfolding(DatalogProgram query) throws OBDAException {
-
-		log.debug("Start the partial evaluation process...");
-
-		DatalogProgram unfolding = unfolder.unfold(query);
-		//log.debug("Partial evaluation: \n{}", unfolding);
-		log.debug("Data atoms evaluated: \n{}", unfolding);
-
-		removeNonAnswerQueries(unfolding);
-
-		//log.debug("After target rules removed: \n{}", unfolding);
-		log.debug("Irrelevant rules removed: \n{}", unfolding);
-
-		ExpressionEvaluator evaluator = new ExpressionEvaluator(unfolder.getUriTemplateMatcher());
-		evaluator.evaluateExpressions(unfolding);
-		
-		/*
-			UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
-			for (CQIE cq : unfolding.getRules())
-				ucq.add(cq);
-			
-			List<CQIE> rules = new ArrayList<>(unfolding.getRules());
-			unfolding.removeRules(rules); 
-			
-			for (CQIE cq : ucq.asCQIE()) {
-				unfolding.appendRule(cq);
-			}
-			log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
-		 
-		 */
-
-		log.debug("Boolean expression evaluated: \n{}", unfolding);
-		log.debug("Partial evaluation ended.");
-
-		return unfolding;
-	}
-
-	private static void removeNonAnswerQueries(DatalogProgram program) {
-		List<CQIE> toRemove = new LinkedList<>();
-		for (CQIE rule : program.getRules()) {
-			Predicate headPredicate = rule.getHead().getFunctionSymbol();
-			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
-				toRemove.add(rule);
-			}
-		}
-		program.removeRules(toRemove);
-	}
-
-	
-	
 }

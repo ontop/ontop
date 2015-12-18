@@ -37,10 +37,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.QueryParser;
-import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -205,7 +202,8 @@ public class QuestDBStatement implements OBDAStatement {
 	 */
 	
 	public String getSQL(String query) throws Exception {
-		return st.questInstance.getEngine().getSQL(query);
+		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 
+		return st.questInstance.getEngine().getSQL(pq);
 	}
 
 	@Override
@@ -214,10 +212,7 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getRewriting(String query) throws Exception {
-		
-		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-		
+		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 
 		return st.questInstance.getEngine().getRewriting(pq);
 	}
 }

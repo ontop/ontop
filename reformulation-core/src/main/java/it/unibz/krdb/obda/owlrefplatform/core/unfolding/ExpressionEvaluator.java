@@ -41,13 +41,12 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -67,62 +66,54 @@ public class ExpressionEvaluator {
 	}
 	
 	public void evaluateExpressions(DatalogProgram p) {
-		Set<CQIE> toremove = new LinkedHashSet<CQIE>();
+		List<CQIE> toremove = new LinkedList<>();
 		for (CQIE q : p.getRules()) {
 			setRegexFlag(false); // reset the ObjectConstant flag
-			boolean empty = evaluateExpressions(q);
-			if (empty) {
+			boolean empty = evaluateExpressions(q.getBody());
+			if (empty) 
 				toremove.add(q);
-			}
 		}
 		p.removeRules(toremove);
 	}
 
-	public boolean evaluateExpressions(CQIE q) {
-		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
-			Function atom = q.getBody().get(atomidx);
+	private boolean evaluateExpressions(List<Function> body) {
+		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
+			Function atom = body.get(atomidx);
 			Term newatom = eval(atom);
 			if (newatom == OBDAVocabulary.TRUE) {
-				q.getBody().remove(atomidx);
+				body.remove(atomidx);
 				atomidx -= 1;
 				continue;
-			} else if (newatom == OBDAVocabulary.FALSE) {
+			} 
+			else if (newatom == OBDAVocabulary.FALSE) {
 				return true;
 			}
-			q.getBody().remove(atomidx);
-			q.getBody().add(atomidx, (Function)newatom);
+			body.set(atomidx, (Function)newatom);
 		}
 		return false;
 	}
 
-	public Term eval(Term expr) {
-		if (expr instanceof Variable) {
-			return eval((Variable) expr);
-		} else if (expr instanceof Constant) {
-			return eval((Constant) expr);
-		} else if (expr instanceof Function) {
+	private Term eval(Term expr) {
+		if (expr instanceof Variable) 
+			return expr;
+
+		else if (expr instanceof Constant) 
+			return expr;
+		
+		else if (expr instanceof Function) 
 			return eval((Function) expr);
-		} else {
-			throw new RuntimeException("Invalid expression");
-		}
+		 
+		throw new RuntimeException("Invalid expression");
 	}
 
-	public Term eval(Variable expr) {
-		return expr;
-	}
-
-	public Term eval(Constant expr) {
-		return expr;
-	}
-
-	public Term eval(Function expr) {
+	private Term eval(Function expr) {
 		Predicate p = expr.getFunctionSymbol();
-		if (p == OBDAVocabulary.SPARQL_JOIN || p == OBDAVocabulary.SPARQL_LEFTJOIN) {
+		if (expr.isAlgebraFunction()) { // p == OBDAVocabulary.SPARQL_JOIN || p == OBDAVocabulary.SPARQL_LEFTJOIN
 			List<Term> terms = expr.getTerms();
 			for (int i=0; i<terms.size(); i++) {
 				Term old = terms.get(i);
 				if (old instanceof Function) {
-					Term newterm = eval((Function) terms.get(i));
+					Term newterm = eval((Function)old);
 					if (!newterm.equals(old))
 						if (newterm == OBDAVocabulary.FALSE) {
 							//
@@ -140,7 +131,7 @@ public class ExpressionEvaluator {
 			}
 			return expr;
 		}
-		if (expr.isBooleanFunction()) {
+		else if (expr.isBooleanFunction()) {
 			return evalBoolean(expr);
 		} 
 		else if (p instanceof NonBooleanOperationPredicate) {
@@ -150,78 +141,45 @@ public class ExpressionEvaluator {
 			return evalNumericalOperation(expr);
 		} 
 		else if (expr.isDataTypeFunction()) {
-			if (dtfac.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
-				if (expr.getTerm(0) instanceof Constant) {
-					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					String valueString = value.getValue();
+			Term t0 = expr.getTerm(0);
+			if (t0 instanceof Constant) {
+				ValueConstant value = (ValueConstant) t0;
+				String valueString = value.getValue();
+				if (dtfac.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 					if (valueString.equals("true") || valueString.equals("1")) {
 						return OBDAVocabulary.TRUE;
-					} else if (valueString.equals("false") || valueString.equals("0")) {
+					} 
+					else if (valueString.equals("false") || valueString.equals("0")) {
 						return OBDAVocabulary.FALSE;
 					}
-				} else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunctionIsTrue(expr);
-				} 
-				else {
-					return expr;
 				}
-			}
-			else if (dtfac.isInteger(p)) {
-
-				if (expr.getTerm(0) instanceof Constant) {
-					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					long valueInteger = Long.parseLong(value.getValue());
+				else if (dtfac.isInteger(p)) {
+					long valueInteger = Long.parseLong(valueString);
 					return fac.getBooleanConstant(valueInteger != 0);
 				} 
-				else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunctionIsTrue(expr);
-				} 
-				else {
-					return expr;
-				}
-			}
-			else if (dtfac.isFloat(p)) {
-				
-				if (expr.getTerm(0) instanceof Constant) {
-					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					double valueD = Double.parseDouble(value.getValue());
+				else if (dtfac.isFloat(p)) {
+					double valueD = Double.parseDouble(valueString);
 					return fac.getBooleanConstant(valueD > 0); 
 				} 
-				else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunctionIsTrue(expr);
+				else if (dtfac.isString(p)) {
+					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
+					return fac.getBooleanConstant(valueString.length() != 0);
 				} 
-				else {
-					return expr;
-				}
+				else if (dtfac.isLiteral(p)) { // R: a bit wider than p == fac.getDataTypePredicateLiteral() 
+									// by taking LANG into account
+					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
+					return fac.getBooleanConstant(valueString.length() != 0);
+				} 
+				// TODO (R): year, date and time are not covered?
+			} 
+			else if (t0 instanceof Variable) {
+				return fac.getFunctionIsTrue(expr);
+			} 
+			else {
+				return expr;
 			}
-			else if (dtfac.isString(p)) {
-				if (expr.getTerm(0) instanceof Constant) {
-					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					return fac.getBooleanConstant(value.toString().length() != 0);
-				} 
-				else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunctionIsTrue(expr);
-				} 
-				else {
-					return expr;
-				}
-			}
-			else if (dtfac.isLiteral(p)) { // R: a bit wider than p == fac.getDataTypePredicateLiteral() 
-				                           // by taking LANG into account
-				if (expr.getTerm(0) instanceof Constant) {
-					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					return fac.getBooleanConstant(value.toString().length() != 0);
-				} 
-				else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunctionIsTrue(expr);
-				} 
-				else {
-					return expr;
-				}
-			}
-			// TODO (R): year, date and time are not covered?
 		}
-		if (p.getName().toString().toUpperCase().contains("QUEST_OBJECT_PROPERTY_ASSERTION")) {
+		if (p.getName().toUpperCase().contains("QUEST_OBJECT_PROPERTY_ASSERTION")) {
 			// ROMAN (26 Sep 2015): what exactly is the meaning of this check?
 			setRegexFlag(true);
 		}
@@ -236,7 +194,7 @@ public class ExpressionEvaluator {
 		return regexFlag;
 	}
 
-	public Term evalBoolean(Function term) {
+	private Term evalBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.AND) {
 			return evalAndOr(term, true);
@@ -620,7 +578,7 @@ public class ExpressionEvaluator {
 		return term;
 	}
 
-	public Term evalIsNullNotNull(Function term, boolean isnull) {
+	private Term evalIsNullNotNull(Function term, boolean isnull) {
 		Term innerTerm = term.getTerms().get(0);
 		if (innerTerm instanceof Function) {
 			Function f = (Function) innerTerm;
@@ -687,7 +645,7 @@ public class ExpressionEvaluator {
 		return term;
 	}
 
-	public Term evalEqNeq(Function term, boolean eq) {
+	private Term evalEqNeq(Function term, boolean eq) {
 		/*
 		 * Evaluate the first term
 		 */
@@ -903,10 +861,14 @@ public class ExpressionEvaluator {
 				List<Function> temp = new ArrayList<>();
 				Set<Variable> keys = theta.getMap().keySet();
 				for (Variable var : keys) {
-					result = createEqNeqFilter(var, theta.get(var), isEqual);
+					if (isEqual) 
+						result = fac.getFunctionEQ(var, theta.get(var));
+					else 
+						result = fac.getFunctionNEQ(var, theta.get(var));
+					
 					temp.add(result);
 					if (temp.size() == 2) {
-						result = createAndFilter(temp.get(0), temp.get(1));
+						result = fac.getFunctionAND(temp.get(0), temp.get(1));
 						temp.clear();
 						temp.add(result);
 					}
@@ -920,20 +882,9 @@ public class ExpressionEvaluator {
 		ValueConstant uriString = (ValueConstant) uriFunction.getTerm(0);
 		return uriTemplateMatcher.generateURIFunction(uriString.getValue());
 	}
-	
-	public Function createEqNeqFilter(Variable var, Term value, boolean isEqual) {
-		if (isEqual) {
-			return fac.getFunctionEQ(var, value);
-		} else {
-			return fac.getFunctionNEQ(var, value);
-		}
-	}
 		
-	private Function createAndFilter(Function function1, Function function2) {
-		return fac.getFunctionAND(function1, function2);
-	}
 
-	public Term evalAndOr(Function term, boolean and) {
+	private Term evalAndOr(Function term, boolean and) {
 		Term teval1 = eval(term.getTerm(0));
 		Term teval2 = eval(term.getTerm(1));
 

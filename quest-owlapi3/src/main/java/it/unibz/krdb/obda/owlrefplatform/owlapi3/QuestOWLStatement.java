@@ -33,10 +33,7 @@ import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
-import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.QueryParser;
-import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
@@ -147,9 +144,6 @@ public class QuestOWLStatement implements AutoCloseable {
 			// Retrieves the ABox from the ontology file.
 
 			aBoxIter = new OWLAPI3ABoxIterator(set, st.questInstance.getVocabulary());
-			// TODO: (ROMAN) -- check whether we need to use 
-			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
-
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} 
 		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
@@ -360,9 +354,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-			
+			ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 			
 			return st.questInstance.getEngine().getRewriting(pq);
 		} 
 		catch (Exception e) {
@@ -372,8 +364,10 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	public String getUnfolding(String query) throws OWLException {
 		try {
-			return st.questInstance.getEngine().getSQL(query);
-		} catch (Exception e) {
+			ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 			
+			return st.questInstance.getEngine().getSQL(pq);
+		} 
+		catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}

@@ -196,7 +196,6 @@ public class QuestStatement implements OBDAStatement {
 		}
 		try {
 			ParsedQuery pq = engine.getParsedQuery(strquery);
-			// encoding ofquery type into numbers
 			if (SPARQLQueryUtility.isSelectQuery(pq)) {
 				TupleResultSet executedQuery = executeTupleQuery(strquery, pq, QueryType.SELECT);
 				return executedQuery;
@@ -210,7 +209,7 @@ public class QuestStatement implements OBDAStatement {
 				return executedGraphQuery;	
 			} 
 			else if (SPARQLQueryUtility.isDescribeQuery(pq)) {
-				// create list of uriconstants we want to describe
+				// create list of URI constants we want to describe
 				List<String> constants = new LinkedList<>();
 				if (SPARQLQueryUtility.isVarDescribe(strquery)) {
 					// if describe ?var, we have to do select distinct ?var first
@@ -306,26 +305,20 @@ public class QuestStatement implements OBDAStatement {
 		
 		log.debug("Executing SPARQL query: \n{}", strquery);
 		
-		// Here we need to get the template for the CONSTRUCT query results
-		SesameConstructTemplate templ = null;
 		try {
-			templ = new SesameConstructTemplate(strquery);
-		} catch (MalformedQueryException e) {
-			e.printStackTrace();
-		}	
-		String query = SPARQLQueryUtility.getSelectFromConstruct(strquery);
-		
-		ParsedQuery pq = null;
-		try {
-			pq = engine.getParsedQuery(query);
+			// Here we need to get the template for the CONSTRUCT query results
+			SesameConstructTemplate templ = new SesameConstructTemplate(strquery);
+			String query = SPARQLQueryUtility.getSelectFromConstruct(strquery);
+			ParsedQuery pq = engine.getParsedQuery(query);
+			
+			QueryExecutionThread executionthread = startExecute(pq, type, templ);
+			QuestGraphResultSet executedGraphQuery = executionthread.getGraphResult();
+			return executedGraphQuery;
 		} 
 		catch (MalformedQueryException e) {
+			e.printStackTrace();
 			throw new OBDAException(e);
 		}
-		
-		QueryExecutionThread executionthread = startExecute(pq, type, templ);
-		QuestGraphResultSet executedGraphQuery = executionthread.getGraphResult();
-		return executedGraphQuery;
 	}
 	
 	
@@ -367,7 +360,8 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public long getTupleCount(String query) throws Exception {
 
-		String unf = engine.getSQL(query);
+		ParsedQuery pq = engine.getParsedQuery(query); 
+		String unf = engine.getSQL(pq);
 		String newsql = "SELECT count(*) FROM (" + unf + ") t1";
 		if (!canceled) {
 			java.sql.ResultSet set = sqlstatement.executeQuery(newsql);
