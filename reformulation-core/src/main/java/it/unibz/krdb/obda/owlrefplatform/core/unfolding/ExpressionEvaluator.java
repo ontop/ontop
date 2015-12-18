@@ -197,9 +197,9 @@ public class ExpressionEvaluator {
 	private Term evalBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.AND) {
-			return evalAndOr(term, true);
+			return evalAnd(term.getTerm(0), term.getTerm(1));
 		} else if (pred == OBDAVocabulary.OR) {
-			return evalAndOr(term, false);
+			return evalOr(term.getTerm(0), term.getTerm(1));
 		} else if (pred == OBDAVocabulary.EQ) {
 			return evalEqNeq(term, true);
 		} else if (pred == OBDAVocabulary.GT) {
@@ -651,9 +651,7 @@ public class ExpressionEvaluator {
 		 */
 		
 		// Do not eval if term is DataTypeFunction, e.g. integer(10)
-		Term teval1 = null;
-		Term teval2 = null;
-		
+		Term teval1;
 		if (term.getTerm(0) instanceof Function) {
 			Function t1 = (Function) term.getTerm(0);
 			if (!(t1.isDataTypeFunction())) {
@@ -672,6 +670,7 @@ public class ExpressionEvaluator {
 		 * Evaluate the second term
 		 */
 
+		Term teval2;
 		if (term.getTerm(1) instanceof Function) {
 			Function t2 = (Function) term.getTerm(1);
 			Predicate p2 = t2.getFunctionSymbol();
@@ -748,41 +747,38 @@ public class ExpressionEvaluator {
 						// languages case literals without language, its
 						// exactly as normal datatypes.
 						// This is copy paste code
-						Function eqValues = null;
-						Function eqLang = null;
-						Function comparison = null;
 						if (eq) {
-							eqValues = fac.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
-							eqLang = fac.getFunctionEQ(f1.getTerm(1), f2.getTerm(1));
-							comparison = fac.getFunctionAND(eqValues, eqLang);
-							return evalAndOr(comparison, true);
+							Function eqValues = fac.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
+							Function eqLang = fac.getFunctionEQ(f1.getTerm(1), f2.getTerm(1));
+							return evalAnd(eqValues, eqLang);
 						}
-						eqValues = fac.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
-						eqLang = fac.getFunctionNEQ(f1.getTerm(1), f2.getTerm(1));
-						comparison = fac.getFunctionOR(eqValues, eqLang);
-						return evalAndOr(comparison, false);
+						Function eqValues = fac.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
+						Function eqLang = fac.getFunctionNEQ(f1.getTerm(1), f2.getTerm(1));
+						return evalOr(eqValues, eqLang);
 					}
 					// case literals without language, its exactly as normal
 					// datatypes
 					// this is copy paste code
-					Function neweq = null;
 					if (eq) {
-						neweq = fac.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
+						Function neweq = fac.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
 						return evalEqNeq(neweq, true);
-					} else {
-						neweq = fac.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
+					} 
+					else {
+						Function neweq = fac.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
 						return evalEqNeq(neweq, false);
 					}
-				} else if (pred1.equals(pred2)) {
-					Function neweq = null;
+				} 
+				else if (pred1.equals(pred2)) {
 					if (pred1 instanceof URITemplatePredicate) {
 						return evalUriTemplateEqNeq(f1, f2, eq);
-					} else {
+					} 
+					else {
 						if (eq) {
-							neweq = fac.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
+							Function neweq = fac.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
 							return evalEqNeq(neweq, true);
-						} else {
-							neweq = fac.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
+						} 
+						else {
+							Function neweq = fac.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
 							return evalEqNeq(neweq, false);
 						}
 					}
@@ -883,68 +879,36 @@ public class ExpressionEvaluator {
 		return uriTemplateMatcher.generateURIFunction(uriString.getValue());
 	}
 		
+	
+	private Term evalAnd(Term t1, Term t2) {
+		Term e1 = eval(t1);
+		Term e2 = eval(t2);
+	
+		if (e1 == OBDAVocabulary.FALSE || e2 == OBDAVocabulary.FALSE)
+			return OBDAVocabulary.FALSE;
+		
+		if (e1 == OBDAVocabulary.TRUE)
+			return e2;
+		
+		if (e2 == OBDAVocabulary.TRUE)
+			return e1;
+		
+		return fac.getFunctionAND(e1, e2);
+	}
 
-	private Term evalAndOr(Function term, boolean and) {
-		Term teval1 = eval(term.getTerm(0));
-		Term teval2 = eval(term.getTerm(1));
-
-		/*
-		 * Normalizing the location of terms, constants first
-		 */
-		Term eval1 = teval1 instanceof Constant ? teval1 : teval2;
-		Term eval2 = teval1 instanceof Constant ? teval2 : teval1;
-
-		/*
-		 * Implementing boolean logic
-		 */
-		if (eval1 == OBDAVocabulary.TRUE) {
-			if (eval2 == OBDAVocabulary.TRUE) {
-				return fac.getBooleanConstant(and);
-			} 
-			else if (eval2 == OBDAVocabulary.FALSE) {
-				return fac.getBooleanConstant(!and);
-			} 
-			else if (and) {
-				/* if its an and we still need to evaluate eval2 */
-				return eval2;
-			} else {
-				/*
-				 * Its an Or, and the first was true, so it doesn't matter whats
-				 * next.
-				 */
-				return OBDAVocabulary.TRUE;
-			}
-
-		} else if (eval1 == OBDAVocabulary.FALSE) {
-			if (eval2 == OBDAVocabulary.TRUE) {
-				return fac.getBooleanConstant(!and);
-			} 
-			else if (eval2 == OBDAVocabulary.FALSE) {
-				// TODO: check whether the two FALSE were INTENDED
-				//if (and) {
-					return OBDAVocabulary.FALSE;
-				//} else {
-				//	return OBDAVocabulary.FALSE;
-				//}
-			} else if (and) {
-				/*
-				 * Its an And, and the first was false, so it doesn't matter
-				 * whats next.
-				 */
-				return OBDAVocabulary.FALSE;
-			} else {
-				return eval2;
-			}
-		}
-		/*
-		 * None of the subnodes evaluated to true or false, we have functions
-		 * that need to be evaluated
-		 */
-		// TODO check if we can further optimize this
-		if (and) {
-			return fac.getFunctionAND(eval1, eval2);
-		} else {
-			return fac.getFunctionOR(eval1, eval2);
-		}
+	private Term evalOr(Term t1, Term t2) {
+		Term e1 = eval(t1);
+		Term e2 = eval(t2);
+	
+		if (e1 == OBDAVocabulary.TRUE || e2 == OBDAVocabulary.TRUE)
+			return OBDAVocabulary.TRUE;
+		
+		if (e1 == OBDAVocabulary.FALSE)
+			return e2;
+		
+		if (e2 == OBDAVocabulary.FALSE)
+			return e1;
+		
+		return fac.getFunctionOR(e1, e2);
 	}
 }
