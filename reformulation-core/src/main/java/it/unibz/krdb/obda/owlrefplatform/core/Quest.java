@@ -269,7 +269,7 @@ public class Quest implements Serializable {
 	
 	// TEST ONLY
 	public List<CQIE> getUnfolderRules() {
-		return engine.unfolder.getRules();
+		return engine.unfolder.ufp;
 	}
 
 	private void loadOBDAModel(OBDAModel model) {
@@ -422,7 +422,6 @@ public class Quest implements Serializable {
 		 */
 
 		final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(inputOntology, bOptimizeEquivalences);
-		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
 
 		try {
 
@@ -433,24 +432,24 @@ public class Quest implements Serializable {
 			 */
 
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
+				if (!aboxSchemaType.equals(QuestConstants.SEMANTIC_INDEX)) {
+					throw new Exception(aboxSchemaType
+							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
+				}
+
 				if (inmemory) {
-					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
 							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
-					String username = "sa";
-					String password = "";
 
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.h2.Driver");
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "sa");
 					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 				} 
 				else {
-					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-
 					if (aboxJdbcURL.trim().equals(""))
 						throw new OBDAException("Found empty JDBC_URL parametery. Quest in CLASSIC/JDBC mode requires a JDBC_URL value.");
 
@@ -458,6 +457,7 @@ public class Quest implements Serializable {
 						throw new OBDAException(
 								"Found empty JDBC_DRIVER parametery. Quest in CLASSIC/JDBC mode requires a JDBC_DRIVER value.");
 
+					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver.trim());
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, aboxJdbcPassword);
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL.trim());
@@ -466,45 +466,30 @@ public class Quest implements Serializable {
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 				}
 
-				if (!aboxSchemaType.equals(QuestConstants.SEMANTIC_INDEX)) {
-					throw new Exception(aboxSchemaType
-							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
-				}
-
 				// TODO one of these is redundant??? check
 				connect();
-				// setup connection pool
+				
 				setupConnectionPool();
 
 				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
 
 				if (inmemory) {
-
-					/*
-					 * in this case we we work in memory (with H2), the database
-					 * is clean and Quest will insert new Abox assertions into
-					 * the database.
-					 */
+					// we work in memory (with H2), the database is clean and 
+					// Quest will insert new Abox assertions into the database.
 					dataRepository.generateMetadata();
 					
-					/* Creating the ABox repository */
+					// Creating the ABox repository 
 					dataRepository.createDBSchemaAndInsertMetadata(localConnection);
 				} 
 				else {
-					/*
-					 * Here we expect the repository to be already created in
-					 * the database, we will restore the repository and we will
-					 * NOT insert any data in the repo, it should have been
-					 * inserted already.
-					 */
+					// the repository has already been created in the database, 
+					// restore the repository and do NOT insert any data in the repo, 
+					// it should have been inserted already.
 					dataRepository.loadMetadata(localConnection);
 
 					// TODO add code to verify that the existing semantic index
-					// repository can be used
-					// with the current ontology, e.g., checking the vocabulary
-					// of URIs, checking the
-					// ranges w.r.t. to the ontology entailments, etc.
-
+					// repository can be used with the current ontology, e.g., 
+					// checking the vocabulary of URIs, ranges wrt the ontology entailments
 				}
 
 				// getting OBDA mapping axioms
@@ -522,18 +507,16 @@ public class Quest implements Serializable {
 							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
 									+ sources.size() + " data sources. Please remove the aditional sources.");
 
-				/* Setting up the OBDA model */
+				// Setting up the OBDA model 
 
 				obdaSource = sources.iterator().next();
 
 				log.debug("Testing DB connection...");
 				connect();
 
-				// setup connection pool
 				setupConnectionPool();
 
-				// obtain mappings by replace equivalences in the source mappings
-				mappings = vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
+				mappings = inputOBDAModel.getMappings(obdaSource.getSourceID());
 			}
 
 			
@@ -603,31 +586,17 @@ public class Quest implements Serializable {
 			
             SQLQueryGenerator datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
-            final QuestUnfolder unfolder = new QuestUnfolder(mappings, metadata, localConnection);
+    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
+            
+            final QuestUnfolder unfolder = new QuestUnfolder(metadata);
 
 			/*
 			 * T-Mappings and Fact mappings
 			 */
-			if (aboxMode.equals(QuestConstants.VIRTUAL)) {
-				log.debug("Original mapping size: {}", unfolder.getRulesSize());
-
-				 // Normalizing language tags and equalities
-				unfolder.normalizeMappings();
-
-				// Apply TMappings
-				unfolder.applyTMappings(reformulationReasoner, true, excludeFromTMappings);
-				
-                // Adding ontology assertions (ABox) as rules (facts, head with no body).
-                unfolder.addAssertionsAsFacts(inputOntology.getClassAssertions(),
-                		inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions());
-
-				// Adding data typing on the mapping axioms.
-				 // Adding NOT NULL conditions to the variables used in the head
-				 // of all mappings to preserve SQL-RDF semantics
-				unfolder.extendTypesWithMetadataAndAddNOTNULL(reformulationReasoner, vocabularyValidator, metadata);
-			}
-			
-			unfolder.setupUnfolder();
+			if (aboxMode.equals(QuestConstants.VIRTUAL)) 
+				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings);
+			else
+				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 
 			if (dataRepository != null)
 				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
@@ -635,7 +604,9 @@ public class Quest implements Serializable {
 					public void repositoryChanged() {
 						engine.clearSQLCache();
 						try {
-							unfolder.updateSemanticIndexMappings(dataRepository.getMappings(), reformulationReasoner);
+							// 
+							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
+							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 						} 
 						catch (Exception e) {
 							log.error("Error updating Semantic Index mappings", e);

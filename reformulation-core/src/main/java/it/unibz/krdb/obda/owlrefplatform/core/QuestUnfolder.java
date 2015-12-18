@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
@@ -24,6 +25,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +38,6 @@ public class QuestUnfolder {
 	/* The active unfolding engine */
 	private DatalogUnfolder unfolder;
 
-	/* As unfolding OBDAModel, but experimental */
-	private List<CQIE> unfoldingProgram;
-
 	private final DBMetadata metadata;
 	private final Multimap<Predicate, List<Integer>> pkeys;
 	private final CQContainmentCheckUnderLIDs foreignKeyCQC;
@@ -48,6 +47,8 @@ public class QuestUnfolder {
 	 * queries into Functions, used by the SPARQL translator.
 	 */
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+
+	protected List<CQIE> ufp; // for TESTS ONLY
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
@@ -58,7 +59,7 @@ public class QuestUnfolder {
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	public QuestUnfolder(Collection<OBDAMappingAxiom> mappings, DBMetadata metadata,  Connection localConnection) throws SQLException, JSQLParserException {
+	public QuestUnfolder(DBMetadata metadata)  {
 
 		this.metadata = metadata;
 		this.pkeys = DBMetadataUtil.extractPKs(metadata);
@@ -66,7 +67,12 @@ public class QuestUnfolder {
 		// for eliminating redundancy from the unfolding program
 		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
+	}
 
+	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings) 
+					throws SQLException, JSQLParserException, OBDAException {
+
+		mappings = vocabularyValidator.replaceEquivalences(mappings);
 		
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
@@ -84,25 +90,57 @@ public class QuestUnfolder {
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
 		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
 		
-		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
-	}
+		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
+		
+		
+		log.debug("Original mapping size: {}", unfoldingProgram.size());
+		
+		 // Normalizing language tags and equalities
+		normalizeMappings(unfoldingProgram);
 
+		// Apply TMappings
+		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, true, excludeFromTMappings);
+		
+       // Adding ontology assertions (ABox) as rules (facts, head with no body).
+       addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
+       		inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions());
 
-	public int getRulesSize() {
-		return unfoldingProgram.size();
-	}
+		// Adding data typing on the mapping axioms.
+		 // Adding NOT NULL conditions to the variables used in the head
+		 // of all mappings to preserve SQL-RDF semantics
+		extendTypesWithMetadataAndAddNOTNULL(unfoldingProgram, reformulationReasoner, vocabularyValidator);
+		
+		
+		// Collecting URI templates
+		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
-	// USED ONLY IN TESTS
-	@Deprecated
-	public List<CQIE> getRules() {
-		return unfoldingProgram;
+		// Adding "triple(x,y,z)" mappings for support of unbounded
+		// predicates and variables as class names (implemented in the
+		// sparql translator)
+		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
+
+        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+		
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		
+		this.ufp = unfoldingProgram;
 	}
 	
+		
 	/**
 	 * Setting up the unfolder and SQL generation
+	 * @param reformulationReasoner 
+	 * @param collection 
+	 * @throws OBDAException 
 	 */
 
-	public void setupUnfolder() {
+	public void setupInSemanticIndexMode(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
+	
+		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
+		
+		// this call is required to complete the T-mappings by rules taking account of 
+		// existential quantifiers and inverse roles
+		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, false, TMappingExclusionConfig.empty());
 		
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
@@ -115,10 +153,12 @@ public class QuestUnfolder {
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
 		
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
+		
+		this.ufp = unfoldingProgram;
 	}
 
 	
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
+	private List<CQIE> applyTMappings(List<CQIE>  unfoldingProgram, TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
@@ -139,6 +179,8 @@ public class QuestUnfolder {
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());
 		log.debug("TMapping processing time: {} ms", (endTime - startTime));
+		
+		return unfoldingProgram;
 	}
 
 	/***
@@ -147,7 +189,7 @@ public class QuestUnfolder {
 	 * of all mappings to preserve SQL-RDF semantics
 	 */
 	
-	public void extendTypesWithMetadataAndAddNOTNULL(TBoxReasoner tboxReasoner, VocabularyValidator qvv, DBMetadata metadata) throws OBDAException {
+	private void extendTypesWithMetadataAndAddNOTNULL(List<CQIE> unfoldingProgram, TBoxReasoner tboxReasoner, VocabularyValidator qvv) throws OBDAException {
 		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tboxReasoner, qvv);
 		for (CQIE mapping : unfoldingProgram)  {
 			typeRepair.insertDataTyping(mapping);
@@ -168,7 +210,7 @@ public class QuestUnfolder {
 	 * (remove them by replacing all equivalent terms with one representative)
 	 */
 	
-	public void normalizeMappings() {
+	private void normalizeMappings(List<CQIE> unfoldingProgram) {
 	
 		// Normalizing language tags. Making all LOWER CASE
 
@@ -201,7 +243,7 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	public void addAssertionsAsFacts(Iterable<ClassAssertion> cas, 
+	private void addAssertionsAsFacts(List<CQIE> unfoldingProgram, Iterable<ClassAssertion> cas, 
 							Iterable<ObjectPropertyAssertion> pas, Iterable<DataPropertyAssertion> das) {
 		
 		int count = 0;
@@ -257,18 +299,6 @@ public class QuestUnfolder {
 	
 	
 	
-	public void updateSemanticIndexMappings(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
-
-		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
-		
-		// this call is required to complete the T-mappings by rules taking account of 
-		// existential quantifiers and inverse roles
-		applyTMappings(reformulationReasoner, false, TMappingExclusionConfig.empty());
-		
-		setupUnfolder();
-
-		log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
-	}
 
 	
 	/***
