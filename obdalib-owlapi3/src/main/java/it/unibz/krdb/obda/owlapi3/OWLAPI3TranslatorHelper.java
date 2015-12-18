@@ -58,9 +58,6 @@ public class OWLAPI3TranslatorHelper {
 	}
 
 	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
-		OWLAnnotationSubject subject = ax.getSubject();
-
-		OWLAnnotationValue value = ax.getValue();
 
 		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
 

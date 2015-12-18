@@ -24,8 +24,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.AnnotationProperty;
-import it.unibz.krdb.obda.ontology.AnnotationPropertyDomain;
-import it.unibz.krdb.obda.ontology.AnnotationPropertyRange;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification
@@ -49,7 +47,8 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 
 	AnnotationPropertyImpl(String name) {
-		this.predicate = ofac.getDataPropertyPredicate(name);
+		//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
+		this.predicate = ofac.getPredicate(name, new Predicate.COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
 		this.name = name;		
 
 	}
@@ -64,19 +63,6 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 		return name;
 	}
 
-	@Override
-	public AnnotationPropertyDomain getDomain() {
-
-		//TODO:to be implemented
-		return null;
-	}
-
-	@Override
-	public AnnotationPropertyRange getRange() {
-
-		//TODO: to be implemented
-		return null;
-	}
 
 	@Override
 	public boolean equals(Object obj) {

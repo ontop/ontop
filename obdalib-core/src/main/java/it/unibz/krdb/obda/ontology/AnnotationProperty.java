@@ -34,7 +34,7 @@ public interface AnnotationProperty extends Description {
      * @return iri  for the domain
      */
 
-    public AnnotationPropertyDomain getDomain();
+//    public AnnotationPropertyDomain getDomain();
 
     /**
      * the range iri for the annotation property
@@ -45,7 +45,7 @@ public interface AnnotationProperty extends Description {
      * @return iri for the range
      */
 
-    public AnnotationPropertyRange getRange();
+//    public AnnotationPropertyRange getRange();
 
 
 }

@@ -20,8 +20,6 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.ontology.AnnotationAssertion;
 import it.unibz.krdb.obda.ontology.AnnotationProperty;
 
@@ -40,23 +38,10 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	private static final long serialVersionUID = -8834975903851540150L;
 
 	private final AnnotationProperty prop;
-	private final Constant o2;
-	private final ObjectConstant o1;
 
-	AnnotationAssertionImpl(AnnotationProperty prop, ObjectConstant o1, Constant o2) {
+	AnnotationAssertionImpl(AnnotationProperty prop) {
 		this.prop = prop;
-		this.o1 = o1;
-		this.o2 = o2;
-	}
 
-	@Override
-	public ObjectConstant getSubject() {
-		return o1;
-	}
-
-	@Override
-	public Constant getValue() {
-		return o2;
 	}
 
 	@Override
@@ -68,19 +53,19 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	public boolean equals(Object obj) {
 		if (obj instanceof AnnotationAssertionImpl) {
 			AnnotationAssertionImpl other = (AnnotationAssertionImpl)obj;
-			return prop.equals(other.prop) && o1.equals(other.o1)  && o2.equals(other.o2);
+			return prop.equals(other.prop);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return prop.hashCode() + o1.hashCode() + o2.hashCode();
+		return prop.hashCode() ;
 	}
 	
 	@Override
 	public String toString() {
-		return prop + "(" + o1 + ", " + o2 + ")";
+		return prop.getName();
 	}
 
 }

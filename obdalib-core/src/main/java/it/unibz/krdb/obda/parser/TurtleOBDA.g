@@ -636,8 +636,8 @@ stringLiteral returns [Term value]
 
 dataTypeString returns [Term value]
   :  stringLiteral REFERENCE resource {
-      if (($stringLiteral.value) instanceof Function){
-          Function f = (Function)$stringLiteral.value;
+      Term stringValue = $stringLiteral.value;
+
           if ($resource.value instanceof Function){
           	    String functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
 
@@ -645,24 +645,12 @@ dataTypeString returns [Term value]
                     if (type == null) {
                       throw new RuntimeException("Unsupported datatype: " + functionName);
                     }
-                    $value = dfac.getTypedTerm(f, type);
+                    $value = dfac.getTypedTerm(stringValue, type);
                     }
            else {
-          value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
+          value = dfac.getTypedTerm(stringValue, COL_TYPE.LITERAL);
           }
-      }else{
-          ValueConstant constant = (ValueConstant)$stringLiteral.value;
-          String functionName = $resource.value.toString();
-          Predicate functionSymbol = null;
-          if ($resource.value instanceof Function){
-	    functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
-          }
-          Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
-          if (type == null) {
-            throw new RuntimeException("Unsupported datatype: " + functionName);
-          }
-          $value = dfac.getTypedTerm(constant, type);
-      }
+
   };
 
 numericLiteral returns [Term value]

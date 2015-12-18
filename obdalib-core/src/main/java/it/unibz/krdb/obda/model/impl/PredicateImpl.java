@@ -84,7 +84,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isClass() {
-		if (arity == 1 && types[0] == COL_TYPE.OBJECT) {
+		if (arity == 1 && getType(0) == COL_TYPE.OBJECT) {
 			return true;
 		}
 		return false;
@@ -92,7 +92,15 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isObjectProperty() {
-		if (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.OBJECT) {
+		if (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isAnnotationProperty() {
+		if (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.NULL) {
 			return true;
 		}
 		return false;
@@ -100,7 +108,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isDataProperty() {
-		if (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.LITERAL) {
+		if (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.LITERAL) {
 			return true;
 		}
 		return false;

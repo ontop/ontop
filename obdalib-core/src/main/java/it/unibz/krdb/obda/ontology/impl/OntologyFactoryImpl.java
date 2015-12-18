@@ -123,9 +123,15 @@ public class OntologyFactoryImpl implements OntologyFactory {
 //		return new AnnotationAssertionImpl(ap,o,c);
 //	}
 
+	/**
+	 * Creates an annotation assertion
+	 * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
+	 * AnnotationSubject := IRI | AnonymousIndividual
+	 * Subjects and value are not currently stored
+	 */
 	@Override
 	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap) {
-		return new AnnotationAssertionImpl(ap,null,null);
+		return new AnnotationAssertionImpl(ap);
 	}
 
 }

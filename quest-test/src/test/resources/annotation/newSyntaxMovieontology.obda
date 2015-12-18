@@ -23,15 +23,15 @@ driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Actor
-target		imdb:name/{person_id} a dbpedia:Actor .
+target		imdb:name/{person_id} a dbpedia:Actor , mo:Vip .
 source		select person_id from cast_info where cast_info.role_id = 1
 
 mappingId	Movie
-target		imdb:title/{id} a mo:Movie ; dc:date "{production_year}" ; dc:description imdb:title/{title}  .
+target		imdb:title/{id} a mo:Movie ; dc:date "{production_year}" ; dc:description imdb:title/{title} ; mo:idTitle mo:movie{id} .
 source		select id, title, production_year from title where kind_id = 1
 
 mappingId	Production Company
-target		imdb:company/{company_id} a mo:Production_Company . 
+target		imdb:company/{company_id} a mo:Production_Company ; mo:companyId {company_id}^^xsd:int .
 source		select company_id from movie_companies where movie_companies.company_type_id = 2
 
 mappingId	Person has Birth Date

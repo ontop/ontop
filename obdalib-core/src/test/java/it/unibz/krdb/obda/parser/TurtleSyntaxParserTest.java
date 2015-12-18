@@ -101,7 +101,7 @@ public class TurtleSyntaxParserTest  {
 	@Test
 	public void test_3_1_new_string() {
 		final boolean result = parse(":Person-{id} :firstName \"{fname}\"^^xsd:string .");
-		assertFalse(result);
+		assertTrue(result);
 	}
 
 	@Test

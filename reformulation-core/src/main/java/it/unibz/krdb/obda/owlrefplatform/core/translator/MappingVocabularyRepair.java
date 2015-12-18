@@ -79,7 +79,7 @@ public class MappingVocabularyRepair {
 			urimap.put(p.getName(), p.getPredicate());
 
 
-		Collection<OBDAMappingAxiom> result = new LinkedList<>();
+		Collection<OBDAMappingAxiom> result = new ArrayList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			List<Function> targetQuery = mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
@@ -88,7 +88,7 @@ public class MappingVocabularyRepair {
 				Predicate p = atom.getFunctionSymbol();
 
 				/* Fixing terms */
-				List<Term> newTerms = new LinkedList<>();
+				List<Term> newTerms = new ArrayList<>();
 				for (Term term : atom.getTerms()) {
 					newTerms.add(fixTerm(term));
 				}
@@ -130,11 +130,15 @@ public class MappingVocabularyRepair {
 								}
 							} 
 							else  {
+								// In case we want to support as data property the cases that we don't understand how they have been defined.
 //								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
+//								System.err.println("refers to mapping:" + mapping);
 //								System.err.println("Treated as a data property");
 //								Predicate pred = dfac.getDataPropertyPredicate(p.getName());
 //								newatom = dfac.getFunction(pred, getNormalTerm(t1), t2);
-								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName());
+
+								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName()
+								                                   +"\n refers to mapping: \n" + mapping);
 							}
 						}
 						else  {
@@ -152,16 +156,30 @@ public class MappingVocabularyRepair {
 					if (newTerms.size() == 1) {
 						newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)));
 					}
-					else if (newTerms.size() == 2) {
-						if (predicate.isObjectProperty()) {
-							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));							
+					else if (newTerms.size() == 2)
+					{
+						if (predicate.isObjectProperty())
+						{
+							newatom = dfac.getFunction(p, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));
 						}
-						else { //could be both data or annotation property (treated both as data property)
-							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));							
+						else
+						{
+								if(predicate.isAnnotationProperty())
+								{
+									//use the value of p as defined in the mappings (can be object or data property)
+
+									newatom = dfac.getFunction(p, getNormalTerm(newTerms.get(0)), newTerms.get(1));
+								}
+							else
+								{
+								newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));
+								}
 						}
 					}
-					else 
-						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());			
+					else
+					{
+						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
+					}
 				}
 
  				newbody.add(newatom);

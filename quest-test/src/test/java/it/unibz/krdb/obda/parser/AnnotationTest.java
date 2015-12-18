@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
- * Class to test if annotation property can be treated as data property
+ * Class to test if annotation property can be treated as data property and object property
  *
  *
  */
@@ -159,8 +159,8 @@ public class AnnotationTest {
         assertEquals("<1>", results);
     }
 
-    @Test
-    public void testAnnotationInt() throws Exception {
+    @Test //no class in the ontology
+    public void testClassUndefined() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
 
@@ -168,16 +168,54 @@ public class AnnotationTest {
                 "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
                 "\n" +
                 "SELECT  ?r " +
-                " ?movie \n" +
-                "WHERE {?movie dbpedia:productionStartYear ?r . \n" +
+                "WHERE {?r a mo:Vip . \n" +
 
                 "}";
 
 
 
         String results = runTestQuery(p, queryBind);
-        assertEquals("\"2006\"^^xsd:int", results);
+        assertEquals("<http://www.imdb.com/name/1>", results);
     }
+
+    @Test //no dataproperty in the ontology
+    public void testDataPropertyUndefined() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+        String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
+                "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
+                "\n" +
+                "SELECT  ?r " +
+                "WHERE {?company mo:companyId ?r . \n" +
+
+                "}";
+
+
+
+        String results = runTestQuery(p, queryBind);
+        assertEquals("\"113564\"^^xsd:int", results);
+    }
+
+    @Test //no objectproperty in the ontology
+    public void testObjectPropertyUndefined() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+        String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
+                "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
+                "\n" +
+                "SELECT  ?r " +
+                "WHERE {?movie mo:idTitle ?r . \n" +
+
+                "}";
+
+
+
+        String results = runTestQuery(p, queryBind);
+        assertEquals("<http://www.movieontology.org/2009/10/01/movieontology.owl#movie78543>", results);
+    }
+
 
     private String runTestQuery(Properties p, String query) throws Exception {
 
