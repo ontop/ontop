@@ -121,6 +121,8 @@ public interface Predicate extends Cloneable, Serializable {
 
 	boolean isObjectProperty();
 
+	boolean isAnnotationProperty();
+
 	boolean isDataProperty();
 	
 	boolean isDataPredicate();

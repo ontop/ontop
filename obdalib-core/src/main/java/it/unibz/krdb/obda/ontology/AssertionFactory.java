@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
@@ -72,5 +73,17 @@ public interface AssertionFactory {
 	 */
 	
 	public DataPropertyAssertion createDataPropertyAssertion(String propertyName, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
-		
+
+
+	/**
+	 * creates a data property assertion (without checking any vocabulary)
+	 *
+	 * @param propertyName
+	 * @param o
+	 * @param v
+	 * @return null if it is top data property ([D4])
+	 * @throws InconsistentOntologyException if it is the bottom data property ([D4])
+	 */
+
+	public AnnotationAssertion createAnnotationAssertion(String propertyName, ObjectConstant o, Constant v) throws InconsistentOntologyException;
 }

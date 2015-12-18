@@ -64,7 +64,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	/**
 	 * general constructor 
 	 * 
-	 * @param p
+	 * @param name
 	 */
 	
 	ObjectPropertyExpressionImpl(String name) {

@@ -35,6 +35,16 @@ public interface ImmutableOntologyVocabulary {
 	 */
 	
 	public DataPropertyExpression getDataProperty(String uri);
+
+	/**
+	 * check whether the annotation property has been declared and return the class object
+	 *
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the data property has not been declared
+	 */
+
+	public AnnotationProperty getAnnotationProperty(String uri);
 	
 	
 	public Datatype getDatatype(String uri);
@@ -66,7 +76,16 @@ public interface ImmutableOntologyVocabulary {
 	 */
 	
 	public boolean containsDataProperty(String uri);
-	
+
+	/**
+	 * check whether the data property has been declared
+	 *
+	 * @param uri
+	 * @return
+	 */
+
+	public boolean containsAnnotationProperty(String uri);
+
 	/**
 	 * return all declared classes
 	 * 
@@ -90,6 +109,14 @@ public interface ImmutableOntologyVocabulary {
 	 */
 	
 	public Collection<DataPropertyExpression> getDataProperties();
+
+	/**
+	 * return all declared annotation properties
+	 *
+	 * @return
+	 */
+
+	public Collection<AnnotationProperty> getAnnotationProperties();
 	
 	
 	/**
