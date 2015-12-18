@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import it.unibz.krdb.obda.model.*;
@@ -21,12 +20,7 @@ import it.unibz.krdb.obda.parser.PreprocessProjection;
 import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
-import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.UniqueConstraint;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
@@ -46,6 +40,8 @@ public class QuestUnfolder {
 	private List<CQIE> unfoldingProgram;
 
 	private final DBMetadata metadata;
+	private final Multimap<Predicate, List<Integer>> pkeys;
+	private final CQContainmentCheckUnderLIDs foreignKeyCQC;
 	
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
@@ -65,6 +61,12 @@ public class QuestUnfolder {
 	public QuestUnfolder(Collection<OBDAMappingAxiom> mappings, DBMetadata metadata,  Connection localConnection) throws SQLException, JSQLParserException {
 
 		this.metadata = metadata;
+		this.pkeys = DBMetadataUtil.extractPKs(metadata);
+		
+		// for eliminating redundancy from the unfolding program
+		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
+		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
+
 		
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
@@ -112,70 +114,13 @@ public class QuestUnfolder {
 
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
 		
-		unfolder = createDatalogUnfolder(unfoldingProgram, metadata);	
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public static DatalogUnfolder createDatalogUnfolder(List<CQIE> unfoldingProgram, DBMetadata metadata) {
-		Multimap<Predicate, List<Integer>> pkeys = extractPKs(metadata, unfoldingProgram);
-		return new DatalogUnfolder(unfoldingProgram, pkeys);	
-	}
-	
-	/***
-	 * Generates a map for each predicate in the body of the rules in 'program'
-	 * that contains the Primary Key data for the predicates obtained from the
-	 * info in the metadata.
-     *
-     * It also returns the columns with unique constraints
-     *
-     * For instance, Given the table definition
-     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
-     *
-     * The methods will return the following Multimap:
-     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
-     *
-	 * 
-	 * @param metadata
-	 * @param program
-	 */
-	private static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
-			List<CQIE> program) {
-		
-		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
-		for (CQIE mapping : program) {
-			for (Function newatom : mapping.getBody()) {
-				Predicate newAtomPredicate = newatom.getFunctionSymbol();
-				if (newatom.isBooleanFunction()) 
-					continue;
-				
-				if (pkeys.containsKey(newAtomPredicate))
-					continue;
-				
-				RelationID newAtomName = Relation2DatalogPredicate.createRelationFromPredicateName(newAtomPredicate);
-				DatabaseRelationDefinition def = metadata.getDatabaseRelation(newAtomName);
-				if (def != null) {
-					// primary key and unique constraints
-					for (UniqueConstraint uc : def.getUniqueConstraints()) {
-						List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
-						for (Attribute att : def.getAttributes()) {
-							if (uc.getAttributes().contains(att)) 
-								pkeyIdx.add(att.getIndex());
-						}
-						pkeys.put(newAtomPredicate, pkeyIdx);
-					}
-				}
-			}
-		}
-		return pkeys;
-	}
-	
 	
 	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
-
-		// for eliminating redundancy from the unfolding program
-		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
-		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 
 		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full,  foreignKeyCQC, excludeFromTMappings);
 		
@@ -198,22 +143,15 @@ public class QuestUnfolder {
 
 	/***
 	 * Adding data typing on the mapping axioms.
-	 */
-	
-	public void extendTypesWithMetadata(TBoxReasoner tboxReasoner, VocabularyValidator qvv, DBMetadata metadata) throws OBDAException {
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tboxReasoner, qvv);
-		for (CQIE mapping : unfoldingProgram) 
-			typeRepair.insertDataTyping(mapping);
-	}
-
-	/***
 	 * Adding NOT NULL conditions to the variables used in the head
 	 * of all mappings to preserve SQL-RDF semantics
 	 */
 	
-	public void addNOTNULLToMappings() {
+	public void extendTypesWithMetadataAndAddNOTNULL(TBoxReasoner tboxReasoner, VocabularyValidator qvv, DBMetadata metadata) throws OBDAException {
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tboxReasoner, qvv);
+		for (CQIE mapping : unfoldingProgram)  {
+			typeRepair.insertDataTyping(mapping);
 
-		for (CQIE mapping : unfoldingProgram) {
 			Set<Variable> headvars = new HashSet<>();
 			TermUtils.addReferencedVariablesTo(headvars, mapping.getHead());
 			for (Variable var : headvars) {
@@ -224,7 +162,7 @@ public class QuestUnfolder {
 			}
 		}
 	}
-	
+
 	/**
 	 * Normalize language tags (make them lower-case) and equalities 
 	 * (remove them by replacing all equivalent terms with one representative)
@@ -241,18 +179,16 @@ public class QuestUnfolder {
 					continue;
 				
 				Function typedTerm = (Function) term;
-				Predicate type = typedTerm.getFunctionSymbol();
-
-				if (typedTerm.getTerms().size() != 2 || !type.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI))
-					continue;
-				
-				 // changing the language, its always the second inner term (literal,lang)
-				Term originalLangTag = typedTerm.getTerm(1);
-				if (originalLangTag instanceof ValueConstant) {
-					ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-					Term normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(), originalLangConstant.getType());
-					typedTerm.setTerm(1, normalizedLangTag);
-				} 
+				if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+					 // changing the language, its always the second inner term (literal,lang)
+					Term originalLangTag = typedTerm.getTerm(1);
+					if (originalLangTag instanceof ValueConstant) {
+						ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
+						Term normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(), 
+															originalLangConstant.getType());
+						typedTerm.setTerm(1, normalizedLangTag);
+					} 
+				}
 			}
 		}
 
@@ -265,10 +201,11 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	public void addClassAssertionsAsFacts(Iterable<ClassAssertion> assertions) {
+	public void addAssertionsAsFacts(Iterable<ClassAssertion> cas, 
+							Iterable<ObjectPropertyAssertion> pas, Iterable<DataPropertyAssertion> das) {
 		
 		int count = 0;
-		for (ClassAssertion ca : assertions) {
+		for (ClassAssertion ca : cas) {
 			// no blank nodes are supported here
 			URIConstant c = (URIConstant)ca.getIndividual();
 			Predicate p = ca.getConcept().getPredicate();
@@ -280,12 +217,9 @@ public class QuestUnfolder {
 			count++;
 		}
 		log.debug("Appended {} class assertions from ontology as fact rules", count);
-	}		
-	
-	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
 		
-		int count = 0;
-		for (ObjectPropertyAssertion pa : assertions) {
+		count = 0;
+		for (ObjectPropertyAssertion pa : pas) {
 			// no blank nodes are supported here
 			URIConstant s = (URIConstant)pa.getSubject();
 			URIConstant o = (URIConstant)pa.getObject();
@@ -299,9 +233,7 @@ public class QuestUnfolder {
 			count++;
 		}
 		log.debug("Appended {} object property assertions as fact rules", count);
-	}		
-	
-	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {
+			
 		
 //		int count = 0;
 //		for (DataPropertyAssertion a : assertions) {
@@ -352,25 +284,16 @@ public class QuestUnfolder {
 			Function newhead = null;
 			Function currenthead = mapping.getHead();
 			if (currenthead.getArity() == 1) {
-				/*
-				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
-				 * uri(Class))
-				 */
+				// head is Class(x) Forming head as triple(x, uri(rdf:type), uri(Class))
 				Function rdfTypeConstant = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-
 				String classname = currenthead.getFunctionSymbol().getName();
 				Term classConstant = fac.getUriTemplate(fac.getConstantLiteral(classname));
-				
 				newhead = fac.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
 			} 
 			else if (currenthead.getArity() == 2) {
-				/*
-				 * head is Property(x,y) Forming head as triple(x,uri(Property),
-				 * y)
-				 */
+				 //head is Property(x,y) Forming head as triple(x, uri(Property), y)
 				String propname = currenthead.getFunctionSymbol().getName();
 				Function propConstant = fac.getUriTemplate(fac.getConstantLiteral(propname));
-				
 				newhead = fac.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
 			}
 			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());

@@ -618,17 +618,13 @@ public class Quest implements Serializable {
 				unfolder.applyTMappings(reformulationReasoner, true, excludeFromTMappings);
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
-                unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());
-                unfolder.addObjectPropertyAssertionsAsFacts(inputOntology.getObjectPropertyAssertions());
-                unfolder.addDataPropertyAssertionsAsFacts(inputOntology.getDataPropertyAssertions());
+                unfolder.addAssertionsAsFacts(inputOntology.getClassAssertions(),
+                		inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions());
 
 				// Adding data typing on the mapping axioms.
-				unfolder.extendTypesWithMetadata(reformulationReasoner, vocabularyValidator, metadata);
-
-				
 				 // Adding NOT NULL conditions to the variables used in the head
 				 // of all mappings to preserve SQL-RDF semantics
-				unfolder.addNOTNULLToMappings();
+				unfolder.extendTypesWithMetadataAndAddNOTNULL(reformulationReasoner, vocabularyValidator, metadata);
 			}
 			
 			unfolder.setupUnfolder();
