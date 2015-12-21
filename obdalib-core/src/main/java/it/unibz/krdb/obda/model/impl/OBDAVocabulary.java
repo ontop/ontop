@@ -168,6 +168,12 @@ public class OBDAVocabulary {
 	public static final DateTimeOperationPredicate TZ = new DateTimeOperationPredicateImpl(
 			"TZ", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 
+	/*Analytic Functions*/
+
+	public static final AnalyticOperationPredicate LEAD = new AnalyticOperationPredicateImpl(
+			"LEAD", 2, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.INTEGER });
+
+
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
 

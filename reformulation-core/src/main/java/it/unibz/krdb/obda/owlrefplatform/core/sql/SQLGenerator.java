@@ -838,6 +838,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = termStr;
 
 			}
+			else if(function instanceof AnalyticOperationPredicate){
+				mainColumn = getSQLString(ov, index, false);
+			}
 			else if (function instanceof URITemplatePredicate) {
 				// New template based URI building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
@@ -1483,7 +1486,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 			}
 			
-		} else {
+		}else if (functionSymbol instanceof AnalyticOperationPredicate){
+			String t1 = getSQLString(function.getTerm(0), index, false);
+			String t2 = getSQLString(function.getTerm(1), index, false);
+
+			String result = sqladapter.lead(t1, t2);
+			return result;
+		}
+
+		else {
 			String functionName = functionSymbol.toString();
 			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);

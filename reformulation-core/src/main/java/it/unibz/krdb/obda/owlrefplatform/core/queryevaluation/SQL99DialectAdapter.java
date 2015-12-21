@@ -229,6 +229,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 
+	@Override
+	public String lead(String column, String offset) {
+		return null;
+	}
+
 
 	@Override
 	public String sqlQualifiedColumn(String tablename, String columnname) {

@@ -455,7 +455,8 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(AnalyticExpression analytic) {
-			unsupported(analytic);
+			//unsupported(analytic);
+			analytic.getExpression().accept(this);
 		}
 
 		@Override

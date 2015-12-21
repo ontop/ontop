@@ -1,7 +1,11 @@
 package it.unibz.krdb.obda.model.impl;
 
-/**
- * Created by elem on 18/12/15.
- */
-public class AnalyticOperationPredicateImpl {
+import it.unibz.krdb.obda.model.AnalyticOperationPredicate;
+
+
+public class AnalyticOperationPredicateImpl extends PredicateImpl implements AnalyticOperationPredicate {
+
+    protected AnalyticOperationPredicateImpl(String name, int arity, COL_TYPE[] types) {
+        super(name, arity, types);
+    }
 }

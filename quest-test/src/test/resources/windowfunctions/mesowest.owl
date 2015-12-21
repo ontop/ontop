@@ -33,7 +33,8 @@
     <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#endTime -->
 
     <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#endTime">
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Precipitation"/>
+        <rdfs:range rdf:resource="&xsd;dateTimeStamp"/>
     </owl:DatatypeProperty>
     
 
@@ -41,7 +42,8 @@
     <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#startTime -->
 
     <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#startTime">
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Precipitation"/>
+        <rdfs:range rdf:resource="&xsd;dateTimeStamp"/>
     </owl:DatatypeProperty>
     
 
@@ -57,15 +59,25 @@
     
 
 
-    <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain -->
+    <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Precipitation -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain"/>
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Precipitation"/>
     
 
 
-    <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Station -->
+    <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Station"/>
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Precipitation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Snow -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Snow">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Precipitation"/>
+    </owl:Class>
 </rdf:RDF>
 
 

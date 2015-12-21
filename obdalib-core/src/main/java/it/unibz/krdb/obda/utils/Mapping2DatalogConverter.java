@@ -871,7 +871,13 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(AnalyticExpression expression) {
-            throw new UnsupportedOperationException();
+            Expression column = expression.getExpression();
+            Expression offset = expression.getOffset();
+            Term col = visitEx(column);
+            Term ofs = visitEx(offset);
+            result = fac.getFunction(OBDAVocabulary.LEAD, col, ofs);
+
+            //throw new UnsupportedOperationException();
         }
 
         @Override

@@ -154,6 +154,14 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     }
 
 	@Override
+	public String lead(String column, String offset) {
+		String str = "LEAD(" + column + "," + offset +") ";
+		str = str + "OVER ()";
+
+		return str;
+	}
+
+	@Override
 	public String getDummyTable() {
 		return "SELECT 1";
 	}

@@ -1,8 +1,12 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/elem/ontologies/2015/11/mesowest2#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
-sourceUri	mesowest2
+sourceUri	mesowest
 connectionUrl	jdbc:postgresql://localhost/mesowest
 username	postgres
 password	
@@ -10,21 +14,26 @@ driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	rain
-target		:Rain/{station_id}/{currTime}/{nextTime} a :Rain ; :startTime {nextTime} ; :endTime {currTime} . 
-source		SELECT currTime, nextTime, station_id
-			FROM (SELECT date_time AS currTime,
-			date_time AS nextTime,
-			station_id
+target		:Rain/{station_id}/{currTime}/{nextTime} a :Rain ; :startTime {currTime} ; :endTime {nextTime} .
+source		SELECT station_id, currTime, currP1, nextTime, nextP1
+			FROM (SELECT date_time AS currTime, precip_accum_one_hour_set_1 AS currP1,
+			lead(date_time, 1) OVER () AS nextTime,
+			lead(precip_accum_one_hour_set_1, 1) OVER () AS nextP1,
+			station_id, air_temp_set_1
 			FROM tb_newyorkdata2012
-			WHERE station_id = 'KFZY' AND air_temp_set_1 > 5) AS SUB
+			WHERE station_id = 'KFZY' AND air_temp_set_1 > 5) AS a
+			WHERE nextP1 > currP1
 
 mappingId	snow
-target		:Snow/{station_id}/{currTime}/{nextTime} a :Snow ; :startTime {nextTime} ; :endTime {currTime} . 
-source		SELECT currTime, nextTime, station_id
-			FROM (SELECT date_time AS currTime,
-			date_time AS nextTime,
-			station_id
+target		:Snow/{station_id}/{currTime}/{nextTime} a :Snow ; :startTime {currTime} ; :endTime {nextTime} .
+source		SELECT station_id, currTime, currP1, nextTime, nextP1
+			FROM (SELECT date_time AS currTime, precip_accum_one_hour_set_1 AS currP1,
+			lead(date_time, 1) OVER () AS nextTime,
+			lead(precip_accum_one_hour_set_1, 1) OVER () AS nextP1,
+			station_id, air_temp_set_1
 			FROM tb_newyorkdata2012
-			WHERE station_id = 'KFZY' AND air_temp_set_1 < 0) AS SUB
+			WHERE station_id = 'KFZY' AND air_temp_set_1 < -5) AS a
+			WHERE nextP1 > currP1
+
 ]]
 

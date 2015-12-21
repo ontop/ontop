@@ -68,6 +68,8 @@ public interface SQLDialectAdapter {
 	public String strConcat(String[] strings);
 
 	public String strReplace(String str, String oldstr, String newstr);
+
+	public String lead(String column, String offset);
 	
 	/*
 	 * Table/Column name functions

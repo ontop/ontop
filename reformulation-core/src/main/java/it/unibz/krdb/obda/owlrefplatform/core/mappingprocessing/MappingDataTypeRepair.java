@@ -160,11 +160,14 @@ public class MappingDataTypeRepair {
                 // NO-OP for object properties
             }
 
+            else if(functionSymbol instanceof AnalyticOperationPredicate){
+
+            }
+
             /** If it is a concat or replace function, can have a datatype assigned to its alias (function with datatype predicate)
              *  or if no information about the datatype is assigned we will assign the value from the ontology
              if present or the information from the database will be used.
              */
-
             else if (functionSymbol.isStringOperationPredicate() || functionSymbol.isArithmeticPredicate()) {
 
             	Function normal = qvv.getNormal(atom);
