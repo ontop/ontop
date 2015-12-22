@@ -69,6 +69,7 @@ import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -380,7 +381,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
 		// Setup the prefixes
-		PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
+		PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
 		//		addOBDACommonPrefixes(prefixManager);
 
 		PrefixManagerWrapper prefixwrapper = new PrefixManagerWrapper(prefixManager);
@@ -466,7 +467,7 @@ public class OBDAModelManager implements Disposable {
 				OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
 
 				OWLOntology ontology = mmgr.getActiveOntology();
-				PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
+				PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
 
 				String defaultPrefix = prefixManager.getDefaultPrefix();
 				if (defaultPrefix == null) {

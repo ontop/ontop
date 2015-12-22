@@ -8,11 +8,11 @@
 	</parent>
 
 	<artifactId>ontop-protege4</artifactId>
-	<name>ontop-protege4</name>
+	<name>ontop-protege</name>
 
 
     <properties>
-        <protege.version>5.0.0-beta-16</protege.version>
+        <protege.version>5.0.0-beta-21</protege.version>
     </properties>
 
 	<dependencies>
@@ -139,13 +139,13 @@
 
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
-			<artifactId>org.protege.editor.core.application</artifactId>
+            <artifactId>protege-editor-core</artifactId>
 			<version>${protege.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
-			<artifactId>org.protege.editor.owl</artifactId>
+            <artifactId>protege-editor-owl</artifactId>
 			<version>${protege.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -271,8 +271,8 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<excludes>
 					
 						<exclude>**/TBoxDAGImpl.java</exclude>
@@ -328,7 +328,7 @@
 					<instructions>
 
 						<!-- <Build-Jdk>1.6</Build-Jdk> -->
-						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+						<Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
