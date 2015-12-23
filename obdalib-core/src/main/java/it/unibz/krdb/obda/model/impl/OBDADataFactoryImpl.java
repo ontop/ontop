@@ -351,8 +351,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionLike(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LIKE, term1, term2);
+	public Function getSQLFunctionLike(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.SQL_LIKE, term1, term2);
 	}
 	
 	@Override

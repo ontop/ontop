@@ -139,7 +139,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getLANGMATCHESFunction(Term term1, Term term2);
 	
-	public Function getFunctionLike(Term term1, Term term2);
+	// ROMAN (23 Dec 2015): LIKE comes only from mappings
+	public Function getSQLFunctionLike(Term term1, Term term2);
 	
 	public Function getFunctionRegex(Term term1, Term term2, Term term3);
 	

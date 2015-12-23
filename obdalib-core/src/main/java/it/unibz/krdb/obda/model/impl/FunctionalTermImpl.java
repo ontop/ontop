@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DateTimeOperationPredicate;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.StringOperationPredicate;
@@ -257,4 +258,10 @@ public class FunctionalTermImpl implements Function, ListListener {
 	public boolean isDataTypeFunction() {
 		return functor instanceof DatatypePredicate;
 	}
+	
+	@Override
+	public boolean isNonBooleanFunction() {
+		return functor instanceof NonBooleanOperationPredicate;
+	}
+	
 }

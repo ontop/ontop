@@ -413,7 +413,7 @@ public class Mapping2DatalogConverter {
                     compositeTerm = fac.getFunctionOR(t1, t2);
                     break;
                 case "LIKE":
-                    compositeTerm = fac.getFunctionLike(t1, t2);
+                    compositeTerm = fac.getSQLFunctionLike(t1, t2);
                     break;
                 case "~":
                     compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral(""));

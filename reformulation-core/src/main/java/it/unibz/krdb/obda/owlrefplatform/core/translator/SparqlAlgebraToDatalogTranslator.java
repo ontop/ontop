@@ -141,7 +141,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				ValueExpr expression = c.getExpr();
 				if (!(expression instanceof Var)) {
 					throw new IllegalArgumentException("Error translating ORDER BY. "
-							+ "The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
+							+ "The current implementation can only sort by variables, this query has a more complex expression '" + expression + "'");
 				}
 				Var v = (Var) expression;
 				Variable var = ofac.getVariable(v.getName());
@@ -735,10 +735,10 @@ public class SparqlAlgebraToDatalogTranslator {
 						.put("http://www.w3.org/2005/xpath-functions#starts-with", OBDAVocabulary.STR_STARTS) 
 						.put("http://www.w3.org/2005/xpath-functions#ends-with", OBDAVocabulary.STR_ENDS) 
 						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", OBDAVocabulary.ENCODE_FOR_URI) 
+						.put("http://www.w3.org/2005/xpath-functions#contains", OBDAVocabulary.CONTAINS) 
 						.put("UUID", OBDAVocabulary.UUID) 
 						.put("STRUUID", OBDAVocabulary.STRUUID) 
 
-						.put("http://www.w3.org/2005/xpath-functions#contains", OBDAVocabulary.CONTAINS) 
 						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", OBDAVocabulary.ABS) 
 						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", OBDAVocabulary.CEIL) 
 						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", OBDAVocabulary.FLOOR) 

@@ -861,7 +861,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				// Functions returning string values
 				mainColumn = getSQLString(ov, index, false);
 			}
-			else if (function instanceof NonBooleanOperationPredicate){
+			else if (ov.isNonBooleanFunction()){
 			 	if (function.equals(OBDAVocabulary.UUID)) {
 				 mainColumn = sqladapter.uuid();
 				} else if (function.equals(OBDAVocabulary.STRUUID)) {
@@ -1031,7 +1031,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				type = COL_TYPE.OBJECT;
 			} else if (function instanceof BNodePredicate) {
 				type = COL_TYPE.BNODE;
-			} else if (ov.isStringFunction() || function instanceof NonBooleanOperationPredicate) {
+			} else if (ov.isStringFunction() || ov.isNonBooleanFunction()) {
 
 
 				if (function.equals(OBDAVocabulary.CONCAT)) {
@@ -1729,8 +1729,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_NOT_NULL_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.IS_TRUE)) {
 			operator = IS_TRUE_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
-			operator = LIKE_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SQL_LIKE)) {
 			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this

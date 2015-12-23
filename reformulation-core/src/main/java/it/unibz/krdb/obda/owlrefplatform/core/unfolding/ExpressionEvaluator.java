@@ -134,7 +134,7 @@ public class ExpressionEvaluator {
 		else if (expr.isBooleanFunction()) {
 			return evalBoolean(expr);
 		} 
-		else if (p instanceof NonBooleanOperationPredicate) {
+		else if (expr.isNonBooleanFunction()) {
 			return evalNonBoolean(expr);
 		} 
 		else if (expr.isArithmeticFunction()) {
@@ -232,7 +232,7 @@ public class ExpressionEvaluator {
 			return evalLangMatches(term);
 		} else if (pred == OBDAVocabulary.SPARQL_REGEX) {
 			return evalRegex(term);
-		} else if (pred == OBDAVocabulary.SPARQL_LIKE) {
+		} else if (pred == OBDAVocabulary.SQL_LIKE) {
 				return term;	
 		} else if (pred == OBDAVocabulary.STR_STARTS) {
 			return term;
@@ -263,7 +263,7 @@ public class ExpressionEvaluator {
 	}
 
 	private Term evalNumericalOperation(Function term) {
-		Function returnedDatatype = (Function) getDatatype(term.getFunctionSymbol(), term);
+		Function returnedDatatype = getDatatype(term);
 		if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) {
 			Predicate pred = term.getFunctionSymbol();
 			if (pred == OBDAVocabulary.ADD
@@ -375,15 +375,14 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
-			Predicate predicate = function.getFunctionSymbol();
-			return getDatatype(predicate, term.getTerm(0));
+			return getDatatype(function);
 		}
 		return term;
 	}
 	
-	private Term getDatatype(Predicate predicate, Term lit)
-	{
-		if (predicate instanceof DatatypePredicate) {
+	private Function getDatatype(Function function) {
+		Predicate predicate = function.getFunctionSymbol();
+		if (function.isDataTypeFunction()) {
 			return fac.getUriTemplateForDatatype(predicate.toString());
 		} 
 		else if (predicate instanceof BNodePredicate) {
@@ -392,39 +391,32 @@ public class ExpressionEvaluator {
 		else if (predicate instanceof URITemplatePredicate) {
 			return null;
 		} 
-		else if (predicate instanceof AlgebraOperatorPredicate){
+		else if (function.isAlgebraFunction()) {
 			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
 		else if (predicate instanceof OperationPredicate){
-			if (predicate instanceof BooleanOperationPredicate) {
+			if (function.isBooleanFunction()) {
 				//return boolean uri
 				return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 			}
-			else if (predicate instanceof NumericalOperationPredicate)
+			else if (function.isArithmeticFunction())
 			{
 				//return numerical if arguments have same type
-				if (lit instanceof Function) {
-					Function func = (Function) lit;
-					Term arg1 = func.getTerm(0);
-					Predicate pred1 = getDatatypePredicate(arg1);
-					Term arg2 = func.getTerm(1);
-					Predicate pred2 = getDatatypePredicate(arg2);
-					if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-						return fac.getUriTemplateForDatatype(pred1.toString());
-					} 
-					else if (isNumeric(pred1) && isDouble(pred2)) {
-						return fac.getUriTemplateForDatatype(pred2.toString());
-					} 
-					else {
-						return null;
-					}
-				}
-				else
-				{
+				Term arg1 = function.getTerm(0);
+				Predicate pred1 = getDatatypePredicate(arg1);
+				Term arg2 = function.getTerm(1);
+				Predicate pred2 = getDatatypePredicate(arg2);
+				if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
+					return fac.getUriTemplateForDatatype(pred1.toString());
+				} 
+				else if (isNumeric(pred1) && isDouble(pred2)) {
+					return fac.getUriTemplateForDatatype(pred2.toString());
+				} 
+				else {
 					return null;
 				}
 			}
-			else if (predicate instanceof NonBooleanOperationPredicate){
+			else if (function.isNonBooleanFunction()){
 				return null;
 			}
 		} 

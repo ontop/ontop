@@ -85,4 +85,6 @@ public interface Function extends Term {
 	boolean isStringFunction();
 	
 	boolean isDataTypeFunction();
+
+	boolean isNonBooleanFunction();
 }

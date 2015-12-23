@@ -233,7 +233,9 @@ public class OBDAVocabulary {
 			"LangMatches", 2);
 	public static final BooleanOperationPredicate SPARQL_REGEX = new BooleanOperationPredicateImpl(
 			"regex", 3);
-	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl(
+	
+	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
+	public static final BooleanOperationPredicate SQL_LIKE = new BooleanOperationPredicateImpl(
 			"like", 2);
 
 }
