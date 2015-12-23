@@ -75,8 +75,7 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	public static void unfoldJoinTrees(CQIE query) {
-		List<Function> body = query.getBody();
-		unfoldJoinTrees(body, true);
+		unfoldJoinTrees(query.getBody(), true);
 	}
 
 	/***
@@ -94,23 +93,19 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	private static void unfoldJoinTrees(List body, boolean isJoin) {
-		/* Collecting all necessary conditions */
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = (Function) body.get(i);
-			if (!currentAtom.isAlgebraFunction())
-				continue;
 			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
 				unfoldJoinTrees(currentAtom.getTerms(), false);
-			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_JOIN) {
+			else if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_JOIN) {
 				unfoldJoinTrees(currentAtom.getTerms(), true);
 				int dataAtoms = countDataItems(currentAtom.getTerms());
 				if (isJoin || dataAtoms == 1) {
 					body.remove(i);
 					for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
 						Term term = currentAtom.getTerm(j);
-						Function asAtom = (Function)term;
-						if (!body.contains(asAtom))
-							body.add(i, asAtom);
+						if (!body.contains(term))
+							body.add(i, term);
 					}
 					i -= 1;
 				}
@@ -119,8 +114,7 @@ public class DatalogNormalizer {
 	}
 
 	public static void foldJoinTrees(CQIE query) {
-		List<Function> body = query.getBody();
-		foldJoinTrees(body, false);
+		foldJoinTrees(query.getBody(), false);
 	}
 
 	private static void foldJoinTrees(List atoms, boolean isJoin) {
