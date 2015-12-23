@@ -857,7 +857,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			}
-			else if (ov.isStringFunction() || ov.isDateTimeFunction()) {
+			else if (ov.isStringFunction() ) {
 				// Functions returning string values
 				mainColumn = getSQLString(ov, index, false);
 			}
@@ -866,7 +866,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 mainColumn = sqladapter.uuid();
 				} else if (function.equals(OBDAVocabulary.STRUUID)) {
 				 mainColumn = sqladapter.strUuid();
-			 	}
+			 	} else
+					mainColumn = getSQLString(ov, index, false); // for datetime functions
 			}
             else if (ov.isArithmeticFunction()){
             	String expressionFormat = getNumericalOperatorString(function);
@@ -1064,8 +1065,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 					type = COL_TYPE.INTEGER;
 
-				} else {
-
+				} else if (function.equals(OBDAVocabulary.MONTH) || function.equals(OBDAVocabulary.YEAR) ||
+						function.equals(OBDAVocabulary.DAY) || function.equals(OBDAVocabulary.MINUTES) || 
+						function.equals(OBDAVocabulary.HOURS)) {
+					type = COL_TYPE.INTEGER;
+				} else if (function.equals(OBDAVocabulary.NOW)) {
+					type = COL_TYPE.DATETIME;
+				} else if (function.equals(OBDAVocabulary.SECONDS)) {
+					type = COL_TYPE.DECIMAL;
+				}
+				else {
 					type = COL_TYPE.LITERAL;
 				}
 
@@ -1079,20 +1088,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 					type = COL_TYPE.DOUBLE;
 
 				} else {
-					type = COL_TYPE.LITERAL;
-				}
-			} else if (ov.isDateTimeFunction()) {
-
-				if (function.equals(OBDAVocabulary.MONTH) || function.equals(OBDAVocabulary.YEAR) ||
-						function.equals(OBDAVocabulary.DAY) || function.equals(OBDAVocabulary.MINUTES) || function.equals(OBDAVocabulary.HOURS)) {
-					type = COL_TYPE.INTEGER;
-
-				} else if (function.equals(OBDAVocabulary.NOW)) {
-					type = COL_TYPE.DATETIME;
-				} else if (function.equals(OBDAVocabulary.SECONDS)) {
-					type = COL_TYPE.DECIMAL;
-				}
-				else{
 					type = COL_TYPE.LITERAL;
 				}
 			} else {

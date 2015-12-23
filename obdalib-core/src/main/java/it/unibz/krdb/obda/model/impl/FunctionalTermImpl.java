@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.DatatypePredicate;
-import it.unibz.krdb.obda.model.DateTimeOperationPredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
@@ -242,11 +241,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	@Override
 	public boolean isArithmeticFunction() {
 		return functor instanceof NumericalOperationPredicate;
-	}
-
-	@Override
-	public boolean isDateTimeFunction(){
-		return functor instanceof DateTimeOperationPredicate;
 	}
 
 	@Override

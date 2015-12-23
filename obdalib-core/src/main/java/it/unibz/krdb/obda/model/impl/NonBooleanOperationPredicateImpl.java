@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.model.impl;
  */
 
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
+import it.unibz.krdb.obda.model.Predicate;
 
 public class NonBooleanOperationPredicateImpl extends PredicateImpl implements NonBooleanOperationPredicate {
 
@@ -28,6 +29,14 @@ public class NonBooleanOperationPredicateImpl extends PredicateImpl implements N
 
 	public NonBooleanOperationPredicateImpl(String name, int arity) {
 		super(name, arity, null);
+	}
+	
+	public NonBooleanOperationPredicateImpl(String name, Predicate.COL_TYPE type) {
+		super(name, 1, new COL_TYPE[]{ type });
+	}
+
+	public NonBooleanOperationPredicateImpl(String name) {
+		super(name, 0, new COL_TYPE[]{ });
 	}
 
 	@Override

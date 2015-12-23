@@ -146,29 +146,29 @@ public class OBDAVocabulary {
 
 	/* SPARQL Functions on Dates and Times */
 
-	public static final DateTimeOperationPredicate NOW = new DateTimeOperationPredicateImpl(
-			"NOW", 0, null);
+	public static final NonBooleanOperationPredicate NOW = new NonBooleanOperationPredicateImpl(
+			"NOW");
 
-	public static final DateTimeOperationPredicate YEAR = new DateTimeOperationPredicateImpl(
-			"YEAR", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate YEAR = new NonBooleanOperationPredicateImpl(
+			"YEAR", COL_TYPE.DATETIME_STAMP);
 	
-	public static final DateTimeOperationPredicate DAY = new DateTimeOperationPredicateImpl(
-			"DAY", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate DAY = new NonBooleanOperationPredicateImpl(
+			"DAY", COL_TYPE.DATETIME_STAMP);
 	
-	public static final DateTimeOperationPredicate MONTH = new DateTimeOperationPredicateImpl(
-			"MONTH", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate MONTH = new NonBooleanOperationPredicateImpl(
+			"MONTH", COL_TYPE.DATETIME_STAMP);
 	
-	public static final DateTimeOperationPredicate HOURS = new DateTimeOperationPredicateImpl(
-			"HOURS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate HOURS = new NonBooleanOperationPredicateImpl(
+			"HOURS", COL_TYPE.DATETIME_STAMP);
 	
-	public static final DateTimeOperationPredicate MINUTES = new DateTimeOperationPredicateImpl(
-			"MINUTES", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate MINUTES = new NonBooleanOperationPredicateImpl(
+			"MINUTES", COL_TYPE.DATETIME_STAMP);
 	
-	public static final DateTimeOperationPredicate SECONDS = new DateTimeOperationPredicateImpl(
-			"SECONDS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate SECONDS = new NonBooleanOperationPredicateImpl(
+			"SECONDS", COL_TYPE.DATETIME_STAMP);
 	
-	public static final DateTimeOperationPredicate TZ = new DateTimeOperationPredicateImpl(
-			"TZ", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	public static final NonBooleanOperationPredicate TZ = new NonBooleanOperationPredicateImpl(
+			"TZ", COL_TYPE.DATETIME_STAMP);
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
