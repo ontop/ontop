@@ -128,7 +128,7 @@ public class OBDAVocabulary {
 	/*Hash functions*/
 	
 	public static final NonBooleanOperationPredicate MD5 = new NonBooleanOperationPredicateImpl(
-			"MD5");
+			"MD5", COL_TYPE.LITERAL);
 	
 	public static final NonBooleanOperationPredicate SHA1 = new NonBooleanOperationPredicateImpl(
 			"SHA1", COL_TYPE.LITERAL);
