@@ -4,6 +4,8 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -20,6 +22,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +71,14 @@ public class QuestQueryProcessor {
 		return pq;
 	}
 	
+	/**
+	 * CAN BE CALLED ONLY AFTER getSQL
+	 * 
+	 * @param pq
+	 * @return
+	 */
 	public List<String> getQuerySignature(ParsedQuery pq) {
 		List<String> signature = querySignatureCache.get(pq);
-		if (signature == null) {
-			signature = SparqlAlgebraToDatalogTranslator.getSignature(pq);
-			querySignatureCache.put(pq, signature);
-		}
 		return signature;
 	}
 	
@@ -113,22 +118,35 @@ public class QuestQueryProcessor {
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			
-			DatalogProgram program = translateAndPreProcess(pq);
-			for (CQIE q : program.getRules()) 
-				DatalogNormalizer.unfoldJoinTrees(q);
-			log.debug("Normalized program: \n{}", program);
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
+			DatalogProgram translation = translator.translate(pq);
 
-			if (program.getRules().size() < 1) 
+			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
+
+			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(translation);
+			DatalogProgram program = flattener.flatten();
+			log.debug("Flattened program: \n{}", program);
+				
+			log.debug("Replacing equivalences...");
+			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+			for (CQIE query : program.getRules()) {
+				CQIE newquery = vocabularyValidator.replaceEquivalences(query);
+				newprogram.appendRule(newquery);
+			}
+
+			for (CQIE q : newprogram.getRules()) 
+				DatalogNormalizer.unfoldJoinTrees(q);
+			log.debug("Normalized program: \n{}", newprogram);
+
+			if (newprogram.getRules().size() < 1) 
 				throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 			log.debug("Start the rewriting process...");
 
 			//final long startTime0 = System.currentTimeMillis();
-			for (CQIE cq : program.getRules())
+			for (CQIE cq : newprogram.getRules())
 				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-			DatalogProgram programAfterRewriting = rewriter.rewrite(program);
-			for (CQIE cq : programAfterRewriting.getRules())
-				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
 			
 			//rewritingTime = System.currentTimeMillis() - startTime0;
 
@@ -170,8 +188,19 @@ public class QuestQueryProcessor {
 			log.debug("Partial evaluation ended.");
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 
-			List<String> signature = getQuerySignature(pq);
-
+			List<String> signature = null;
+			 // IMPORTANT: this is the original query 
+			// (with original variable names, not the BINDings after flattening)
+			for (CQIE q : translation.getRules()) 
+				if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+					List<Term> terms = q.getHead().getTerms();
+					signature = new ArrayList<>(terms.size());
+					for (Term t : terms)
+						signature.add(((Variable)t).getName()); // ALL VARIABLES by construction
+					break;
+				}
+			querySignatureCache.put(pq, signature);
+	
 			String sql;
 			if (programAfterUnfolding.getRules().size() > 0) {
 				log.debug("Producing the SQL string...");

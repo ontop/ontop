@@ -984,21 +984,4 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 	
-	/**
-	 * Used only in QuestStatement
-	 *  
-	 * TODO: to be removed
-	 * 
-	 * @param query
-	 * @return
-	 */
-	
-	public static List<String> getSignature(ParsedQuery query) {
-		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
-			TupleExpr te = query.getTupleExpr();
-			List<String> signatureContainer = new ArrayList<>(te.getBindingNames());
-			return signatureContainer;
-		}
-		return Collections.emptyList();
-	}
 }
