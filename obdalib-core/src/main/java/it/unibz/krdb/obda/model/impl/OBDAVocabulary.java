@@ -36,26 +36,26 @@ public class OBDAVocabulary {
 
 	/* Numeric operation predicates */
 
-	public static final Predicate MINUS = new NumericalOperationPredicateImpl(
-			"minus", 1); // TODO (ROMAN): check -- never used
-	public static final NumericalOperationPredicate ADD = new NumericalOperationPredicateImpl(
-			"add", 2);
-	public static final NumericalOperationPredicate SUBTRACT = new NumericalOperationPredicateImpl(
-			"subtract", 2);
-	public static final NumericalOperationPredicate MULTIPLY = new NumericalOperationPredicateImpl(
-			"multiply", 2);
-	public static final NumericalOperationPredicate DIVIDE = new NumericalOperationPredicateImpl(
-			"divide", 2);
-	public static final NumericalOperationPredicate ABS = new NumericalOperationPredicateImpl(
-			"abs", 1);
-	public static final NumericalOperationPredicate ROUND = new NumericalOperationPredicateImpl(
-			"round", 1);
-	public static final NumericalOperationPredicate CEIL = new NumericalOperationPredicateImpl(
-			"ceil", 1);
-	public static final NumericalOperationPredicate FLOOR = new NumericalOperationPredicateImpl(
-			"floor", 1);
-	public static final NumericalOperationPredicate RAND = new NumericalOperationPredicateImpl(
-			"RAND", 0);
+	public static final NonBooleanOperationPredicate MINUS = new NonBooleanOperationPredicateImpl(
+			"minus", null); // TODO (ROMAN): check -- never used
+	public static final NonBooleanOperationPredicate ADD = new NonBooleanOperationPredicateImpl(
+			"add", null, null);
+	public static final NonBooleanOperationPredicate SUBTRACT = new NonBooleanOperationPredicateImpl(
+			"subtract", null, null);
+	public static final NonBooleanOperationPredicate MULTIPLY = new NonBooleanOperationPredicateImpl(
+			"multiply", null, null);
+	public static final NonBooleanOperationPredicate DIVIDE = new NonBooleanOperationPredicateImpl(
+			"divide", null, null);
+	public static final NonBooleanOperationPredicate ABS = new NonBooleanOperationPredicateImpl(
+			"abs", null);
+	public static final NonBooleanOperationPredicate ROUND = new NonBooleanOperationPredicateImpl(
+			"round", null);
+	public static final NonBooleanOperationPredicate CEIL = new NonBooleanOperationPredicateImpl(
+			"ceil", null);
+	public static final NonBooleanOperationPredicate FLOOR = new NonBooleanOperationPredicateImpl(
+			"floor", null);
+	public static final NonBooleanOperationPredicate RAND = new NonBooleanOperationPredicateImpl(
+			"RAND");
 
 
 	/* Boolean predicates */

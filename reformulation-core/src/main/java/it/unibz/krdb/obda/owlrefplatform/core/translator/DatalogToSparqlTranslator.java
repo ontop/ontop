@@ -135,7 +135,7 @@ public class DatalogToSparqlTranslator {
 			final Term object = (isClass(function) ? getPredicate(function) : getObject(function));
 
 			// Check the function symbols
-			if (function.isArithmeticFunction()) {
+			if (function.isNonBooleanFunction()) {
 				final String expressionGraph = printTripleGraph(toSparql(subject), getArithmeticSymbol(functionSymbol), toSparql(object));
 				sb.append(enclosedBrackets(expressionGraph));
 			} 

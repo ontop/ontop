@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
@@ -224,7 +223,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public boolean isDataFunction() {
-		return (!(isBooleanFunction() || isAlgebraFunction() || isArithmeticFunction() || isDataTypeFunction()));
+		return (!(isBooleanFunction() || isAlgebraFunction() || isNonBooleanFunction() || isDataTypeFunction()));
 	}
 
 	@Override
@@ -235,11 +234,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	@Override
 	public boolean isAlgebraFunction() {
 		return functor instanceof AlgebraOperatorPredicate;
-	}
-
-	@Override
-	public boolean isArithmeticFunction() {
-		return functor instanceof NumericalOperationPredicate;
 	}
 	
 	@Override

@@ -923,8 +923,8 @@ public class SparqlAlgebraToDatalogTranslator {
 				.put(Compare.CompareOp.NE, OBDAVocabulary.NEQ)
 				.build();
 
-	private static final ImmutableMap<MathExpr.MathOp, NumericalOperationPredicate> numericalOperations = 
-			new ImmutableMap.Builder<MathExpr.MathOp, NumericalOperationPredicate>()
+	private static final ImmutableMap<MathExpr.MathOp, NonBooleanOperationPredicate> numericalOperations = 
+			new ImmutableMap.Builder<MathExpr.MathOp, NonBooleanOperationPredicate>()
 			.put(MathExpr.MathOp.PLUS, OBDAVocabulary.ADD)
 			.put(MathExpr.MathOp.MINUS, OBDAVocabulary.SUBTRACT)
 			.put(MathExpr.MathOp.MULTIPLY, OBDAVocabulary.MULTIPLY)
@@ -957,7 +957,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof MathExpr) {
-			NumericalOperationPredicate p = numericalOperations.get(((MathExpr)expr).getOperator());
+			NonBooleanOperationPredicate p = numericalOperations.get(((MathExpr)expr).getOperator());
 			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof LangMatches) {

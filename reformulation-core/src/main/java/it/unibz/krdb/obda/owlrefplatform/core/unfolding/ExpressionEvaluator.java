@@ -20,18 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BNodePredicate;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
@@ -136,9 +132,6 @@ public class ExpressionEvaluator {
 		} 
 		else if (expr.isNonBooleanFunction()) {
 			return evalNonBoolean(expr);
-		} 
-		else if (expr.isArithmeticFunction()) {
-			return evalNumericalOperation(expr);
 		} 
 		else if (expr.isDataTypeFunction()) {
 			Term t0 = expr.getTerm(0);
@@ -251,32 +244,26 @@ public class ExpressionEvaluator {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.SPARQL_STR) {
 			return evalStr(term);
-		} else if (pred == OBDAVocabulary.SPARQL_DATATYPE) {
+		} 
+		else if (pred == OBDAVocabulary.SPARQL_DATATYPE) {
 			return evalDatatype(term);
-		} else if (pred == OBDAVocabulary.SPARQL_LANG) {
+		} 
+		else if (pred == OBDAVocabulary.SPARQL_LANG) {
 			return evalLang(term);
+		} 
+		else if (pred == OBDAVocabulary.ADD || pred == OBDAVocabulary.SUBTRACT
+				 || pred == OBDAVocabulary.MULTIPLY || pred == OBDAVocabulary.DIVIDE) {
+			
+			Function returnedDatatype = getDatatype(term);
+			if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) 
+				return term;
+			else
+				return OBDAVocabulary.FALSE;
+			
 		} else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "
 							+ term.toString());
-		}
-	}
-
-	private Term evalNumericalOperation(Function term) {
-		Function returnedDatatype = getDatatype(term);
-		if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) {
-			Predicate pred = term.getFunctionSymbol();
-			if (pred == OBDAVocabulary.ADD
-				 || pred == OBDAVocabulary.SUBTRACT
-				 || pred == OBDAVocabulary.MULTIPLY) {
-				return term;
-			} else {
-				throw new RuntimeException(
-						"Evaluation of expression not supported: "
-								+ term.toString());
-			}
-		} else {
-			return OBDAVocabulary.FALSE;
 		}
 	}
 
@@ -394,32 +381,28 @@ public class ExpressionEvaluator {
 		else if (function.isAlgebraFunction()) {
 			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
-		else if (predicate instanceof OperationPredicate){
-			if (function.isBooleanFunction()) {
-				//return boolean uri
-				return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
-			}
-			else if (function.isArithmeticFunction())
-			{
-				//return numerical if arguments have same type
-				Term arg1 = function.getTerm(0);
-				Predicate pred1 = getDatatypePredicate(arg1);
-				Term arg2 = function.getTerm(1);
-				Predicate pred2 = getDatatypePredicate(arg2);
-				if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-					return fac.getUriTemplateForDatatype(pred1.toString());
-				} 
-				else if (isNumeric(pred1) && isDouble(pred2)) {
-					return fac.getUriTemplateForDatatype(pred2.toString());
-				} 
-				else {
-					return null;
-				}
-			}
-			else if (function.isNonBooleanFunction()){
+		else if (function.isBooleanFunction()) {
+			//return boolean uri
+			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
+		}
+		else if (predicate == OBDAVocabulary.ADD || predicate == OBDAVocabulary.SUBTRACT || 
+				predicate == OBDAVocabulary.MULTIPLY || predicate == OBDAVocabulary.DIVIDE)
+		{
+			//return numerical if arguments have same type
+			Term arg1 = function.getTerm(0);
+			Predicate pred1 = getDatatypePredicate(arg1);
+			Term arg2 = function.getTerm(1);
+			Predicate pred2 = getDatatypePredicate(arg2);
+			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
+				return fac.getUriTemplateForDatatype(pred1.toString());
+			} 
+			else if (isNumeric(pred1) && isDouble(pred2)) {
+				return fac.getUriTemplateForDatatype(pred2.toString());
+			} 
+			else {
 				return null;
 			}
-		} 
+		}
 		return null;
 	}
 	
@@ -666,7 +649,7 @@ public class ExpressionEvaluator {
 		if (term.getTerm(1) instanceof Function) {
 			Function t2 = (Function) term.getTerm(1);
 			Predicate p2 = t2.getFunctionSymbol();
-			if (!(p2 instanceof DatatypePredicate)) {
+			if (!(t2.isDataTypeFunction())) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
 					return OBDAVocabulary.FALSE;
@@ -698,12 +681,12 @@ public class ExpressionEvaluator {
 			Function f1 = (Function) eval1;
 			Predicate pred1 = f1.getFunctionSymbol();
 			
-			if (pred1 instanceof DatatypePredicate) {
+			if (f1.isDataTypeFunction()) {
 				if (pred1.getType(0) == COL_TYPE.UNSUPPORTED) {
 					throw new RuntimeException("Unsupported type: " + pred1);
 				}
 			} 
-			else if (f1.isArithmeticFunction()) {
+			else if (f1.isNonBooleanFunction()) {
 				return term;
 			}
 			

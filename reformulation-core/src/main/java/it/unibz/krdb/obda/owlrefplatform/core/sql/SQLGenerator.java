@@ -45,6 +45,8 @@ import it.unibz.krdb.sql.ParserViewDefinition;
 
 import org.openrdf.model.Literal;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.sql.Types;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -68,15 +70,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String NOT_OPERATOR = "NOT %s";
 	private static final String IS_NULL_OPERATOR = "%s IS NULL";
 	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
-
-	private static final String ADD_OPERATOR = "%s + %s";
-	private static final String SUBTRACT_OPERATOR = "%s - %s";
-	private static final String MULTIPLY_OPERATOR = "%s * %s";
-	
-	private static final String ABS_OPERATOR = "ABS(%s)";
-
-	private static final String FLOOR_OPERATOR = "FLOOR(%s)";
-
 
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
@@ -108,14 +101,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private final SemanticIndexURIMap uriRefIds;
 	
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
+	private final ImmutableMap<NonBooleanOperationPredicate, String> arithmeticOperations;
+	private final ImmutableMap<BooleanOperationPredicate, String> booleanOperations;
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
-		this.metadata = metadata;
-		this.sqladapter = sqladapter;
-		this.distinctResultSet = false;
-		this.generatingREPLACE = true;
-		this.isSI = false;
-		this.uriRefIds = null;
+		this(metadata, sqladapter, false, true, null);
 	}
 
 	/**
@@ -139,6 +130,35 @@ public class SQLGenerator implements SQLQueryGenerator {
 			this.isSI = false;
 			this.uriRefIds = null;
 		}
+		arithmeticOperations = new ImmutableMap.Builder<NonBooleanOperationPredicate, String>()
+				.put(OBDAVocabulary.ADD, "%s + %s")
+				.put(OBDAVocabulary.SUBTRACT, "%s - %s")
+				.put(OBDAVocabulary.MULTIPLY, "%s * %s")
+				.put(OBDAVocabulary.ABS, "ABS(%s)")
+				.put(OBDAVocabulary.CEIL, sqladapter.ceil())
+				.put(OBDAVocabulary.FLOOR, "FLOOR(%s)")
+				.put(OBDAVocabulary.ROUND, sqladapter.round())
+				.put(OBDAVocabulary.RAND, sqladapter.rand()).build();
+		
+		booleanOperations = new ImmutableMap.Builder<BooleanOperationPredicate, String>()
+				.put(OBDAVocabulary.EQ, EQ_OPERATOR)
+				.put(OBDAVocabulary.NEQ, NEQ_OPERATOR)
+				.put(OBDAVocabulary.GT, GT_OPERATOR)
+				.put(OBDAVocabulary.GTE, GTE_OPERATOR)
+				.put(OBDAVocabulary.LT, LT_OPERATOR)
+				.put(OBDAVocabulary.LTE, LTE_OPERATOR)
+				.put(OBDAVocabulary.AND, AND_OPERATOR)
+				.put(OBDAVocabulary.OR, OR_OPERATOR)
+				.put(OBDAVocabulary.NOT, NOT_OPERATOR)
+				.put(OBDAVocabulary.IS_NULL, IS_NULL_OPERATOR)
+				.put(OBDAVocabulary.IS_NOT_NULL, IS_NOT_NULL_OPERATOR)
+				.put(OBDAVocabulary.IS_TRUE, IS_TRUE_OPERATOR)
+				.put(OBDAVocabulary.SQL_LIKE, LIKE_OPERATOR)
+				.put(OBDAVocabulary.SPARQL_REGEX, "") //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
+				.put(OBDAVocabulary.STR_STARTS, sqladapter.strStartsOperator())
+				.put(OBDAVocabulary.STR_ENDS, sqladapter.strEndsOperator())
+				.put(OBDAVocabulary.CONTAINS, sqladapter.strContainsOperator())
+				.build();
 	}
 
 
@@ -310,8 +330,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private String getSQLCondition(Function atom, QueryAliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
 		if (isUnary(atom)) {
-			if (atom.isArithmeticFunction()) {
-				String expressionFormat = getNumericalOperatorString(functionSymbol);
+			if (arithmeticOperations.containsKey(functionSymbol)) {
+				String expressionFormat = arithmeticOperations.get(functionSymbol);
 				Term term = atom.getTerm(0);
 				String column = getSQLString(term, index, false);
 				return String.format(expressionFormat, column);
@@ -359,9 +379,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String leftOp = getSQLString(left, index, true);
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
-			} else if (atom.isArithmeticFunction()) {
+			} else if (arithmeticOperations.containsKey(functionSymbol)) {
 				// For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
-				String expressionFormat = getNumericalOperatorString(functionSymbol);
+				String expressionFormat = arithmeticOperations.get(functionSymbol);
 				Term left = atom.getTerm(0);
 				Term right = atom.getTerm(1);
 				String leftOp = getSQLString(left, index, true);
@@ -529,7 +549,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
 		if (atom.isBooleanFunction()
-				|| atom.isArithmeticFunction()
+				|| atom.isNonBooleanFunction()
 				|| atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
@@ -865,8 +885,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 	} else
 					mainColumn = getSQLString(ov, index, false); // for datetime functions
 			}
-            else if (ov.isArithmeticFunction()){
-            	String expressionFormat = getNumericalOperatorString(function);
+            else if (arithmeticOperations.containsKey(function)) {
+				String expressionFormat = arithmeticOperations.get(function);
             	if (isBinary(ov)) {
             		Term right = ov.getTerm(1);
             		Term left = ov.getTerm(0);
@@ -914,7 +934,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		if (ht instanceof Function) {
             Function ov = (Function) ht;
-            Predicate function = ov.getFunctionSymbol();
 
             String lang = getLangType(ov, index);
 //
@@ -1070,22 +1089,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else if (function.equals(OBDAVocabulary.SECONDS)) {
 					type = COL_TYPE.DECIMAL;
 				}
+				else if (arithmeticOperations.containsKey(function)) {
+
+					if (function.equals(OBDAVocabulary.ABS) || function.equals(OBDAVocabulary.ROUND) ||
+							function.equals(OBDAVocabulary.CEIL) || function.equals(OBDAVocabulary.FLOOR) ) {
+						type = getTypeColumn(ov.getTerm(0));
+
+					}else if (function.equals(OBDAVocabulary.RAND)){
+						type = COL_TYPE.DOUBLE;
+
+					} else {
+						type = COL_TYPE.LITERAL;
+					}
+				} 
 				else {
 					type = COL_TYPE.LITERAL;
 				}
 
-			} else if (ov.isArithmeticFunction()) {
-
-				if (function.equals(OBDAVocabulary.ABS) || function.equals(OBDAVocabulary.ROUND) ||
-						function.equals(OBDAVocabulary.CEIL) || function.equals(OBDAVocabulary.FLOOR) ) {
-					type = getTypeColumn(ov.getTerm(0));
-
-				}else if (function.equals(OBDAVocabulary.RAND)){
-					type = COL_TYPE.DOUBLE;
-
-				} else {
-					type = COL_TYPE.LITERAL;
-				}
 			} else {
 
 //                type = dtfac.getDatatype(functionString);
@@ -1463,8 +1483,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			
 		} 
-		else if (function.isArithmeticFunction()) {
-			String expressionFormat = getNumericalOperatorString(functionSymbol);
+		
+		else if (arithmeticOperations.containsKey(functionSymbol)) {
+			String expressionFormat = arithmeticOperations.get(functionSymbol);
 			String leftOp = getSQLString(term1, index, true);
 				if (isUnary(function)){
 					String result = String.format(expressionFormat, leftOp);
@@ -1489,8 +1510,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			
 		} else {
-			String functionName = functionSymbol.toString();
-			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
+			if (functionSymbol == OBDAVocabulary.QUEST_CAST) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
@@ -1502,131 +1522,130 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.SPARQL_STR) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				if (isStringColType(function, index)) {
 					return columnName;
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			} else if (functionName.equals(OBDAVocabulary.REPLACE.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.REPLACE) {
 				String orig = getSQLString(function.getTerm(0), index, false);
 				String out_str = getSQLString(function.getTerm(1), index, false);
 				String in_str = getSQLString(function.getTerm(2), index, false);
 				String result = sqladapter.strReplace(orig, out_str, in_str);
 				return result;
 			} 
-			 else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
+			else if (functionSymbol ==  OBDAVocabulary.CONCAT) {
 					String left = getSQLString(function.getTerm(0), index, false);
 					String right = getSQLString(function.getTerm(1), index, false);
 					String result = sqladapter.strConcat(new String[]{left, right});
 					return result;
 			}
-
-			else if (functionName.equals(OBDAVocabulary.STRLEN.getName())) {
+			else if (functionSymbol == OBDAVocabulary.STRLEN) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.strLength(literal);
 				return result;
-			} else if (functionName.equals(OBDAVocabulary.YEAR.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.YEAR) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateYear(literal);
 				return result;
-
-			} else if (functionName.equals(OBDAVocabulary.MINUTES.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.MINUTES) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateMinutes(literal);
 				return result;
-
-			} else if (functionName.equals(OBDAVocabulary.DAY.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.DAY) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateDay(literal);
 				return result;
-
-			} else if (functionName.equals(OBDAVocabulary.NOW.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.NOW) {
 				return sqladapter.dateNow();
 
-			}  else if (functionName.equals(OBDAVocabulary.MONTH.getName())) {
+			}  
+			else if (functionSymbol == OBDAVocabulary.MONTH) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateMonth(literal);
 				return result;
-
-			}  else if (functionName.equals(OBDAVocabulary.SECONDS.getName())) {
+			}  
+			else if (functionSymbol == OBDAVocabulary.SECONDS) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateSeconds(literal);
 				return result;
-
-			} else if (functionName.equals(OBDAVocabulary.HOURS.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.HOURS) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateHours(literal);
 				return result;
-
-			} else if (functionName.equals(OBDAVocabulary.TZ.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.TZ) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.dateTZ(literal);
 				return result;
-
-			} else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.ENCODE_FOR_URI) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.strEncodeForUri(literal);
 				return result;
 			}
-
-			else if (functionName.equals(OBDAVocabulary.UCASE.getName())) {
+			else if (functionSymbol == OBDAVocabulary.UCASE) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.strUcase(literal);
 				return result;
 			}
-
-			else if (functionSymbol.equals(OBDAVocabulary.MD5)) {
+			else if (functionSymbol == OBDAVocabulary.MD5) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.MD5(literal);
 				return result;
-
-			} else if (functionSymbol.equals(OBDAVocabulary.SHA1)) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.SHA1) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.SHA1(literal);
 				return result;
-			} else if (functionSymbol.equals(OBDAVocabulary.SHA256)) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.SHA256) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.SHA256(literal);
 				return result;
-			} else if (functionSymbol.equals(OBDAVocabulary.SHA512)) {
+			} 
+			else if (functionSymbol == OBDAVocabulary.SHA512) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.SHA512(literal); //TODO FIX
 				return result;
 			}
-
-			else if (functionName.equals(OBDAVocabulary.LCASE.getName())) {
+			else if (functionSymbol == OBDAVocabulary.LCASE) {
 				String literal = getSQLString(function.getTerm(0), index, false);
 				String result = sqladapter.strLcase(literal);
 				return result;
-			}  else if (functionName.equals(OBDAVocabulary.SUBSTR.getName())) {
+			}  
+			else if (functionSymbol == OBDAVocabulary.SUBSTR) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String start = getSQLString(function.getTerm(1), index, false);
-				if(function.getTerms().size()==2){
+				if (function.getTerms().size() == 2){
 					return sqladapter.strSubstr(string, start);
 				}
-
 				String end = getSQLString(function.getTerm(2), index, false);
 				String result = sqladapter.strSubstr(string, start, end);
 
 				return result;
 			}
-
-			else if (functionName.equals(OBDAVocabulary.STRBEFORE.getName())) {
+			else if (functionSymbol == OBDAVocabulary.STRBEFORE) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String before = getSQLString(function.getTerm(1), index, false);
 				String result = sqladapter.strBefore(string, before);
 				return result;
 			}
-
-			else if (functionName.equals(OBDAVocabulary.STRAFTER.getName())) {
+			else if (functionSymbol == OBDAVocabulary.STRAFTER) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String after = getSQLString(function.getTerm(1), index, false);
 				String result = sqladapter.strAfter(string, after);
 				return result;
 			}
-
 
 		}
 
@@ -1655,35 +1674,34 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
-		String sql = null;
-		if (constant.getType() == COL_TYPE.BNODE || constant.getType() == COL_TYPE.LITERAL || constant.getType() == COL_TYPE.OBJECT
-				|| constant.getType() == COL_TYPE.STRING) {
-			sql = "'" + constant.getValue() + "'";
-		} 
-		else if (constant.getType() == COL_TYPE.BOOLEAN) {
-			String value = constant.getValue();
-			boolean v = XsdDatatypeConverter.parseXsdBoolean(value);
-			sql = sqladapter.getSQLLexicalFormBoolean(v);
-		} 
-		else if (constant.getType() == COL_TYPE.DATETIME ) {
-			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
+		switch (constant.getType()) {
+		case BNODE:
+		case LITERAL:
+		case OBJECT:
+		case STRING:
+			return "'" + constant.getValue() + "'";
+		case BOOLEAN:
+			boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
+			return sqladapter.getSQLLexicalFormBoolean(v);		
+		case DATETIME:
+			return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
+		case DATETIME_STAMP:
+			return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
+		case DECIMAL:
+		case DOUBLE:
+		case INTEGER:
+		case LONG:
+		case FLOAT:
+		case NON_POSITIVE_INTEGER:
+		case INT:
+		case UNSIGNED_INT:
+		case NEGATIVE_INTEGER:
+		case POSITIVE_INTEGER:
+		case NON_NEGATIVE_INTEGER:
+			return constant.getValue();
+		default:
+			return "'" + constant.getValue() + "'";
 		}
-		else if (constant.getType() == COL_TYPE.DATETIME_STAMP ) {
-			sql = sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
-		}
-		else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
-				|| constant.getType() == COL_TYPE.INTEGER || constant.getType() == COL_TYPE.LONG
-                || constant.getType() == COL_TYPE.FLOAT || constant.getType() == COL_TYPE.NON_POSITIVE_INTEGER
-                || constant.getType() == COL_TYPE.INT || constant.getType() == COL_TYPE.UNSIGNED_INT
-                || constant.getType() == COL_TYPE.NEGATIVE_INTEGER
-                || constant.getType() == COL_TYPE.POSITIVE_INTEGER || constant.getType() == COL_TYPE.NON_NEGATIVE_INTEGER) {
-			sql = constant.getValue();
-		} 
-		else {
-			sql = "'" + constant.getValue() + "'";
-		}
-		return sql;
-
 	}
 
 
@@ -1695,70 +1713,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getBooleanOperatorString(Predicate functionSymbol) {
-		String operator = null;
-		if (functionSymbol.equals(OBDAVocabulary.EQ)) {
-			operator = EQ_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.NEQ)) {
-			operator = NEQ_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.GT)) {
-			operator = GT_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.GTE)) {
-			operator = GTE_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.LT)) {
-			operator = LT_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.LTE)) {
-			operator = LTE_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.AND)) {
-			operator = AND_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.OR)) {
-			operator = OR_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.NOT)) {
-			operator = NOT_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.IS_NULL)) {
-			operator = IS_NULL_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.IS_NOT_NULL)) {
-			operator = IS_NOT_NULL_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.IS_TRUE)) {
-			operator = IS_TRUE_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SQL_LIKE)) {
-			operator = LIKE_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
-			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
-		} else if (functionSymbol.equals(OBDAVocabulary.STR_STARTS)) {
-			operator = sqladapter.strStartsOperator();
-		} else if (functionSymbol.equals(OBDAVocabulary.STR_ENDS)) {
-			operator = sqladapter.strEndsOperator();
-		} else if (functionSymbol.equals(OBDAVocabulary.CONTAINS)) {
-				operator = sqladapter.strContainsOperator();}
-		else {
+		String operator = booleanOperations.get(functionSymbol);
+		if (operator == null)
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
-		}
+		
 		return operator;
 	}
 
-	private String getNumericalOperatorString(Predicate functionSymbol) {
-		String operator;
-		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
-			operator = ADD_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
-			operator = SUBTRACT_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
-			operator = MULTIPLY_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.ABS)) {
-				operator = ABS_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.CEIL)) {
-			operator = sqladapter.ceil();
-		} else if (functionSymbol.equals(OBDAVocabulary.FLOOR)) {
-			operator = FLOOR_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.ROUND)) {
-			operator = sqladapter.round();
-		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
-			operator = sqladapter.rand();
-		} else {
-			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
-		}
-		return operator;
-	}
     /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
