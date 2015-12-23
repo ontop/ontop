@@ -27,8 +27,12 @@ public class NonBooleanOperationPredicateImpl extends PredicateImpl implements N
 
 	private static final long serialVersionUID = 1L;
 
-	public NonBooleanOperationPredicateImpl(String name, int arity) {
-		super(name, arity, null);
+	public NonBooleanOperationPredicateImpl(String name, Predicate.COL_TYPE type1, Predicate.COL_TYPE type2, Predicate.COL_TYPE type3) {
+		super(name, 3, new COL_TYPE[]{ type1, type2, type3 });
+	}
+	
+	public NonBooleanOperationPredicateImpl(String name, Predicate.COL_TYPE type1, Predicate.COL_TYPE type2) {
+		super(name, 2, new COL_TYPE[]{ type1, type2 });
 	}
 	
 	public NonBooleanOperationPredicateImpl(String name, Predicate.COL_TYPE type) {

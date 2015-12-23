@@ -80,8 +80,6 @@ public interface Function extends Term {
 	
 	boolean isArithmeticFunction();
 
-	boolean isStringFunction();
-	
 	boolean isDataTypeFunction();
 
 	boolean isNonBooleanFunction();

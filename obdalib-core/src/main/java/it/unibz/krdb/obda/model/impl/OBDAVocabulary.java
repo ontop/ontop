@@ -98,50 +98,46 @@ public class OBDAVocabulary {
 
 	/*SPARQL String predicates */
 
-	public static final StringOperationPredicate UCASE = new StringOperationPredicateImpl(
-			"UCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
+	public static final NonBooleanOperationPredicate UCASE = new NonBooleanOperationPredicateImpl(
+			"UCASE", COL_TYPE.LITERAL ); 
 
-	public static final StringOperationPredicate LCASE = new StringOperationPredicateImpl(
-			"LCASE", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
+	public static final NonBooleanOperationPredicate LCASE = new NonBooleanOperationPredicateImpl(
+			"LCASE", COL_TYPE.LITERAL ); 
 
-	public static final StringOperationPredicate STRLEN = new StringOperationPredicateImpl(
-			"STRLEN", 1, new COL_TYPE[] { COL_TYPE.LITERAL }); 
+	public static final NonBooleanOperationPredicate STRLEN = new NonBooleanOperationPredicateImpl(
+			"STRLEN", COL_TYPE.LITERAL ); 
 
-	public static final StringOperationPredicate SUBSTR = new StringOperationPredicateImpl(
-			"SUBSTR", 3, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.INTEGER,
-					COL_TYPE.INTEGER }); 
+	public static final NonBooleanOperationPredicate SUBSTR = new NonBooleanOperationPredicateImpl(
+			"SUBSTR", COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER); 
 
-	public static final StringOperationPredicate STRBEFORE = new StringOperationPredicateImpl(
-			"STRBEFORE", 2,
-			new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL }); 
+	public static final NonBooleanOperationPredicate STRBEFORE = new NonBooleanOperationPredicateImpl(
+			"STRBEFORE", COL_TYPE.LITERAL, COL_TYPE.LITERAL); 
 
-	public static final StringOperationPredicate STRAFTER = new StringOperationPredicateImpl(
-			"STRAFTER", 2,
-			new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL }); 
+	public static final NonBooleanOperationPredicate STRAFTER = new NonBooleanOperationPredicateImpl(
+			"STRAFTER", COL_TYPE.LITERAL, COL_TYPE.LITERAL ); 
 
-	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
-			"REPLACE", 3, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL,
-					COL_TYPE.LITERAL });
+	public static final NonBooleanOperationPredicate REPLACE = new NonBooleanOperationPredicateImpl(
+			"REPLACE", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL);
 
-	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
-			"CONCAT", 2, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
+	public static final NonBooleanOperationPredicate CONCAT = new NonBooleanOperationPredicateImpl(
+			"CONCAT", COL_TYPE.LITERAL, COL_TYPE.LITERAL );
 
-	public static final StringOperationPredicate ENCODE_FOR_URI = new StringOperationPredicateImpl(
-			"ENCODE_FOR_URI", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	public static final NonBooleanOperationPredicate ENCODE_FOR_URI = new NonBooleanOperationPredicateImpl(
+			"ENCODE_FOR_URI", COL_TYPE.LITERAL);
 
 	/*Hash functions*/
 	
-	public static final StringOperationPredicate MD5 = new StringOperationPredicateImpl(
-			"MD5", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	public static final NonBooleanOperationPredicate MD5 = new NonBooleanOperationPredicateImpl(
+			"MD5");
 	
-	public static final StringOperationPredicate SHA1 = new StringOperationPredicateImpl(
-			"SHA1", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	public static final NonBooleanOperationPredicate SHA1 = new NonBooleanOperationPredicateImpl(
+			"SHA1", COL_TYPE.LITERAL);
 	
-	public static final StringOperationPredicate SHA512 = new StringOperationPredicateImpl(
-			"SHA521", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	public static final NonBooleanOperationPredicate SHA512 = new NonBooleanOperationPredicateImpl(
+			"SHA521", COL_TYPE.LITERAL);
 	
-	public static final StringOperationPredicate SHA256 = new StringOperationPredicateImpl(
-			"SHA256", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	public static final NonBooleanOperationPredicate SHA256 = new NonBooleanOperationPredicateImpl(
+			"SHA256", COL_TYPE.LITERAL);
 
 
 	/* SPARQL Functions on Dates and Times */
@@ -208,16 +204,16 @@ public class OBDAVocabulary {
 
 	/* SPARQL built-in functions */
 
-	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl(
-			"str", 1);
-	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl(
-			"datatype", 1);
-	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl(
-			"lang" , 1 );
-	public static final OperationPredicate UUID = new NonBooleanOperationPredicateImpl(
-			"UUID", 0);
-	public static final OperationPredicate STRUUID = new NonBooleanOperationPredicateImpl(
-			"STRUUID", 0);
+	public static final NonBooleanOperationPredicate SPARQL_STR = new NonBooleanOperationPredicateImpl(
+			"str", COL_TYPE.LITERAL );
+	public static final NonBooleanOperationPredicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl(
+			"datatype", COL_TYPE.LITERAL );
+	public static final NonBooleanOperationPredicate SPARQL_LANG = new NonBooleanOperationPredicateImpl(
+			"lang" , COL_TYPE.LITERAL );
+	public static final NonBooleanOperationPredicate UUID = new NonBooleanOperationPredicateImpl(
+			"UUID");
+	public static final NonBooleanOperationPredicate STRUUID = new NonBooleanOperationPredicateImpl(
+			"STRUUID");
 
 	/* SPARQL built-in predicates */
 

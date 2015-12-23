@@ -414,7 +414,7 @@ public class OBDAMappingTransformer {
 							StringBuilder sb = new StringBuilder();
 							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
 							
-							if (functionSymbol instanceof StringOperationPredicate){ //concat
+							if (functionSymbol.equals(OBDAVocabulary.CONCAT)){ //concat
 								
 								List<Term> terms = ((Function)objectTerm).getTerms();
 								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));

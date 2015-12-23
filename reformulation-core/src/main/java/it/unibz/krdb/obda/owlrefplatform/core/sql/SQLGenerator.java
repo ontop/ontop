@@ -857,10 +857,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
 			}
-			else if (ov.isStringFunction() ) {
-				// Functions returning string values
-				mainColumn = getSQLString(ov, index, false);
-			}
 			else if (ov.isNonBooleanFunction()){
 			 	if (function.equals(OBDAVocabulary.UUID)) {
 				 mainColumn = sqladapter.uuid();
@@ -947,7 +943,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             }
 
         }
-        else if (func1.isStringFunction()) {
+        else if (func1.isNonBooleanFunction()) {
 
             if(pred1.equals(OBDAVocabulary.CONCAT)) {
                 Term concat1 = func1.getTerm(0);
@@ -1032,7 +1028,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				type = COL_TYPE.OBJECT;
 			} else if (function instanceof BNodePredicate) {
 				type = COL_TYPE.BNODE;
-			} else if (ov.isStringFunction() || ov.isNonBooleanFunction()) {
+			} else if (ov.isNonBooleanFunction()) {
 
 
 				if (function.equals(OBDAVocabulary.CONCAT)) {
