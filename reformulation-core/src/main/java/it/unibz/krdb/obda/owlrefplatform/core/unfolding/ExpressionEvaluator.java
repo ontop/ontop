@@ -21,15 +21,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  */
 
 import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BNodePredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -127,11 +126,8 @@ public class ExpressionEvaluator {
 			}
 			return expr;
 		}
-		else if (expr.isBooleanFunction()) {
-			return evalBoolean(expr);
-		} 
-		else if (expr.isNonBooleanFunction()) {
-			return evalNonBoolean(expr);
+		else if (expr.isOperation()) {
+			return evalOperation(expr);
 		} 
 		else if (expr.isDataTypeFunction()) {
 			Term t0 = expr.getTerm(0);
@@ -187,72 +183,61 @@ public class ExpressionEvaluator {
 		return regexFlag;
 	}
 
-	private Term evalBoolean(Function term) {
+	private Term evalOperation(Function term) {
 		Predicate pred = term.getFunctionSymbol();
-		if (pred == OBDAVocabulary.AND) {
+		if (pred == ExpressionOperation.AND) {
 			return evalAnd(term.getTerm(0), term.getTerm(1));
-		} else if (pred == OBDAVocabulary.OR) {
+		} else if (pred == ExpressionOperation.OR) {
 			return evalOr(term.getTerm(0), term.getTerm(1));
-		} else if (pred == OBDAVocabulary.EQ) {
+		} else if (pred == ExpressionOperation.EQ) {
 			return evalEqNeq(term, true);
-		} else if (pred == OBDAVocabulary.GT) {
+		} else if (pred == ExpressionOperation.GT) {
 			return term;
-		} else if (pred == OBDAVocabulary.GTE) {
+		} else if (pred == ExpressionOperation.GTE) {
 			return term;
-		} else if (pred == OBDAVocabulary.IS_NOT_NULL) {
+		} else if (pred == ExpressionOperation.IS_NOT_NULL) {
 			return evalIsNullNotNull(term, false);
-		} else if (pred == OBDAVocabulary.IS_NULL) {
+		} else if (pred == ExpressionOperation.IS_NULL) {
 			return evalIsNullNotNull(term, true);
-		} else if (pred == OBDAVocabulary.LT) {
+		} else if (pred == ExpressionOperation.LT) {
 			return term;
-		} else if (pred == OBDAVocabulary.LTE) {
+		} else if (pred == ExpressionOperation.LTE) {
 			return term;
-		} else if (pred == OBDAVocabulary.NEQ) {
+		} else if (pred == ExpressionOperation.NEQ) {
 			return evalEqNeq(term, false);
-		} else if (pred == OBDAVocabulary.NOT) {
+		} else if (pred == ExpressionOperation.NOT) {
 			return evalNot(term);
-		} else if (pred == OBDAVocabulary.IS_TRUE) {
+		} else if (pred == ExpressionOperation.IS_TRUE) {
 			return evalIsTrue(term);
-		} else if (pred == OBDAVocabulary.SPARQL_IS_LITERAL) {
+		} else if (pred == ExpressionOperation.IS_LITERAL) {
 			return evalIsLiteral(term);
-		} else if (pred == OBDAVocabulary.SPARQL_IS_BLANK) {
+		} else if (pred == ExpressionOperation.IS_BLANK) {
 			return evalIsBlank(term);
-		} else if (pred == OBDAVocabulary.SPARQL_IS_URI) {
-			return evalIsUri(term);
-		} else if (pred == OBDAVocabulary.SPARQL_IS_IRI) {
+		} else if (pred == ExpressionOperation.IS_IRI) {
 			return evalIsIri(term);
-		} else if (pred == OBDAVocabulary.SPARQL_LANGMATCHES) {
+		} else if (pred == ExpressionOperation.LANGMATCHES) {
 			return evalLangMatches(term);
-		} else if (pred == OBDAVocabulary.SPARQL_REGEX) {
+		} else if (pred == ExpressionOperation.REGEX) {
 			return evalRegex(term);
-		} else if (pred == OBDAVocabulary.SQL_LIKE) {
+		} else if (pred == ExpressionOperation.SQL_LIKE) {
 				return term;	
-		} else if (pred == OBDAVocabulary.STR_STARTS) {
+		} else if (pred == ExpressionOperation.STR_STARTS) {
 			return term;
-		} else if (pred == OBDAVocabulary.STR_ENDS) {
+		} else if (pred == ExpressionOperation.STR_ENDS) {
 			return term;
-		} else if (pred == OBDAVocabulary.CONTAINS) {
+		} else if (pred == ExpressionOperation.CONTAINS) {
 			return term;
-		} else {
-			throw new RuntimeException(
-					"Evaluation of expression not supported: "
-							+ term.toString());
-		}
-	}
-
-	private Term evalNonBoolean(Function term) {
-		Predicate pred = term.getFunctionSymbol();
-		if (pred == OBDAVocabulary.SPARQL_STR) {
+		} else if (pred == ExpressionOperation.SPARQL_STR) {
 			return evalStr(term);
 		} 
-		else if (pred == OBDAVocabulary.SPARQL_DATATYPE) {
+		else if (pred == ExpressionOperation.SPARQL_DATATYPE) {
 			return evalDatatype(term);
 		} 
-		else if (pred == OBDAVocabulary.SPARQL_LANG) {
+		else if (pred == ExpressionOperation.SPARQL_LANG) {
 			return evalLang(term);
 		} 
-		else if (pred == OBDAVocabulary.ADD || pred == OBDAVocabulary.SUBTRACT
-				 || pred == OBDAVocabulary.MULTIPLY || pred == OBDAVocabulary.DIVIDE) {
+		else if (pred == ExpressionOperation.ADD || pred == ExpressionOperation.SUBTRACT
+				 || pred == ExpressionOperation.MULTIPLY || pred == ExpressionOperation.DIVIDE) {
 			
 			Function returnedDatatype = getDatatype(term);
 			if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) 
@@ -260,7 +245,11 @@ public class ExpressionEvaluator {
 			else
 				return OBDAVocabulary.FALSE;
 			
-		} else {
+		} 
+		else if (pred == ExpressionOperation.QUEST_CAST) {
+			return term;
+		}	
+		else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "
 							+ term.toString());
@@ -381,12 +370,8 @@ public class ExpressionEvaluator {
 		else if (function.isAlgebraFunction()) {
 			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
-		else if (function.isBooleanFunction()) {
-			//return boolean uri
-			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
-		}
-		else if (predicate == OBDAVocabulary.ADD || predicate == OBDAVocabulary.SUBTRACT || 
-				predicate == OBDAVocabulary.MULTIPLY || predicate == OBDAVocabulary.DIVIDE)
+		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
+				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
 		{
 			//return numerical if arguments have same type
 			Term arg1 = function.getTerm(0);
@@ -402,6 +387,10 @@ public class ExpressionEvaluator {
 			else {
 				return null;
 			}
+		}
+		else if (function.isOperation()) {
+			//return boolean uri
+			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		}
 		return null;
 	}
@@ -547,7 +536,7 @@ public class ExpressionEvaluator {
 			Predicate functionSymbol = f.getFunctionSymbol();
 			if (isObjectConstant()) {
 				setRegexFlag(false);
-				return fac.getBooleanConstant(functionSymbol.equals(OBDAVocabulary.SPARQL_STR));
+				return fac.getBooleanConstant(functionSymbol.equals(ExpressionOperation.SPARQL_STR));
 			}
 		}
 		return term;
@@ -584,13 +573,13 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function f = (Function) teval;
 			Predicate predicate = f.getFunctionSymbol();
-			if (predicate == OBDAVocabulary.IS_NOT_NULL) {
+			if (predicate == ExpressionOperation.IS_NOT_NULL) {
 				return fac.getFunctionIsNotNull(f.getTerm(0));
-			} else if (predicate == OBDAVocabulary.IS_NULL) {
+			} else if (predicate == ExpressionOperation.IS_NULL) {
 				return fac.getFunctionIsNull(f.getTerm(0));
-			} else if (predicate == OBDAVocabulary.NEQ) {
+			} else if (predicate == ExpressionOperation.NEQ) {
 				return fac.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
-			} else if (predicate == OBDAVocabulary.EQ) {
+			} else if (predicate == ExpressionOperation.EQ) {
 				return fac.getFunctionEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
@@ -605,13 +594,13 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function f = (Function) teval;
 			Predicate predicate = f.getFunctionSymbol();
-			if (predicate == OBDAVocabulary.IS_NOT_NULL) {
+			if (predicate == ExpressionOperation.IS_NOT_NULL) {
 				return fac.getFunctionIsNull(f.getTerm(0));
-			} else if (predicate == OBDAVocabulary.IS_NULL) {
+			} else if (predicate == ExpressionOperation.IS_NULL) {
 				return fac.getFunctionIsNotNull(f.getTerm(0));
-			} else if (predicate == OBDAVocabulary.NEQ) {
+			} else if (predicate == ExpressionOperation.NEQ) {
 				return fac.getFunctionEQ(f.getTerm(0), f.getTerm(1));
-			} else if (predicate == OBDAVocabulary.EQ) {
+			} else if (predicate == ExpressionOperation.EQ) {
 				return fac.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
@@ -686,7 +675,7 @@ public class ExpressionEvaluator {
 					throw new RuntimeException("Unsupported type: " + pred1);
 				}
 			} 
-			else if (f1.isNonBooleanFunction()) {
+			else if (f1.isOperation()) {
 				return term;
 			}
 			

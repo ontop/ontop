@@ -105,7 +105,7 @@ public class DatalogUnfolder {
 				if (innerTerm instanceof Function)
 					collectPredicates(predicates, (Function) innerTerm);
 		} 
-		else if (!(atom.isBooleanFunction())) {
+		else if (!(atom.isOperation())) {
 			Predicate pred = atom.getFunctionSymbol();
 			predicates.add(pred);
 		}
@@ -1535,10 +1535,7 @@ public class DatalogUnfolder {
 			for (int newatomidx = 0; newatomidx < innerAtoms.size(); newatomidx++) {
 
 				Function newatom = innerAtoms.get(newatomidx);
-				if (!newatom.isBooleanFunction())
-					continue;
-
-				if (!newatom.getFunctionSymbol().equals(OBDAVocabulary.IS_NOT_NULL))
+				if (newatom.getFunctionSymbol() != ExpressionOperation.IS_NOT_NULL)
 					continue;
 
 				Function replacement = null;

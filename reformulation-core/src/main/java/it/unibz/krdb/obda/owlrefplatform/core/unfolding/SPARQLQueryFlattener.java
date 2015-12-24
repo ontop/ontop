@@ -90,7 +90,7 @@ public class SPARQLQueryFlattener {
 				if (innerTerm instanceof Function)
 					collectPredicates(predicates, (Function) innerTerm);
 		} 
-		else if (!(atom.isBooleanFunction())) {
+		else if (!(atom.isOperation())) {
 			Predicate pred = atom.getFunctionSymbol();
 			predicates.add(pred);
 		}

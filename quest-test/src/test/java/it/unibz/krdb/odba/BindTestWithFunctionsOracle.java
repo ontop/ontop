@@ -311,10 +311,10 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL Tutorial\"");
-        expectedValues.add("\"e Semantic Web\"");
-        expectedValues.add("\"ime and Punishment\"");
-        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"");
+        expectedValues.add("\"ARQL Tutorial\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Semantic Web\"@en");
+        expectedValues.add("\"ime and Punishment\"@en");
+        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -338,10 +338,10 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL T\"");
-        expectedValues.add("\"e Sema\"");
-        expectedValues.add("\"ime an\"");
-        expectedValues.add("\"e Logi\"");
+        expectedValues.add("\"ARQL T\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Sema\"@en");
+        expectedValues.add("\"ime an\"@en");
+        expectedValues.add("\"e Logi\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -446,8 +446,8 @@ public class BindTestWithFunctionsOracle {
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"");
+        expectedValues.add("\"The Semantic Web\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
 
         checkReturnedValues(p, queryBind, expectedValues);
     }
@@ -560,10 +560,10 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
+         expectedValues.add(null);   // ROMAN (23 Dec 2015): now the language tag is handled correctly
+         expectedValues.add("\"The Seman\"@en");
          expectedValues.add(null);
-         expectedValues.add("\"The Seman\"");
-         expectedValues.add(null);
-         expectedValues.add("\"The Logic Book: Introduc\"");
+         expectedValues.add("\"The Logic Book: Introduc\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
 
     }
@@ -590,10 +590,10 @@ public class BindTestWithFunctionsOracle {
 
 
         List<String> expectedValues = new ArrayList<>();
+        expectedValues.add(null);   // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\" Semantic Web\"@en");
         expectedValues.add(null);
-        expectedValues.add("\" Semantic Web\"");
-        expectedValues.add(null);
-        expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
+        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
 
     }

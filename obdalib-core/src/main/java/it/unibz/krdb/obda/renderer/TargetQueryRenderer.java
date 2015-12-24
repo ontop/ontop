@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
@@ -218,7 +219,7 @@ public class TargetQueryRenderer {
 				}		
 				}
 			} 
-			else if (function.equals(OBDAVocabulary.CONCAT)) { //Concat
+			else if (functionSymbol == ExpressionOperation.CONCAT) { //Concat
 				List<Term> terms = function.getTerms();
 				sb.append("\"");
 				getNestedConcats(sb, terms.get(0),terms.get(1));

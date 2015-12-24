@@ -270,22 +270,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.EQ, firstTerm, secondTerm);
+		return getFunction(ExpressionOperation.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Function getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.NEQ, firstTerm, secondTerm);
+		return getFunction(ExpressionOperation.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Function getFunctionNOT(Term term) {
-		return getFunction(OBDAVocabulary.NOT, term);
+		return getFunction(ExpressionOperation.NOT, term);
 	}
 
 	@Override
 	public Function getFunctionAND(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.AND, term1, term2);
+		return getFunction(ExpressionOperation.AND, term1, term2);
 	}
 	
 //	@Override
@@ -310,7 +310,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionOR(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.OR, term1, term2);
+		return getFunction(ExpressionOperation.OR, term1, term2);
 	}
 
 	
@@ -336,54 +336,54 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionIsNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NULL, term);
+		return getFunction(ExpressionOperation.IS_NULL, term);
 	}
 
 	@Override
 	public Function getFunctionIsNotNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NOT_NULL, term);
+		return getFunction(ExpressionOperation.IS_NOT_NULL, term);
 	}
 
 
 	@Override
 	public Function getLANGMATCHESFunction(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
+		return getFunction(ExpressionOperation.LANGMATCHES, term1, term2);
 	}
 
 	@Override
 	public Function getSQLFunctionLike(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SQL_LIKE, term1, term2);
+		return getFunction(ExpressionOperation.SQL_LIKE, term1, term2);
 	}
 	
 	@Override
 	public Function getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3 );
+		return getFunction(ExpressionOperation.REGEX, term1, term2, term3 );
 	}
 	
 	@Override
 	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
-		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
+		return getFunction(ExpressionOperation.REPLACE, term1, term2, term3 );
 	}
 	
     @Override
     public Function getFunctionConcat(Term term1, Term term2) {
-        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+        return getFunction(ExpressionOperation.CONCAT, term1, term2);
     }
 
     @Override
     public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
-        return getFunction(OBDAVocabulary.SUBSTR, term1, term2, term3);
+        return getFunction(ExpressionOperation.SUBSTR, term1, term2, term3);
     } //added by Nika
 
 	@Override
 	public Function getFunctionSubstring(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SUBSTR, term1, term2);
+		return getFunction(ExpressionOperation.SUBSTR, term1, term2);
 	}
         
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
-		return getFunction(OBDAVocabulary.QUEST_CAST, term1, term2);
+		return getFunction(ExpressionOperation.QUEST_CAST, term1, term2);
 	}
 	
 	@Override
@@ -418,7 +418,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionIsTrue(Term term) {
-		return getFunction(OBDAVocabulary.IS_TRUE, term);
+		return getFunction(ExpressionOperation.IS_TRUE, term);
 	}
 
 	@Override

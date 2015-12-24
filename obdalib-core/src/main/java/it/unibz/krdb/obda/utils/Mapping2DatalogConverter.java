@@ -344,17 +344,17 @@ public class Mapping2DatalogConverter {
     
 	private static final ImmutableMap<String, OperationPredicate> operations = 
 			new ImmutableMap.Builder<String, OperationPredicate>()
-				.put("=", OBDAVocabulary.EQ)
-				.put(">=", OBDAVocabulary.GTE)
-				.put(">", OBDAVocabulary.GT)
-				.put("<=", OBDAVocabulary.LTE)
-				.put("<", OBDAVocabulary.LT)
-				.put("<>", OBDAVocabulary.NEQ)
-				.put("!=", OBDAVocabulary.NEQ)
-				.put("+", OBDAVocabulary.ADD)
-				.put("-", OBDAVocabulary.SUBTRACT)
-				.put("*", OBDAVocabulary.MULTIPLY)
-				.put("/", OBDAVocabulary.DIVIDE)
+				.put("=", ExpressionOperation.EQ)
+				.put(">=", ExpressionOperation.GTE)
+				.put(">", ExpressionOperation.GT)
+				.put("<=", ExpressionOperation.LTE)
+				.put("<", ExpressionOperation.LT)
+				.put("<>", ExpressionOperation.NEQ)
+				.put("!=", ExpressionOperation.NEQ)
+				.put("+", ExpressionOperation.ADD)
+				.put("-", ExpressionOperation.SUBTRACT)
+				.put("*", ExpressionOperation.MULTIPLY)
+				.put("/", ExpressionOperation.DIVIDE)
 				.build();
 
 
@@ -813,7 +813,7 @@ public class Mapping2DatalogConverter {
         	Expression right = concat.getRightExpression();
         	Term l = visitEx(left);
         	Term r = visitEx(right);
-        	result = fac.getFunction(OBDAVocabulary.CONCAT, l, r);
+        	result = fac.getFunction(ExpressionOperation.CONCAT, l, r);
         }
 
         @Override

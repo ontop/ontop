@@ -727,37 +727,37 @@ public class SparqlAlgebraToDatalogTranslator {
 	// XPath 1.0 functions (XPath 1.1 has variants with more arguments)
 	private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
 				new ImmutableMap.Builder<String, OperationPredicate>()
-						.put("http://www.w3.org/2005/xpath-functions#upper-case", OBDAVocabulary.UCASE)
-						.put("http://www.w3.org/2005/xpath-functions#lower-case", OBDAVocabulary.LCASE)
-						.put("http://www.w3.org/2005/xpath-functions#string-length", OBDAVocabulary.STRLEN) 
-						.put("http://www.w3.org/2005/xpath-functions#substring-before", OBDAVocabulary.STRBEFORE) 
-						.put("http://www.w3.org/2005/xpath-functions#substring-after", OBDAVocabulary.STRAFTER) 
-						.put("http://www.w3.org/2005/xpath-functions#starts-with", OBDAVocabulary.STR_STARTS) 
-						.put("http://www.w3.org/2005/xpath-functions#ends-with", OBDAVocabulary.STR_ENDS) 
-						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", OBDAVocabulary.ENCODE_FOR_URI) 
-						.put("http://www.w3.org/2005/xpath-functions#contains", OBDAVocabulary.CONTAINS) 
-						.put("UUID", OBDAVocabulary.UUID) 
-						.put("STRUUID", OBDAVocabulary.STRUUID) 
+						.put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
+						.put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
+						.put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN) 
+						.put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE) 
+						.put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER) 
+						.put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS) 
+						.put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS) 
+						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI) 
+						.put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS) 
+						.put("UUID", ExpressionOperation.UUID) 
+						.put("STRUUID", ExpressionOperation.STRUUID) 
 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", OBDAVocabulary.ABS) 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", OBDAVocabulary.CEIL) 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", OBDAVocabulary.FLOOR) 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-round", OBDAVocabulary.ROUND) 
-						.put("RAND", OBDAVocabulary.RAND) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND) 
+						.put("RAND", ExpressionOperation.RAND) 
 						
-						.put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", OBDAVocabulary.YEAR) 
-						.put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", OBDAVocabulary.DAY) 
-						.put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", OBDAVocabulary.MONTH) 
-						.put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", OBDAVocabulary.HOURS) 
-						.put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", OBDAVocabulary.MINUTES) 
-						.put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", OBDAVocabulary.SECONDS) 
-						.put("NOW", OBDAVocabulary.NOW) 
-						.put("TZ", OBDAVocabulary.TZ) 
+						.put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR) 
+						.put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY) 
+						.put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH) 
+						.put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS) 
+						.put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES) 
+						.put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS) 
+						.put("NOW", ExpressionOperation.NOW) 
+						.put("TZ", ExpressionOperation.TZ) 
 					
-						.put("MD5", OBDAVocabulary.MD5) 
-						.put("SHA1", OBDAVocabulary.SHA1) 
-						.put("SHA256", OBDAVocabulary.SHA256) 
-						.put("SHA512", OBDAVocabulary.SHA512) 
+						.put("MD5", ExpressionOperation.MD5) 
+						.put("SHA1", ExpressionOperation.SHA1) 
+						.put("SHA256", ExpressionOperation.SHA256) 
+						.put("SHA512", ExpressionOperation.SHA512) 
 						.build();
 	
 	
@@ -887,25 +887,24 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getFunctionNOT(term);
 		}
 		else if (expr instanceof IsLiteral) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, term);	
+			return ofac.getFunction(ExpressionOperation.IS_LITERAL, term);	
 		} 
 		else if (expr instanceof IsURI) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, term);
+			return ofac.getFunction(ExpressionOperation.IS_IRI, term);
 		} 
 		else if (expr instanceof Str) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_STR, term);
+			return ofac.getFunction(ExpressionOperation.SPARQL_STR, term);
 		} 
 		else if (expr instanceof Datatype) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, term);
+			return ofac.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
 		} 
 		else if (expr instanceof IsBNode) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, term);
-		} 
-		
+			return ofac.getFunction(ExpressionOperation.IS_BLANK, term);
+		} 	
 		else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
 			if (arg instanceof Var) 
-				return ofac.getFunction(OBDAVocabulary.SPARQL_LANG, term);
+				return ofac.getFunction(ExpressionOperation.SPARQL_LANG, term);
 			else
 				throw new RuntimeException("A variable or a value is expected in " + expr);
 		}
@@ -913,22 +912,22 @@ public class SparqlAlgebraToDatalogTranslator {
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 	
-	private static final ImmutableMap<Compare.CompareOp, BooleanOperationPredicate> relationalOperations = 
-			new ImmutableMap.Builder<Compare.CompareOp, BooleanOperationPredicate>()
-				.put(Compare.CompareOp.EQ, OBDAVocabulary.EQ)
-				.put(Compare.CompareOp.GE, OBDAVocabulary.GTE)
-				.put(Compare.CompareOp.GT, OBDAVocabulary.GT)
-				.put(Compare.CompareOp.LE, OBDAVocabulary.LTE)
-				.put(Compare.CompareOp.LT, OBDAVocabulary.LT)
-				.put(Compare.CompareOp.NE, OBDAVocabulary.NEQ)
+	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> relationalOperations = 
+			new ImmutableMap.Builder<Compare.CompareOp, ExpressionOperation>()
+				.put(Compare.CompareOp.EQ, ExpressionOperation.EQ)
+				.put(Compare.CompareOp.GE, ExpressionOperation.GTE)
+				.put(Compare.CompareOp.GT, ExpressionOperation.GT)
+				.put(Compare.CompareOp.LE, ExpressionOperation.LTE)
+				.put(Compare.CompareOp.LT, ExpressionOperation.LT)
+				.put(Compare.CompareOp.NE, ExpressionOperation.NEQ)
 				.build();
 
-	private static final ImmutableMap<MathExpr.MathOp, NonBooleanOperationPredicate> numericalOperations = 
-			new ImmutableMap.Builder<MathExpr.MathOp, NonBooleanOperationPredicate>()
-			.put(MathExpr.MathOp.PLUS, OBDAVocabulary.ADD)
-			.put(MathExpr.MathOp.MINUS, OBDAVocabulary.SUBTRACT)
-			.put(MathExpr.MathOp.MULTIPLY, OBDAVocabulary.MULTIPLY)
-			.put(MathExpr.MathOp.DIVIDE, OBDAVocabulary.DIVIDE)
+	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> numericalOperations = 
+			new ImmutableMap.Builder<MathExpr.MathOp, ExpressionOperation>()
+			.put(MathExpr.MathOp.PLUS, ExpressionOperation.ADD)
+			.put(MathExpr.MathOp.MINUS, ExpressionOperation.SUBTRACT)
+			.put(MathExpr.MathOp.MULTIPLY, ExpressionOperation.MULTIPLY)
+			.put(MathExpr.MathOp.DIVIDE, ExpressionOperation.DIVIDE)
 			.build();
 			
 	
@@ -950,14 +949,14 @@ public class SparqlAlgebraToDatalogTranslator {
 			Regex reg = (Regex) expr;
 			ValueExpr flags = reg.getFlagsArg();
 			Term term3 = (flags != null) ? getExpression(flags) : OBDAVocabulary.NULL;
-			return ofac.getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
+			return ofac.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
 		}
 		else if (expr instanceof Compare) {
-			BooleanOperationPredicate p = relationalOperations.get(((Compare) expr).getOperator());
+			ExpressionOperation p = relationalOperations.get(((Compare) expr).getOperator());
 			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof MathExpr) {
-			NonBooleanOperationPredicate p = numericalOperations.get(((MathExpr)expr).getOperator());
+			ExpressionOperation p = numericalOperations.get(((MathExpr)expr).getOperator());
 			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof LangMatches) {

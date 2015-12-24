@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
@@ -135,13 +136,9 @@ public class DatalogToSparqlTranslator {
 			final Term object = (isClass(function) ? getPredicate(function) : getObject(function));
 
 			// Check the function symbols
-			if (function.isNonBooleanFunction()) {
-				final String expressionGraph = printTripleGraph(toSparql(subject), getArithmeticSymbol(functionSymbol), toSparql(object));
-				sb.append(enclosedBrackets(expressionGraph));
-			} 
-			else if (function.isBooleanFunction()) {
+			if (function.isOperation()) {
 				final String expressionGraph = printTripleGraph(toSparql(subject), getBooleanSymbol(functionSymbol), toSparql(object));
-				if (functionSymbol.equals(OBDAVocabulary.AND) || functionSymbol.equals(OBDAVocabulary.OR)) {
+				if (functionSymbol == ExpressionOperation.AND || functionSymbol == ExpressionOperation.OR) {
 					sb.append(enclosedBrackets(expressionGraph));
 				} else {
 					sb.append(expressionGraph);
@@ -167,39 +164,31 @@ public class DatalogToSparqlTranslator {
 	}
 
 	/**
-	 * Returns the arithmetic symbols for binary operations given its function symbol.
-	 */
-	private String getArithmeticSymbol(Predicate functionSymbol) {
-		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
-			return SparqlKeyword.ADD;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
-			return SparqlKeyword.SUBTRACT;
-		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
-			return SparqlKeyword.MULTIPLY;
-		}
-		throw new UnknownArithmeticSymbolException(functionSymbol.getName());
-	}
-
-	/**
 	 * Returns the boolean symbols for binary operations given its function symbol.
 	 */
 	private String getBooleanSymbol(Predicate functionSymbol) {
-		if (functionSymbol.equals(OBDAVocabulary.AND)) {
+		if (functionSymbol == ExpressionOperation.AND) {
 			return SparqlKeyword.AND;
-		} else if (functionSymbol.equals(OBDAVocabulary.OR)) {
+		} else if (functionSymbol == ExpressionOperation.OR) {
 			return SparqlKeyword.OR;
-		} else if (functionSymbol.equals(OBDAVocabulary.EQ)) {
+		} else if (functionSymbol == ExpressionOperation.EQ) {
 			return SparqlKeyword.EQUALS;
-		} else if (functionSymbol.equals(OBDAVocabulary.NEQ)) {
+		} else if (functionSymbol == ExpressionOperation.NEQ) {
 			return SparqlKeyword.NOT_EQUALS;
-		} else if (functionSymbol.equals(OBDAVocabulary.GT)) {
+		} else if (functionSymbol == ExpressionOperation.GT) {
 			return SparqlKeyword.GREATER_THAN;
-		} else if (functionSymbol.equals(OBDAVocabulary.GTE)) {
+		} else if (functionSymbol == ExpressionOperation.GTE) {
 			return SparqlKeyword.GREATER_THAN_AND_EQUALS;
-		} else if (functionSymbol.equals(OBDAVocabulary.LT)) {
+		} else if (functionSymbol == ExpressionOperation.LT) {
 			return SparqlKeyword.LESS_THAN;
-		} else if (functionSymbol.equals(OBDAVocabulary.LTE)) {
+		} else if (functionSymbol == ExpressionOperation.LTE) {
 			return SparqlKeyword.LESS_THAN_AND_EQUALS;
+		} else if (functionSymbol == ExpressionOperation.ADD) {
+			return SparqlKeyword.ADD;
+		} else if (functionSymbol == ExpressionOperation.SUBTRACT) {
+			return SparqlKeyword.SUBTRACT;
+		} else if (functionSymbol == ExpressionOperation.MULTIPLY) {
+			return SparqlKeyword.MULTIPLY;
 		}
 		throw new UnknownBooleanSymbolException(functionSymbol.getName());
 	}
@@ -291,7 +280,7 @@ public class DatalogToSparqlTranslator {
 		for (Function graph : queryBody) {
 			if (graph.isAlgebraFunction()) {
 				printJoinExpression(graph, datalog, sb, indentLevel);
-			} else if (graph.isBooleanFunction()) {
+			} else if (graph.isOperation()) {
 				printBooleanFilter(graph, sb, indentLevel);
 			} else {
 				printGraph(graph, datalog, sb, indentLevel);
