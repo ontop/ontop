@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import it.unibz.krdb.obda.parser.EncodeForURI;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -543,7 +544,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				result = ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 			} 
 			else {
-				String subject_URI = decodeURIEscapeCodes(s.stringValue());
+				String subject_URI = EncodeForURI.decodeURIEscapeCodes(s.stringValue());
 				result = uriTemplateMatcher.generateURIFunction(subject_URI);
 			}
 		}
@@ -551,99 +552,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		return result;
 	}
 	
-	/***
-	 * Given a string representing a URI, this method will return a new String 
-	 * in which all percent encoded characters (e.g., %20) will
-	 * be restored to their original characters (e.g., ' '). 
-	 * This is necessary to transform some URIs into the original database values.
-	 * 
-	 * @param encodedURI
-	 * @return
-	 */
-	
-	private String decodeURIEscapeCodes(String encodedURI) {
-		int length = encodedURI.length();
-		StringBuilder strBuilder = new StringBuilder(length+20);
-		
-		char[] codeBuffer = new char[3];
-		
-		for (int ci = 0; ci < length; ci++) {
-			char c = encodedURI.charAt(ci);
-
-			if (c != '%') {
-				// base case, the character is a normal character, just
-				// append
-				strBuilder.append(c);
-				continue;
-			}
-
-			/*
-			 * found a escape, processing the code and replacing it by
-			 * the original value that should be found on the DB. This
-			 * should not be used all the time, only when working in
-			 * virtual mode... we need to fix this with a FLAG.
-			 */
-
-			// First we get the 2 chars next to %
-			codeBuffer[0] = '%';
-			codeBuffer[1] = encodedURI.charAt(ci + 1);
-			codeBuffer[2] = encodedURI.charAt(ci + 2);
-
-			// now we check if they match any of our escape codes, if
-			// they do the char to be inserted is put in codeBuffer
-			// otherwise
-			String code = String.copyValueOf(codeBuffer);
-			if (code.equals("%20")) {
-				strBuilder.append(' ');
-			} else if (code.equals("%21")) {
-				strBuilder.append('!');
-			} else if (code.equals("%40")) {
-				strBuilder.append('@');
-			} else if (code.equals("%23")) {
-				strBuilder.append('#');
-			} else if (code.equals("%24")) {
-				strBuilder.append('$');
-			} else if (code.equals("%26")) {
-				strBuilder.append('&');
-			} else if (code.equals("%42")) {
-				strBuilder.append('*');
-			} else if (code.equals("%28")) {
-				strBuilder.append('(');
-			} else if (code.equals("%29")) {
-				strBuilder.append(')');
-			} else if (code.equals("%5B")) {
-				strBuilder.append('[');
-			} else if (code.equals("%5C")) {
-				strBuilder.append(']');
-			} else if (code.equals("%2C")) {
-				strBuilder.append(',');
-			} else if (code.equals("%3B")) {
-				strBuilder.append(';');
-			} else if (code.equals("%3A")) {
-				strBuilder.append(':');
-			} else if (code.equals("%3F")) {
-				strBuilder.append('?');
-			} else if (code.equals("%3D")) {
-				strBuilder.append('=');
-			} else if (code.equals("%2B")) {
-				strBuilder.append('+');
-			} else if (code.equals("%22")) {
-				strBuilder.append("''");
-			} else if (code.equals("%2F")) {
-				strBuilder.append('/');
-			} else {
-				// This was not an escape code, so we just append the
-				// characters and continue;
-				log.warn("Error decoding an encoded URI from the query. Problematic code: {}", code);
-				log.warn("Problematic URI: {}", encodedURI);
-				strBuilder.append(codeBuffer);
-			}
-			ci += 2;
-
-		}
-		return strBuilder.toString();
-
-	}
 	
 
 

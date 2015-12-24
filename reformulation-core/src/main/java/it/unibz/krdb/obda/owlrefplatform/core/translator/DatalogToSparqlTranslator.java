@@ -71,6 +71,36 @@ public class DatalogToSparqlTranslator {
 		this.prefixManager = prefixManager;
 	}
 
+	
+	private static final String PREFIX = "PREFIX";
+	private static final String SELECT = "SELECT";
+	private static final String DISTINCT = "DISTINCT";
+	private static final String FROM = "FROM";
+	private static final String WHERE = "WHERE";
+	private static final String FILTER = "FILTER";
+	private static final String UNION = "UNION";
+	private static final String OPTIONAL = "OPTIONAL";
+	private static final String LIMIT = "LIMIT";
+	private static final String OFFSET = "OFFSET";
+	private static final String ORDER_BY = "ORDER BY";
+	private static final String ASCENDING = "ASC";
+	private static final String DESCENDING = "DESC";
+	
+	// Operator
+	private static final String AND = "&&";
+	private static final String OR = "||";
+	private static final String EQUALS = "=";
+	private static final String NOT_EQUALS = "!=";
+	private static final String GREATER_THAN = ">";
+	private static final String GREATER_THAN_AND_EQUALS = ">=";
+	private static final String LESS_THAN = "<";
+	private static final String LESS_THAN_AND_EQUALS = "<=";
+	private static final String ADD = "+";
+	private static final String SUBTRACT = "-";
+	private static final String MULTIPLY = "*";
+
+	
+	
 	/**
 	 * Produces SPARQL string given a valid datalog program.
 	 */
@@ -168,27 +198,27 @@ public class DatalogToSparqlTranslator {
 	 */
 	private String getBooleanSymbol(Predicate functionSymbol) {
 		if (functionSymbol == ExpressionOperation.AND) {
-			return SparqlKeyword.AND;
+			return AND;
 		} else if (functionSymbol == ExpressionOperation.OR) {
-			return SparqlKeyword.OR;
+			return OR;
 		} else if (functionSymbol == ExpressionOperation.EQ) {
-			return SparqlKeyword.EQUALS;
+			return EQUALS;
 		} else if (functionSymbol == ExpressionOperation.NEQ) {
-			return SparqlKeyword.NOT_EQUALS;
+			return NOT_EQUALS;
 		} else if (functionSymbol == ExpressionOperation.GT) {
-			return SparqlKeyword.GREATER_THAN;
+			return GREATER_THAN;
 		} else if (functionSymbol == ExpressionOperation.GTE) {
-			return SparqlKeyword.GREATER_THAN_AND_EQUALS;
+			return GREATER_THAN_AND_EQUALS;
 		} else if (functionSymbol == ExpressionOperation.LT) {
-			return SparqlKeyword.LESS_THAN;
+			return LESS_THAN;
 		} else if (functionSymbol == ExpressionOperation.LTE) {
-			return SparqlKeyword.LESS_THAN_AND_EQUALS;
+			return LESS_THAN_AND_EQUALS;
 		} else if (functionSymbol == ExpressionOperation.ADD) {
-			return SparqlKeyword.ADD;
+			return ADD;
 		} else if (functionSymbol == ExpressionOperation.SUBTRACT) {
-			return SparqlKeyword.SUBTRACT;
+			return SUBTRACT;
 		} else if (functionSymbol == ExpressionOperation.MULTIPLY) {
-			return SparqlKeyword.MULTIPLY;
+			return MULTIPLY;
 		}
 		throw new UnknownBooleanSymbolException(functionSymbol.getName());
 	}
@@ -242,7 +272,7 @@ public class DatalogToSparqlTranslator {
 	private void printPrefixDeclaration(StringBuilder sb) {
 		for (String prefix : prefixManager.getPrefixMap().keySet()) {
 			String iri = prefixManager.getURIDefinition(prefix);
-			sb.append(SparqlKeyword.PREFIX + " " + prefix);
+			sb.append(PREFIX + " " + prefix);
 			sb.append("\t");
 			sb.append("<" + iri + ">");
 			sb.append("\n");
@@ -250,9 +280,9 @@ public class DatalogToSparqlTranslator {
 	}
 
 	private void printQueryProjection(DatalogProgram datalog, StringBuilder sb) {
-		sb.append(SparqlKeyword.SELECT + " ");
+		sb.append(SELECT + " ");
 		if (queryModifiers.isDistinct()) {
-			sb.append(SparqlKeyword.DISTINCT + " ");
+			sb.append(DISTINCT + " ");
 		}
 		CQIE mainQuery = datalog.getRules().get(0);  // assume the first rule contains the projection
 		for (Term term : mainQuery.getHead().getTerms()) {
@@ -263,7 +293,7 @@ public class DatalogToSparqlTranslator {
 	}
 
 	private void printQueryBody(DatalogProgram datalog, StringBuilder sb) {
-		sb.append(SparqlKeyword.WHERE + " {");
+		sb.append(WHERE + " {");
 		sb.append("\n");
 		List<CQIE> mainQueries = getMainQueries(datalog);
 		
@@ -297,7 +327,7 @@ public class DatalogToSparqlTranslator {
 		else if (joinPredicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
-			sb.append(SparqlKeyword.OPTIONAL + " {\n");
+			sb.append(OPTIONAL + " {\n");
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel+1);
 			sb.append(indent(indentLevel));
 			sb.append("}");
@@ -328,7 +358,7 @@ public class DatalogToSparqlTranslator {
 
 	private void printBooleanFilter(Function graph, StringBuilder sb, int indentLevel) {
 		sb.append(indent(indentLevel));
-		sb.append(SparqlKeyword.FILTER + " ");
+		sb.append(FILTER + " ");
 		sb.append("( ");
 		sb.append(toSparql(graph));
 		sb.append(" ) .");
@@ -339,7 +369,7 @@ public class DatalogToSparqlTranslator {
 		boolean needUnion = false;
 		for (CQIE query : queries) {
 			if (needUnion) {
-				sb.append(indent(indentLevel) + SparqlKeyword.UNION);
+				sb.append(indent(indentLevel) + UNION);
 				sb.append("\n");
 			}
 			sb.append(indent(1) + "{");
@@ -357,20 +387,20 @@ public class DatalogToSparqlTranslator {
 	private void printQueryModifier(DatalogProgram datalog, StringBuilder sb) {
 		sb.append("\n");
 		if (queryModifiers.hasLimit()) {
-			sb.append(SparqlKeyword.LIMIT + " " + queryModifiers.getLimit());
+			sb.append(LIMIT + " " + queryModifiers.getLimit());
 			sb.append("\n");
 		}
 		if (queryModifiers.hasOffset()) {
-			sb.append(SparqlKeyword.OFFSET + " " + queryModifiers.getOffset());
+			sb.append(OFFSET + " " + queryModifiers.getOffset());
 			sb.append("\n");
 		}
 		if (queryModifiers.hasOrder()) {
-			sb.append(SparqlKeyword.ORDER_BY + " ");
+			sb.append(ORDER_BY + " ");
 			for (OrderCondition condition : queryModifiers.getSortConditions()) {
 				String var = toSparql(condition.getVariable());
 				switch (condition.getDirection()) {
-					case OrderCondition.ORDER_ASCENDING: sb.append(SparqlKeyword.ASCENDING + " (" + var + ")"); break;
-					case OrderCondition.ORDER_DESCENDING: sb.append(SparqlKeyword.DESCENDING + " (" + var + ")"); break;
+					case OrderCondition.ORDER_ASCENDING: sb.append(ASCENDING + " (" + var + ")"); break;
+					case OrderCondition.ORDER_DESCENDING: sb.append(DESCENDING + " (" + var + ")"); break;
 					default: sb.append(var);
 				}
 				sb.append(" ");

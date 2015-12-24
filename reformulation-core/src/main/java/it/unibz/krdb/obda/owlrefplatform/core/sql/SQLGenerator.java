@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import it.unibz.krdb.obda.parser.EncodeForURI;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.QualifiedAttributeID;
@@ -49,6 +50,7 @@ import com.google.common.collect.ImmutableMap;
 
 import java.sql.Types;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 
@@ -145,27 +147,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 		operations = builder.build();
 		
         if (sqlGenerateReplace) {
-            replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-                    "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
-            replace2 = ",' ', '%20')," +
-                    "'!', '%21')," +
-                    "'@', '%40')," +
-                    "'#', '%23')," +
-                    "'$', '%24')," +
-                    "'&', '%26')," +
-                    "'*', '%42'), " +
-                    "'(', '%28'), " +
-                    "')', '%29'), " +
-                    "'[', '%5B'), " +
-                    "']', '%5D'), " +
-                    "',', '%2C'), " +
-                    "';', '%3B'), " +
-                    "':', '%3A'), " +
-                    "'?', '%3F'), " +
-                    "'=', '%3D'), " +
-                    "'+', '%2B'), " +
-                    "'''', '%22'), " +
-                    "'/', '%2F')";
+        	StringBuilder sb1 = new StringBuilder();
+        	StringBuilder sb2 = new StringBuilder();
+        	for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+        		sb1.append("REPLACE(");
+        		sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
+        	}
+        	replace1 = sb1.toString();
+        	replace2 = sb2.toString();
         } 
         else {
             replace1 = replace2 = "";
