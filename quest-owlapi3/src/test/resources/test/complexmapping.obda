@@ -1,0 +1,55 @@
+[PrefixDeclaration]
+:		http://it.unibz.krdb/obda/test/simple#
+quest:		http://obda.org/quest#
+
+[SourceDeclaration]
+sourceUri	h2
+connectionUrl	jdbc:h2:mem:questjunitdb
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{u} :U {val} .
+source	SELECT REPLACE(uri, ' ', '%20') AS u, val FROM TABLE1
+
+mappingId	mapping2
+target	:{uri} :U2 {valcat} .
+source	SELECT uri, 'NO ' || val as valcat FROM TABLE1
+
+mappingId	mapping3
+target	:{uri} :U3 {valcat} .
+source	SELECT uri, val || 'to' as valcat FROM TABLE1
+
+mappingId	mapping4
+target	:{uri} :U4 {r1} .
+source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
+
+mappingId	mapping5
+target	:{uri} :U5 {valcat}^^xsd:string .
+source	SELECT uri, CONCAT(val,'test') as valcat FROM TABLE1
+
+mappingId	mapping6
+target	:{uri} :U6 {valcat} .
+source	SELECT uri, CONCAT(val,'te', 'st') as valcat FROM TABLE1
+
+mappingId	mapping7
+target	:{uri} :U7 {valcat} .
+source	SELECT uri, val || 'to' || uri as valcat FROM TABLE1
+
+mappingId	mapping8
+target	:{uri} :U8 {valcat} .
+source	SELECT uri, CONCAT(CONCAT(val,'te'), 'st') as valcat FROM TABLE1
+
+mappingId	mapping9
+target	:{u} :U9 {val}^^xsd:string .
+source	SELECT REPLACE(CONCAT(uri,'se'), 'se', '') as u,  val FROM TABLE1
+
+
+
+
+
+
+]]
+

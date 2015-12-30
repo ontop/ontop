@@ -1,0 +1,44 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/smallDatabase#
+
+[SourceDeclaration]
+sourceUri	SmallDataset
+connectionUrl	jdbc:h2:mem:questjunitdb
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mappingAddress
+target		:address-{id} a :Address ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} . 
+source		select id, street, number, city from address
+
+mappingId	mappingCompanies
+target		:company-{id} a :Company ; :companyName {name} . 
+source		select id, name from company
+
+mappingId	mappingCompanyAddress
+target		:company-{id} :hasSupplier :address-{addressid} . 
+source		select id, addressid from company
+
+mappingId	mappingClient
+target		:person-{id} a :Client ; :firstName {name} . 
+source		select id, name from client
+
+mappingId	mappingMan
+target		:person-{id} a :Man . 
+source		select id, name, sex from client where sex='M'
+
+mappingId	mappingWoman
+target		:person-{id} a :Woman . 
+source		select id, name, sex from client where sex='F'
+
+mappingId	mappingBigCompanies
+target		:company-{id} a :BigBusiness . 
+source		select id, marketshares from company where marketshares > 200000
+
+mappingId	mappingSmallCompanies
+target		:company-{id} a :SmallBusiness . 
+source		select id, marketshares from company where marketshares < 200000
+]]
+

@@ -34,18 +34,10 @@ public class OntopOWLException extends OWLException {
 	private static final long serialVersionUID = -3822597596242502263L;
 
 	/**
-	 * 
-	 */
-	public OntopOWLException() {
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
 	 * @param message
 	 */
 	public OntopOWLException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -53,16 +45,5 @@ public class OntopOWLException extends OWLException {
 	 */
 	public OntopOWLException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
-
-	/**
-	 * @param message
-	 * @param cause
-	 */
-	public OntopOWLException(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
-
 }

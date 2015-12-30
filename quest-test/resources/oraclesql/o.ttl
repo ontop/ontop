@@ -1,0 +1,86 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+
+_:node18t35m3o7x8 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-{country_name}" ;
+	a rr:SubjectMap .
+
+_:node18t35m3o7x9 rr:logicalTable _:node18t35m3o7x7 ;
+	a rr:TriplesMap .
+
+_:node18t35m3o7x8 rr:termType rr:IRI .
+
+_:node18t35m3o7x7 a rr:R2RMLView .
+
+_:node18t35m3o7x8 a rr:TermMap ;
+	rr:class <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country> .
+
+_:node18t35m3o7x7 rr:sqlQuery "select country_name FROM hr.countries" .
+
+_:node18t35m3o7x9 rr:subjectMap _:node18t35m3o7x8 .
+
+_:node18t35m3o7x11 a rr:TermMap .
+
+_:node18t35m3o7x12 rr:logicalTable _:node18t35m3o7x10 ;
+	rr:subjectMap _:node18t35m3o7x11 .
+
+_:node18t35m3o7x11 rr:termType rr:IRI ;
+	a rr:SubjectMap .
+
+_:node18t35m3o7x10 a rr:R2RMLView .
+
+_:node18t35m3o7x11 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-{COL}" .
+
+_:node18t35m3o7x10 rr:sqlQuery "select country_name COL FROM HR.countries" .
+
+_:node18t35m3o7x12 a rr:TriplesMap .
+
+_:node18t35m3o7x11 rr:class <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2> .
+
+_:node18t35m3o7x14 rr:termType rr:IRI ;
+	a rr:TermMap .
+
+_:node18t35m3o7x15 rr:logicalTable _:node18t35m3o7x13 .
+
+_:node18t35m3o7x14 a rr:SubjectMap ;
+	rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-{COL}" .
+
+_:node18t35m3o7x15 rr:subjectMap _:node18t35m3o7x14 .
+
+_:node18t35m3o7x14 rr:class <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3> .
+
+_:node18t35m3o7x13 a rr:R2RMLView ;
+	rr:sqlQuery "select 'Country Name' COL FROM dual" .
+
+_:node18t35m3o7x15 a rr:TriplesMap .
+
+_:node18t35m3o7x17 a rr:TermMap .
+
+_:node18t35m3o7x16 rr:sqlQuery "select To_Char(country_name) \"col\" FROM HR.countries" .
+
+_:node18t35m3o7x17 rr:class <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4> .
+
+_:node18t35m3o7x18 rr:subjectMap _:node18t35m3o7x17 .
+
+_:node18t35m3o7x17 rr:termType rr:IRI ;
+	rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-{col}" ;
+	a rr:SubjectMap .
+
+_:node18t35m3o7x18 rr:logicalTable _:node18t35m3o7x16 ;
+	a rr:TriplesMap .
+
+_:node18t35m3o7x16 a rr:R2RMLView .
+
+_:node18t35m3o7x21 a rr:TriplesMap .
+
+_:node18t35m3o7x20 rr:class <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5> ;
+	rr:termType rr:IRI .
+
+_:node18t35m3o7x21 rr:logicalTable _:node18t35m3o7x19 ;
+	rr:subjectMap _:node18t35m3o7x20 .
+
+_:node18t35m3o7x20 a rr:SubjectMap .
+
+_:node18t35m3o7x19 a rr:R2RMLView ;
+	rr:sqlQuery "select To_Char(country_name) col FROM HR.countries" .
+
+_:node18t35m3o7x20 rr:template "http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-{COL}" ;
+	a rr:TermMap .

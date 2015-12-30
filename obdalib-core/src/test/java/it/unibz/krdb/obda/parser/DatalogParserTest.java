@@ -24,10 +24,10 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.List;
 
@@ -140,7 +140,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName().toString();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -151,15 +151,15 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
@@ -169,7 +169,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -180,12 +180,12 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -196,9 +196,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 	}
 
 	/**
@@ -221,7 +221,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -232,15 +232,15 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
@@ -250,7 +250,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -261,12 +261,12 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -277,9 +277,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 	}
 
 	/**
@@ -302,7 +302,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -313,15 +313,15 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
@@ -331,7 +331,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -342,9 +342,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
@@ -353,7 +353,7 @@ public class DatalogParserTest extends TestCase {
 				((ValueConstantImpl)term).getValue(), "Person");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/r");
 
@@ -376,9 +376,9 @@ public class DatalogParserTest extends TestCase {
 
 		Term objVarTerm = objVarTerms.get(0);
 		assertTrue("Mismatch term type!",
-				objVarTerm instanceof VariableImpl);
+				objVarTerm instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)objVarTerm).getName(), "y");
+				((Variable)objVarTerm).getName(), "y");
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("Mismatch term type!",
@@ -417,7 +417,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -428,9 +428,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
@@ -440,7 +440,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -451,9 +451,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
@@ -468,7 +468,7 @@ public class DatalogParserTest extends TestCase {
 	    head = rules.get(1).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#r");
 
@@ -479,9 +479,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
@@ -491,7 +491,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/s");
 
@@ -502,9 +502,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
@@ -520,7 +520,7 @@ public class DatalogParserTest extends TestCase {
 	    head = rules.get(2).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#t");
 
@@ -531,9 +531,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "z");
+				((Variable)term).getName(), "z");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
@@ -543,7 +543,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/u");
 
@@ -554,9 +554,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "z");
+				((Variable)term).getName(), "z");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
@@ -604,7 +604,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -615,9 +615,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
@@ -627,7 +627,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -638,9 +638,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
@@ -735,7 +735,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -746,9 +746,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 	}
 
 	/**
@@ -771,7 +771,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -782,9 +782,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
@@ -812,10 +812,10 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
-		assertEquals(2, head.getPredicate().getArity());
+		assertEquals(2, head.getFunctionSymbol().getArity());
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
@@ -824,15 +824,15 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
@@ -842,7 +842,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -853,12 +853,12 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -869,9 +869,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 	}
 
 	/**
@@ -894,7 +894,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -905,15 +905,15 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
@@ -923,7 +923,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -934,12 +934,12 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -950,9 +950,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 	}
 
 	/**
@@ -975,7 +975,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -992,7 +992,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -1003,12 +1003,12 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -1019,9 +1019,9 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 	}
 
 	/**
@@ -1044,7 +1044,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -1055,15 +1055,15 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((Variable)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
@@ -1073,7 +1073,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -1084,12 +1084,12 @@ public class DatalogParserTest extends TestCase {
 
 		term = terms.get(0);
 		assertTrue("Mismatch term type!",
-				term instanceof VariableImpl);
+				term instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((Variable)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -1112,9 +1112,9 @@ public class DatalogParserTest extends TestCase {
 
 		Term objVarTerm = objVarTerms.get(0);
 		assertTrue("Mismatch term type!",
-				objVarTerm instanceof VariableImpl);
+				objVarTerm instanceof Variable);
 		assertEquals("Mismatch variable name!",
-				((VariableImpl)objVarTerm).getName(), "y");
+				((Variable)objVarTerm).getName(), "y");
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("Mismatch term type!",

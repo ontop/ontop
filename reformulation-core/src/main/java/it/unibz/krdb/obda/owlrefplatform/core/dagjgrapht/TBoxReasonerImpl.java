@@ -21,73 +21,100 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.BinaryAxiom;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
- * Allows to reason over the TBox using  DAG or graph
+ * TBoxReasonerImpl
+ * 
+ *    a DAG-based TBox reasoner
+ *    
+ * @author Roman Kontchakov
  * 
  */
 
 public class TBoxReasonerImpl implements TBoxReasoner {
 
-	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
-	
-	private final DefaultDirectedGraph<Property,DefaultEdge> propertyGraph; // test only
-	private final DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph; // test only
+	private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAGImpl<ClassExpression> classDAG;
+	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
 
-	private final EquivalencesDAGImpl<Property> propertyDAG;
-	private final EquivalencesDAGImpl<BasicClassDescription> classDAG;
-	
-	
-	public TBoxReasonerImpl(Ontology onto) {
-		propertyGraph = OntologyGraph.getPropertyGraph(onto);
-		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
-		
-		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
-		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
+	/**
+	 * constructs a TBox reasoner from an ontology
+	 * @param onto: ontology
+	 */
 
-		choosePropertyRepresentatives(propertyDAG);
-		chooseClassRepresentatives(classDAG, propertyDAG);
+	public static TBoxReasoner create(Ontology onto) {
+		return create(onto, false);
 	}
-
-	private TBoxReasonerImpl(DefaultDirectedGraph<Property,DefaultEdge> propertyGraph, 
-					DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph) {
-		this.propertyGraph = propertyGraph;
-		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
-		
-		this.classGraph = classGraph;
-		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
-
-		choosePropertyRepresentatives(propertyDAG);
-		chooseClassRepresentatives(classDAG, propertyDAG);
-	}
-
 	
+	public static TBoxReasoner create(Ontology onto, boolean equivalenceReduced) {
+		final DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph = 
+				getObjectPropertyGraph(onto);
+		final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = 
+				EquivalencesDAGImpl.getEquivalencesDAG(objectPropertyGraph);
+		
+		final DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> dataPropertyGraph = 
+				getDataPropertyGraph(onto);
+		final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = 
+				EquivalencesDAGImpl.getEquivalencesDAG(dataPropertyGraph);	
+		
+		final EquivalencesDAGImpl<ClassExpression> classDAG = 
+				 EquivalencesDAGImpl.getEquivalencesDAG(getClassGraph(onto, objectPropertyGraph, dataPropertyGraph));
+		
+		final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG = 
+				 EquivalencesDAGImpl.getEquivalencesDAG(getDataRangeGraph(onto, dataPropertyGraph));
 
-
+		chooseObjectPropertyRepresentatives(objectPropertyDAG);
+		chooseDataPropertyRepresentatives(dataPropertyDAG);
+		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
+		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
+		
+		TBoxReasonerImpl r = new TBoxReasonerImpl(classDAG, dataRangeDAG, objectPropertyDAG, dataPropertyDAG);
+		if (equivalenceReduced) {
+			r = getEquivalenceSimplifiedReasoner(r);
+		}
+		return r;
+	}
+	
+	/**
+	 * constructs from DAGs
+	 * @param classDAG
+	 * @param propertyDAG
+	 */
+	private TBoxReasonerImpl(EquivalencesDAGImpl<ClassExpression> classDAG,
+						EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG,
+						EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG, 
+						EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG) {
+		this.objectPropertyDAG = objectPropertyDAG;		
+		this.dataPropertyDAG = dataPropertyDAG;		
+		this.classDAG = classDAG;
+		this.dataRangeDAG = dataRangeDAG;
+	}
+	
 	@Override
 	public String toString() {
-		return propertyDAG.toString() + "\n" + classDAG.toString();
+		return objectPropertyDAG.toString() + "\n" + dataPropertyDAG.toString() + "\n" + classDAG.toString();
 	}
 	
 	
@@ -101,18 +128,40 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	@Override
-	public EquivalencesDAG<BasicClassDescription> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
 	}
 
 	/**
-	 * Return the DAG of properties
+	 * Return the DAG of datatypes and data property ranges
 	 * 
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<Property> getProperties() {
-		return propertyDAG;
+
+	@Override
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
+		return dataRangeDAG;
+	}
+	
+	/**
+	 * Return the DAG of object properties
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
+		return objectPropertyDAG;
+	}
+	
+	/**
+	 * Return the DAG of data properties
+	 * 
+	 * @return DAG 
+	 */
+	
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
+		return dataPropertyDAG;
 	}
 	
 	
@@ -122,23 +171,32 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	
 	@Deprecated // test only
-	public DefaultDirectedGraph<BasicClassDescription,DefaultEdge> getClassGraph() {
-		return classGraph;
+	public DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph() {
+		return classDAG.getGraph();
+	}
+	@Deprecated // test only
+	public DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph() {
+		return dataRangeDAG.getGraph();
 	}
 	
 	@Deprecated // test only
-	public DefaultDirectedGraph<Property,DefaultEdge> getPropertyGraph() {
-		return propertyGraph;
+	public DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph() {
+		return objectPropertyDAG.getGraph();
 	}
+	@Deprecated // test only
+	public DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph() {
+		return dataPropertyDAG.getGraph();
+	}
+	
 	
 	@Deprecated // test only
 	public int edgeSetSize() {
-		return propertyDAG.edgeSetSize() + classDAG.edgeSetSize();
+		return objectPropertyDAG.edgeSetSize() + dataPropertyDAG.edgeSetSize() + classDAG.edgeSetSize();
 	}
 	
 	@Deprecated // test only
 	public int vertexSetSize() {
-		return propertyDAG.vertexSet().size() + classDAG.vertexSet().size();
+		return objectPropertyDAG.vertexSetSize() + dataPropertyDAG.vertexSetSize() +  classDAG.vertexSetSize();
 	}
 	
 	
@@ -146,10 +204,19 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	
 	// lexicographical comparison of property names (a property is before its inverse) 
-	private static final Comparator<Property> propertyComparator = new Comparator<Property>() {
+	private static final Comparator<DataPropertyExpression> dataPropertyComparator = new Comparator<DataPropertyExpression>() {
 		@Override
-		public int compare(Property o1, Property o2) {
-			int compared = o1.getPredicate().getName().compareTo(o2.getPredicate().getName()); 
+		public int compare(DataPropertyExpression o1, DataPropertyExpression o2) {
+			int compared = o1.getName().compareTo(o2.getName()); 
+			return compared;
+		}
+	}; 
+
+	// lexicographical comparison of property names (a property is before its inverse) 
+	private static final Comparator<ObjectPropertyExpression> objectPropertyComparator = new Comparator<ObjectPropertyExpression>() {
+		@Override
+		public int compare(ObjectPropertyExpression o1, ObjectPropertyExpression o2) {
+			int compared = o1.getName().compareTo(o2.getName()); 
 			if (compared == 0) {
 				if (o1.isInverse() == o2.isInverse())
 					return 0;
@@ -163,23 +230,22 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}; 
 	
 
-	public static void choosePropertyRepresentatives(EquivalencesDAGImpl<Property> dag) {
+	private static void chooseObjectPropertyRepresentatives(EquivalencesDAGImpl<ObjectPropertyExpression> dag) {
 		
-		
-		for (Equivalences<Property> set : dag.vertexSet()) {
+		for (Equivalences<ObjectPropertyExpression> set : dag) {
 			
-			// ski if has already been done 
+			// skip if has already been done 
 			if (set.getRepresentative() != null)
 				continue;
 				
-			Property rep = Collections.min(set.getMembers(), propertyComparator);	
-			Property repInv = fac.createProperty(rep.getPredicate(), !rep.isInverse());
+			ObjectPropertyExpression rep = Collections.min(set.getMembers(), objectPropertyComparator);	
+			ObjectPropertyExpression repInv = rep.getInverse();
 			
-			Equivalences<Property> setInv = dag.getVertex(repInv);
+			Equivalences<ObjectPropertyExpression> setInv = dag.getVertex(repInv);
 			
 			if (rep.isInverse()) {
-				repInv = Collections.min(setInv.getMembers(), propertyComparator);	
-				rep = fac.createProperty(repInv.getPredicate(), !repInv.isInverse());	
+				repInv = Collections.min(setInv.getMembers(), objectPropertyComparator);	
+				rep = repInv.getInverse();	
 				
 				setInv.setIndexed();							
 			}
@@ -187,34 +253,28 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				set.setIndexed();
 			
 			set.setRepresentative(rep);
-			// System.out.println("SET REP: " + set);
 			if (!set.contains(repInv)) {
 				// if not symmetric 
 				// (each set either consists of symmetric properties 
 				//        or none of the properties in the set is symmetric)
 				setInv.setRepresentative(repInv);
-				//System.out.println("SET REP: " + setInv);
 			}
-		}
+		}				
+	}	
+	
+	private static void chooseDataPropertyRepresentatives(EquivalencesDAGImpl<DataPropertyExpression> dag) {
 		
-		
-		
-/*		
-		for (Equivalences<Property> equivalenceClass : dag.vertexSet()) {
-				System.out.println(" " + equivalenceClass);
-				if (equivalenceClass.getRepresentative() == null)
-					System.out.println("NULL REP FOR: " + equivalenceClass);
-				if (!equivalenceClass.isIndexed()) {
-					Property representative = equivalenceClass.getRepresentative();
-					Property inverse = fac.createProperty(representative.getPredicate(), !representative.isInverse());
-					Equivalences<Property> inverseEquivalenceSet = dag.getVertex(inverse);
-					if (!inverseEquivalenceSet.isIndexed())
-						System.out.println("NOT INDEXED: " + equivalenceClass + " AND " + inverseEquivalenceSet);
-				}
-		}
-		
-		System.out.println("RESULT: " + dag);
-*/	
+		for (Equivalences<DataPropertyExpression> set : dag) {			
+			// skip if has already been done 
+			if (set.getRepresentative() != null)
+				continue;
+				
+			DataPropertyExpression rep = Collections.min(set.getMembers(), dataPropertyComparator);	
+
+			set.setIndexed();
+			
+			set.setRepresentative(rep);
+		}				
 	}	
 	
 		
@@ -222,34 +282,53 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private static final Comparator<OClass> classComparator = new Comparator<OClass>() {
 		@Override
 		public int compare(OClass o1, OClass o2) {
+			return o1.getName().compareTo(o2.getName());
+		}
+	}; 
+	
+	// lexicographical comparison of class names 
+	private static final Comparator<Datatype> datatypeComparator = new Comparator<Datatype>() {
+		@Override
+		public int compare(Datatype o1, Datatype o2) {
 			return o1.getPredicate().getName().compareTo(o2.getPredicate().getName());
 		}
 	}; 
 	
 	
-	
-	public static void chooseClassRepresentatives(EquivalencesDAGImpl<BasicClassDescription> dag, EquivalencesDAG<Property> propertyDAG) {
+	private static void chooseClassRepresentatives(EquivalencesDAGImpl<ClassExpression> dag, 
+				EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG, 
+				EquivalencesDAG<DataPropertyExpression> dataPropertyDAG) {
 
-		for (Equivalences<BasicClassDescription> equivalenceSet : dag.vertexSet()) {
+		for (Equivalences<ClassExpression> equivalenceSet : dag) {
 
-			BasicClassDescription representative = null;			
+			ClassExpression representative = null;			
 			if (equivalenceSet.size() <= 1) {
 				representative = equivalenceSet.iterator().next();
 			}
 			else {
 				// find a named class as a representative 
 				OClass namedRepresentative = null;
-				for (BasicClassDescription e : equivalenceSet) 
+				for (ClassExpression e : equivalenceSet) 
 					if (e instanceof OClass) {
 						if (namedRepresentative == null || classComparator.compare((OClass)e, namedRepresentative) < 0)
 							namedRepresentative = (OClass)e;
 					}
 		
 				if (namedRepresentative == null) {
-					PropertySomeRestriction first = (PropertySomeRestriction)equivalenceSet.iterator().next();
-					Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
-					Property propRep = propertyDAG.getVertex(prop).getRepresentative();
-					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
+					ClassExpression first = equivalenceSet.iterator().next();
+					if (first instanceof ObjectSomeValuesFrom) {
+						ObjectSomeValuesFrom firstp = (ObjectSomeValuesFrom)first;
+						ObjectPropertyExpression prop = firstp.getProperty();
+						ObjectPropertyExpression propRep = objectPropertyDAG.getVertex(prop).getRepresentative();
+						representative = propRep.getDomain();
+					}
+					else {
+						assert (first instanceof DataSomeValuesFrom); 
+						DataSomeValuesFrom firstp = (DataSomeValuesFrom)first;
+						DataPropertyExpression prop = firstp.getProperty();
+						DataPropertyExpression propRep = dataPropertyDAG.getVertex(prop).getRepresentative();
+						representative = propRep.getDomainRestriction(DatatypeImpl.rdfsLiteral);
+					}
 				}
 				else
 					representative = namedRepresentative;
@@ -261,94 +340,298 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
+	private static void chooseDataRangeRepresentatives(EquivalencesDAGImpl<DataRangeExpression> dag, 
+			EquivalencesDAG<DataPropertyExpression> dataPropertyDAG) {
 
-//	public static TBoxReasonerImpl getChainReasoner2(Ontology onto) {
-//		
-//		return new TBoxReasonerImpl((OntologyGraph.getGraph(onto, true)));		
-//	}
+		for (Equivalences<DataRangeExpression> equivalenceSet : dag) {
+
+			DataRangeExpression representative = null;			
+			if (equivalenceSet.size() <= 1) {
+				representative = equivalenceSet.iterator().next();
+			}
+			else {
+				// find a named class as a representative 
+				Datatype namedRepresentative = null;
+				for (DataRangeExpression e : equivalenceSet) 
+					if (e instanceof Datatype) {
+						if (namedRepresentative == null || datatypeComparator.compare((Datatype)e, namedRepresentative) < 0)
+							namedRepresentative = (Datatype)e;
+					}
+		
+				if (namedRepresentative == null) {
+					DataRangeExpression first = equivalenceSet.iterator().next();
+					assert (first instanceof DataPropertyRangeExpression);
+					DataPropertyRangeExpression firstp = (DataPropertyRangeExpression)first;
+					DataPropertyExpression prop = firstp.getProperty();
+	                Equivalences<DataPropertyExpression> vertex = dataPropertyDAG.getVertex(prop);
+	                if (vertex == null){
+	                    throw new IllegalStateException("Unknown data property: " + prop);
+	                }
+	                DataPropertyExpression propRep = vertex.getRepresentative();
+					representative = propRep.getRange();
+				}
+				else
+					representative = namedRepresentative;
+			}
+
+			equivalenceSet.setRepresentative(representative);
+			if (representative instanceof OClass)
+				equivalenceSet.setIndexed();
+		}		
+	}
 	
-	/***
-	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
-	 * relation of the original DAG gets extended to the reachability relation
-	 * of T and Sigma chains.
-	 * 
-	 * 
+	/**
+	 * constructs a TBoxReasoner that has a reduced number of classes and properties in each equivalent class
+	 *  
+	 *   - each object property equivalence class contains one property (representative)
+	 *     except when the representative property is equivalent to its inverse, in which 
+	 *     case the equivalence class contains both the property and its inverse
+	 *     
+	 *   - each data property equivalence class contains a single property (representative)
+	 *   
+	 *   - each class equivalence class contains the representative and all domains / ranges 
+	 *     of the representatives of property equivalence classes
+	 *     
+	 *  in other words, the constructed TBoxReasoner is the restriction to the vocabulary of the representatives
+	 *     all other symbols are mapped to the nodes via *Equivalences hash-maps
+	 *     
+	 * @param reasoner
+	 * @return reduced reasoner
 	 */
 	
-	public static TBoxReasonerImpl getChainReasoner(Ontology onto) {
-		TBoxReasonerImpl tbox = new TBoxReasonerImpl(onto);
-		
-		
-		EquivalencesDAG<BasicClassDescription> classes = tbox.getClasses();
-		
-		// move everything to a graph that admits cycles
-		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> modifiedGraph = 
-				new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
+	
+	private static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
 
-		// clone all the vertex and edges from dag
-		for (Equivalences<BasicClassDescription> v : classes) 
-			modifiedGraph.addVertex(v.getRepresentative());
+		// OBJECT PROPERTIES
+		// 		
+		SimpleDirectedGraph<Equivalences<ObjectPropertyExpression>, DefaultEdge> objectProperties 
+					= new SimpleDirectedGraph<>(DefaultEdge.class);
+
+		// create vertices for properties 
+		for(Equivalences<ObjectPropertyExpression> node : reasoner.getObjectPropertyDAG()) {
+			ObjectPropertyExpression rep = node.getRepresentative();
+			ObjectPropertyExpression repInv = rep.getInverse();
+			
+			Equivalences<ObjectPropertyExpression> reducedNode;
+			if (!node.contains(repInv))
+				reducedNode = new Equivalences<>(ImmutableSet.of(rep), rep, node.isIndexed());
+			else
+				// the object property is equivalent to its inverse
+				reducedNode = new Equivalences<>(ImmutableSet.of(rep, repInv), rep, node.isIndexed());	
+				
+			objectProperties.addVertex(reducedNode);
+		}
 		
-		for (Equivalences<BasicClassDescription> v : classes) {
-			BasicClassDescription s = v.getRepresentative();
-			for (Equivalences<BasicClassDescription> vp : classes.getDirectSuper(v))
-				modifiedGraph.addEdge(s, vp.getRepresentative());
+		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = EquivalencesDAGImpl.reduce(
+				(EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.getObjectPropertyDAG(), objectProperties);
+
+		// DATA PROPERTIES
+		// 		
+		SimpleDirectedGraph<Equivalences<DataPropertyExpression>, DefaultEdge> dataProperties 
+					= new SimpleDirectedGraph<>(DefaultEdge.class);
+		
+		// create vertices for properties 
+		for(Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
+			DataPropertyExpression rep = node.getRepresentative();
+			
+			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<>(ImmutableSet.of(rep), rep, node.isIndexed());
+			dataProperties.addVertex(reducedNode);
+		}
+		
+		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = EquivalencesDAGImpl.reduce(
+				(EquivalencesDAGImpl<DataPropertyExpression>)reasoner.getDataPropertyDAG(), dataProperties);
+				
+		// CLASSES
+		// 
+		SimpleDirectedGraph<Equivalences<ClassExpression>, DefaultEdge> classes = new SimpleDirectedGraph<>(DefaultEdge.class);
+	
+		// create vertices for classes
+		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
+			ClassExpression rep = node.getRepresentative();
+			
+			ImmutableSet.Builder<ClassExpression> reduced = new ImmutableSet.Builder<>();	
+			for (ClassExpression equi : node) {	
+				if (equi.equals(rep)) {
+					reduced.add(equi);
+				}
+				else if (equi instanceof OClass) {
+					// an entry is created for a named class
+					//OClass equiClass = (OClass) equi;
+					//classEquivalenceMap.put(equiClass.getName(), (OClass)rep);
+				}
+				else if (equi instanceof ObjectSomeValuesFrom) {
+					// the property of the existential is a representative of its equivalence class
+					if (objectPropertyDAG.getVertex(((ObjectSomeValuesFrom) equi).getProperty()) != null)
+						reduced.add(equi);
+				}
+				else  {
+					// the property of the existential is a representative of its equivalence class
+					if (dataPropertyDAG.getVertex(((DataSomeValuesFrom) equi).getProperty()) != null)
+						reduced.add(equi);
+				}
+			}
+			
+			Equivalences<ClassExpression> reducedNode = new Equivalences<>(reduced.build(), rep, node.isIndexed());			
+			classes.addVertex(reducedNode);
+		}			
+
+		EquivalencesDAGImpl<ClassExpression> classDAG = EquivalencesDAGImpl.reduce(
+				(EquivalencesDAGImpl<ClassExpression>)reasoner.getClassDAG(), classes);
+		
+		// DATA RANGES
+		// 
+		// TODO: a proper implementation is in order here
+		
+		return new TBoxReasonerImpl(classDAG, (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(), 
+				objectPropertyDAG, dataPropertyDAG);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 *  graph representation of object property inclusions in the ontology
+	 *  
+	 *  adds inclusions between the inverses of R and S if
+	 *         R is declared a sub-property of S in the ontology
+	 * 
+	 * @param an ontology 
+	 * @return the graph of the property inclusions 
+	 */
+	
+	private static DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph(Ontology ontology) {
+		
+		DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
+				
+		for (ObjectPropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
+			if (!role.isBottom() && !role.isTop()) {
+				graph.addVertex(role);
+				graph.addVertex(role.getInverse());
+			}
+		}
+		
+		for (ObjectPropertyExpression role : ontology.getAuxiliaryObjectProperties()) {
+			graph.addVertex(role);
+			graph.addVertex(role.getInverse());
+		}
+		
+		// property inclusions
+		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
+			// adds the direct edge and the inverse (e.g., R ISA S and R- ISA S-)
+			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());			
+			graph.addEdge(roleIncl.getSub().getInverse(), roleIncl.getSuper().getInverse());
+		}
+		
+		return graph;
+	}
+	
+	/**
+	 *  graph representation of data property inclusions in the ontology
+	 *  
+	 *  adds inclusions between the inverses of R and S if
+	 *         R is declared a sub-property of S in the ontology
+	 * 
+	 * @param an ontology 
+	 * @return the graph of the property inclusions 
+	 */
+	
+	private static DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph(Ontology ontology) {
+		
+		DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
+				
+		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) 
+			if (!role.isBottom() && !role.isTop()) 
+				graph.addVertex(role);
+		
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) 
+			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
+		
+		return graph;
+	}
+	
+	/**
+	 * graph representation of the class inclusions in the ontology
+	 * 
+	 * adds inclusions of the domain of R in the domain of S if
+	 *           the provided property graph has an edge from R to S
+	 *           (given the getPropertyGraph algorithm, this also 
+	 *           implies inclusions of the range of R in the range of S
+	 * 
+	 * @param ontology
+	 * @param objectPropertyGraph obtained by getObjectPropertyGraph
+	 * @param dataPropertyGraph obtained by getDataPropertyGraph
+	 * @return the graph of the concept inclusions
+	 */
+	
+	private static DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph (Ontology ontology, 
+													DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> objectPropertyGraph, 
+													DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
+		
+		DefaultDirectedGraph<ClassExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
+		
+		for (OClass concept : ontology.getVocabulary().getClasses()) 
+			if (!concept.isBottom() && !concept.isTop()) 
+				graph.addVertex(concept);
+	
+		// domains and ranges of roles
+		for (ObjectPropertyExpression role : objectPropertyGraph.vertexSet()) 
+			graph.addVertex(role.getDomain());			
+		
+		// edges between the domains and ranges for sub-properties
+		for (DefaultEdge edge : objectPropertyGraph.edgeSet()) {
+			ObjectPropertyExpression child = objectPropertyGraph.getEdgeSource(edge);
+			ObjectPropertyExpression parent = objectPropertyGraph.getEdgeTarget(edge);
+			graph.addEdge(child.getDomain(), parent.getDomain());		
+		}
+		
+		// domains and ranges of roles
+		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) 
+			for (DataSomeValuesFrom dom : role.getAllDomainRestrictions())
+				graph.addVertex(dom);			
+		
+		// edges between the domains and ranges for sub-properties
+		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
+			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
+			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
+			graph.addEdge(child.getDomainRestriction(DatatypeImpl.rdfsLiteral), parent.getDomainRestriction(DatatypeImpl.rdfsLiteral));		
 		}
 
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-		HashSet<BasicClassDescription> processedNodes = new HashSet<BasicClassDescription>();
 		
-		for (Equivalences<BasicClassDescription> existsNode : classes) {
-			BasicClassDescription node = existsNode.getRepresentative();
-			
-			if (!(node instanceof PropertySomeRestriction) || processedNodes.contains(node)) 
-				continue;
-
-			/*
-			 * Adding a cycle between exists R and exists R- for each R.
-			 */
-
-			PropertySomeRestriction exists = (PropertySomeRestriction) node;
-			Equivalences<BasicClassDescription> existsInvNode = classes.getVertex(
-						fac.createPropertySomeRestriction(exists.getPredicate(), !exists.isInverse()));
-			
-			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(existsNode)) {
-				BasicClassDescription child = children.getRepresentative(); 
-				if (!child.equals(existsInvNode))
-					modifiedGraph.addEdge(child, existsInvNode.getRepresentative());
-			}
-			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(existsInvNode)) {
-				BasicClassDescription child = children.getRepresentative(); 
-				if (!child.equals(existsNode))
-					modifiedGraph.addEdge(child, existsNode.getRepresentative());
-			}
-
-			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(existsNode)) {
-				BasicClassDescription parent = parents.getRepresentative(); 
-				if (!parent.equals(existsInvNode))
-					modifiedGraph.addEdge(existsInvNode.getRepresentative(), parent);
-			}
-
-			for (Equivalences<BasicClassDescription> parents : classes.getDirectSuper(existsInvNode)) {
-				BasicClassDescription parent = parents.getRepresentative(); 
-				if (!parent.equals(existsInvNode))
-					modifiedGraph.addEdge(existsNode.getRepresentative(), parent);
-			}
-
-			processedNodes.add(existsNode.getRepresentative());
-			processedNodes.add(existsInvNode.getRepresentative());
-		}
-
-		/* Collapsing the cycles */
-		return new TBoxReasonerImpl(tbox.propertyGraph, modifiedGraph);
+		// class inclusions from the ontology
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) 
+			graph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
+		 
+		return graph;
 	}
 
+	private static DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph (Ontology ontology, 
+							DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
+
+		DefaultDirectedGraph<DataRangeExpression,DefaultEdge> dataRangeGraph 
+					= new  DefaultDirectedGraph<DataRangeExpression,DefaultEdge>(DefaultEdge.class);
+
+		// ranges of roles
+		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) 
+			dataRangeGraph.addVertex(role.getRange());			
+		
+		// edges between the ranges for sub-properties
+		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
+			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
+			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
+			dataRangeGraph.addEdge(child.getRange(), parent.getRange());		
+		}
+
+		// data range inclusions from the ontology
+		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+			dataRangeGraph.addVertex(clsIncl.getSuper()); // Datatype is not among the vertices from the start
+			dataRangeGraph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
+		}
+
+		return dataRangeGraph;
+	}
+	
 }

@@ -22,20 +22,10 @@ package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
@@ -51,15 +41,19 @@ import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
-import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ViewDefinition;
-import it.unibz.krdb.sql.api.Attribute;
 
-import java.awt.Color;
-import java.awt.Component;
+import it.unibz.krdb.sql.Attribute;
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DBMetadataExtractor;
+import it.unibz.krdb.sql.RelationDefinition;
+import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.ParserViewDefinition;
+
+import javax.swing.*;
+import javax.swing.plaf.metal.MetalComboBoxButton;
+import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -72,19 +66,6 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.plaf.metal.MetalComboBoxButton;
-import javax.swing.table.TableModel;
 
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -310,7 +291,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (Predicate pred : obdaModel.getDeclaredClasses()) {
+        for (OClass c : obdaModel.getOntologyVocabulary().getClasses()) {
+        	Predicate pred = c.getPredicate(); 
             v.addElement(new PredicateItem(pred, prefixManager));
         }
         cboClassAutoSuggest = new AutoSuggestComboBox(v);
@@ -401,7 +383,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		txtQueryEditor.setText(EMPTY_TEXT); // clear the text editor
 		JComboBox cb = (JComboBox) evt.getSource();
 		if (cb.getSelectedIndex() != -1) {
-			DataDefinition dd = (DataDefinition) cb.getSelectedItem();
+			RelationDefinition dd = (RelationDefinition) cb.getSelectedItem();
 			if (dd != null) {
 				String sql = generateSQLString(dd);
 				txtQueryEditor.setText(sql);
@@ -514,10 +496,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			
 			// Prepare the mapping target
 			predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			OBDAQuery target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			List<Function> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 			
 			// Create the mapping axiom
-			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(source, target);
+			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom);
 			
 			// Clear the form afterwards
@@ -534,7 +516,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
 	
-	private CQIE prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
+	private List<Function> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
 		List<Function> body = new ArrayList<Function>();
 		
@@ -546,13 +528,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		
 		// Store attributes and roles in the body
-		List<Term> distinguishVariables = new ArrayList<Term>();
+		//List<Term> distinguishVariables = new ArrayList<Term>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
 				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
-				distinguishVariables.add(objectTerm);
+				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
 				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
@@ -560,11 +542,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 		}
 		// Create the head
-		int arity = distinguishVariables.size();
-		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		//int arity = distinguishVariables.size();
+		//Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
-		return dfac.getCQIE(head, body);
+		return body;
 	}
 	
 	private Function createSubjectTerm(MapItem predicateSubjectMap) {
@@ -648,7 +630,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
+		return dfac.getUriTemplate(terms);
 	}
 
 	// Column placeholder pattern
@@ -706,7 +688,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		predicateSubjectMap = null;
 	}
 
-	private String generateSQLString(DataDefinition table) {
+	private String generateSQLString(RelationDefinition table) {
 		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
@@ -714,13 +696,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(",");
 			}
 			sb.append(" ");
-			sb.append(attr.getName());
+			sb.append(attr.getID());
 			needComma = true;
 		}
 		sb.append(" ");
 		sb.append("from");
 		sb.append(" ");
-		sb.append(table.getName());
+		sb.append(table.getID());
 		return sb.toString();
 	}
 
@@ -770,14 +752,20 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void addDatabaseTableToDataSetComboBox() {
-		DefaultComboBoxModel relationList = new DefaultComboBoxModel();
+		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-			DBMetadata md = man.getMetaData(selectedSource);
-			for (DataDefinition relation : md.getRelationList()) {
+			Connection conn = man.getConnection(selectedSource);
+			DBMetadata md = DBMetadataExtractor.createMetadata(conn);
+			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
+			DBMetadataExtractor.loadMetadata(md, conn, null);
+			// ROMAN (7 Oct 2015): I'm not sure we need to add "views" -- they are 
+			// created by SQLQueryParser for complex queries that cannot be parsed
+			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
 				relationList.addElement(relation);
 			}
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e) {
 			// NO-OP
 		}
 		cboDataSet.setModel(relationList);
@@ -891,16 +879,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					label.setText("<Select database table>");
 					return label;
 				} else {				
-					if (value instanceof TableDefinition) {
-						TableDefinition td = (TableDefinition) value;
+					if (value instanceof DatabaseRelationDefinition) {
+						DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
-						label.setText(td.getName());
-					} else if (value instanceof ViewDefinition) {
-						ViewDefinition vd = (ViewDefinition) value;
+						label.setText(td.getID().getSQLRendering());
+					} else if (value instanceof ParserViewDefinition) {
+						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are 
+						// created by SQLQueryParser for complex queries that cannot be parsed
+						ParserViewDefinition vd = (ParserViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);
-						label.setText(vd.getName());
+						label.setText(vd.getID().getSQLRendering());
 					}
 					return label;
 				}
@@ -934,6 +924,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		Thread thread = null;
 		ResultSet result = null;
 		Statement statement = null;
+		private boolean isCancelled = false;
+		private boolean errorShown = false;
 
 		private ExecuteSQLQueryAction(CountDownLatch latch) {
 			this.latch = latch;
@@ -941,6 +933,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 		@Override
 		public void actionCanceled() throws SQLException {
+			this.isCancelled = true;
 			if (thread != null) {
 				thread.interrupt();
 			}
@@ -962,7 +955,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					try {
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType);
+                        //second parameter is database version, not relevant in this step
+                        SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
 						String sqlString = txtQueryEditor.getText();
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter
@@ -982,11 +976,22 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						latch.countDown();
 					} catch (Exception e) {
 						latch.countDown();
+						errorShown = true;
 						DialogUtils.showQuickErrorDialog(null, e);
 					}
 				}
 			};
 			thread.start();
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return this.isCancelled;
+		}
+
+		@Override
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 	}
 }

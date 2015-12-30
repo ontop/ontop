@@ -22,27 +22,11 @@ package it.unibz.krdb.obda.protege4.utils;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.JTextPane;
-import javax.swing.Timer;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -50,6 +34,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 public class QueryPainter {
 	private final OBDAModel apic;
@@ -58,6 +48,7 @@ public class QueryPainter {
 	private SimpleAttributeSet brackets;
 	private SimpleAttributeSet dataProp;
 	private SimpleAttributeSet objectProp;
+	private SimpleAttributeSet annotProp;
 	private SimpleAttributeSet clazz;
 	private SimpleAttributeSet individual;
 
@@ -175,8 +166,7 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		CQIE query = null;
-		query = textParser.parse(text);
+		List<Function> query = textParser.parse(text);
 
 		if (query == null) {
 			invalid = true;
@@ -288,9 +278,14 @@ public class QueryPainter {
 		brackets = new SimpleAttributeSet();
 		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
+		annotProp = new SimpleAttributeSet();
+		Color c_dp = new Color(109, 159, 162);
+		annotProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		annotProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
+
 		dataProp = new SimpleAttributeSet();
-		Color c_dp = new Color(41, 167, 121);
-		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		Color c_ap = new Color(41, 167, 121);
+		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_ap);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
 		objectProp = new SimpleAttributeSet();
@@ -348,9 +343,10 @@ public class QueryPainter {
 		PrefixManager man = apic.getPrefixManager();
 
 		String input = doc.getText(0, doc.getLength());
-		CQIE current_query = parse(input);
+		List<Function> current_query = parse(input);
 
 		if (current_query == null) {
+            JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
 			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
 		}
 		input = doc.getText(0, doc.getLength());
@@ -382,7 +378,7 @@ public class QueryPainter {
 			doc.setCharacterAttributes(pos, 1, black, false);
 			pos = input.indexOf(":", pos + 1);
 		}
-		for (Function atom : current_query.getBody()) {
+		for (Function atom : current_query) {
 			Predicate predicate = atom.getFunctionSymbol();
 			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());
 			if (validator.isClass(predicate)) {
@@ -393,6 +389,9 @@ public class QueryPainter {
 				tasks.add(task);
 			} else if (validator.isDataProperty(predicate)) {
 				ColorTask task = new ColorTask(predicateName, dataProp);
+				tasks.add(task);
+			} else if (validator.isAnnotProperty(predicate)) {
+				ColorTask task = new ColorTask(predicateName, annotProp);
 				tasks.add(task);
 			}
 
@@ -427,7 +426,7 @@ public class QueryPainter {
 		tasks.clear();
 	}
 
-	private CQIE parse(String query) {
+	private List<Function> parse(String query) {
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

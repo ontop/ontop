@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public interface OBDAConnection {
+public interface OBDAConnection extends AutoCloseable {
 
 	public void close() throws OBDAException;
 

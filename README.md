@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
+[![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://travis-ci.org/ontop/ontop)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 Ontop
 ==================
@@ -21,27 +21,23 @@ The project is a [Maven](http://maven.apache.org/) project. Compiling, running t
 
 Currently we use Maven 3 and Java 7 to build the project.
 
-Code organization
---------------------
-The code is organized in several submodules as follows:
-
-// TODO - extend this section of the readme
-
 
 Links
 --------------------
 
 official website and documentations: http://ontop.inf.unibz.it/
 
-Mail list: ontop4obda AT googlegroups DOT com
-
-Blog: http://ontop-obda.blogspot.it/
+Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 
 Source Code: https://github.com/ontop/ontop
 
 Issue Tracker: https://github.com/ontop/ontop/issues
 
 Wiki: https://github.com/ontop/ontop/wiki
+
+Facebook: https://www.facebook.com/obdaontop/
+
+Twitter: https://twitter.com/ontop4obda
 
 
 

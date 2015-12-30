@@ -110,10 +110,10 @@ public class SPARQLQueryUtility {
 		return false;
 	}
 
-	public static String getDescribeURI(String strquery) {
+	public static String getDescribeURI(String strquery) throws MalformedQueryException {
 		int describeIdx = strquery.toLowerCase().indexOf("describe");
 		String uri = "";
-		try{
+		
 		org.openrdf.query.parser.sparql.SPARQLParser parser = new SPARQLParser();
 			ParsedQuery q = parser.parseQuery(strquery, "http://example.org");
 			TupleExpr expr = q.getTupleExpr();
@@ -125,10 +125,7 @@ public class SPARQLQueryUtility {
 				int last = sign.indexOf(')', first);
 				uri = sign.substring(first, last);
 			}
-		} catch (MalformedQueryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		if (uri.isEmpty()) {
 			int firstIdx = strquery.indexOf('<', describeIdx);
 			int lastIdx = strquery.indexOf('>', describeIdx);

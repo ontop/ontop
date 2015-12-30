@@ -113,12 +113,12 @@ public class DataSourceImpl implements OBDADataSource {
 	}
 
 	@Override
-	public void setRegistred(boolean registred) {
-		this.registred = registred;
+	public void setRegistered(boolean registered) {
+		this.registred = registered;
 	}
 
 	@Override
-	public boolean isRegistred() {
+	public boolean isRegistered() {
 		return registred;
 	}
 
@@ -130,7 +130,7 @@ public class DataSourceImpl implements OBDADataSource {
 			clone.setParameter(key, parameters.getProperty(key));
 		}
 		clone.setEnabled(isEnabled());
-		clone.setRegistred(isRegistred());
+		clone.setRegistered(isRegistered());
 
 		return clone;
 	}

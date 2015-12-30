@@ -25,14 +25,17 @@ import java.util.*;
 
 import org.jgrapht.*;
 
+import com.google.common.collect.ImmutableSet;
+
 
 /**
- * Allows obtaining the strongly connected components of a directed graph. 
+ * Allows obtaining the strongly connected components of a directed graph.
  *
- *The implemented algorithm follows Cheriyan-Mehlhorn/Gabow's algorithm
- *Presented in Path-based depth-first search for strong and biconnected components by Gabow (2000).
- *The running time is order of O(|V|+|E|)
-
+ * The implemented algorithm follows Cheriyan-Mehlhorn/Gabow's algorithm
+ * Presented in Path-based depth-first search for strong and biconnected components by Gabow (2000).
+ * The running time is order of O(|V|+|E|)
+ *
+ * TODO: replace by GabowStrongConnectivityInspector (from an updated JGraphT)
  *
  *
  */
@@ -110,7 +113,7 @@ public class GabowSCC<V, E>
     {
         if (stronglyConnectedSets == null) {
             
-            stronglyConnectedSets = new Vector<Equivalences<V>>();
+            stronglyConnectedSets = new Vector<>();
 
             // create VertexData objects for all vertices, store them
             createVertexNumber();
@@ -139,14 +142,14 @@ public class GabowSCC<V, E>
     private void createVertexNumber()
     {
     	c = graph.vertexSet().size();
-        vertexToVertexNumber = new HashMap<V, VertexNumber<V>>(c);
+        vertexToVertexNumber = new HashMap<>(c);
 
         for (V vertex : graph.vertexSet()) {
             vertexToVertexNumber.put(vertex, new VertexNumber<V>(vertex, 0));            
         }
         
-        stack = new ArrayDeque<VertexNumber<V>>(c);
-        B = new ArrayDeque<Integer>(c);
+        stack = new ArrayDeque<>(c);
+        B = new ArrayDeque<>(c);
     }
 
     /*
@@ -172,7 +175,7 @@ public class GabowSCC<V, E>
              } 
          }
          
-         Set<V> L = new HashSet<V>(); 
+         ImmutableSet.Builder<V> L = new ImmutableSet.Builder<>(); 
          if (v.getNumber() == (B.getLast())) { 
         	 /* number vertices of the next strong component */
         	 B.removeLast(); 
@@ -183,7 +186,7 @@ public class GabowSCC<V, E>
                  L.add(r.getVertex()); 
                  r.setNumber(c);
              } 
-             stronglyConnectedSets.add(new Equivalences<V>(L)); 
+             stronglyConnectedSets.add(new Equivalences<V>(L.build())); 
          } 
     }
 

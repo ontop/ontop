@@ -65,7 +65,7 @@ public class OWLConstructDescribeTest extends TestCase{
 	
 	@Override
 	public void setUp() throws Exception {
-		try {
+		
 			// Loading the OWL file
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
@@ -89,7 +89,6 @@ public class OWLConstructDescribeTest extends TestCase{
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
@@ -103,12 +102,8 @@ public class OWLConstructDescribeTest extends TestCase{
 			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			throw e;
-		}
+		
+
 	}
 	
 	@Override

@@ -21,7 +21,6 @@ package inf.unibz.ontp.sesame.repository.test;
  */
 
 import java.io.File;
-import java.net.URI;
 
 import junit.framework.TestCase;
 

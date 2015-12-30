@@ -71,7 +71,7 @@ CREATE TABLE transaction (
 	forcompanyid INT,
 	stockid INT,
 	brokerid INT,
-	"type" VARCHAR(100),
+	type VARCHAR(100),
 	"date" VARCHAR(100),
 );
 

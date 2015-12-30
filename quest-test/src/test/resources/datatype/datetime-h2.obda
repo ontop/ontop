@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://ontop.inf.unibz.it/test/datatypes#
+xsd:	http://www.w3.org/2001/XMLSchema#
+
+[SourceDeclaration]
+sourceUri	h2
+connectionUrl	jdbc:h2:mem:datatypes
+username	sa	
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+
+mappingId	Date-Time Types
+target		:datetime-{id} a :Row ; :hasTime {type_time} ; :hasTimeString {type_time}^^xsd:string ; :hasDate {type_date}^^xsd:date ; :hasDateString {type_date}^^xsd:string ; :hasYear {type_year}^^xsd:gYear ; :hasTimestamp {type_timestamp} ; :hasTimestampString {type_timestamp}^^xsd:string .
+source		select id, type_timestamp, type_year, type_date, type_time from "DateTimes"
+
+
+]]
+

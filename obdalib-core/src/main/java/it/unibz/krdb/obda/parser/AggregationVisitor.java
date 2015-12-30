@@ -21,67 +21,14 @@ package it.unibz.krdb.obda.parser;
  */
 
 import it.unibz.krdb.sql.api.AggregationJSQL;
-import it.unibz.krdb.sql.api.TableJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.WhenClause;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.FromItemVisitor;
-import net.sf.jsqlparser.statement.select.LateralSubSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.SubJoin;
-import net.sf.jsqlparser.statement.select.SubSelect;
-import net.sf.jsqlparser.statement.select.ValuesList;
-import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.*;
 
 
 /**
@@ -91,18 +38,15 @@ import net.sf.jsqlparser.statement.select.WithItem;
 public class AggregationVisitor implements SelectVisitor, FromItemVisitor, ExpressionVisitor {
 
 	AggregationJSQL aggregation= new AggregationJSQL();
-	boolean unquote=false;
 	
 	/**
-	 * Return a {@link AggregationSQL} containing GROUP BY statement
+	 * Return a {@link AggregationJSQL} containing GROUP BY statement
 	 * @param select 
 	 * @return
 	 */
-	public AggregationJSQL getAggregation(Select select, boolean unquote){
+	public AggregationJSQL getAggregation(Select select, boolean deepParsing){
 		
-		
-		this.unquote=unquote;
-	
+
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
@@ -125,15 +69,11 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 //		plainSelect.getFromItem().accept(this);
 		
 		if(plainSelect.getGroupByColumnReferences()!=null){
-			
-			if(unquote){
+
 				for(Expression express: plainSelect.getGroupByColumnReferences() ){
 					express.accept(this);
 				}
-			}
-			else
-			
-			aggregation.addAll(plainSelect.getGroupByColumnReferences());
+
 		}
 	}
 
@@ -196,12 +136,6 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -358,19 +292,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(Column tableColumn) {
-		Table table= tableColumn.getTable();
-		if(table.getName()!=null && unquote ){
-			
-			TableJSQL fixTable = new TableJSQL(table);
-			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTableName());
-			table.setSchemaName(fixTable.getSchema());
-		
-		}
-		String columnName= tableColumn.getColumnName();
-		if(unquote && VisitedQuery.pQuotes.matcher(columnName).matches())
-			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
-		
+		//TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 
 	@Override
@@ -471,6 +393,24 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(RegExpMatchOperator rexpr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SignedExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

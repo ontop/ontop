@@ -1,0 +1,22 @@
+[PrefixDeclaration]
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	RandBStockExchange
+connectionUrl	jdbc:postgresql://localhost/imdb
+username	imdb
+password	imdb
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-companies
+target		:company-{id} a :Company ; :companyName {name} ; :netWorth {networth} . 
+source		select id, name, networth from company
+
+]]
+

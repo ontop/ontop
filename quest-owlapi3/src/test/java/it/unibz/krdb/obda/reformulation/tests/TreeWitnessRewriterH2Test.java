@@ -161,6 +161,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -182,12 +183,10 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -202,6 +201,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		st.close();
@@ -240,7 +240,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 
 		factory.setPreferenceHolder(p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLStatement st = reasoner.getStatement();
@@ -329,7 +329,6 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setProperty("rewrite", "true");
 
 		runTests(p);

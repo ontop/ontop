@@ -1,0 +1,21 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix ex: <http://example.com/ns#> .
+
+<TriplesMapStudent>
+a rr:TriplesMap ; 
+rr:logicalTable [ rr:tableName "student" ];
+rr:subjectMap [ rr:template "http://example.com/resource/Student/{firstname}{surname}";
+                rr:class ex:Student; ];
+rr:predicateObjectMap [ 
+    rr:predicate ex:isAuthorOf ; 
+    rr:objectMap [
+        rr:parentTriplesMap <TriplesMapPaper>;
+        rr:joinCondition [ rr:child "firstname" ; rr:parent "authorName" ; ];
+        rr:joinCondition [ rr:child "surname" ; rr:parent "authorSurname" ; ];]; ].
+
+<TriplesMapPaper>
+a rr:TriplesMap ; 
+rr:logicalTable [
+    rr:sqlQuery "SELECT authorName, authorSurname, aid FROM article WHERE article type='ppr '" ];
+    rr:subjectMap [ rr:template "http://example.com/resource/Paper/{aid}";
+                    rr:class ex:Paper; ].

@@ -31,8 +31,10 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.IOException;
@@ -43,10 +45,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -61,26 +62,19 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private PrefixManager prefixManager;
 
-	private HashMap<URI, OBDADataSource> datasources;
+	private Map<URI, OBDADataSource> datasources;
 
-	private ArrayList<OBDAModelListener> sourceslisteners;
+	private List<OBDAModelListener> sourceslisteners;
 
 	private Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings;
 
-	private ArrayList<OBDAMappingListener> mappinglisteners;
+	private List<OBDAMappingListener> mappinglisteners;
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelImpl.class);
 
-	private final LinkedHashSet<Predicate> declaredClasses = new LinkedHashSet<Predicate>();
-
-	private final LinkedHashSet<Predicate> declaredObjectProperties = new LinkedHashSet<Predicate>();
-
-	private final LinkedHashSet<Predicate> declaredDataProperties = new LinkedHashSet<Predicate>();
-
-	// All other predicates (not classes or properties)
-	private final LinkedHashSet<Predicate> declaredPredicates = new LinkedHashSet<Predicate>();
+	private final OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
 
 	/**
 	 * The default constructor
@@ -171,15 +165,14 @@ public class OBDAModelImpl implements OBDAModel {
 		sourceslisteners.add(listener);
 	}
 
-	@Override
-	public void fireSourceAdded(OBDADataSource source) {
+	
+	private void fireSourceAdded(OBDADataSource source) {
 		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceAdded(source);
 		}
 	}
 
-	@Override
-	public void fireSourceRemoved(OBDADataSource source) {
+	private void fireSourceRemoved(OBDADataSource source) {
 		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceDeleted(source);
 		}
@@ -192,8 +185,7 @@ public class OBDAModelImpl implements OBDAModel {
 		}
 	}
 
-	@Override
-	public void fireSourceNameUpdated(URI old, OBDADataSource neu) {
+	private void fireSourceNameUpdated(URI old, OBDADataSource neu) {
 		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceUpdated(old.toString(), neu);
 		}
@@ -254,7 +246,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public void removeAllMappings(URI datasource_uri) {
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
+		List<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
 		while (!mappings.isEmpty()) {
 			mappings.remove(0);
 		}
@@ -300,7 +292,7 @@ public class OBDAModelImpl implements OBDAModel {
 		if (pos == -1) {
 			return null;
 		}
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(source_uri);
+		List<OBDAMappingAxiom> mappings = getMappings(source_uri);
 		return mappings.get(pos);
 	}
 
@@ -310,10 +302,10 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public ArrayList<OBDAMappingAxiom> getMappings(URI datasource_uri) {
+	public List<OBDAMappingAxiom> getMappings(URI datasource_uri) {
 		if (datasource_uri == null)
 			return null;
-		ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+		List<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 		if (current_mappings == null) {
 			initMappingsArray(datasource_uri);
 		}
@@ -364,26 +356,37 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery) {
+	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		mapping.setSourceQuery(sourceQuery);
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
 
 	@Override
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 
+		// adds a new mapping
 		if (!containsMapping(datasource_uri, new_mappingid)) {
 			mapping.setId(new_mappingid);
 			fireMappigUpdated(datasource_uri, mapping_id, mapping);
 			return 0;
+		} 
+		// updates an existing mapping
+		else {
+			// updates the mapping without changing the mapping id
+			if (new_mappingid.equals(mapping_id)) {
+				return -1;
+			} 
+			// changes the mapping id to an existing one  
+			else {
+				throw new DuplicateMappingException(new_mappingid);
+			}
 		}
-		return -1;
 	}
 
 	@Override
-	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, OBDAQuery targetQuery) {
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, List<Function> targetQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		if (mapping == null) {
 			return;
@@ -440,8 +443,7 @@ public class OBDAModelImpl implements OBDAModel {
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
 			for (OBDAMappingAxiom mapping : mp) {
-				CQIE cq = (CQIE) mapping.getTargetQuery();
-				List<Function> body = cq.getBody();
+				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
 					if (!oldatom.getFunctionSymbol().equals(oldname)) {
@@ -463,8 +465,7 @@ public class OBDAModelImpl implements OBDAModel {
 		for (OBDADataSource source : datasources.values()) {
 			List<OBDAMappingAxiom> mp = new ArrayList<OBDAMappingAxiom>(mappings.get(source.getSourceID()));
 			for (OBDAMappingAxiom mapping : mp) {
-				CQIE cq = (CQIE) mapping.getTargetQuery();
-				List<Function> body = cq.getBody();
+				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
 					if (!oldatom.getFunctionSymbol().equals(predicate)) {
@@ -492,110 +493,7 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public Set<Predicate> getDeclaredPredicates() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredClasses);
-		result.addAll(declaredObjectProperties);
-		result.addAll(declaredDataProperties);
-		result.addAll(declaredPredicates);
-		return result;
-	}
-
-	@Override
-	public Set<Predicate> getDeclaredClasses() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredClasses);
-		return result;
-	}
-
-	@Override
-	public Set<Predicate> getDeclaredObjectProperties() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredObjectProperties);
-		return result;
-	}
-
-	@Override
-	public Set<Predicate> getDeclaredDataProperties() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredDataProperties);
-		return result;
-	}
-
-	@Override
-	public boolean declarePredicate(Predicate predicate) {
-		if (predicate.isClass()) {
-			return declaredClasses.add(predicate);
-		} else if (predicate.isObjectProperty()) {
-			return declaredObjectProperties.add(predicate);
-		} else if (predicate.isDataProperty()) {
-			return declaredDataProperties.add(predicate);
-		} else {
-			return declaredPredicates.add(predicate);
-		}
-	}
-
-	@Override
-	public boolean declareClass(Predicate classname) {
-		if (!classname.isClass()) {
-			throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + classname);
-		}
-		return declaredClasses.add(classname);
-	}
-
-	@Override
-	public boolean declareObjectProperty(Predicate property) {
-		if (!property.isObjectProperty()) {
-			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
-		}
-		return declaredObjectProperties.add(property);
-	}
-
-	@Override
-	public boolean declareDataProperty(Predicate property) {
-		if (!property.isDataProperty()) {
-			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
-		}
-		return declaredDataProperties.add(property);
-	}
-
-	@Override
-	public boolean unDeclarePredicate(Predicate predicate) {
-		return declaredPredicates.remove(predicate);
-	}
-
-	@Override
-	public boolean unDeclareClass(Predicate classname) {
-		return declaredClasses.remove(classname);
-	}
-
-	@Override
-	public boolean unDeclareObjectProperty(Predicate property) {
-		return declaredObjectProperties.remove(property);
-	}
-
-	@Override
-	public boolean unDeclareDataProperty(Predicate property) {
-		return declaredDataProperties.remove(property);
-	}
-	
-	@Override
-	public boolean isDeclaredClass(Predicate classname) {
-		return declaredClasses.contains(classname);
-	}
-
-	@Override
-	public boolean isDeclaredObjectProperty(Predicate property) {
-		return declaredObjectProperties.contains(property);
-	}
-
-	@Override
-	public boolean isDeclaredDataProperty(Predicate property) {
-		return declaredDataProperties.contains(property);
-	}
-
-	@Override
-	public boolean isDeclared(Predicate predicate) {
-		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate) || declaredPredicates.contains(predicate));
+	public OntologyVocabulary getOntologyVocabulary() {
+		return vocabulary;
 	}
 }

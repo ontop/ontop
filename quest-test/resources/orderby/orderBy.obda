@@ -1,0 +1,15 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
+username	system
+password	obdaps83
+driverClass	oracle.jdbc.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{country_name} a :Country ; :name {country_name} .
+source		select country_name FROM hr.countries
+]]

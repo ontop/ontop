@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
@@ -101,18 +100,14 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         OWLOntology schoolOntology = manager.loadOntologyFromOntologyDocument(file);
         
         // Setup the entity declarations
-        for (OWLClass c : schoolOntology.getClassesInSignature()) {
-            Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
-            model.declareClass(pred);
-        }
-        for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) {
-            Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
-            model.declareObjectProperty(pred);
-        }
-        for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) {
-            Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
-            model.declareDataProperty(pred);
-        }
+        for (OWLClass c : schoolOntology.getClassesInSignature()) 
+            model.getOntologyVocabulary().createClass(c.getIRI().toString());
+        
+        for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) 
+            model.getOntologyVocabulary().createObjectProperty(r.getIRI().toString());
+        
+        for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) 
+            model.getOntologyVocabulary().createDataProperty(p.getIRI().toString());
     }
 
     public void testRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
@@ -298,9 +293,9 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     private void addSampleMappings(OBDAModel model, URI sourceId) {
         // Add some mappings
         try {
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[0][0], mappings[0][1], parser.parse(mappings[0][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[1][0], mappings[1][1], parser.parse(mappings[1][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[2][0], mappings[2][1], parser.parse(mappings[2][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[0][0], dfac.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[1][0], dfac.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[2][0], dfac.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2])));
         } catch (Exception e) {
             // NO-OP
         }
@@ -309,9 +304,9 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     private void addMoreSampleMappings(OBDAModel model, URI sourceId) {
         // Add some mappings
         try {
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[3][0], mappings[3][1], parser.parse(mappings[3][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[4][0], mappings[4][1], parser.parse(mappings[4][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[5][0], mappings[5][1], parser.parse(mappings[5][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[3][0], dfac.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[4][0], dfac.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[5][0], dfac.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2])));
         } catch (Exception e) {
             // NO-OP
         }

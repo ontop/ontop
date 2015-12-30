@@ -30,7 +30,7 @@
     <Declaration>
         <DataProperty IRI="#name"/>
     </Declaration>
-    <DataPropertyDomain>
+	 <DataPropertyDomain>
         <DataProperty IRI="#name"/>
         <Class IRI="#Country"/>
     </DataPropertyDomain>
@@ -38,6 +38,10 @@
         <DataProperty IRI="#name"/>
         <Datatype abbreviatedIRI="rdf:PlainLiteral"/>
     </DataPropertyRange>
+   <Declaration>
+        <DataProperty IRI="#position"/>
+    </Declaration>
+   
 </Ontology>
 
 

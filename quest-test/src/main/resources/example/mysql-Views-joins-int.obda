@@ -1,0 +1,59 @@
+[PrefixDeclaration]
+:		http://www.example.org/#
+
+[SourceDeclaration]
+sourceUri	viewTest
+connectionUrl	jdbc:mysql://vulcan/ontowis_100k
+username	test
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID2
+target     <http://www.example.org/{unique21}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {unique12}^^xsd:integer .
+source   Select unique21, unique12 from view12 
+
+mappingId	MAPPING-ID3
+target     <http://www.example.org/{unique21}> a <http://www.example.org/2Tab1>; <http://www.example.org/Tab3unique2Tab3> {unique13}^^xsd:integer .
+source   Select unique21, unique13 from view123 
+
+mappingId	MAPPING-ID4
+target     <http://www.example.org/{unique21}> a <http://www.example.org/3Tab1>; <http://www.example.org/Tab4unique2Tab4> {unique14}^^xsd:integer .
+source   Select unique21, unique14 from view1234 
+
+mappingId	MAPPING-ID5
+target     <http://www.example.org/{unique21}> a <http://www.example.org/4Tab1>; <http://www.example.org/Tab5unique2Tab5> {unique15}^^xsd:integer .
+source   Select unique21, unique15 from view12345 
+
+mappingId	MAPPING-ID6
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString2j> {stringu11}^^xsd:string .
+source   Select unique21, stringu11 from view12 
+
+mappingId	MAPPING-ID7
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString22j> {stringu21}^^xsd:string .
+source   Select unique21, stringu21 from view12 
+
+mappingId	MAPPING-ID9
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString3j> {stringu11}^^xsd:string .
+source   Select unique21, stringu11 from view123 
+
+mappingId	MAPPING-ID10
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString23j> {stringu21}^^xsd:string .
+source   Select unique21, stringu21 from view123 
+
+mappingId	MAPPING-ID12
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString4j> {stringu11}^^xsd:string .
+source   Select unique21, stringu11 from view1234 
+
+mappingId	MAPPING-ID13
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString24j> {stringu21}^^xsd:string .
+source   Select unique21, stringu21 from view1234  
+
+mappingId	MAPPING-ID14
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString5j> {stringu11}^^xsd:string .
+source   Select unique21, stringu11 from view12345 
+
+mappingId	MAPPING-ID15
+target     <http://www.example.org/{unique21}>  <http://www.example.org/hasString25j> {stringu21}^^xsd:string .
+source   Select unique21, stringu21 from view12345 
+]]

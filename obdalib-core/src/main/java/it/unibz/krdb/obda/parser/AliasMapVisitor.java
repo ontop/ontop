@@ -20,75 +20,26 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.VisitedQuery;
-
-import java.util.HashMap;
-
-/** 
- * Class to create an Alias Map for the select statement
- */
-
-
-
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.InverseExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.WhenClause;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import it.unibz.krdb.sql.QuotedID;
+import it.unibz.krdb.sql.QuotedIDFactory;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectItemVisitor;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.SubSelect;
-import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Class to create an Alias Map for the select statement
+ * 
+ * BRINGS EXPRESSION ALIAS NAMES in SELECT clauses (including subqueries) into NORMAL FORM
+ * 
+ */
 
 /**
  * 
@@ -97,10 +48,29 @@ import net.sf.jsqlparser.statement.select.WithItem;
  * Remove quotes when present.
  */
 
-public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
+public class AliasMapVisitor {
 
-	HashMap<String,String> aliasMap;
-	boolean unquote; //remove quotes from columns
+	private final QuotedIDFactory idfac;
+	private final Map<QuotedID, Expression> aliasMap = new HashMap<>();
+	
+	/**
+	 * NORMALISES EXPRESSION ALIAS NAMES in SELECT clauses (including subqueries)
+	 * 
+	 * @param select
+	 * @param idfac
+	 */
+	
+	public AliasMapVisitor(Select select, QuotedIDFactory idfac) {
+		this.idfac = idfac;
+
+		if (select.getWithItemsList() != null) {
+			for (WithItem withItem : select.getWithItemsList()) {
+				withItem.accept(selectVisitor);
+			}
+		}
+		
+		select.getSelectBody().accept(selectVisitor);
+	}
 	
 	/**
 	 * Return a map between the column in the select statement and its alias.
@@ -108,136 +78,159 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	 * @return alias map
 	 */
 	
-	public HashMap<String,String> getAliasMap(Select select, boolean unquote) {
-		
-		this.unquote= unquote;
-		aliasMap = new HashMap<String, String>();
-		
-		if (select.getWithItemsList() != null) {
-			for (WithItem withItem : select.getWithItemsList()) {
-				withItem.accept(this);
-			}
-		}
-		
-		select.getSelectBody().accept(this);
+	public Map<QuotedID, Expression> getAliasMap() {
 		return aliasMap;
 	}
 	
-	/*
-	 * visit Plainselect, search for the content in select
-	 * Stored in AggregationJSQL. 
-	 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
-	 */
 	
-	@Override
-	public void visit(PlainSelect plainSelect) {
+	private SelectVisitor selectVisitor = new SelectVisitor() {
+		/*
+		 * visit PlainSelect, search for the content in select
+		 * Stored in AggregationJSQL. 
+		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+		 */
 		
-		for (SelectItem item : plainSelect.getSelectItems())
-		{
-			item.accept(this);
-		}
-	}
+		@Override
+		public void visit(PlainSelect plainSelect) {
+	        plainSelect.getFromItem().accept(fromItemVisitor);
 
-	@Override
-	public void visit(AllColumns columns) {
-		//we are not interested in allcolumns (SELECT *) since it does not have aliases
-		
-	}
-
-	@Override
-	public void visit(AllTableColumns tableColumns) {
-		//we are not interested in alltablecolumns (SELECT table.*) since it does not have aliases
-	}
-	
-	/*
-	 *visit SelectExpressionItem that contains the expression and its alias as in SELECT expr1 AS EXPR
-	 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.SelectExpressionItem)
-	 */
-
-	@Override
-	public void visit(SelectExpressionItem selectExpr) {
-		if ( selectExpr.getAlias() != null) {
-			String alias = selectExpr.getAlias().getName();
-			Expression e = selectExpr.getExpression();
-			e.accept(this);
-			//remove alias quotes if present
-			if(unquote && VisitedQuery.pQuotes.matcher(alias).matches()){
-				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
+	        if (plainSelect.getJoins() != null) {
+	            for (Join join : plainSelect.getJoins()) {
+	                join.getRightItem().accept(fromItemVisitor);
+	            }
+	        }
+	        if (plainSelect.getWhere() != null) {
+	            plainSelect.getWhere().accept(expressionVisitor);
+	        }
+			
+			for (SelectItem item : plainSelect.getSelectItems()) {
+				item.accept(selectItemVisitor);
 			}
-			else
-				aliasMap.put(e.toString().toLowerCase(), alias);
+	    }
+		
+		@Override
+		public void visit(SetOperationList arg0) {
+			// we are not considering UNION case
 		}
-	}
-	@Override
-	public void visit(SetOperationList arg0) {
-		// we are not considering UNION case
-		
-	}
 
-	@Override
-	public void visit(WithItem arg0) {
-		// we are not considering withItem case
-		
-	}
+		@Override
+		public void visit(WithItem arg0) {
+			// we are not considering withItem case
+		}
+	};
+	
+	private SelectItemVisitor selectItemVisitor = new SelectItemVisitor() {
 
+		@Override
+		public void visit(AllColumns columns) {
+			//we are not interested in allcolumns (SELECT *) since it does not have aliases	
+		}
+
+		@Override
+		public void visit(AllTableColumns tableColumns) {
+			//we are not interested in alltablecolumns (SELECT table.*) since it does not have aliases
+		}
+		
+		/*
+		 *visit SelectExpressionItem that contains the expression and its alias as in SELECT expr1 AS EXPR
+		 * @see net.sf.jsqlparser.statement.select.SelectItemVisitor#visit(net.sf.jsqlparser.statement.select.SelectExpressionItem)
+		 */
+
+		@Override
+		public void visit(SelectExpressionItem selectExpr) {
+			Alias alias = selectExpr.getAlias();
+			if (alias  != null) {
+				Expression e = selectExpr.getExpression();
+				e.accept(expressionVisitor);
+				
+				// NORMALIZE EXPRESSION ALIAS NAME
+				QuotedID aliasName = idfac.createAttributeID(alias.getName());
+				alias.setName(aliasName.getSQLRendering());
+				aliasMap.put(aliasName, e);
+			}
+			// ELSE
+			// ROMAN (27 Sep 2015): set an error flag -- each complex expression must have a name (alias)
+		}
+	};
+	
+	FromItemVisitor fromItemVisitor = new FromItemVisitor() {
+	    @Override
+	    public void visit(Table tableName) {
+
+	    }
+
+	    @Override
+	    public void visit(SubJoin subjoin) {
+
+	    }
+
+	    @Override
+	    public void visit(LateralSubSelect lateralSubSelect) {
+
+	    }
+
+	    @Override
+	    public void visit(ValuesList valuesList) {
+
+	    }
+	    @Override
+		public void visit(SubSelect subSelect) {
+	        subSelect.getSelectBody().accept(selectVisitor);
+		}
+	};
+    
+	private ExpressionVisitor expressionVisitor = new ExpressionVisitor() {
+	
+	    @Override
+		public void visit(SubSelect subSelect) {
+	        subSelect.getSelectBody().accept(selectVisitor);
+		}
+
+		/*
+		 * We do not modify the column we are only interested if the alias is present. 
+		 * Each alias has a distinct column (non-Javadoc)
+		 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
+		 */
+		@Override
+		public void visit(Column tableColumn) {
+			
+		}
+
+		
 	@Override
 	public void visit(NullValue nullValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(Function function) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(InverseExpression inverseExpression) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(JdbcParameter jdbcParameter) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(JdbcNamedParameter jdbcNamedParameter) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(DoubleValue doubleValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(LongValue longValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(DateValue dateValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(TimeValue timeValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void visit(TimestampValue timestampValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -248,8 +241,6 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 
 	@Override
 	public void visit(StringValue stringValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -348,22 +339,8 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		
 	}
 
-	/*
-	 * We do not modify the column we are only interested if the alias is present. Each alias has a distinct column (non-Javadoc)
-	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.schema.Column)
-	 */
-	@Override
-	public void visit(Column tableColumn) {
-		
-	}
 
-	@Override
-	public void visit(SubSelect subSelect) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
+    @Override
 	public void visit(CaseExpression caseExpression) {
 		// TODO Auto-generated method stub
 		
@@ -465,4 +442,22 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 		
 	}
 
+	@Override
+	public void visit(SignedExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	};
 }

@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.testsuite;
  * #L%
  */
 
+import it.unibz.krdb.obda.quest.datatypes.MssqlDatatypeTest;
 import it.unibz.krdb.obda.quest.datatypes.MysqlDatatypeTest;
 import it.unibz.krdb.obda.quest.datatypes.OracleDatatypeTest;
 import it.unibz.krdb.obda.quest.datatypes.PgsqlDatatypeTest;
@@ -32,7 +33,7 @@ public class TestDatatypeSuite extends TestSuite {
 		TestSuite suite = new TestSuite("Database Data-type Test Suite");
 		suite.addTest(MysqlDatatypeTest.suite());
 		suite.addTest(PgsqlDatatypeTest.suite());
-//		suite.addTest(MssqlDatatypeTest.suite());
+		suite.addTest(MssqlDatatypeTest.suite());
 		suite.addTest(OracleDatatypeTest.suite());
 //		suite.addTest(Db2DatatypeTest.suite());
 		return suite;

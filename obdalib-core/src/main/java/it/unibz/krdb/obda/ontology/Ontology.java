@@ -20,75 +20,119 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
-public interface Ontology extends Cloneable, Serializable {
-
-	public void addAssertion(Axiom assertion);
-
-	public void addAssertions(Collection<Axiom> assertion);
-
-	public void addEntity(Predicate c);
-	
-	public void addConcept(Predicate c);
-
-	public void addRole(Predicate role);
-
-	public void addConcepts(Collection<Predicate> cd);
-
-	public void addRoles(Collection<Predicate> rd);
-
-	public Set<Predicate> getRoles();
-
-	public Set<Predicate> getConcepts();
-	
-	public Set<Predicate> getVocabulary();
-
-	public Set<Axiom> getAssertions();
-
-	public boolean referencesPredicate(Predicate pred);
-
-	public boolean referencesPredicates(Collection<Predicate> preds);
-
-	/***
-	 * This will retrun all the assertions whose right side concept description
-	 * refers to the predicate 'pred'
-	 */
-	public Set<SubDescriptionAxiom> getByIncluding(Predicate pred);
-
-	/***
-	 * As before but it will only return assetions where the right side is an
-	 * existential role concept description
-	 */
-	public Set<SubDescriptionAxiom> getByIncludingExistOnly(Predicate pred);
-
-	public Set<SubDescriptionAxiom> getByIncludingNoExist(Predicate pred);
-
-	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred);
-
-	public String getUri();
+public interface Ontology extends Serializable {
 
 	/**
-	 * This will saturate the ontology, i.e. it will make sure that all axioms
-	 * implied by this ontology are asserted in the ontology and accessible
-	 * through the methods of the ontology.
+	 * vocabulary is used to check whether all the symbols referenced in axioms are valid
+	 * @return ontology vocabulary 
 	 */
-	public void saturate();
+	
+	public ImmutableOntologyVocabulary getVocabulary();
+	
+	// SUBCLASS/PROPERTY
 
-	public Ontology clone();
+	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) throws InconsistentOntologyException;
 
-	public void addEntities(Set<Predicate> referencedEntities);
+	public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException;
+	
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) throws InconsistentOntologyException;
+
+	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) throws InconsistentOntologyException;
+
+
+	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms();
+
+	public Collection<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
+	
+	public Collection<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+
+	public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
+
+	//TODO:subproperty annotation
+
+	// DISJOINTNESS
+	
+	public void addDisjointClassesAxiom(ClassExpression... classes) throws InconsistentOntologyException;
+
+	public void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... properties) throws InconsistentOntologyException;
+	
+	public void addDisjointDataPropertiesAxiom(DataPropertyExpression... properties) throws InconsistentOntologyException;
+	
+	
+	public Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
+	
+	public Collection<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+
+	public Collection<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+	
+	
+	// REFLEXIVITY / IRREFLEXIVITY
+	
+	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
+
+	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
+	
+	public Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms();
+	
+	public Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms();
+	
+	// FUNCTIONALITY 
+	
+	
+	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
+
+	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
+	
+	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
+
+	public Set<DataPropertyExpression> getFunctionalDataProperties();
+	
+	
+	// ASSERTIONS
+	
+	public void addClassAssertion(ClassAssertion assertion);
+
+	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion);
+
+	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
+
+	public void addAnnotationAssertion(AnnotationAssertion assertion);
+
+	
+	public List<ClassAssertion> getClassAssertions();
+
+	public List<ObjectPropertyAssertion> getObjectPropertyAssertions();
+	
+	public List<DataPropertyAssertion> getDataPropertyAssertions();
+
+	public List<AnnotationAssertion> getAnnotationAssertions();
+
+
+
+
 
 	/**
+	 * create an auxiliary object property 
+	 * (auxiliary properties result from ontology normalization)
+	 * 
+	 *
+	 */
+
+	public ObjectPropertyExpression createAuxiliaryObjectProperty();
+	
+	
+	/**
+	 * return all auxiliary object properties
+	 * (auxiliary properties result from ontology normalization)
+	 * 
 	 * @return
 	 */
-	public Set<Assertion> getABox();
 	
-	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms();
-	
-	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms();
+	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
+
 }

@@ -1,0 +1,34 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+
+[SourceDeclaration]
+sourceUri	MultiSchemaH2
+connectionUrl	jdbc:h2:mem:questrepository
+username	fish
+password	fish
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Address
+target		:Address-{id} a :Address . 
+source		select id from "stockexchange".address
+
+mappingId	Name
+target		:Broker-{name} a :Broker .
+source		select broker.name from "stockexchange".broker
+
+mappingId	Worker
+target		:Worker-{worker} a :Worker .
+source		select broker.name as worker from "stockexchange".broker
+
+mappingId	Client
+target		:Client-{NameOfClient} :isBroker :Broker-{brokerName} .
+source		select broker.name as brokerName, client.name as NameOfClient, broker.id from "stockexchange".broker, "stockexchange".client where broker.id = client.id
+
+mappingId	Mix
+target		:Broker2-{id} :hasFile :Med-{med} . 
+source		SELECT "id", med from "stockexchange".address, policy
+
+
+]]
+

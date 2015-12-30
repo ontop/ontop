@@ -20,14 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A class that represents the preferences which can be modified by the user.
@@ -46,12 +46,22 @@ public class QuestPreferences extends Properties {
 	public static final String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";
 	public static final String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
+
+	/**
+	 * Options to specify base IRI.
+	 *
+	 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-base-iri">Base IRI</a>
+	 */
+	public static final String  BASE_IRI             	= "org.obda.owlreformulationplatform.baseiri";
 	
 	public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
-	
+
+    public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
+	public static final String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
+
 	public static final String  REWRITE 	= "rewrite";
 	
-	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
+//	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 	
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
@@ -66,13 +76,14 @@ public class QuestPreferences extends Properties {
 	
 	public static final String JDBC_DRIVER = "JDBC_DRIVER";
 	
+	public static final String PRINT_KEYS = "PRINT_KEYS";
+
 	// Tomcat connection pool properties
 	public static final String MAX_POOL_SIZE = "max_pool_size";
 	public static final String INIT_POOL_SIZE = "initial_pool_size";
 	public static final String REMOVE_ABANDONED = "remove_abandoned";
 	public static final String ABANDONED_TIMEOUT = "abandoned_timeout";
-	public static final String KEEP_ALIVE = "keep_alive";
-	
+	public static final String KEEP_ALIVE = "keep_alive";	
 	
 	private Logger				log						= LoggerFactory.getLogger(QuestPreferences.class);
 
@@ -161,7 +172,7 @@ public class QuestPreferences extends Properties {
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
 		keys.add(OPTIMIZE_EQUIVALENCES);
-		keys.add(OPTIMIZE_TBOX_SIGMA);
+//		keys.add(OPTIMIZE_TBOX_SIGMA);
 //		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;

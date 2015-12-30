@@ -34,7 +34,6 @@ import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.renderer.OWLEntityRendererImpl;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA

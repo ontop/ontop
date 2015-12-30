@@ -21,16 +21,16 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -39,21 +39,32 @@ public class DAGTest extends TestCase {
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	private void test_dag_index_nodes(String testname) throws Exception {
-		TBoxReasonerImpl reasoner = helper.load_dag(testname);
+		TBoxReasoner reasoner = helper.load_dag(testname);
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
-		Set<BasicClassDescription> classes= new HashSet<BasicClassDescription>();
-		for(Equivalences<BasicClassDescription> node : reasoner.getClasses()) {
-			for(BasicClassDescription c: node)
+		List<Description> classes= new LinkedList<Description>();
+		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
+			for(ClassExpression c: node)
+				classes.add(c);
+		}
+		for(Equivalences<DataRangeExpression> node : reasoner.getDataRangeDAG()) {
+			for(DataRangeExpression c: node)
 				classes.add(c);
 		}
 		
-		Set<Property> roles= new HashSet<Property>();
-		for(Equivalences<Property> node : reasoner.getProperties()) {
-			for(Property r: node)
+		List<Description> roles= new LinkedList<Description>();
+		for (Equivalences<ObjectPropertyExpression> node : reasoner.getObjectPropertyDAG()) {
+			for (ObjectPropertyExpression r: node)
 				roles.add(r);
 		}
+		for (Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
+			for (DataPropertyExpression r: node) {
+				roles.add(r);
+				roles.add(r); // ROMAN: hacky way of double-counting data properties (which have no inverses)
+			}
+		}
 		
+		System.out.println(classes);
 		System.out.println(roles);
 		assertEquals(exp_idx.get(0).size(), classes.size());
 		assertEquals(exp_idx.get(1).size(), roles.size());

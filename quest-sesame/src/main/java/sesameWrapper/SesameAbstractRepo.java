@@ -31,14 +31,14 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
 
 public abstract class SesameAbstractRepo implements
-		org.openrdf.repository.Repository {
+		org.openrdf.repository.Repository, AutoCloseable {
 
 	private RepositoryConnection repoConnection;
 	private Map<String, String> namespaces;
 	boolean isinitialized = false;
 	
 	public SesameAbstractRepo() {
-		namespaces = new HashMap<String, String>();
+		namespaces = new HashMap<>();
 	}
 
 	public RepositoryConnection getConnection() throws RepositoryException {
@@ -46,8 +46,9 @@ public abstract class SesameAbstractRepo implements
 			this.repoConnection = new RepositoryConnection(this,
 					getQuestConnection());
 		} catch (OBDAException e) {
-			System.out.println("Error creating repo connecion!");
+			System.err.println("Error creating repo connection!");
 			e.printStackTrace();
+            throw new RepositoryException(e.getMessage());
 		}
 		return repoConnection;
 
@@ -99,6 +100,11 @@ public abstract class SesameAbstractRepo implements
 			repoConnection.close();
 		
 	}
+
+    @Override
+    public void close() throws Exception {
+        this.shutDown();
+    }
 	
 
 	public abstract String getType();

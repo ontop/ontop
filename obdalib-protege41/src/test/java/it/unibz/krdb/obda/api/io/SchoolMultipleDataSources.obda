@@ -15,7 +15,7 @@ driverClass	org.postgresl.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	M4
-target		:P{id} a :Student ; :firstName {nome} ; :lastName {cognome} ; :age {eta}^^xsd:integer . 
+target		:P{id} a :Student ; :firstName {nome} ; :lastName {cognome} ; :age {eta}^^xsd:int . 
 source		select id, nome, cognome, eta from studenti
 
 mappingId	M5
@@ -36,7 +36,7 @@ driverClass	org.postgresl.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	M1
-target		:P{id} a :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:integer . 
+target		:P{id} a :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:int . 
 source		select id, fname, lname, age from student
 
 mappingId	M2

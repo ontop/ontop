@@ -25,10 +25,13 @@ import it.unibz.krdb.obda.model.BNodePredicate;
 public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate {
 
 	private static final long serialVersionUID = -1546325236776439443L;
+	
+	// The name of the function that creates URI's in Quest
+	public static final String QUEST_BNODE = "BNODE";
 
 	public BNodePredicateImpl(int arity) {
 		// TODO: BAD CODE! Predicate shouldn't store the arity and the type.
-		super(OBDAVocabulary.QUEST_BNODE, arity, null);
+		super(QUEST_BNODE, arity, null);
 	}
 
 	@Override

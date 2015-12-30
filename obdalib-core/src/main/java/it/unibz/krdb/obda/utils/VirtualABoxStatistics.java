@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.utils;
  */
 
 import it.unibz.krdb.obda.exception.NoDatasourceSelectedException;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -141,18 +143,18 @@ public class VirtualABoxStatistics {
 
 		for (OBDADataSource database : sourceList) {
 			URI sourceUri = database.getSourceID();
-			ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
+			List<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 
 			HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
 			for (OBDAMappingAxiom mapping : mappingList) {
 				String mappingId = mapping.getId();
 				int triplesCount = 0;
 				try {
-					OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
+					OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 					int tuples = getTuplesCount(database, sourceQuery);
 
-					CQIEImpl targetQuery = (CQIEImpl) mapping.getTargetQuery();
-					int atoms = getAtomCount(targetQuery);
+					List<Function> targetQuery = mapping.getTargetQuery();
+					int atoms = targetQuery.size();
 
 					triplesCount = tuples * atoms;
 				} catch (Exception e) {
@@ -171,7 +173,7 @@ public class VirtualABoxStatistics {
 		ResultSet rs = null;
 		int count = -1;
 		try {
-			String sql = String.format("select COUNT(*) %s", getSelectionString(query));
+            String sql = String.format("select COUNT(*) %s", getSelectionString(query));
 			Connection c = conn.getConnection(sourceId);
 			st = c.createStatement();
 
@@ -198,15 +200,12 @@ public class VirtualABoxStatistics {
 		return count;
 	}
 
-	private int getAtomCount(CQIEImpl query) {
-		return query.getBody().size();
-	}
-
 	private String getSelectionString(OBDASQLQuery query) {
 		final String originalSql = query.toString();
 		
 		String sql = originalSql.toLowerCase(); // make it lower case to help identify a string.
-		int start = sql.indexOf("from");
+        String fromStr = " from "; //spaces are added to the begining and the end of 'from' word. Because there could be any field that includes from string in mapping.
+		int start = sql.indexOf(fromStr);
 		int end = sql.length();
 		
 		return originalSql.substring(start, end);

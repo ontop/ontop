@@ -25,7 +25,7 @@ import java.sql.Types;
 public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		if (strings.length == 1)
@@ -42,7 +42,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
+		if (limit < 0 ) {
 			if (offset < 0) {
 				// If both limit and offset is not specified.
 				return "";
@@ -61,6 +61,50 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "LOCATE(%2$s , %1$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,SIGN(LOCATE(%s,%s)) * (LOCATE(%s,%s)-1))", str,   before, str, before, str);
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+		//rtrim is needed to remove the space in
+		return String.format("RTRIM(SUBSTR(%s,LOCATE(%s,%s)+LENGTH(%s), SIGN(LOCATE(%s,%s))*LENGTH(%s)))",
+				str, after, str , after, after, str, str);
+	}
+
+	@Override
+	public String dateNow() {
+		return "CURRENT TIMESTAMP";
+
+	}
+
+//	@Override
+//	public String strUuid() {
+//		return "TRIM(CHAR(HEX(GENERATE_UNIQUE())))";
+//	}
+//
+//	@Override
+//	//similar to UUID
+//	public String uuid() {
+//		return "'urn:uuid:'|| TRIM(CHAR(HEX(GENERATE_UNIQUE())))";
+//	}
+
+	@Override //maybe support from version 10 up
+	public String dateTZ(String str) {
+		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str),":", String.format("EXTRACT(TIMEZONE_MINUTE FROM %s)",str)  });
+	}
+
+	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
 		if (type == Types.VARCHAR) {
@@ -70,4 +114,64 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		return "CAST(" + value + " AS " + strType + ")";
 	}
+
+	@Override
+	public String getDummyTable() {
+		return "SELECT 1 from sysibm.sysdummy1";
+	}
+
+	@Override 
+	public String getSQLLexicalFormBoolean(boolean value) {
+		return value ? 	"1" : "0";
+	}
+
+	/***
+	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
+	 * The method will strip any fractional seconds found in the date time
+	 * (since we haven't found a nice way to support them in all databases). It
+	 * will also normalize the use of Z to the timezome +00:00 and last, if the
+	 * database is H2, it will remove all timezone information, since this is
+	 * not supported there.
+	 * 
+	 *
+	 * @return
+	 */
+	@Override
+	public String getSQLLexicalFormDatetime(String v) {
+		String datetime = v.replace('T', ' ');
+		int dotlocation = datetime.indexOf('.');
+		int zlocation = datetime.indexOf('Z');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+		int pluslocation = datetime.indexOf('+');
+		StringBuilder bf = new StringBuilder(datetime);
+		if (zlocation != -1) {
+			/*
+			 * replacing Z by +00:00
+			 */
+			bf.replace(zlocation, bf.length(), "+00:00");
+		}
+
+		if (dotlocation != -1) {
+			/*
+			 * Stripping the string from the presicion that is not supported by
+			 * SQL timestamps.
+			 */
+			// TODO we need to check which databases support fractional
+			// sections (e.g., oracle,db2, postgres)
+			// so that when supported, we use it.
+			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
+			if (endlocation == -1) {
+				endlocation = datetime.length();
+			}
+			bf.replace(dotlocation, endlocation, "");
+		}
+		if (bf.length() > 19) {
+			bf.delete(19, bf.length());
+		}
+		bf.insert(0, "'");
+		bf.append("'");
+		
+		return bf.toString();
+	}
+
 }

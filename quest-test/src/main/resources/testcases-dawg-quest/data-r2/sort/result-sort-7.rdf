@@ -20,7 +20,7 @@
             </rs:binding>
         </rs:solution>
 
-		<!-- Removed entry: Quest doesn't support multiple datatypes in sort() function.
+		<!-- Removed entry: Quest doesn't support multiple datatypes in sort() function. -->
         <rs:solution rdf:parseType="Resource">
             <rs:index rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</rs:index>
             <rs:binding rdf:parseType="Resource">
@@ -32,7 +32,7 @@
                 <rs:value rdf:datatype="http://www.w3.org/2001/XMLSchema#float">23.0</rs:value>
             </rs:binding>
         </rs:solution>
- 		-->
+
  		
         <rs:solution rdf:parseType="Resource">
             <rs:index rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</rs:index>

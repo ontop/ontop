@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
@@ -31,11 +30,9 @@ import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -56,8 +53,6 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String SPACE = " ";
 	private static final String COMMA = ",";
 	private static final String INV_IMPLIES = ":-";
-
-	private OBDAQueryModifiers modifiers = null;
 
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(Function head, List<Function> body) {		
@@ -218,56 +213,11 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return modifiers;
-	}
-
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		this.modifiers = modifiers;
-		listChanged();
-	}
-
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Function atom : body)
-			for (Term t : atom.getTerms()) {
-				for (Variable v : t.getReferencedVariables())
-					vars.add(v);
-			}
-		return vars;
-	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		Map<Variable, Integer> vars = new HashMap<Variable, Integer>();
 		for (Function atom : body) {
-			Map<Variable, Integer> atomCount = atom.getVariableCount();
-			for (Variable var : atomCount.keySet()) {
-				Integer count = vars.get(var);
-				if (count != null) {
-					vars.put(var, count + atomCount.get(var));
-				} else {
-					vars.put(var, new Integer(atomCount.get(var)));
-				}
-			}
-		}
-
-		Map<Variable, Integer> atomCount = head.getVariableCount();
-		for (Variable var : atomCount.keySet()) {
-			Integer count = vars.get(var);
-			if (count != null) {
-				vars.put(var, count + atomCount.get(var));
-			} else {
-				vars.put(var, new Integer(atomCount.get(var)));
-			}
+			TermUtils.addReferencedVariablesTo(vars, atom);
 		}
 		return vars;
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
 	}
 }

@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+:		http://myproject.org/odbs#
+
+[SourceDeclaration]
+sourceUri	database_conference
+connectionUrl	jdbc:mysql://10.7.20.39/conference
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	event
+target		:trace{n} :TcontainsE :event{e} .
+source		 select distinct 'submit the paper' as `n`, concat("paper", Submission.`paper` ) as `e` from Submission
+
+]]
+

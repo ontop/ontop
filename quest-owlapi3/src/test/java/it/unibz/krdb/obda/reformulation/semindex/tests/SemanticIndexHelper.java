@@ -21,20 +21,15 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-
-
-
-
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -53,9 +48,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.h2.jdbcx.JdbcDataSource;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -65,25 +58,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Helper class to load ontologies and comapre computed values to expected results
+ * Helper class to load ontologies and compare computed values to expected results
  *
  * @author Sergejs Pugac
  */
+
+// USED IN TWO TESTS ONLY
+
 public class SemanticIndexHelper {
     public final static Logger log = LoggerFactory.getLogger(SemanticIndexHelper.class);
 
-
-
-    public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-   
-    
-    public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+    public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+    private Ontology onto;
     
     public transient Connection conn;
-
-    private  OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    
-    private  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     private String owl_exists = "::__exists__::";
     private String owl_inverse_exists = "::__inverse__exists__::";
@@ -102,18 +90,13 @@ public class SemanticIndexHelper {
 
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
-        OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-        OWLAPI3Translator translator = new OWLAPI3Translator();
-
-        Ontology ontology = translator.translate(owlOntology);
+        Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(owlfile);
         return ontology;
-
     }
 
-    public TBoxReasonerImpl load_dag(String ontoname) throws Exception {
-
-    	return new TBoxReasonerImpl(load_onto(ontoname));
-        //return DAGBuilder.getDAG(load_onto(ontoname));
+    public TBoxReasoner load_dag(String ontoname) throws Exception {
+    	onto = load_onto(ontoname);
+    	return TBoxReasonerImpl.create(onto);
     }
 
     public List<List<Description>> get_results(String resname) {
@@ -183,15 +166,33 @@ public class SemanticIndexHelper {
                     inverse = true;
                 }
 
-                p = predicateFactory.getPredicate(uri, arity);
-
                 if (type.equals("classes")) {
-                    if (exists)
-                        description = descFactory.getPropertySomeRestriction(p, inverse);
+                    if (exists) {
+                    	if (onto.getVocabulary().containsObjectProperty(uri)) {
+                        	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
+                        	if (inverse)
+                        		prop = prop.getInverse();
+                            description = prop.getDomain();
+                    	}
+                    	else {
+                    		DataPropertyExpression prop = onto.getVocabulary().getDataProperty(uri);
+                    		description = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral);
+                    	}
+                    }
                     else
-                        description = descFactory.createClass(p);
-                } else {
-                    description = descFactory.createProperty(p, inverse);
+                        description = onto.getVocabulary().getClass(uri);
+                } 
+                else {
+                	if (onto.getVocabulary().containsObjectProperty(uri)) {	
+                    	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
+                        if (inverse)
+                        	description = prop.getInverse();
+                        else
+                        	description = prop;
+                	}
+                	else {
+                		description = onto.getVocabulary().getDataProperty(uri);
+                	}
                 }
 
 
@@ -213,22 +214,20 @@ public class SemanticIndexHelper {
         return rv;
     }
 
-    public List<String[]> get_abox(String resname) {
+    public List<String[]> get_abox(String resname) throws Exception {
         String resfile = owlloc + resname + ".abox";
         List<String[]> rv = new LinkedList<String[]>();
-        try {
-
-            FileInputStream fstream = new FileInputStream(resfile);
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String strLine;
-            while ((strLine = br.readLine()) != null) {
-                String[] tokens = strLine.split(" ");
-                rv.add(tokens);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+      
+        FileInputStream fstream = new FileInputStream(resfile);
+        DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String strLine;
+        while ((strLine = br.readLine()) != null) {
+            String[] tokens = strLine.split(" ");
+            rv.add(tokens);
         }
+        br.close();
+        
         return rv;
     }
 

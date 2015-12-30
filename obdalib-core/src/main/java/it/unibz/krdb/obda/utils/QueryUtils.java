@@ -23,15 +23,14 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 
 public class QueryUtils {
 
-	public static void copyQueryModifiers(OBDAQuery source, OBDAQuery target) {
-		target.getQueryModifiers().copy(source.getQueryModifiers());
-	}
+//	public static void copyQueryModifiers(OBDAQuery source, OBDAQuery target) {
+//		target.getQueryModifiers().copy(source.getQueryModifiers());
+//	}
 
 	public static boolean isBoolean(DatalogProgram query) {
 		for (CQIE rule : query.getRules()) {

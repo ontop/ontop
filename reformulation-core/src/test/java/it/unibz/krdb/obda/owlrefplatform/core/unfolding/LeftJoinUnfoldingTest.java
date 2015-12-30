@@ -39,7 +39,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		DatalogProgram queryProgram = fac.getDatalogProgram();
 		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
 		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getFunction(fac.getLeftJoinPredicate(), a, R);
+		Function lj = fac.getSPARQLLeftJoin(a, R);
 		Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
 		CQIE query = fac.getCQIE(head, lj);
 		queryProgram.appendRule(query);
@@ -64,8 +64,8 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q");
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+		DatalogProgram result = unfolder.unfold(queryProgram);
 
 		System.out.println(result);
 
@@ -85,7 +85,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		DatalogProgram queryProgram = fac.getDatalogProgram();
 		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
 		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getFunction(fac.getLeftJoinPredicate(), a, R);
+		Function lj = fac.getSPARQLLeftJoin(a, R);
 		Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
 		ArrayList<Function> bodyl = new ArrayList<Function>();
 		bodyl.add(a);
@@ -115,8 +115,8 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q");
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+		DatalogProgram result = unfolder.unfold(queryProgram);
 
 		System.out.println(result);
 
@@ -138,7 +138,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		DatalogProgram queryProgram = fac.getDatalogProgram();
 		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
 		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getFunction(fac.getLeftJoinPredicate(), a, R);
+		Function lj = fac.getSPARQLLeftJoin(a, R);
 		Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
 		CQIE query = fac.getCQIE(head, lj);
 		queryProgram.appendRule(query);
@@ -164,8 +164,8 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q");
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+		DatalogProgram result = unfolder.unfold(queryProgram);
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);
@@ -184,7 +184,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 			DatalogProgram queryProgram = fac.getDatalogProgram();
 			Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
 			Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-			Function lj = fac.getFunction(fac.getLeftJoinPredicate(), a, R);
+			Function lj = fac.getSPARQLLeftJoin(a, R);
 			Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
 			CQIE query = fac.getCQIE(head, lj);
 			queryProgram.appendRule(query);
@@ -210,8 +210,8 @@ public class LeftJoinUnfoldingTest extends TestCase {
 			CQIE rule3 = fac.getCQIE(head, body);
 			p.appendRule(rule3);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(p);
-			DatalogProgram result = unfolder.unfold(queryProgram, "q");
+			DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+			DatalogProgram result = unfolder.unfold(queryProgram);
 
 			// Only one rule should be returned where y is null
 			System.out.println(result);
@@ -244,13 +244,13 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		// main rule q(x,y) :- LJ(A(x), R(x,y))
 		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
 		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getFunction(fac.getLeftJoinPredicate(), a, R);
+		Function lj = fac.getSPARQLLeftJoin(a, R);
 		head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
 		CQIE rule1 = fac.getCQIE(head, lj);
 		query.appendRule(rule1);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(query, "q");
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+		DatalogProgram result = unfolder.unfold(query);
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);

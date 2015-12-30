@@ -20,11 +20,11 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-public interface CQIE extends OBDAQuery {
+public interface CQIE extends Serializable {
 
 	public Function getHead();
 
@@ -37,6 +37,4 @@ public interface CQIE extends OBDAQuery {
 	public CQIE clone();
 	
 	public Set<Variable> getReferencedVariables();
-	
-	public Map<Variable,Integer> getVariableCount();
 }

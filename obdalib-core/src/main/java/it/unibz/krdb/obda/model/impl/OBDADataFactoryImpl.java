@@ -20,23 +20,13 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
+import com.google.common.base.Preconditions;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 
 import java.net.URI;
 import java.util.Collection;
@@ -44,22 +34,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-
-//import com.hp.hpl.jena.iri.IRI;
-//import com.hp.hpl.jena.iri.IRIFactory;
-
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
 	
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
+	private DatatypeFactoryImpl datatypes = null;
+	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
+	
 
 	private static int counter = 0;
 	
-	protected OBDADataFactoryImpl() {
+	private OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
 
@@ -76,24 +63,41 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return irifactory;
 	}
-
-	public static org.openrdf.model.URI getIRI(String s){
-		return getIRIFactory().createURI(s);
-				}
 	
+	@Override
+	public DatatypeFactory getDatatypeFactory() {
+		if (datatypes == null) {
+			datatypes = new DatatypeFactoryImpl();
+		}
+		return datatypes;
+	}
+
+	
+	@Override 
+	public JdbcTypeMapper getJdbcTypeMapper() {
+		return jdbcTypeMapper;
+	}
+	
+	
+		
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {
-		if (arity == 1) {
-			return new PredicateImpl(name, arity,
-					new COL_TYPE[] { COL_TYPE.OBJECT });
-		} else {
+//		if (arity == 1) {
+//			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
+//		} else {
 			return new PredicateImpl(name, arity, null);
-		}
+//		}
 	}
+	
+	@Override
+	public Predicate getPredicate(String uri, COL_TYPE[] types) {
+		return new PredicateImpl(uri, types.length, types);
+	}
+
 
 	public Predicate getObjectPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
@@ -101,6 +105,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	public Predicate getDataPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+	}
+	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
 	}
 
 	public Predicate getClassPredicate(String name) {
@@ -124,23 +131,41 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getTypedTerm(Term value, COL_TYPE type) {
+		Predicate pred = getDatatypeFactory().getTypePredicate(type);
+		if (pred == null)
+			throw new RuntimeException("Unknown data type!");
+		
+		return getFunction(pred, value);
+	}
+	
+	@Override
 	public ValueConstant getConstantLiteral(String value, String language) {
-		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
+		return new ValueConstantImpl(value, language.toLowerCase());
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, Term language) {
+		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getFunction(pred, value, language);
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, String language) {
+		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.LITERAL);		
+		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getFunction(pred, value, lang);
 	}
 	
 	@Override
 	public ValueConstant getConstantFreshLiteral() {
+		// TODO: a bit more elaborate name is needed to avoid conflicts
 		return new ValueConstantImpl("f" + (counter++), COL_TYPE.LITERAL);
 	}
 
 	@Override
 	public Variable getVariable(String name) {
 		return new VariableImpl(name);
-	}
-
-	@Override
-	public Variable getVariableNondistinguished() {
-		return new AnonymousVariable();
 	}
 
 	@Override
@@ -174,22 +199,37 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(CQIE rule) {
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rule);
+		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
-
+	
 	@Override
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		return p;
 	}
+	
+	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.appendRule(rules);
+		p.getQueryModifiers().copy(modifiers);
+		return p;
+	}
+	
 
 	@Override
-	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
+	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
+	}
+
+	@Override
+	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery) {
+		String id = IDGenerator.getNextUniqueID("MAPID-");
+		return getRDBMSMappingAxiom(id, sourceQuery, targetQuery);
 	}
 
 	@Override
@@ -197,74 +237,36 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new SQLQueryImpl(query);
 	}
 
-	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery) {
-		return new RDBMSMappingAxiomImpl(id, new SQLQueryImpl(sql), targetQuery);
-	}
-
-	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery) {
-		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
-		return getRDBMSMappingAxiom(id, sql, targetQuery);
-	}
-
-	
-	@Override
-	public Predicate getDataTypePredicateLiteral() {
-		return OBDAVocabulary.RDFS_LITERAL;
-	}
-	
-	@Override
-	public Predicate getDataTypePredicateLiteralLang() {
-		return OBDAVocabulary.RDFS_LITERAL_LANG;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateString() {
-		return OBDAVocabulary.XSD_STRING;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateInteger() {
-		return OBDAVocabulary.XSD_INTEGER;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDecimal() {
-		return OBDAVocabulary.XSD_DECIMAL;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDouble() {
-		return OBDAVocabulary.XSD_DOUBLE;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDateTime() {
-		return OBDAVocabulary.XSD_DATETIME;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateBoolean() {
-		return OBDAVocabulary.XSD_BOOLEAN;
-	}
-
-	@Override
-	public Predicate getUriTemplatePredicate(int arity) {
-		return new URITemplatePredicateImpl(arity);
-	}
-	
 	
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		Predicate uriPred = getUriTemplatePredicate(terms.length);
+		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
+		return getFunction(uriPred, terms);		
+	}
+	
+	@Override
+	public Function getUriTemplate(List<Term> terms) {
+		Predicate uriPred = new URITemplatePredicateImpl(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
-	public Predicate getBNodeTemplatePredicate(int arity) {
-		return new BNodePredicateImpl(arity);
+	public Function getUriTemplateForDatatype(String type) {
+		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type, COL_TYPE.OBJECT));
 	}
+	
+	@Override
+	public Function getBNodeTemplate(Term... terms) {
+		Predicate pred = new BNodePredicateImpl(terms.length);
+		return getFunction(pred, terms);
+	}
+	
+	@Override
+	public Function getBNodeTemplate(List<Term> terms) {
+		Predicate pred = new BNodePredicateImpl(terms.size());
+		return getFunction(pred, terms);
+	}
+
 
 	@Override
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
@@ -305,6 +307,114 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionAND(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.AND, term1, term2);
 	}
+	
+	@Override
+	public Function getFunctionStrStarts(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.STR_STARTS, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionStrEnds(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.STR_ENDS, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionContains(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.CONTAINS, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionEncodeForUri(Term term1) {
+		return getFunction(OBDAVocabulary.ENCODE_FOR_URI, term1);
+	}
+	@Override
+	public Function getFunctionAbs(Term term1){
+		return getFunction(OBDAVocabulary.ABS, term1);
+	}
+
+	@Override
+	public Function getFunctionCeil(Term term1){
+	return getFunction(OBDAVocabulary.CEIL, term1);
+	}
+	@Override
+	public Function getFunctionFloor(Term term1){
+	return getFunction(OBDAVocabulary.FLOOR, term1);
+	}
+	@Override
+	public Function getFunctionRound(Term term1){
+	return getFunction(OBDAVocabulary.ROUND, term1);
+	}
+	@Override
+	public Function getFunctionSHA1(Term term1){
+		return getFunction(OBDAVocabulary.SHA1, term1);
+
+	}
+	@Override
+	public Function getFunctionSHA256(Term term1){
+		return getFunction(OBDAVocabulary.SHA256, term1);
+
+	}
+	@Override
+	public Function getFunctionSHA512(Term term1){
+		return getFunction(OBDAVocabulary.SHA512, term1);
+
+	}
+	@Override
+	public Function getFunctionMD5(Term term1){
+		return getFunction(OBDAVocabulary.MD5, term1);
+
+	}
+	@Override
+	public Function getFunctionRand(){
+	return getFunction(OBDAVocabulary.RAND);
+	}
+	@Override
+	public Function getFunctionUUID(){
+		return getFunction(OBDAVocabulary.UUID);
+		}
+
+	@Override
+	public Function getFunctionstrUUID(){
+		return getFunction(OBDAVocabulary.STRUUID);
+	}
+	@Override
+	public Function getFunctionNow(){
+		return getFunction(OBDAVocabulary.NOW);
+		}
+	
+	@Override
+	public Function getFunctionYear(Term arg){
+		return getFunction(OBDAVocabulary.YEAR, arg);
+		}
+	
+	@Override
+	public Function getFunctionDay(Term arg){
+		return getFunction(OBDAVocabulary.DAY, arg);
+		}
+	
+	@Override
+	public Function getFunctionMonth(Term arg){
+		return getFunction(OBDAVocabulary.MONTH, arg);
+		}
+	
+	@Override
+	public Function getFunctionMinutes(Term arg){
+		return getFunction(OBDAVocabulary.MINUTES, arg);
+		}
+	@Override
+	public Function getFunctionSeconds(Term arg){
+		return getFunction(OBDAVocabulary.SECONDS, arg);
+		}
+	
+	@Override
+	public Function getFunctionTZ(Term arg){
+		return getFunction(OBDAVocabulary.TZ, arg);
+		}
+	
+	@Override
+	public Function getFunctionHours(Term arg){
+		return getFunction(OBDAVocabulary.HOURS, arg);
+		}
 
 //	@Override
 //	public Function getANDFunction(List<Term> terms) {
@@ -364,16 +474,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 
 	@Override
-	public Predicate getJoinPredicate() {
-		return OBDAVocabulary.SPARQL_JOIN;
-	}
-	
-	@Override
-	public Predicate getLeftJoinPredicate() {
-		return OBDAVocabulary.SPARQL_LEFTJOIN;
-	}
-	
-	@Override
 	public Function getLANGMATCHESFunction(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
@@ -381,6 +481,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getFunctionLike(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.SPARQL_LIKE, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionRegex(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3 );
+	}
+	
+	@Override
+	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
 	}
 	
 	@Override
@@ -395,7 +505,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionSubstract(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SUBSTRACT, term1, term2);
+		return getFunction(OBDAVocabulary.SUBTRACT, term1, term2);
 	}
 
 	@Override
@@ -403,6 +513,52 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
 	}
 
+    @Override
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+    }
+
+    @Override
+    public Function getFunctionLength(Term term1) {
+        return getFunction(OBDAVocabulary.STRLEN, term1);
+    } //added by Nika
+    
+    @Override
+    public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
+        return getFunction(OBDAVocabulary.SUBSTR, term1, term2, term3);
+    } //added by Nika
+
+	@Override
+	public Function getFunctionSubstring(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.SUBSTR, term1, term2);
+	}
+    
+    @Override
+    public Function getFunctionUpper(Term term) {
+        return getFunction(OBDAVocabulary.UCASE, term);
+    } 
+    
+    @Override
+    public Function getFunctionLower(Term term) {
+        return getFunction(OBDAVocabulary.LCASE, term);
+    } 
+    
+    
+    @Override
+    public Function getFunctionStrBefore(Term term1, Term term2){
+    	return getFunction(OBDAVocabulary.STRBEFORE, term1, term2); 
+    } 
+    @Override
+	public Function getFunctionStrAfter(Term term1, Term term2){
+    	return getFunction(OBDAVocabulary.STRAFTER, term1, term2);
+    } 
+    
+	@Override
+	public Function getFunctionCast(Term term1, Term term2) {
+		// TODO implement cast function
+		return getFunction(OBDAVocabulary.QUEST_CAST, term1, term2);
+	}
+	
 	@Override
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, 
 			String password, String driverclass) {
@@ -413,7 +569,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, 
 			String username, String password, String driverclass) {
-		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
+        Preconditions.checkNotNull(sourceuri, "sourceuri is null");
+        Preconditions.checkNotNull(jdbcurl, "jdbcurl is null");
+        Preconditions.checkNotNull(password, "password is null");
+        Preconditions.checkNotNull(username, "username is null");
+        Preconditions.checkNotNull(driverclass, "driverclass is null");
+
+        DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
@@ -423,60 +585,115 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	
 	@Override
-	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types) {
-		return new PredicateImpl(uri, arity, types);
-	}
-
-	@Override
 	public BNode getConstantBNode(String name) {
 		return new BNodeConstantImpl(name);
 	}
 
 	@Override
-	public Constant getConstantNULL() {
-		return OBDAVocabulary.NULL;
+	public Function getFunctionIsTrue(Term term) {
+		return getFunction(OBDAVocabulary.IS_TRUE, term);
 	}
 
 	@Override
-	public Constant getConstantTrue() {
-		return OBDAVocabulary.TRUE;
+	public Function getSPARQLJoin(Function t1, Function t2) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
 	@Override
-	public Constant getConstantFalse() {
-		return OBDAVocabulary.FALSE;
+	public Function getSPARQLLeftJoin(Function t1, Function t2) {
+		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}
 
 	@Override
-	public Predicate getDataTypePredicateUnsupported(String uri) {
-		return getDataTypePredicateUnsupported(uri);
+	public ValueConstant getBooleanConstant(boolean value) {
+		return value ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE;
 	}
 
 	@Override
-	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
-		switch (type) {
-		case LITERAL:
-			return getDataTypePredicateLiteral();
-		case LITERAL_LANG:
-			return getDataTypePredicateLiteral();
-		case STRING:
-			return getDataTypePredicateString();
-		case INTEGER:
-			return getDataTypePredicateInteger();
-		case DECIMAL:
-			return getDataTypePredicateDecimal();
-		case DOUBLE:
-			return getDataTypePredicateDouble();
-		case DATETIME:
-			return getDataTypePredicateDateTime();
-		case BOOLEAN:
-			return getDataTypePredicateBoolean();
-		case OBJECT:
-			return getUriTemplatePredicate(1);
-		case BNODE:
-			return getBNodeTemplatePredicate(1);
-		default:
-			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
+	public Function getTripleAtom(Term subject, Term predicate, Term object) {
+		return getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+	}
+
+	private int suffix = 0;
+	
+	/***
+	 * Replaces each variable 'v' in the query for a new variable constructed
+	 * using the name of the original variable plus the counter. For example
+	 * 
+	 * <pre>
+	 * q(x) :- C(x)
+	 * 
+	 * results in
+	 * 
+	 * q(x_1) :- C(x_1)
+	 * 
+	 * if counter = 1.
+	 * </pre>
+	 * 
+	 * <p>
+	 * This method can be used to generate "fresh" rules from a datalog program
+	 * so that it can be used during a resolution step.
+	 * suffix
+	 *            The integer that will be apended to every variable name
+	 * @param rule
+	 * @return
+	 */
+	@Override
+	public CQIE getFreshCQIECopy(CQIE rule) {
+		
+		int suff = ++suffix;
+		
+		// This method doesn't support nested functional terms
+		CQIE freshRule = rule.clone();
+		Function head = freshRule.getHead();
+		List<Term> headTerms = head.getTerms();
+		for (int i = 0; i < headTerms.size(); i++) {
+			Term term = headTerms.get(i);
+			Term newTerm = getFreshTerm(term, suff);
+			headTerms.set(i, newTerm);
 		}
+
+		List<Function> body = freshRule.getBody();
+		for (Function atom : body) {
+			List<Term> atomTerms = atom.getTerms();
+			for (int i = 0; i < atomTerms.size(); i++) {
+				Term term = atomTerms.get(i);
+				Term newTerm = getFreshTerm(term, suff);
+				atomTerms.set(i, newTerm);
+			}
+		}
+		return freshRule;
 	}
+
+	private Term getFreshTerm(Term term, int suff) {
+		Term newTerm;
+		if (term instanceof Variable) {
+			Variable variable = (Variable) term;
+			newTerm = getVariable(variable.getName() + "_" + suff);
+		} 
+		else if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+			List<Term> innerTerms = functionalTerm.getTerms();
+			List<Term> newInnerTerms = new LinkedList<>();
+			for (int j = 0; j < innerTerms.size(); j++) {
+				Term innerTerm = innerTerms.get(j);
+				newInnerTerms.add(getFreshTerm(innerTerm, suff));
+			}
+			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
+			Function newFunctionalTerm = getFunction(newFunctionSymbol, newInnerTerms);
+			newTerm = newFunctionalTerm;
+		} 
+		else if (term instanceof Constant) {
+			newTerm = term.clone();
+		} 
+		else {
+			throw new RuntimeException("Unsupported term: " + term);
+		}
+		return newTerm;
+	}
+
+
+
+	
+
 }

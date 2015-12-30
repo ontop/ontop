@@ -79,9 +79,6 @@ public class TMappingConcurrencyErrorFixTest{
 	public void setUp() throws Exception {
 		
 		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
 		// String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb;";
 		String username = "sa";
@@ -134,14 +131,12 @@ public class TMappingConcurrencyErrorFixTest{
 
 	@After
 	public void tearDown() throws Exception{
-		try {
+	
 			dropTables();
 			reasoner.dispose();
 			connection.close();
 			
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 		
 	}
 	
@@ -183,7 +178,9 @@ public class TMappingConcurrencyErrorFixTest{
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
+			
 			conn.close();
 			reasoner.dispose();
 		}
@@ -191,7 +188,7 @@ public class TMappingConcurrencyErrorFixTest{
 	}
 
 	/**
-	 * Test use of quoted mixed case table name
+	 * Test no error is generate before SPARQL query 
 	 * @throws Exception
 	 */
 	@Test

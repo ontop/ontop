@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.Serializable;
@@ -31,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
 /***
  * A container for the database and mapping declarations needed to define a
@@ -63,9 +63,13 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public String getBuiltBy();
 
+	
+	
 	public void setPrefixManager(PrefixManager prefman);
 
 	public PrefixManager getPrefixManager();
+	
+	
 
 	public OBDADataFactory getDataFactory();
 
@@ -77,14 +81,8 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void removeSourcesListener(OBDAModelListener listener);
 
-	public void fireSourceAdded(OBDADataSource source);
-
-	public void fireSourceRemoved(OBDADataSource source);
-
 	public void fireSourceParametersUpdated();
 
-	public void fireSourceNameUpdated(URI old, OBDADataSource neu); // TODO
-																	// remove
 
 	/**
 	 * Returns the list of all sources defined in this OBDA model. This list is
@@ -128,7 +126,7 @@ public interface OBDAModel extends Cloneable, Serializable {
 	/**
 	 * Returns all the mappings the given data source id.
 	 */
-	public ArrayList<OBDAMappingAxiom> getMappings(URI sourceuri);
+	public List<OBDAMappingAxiom> getMappings(URI sourceuri);
 
 	/**
 	 * Returns all the mappings in this model.
@@ -160,18 +158,19 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	/**
 	 * Updates the mapping id.
+	 * @throws DuplicateMappingException 
 	 */
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid);
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException;
 
 	/**
 	 * Replaces the old target query with the new one given its id.
 	 */
-	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, OBDAQuery targetQuery);
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, List<Function> targetQuery);
 
 	/**
 	 * Replaces the old source query with the new one given its id.
 	 */
-	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery);
+	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery);
 
 	/**
 	 * Refactors every mapping in this OBDA model by modifying each mapping of
@@ -191,36 +190,12 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void reset();
 
-	public Set<Predicate> getDeclaredPredicates();
-
-	public Set<Predicate> getDeclaredClasses();
-
-	public Set<Predicate> getDeclaredObjectProperties();
-
-	public Set<Predicate> getDeclaredDataProperties();
-
-	public boolean declarePredicate(Predicate predicate);
-
-	public boolean declareClass(Predicate classname);
-
-	public boolean declareObjectProperty(Predicate property);
-
-	public boolean declareDataProperty(Predicate property);
-
-	public boolean unDeclarePredicate(Predicate predicate);
-
-	public boolean unDeclareClass(Predicate classname);
-
-	public boolean unDeclareObjectProperty(Predicate property);
-
-	public boolean unDeclareDataProperty(Predicate property);
-
-	public boolean isDeclaredClass(Predicate classname);
-
-	public boolean isDeclaredObjectProperty(Predicate property);
-
-	public boolean isDeclaredDataProperty(Predicate property);
-
-	public boolean isDeclared(Predicate predicate);
-
+	
+	/**
+	 * 
+	 * @return
+	 */
+	
+	public OntologyVocabulary getOntologyVocabulary();
+		
 }

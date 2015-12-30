@@ -20,45 +20,68 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
+import java.util.Collection;
 import java.util.Iterator;
 
-public class OWLAPI3Materializer {
+public class OWLAPI3Materializer implements AutoCloseable{
 
-	private Iterator<Assertion> assertions = null;
-	private QuestMaterializer materializer;
+	private final Iterator<Assertion> assertions;
+	private final QuestMaterializer materializer;
 	
-	public OWLAPI3Materializer(OBDAModel model) throws Exception {
-		 this(model, null);
+	public OWLAPI3Materializer(OBDAModel model, boolean doStreamResults) throws Exception {
+		 this(model, null, doStreamResults);
 	}
+
 	
-	public OWLAPI3Materializer(OBDAModel model, Ontology onto) throws Exception {
-		 materializer = new QuestMaterializer(model, onto);
+	public OWLAPI3Materializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+		 materializer = new QuestMaterializer(model, onto, doStreamResults);
 		 assertions = materializer.getAssertionIterator();
 	}
-	
-	public QuestOWLIndividualIterator getIterator() {
-		return new QuestOWLIndividualIterator(assertions);
+
+    /*
+     * only materialize the predicates in  `predicates`
+     */
+    public OWLAPI3Materializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
+        materializer = new QuestMaterializer(model, onto, predicates, doStreamResults);
+        assertions = materializer.getAssertionIterator();
+    }
+
+    public OWLAPI3Materializer(OBDAModel obdaModel, Ontology onto, Predicate predicate, boolean doStreamResults)  throws Exception{
+        this(obdaModel, onto, ImmutableSet.of(predicate), doStreamResults);
+    }
+
+    public QuestOWLIndividualAxiomIterator getIterator() {
+		return new QuestOWLIndividualAxiomIterator(assertions);
 	}
 	
 	public void disconnect() {
 		materializer.disconnect();
 	}
 	
-	public long getTriplesCount()
-	{ try {
-		return materializer.getTriplesCount();
-	} catch (Exception e) {
-		e.printStackTrace();
-	}return -1;
+	public long getTriplesCount() { 
+		try {
+			return materializer.getTriplesCount();
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public int getVocabularySize() {
 		return materializer.getVocabSize();
 	}
+
+    @Override
+    public void close() throws Exception {
+        disconnect();
+    }
 }

@@ -1,0 +1,523 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.semanticweb.org/orchidlioness/ontologies/2014/4/final_project"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     ontologyIRI="http://www.semanticweb.org/orchidlioness/ontologies/2014/4/final_project">
+    <Prefix name="" IRI="http://www.semanticweb.org/orchidlioness/ontologies/2014/4/final_project#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="#Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Author"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#BBC_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#BookForDavies"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Davies_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Double_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Elizabethan"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Era"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Favorite"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Onebook"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Puritan"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Quadruple_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Rationalist"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Romanticist"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Shallcross_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Snodin_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Victorian"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Welch_Adaptation"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Work"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#BBCadapts"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#DaviesAdapts"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#adaptedBy"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#adaptedByBBC"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#adaptedByDavies"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#adapts"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#from"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#onlyWrites"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#producedBy"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#producedByBBC"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#publishes"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#writeForDavies"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#writes"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#writtenBy"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#writtenIn"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#beginYear"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#endYear"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#eraName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#filmTitle"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#firstname"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#screenWriter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#surname"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#title"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#yearOfAdaptation"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#yearOfPublication"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="#Adaptation"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#adapts"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Author"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#writes"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#BBC_Adaptation"/>
+        <Class IRI="#Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#BBC_Adaptation"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#BBCadapts"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#BookForDavies"/>
+        <Class IRI="#Work"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Davies_Adaptation"/>
+        <Class IRI="#BBC_Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Davies_Adaptation"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#DaviesAdapts"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Double_Adaptation"/>
+        <Class IRI="#Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Elizabethan"/>
+        <Class IRI="#Author"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Era"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#publishes"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Favorite"/>
+        <Class IRI="#Author"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Favorite"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#producedByBBC"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Favorite"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#writeForDavies"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Onebook"/>
+        <Class IRI="#Work"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Onebook"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#adaptedBy"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Puritan"/>
+        <Class IRI="#Author"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Quadruple_Adaptation"/>
+        <Class IRI="#Double_Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Rationalist"/>
+        <Class IRI="#Author"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Romanticist"/>
+        <Class IRI="#Author"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Shallcross_Adaptation"/>
+        <Class IRI="#BBC_Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Snodin_Adaptation"/>
+        <Class IRI="#BBC_Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Victorian"/>
+        <Class IRI="#Author"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Welch_Adaptation"/>
+        <Class IRI="#BBC_Adaptation"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Work"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#writtenBy"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Work"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#writtenIn"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#BBCadapts"/>
+        <ObjectProperty IRI="#adapts"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#DaviesAdapts"/>
+        <ObjectProperty IRI="#BBCadapts"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#adaptedByBBC"/>
+        <ObjectProperty IRI="#adaptedBy"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#adaptedByDavies"/>
+        <ObjectProperty IRI="#adaptedByBBC"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#onlyWrites"/>
+        <ObjectProperty IRI="#writes"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#producedByBBC"/>
+        <ObjectProperty IRI="#producedBy"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#writeForDavies"/>
+        <ObjectProperty IRI="#writes"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#writtenBy"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#adaptedByBBC"/>
+        <ObjectProperty IRI="#BBCadapts"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#adaptedByDavies"/>
+        <ObjectProperty IRI="#DaviesAdapts"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#adaptedBy"/>
+        <ObjectProperty IRI="#adapts"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#from"/>
+        <ObjectProperty IRI="#producedBy"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#writtenIn"/>
+        <ObjectProperty IRI="#publishes"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#writtenBy"/>
+        <ObjectProperty IRI="#writes"/>
+    </InverseObjectProperties>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#adapts"/>
+    </FunctionalObjectProperty>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#from"/>
+    </FunctionalObjectProperty>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#onlyWrites"/>
+    </FunctionalObjectProperty>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#publishes"/>
+    </FunctionalObjectProperty>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#writtenBy"/>
+    </FunctionalObjectProperty>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#writtenIn"/>
+    </FunctionalObjectProperty>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#adaptedBy"/>
+        <Class IRI="#Work"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#adaptedByBBC"/>
+        <Class IRI="#Work"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#adaptedByDavies"/>
+        <Class IRI="#BookForDavies"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#from"/>
+        <Class IRI="#Adaptation"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#onlyWrites"/>
+        <Class IRI="#Author"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#producedByBBC"/>
+        <Class IRI="#Favorite"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#writeForDavies"/>
+        <Class IRI="#Author"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#writes"/>
+        <Class IRI="#Author"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#writtenIn"/>
+        <Class IRI="#Work"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#adaptedBy"/>
+        <Class IRI="#Adaptation"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#adaptedByBBC"/>
+        <Class IRI="#BBC_Adaptation"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#adaptedByDavies"/>
+        <Class IRI="#Davies_Adaptation"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#from"/>
+        <Class IRI="#Author"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#onlyWrites"/>
+        <Class IRI="#Onebook"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#producedByBBC"/>
+        <Class IRI="#BBC_Adaptation"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#writeForDavies"/>
+        <Class IRI="#BookForDavies"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#writes"/>
+        <Class IRI="#Work"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#writtenIn"/>
+        <Class IRI="#Era"/>
+    </ObjectPropertyRange>
+    <FunctionalDataProperty>
+        <DataProperty IRI="#firstname"/>
+    </FunctionalDataProperty>
+    <FunctionalDataProperty>
+        <DataProperty IRI="#surname"/>
+    </FunctionalDataProperty>
+    <DataPropertyDomain>
+        <DataProperty IRI="#beginYear"/>
+        <Class IRI="#Era"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#endYear"/>
+        <Class IRI="#Era"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#eraName"/>
+        <Class IRI="#Era"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#filmTitle"/>
+        <Class IRI="#Adaptation"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#firstname"/>
+        <Class IRI="#Author"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#screenWriter"/>
+        <Class IRI="#Adaptation"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#surname"/>
+        <Class IRI="#Author"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#title"/>
+        <Class IRI="#Work"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#yearOfAdaptation"/>
+        <Class IRI="#Adaptation"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#yearOfPublication"/>
+        <Class IRI="#Work"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="#beginYear"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#endYear"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#eraName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#filmTitle"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#firstname"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#screenWriter"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#surname"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#title"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#yearOfAdaptation"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#yearOfPublication"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

@@ -39,6 +39,7 @@ import java.io.FileReader;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,7 +47,7 @@ import junit.framework.TestCase;
 
 public class VirtualABoxMaterializerTest extends TestCase {
 
-	OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -60,7 +61,7 @@ try{
 		 * Setting the database;
 		 */
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -99,6 +100,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -122,12 +124,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -135,13 +137,13 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		assertEquals(0, assertions.size());
@@ -185,6 +187,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -219,12 +222,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -232,12 +235,12 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		
@@ -281,6 +284,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -324,12 +328,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -337,13 +341,13 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
 		model.addMapping(source3.getSourceID(), map1);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -386,6 +390,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -410,7 +415,7 @@ try{
 		source3.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source3);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -453,6 +458,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -496,12 +502,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -509,11 +515,11 @@ try{
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
 		model.addMapping(source2.getSourceID(), map1);
 		
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 	
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -554,6 +560,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -572,10 +579,10 @@ try{
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		
-		final Term firstNameVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("fn"));
-		final Term lastNameVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("ln"));
-		final Term ageVariable = fac.getFunction(fac.getDataTypePredicateInteger(), fac.getVariable("age"));
-		final Term schoolUriVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("schooluri"));
+		final Term firstNameVariable = fac.getTypedTerm(fac.getVariable("fn"), COL_TYPE.STRING);
+		final Term lastNameVariable = fac.getTypedTerm(fac.getVariable("ln"), COL_TYPE.STRING);
+		final Term ageVariable = fac.getTypedTerm(fac.getVariable("age"), COL_TYPE.INTEGER);
+		final Term schoolUriVariable = fac.getTypedTerm(fac.getVariable("schooluri"), COL_TYPE.STRING);
 		
 		headTerms.add(firstNameVariable);
 		headTerms.add(lastNameVariable);
@@ -584,17 +591,16 @@ try{
 
 		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = fac.getFunction(fac.getUriTemplatePredicate(2),
-				fac.getConstantLiteral("http://schools.com/persons{}{}"), 
+		Term objectTerm = fac.getUriTemplate(fac.getConstantLiteral("http://schools.com/persons{}{}"),  // R: was binary -- why?
 				firstNameVariable,
 				lastNameVariable);
 
 //		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getClassPredicate("Person");
-		Predicate fn = fac.getDataPropertyPredicate("firstn");
-		Predicate ln = fac.getDataPropertyPredicate("lastn");
-		Predicate age = fac.getDataPropertyPredicate("agee");
-		Predicate hasschool = fac.getDataPropertyPredicate("hasschool");
+		Predicate fn = fac.getDataPropertyPredicate("firstn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("lastn", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("agee", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
 		Predicate school = fac.getClassPredicate("School");
 //		body.add(fac.getFunctionalTerm(person, objectTerm));
 //		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
@@ -604,12 +610,18 @@ try{
 //		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		
-		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql1, fac.getCQIE(head, fac.getFunction(person, objectTerm)));
-		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getFunction(fn, objectTerm, firstNameVariable)));
-		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getFunction(ln, objectTerm, lastNameVariable)));
-		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getFunction(age, objectTerm, ageVariable)));
-		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
-		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getFunction(school, schoolUriVariable)));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql1), 
+								Collections.singletonList(fac.getFunction(person, objectTerm)));
+		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql2), 
+								Collections.singletonList(fac.getFunction(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql3), 
+								Collections.singletonList(fac.getFunction(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql4), 
+								Collections.singletonList(fac.getFunction(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql5), 
+								Collections.singletonList(fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql6), 
+								Collections.singletonList(fac.getFunction(school, schoolUriVariable)));
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
@@ -620,7 +632,7 @@ try{
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 		
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		int count = materializer.getTripleCount();

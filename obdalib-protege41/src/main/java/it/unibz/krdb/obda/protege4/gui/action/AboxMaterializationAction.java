@@ -23,8 +23,7 @@ package it.unibz.krdb.obda.protege4.gui.action;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
@@ -83,6 +82,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLOntologyImpl;
 public class AboxMaterializationAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
+	private static final boolean DO_STREAM_RESULTS = true;
 
 	private OWLEditorKit editorKit = null;
 	private OBDAModel obdaModel = null;
@@ -183,7 +183,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private void materializeToFile(int format) throws Exception
 	{
 		String fileName = "";
-		int count = 0;
+		long count = 0;
 		long time = 0;
 		int vocab = 0;
 		final JFileChooser fc = new JFileChooser();
@@ -198,17 +198,17 @@ public class AboxMaterializationAction extends ProtegeAction {
 						new OutputStreamWriter(out, "UTF-8"));
 
 				OWLOntology ontology = modelManager.getActiveOntology();
-				OWLOntologyManager manager = modelManager
-						.getOWLOntologyManager();
-				OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-				Ontology onto = new OWLAPI3Translator().translate(ontology);
+				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
+				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+				Ontology onto = OWLAPI3TranslatorUtility.translate(ontology);
+				obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
 				
 				final long startTime = System.currentTimeMillis();
 				if (format != 3) {
 					// we are going to use SESAME MATERIALIZER
 				
 					SesameMaterializer materializer = new SesameMaterializer(
-							obdaModel, onto);
+							obdaModel, onto, DO_STREAM_RESULTS);
 					Iterator<Statement> iterator = materializer.getIterator();
 					RDFWriter writer = null;
 
@@ -228,24 +228,24 @@ public class AboxMaterializationAction extends ProtegeAction {
 					while (iterator.hasNext())
 						writer.handleStatement(iterator.next());
 					writer.endRDF();
-					count = (int) materializer.getTriplesCount();
+					count = materializer.getTriplesCount();
 					vocab = materializer.getVocabularySize();
 					materializer.disconnect();
 				}
 
 				else {
 					// owlxml, OWL materializer
-					OWLAPI3Materializer materializer = new OWLAPI3Materializer(
-							obdaModel, onto);
-					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
-					while (iterator.hasNext())
-						manager.addAxiom(ontology, iterator.next());
-					manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
-							new WriterDocumentTarget(fileWriter));
+					try (OWLAPI3Materializer materializer = new OWLAPI3Materializer(
+							obdaModel, onto, DO_STREAM_RESULTS)) {
+						Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
+						while (iterator.hasNext())
+							manager.addAxiom(ontology, iterator.next());
+						manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
+								new WriterDocumentTarget(fileWriter));
 
-					count = (int) materializer.getTriplesCount();
-					vocab = materializer.getVocabularySize();
-					materializer.disconnect();
+						count = materializer.getTriplesCount();
+						vocab = materializer.getVocabularySize();
+					}
 				}
 
 				fileWriter.close();
@@ -287,7 +287,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		if (response == JOptionPane.YES_OPTION) {			
 			try {
 			
-				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel);
+				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
 				

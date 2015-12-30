@@ -21,19 +21,27 @@ package it.unibz.krdb.obda.ontology;
  */
 
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
+
+/**
+ * Represents ObjectPropertyAssertion from the OWL 2 QL Specification
+ * 
+ * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations 
+ * 									ObjectPropertyExpression sourceIndividual targetIndividual ')'
+ * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
+ * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
+ * 
+ * Support for owl:topObjectProperty and owl:bottomObjectProperty
+ *     - the inverses of the two coincide with themselves 
+ * 
+ * @author Roman Kontchakov
+ *
+ */
 
 public interface ObjectPropertyAssertion extends Assertion {
 
-	public ObjectConstant getFirstObject();
-
-	public ObjectConstant getSecondObject();
-
-	/***
-	 * Use get predicate instead
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Predicate getRole();
+	public ObjectPropertyExpression getProperty();
+	
+	public ObjectConstant getSubject();
+	
+	public ObjectConstant getObject();	
 }

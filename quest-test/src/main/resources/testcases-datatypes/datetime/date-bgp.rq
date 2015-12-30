@@ -2,5 +2,5 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 
 SELECT ?x
 WHERE {
-   ?x a :Row; :hasDate "2013-03-18" .
+   ?x a :Row; :hasDate "2013-03-18"^^xsd:date .
 }

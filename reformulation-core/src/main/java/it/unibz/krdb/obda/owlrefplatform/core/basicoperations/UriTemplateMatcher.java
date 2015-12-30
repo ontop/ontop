@@ -20,54 +20,107 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class UriTemplateMatcher {
 
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
 	
-	public UriTemplateMatcher() {
-		// NO-OP
+	/**
+	 * creates a URI template matcher 
+	 * 
+	 * @param unfoldingProgram
+	 * @return
+	 */
+	
+	public static UriTemplateMatcher create(List<CQIE> unfoldingProgram) {
+
+		Set<String> templateStrings = new HashSet<>();
+		
+		UriTemplateMatcher uriTemplateMatcher  = new UriTemplateMatcher();
+
+		for (CQIE mapping : unfoldingProgram) { 
+			
+			Function head = mapping.getHead();
+
+			 // Collecting URI templates and making pattern matchers for them.
+			for (Term term : head.getTerms()) {
+				if (!(term instanceof Function)) {
+					continue;
+				}
+				Function fun = (Function) term;
+				if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
+					continue;
+				}
+				/*
+				 * This is a URI function, so it can generate pattern matchers
+				 * for the URIs. We have two cases, one where the arity is 1,
+				 * and there is a constant/variable. The second case is
+				 * where the first element is a string template of the URI, and
+				 * the rest of the terms are variables/constants
+				 */
+				if (fun.getTerms().size() == 1) {
+					/*
+					 * URI without template, we get it directly from the column
+					 * of the table, and the function is only f(x)
+					 */
+					if (templateStrings.contains("(.+)")) {
+						continue;
+					}
+					Function templateFunction = ofac.getUriTemplate(ofac.getVariable("x"));
+					Pattern matcher = Pattern.compile("(.+)");
+					uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
+					templateStrings.add("(.+)");
+				} 
+				else {
+					ValueConstant template = (ValueConstant) fun.getTerms().get(0);
+					String templateString = template.getValue();
+					templateString = templateString.replace("{}", "(.+)");
+
+					if (templateStrings.contains(templateString)) {
+						continue;
+					}
+					Pattern mattcher = Pattern.compile(templateString);
+					uriTemplateMatcher.uriTemplateMatcher.put(mattcher, fun);
+					templateStrings.add(templateString);
+				}
+			}
+		}
+		return uriTemplateMatcher;
 	}
 	
-	
-	public void clear() {
-		uriTemplateMatcher.clear();
-	}
-	
-	public UriTemplateMatcher(Map<Pattern, Function> existing) {
-		uriTemplateMatcher.putAll(existing);
-	}
-	
-	public void put(Pattern uriTemplatePattern, Function uriFunction) {
-		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
-	}
 	
 	/***
 	 * We will try to match the URI to one of our patterns, if this happens, we
-	 * have a corresponding function, and the paramters for this function. The
+	 * have a corresponding function, and the parameters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
 	public Function generateURIFunction(String uriString) {
 		Function functionURI = null;
 
-		List<Pattern> patternsMatched = new LinkedList<Pattern>();
+		List<Pattern> patternsMatched = new LinkedList<>();
 		for (Pattern pattern : uriTemplateMatcher.keySet()) {
 
 			Matcher matcher = pattern.matcher(uriString);
@@ -89,35 +142,35 @@ public class UriTemplateMatcher {
 			Term baseParameter = matchingFunction.getTerms().get(0);
 			if (baseParameter instanceof Constant) {
 				/*
-				 * This is a general tempalte function of the form
+				 * This is a general template function of the form
 				 * uri("http://....", var1, var2,...) <p> we need to match var1,
 				 * var2, etc with substrings from the subjectURI
 				 */
 				Matcher matcher = pattern.matcher(uriString);
 				if ( matcher.matches()) {
-					List<Term> values = new LinkedList<Term>();
+					List<Term> values = new ArrayList<>(matcher.groupCount());
 					values.add(baseParameter);
 					for (int i = 0; i < matcher.groupCount(); i++) {
 						String value = matcher.group(i + 1);
 						values.add(ofac.getConstantLiteral(value));
 					}
-					functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(values.size()), values);
+					functionURI = ofac.getUriTemplate(values);
 				}
-			} else if (baseParameter instanceof Variable) {
+			} 
+			else if (baseParameter instanceof Variable) {
 				/*
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-				functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
-						ofac.getConstantLiteral(uriString));
+				functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 			}
 			break;
 		}
 		if (functionURI == null) {
-			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
-			 * generate empty queires later in the query answering process
+			/* If we cannot match against a template, we try to match against the most general template (which will
+			 * generate empty queries later in the query answering process
 			 */
-			functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(uriString));
+			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 		}
 			
 		return functionURI;

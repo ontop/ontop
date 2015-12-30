@@ -21,201 +21,181 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
-
-import java.io.File;
-import java.util.Map;
-
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAGImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class EquivalenceSimplificationTest extends TestCase {
 
-	final String	path	= "src/test/resources/test/equivalence/";
+	private final String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
+	private final String path = "src/test/resources/test/equivalence/";
 
 	public void test_equivalence_namedclasses() throws Exception {
 
 		/*
-		 * The ontology contains A1 = A2 = A3, B1 ISA A1, B1 = B2 = B3, this
-		 * gives 9 inferences and R1 = R2 = R3, S1 ISA R1, S1 = S2 = S3, this
-		 * gives 36 inferences (counting inverse related inferences, and exist
-		 * related inferences. Total, 45 inferences
+		 * The ontology contains classes A1 = A2 = A3 >= B1 = B2 = B3 >= C1 = C2 = C3
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_401.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
-
-		assertEquals(3, simpleonto.getConcepts().size());
-		assertEquals(0, simpleonto.getRoles().size());
-		assertEquals(3, simpleonto.getAssertions().size());
-		assertEquals(3, simpleonto.getVocabulary().size());
-
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
-
-		assertEquals(6, eqMap.keySet().size());
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // Roman: instead of B1
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
 		
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2"))); // Roman: B3 -> B1
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // Roman: B3 <-> B1
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		assertEquals(3, classDAG.vertexSetSize()); // A1, B1, C1
+		assertEquals(0, propDAG.vertexSetSize()); // no properties
+		assertEquals(2, classDAG.edgeSetSize());  // A1 <- B1 <- C1
+		assertEquals(0, propDAG.edgeSetSize());  // no properties
 
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
+		ClassExpression A1 = voc.getClass(testURI + "A1");
+		ClassExpression B1 = voc.getClass(testURI + "B1");
+		ClassExpression C1 = voc.getClass(testURI + "C1");
+		ClassExpression A2 = voc.getClass(testURI + "A2");
+		ClassExpression A3 = voc.getClass(testURI + "A3");
+		ClassExpression B2 = voc.getClass(testURI + "B2");
+		ClassExpression B3 = voc.getClass(testURI + "B3");
+		ClassExpression C2 = voc.getClass(testURI + "C2");
+		ClassExpression C3 = voc.getClass(testURI + "C3");
+
+		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		assertEquals(classes.getCanonicalForm(A1), A1);
+		assertEquals(classes.getCanonicalForm(B1), B1);
+		assertEquals(classes.getCanonicalForm(C1), C1);
+		assertEquals(classes.getCanonicalForm(A2), A1);
+		assertEquals(classes.getCanonicalForm(A3), A1);
+		assertEquals(classes.getCanonicalForm(B2), B1);
+		assertEquals(classes.getCanonicalForm(B3), B1);
+		assertEquals(classes.getCanonicalForm(C2), C1);
+		assertEquals(classes.getCanonicalForm(C3), C1);
 	}
 	
 	
 	public void test_equivalence_namedproperties() throws Exception {
 
 		/*
-		 * The ontology contains A1 = A2 = A3, B1 ISA A1, B1 = B2 = B3, this
-		 * gives 9 inferences and R1 = R2 = R3, S1 ISA R1, S1 = S2 = S3, this
-		 * gives 36 inferences (counting inverse related inferences, and exist
-		 * related inferences. Total, 45 inferences
+		 * The ontology contains object properties A1 = A2 = A3 >= B1 = B2 = B3 >= C1 = C2 = C3
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_402.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
-		
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 
-		assertEquals(0, simpleonto.getConcepts().size());
-		assertEquals(3, simpleonto.getRoles().size());
-		assertEquals(12, simpleonto.getAssertions().size());
-		assertEquals(3, simpleonto.getVocabulary().size());
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
+		
+		// \exists A1, \exists A1^-,  \exists B1, \exists B1^-,  \exists C1, \exists C1^-
+		assertEquals(6, classDAG.vertexSetSize()); 
+		assertEquals(6, propDAG.vertexSetSize()); // A1, A1^-, B1, B1^-, C1, C1^- 
+		// \exists A1 <- \exists B1 <- \exists C1, \exists A1^- <- \exists B1^- <- \exists C1^-
+		assertEquals(4, classDAG.edgeSetSize()); 
+		assertEquals(4, classDAG.edgeSetSize()); // A1 <- B1 <- C1, A1^- <- B1^- <- C1^-
 
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
 		
-		assertEquals(6, eqMap.keySet().size());
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // ROMAN: B1 and B3 ARE SYMMETRIC
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
-		
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2"))); // ROMAN: B3 -> B1
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // ROMAN: B3 <-> B1
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
+		ObjectPropertyExpression A1 = voc.getObjectProperty(testURI + "A1");
+		ObjectPropertyExpression B1 = voc.getObjectProperty(testURI + "B1");
+		ObjectPropertyExpression C1 = voc.getObjectProperty(testURI + "C1");
+		ObjectPropertyExpression A2 = voc.getObjectProperty(testURI + "A2");
+		ObjectPropertyExpression A3 = voc.getObjectProperty(testURI + "A3");
+		ObjectPropertyExpression B2 = voc.getObjectProperty(testURI + "B2");
+		ObjectPropertyExpression B3 = voc.getObjectProperty(testURI + "B3");
+		ObjectPropertyExpression C2 = voc.getObjectProperty(testURI + "C2");
+		ObjectPropertyExpression C3 = voc.getObjectProperty(testURI + "C3");
+
+		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
+		assertEquals(ops.getCanonicalForm(A1), A1);
+		assertEquals(ops.getCanonicalForm(B1), B1);
+		assertEquals(ops.getCanonicalForm(C1), C1);
+		assertEquals(ops.getCanonicalForm(A2), A1);
+		assertEquals(ops.getCanonicalForm(A3), A1);
+		assertEquals(ops.getCanonicalForm(B2), B1);
+		assertEquals(ops.getCanonicalForm(B3), B1); 
+		assertEquals(ops.getCanonicalForm(C2), C1);
+		assertEquals(ops.getCanonicalForm(C3), C1);
 	}
 	
 	
 	public void test_equivalence_namedclassesandexists() throws Exception {
 
 		/*
-		 * The ontology contains A1 = A2 = A3, B1 ISA A1, B1 = B2 = B3, this
-		 * gives 9 inferences and R1 = R2 = R3, S1 ISA R1, S1 = S2 = S3, this
-		 * gives 36 inferences (counting inverse related inferences, and exist
-		 * related inferences. Total, 45 inferences
+		 * The ontology contains object properties M, R, S
+		 * and classes A1 = A3 = \exists R <= B1 = B3 = \exists S^- <= C1 = C3 = \exists M
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_403.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
-
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
-
-		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
-		assertEquals(3, simpleonto.getRoles().size());
-		assertEquals(9, simpleonto.getAssertions().size());
-		assertEquals(6, simpleonto.getVocabulary().size());
-
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
-
-		assertEquals(3, eqMap.keySet().size());
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // Roman: instead of B1
-		assertTrue(eqMap.keySet().contains(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 		
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // Roman B1 <-> B3
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),eqMap.get(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
 		
+		assertEquals(6, propDAG.vertexSetSize()); // M, M^-, R, R^-, S, S^-
+		assertEquals(6, classDAG.vertexSetSize()); // A1, B1, C1, \exists R^-, \exists S, \exists M^-
+		assertEquals(0, propDAG.edgeSetSize()); // 
+		assertEquals(2, classDAG.edgeSetSize()); // A1 <- B1 <- C1
+
+		
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
+		ClassExpression A1 = voc.getClass(testURI + "A1");
+		ClassExpression B1 = voc.getClass(testURI + "B1");
+		ClassExpression C1 = voc.getClass(testURI + "C1");
+		ClassExpression A3 = voc.getClass(testURI + "A3");
+		ClassExpression B3 = voc.getClass(testURI + "B3");
+		ClassExpression C3 = voc.getClass(testURI + "C3");
+
+		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		assertEquals(classes.getCanonicalForm(A1), A1);
+		assertEquals(classes.getCanonicalForm(B1), B1);
+		assertEquals(classes.getCanonicalForm(C1), C1);
+		assertEquals(classes.getCanonicalForm(A3), A1);
+		assertEquals(classes.getCanonicalForm(B3), B1);
+		assertEquals(classes.getCanonicalForm(C3), C1);		
 	}
 	
 	public void test_equivalence_namedproperties_and_inverses() throws Exception {
 
 		/*
-		 * The ontology contains A1 = A2 = A3, B1 ISA A1, B1 = B2 = B3, this
-		 * gives 9 inferences and R1 = R2 = R3, S1 ISA R1, S1 = S2 = S3, this
-		 * gives 36 inferences (counting inverse related inferences, and exist
-		 * related inferences. Total, 45 inferences
+		 * The ontology contains object properties A1 = A2^- = A3 >= B1 = B2^- = B3 >= C1 = C2^- = C3
 		 */
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		File file = new File(path + "test_404.owl");
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
 
-		EquivalenceTBoxOptimizer optimizer = new EquivalenceTBoxOptimizer(ontology);
-		optimizer.optimize();
-		Ontology simpleonto = optimizer.getOptimalTBox();
-		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
-
-		assertEquals(12, simpleonto.getAssertions().size());
-		assertEquals(0, simpleonto.getConcepts().size());
-		assertEquals(3, simpleonto.getRoles().size());
-		assertEquals(3, simpleonto.getVocabulary().size());
-
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
-
-		assertEquals(6, eqMap.keySet().size());
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // ROMAN: again, B1 and B3 are symmetric
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertTrue(eqMap.keySet().contains(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
 		
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1",true),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1", true),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2"))); // B3 -> B1
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3")));  //  B1 <-> B3
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1", true),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),eqMap.get(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		assertEquals(6, classDAG.vertexSetSize()); // A1, A1^-, B1, B1^-, C1, C1^-
+		assertEquals(6, propDAG.vertexSetSize()); // 
+		assertEquals(4, classDAG.edgeSetSize()); // A1 >= B1 >= C1, A1^- >= B1^- >= C1^-
+		assertEquals(4, propDAG.edgeSetSize()); //
+
+		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
+		ObjectPropertyExpression A1 = voc.getObjectProperty(testURI + "A1");
+		ObjectPropertyExpression B1 = voc.getObjectProperty(testURI + "B1");
+		ObjectPropertyExpression C1 = voc.getObjectProperty(testURI + "C1");
+		ObjectPropertyExpression A2 = voc.getObjectProperty(testURI + "A2");
+		ObjectPropertyExpression A3 = voc.getObjectProperty(testURI + "A3");
+		ObjectPropertyExpression B2 = voc.getObjectProperty(testURI + "B2");
+		ObjectPropertyExpression B3 = voc.getObjectProperty(testURI + "B3");
+		ObjectPropertyExpression C2 = voc.getObjectProperty(testURI + "C2");
+		ObjectPropertyExpression C3 = voc.getObjectProperty(testURI + "C3");
+
+		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
+		assertEquals(ops.getCanonicalForm(A1), A1);
+		assertEquals(ops.getCanonicalForm(B1), B1);
+		assertEquals(ops.getCanonicalForm(C1), C1);
+		assertEquals(ops.getCanonicalForm(A2), A1.getInverse());
+		assertEquals(ops.getCanonicalForm(A3), A1);
+		assertEquals(ops.getCanonicalForm(B2), B1.getInverse());
+		assertEquals(ops.getCanonicalForm(B3), B1); 
+		assertEquals(ops.getCanonicalForm(C2), C1.getInverse());
+		assertEquals(ops.getCanonicalForm(C3), C1);
 	}
 
 }

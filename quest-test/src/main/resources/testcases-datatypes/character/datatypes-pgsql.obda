@@ -1,5 +1,6 @@
 [PrefixDeclaration]
 :		http://ontop.inf.unibz.it/test/datatypes#
+xsd:	http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	PgsqlTypes
@@ -18,7 +19,7 @@ target		:character-{id} a :Row ; :hasVarChar {type_varchar} ; :hasCharacter {typ
 source		select id, type_varchar, type_character, type_text, type_char, type_name from "Characters"
 
 mappingId	Date-Time Types
-target		:datetime-{id} a :Row ; :hasTime {type_time} ; :hasTimeTZ {type_time_tz} ; :hasDate {type_date} ; :hasTimestamp {type_timestamp} ; :hasTimestampTZ {type_timestamp_tz} ; :hasInterval {type_interval} . 
+target		:datetime-{id} a :Row ; :hasTime {type_time} ; :hasTimeString {type_time}^^xsd:string ; :hasTimeTZ {type_time_tz} ; :hasDate {type_date} ; :hasDateString {type_date}^^xsd:string ; :hasTimestamp {type_timestamp} ; :hasTimestampTZ {type_timestamp_tz} ; :hasInterval {type_interval} ; :hasTimestampString {type_timestamp}^^xsd:string ; :hasTimestampTZString {type_timestamp_tz}^^xsd:string .
 source		select id, type_timestamp, type_timestamp_tz, type_date, type_time, type_time_tz, type_interval from "DateTimes"
 
 mappingId	Boolean Types

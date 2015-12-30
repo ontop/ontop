@@ -20,15 +20,9 @@ package it.unibz.krdb.obda.sesame;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Iterator;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import org.openrdf.model.Statement;
 
@@ -39,7 +33,7 @@ import org.openrdf.model.Statement;
  * 
  */
 public class SesameStatementIterator implements Iterator<Statement> {
-	private Iterator<Assertion> iterator;	
+	private final Iterator<Assertion> iterator;	
 	
 
 	public SesameStatementIterator(Iterator<Assertion> it) {
@@ -49,6 +43,21 @@ public class SesameStatementIterator implements Iterator<Statement> {
 	public boolean hasNext() {
 		return iterator.hasNext();
 	}
+
+
+    /* //another version which skips errors
+    public Statement next() {
+        try {
+            Assertion assertion = iterator.next();
+            Statement statement = new SesameStatement(assertion);
+            return statement;
+        } catch (IllegalArgumentException ex){
+            System.err.println("Skip the assertion cannot be converted into triple: ");
+            ex.printStackTrace();
+            return next();
+        }
+
+    }*/
 
 	public Statement next() {
 		Assertion assertion = iterator.next();

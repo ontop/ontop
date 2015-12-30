@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.renderer;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 
 /**
  * A utility class to render a Source Query object into its representational
@@ -31,7 +31,7 @@ public class SourceQueryRenderer {
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string.
 	 */
-	public static String encode(OBDAQuery input) {
+	public static String encode(OBDASQLQuery input) {
 		if (input == null) {
 			return "";
 		}

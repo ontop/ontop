@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.LUBM.rdf_generator;
  * #L%
  */
 
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -559,7 +560,7 @@ public class Generator {
         /**
          * list of authors
          */
-        public ArrayList authors;
+        public ArrayList<String> authors;
     }
 
     /**
@@ -597,23 +598,23 @@ public class Generator {
     /**
      * list of undergraduate courses generated so far (in the current department)
      */
-    private ArrayList underCourses_;
+    private ArrayList<CourseInfo> underCourses_;
     /**
      * list of graduate courses generated so far (in the current department)
      */
-    private ArrayList gradCourses_;
+    private ArrayList<CourseInfo> gradCourses_;
     /**
      * list of remaining available undergraduate courses (in the current department)
      */
-    private ArrayList remainingUnderCourses_;
+    private ArrayList<Integer> remainingUnderCourses_;
     /**
      * list of remaining available graduate courses (in the current department)
      */
-    private ArrayList remainingGradCourses_;
+    private ArrayList<Integer> remainingGradCourses_;
     /**
      * list of publication instances generated so far (in the current department)
      */
-    private ArrayList publications_;
+    private ArrayList<PublicationInfo> publications_;
     /**
      * index of the full professor who has been chosen as the department chair
      */
@@ -713,11 +714,11 @@ public class Generator {
         }
 
         random_ = new Random();
-        underCourses_ = new ArrayList();
-        gradCourses_ = new ArrayList();
-        remainingUnderCourses_ = new ArrayList();
-        remainingGradCourses_ = new ArrayList();
-        publications_ = new ArrayList();
+        underCourses_ = new ArrayList<>();
+        gradCourses_ = new ArrayList<>();
+        remainingUnderCourses_ = new ArrayList<>();
+        remainingGradCourses_ = new ArrayList<>();
+        publications_ = new ArrayList<>();
     }
 
     /**
@@ -1060,8 +1061,8 @@ public class Generator {
         int indexInFaculty;
         int courseNum;
         int courseIndex;
-        boolean dup;
-        CourseInfo course;
+        //boolean dup;
+        //CourseInfo course;
 
         indexInFaculty = instances_[CS_C_FACULTY].count - 1;
 
@@ -1106,7 +1107,7 @@ public class Generator {
 
         CourseInfo course = new CourseInfo();
         course.indexInFaculty = indexInFaculty;
-        course.globalIndex = ((Integer) remainingUnderCourses_.get(pos)).intValue();
+        course.globalIndex = remainingUnderCourses_.get(pos);
         underCourses_.add(course);
 
         remainingUnderCourses_.remove(pos);
@@ -1128,7 +1129,7 @@ public class Generator {
 
         CourseInfo course = new CourseInfo();
         course.indexInFaculty = indexInFaculty;
-        course.globalIndex = ((Integer) remainingGradCourses_.get(pos)).intValue();
+        course.globalIndex = remainingGradCourses_.get(pos);
         gradCourses_.add(course);
 
         remainingGradCourses_.remove(pos);
@@ -1234,7 +1235,7 @@ public class Generator {
             publication = new PublicationInfo();
             publication.id = _getId(CS_C_PUBLICATION, i, author);
             publication.name = _getRelativeName(CS_C_PUBLICATION, i);
-            publication.authors = new ArrayList();
+            publication.authors = new ArrayList<>();
             publication.authors.add(author);
             publications_.add(publication);
         }
@@ -1253,10 +1254,9 @@ public class Generator {
         PublicationInfo publication;
 
         num = _getRandomFromRange(min, max);
-        ArrayList list = _getRandomList(num, 0, publications_.size() - 1);
+        ArrayList<Integer> list = _getRandomList(num, 0, publications_.size() - 1);
         for (int i = 0; i < list.size(); i++) {
-            publication = (PublicationInfo) publications_.get(((Integer) list.get(i)).
-                    intValue());
+            publication = publications_.get(list.get(i));
             publication.authors.add(author);
         }
     }
@@ -1267,7 +1267,7 @@ public class Generator {
      */
     private void _generatePublications() {
         for (int i = 0; i < publications_.size(); i++) {
-            _generateAPublication((PublicationInfo) publications_.get(i));
+            _generateAPublication(publications_.get(i));
         }
     }
 
@@ -1281,7 +1281,7 @@ public class Generator {
         writer_.addProperty(CS_P_NAME, publication.name, false);
         for (int i = 0; i < publication.authors.size(); i++) {
             writer_.addProperty(CS_P_PUBLICATIONAUTHOR,
-                    (String) publication.authors.get(i), true);
+                    publication.authors.get(i), true);
         }
         writer_.endSection(CS_C_PUBLICATION);
     }
@@ -1307,15 +1307,14 @@ public class Generator {
      */
     private void _generateAnUndergraduateStudent(int index) {
         int n;
-        ArrayList list;
+        ArrayList<Integer> list;
 
         writer_.startSection(CS_C_UNDERSTUD, _getId(CS_C_UNDERSTUD, index));
         _generateAStudent_a(CS_C_UNDERSTUD, index);
         n = _getRandomFromRange(UNDERSTUD_COURSE_MIN, UNDERSTUD_COURSE_MAX);
         list = _getRandomList(n, 0, underCourses_.size() - 1);
         for (int i = 0; i < list.size(); i++) {
-            CourseInfo info = (CourseInfo) underCourses_.get(((Integer) list.get(i)).
-                    intValue());
+            CourseInfo info = underCourses_.get(list.get(i));
             writer_.addProperty(CS_P_TAKECOURSE, _getId(CS_C_COURSE, info.globalIndex), true);
         }
         if (0 == random_.nextInt(R_UNDERSTUD_ADVISOR)) {
@@ -1331,7 +1330,7 @@ public class Generator {
      */
     private void _generateAGradudateStudent(int index) {
         int n;
-        ArrayList list;
+        ArrayList<Integer> list;
         String id;
 
         id = _getId(CS_C_GRADSTUD, index);
@@ -1340,8 +1339,7 @@ public class Generator {
         n = _getRandomFromRange(GRADSTUD_COURSE_MIN, GRADSTUD_COURSE_MAX);
         list = _getRandomList(n, 0, gradCourses_.size() - 1);
         for (int i = 0; i < list.size(); i++) {
-            CourseInfo info = (CourseInfo) gradCourses_.get(((Integer) list.get(i)).
-                    intValue());
+            CourseInfo info = gradCourses_.get(list.get(i));
             writer_.addProperty(CS_P_TAKECOURSE,
                     _getId(CS_C_GRADCOURSE, info.globalIndex), true);
         }
@@ -1419,10 +1417,10 @@ public class Generator {
      */
     private void _generateCourses() {
         for (int i = 0; i < underCourses_.size(); i++) {
-            _generateACourse(((CourseInfo) underCourses_.get(i)).globalIndex);
+            _generateACourse(underCourses_.get(i).globalIndex);
         }
         for (int i = 0; i < gradCourses_.size(); i++) {
-            _generateAGraduateCourse(((CourseInfo) gradCourses_.get(i)).globalIndex);
+            _generateAGraduateCourse(gradCourses_.get(i).globalIndex);
         }
     }
 
@@ -1430,14 +1428,14 @@ public class Generator {
      * Chooses RAs and TAs from graduate student and generates their instances accordingly.
      */
     private void _generateRaTa() {
-        ArrayList list, courseList;
+        ArrayList<Integer> list, courseList;
         TaInfo ta;
         RaInfo ra;
-        ArrayList tas, ras;
+        //ArrayList tas, ras;
         int i;
 
-        tas = new ArrayList();
-        ras = new ArrayList();
+        //tas = new ArrayList<>();
+        //ras = new ArrayList<>();
         list = _getRandomList(instances_[CS_C_TA].total + instances_[CS_C_RA].total,
                 0, instances_[CS_C_GRADSTUD].total - 1);
         courseList = _getRandomList(instances_[CS_C_TA].total, 0,
@@ -1445,14 +1443,13 @@ public class Generator {
 
         for (i = 0; i < instances_[CS_C_TA].total; i++) {
             ta = new TaInfo();
-            ta.indexInGradStud = ((Integer) list.get(i)).intValue();
-            ta.indexInCourse = ((CourseInfo) underCourses_.get(((Integer)
-                    courseList.get(i)).intValue())).globalIndex;
+            ta.indexInGradStud = list.get(i);
+            ta.indexInCourse = underCourses_.get(courseList.get(i)).globalIndex;
             _generateATa(ta);
         }
         while (i < list.size()) {
             ra = new RaInfo();
-            ra.indexInGradStud = ((Integer) list.get(i)).intValue();
+            ra.indexInGradStud = list.get(i);
             _generateAnRa(ra);
             i++;
         }
@@ -1651,16 +1648,16 @@ public class Generator {
      * @param max Maximum value of selectable integer.
      * @return So generated list of integers.
      */
-    private ArrayList _getRandomList(int num, int min, int max) {
-        ArrayList list = new ArrayList();
-        ArrayList tmp = new ArrayList();
+    private ArrayList<Integer> _getRandomList(int num, int min, int max) {
+        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<Integer> tmp = new ArrayList<>();
         for (int i = min; i <= max; i++) {
             tmp.add(new Integer(i));
         }
 
         for (int i = 0; i < num; i++) {
             int pos = _getRandomFromRange(0, tmp.size() - 1);
-            list.add((Integer) tmp.get(pos));
+            list.add(tmp.get(pos));
             tmp.remove(pos);
         }
 

@@ -105,12 +105,10 @@ public class JoinElminationMappingTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -158,7 +156,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
@@ -169,7 +166,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
@@ -180,7 +176,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
@@ -191,7 +186,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
@@ -205,7 +199,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -216,7 +209,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -232,7 +224,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -248,7 +239,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -259,7 +249,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		runTests(p);
 	}
 
@@ -267,7 +256,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		runTests(p);
 	}
 
@@ -278,7 +266,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		runTests(p);
 	}
 
@@ -289,7 +276,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		runTests(p);
 	}
 }

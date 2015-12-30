@@ -20,25 +20,35 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+/**
+ * Represents DataPropertyAssertion from OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations DataPropertyExpression Individual Literal ')'
+ * 
+ */
+
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 
-/***
- * An assertion for data properties, e.g., name(mariano,"Mariano Rodriguez").
- * Corresponds to RDF triple: :mariano :name "Mariano Rodriguez".
+/**
+ * Represents DataPropertyAssertion from the OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations 
+ * 								DataPropertyExpression sourceIndividual targetValue ')'
+ * DataPropertyExpression := DataProperty
+ * 
+ *  Support for owl:topDataProperty and owl:bottomDataProperty
+ * 
+ * @author Roman Kontchakov
+ *
  */
+
+
 public interface DataPropertyAssertion extends Assertion {
 
-	public ObjectConstant getObject();
-
-	public ValueConstant getValue();
-
-	/***
-	 * Use get predicate instead
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Predicate getAttribute();
+	public DataPropertyExpression getProperty();
+	
+	public ObjectConstant getSubject();
+	
+	public ValueConstant getValue();	
 }

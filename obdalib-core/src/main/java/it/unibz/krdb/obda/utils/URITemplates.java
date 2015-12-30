@@ -24,11 +24,15 @@ import it.unibz.krdb.obda.exception.InvalidPrefixWritingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A utility class for URI templates
@@ -102,9 +106,11 @@ public class URITemplates {
 
 	
 	public static String getUriTemplateString(Function uriFunction) {
-		Term term = uriFunction.getTerm(0);
-		String template = term.toString();
-		Iterator<Variable> vars = uriFunction.getVariables().iterator();
+		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
+		String template = term.getValue();
+		List<Variable> varlist = new LinkedList<>();
+		TermUtils.addReferencedVariablesTo(varlist, uriFunction);
+		Iterator<Variable> vars = varlist.iterator();
 		String[] split = template.split("\\{\\}");
 		int i = 0;
 		template = "";
@@ -115,9 +121,9 @@ public class URITemplates {
 		//the number of place holdes should be equal to the number of variables.
 		if (split.length-i == 1){
 			template += split[i];
-			//we remove the quotes cos later the literal constructor adds them
-			template= template.substring(1, template.length()-1);
-		}else{
+		} else if(split.length == i){
+			// do nothing
+		} else{
 			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
 		}
 		

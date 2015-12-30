@@ -2,8 +2,8 @@ PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
 SELECT DISTINCT * WHERE {      
 	    $x a :Address . 
 		$x :addressID $id. 
-		$x :inStreet "Via Marconi". 
-		$x :inCity "Bolzano". 
+		$x :inStreet "Via Marconi"^^<http://www.w3.org/2001/XMLSchema#string>.  
+		$x :inCity "Bolzano"^^<http://www.w3.org/2001/XMLSchema#string>.  
 		$x :inCountry $country. 
 		$x :inState $state. 
 		$x :hasNumber $number.

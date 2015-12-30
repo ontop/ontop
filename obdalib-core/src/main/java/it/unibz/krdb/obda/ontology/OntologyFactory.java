@@ -20,58 +20,83 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
+
+/**
+ * 
+ * @author Roman Kontchakov
+ *
+ */
 
 public interface OntologyFactory {
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
+	/**
+	 * creates a modifiable ontology vocabulary 
+	 * 
+	 * @return created vocabulary
+	 */
 	
-	public OClass createClass(Predicate p);
+	public OntologyVocabulary createVocabulary();
 	
-	public OClass createClass(String uri);
+	/**
+	 * creates an ontology using a given vocabulary
+	 * (the vocabulary is copied and fixes it)
+	 * 
+	 * @param voc
+	 * @return
+	 */
+	
+	public Ontology createOntology(ImmutableOntologyVocabulary voc);
+	
+	/**
+	 * Creates a class assertion 
+	 *    (implements rule [C4])
+	 * 
+	 * @param ce 
+	 * @param o
+	 * @return
+	 * @return null if ce is the top class ([C4])
+	 * @throws InconsistentOntologyException if ce is the bottom class ([C4])
+	 */
+	
+	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
+	
+	
+	/**
+	 * Creates an object property assertion 
+	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 *    (implements rule [O4])
+	 * 
+	 * @param ope
+	 * @param o1
+	 * @param o2
+	 * @return null if ope is the top property ([O4])
+	 * @throws InconsistentOntologyException if ope is the bottom property ([O4])
+	 */
+	
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
 
-	public Property createProperty(Predicate p, boolean inverse);
+	/**
+	 * Creates a data property assertion 
+	 *    (implements rule [D4])
+	 * 
+	 * @param dpe
+	 * @param o
+	 * @param v
+	 * @return null if dpe is the top property ([D4])
+	 * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
+	 */
+	
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
 
-	public Property createProperty(Predicate p);
-	
-	public Property createObjectProperty(String uri, boolean inverse);
-	
-	public Property createObjectProperty(String uri);
-	
-	public Property createDataProperty(String uri);
-	
-	public DataType createDataType(Predicate p);
-	
-	public Ontology createOntology(String uri);
-	
-	public Ontology createOntology();
+	/**
+	 * Creates an annotation property assertion
+	 *Temporary solution without information about the values
+	 */
 
-	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including);
+//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
 
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2);
 
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
-
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler);
-
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
-	
-	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
-	
-	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2);
-	
-	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(Predicate p1, Predicate p2);
-	
-	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(Predicate p1, Predicate p2);
-
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
-
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2);
-	
-	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2);
-	
-	public ClassAssertion createClassAssertion(Predicate concept, ObjectConstant object);
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
 }

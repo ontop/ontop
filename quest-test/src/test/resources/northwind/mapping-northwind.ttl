@@ -1,0 +1,124 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+
+_:node19fn4oeocx18 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx2 rr:termType rr:IRI .
+
+_:node19fn4oeocx20 rr:column "POSTALCODE" .
+
+_:node19fn4oeocx8 a rr:ObjectMap .
+
+_:node19fn4oeocx20 a rr:TermMap .
+
+_:node19fn4oeocx9 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx2 a rr:TermMap .
+
+_:node19fn4oeocx15 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
+
+_:node19fn4oeocx3 rr:logicalTable _:node19fn4oeocx1 .
+
+_:node19fn4oeocx17 rr:column "REGION" .
+
+_:node19fn4oeocx21 rr:objectMap _:node19fn4oeocx20 .
+
+_:node19fn4oeocx11 a rr:ObjectMap .
+
+_:node19fn4oeocx6 rr:objectMap _:node19fn4oeocx5 .
+
+_:node19fn4oeocx11 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx1 a rr:R2RMLView .
+
+_:node19fn4oeocx14 a rr:TermMap .
+
+_:node19fn4oeocx20 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx9 rr:predicate <http://www.w3.org/2000/01/rdf-schema#label> .
+
+_:node19fn4oeocx15 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx21 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> ;
+	a rr:PredicateObjectMap .
+
+_:node19fn4oeocx18 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
+
+_:node19fn4oeocx3 a rr:TriplesMap .
+
+_:node19fn4oeocx2 rr:template "http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}" .
+
+_:node19fn4oeocx17 a rr:ObjectMap .
+
+_:node19fn4oeocx5 a rr:ObjectMap , rr:TermMap .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx21 .
+
+_:node19fn4oeocx9 rr:objectMap _:node19fn4oeocx8 .
+
+_:node19fn4oeocx14 rr:termType rr:Literal .
+
+_:node19fn4oeocx17 rr:termType rr:Literal .
+
+_:node19fn4oeocx12 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx20 a rr:ObjectMap .
+
+_:node19fn4oeocx5 rr:termType rr:Literal .
+
+_:node19fn4oeocx11 rr:column "COUNTRY" .
+
+_:node19fn4oeocx2 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> .
+
+_:node19fn4oeocx8 rr:template "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something" .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx15 .
+
+_:node19fn4oeocx14 a rr:ObjectMap .
+
+_:node19fn4oeocx3 rr:subjectMap _:node19fn4oeocx2 ;
+	rr:predicateObjectMap _:node19fn4oeocx18 .
+
+_:node19fn4oeocx8 a rr:TermMap .
+
+_:node19fn4oeocx6 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx12 .
+
+_:node19fn4oeocx17 a rr:TermMap .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx9 .
+
+_:node19fn4oeocx14 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx6 .
+
+_:node19fn4oeocx20 rr:termType rr:Literal .
+
+_:node19fn4oeocx18 rr:objectMap _:node19fn4oeocx17 .
+
+_:node19fn4oeocx11 rr:termType rr:Literal .
+
+_:node19fn4oeocx14 rr:column "ADDRESS" .
+
+_:node19fn4oeocx17 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx6 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+
+_:node19fn4oeocx5 rr:column "CITY" .
+
+_:node19fn4oeocx12 rr:objectMap _:node19fn4oeocx11 .
+
+_:node19fn4oeocx15 rr:objectMap _:node19fn4oeocx14 .
+
+_:node19fn4oeocx12 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+
+_:node19fn4oeocx5 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx8 rr:language "en-us" .
+
+_:node19fn4oeocx1 rr:sqlQuery "SELECT * FROM NORTHWIND.EMPLOYEES" .
+
+_:node19fn4oeocx11 a rr:TermMap .
+
+_:node19fn4oeocx8 rr:termType rr:Literal .

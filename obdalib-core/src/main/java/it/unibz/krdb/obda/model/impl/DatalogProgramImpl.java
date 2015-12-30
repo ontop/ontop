@@ -41,7 +41,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	private Map<Predicate, List<CQIE>> predicateIndex = null;
 
-	protected OBDAQueryModifiers modifiers;
+	private OBDAQueryModifiers modifiers;
 
 	@Override
 	public DatalogProgram clone() {
@@ -55,10 +55,11 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	protected DatalogProgramImpl() {
 		modifiers = new OBDAQueryModifiers();
-		rules = new LinkedList<CQIE>();
-		predicateIndex = new HashMap<Predicate, List<CQIE>>();
+		rules = new LinkedList<>();
+		predicateIndex = new HashMap<>();
 	}
 
+	@Override
 	public void appendRule(CQIE rule) {
 		if (rule == null) {
 			throw new IllegalArgumentException("DatalogProgram: Recieved a null rule.");
@@ -81,59 +82,31 @@ public class DatalogProgramImpl implements DatalogProgram {
 		}
 	}
 
+	@Override
 	public void appendRule(Collection<CQIE> rules) {
 		for (CQIE rule : rules) {
 			appendRule(rule);
 		}
 	}
 
-	public void removeRule(CQIE rule) {
-		if (rule == null) {
-			throw new RuntimeException("Invalid parameter: null");
-		}
-		rules.remove(rule);
-
-		Predicate predicate = rule.getHead().getFunctionSymbol();
-		List<CQIE> indexedRules = this.predicateIndex.get(predicate);
-		if (indexedRules != null)
-			indexedRules.remove(rule);
-	}
-
-	public void removeRules(Collection<CQIE> rules) {
-		for (CQIE rule : rules) {
-			removeRule(rule);
-		}
-	}
-	
 	@Override
-	public void removeAllRules() {
-		rules.clear();
-	}
+	public void removeRules(Collection<CQIE> rs) {
+		for (CQIE rule : rs) {
+			this.rules.remove(rule);
 
-	public boolean isUCQ() {
-		if (rules.size() > 1) {
-			boolean isucq = true;
-			CQIE rule0 = rules.get(0);
-			Function head0 = rule0.getHead();
-			for (int i = 1; i < rules.size() && isucq; i++) {
-				CQIE ruleI = rules.get(i);
-				Function headI = ruleI.getHead();
-				if (head0.getArity() != headI.getArity() || !(head0.getFunctionSymbol().equals(headI.getFunctionSymbol()))) {
-					isucq = false;
-				}
-			}
-			return isucq;
-		} else if (rules.size() == 1) {
-			return true;
-		} else {
-			return false;
+			Predicate predicate = rule.getHead().getFunctionSymbol();
+			List<CQIE> indexedRules = this.predicateIndex.get(predicate);
+			if (indexedRules != null)
+				indexedRules.remove(rule);
 		}
 	}
 
+	@Override
 	public List<CQIE> getRules() {
 		return Collections.unmodifiableList(rules);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer bf = new StringBuffer();
 		for (CQIE rule : rules) {
@@ -147,7 +120,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 	public List<CQIE> getRules(Predicate headPredicate) {
 		List<CQIE> rules = predicateIndex.get(headPredicate);
 		if (rules == null) {
-			rules = new LinkedList<CQIE>();
+			rules = new LinkedList<>();
 		}
 		return Collections.unmodifiableList(rules);
 	}
@@ -155,11 +128,6 @@ public class DatalogProgramImpl implements DatalogProgram {
 	@Override
 	public OBDAQueryModifiers getQueryModifiers() {
 		return modifiers;
-	}
-
-	@Override
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		this.modifiers = modifiers;
 	}
 	
 	@Override

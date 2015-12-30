@@ -227,6 +227,8 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 		Thread thread = null;
 		ResultSet result = null;
 		Statement statement = null;
+		private boolean isCancelled = false;
+		private boolean errorShown = false;
 
 		private ExecuteSQLQueryAction(CountDownLatch latch) {
 			this.latch = latch;
@@ -234,6 +236,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 
 		@Override
 		public void actionCanceled() throws SQLException {
+			this.isCancelled = true;
 			if (thread != null) {
 				thread.interrupt();
 			}
@@ -265,12 +268,23 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 						latch.countDown();
 					} catch (Exception e) {
 						latch.countDown();
+						errorShown = true;
 						JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 						log.error("Error while executing query.", e);
 					}
 				}
 			};
 			thread.start();
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return this.isCancelled;
+		}
+
+		@Override
+		public boolean isErrorShown() {
+			return this.errorShown;
 		}
 
 	}
