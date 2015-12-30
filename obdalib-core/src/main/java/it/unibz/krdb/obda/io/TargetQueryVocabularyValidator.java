@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.io;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 
@@ -62,6 +61,18 @@ public interface TargetQueryVocabularyValidator {
 	 *         the input ontology, or false otherwise.
 	 */
 	public boolean isDataProperty(Predicate predicate);
+
+
+	/**
+	 * Checks whether the predicate is an annotation property assertion.
+	 *
+	 * @param predicate
+	 *            The target predicate.
+	 * @return Returns true if the predicate is an annotation property assertion from
+	 *         the input ontology, or false otherwise.
+	 */
+	public boolean isAnnotProperty(Predicate predicate);
+
 
 	/**
 	 * Checks whether the predicate is a "triple", which is used for meta mapping

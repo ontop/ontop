@@ -24,42 +24,16 @@ import com.google.common.base.Optional;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAMappingListener;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAModelListener;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerListener;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.obda.querymanager.*;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-import it.unibz.krdb.sql.QuotedIDFactoryStandardSQL;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import it.unibz.krdb.sql.JDBCConnectionManager;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.owl.OWLEditorKit;
@@ -69,9 +43,12 @@ import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
+
+
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -86,9 +63,15 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.model.SetOntologyID;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
 public class OBDAModelManager implements Disposable {
 
@@ -219,6 +202,10 @@ public class OBDAModelManager implements Disposable {
 							OWLDataProperty op = (OWLDataProperty) entity;
 							activeOBDAModel.getOntologyVocabulary().createDataProperty(op.getIRI().toString());
 						}
+						else if (entity instanceof OWLAnnotationProperty){
+							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
+							activeOBDAModel.getOntologyVocabulary().createAnnotationProperty(ap.getIRI().toString());
+						}
 					}
 
 				} else if (change instanceof RemoveAxiom) {
@@ -238,6 +225,12 @@ public class OBDAModelManager implements Disposable {
 							OWLDataProperty op = (OWLDataProperty) entity;
 							activeOBDAModel.getOntologyVocabulary().removeDataProperty(op.getIRI().toString());
 						}
+
+						else if (entity instanceof  OWLAnnotationProperty ){
+							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
+							activeOBDAModel.getOntologyVocabulary().removeAnnotationProperty(ap.getIRI().toString());
+						}
+
 					}
 				}
 
@@ -307,6 +300,11 @@ public class OBDAModelManager implements Disposable {
 			String uri = entity.getIRI().toString();
 
 			p = dfac.getDataPropertyPredicate(uri);
+
+		} else if (entity instanceof OWLAnnotationProperty) {
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getDataPropertyPredicate(uri);;
 		}
 		return p;
 	}
@@ -378,6 +376,9 @@ public class OBDAModelManager implements Disposable {
 			
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) 
 				activeOBDAModel.getOntologyVocabulary().createDataProperty(p.getIRI().toString());
+
+			for (OWLAnnotationProperty p : ontology.getAnnotationPropertiesInSignature())
+				activeOBDAModel.getOntologyVocabulary().createAnnotationProperty(p.getIRI().toString());
 		}
 
 		// Setup the prefixes

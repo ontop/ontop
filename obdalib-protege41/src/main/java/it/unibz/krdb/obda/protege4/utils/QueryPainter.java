@@ -48,6 +48,7 @@ public class QueryPainter {
 	private SimpleAttributeSet brackets;
 	private SimpleAttributeSet dataProp;
 	private SimpleAttributeSet objectProp;
+	private SimpleAttributeSet annotProp;
 	private SimpleAttributeSet clazz;
 	private SimpleAttributeSet individual;
 
@@ -277,9 +278,14 @@ public class QueryPainter {
 		brackets = new SimpleAttributeSet();
 		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
+		annotProp = new SimpleAttributeSet();
+		Color c_dp = new Color(109, 159, 162);
+		annotProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		annotProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
+
 		dataProp = new SimpleAttributeSet();
-		Color c_dp = new Color(41, 167, 121);
-		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		Color c_ap = new Color(41, 167, 121);
+		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_ap);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
 		objectProp = new SimpleAttributeSet();
@@ -383,6 +389,9 @@ public class QueryPainter {
 				tasks.add(task);
 			} else if (validator.isDataProperty(predicate)) {
 				ColorTask task = new ColorTask(predicateName, dataProp);
+				tasks.add(task);
+			} else if (validator.isAnnotProperty(predicate)) {
+				ColorTask task = new ColorTask(predicateName, annotProp);
 				tasks.add(task);
 			}
 

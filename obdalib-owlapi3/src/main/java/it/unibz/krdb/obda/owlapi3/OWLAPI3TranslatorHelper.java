@@ -1,34 +1,14 @@
 package it.unibz.krdb.obda.owlapi3;
 
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectInverseOf;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
-import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorOWL2QL.TranslationException;
+import org.semanticweb.owlapi.model.*;
 
 public class OWLAPI3TranslatorHelper {
 
@@ -66,15 +46,22 @@ public class OWLAPI3TranslatorHelper {
 	}	
 	
 	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
-		OWLLiteral object = ax.getObject();		
+		OWLLiteral object = ax.getObject();
 		Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
 		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
-		
+
 		URIConstant c1 = getIndividual(ax.getSubject());
 
 		DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
-		
-		return ofac.createDataPropertyAssertion(dpe, c1, c2);	
+
+		return ofac.createDataPropertyAssertion(dpe, c1, c2);
+	}
+
+	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
+
+		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
+
+		return ofac.createAnnotationAssertion(ap);
 	}
 	
 	/**
@@ -115,7 +102,7 @@ public class OWLAPI3TranslatorHelper {
 	/**
 	 * DataPropertyExpression := DataProperty
 	 * 
-	 * @param rolExpression
+	 * @param dpeExpression
 	 * @return
 	 */
 	
@@ -123,8 +110,20 @@ public class OWLAPI3TranslatorHelper {
 		assert (dpeExpression instanceof OWLDataProperty); 
 		return voc.getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
 	}
-	
-	
+
+
+	/**
+	 * AnnotationProperty
+	 *
+	 * @param ap
+	 * @return
+	 */
+
+	public AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap)  {
+		return voc.getAnnotationProperty(ap.getIRI().toString());
+	}
+
+
 
 	public static URIConstant getIndividual(OWLIndividual ind) {
 		if (ind.isAnonymous()) 
