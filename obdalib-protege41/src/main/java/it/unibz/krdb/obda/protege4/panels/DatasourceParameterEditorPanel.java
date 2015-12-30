@@ -120,8 +120,13 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			}
 		});
 
-		
-	}
+        /**
+         * Selects the first datasource if it exists
+         */
+        if (obdaModel.getSources().size() > 0) {
+            selector.set(obdaModel.getSources().get(0));
+        }
+    }
 
 	private void handleTimer() {
 		timer.stop();
