@@ -335,32 +335,29 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	private void cmdExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonExecuteActionPerformed
 		try {
 			// TODO Handle this such that there is a listener checking the progress of the execution
-			Thread queryRunnerThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
-					OBDADataQueryAction<?> action = null;
-					if (query.isSelectQuery() || query.isAskQuery()) {
-						action = QueryInterfacePanel.this.getExecuteSelectAction();
-					} else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
-						action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
-					} else {
-						JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
-					}
-					action.run(query.getQueryString());
-					execTime = action.getExecutionTime();
-					do {
-						int rows = action.getNumberOfRows();
-						updateStatus(rows);	
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e) {
-							break;
-						}
-					} while (action.isRunning());
-					updateStatus(action.getNumberOfRows());
-				};
-			});
+			Thread queryRunnerThread = new Thread(() -> {
+                SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
+                OBDADataQueryAction<?> action = null;
+                if (query.isSelectQuery() || query.isAskQuery()) {
+                    action = QueryInterfacePanel.this.getExecuteSelectAction();
+                } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
+                    action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
+                } else {
+                    JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
+                }
+                action.run(query.getQueryString());
+                execTime = action.getExecutionTime();
+                do {
+                    int rows = action.getNumberOfRows();
+                    updateStatus(rows);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                } while (action.isRunning());
+                updateStatus(action.getNumberOfRows());
+            });
 			queryRunnerThread.start();
 		} catch (Exception e) {
 			DialogUtils.showQuickErrorDialog(QueryInterfacePanel.this, e);
