@@ -257,10 +257,12 @@
 	   		<groupId>com.github.jsqlparser</groupId>
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
+        <!-- ** DO NOT INCLUDE guava. It is part of Protege now **
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
+		-->
 	</dependencies>
 
 
