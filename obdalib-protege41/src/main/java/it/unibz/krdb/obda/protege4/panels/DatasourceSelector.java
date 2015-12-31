@@ -30,6 +30,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -47,10 +49,10 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
 	private OBDADataSource previousSource;
 
-	private DefaultComboBoxModel cboModelDatasource;
+	private DefaultComboBoxModel<OBDADataSource> cboModelDatasource;
 	private DatasourceCellRenderer cboRendererDatasource;
 
-	private Vector<DatasourceSelectorListener> listeners = new Vector<DatasourceSelectorListener>();
+	private List<DatasourceSelectorListener> listeners = new ArrayList<>();
 
 	OBDAModel obdaModel = null;
 
@@ -73,9 +75,9 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	}
 
 	public void initSources() {
-		Vector<OBDADataSource> vecDatasource = new Vector<OBDADataSource>(obdaModel.getSources());
+		Vector<OBDADataSource> vecDatasource = new Vector<>(obdaModel.getSources());
 		if (cboModelDatasource == null) {
-			cboModelDatasource = new DefaultComboBoxModel(vecDatasource.toArray());
+			cboModelDatasource = new DefaultComboBoxModel<>(vecDatasource);
 			cboRendererDatasource = new DatasourceCellRenderer();
 		}
 		cboModelDatasource.removeAllElements();
@@ -94,7 +96,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
 	@Override
 	public void datasourceAdded(OBDADataSource source) {
-		DefaultComboBoxModel model = (DefaultComboBoxModel) cboDatasource.getModel();
+		DefaultComboBoxModel<OBDADataSource> model = (DefaultComboBoxModel<OBDADataSource>) cboDatasource.getModel();
 		model.addElement(source);
 	}
 

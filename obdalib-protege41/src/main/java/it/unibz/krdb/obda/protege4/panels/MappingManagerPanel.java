@@ -75,8 +75,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * 
 	 * @param apic
 	 *            The API controller object.
-	 * @param preference
-	 *            The preference object.
 	 */
 	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
 
@@ -105,33 +103,24 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			}
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-					removeMapping();
-				} else if (e.getKeyCode() == KeyEvent.VK_INSERT) {
-					addMapping();
-				} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					editMapping();
-				}
+                            switch (e.getKeyCode()) {
+                                case KeyEvent.VK_DELETE:
+                                case KeyEvent.VK_BACK_SPACE:
+                                    removeMapping();
+                                    break;
+                                case KeyEvent.VK_INSERT:
+                                    addMapping();
+                                    break;
+                                case KeyEvent.VK_SPACE:
+                                    editMapping();
+                                    break;
+                                default:
+                                    break;
+                            }
 			}
 		});
 
-		mappingList.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// do nothing
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// do nothing
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// do nothing
-			}
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// do nothing
-			}
+		mappingList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int count = e.getClickCount();
@@ -200,55 +189,29 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	private void addMenu() {
 		JMenuItem add = new JMenuItem();
 		add.setText("Create mapping...");
-		add.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addMapping();
-			}
-		});
+		add.addActionListener((ActionEvent e) -> addMapping());
 		menuMappings.add(add);
 
 		JMenuItem delete = new JMenuItem();
 		delete.setText("Remove mapping(s)...");
-		delete.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				removeMapping();
-			}
-		});
+		delete.addActionListener((ActionEvent e) -> removeMapping());
 		menuMappings.add(delete);
 
 		JMenuItem editMapping = new JMenuItem();
 		editMapping.setText("Edit mapping...");
-		editMapping.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editMapping();
-
-			}
-		});
+		editMapping.addActionListener((ActionEvent e) -> editMapping());
 		menuMappings.add(editMapping);
 
 		menuMappings.addSeparator();
 
 		menuValidateBody = new JMenuItem();
 		menuValidateBody.setText("Validate SQL");
-		menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuValidateBodyActionPerformed(evt);
-			}
-		});
+		menuValidateBody.addActionListener(this::menuValidateBodyActionPerformed);
 		menuMappings.add(menuValidateBody);
 
 		menuExecuteBody = new JMenuItem();
 		menuExecuteBody.setText("Execute SQL");
-		menuExecuteBody.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuExecuteBodyActionPerformed(evt);
-			}
-		});
+		menuExecuteBody.addActionListener(this::menuExecuteBodyActionPerformed);
 		menuMappings.add(menuExecuteBody);
 	}
 
@@ -492,12 +455,12 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 */
 	private void processFilterAction() {
 		if (!(chkFilter.isSelected())) {
-			applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
+			applyFilters(new ArrayList<>());
 		}
 		if (chkFilter.isSelected()) {
 			if (txtFilter.getText().isEmpty()) {
 				chkFilter.setSelected(false);
-				applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
+				applyFilters(new ArrayList<>());
 				return;
 			}
 			try {
@@ -540,76 +503,69 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
 
 		outputField.setLocationRelativeTo(this);
-		Runnable action = new Runnable() {
-			@Override
-			public void run() {
-				canceled = false;
-				final List path = mappingList.getSelectedValuesList();
-				if (path == null) {
-					JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
-					return;
-				}
-				outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
-				for (int i = 0; i < path.size(); i++) {
-					final int index = i;
-					OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(index);
-					String id = o.getId();
-					outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
-					long timestart = System.nanoTime();
+		Runnable action = () -> {
+            canceled = false;
+            final List path = mappingList.getSelectedValuesList();
+            if (path == null) {
+                JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
+                return;
+            }
+            outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
+            for (int i = 0; i < path.size(); i++) {
+                OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(i);
+                String id = o.getId();
+                outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
+                validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
+                long timestart = System.nanoTime();
 
-					if (canceled) {
-						return;
-					}
-					if (validator.validate()) {
-						long timestop = System.nanoTime();
-						String output = " valid  \n";
-						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
-						outputField.addText(output, outputField.VALID);
-					} else {
-						long timestop = System.nanoTime();
-						String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
-						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
-						outputField.addText(output, outputField.CRITICAL_ERROR);
-					}
+                if (canceled) {
+                    return;
+                }
+                if (validator.validate()) {
+                    long timestop = System.nanoTime();
+                    String output = " valid  \n";
+                    outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
+                    outputField.addText(output, outputField.VALID);
+                } else {
+                    long timestop = System.nanoTime();
+                    String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
+                    outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
+                    outputField.addText(output, outputField.CRITICAL_ERROR);
+                }
 
-					if (canceled) {
-						return;
-					}
-				}
-				outputField.setVisible(true);
-			}
-		};
+                if (canceled) {
+                    return;
+                }
+            }
+            outputField.setVisible(true);
+        };
 		validatorThread = new Thread(action);
 		validatorThread.start();
 
-		Thread cancelThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (!outputField.closed) {
-					try {
-						Thread.currentThread();
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				if (validatorThread.isAlive()) {
-					try {
-						Thread.currentThread();
-						Thread.sleep(250);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					try {
-						canceled = true;
-						validator.cancelValidation();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
+		Thread cancelThread = new Thread(() -> {
+            while (!outputField.closed) {
+                try {
+                    Thread.currentThread();
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (validatorThread.isAlive()) {
+                try {
+                    Thread.currentThread();
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    canceled = true;
+                    validator.cancelValidation();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 		cancelThread.start();
 
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
@@ -671,7 +627,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 				OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
 				OBDAMappingAxiom newmapping = null;
-				newmapping = (OBDAMappingAxiom) oldmapping.clone();
+				newmapping = oldmapping.clone();
 				newmapping.setId(new_id);
 				controller.addMapping(current_srcuri, newmapping);
 
@@ -719,8 +675,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			addMapping();
 		} else {
 			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+        }
 	}// GEN-LAST:event_addMappingButtonActionPerformed
 
 	private void addMapping() {

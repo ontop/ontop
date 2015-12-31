@@ -32,9 +32,8 @@ import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -42,11 +41,8 @@ import java.awt.event.ItemListener;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Vector;
-
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -67,11 +63,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	 */
 	public DatasourceParameterEditorPanel(OBDAModel model) {
 
-		timer = new Timer(200, new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleTimer();
-			}
-		});
+		timer = new Timer(200, e -> handleTimer());
 		
 		initComponents();
 
@@ -81,7 +73,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		setDatasourcesController(model);
 		enableFields(false);
 
-		Vector<Component> order = new Vector<Component>(7);
+		List<Component> order = new ArrayList<>(7);
 		order.add(pnlDataSourceParameters);
 		order.add(txtJdbcUrl);
 		order.add(txtDatabaseUsername);
@@ -604,38 +596,34 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 		lblConnectionStatus.setText("Establishing connection...");
 		lblConnectionStatus.setForeground(Color.BLACK);
-		
-		Runnable run = new Runnable() {
-			
-			@Override
-			public void run() {
-				JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
-				try {
-						try {
-							connm.closeConnection(selectedDataSource);
-						} catch (Exception e) {
-							
-						}
-					Connection conn = connm.getConnection(selectedDataSource);
-					if (conn == null)
-						throw new SQLException("Error connecting to the database");
-					lblConnectionStatus.setForeground(Color.GREEN.darker());
-					lblConnectionStatus.setText("Connection is OK");
-				} catch (SQLException e) { // if fails
-                    String help = "";
-                    if (e.getMessage().startsWith("No suitable driver")) {
-                        help = "<br/><br/> HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drives\" tab." +
-                                " (Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...) " +
-                                "<br/> More information is on the Wiki: " +
-                                "<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>";
-                    }
-                    lblConnectionStatus.setForeground(Color.RED);
-                    lblConnectionStatus.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+
+        Runnable run = () -> {
+            JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
+            try {
+                try {
+                    connm.closeConnection(selectedDataSource);
+                } catch (Exception e) {
+                    // NO-OP
                 }
-				
-			}
-		};
-		SwingUtilities.invokeLater(run);
+                Connection conn = connm.getConnection(selectedDataSource);
+                if (conn == null)
+                    throw new SQLException("Error connecting to the database");
+                lblConnectionStatus.setForeground(Color.GREEN.darker());
+                lblConnectionStatus.setText("Connection is OK");
+            } catch (SQLException e) { // if fails
+                String help = "";
+                if (e.getMessage().startsWith("No suitable driver")) {
+                    help = "<br/><br/> HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drives\" tab." +
+                            " (Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...) " +
+                            "<br/> More information is on the Wiki: " +
+                            "<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>";
+                }
+                lblConnectionStatus.setForeground(Color.RED);
+                lblConnectionStatus.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+            }
+
+        };
+        SwingUtilities.invokeLater(run);
 		
 	}// GEN-LAST:event_cmdTestConnectionActionPerformed
 
@@ -662,12 +650,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 		try {
 			man.closeConnection(selectedDataSource);
-		} catch (OBDAException e) {
-			// do nothing
-		} catch (SQLException e) {
+		} catch (OBDAException | SQLException e) {
 			// do nothing
 		}
-		String username = txtDatabaseUsername.getText();
+
+        String username = txtDatabaseUsername.getText();
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		String password = new String(txtDatabasePassword.getPassword());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
