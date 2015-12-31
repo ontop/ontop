@@ -77,7 +77,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	public void initSources() {
 		Vector<OBDADataSource> vecDatasource = new Vector<>(obdaModel.getSources());
 		if (cboModelDatasource == null) {
-			cboModelDatasource = new DefaultComboBoxModel<>(vecDatasource);
+			cboModelDatasource = new DefaultComboBoxModel<>(vecDatasource.toArray(new OBDADataSource[vecDatasource.size()]));
 			cboRendererDatasource = new DatasourceCellRenderer();
 		}
 		cboModelDatasource.removeAllElements();
@@ -135,7 +135,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        cboDatasource = new JComboBox();
+        cboDatasource = new JComboBox<>();
 
         setMinimumSize(new Dimension(23, 21));
         setPreferredSize(new Dimension(28, 21));
@@ -143,9 +143,9 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
         cboDatasource.setModel(cboModelDatasource);
         cboDatasource.setMinimumSize(new Dimension(23, 23));
+        cboDatasource.setNextFocusableComponent(cboDatasource);
         cboDatasource.setPreferredSize(new Dimension(28, 23));
         cboDatasource.setRenderer(cboRendererDatasource);
-        cboDatasource.setSelectedIndex(-1);
         cboDatasource.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 cboDatasourceSelected(evt);
@@ -167,24 +167,23 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	}// GEN-LAST:event_cboDatasourceSelected
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JComboBox cboDatasource;
+    private JComboBox<OBDADataSource> cboDatasource;
     // End of variables declaration//GEN-END:variables
 
-	private class DatasourceCellRenderer extends JLabel implements ListCellRenderer {
+    private class DatasourceCellRenderer extends JLabel implements ListCellRenderer<OBDADataSource> {
 
-		private static final long	serialVersionUID	= -8521494988522078279L;
+        private static final long serialVersionUID = -8521494988522078279L;
 
-		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-			if (value == null) {
-				setText("<Select a datasource>");
-			} 
-			else {
-				OBDADataSource datasource = (OBDADataSource) value;
-				String datasourceUri = datasource.getSourceID().toString();
-				setText(datasourceUri);
-			}
-			return this;
-		}
-	}
+        @Override
+        public Component getListCellRendererComponent(JList<? extends OBDADataSource> list, OBDADataSource value,
+                                                      int index, boolean isSelected, boolean cellHasFocus) {
+            if (value == null) {
+                setText("<Select a datasource>");
+            } else {
+                String datasourceUri = value.getSourceID().toString();
+                setText(datasourceUri);
+            }
+            return this;
+        }
+    }
 }
