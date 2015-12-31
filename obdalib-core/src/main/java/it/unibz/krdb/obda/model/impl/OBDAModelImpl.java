@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -181,7 +180,7 @@ public class OBDAModelImpl implements OBDAModel {
 	@Override
 	public void fireSourceParametersUpdated() {
 		for (OBDAModelListener listener : sourceslisteners) {
-			listener.datasourcParametersUpdated();
+			listener.datasourceParametersUpdated();
 		}
 	}
 

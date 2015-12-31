@@ -25,20 +25,18 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A combo box component to select a data source.
@@ -118,7 +116,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	}
 
 	@Override
-	public void datasourcParametersUpdated() {
+	public void datasourceParametersUpdated() {
 		// TODO Change the interface?
 	}
 
@@ -143,27 +141,21 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
         cboDatasource.setModel(cboModelDatasource);
         cboDatasource.setMinimumSize(new Dimension(23, 23));
-        cboDatasource.setNextFocusableComponent(cboDatasource);
         cboDatasource.setPreferredSize(new Dimension(28, 23));
         cboDatasource.setRenderer(cboRendererDatasource);
-        cboDatasource.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                cboDatasourceSelected(evt);
-            }
-        });
+        cboDatasource.addActionListener(this::cboDatasourceSelected);
         add(cboDatasource, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 	private void cboDatasourceSelected(ActionEvent evt) {// GEN-FIRST:event_cboDatasourceSelected
-		JComboBox cb = (JComboBox) evt.getSource();
-		OBDADataSource currentSource = (OBDADataSource) cb.getSelectedItem();
+        OBDADataSource currentSource = cboDatasource.getItemAt(cboDatasource.getSelectedIndex());
 		for (DatasourceSelectorListener listener : listeners) {
 			listener.datasourceChanged(previousSource, currentSource);
 		}
 		// After the listeners have been notified, update the previousSource
 		// to be as the same as the currentSource, so that we have a historical
 		// record of data sources.
-		previousSource = (OBDADataSource) cb.getSelectedItem();
+		previousSource = currentSource;
 	}// GEN-LAST:event_cboDatasourceSelected
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

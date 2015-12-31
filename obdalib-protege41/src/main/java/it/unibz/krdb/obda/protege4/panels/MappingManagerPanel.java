@@ -424,9 +424,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
 
         mappingList.setModel(new javax.swing.AbstractListModel<OBDAMappingAxiom>() {
-            OBDAMappingAxiom[] strings = { };
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
-            public OBDAMappingAxiom getElementAt(int i) { return strings[i]; }
+            public Object getElementAt(int i) { return strings[i]; }
         });
         mappingScrollPane.setViewportView(mappingList);
 

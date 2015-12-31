@@ -26,8 +26,6 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
@@ -92,9 +90,8 @@ public class OBDAModelManager implements Disposable {
 	private JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private boolean applyUserConstraints = false;
+    private boolean applyUserConstraints = false;
 	private ImplicitDBConstraintsReader userConstraints;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
@@ -120,10 +117,10 @@ public class OBDAModelManager implements Disposable {
 		super();
 
 		if (!(editorKit instanceof OWLEditorKit)) {
-			throw new IllegalArgumentException("The OBDA PLugin only works with OWLEditorKit instances.");
+			throw new IllegalArgumentException("The OBDA Plugin only works with OWLEditorKit instances.");
 		}
 		this.owlEditorKit = (OWLEditorKit) editorKit;
-		mmgr = ((OWLModelManager) owlEditorKit.getModelManager()).getOWLOntologyManager();
+		mmgr = owlEditorKit.getModelManager().getOWLOntologyManager();
 		OWLModelManager owlmmgr = (OWLModelManager) editorKit.getModelManager();
 		owlmmgr.addListener(modelManagerListener);
 		obdaManagerListeners = new LinkedList<OBDAModelManagerListener>();
@@ -304,8 +301,8 @@ public class OBDAModelManager implements Disposable {
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = dfac.getDataPropertyPredicate(uri);;
-		}
+			p = dfac.getDataPropertyPredicate(uri);
+        }
 		return p;
 	}
 	
@@ -439,7 +436,7 @@ public class OBDAModelManager implements Disposable {
 			OWLOntology activeOntology = source.getActiveOntology();
 
 			// Initialize the active OBDA model
-			OBDAModel activeOBDAModel = null;
+			OBDAModel activeOBDAModel;
 
 			// Perform a proper handling for each type of event
 			final EventType eventType = event.getType();
@@ -702,7 +699,7 @@ public class OBDAModelManager implements Disposable {
 			triggerOntologyChanged();
 		}
 
-		public void datasourcParametersUpdated() {
+		public void datasourceParametersUpdated() {
 			triggerOntologyChanged();
 		}
 	}

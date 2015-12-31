@@ -102,7 +102,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			}
 
 			@Override
-			public void datasourcParametersUpdated() {
+			public void datasourceParametersUpdated() {
 				// NO OP
 			}
 
