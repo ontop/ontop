@@ -30,17 +30,17 @@
 			<CNode>
 				<Component label="Datasource manager">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent" />
+						value="it.unibz.inf.ontop.protege.DatasourcesManagerViewComponent" />
 				</Component>
 				<Component label="Mapping manager">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent" />
+						value="it.unibz.inf.ontop.protege.MappingsManagerViewComponent" />
 				</Component>
 				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
 					value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
 				<Component label="Mapping Assistant - BETA">
 					<Property id="pluginId"
-						value="it.unibz.krdb.obda.protege4.MappingAssistantViewComponent" />
+						value="it.unibz.inf.ontop.protege.MappingAssistantViewComponent" />
 				</Component>
 			</CNode>
 		</VSNode>
