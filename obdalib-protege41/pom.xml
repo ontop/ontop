@@ -10,13 +10,11 @@
 	<artifactId>ontop-protege</artifactId>
 	<name>ontop-protege</name>
 
-
     <properties>
         <protege.version>5.0.0-beta-21</protege.version>
     </properties>
 
 	<dependencies>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -133,12 +131,12 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-				<groupId>org.javabits.jgrapht</groupId>
-				<artifactId>jgrapht-core</artifactId>		
-		</dependency>
+        <dependency>
+            <groupId>org.javabits.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+        </dependency>
 
-		<dependency>
+        <dependency>
 			<groupId>eu.optique-project</groupId>
 			<artifactId>r2rml-api</artifactId>
 		</dependency>
@@ -147,7 +145,7 @@
 			<artifactId>r2rml-api-sesame-bridge</artifactId>
 		</dependency>
 		
-		<!-- Protege 4 and OWLAPI bundle dependencies -->
+		<!-- Protege and OWLAPI bundle dependencies -->
 
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
@@ -269,37 +267,16 @@
 	   		<groupId>com.github.jsqlparser</groupId>
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
-
-
 	</dependencies>
 
-
-
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-${project.version}</finalName>
+		<finalName>it.unibz.inf.ontop.protege-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<excludes>
-					
-						<exclude>**/TBoxDAGImpl.java</exclude>
-						<exclude>**/dagjgrapht/*.java</exclude>
-						<exclude>**/LUBM*.java</exclude>
-					
-						<exclude>*it/unibz/krdb/obda/owlrefplatform/core/reformulation/TreeWitness*</exclude>
-						<exclude>**/TW*.java</exclude>
-						<exclude>**/LUBM*.java</exclude>
-						<exclude>**/directmapping/*.java</exclude>
-						<exclude>**/views/QueryHistoryView.java</exclude>
-						<exclude>**/views/RDBMSInspectorView.java</exclude>
-					</excludes>
-					<testExcludes>
-						<exclude>**/MappingToRuleTester.java</exclude>
-						<exclude>**/PartialEvaluationTest.java</exclude>
-					</testExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -397,8 +374,10 @@
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
 							or protege wont load it -->
+                        <!--
 						<Bundle-SymbolicName>it.unibz.krdb.obda.protege4;singleton:=true</Bundle-SymbolicName>
-
+                        -->
+                        <Bundle-SymbolicName>it.unibz.inf.ontop.protege;singleton:=true</Bundle-SymbolicName>
 						<!-- This makes sure ONLY the necessary dependencies are imported. 
 							If this is not supplied, maven-bundle-plugin will attempt to import ALL classes 
 							in the dependencies (even transitive ones) This will lead to class not found 
