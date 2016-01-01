@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
+
+import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -21,8 +23,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -39,6 +39,9 @@ import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import com.google.common.collect.UnmodifiableIterator;
 
+import static java.util.stream.Collectors.toSet;
+import static org.junit.Assert.*;
+
 /**
  * Test for OWLAPI3TranslatorOWL2QL
  * 
@@ -46,7 +49,7 @@ import com.google.common.collect.UnmodifiableIterator;
  * 
  */
 
-public class OWL2QLTranslatorTest extends TestCase {
+public class OWL2QLTranslatorTest {
 
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
@@ -412,10 +415,12 @@ public class OWL2QLTranslatorTest extends TestCase {
 			assertEquals("http://example/A", subC.getName());				
 			assertEquals("http://example/C", superC.getName());				
 		}
-	}	
-	
+	}
 
-	@Test
+
+
+
+    @Test
 	public void test_R6() throws Exception {
 		OntologyFactory factory = OntologyFactoryImpl.getInstance(); 
 		OntologyVocabulary voc = factory.createVocabulary();
@@ -702,21 +707,21 @@ public class OWL2QLTranslatorTest extends TestCase {
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(0, axs.size());
+
 		Collection<NaryAxiom<ClassExpression>> axs1 = dlliteonto.getDisjointClassesAxioms();
 		assertEquals(2, axs1.size());
 		
-		Iterator<NaryAxiom<ClassExpression>> axIt = axs1.iterator();
-		NaryAxiom<ClassExpression> ax = axIt.next();
-		assertEquals(2, ax.getComponents().size()); // dpe2 (B) is empty
-		Iterator<ClassExpression> it = ax.getComponents().iterator();
-		assertEquals("http://example/D", it.next().toString());
-		assertEquals("http://example/E", it.next().toString());
-		
-		ax = axIt.next();
-		assertEquals(2, ax.getComponents().size()); // dpe4, dpe5 (D, E) are disjoint
-		it = ax.getComponents().iterator();
-		assertEquals("http://example/B", it.next().toString());
-		assertEquals("http://example/B", it.next().toString());
+		axs1.iterator().forEachRemaining(ax -> {
+            Set<String> clsExpressions = ax.getComponents().stream().map(Object::toString).collect(toSet());
+            if (clsExpressions.size() == 1) {
+                assertEquals(ImmutableSet.of("http://example/B"), clsExpressions);
+            } else if (clsExpressions.size() == 2) {
+                assertEquals(ImmutableSet.of("http://example/D", "http://example/E"), clsExpressions);
+            } else {
+                fail();
+            }
+        });
+
 	}	
 	
 	@Test
@@ -961,39 +966,62 @@ public class OWL2QLTranslatorTest extends TestCase {
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(4, axs.size()); // surrogates for existential restrictions are re-used
 		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
-		BinaryAxiom<ClassExpression> ax = it.next();
-		
-		assertEquals(ax.getSuper(), voc.getClass("http://example/B"));
-		assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
-		ObjectPropertyExpression opep = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux1^-
-		assertEquals(opep.isInverse(), true);
-		
-		ax = it.next();
-		assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
-		ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux
-		assertEquals(ope.isInverse(), false);
-		assertEquals(ax.getSuper(), opep.getInverse().getDomain());
 
-		ax = it.next();
-		assertEquals(ax.getSub(), ope.getDomain());
-		assertEquals(ax.getSuper(), voc.getClass("http://example/D"));
-		
-		ax = it.next();
-		assertEquals(ax.getSub(), voc.getClass("http://example/A"));
-		assertEquals(ax.getSuper(), ope.getInverse().getDomain());
-		
-		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+        it.forEachRemaining(ax -> {
+            if (ax.getSuper().equals(voc.getClass("http://example/B"))){
+                // E AUX.ROLE1^- ISA http://example/B
+                assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+                ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSub()).getProperty();
+                assertTrue(opep.isInverse());
+            } else if (ax.getSuper().equals(voc.getClass("http://example/D"))){
+                // E AUX.ROLE0 ISA http://example/D
+                ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty();
+                assertFalse(ope.isInverse());
+            } else if (ax.getSub().equals(voc.getClass("http://example/A"))){
+                // http://example/A ISA E AUX.ROLE0^-
+                ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSuper()).getProperty();
+                assertTrue(ope.isInverse());
+            } else {
+                // E AUX.ROLE0 ISA E AUX.ROLE1
+                assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
+                ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty();
+                assertFalse(ope.isInverse());
+                ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSuper()).getProperty();
+                assertFalse(opep.isInverse());
+            }
+        });
+
+
+        //BinaryAxiom<ClassExpression> ax = it.next();
+
+//        ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux
+//        ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSub()).getProperty(); // aux1^-
+
+        Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(2, axs1.size());
-		
-		Iterator<BinaryAxiom<ObjectPropertyExpression>> it1 = axs1.iterator();
-		BinaryAxiom<ObjectPropertyExpression> ax1 = it1.next();
-		assertEquals(ax1.getSub(), opep.getInverse());
-		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/S"));
-		
-		ax1 = it1.next();
-		assertEquals(ax1.getSub(), ope.getInverse());
-		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
-		
+
+        axs1.iterator().forEachRemaining(ax -> {
+            if(ax.getSuper().equals(voc.getObjectProperty("http://example/S"))){
+                // AUX.ROLE1 ISA http://example/S
+                assertFalse(ax.getSub().isInverse());
+            } else if(ax.getSuper().equals(voc.getObjectProperty("http://example/R").getInverse())){
+                // AUX.ROLE0^- ISA http://example/R^-
+                assertTrue(ax.getSub().isInverse());
+            } else {
+                fail();
+            }
+        });
+
+//
+//		Iterator<BinaryAxiom<ObjectPropertyExpression>> it1 = axs1.iterator();
+//		BinaryAxiom<ObjectPropertyExpression> ax1 = it1.next();
+//		assertEquals(ax1.getSub(), opep.getInverse());
+//		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/S"));
+//
+//		ax1 = it1.next();
+//		assertEquals(ax1.getSub(), ope.getInverse());
+//		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
+//
 		Collection<NaryAxiom<ClassExpression>> axs2 = dlliteonto.getDisjointClassesAxioms();
 		assertEquals(axs2.size(), 1);
 	}	
