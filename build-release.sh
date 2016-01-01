@@ -26,8 +26,8 @@ export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME
 
 # location for protege clean folder (Protege 4.3)
 export PROTEGE_COPY_PATH=$ONTOP_DEP_HOME
-export PROTEGE_COPY_FILENAME=protege-5.0.0-beta-17-platform-independent
-export PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0-beta-17
+export PROTEGE_COPY_FILENAME=protege-5.0.0-beta-21-platform-independent
+export PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0-beta-21
 export PROTEGE_MAIN_PLUGIN=ontopPro-plugin
 
 # location and name for jetty distribution (should be ZIP)
@@ -49,8 +49,11 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
+# jar name of the pretege plugin
+export PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
+
 export VERSION=1.16
-export REVISION=1
+export REVISION=2-SNAPSHOT
 
 
 # Start building the packages
@@ -72,13 +75,13 @@ mvn bundle:bundle -DskipTests
 
 rm -fr $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
 mkdir $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
-cp target/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
+cp target/$PROTEGE_PLUGIN_NAME-$VERSION.$REVISION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/$PROTEGE_PLUGIN_NAME-$VERSION.$REVISION.jar
 cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
 
 cd $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
 
 mkdir -p $PROTEGE_MAIN_FOLDER_NAME/plugins
-cp it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
+cp $PROTEGE_PLUGIN_NAME-$VERSION.$REVISION.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 cp $JDBC_PLUGINS_PATH/org.protege.osgi.jdbc.prefs.jar $PROTEGE_MAIN_FOLDER_NAME/plugins/
 zip $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/$PROTEGE_MAIN_PLUGIN-$VERSION.$REVISION.zip $PROTEGE_MAIN_FOLDER_NAME/plugins/*.*
@@ -110,6 +113,8 @@ jar -uf $OPENRDF_SESAME_FILENAME.war WEB-INF/lib/*
 
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
 jar -uf $OPENRDF_WORKBENCH_FILENAME.war WEB-INF/lib/*
+
+zip ontop-webapps-$VERSION.$REVISION.zip $OPENRDF_SESAME_FILENAME.war $OPENRDF_WORKBENCH_FILENAME.war
 
 rm -fr WEB-INF
 cd $BUILD_ROOT/quest-distribution
