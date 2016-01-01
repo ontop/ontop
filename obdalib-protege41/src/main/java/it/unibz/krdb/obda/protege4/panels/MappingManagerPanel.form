@@ -333,6 +333,9 @@
                   </StringArray>
                 </Property>
               </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;OBDAMappingAxiom&gt;"/>
+              </AuxValues>
             </Component>
           </SubComponents>
         </Container>

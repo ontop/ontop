@@ -32,6 +32,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
@@ -81,8 +82,8 @@ public class OWLResultSetTableModel implements TableModel {
 		numcols = results.getColumnCount();
 		numrows = 0;
 
-		resultsTable = new Vector<String[]>();
-		listener = new Vector<TableModelListener>();
+		resultsTable = new Vector<>();
+		listener = new Vector<>();
 
 		fetchRowsAsync();
 	}
@@ -162,10 +163,9 @@ public class OWLResultSetTableModel implements TableModel {
 			for (int j = 0; j < numcols; j++) {
 				if(stopFetching)
 					break;
-				OWLPropertyAssertionObject constant = results
-						.getOWLPropertyAssertionObject(j + 1);
+				OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
 				if (constant != null) {
-					crow[j] = constant.toString();
+                    crow[j] = ToStringRenderer.getInstance().getRendering(constant);
 				}
 				else {
 					crow[j] = "";

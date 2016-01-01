@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.r2rml;
 
 import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -37,8 +38,10 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 /**
@@ -263,7 +266,7 @@ public class OBDAMappingTransformer {
 			mapping_id = "http://example.org/" + mapping_id;
 		Resource mainNode = vf.createURI(mapping_id);
 
-		R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
 		
 		//Table
@@ -343,7 +346,8 @@ public class OBDAMappingTransformer {
                             obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
                             //set the datatype for the typed literal
 
-                            Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            //Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            Collection<OWLDataRange> ranges = EntitySearcher.getRanges(dataProperty, ontology);
                             //assign the datatype if present
                             if (ranges.size() == 1) {
                                 IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();

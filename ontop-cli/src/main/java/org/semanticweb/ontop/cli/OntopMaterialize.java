@@ -198,7 +198,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
         //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-        manager.saveOntology(aBox, getOntologyFormat(format), new WriterDocumentTarget(writer));
+        manager.saveOntology(aBox, getDocumentFormat(format), new WriterDocumentTarget(writer));
 
         return tripleCount;
     }
@@ -253,9 +253,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 manager.addAxiom(ontology, iterator.next());
 
 
-            OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
+            OWLDocumentFormat DocumentFormat = getDocumentFormat(format);
 
-            manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));
+            manager.saveOntology(ontology, DocumentFormat, new WriterDocumentTarget(writer));
 
             System.err.println("NR of TRIPLES: " + materializer.getTriplesCount());
             System.err.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());

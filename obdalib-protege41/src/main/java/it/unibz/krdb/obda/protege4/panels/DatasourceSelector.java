@@ -25,18 +25,18 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Vector;
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A combo box component to select a data source.
@@ -47,10 +47,10 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
 	private OBDADataSource previousSource;
 
-	private DefaultComboBoxModel cboModelDatasource;
+	private DefaultComboBoxModel<OBDADataSource> cboModelDatasource;
 	private DatasourceCellRenderer cboRendererDatasource;
 
-	private Vector<DatasourceSelectorListener> listeners = new Vector<DatasourceSelectorListener>();
+	private List<DatasourceSelectorListener> listeners = new ArrayList<>();
 
 	OBDAModel obdaModel = null;
 
@@ -73,9 +73,9 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	}
 
 	public void initSources() {
-		Vector<OBDADataSource> vecDatasource = new Vector<OBDADataSource>(obdaModel.getSources());
+		Vector<OBDADataSource> vecDatasource = new Vector<>(obdaModel.getSources());
 		if (cboModelDatasource == null) {
-			cboModelDatasource = new DefaultComboBoxModel(vecDatasource.toArray());
+			cboModelDatasource = new DefaultComboBoxModel<>(vecDatasource.toArray(new OBDADataSource[vecDatasource.size()]));
 			cboRendererDatasource = new DatasourceCellRenderer();
 		}
 		cboModelDatasource.removeAllElements();
@@ -94,7 +94,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
 	@Override
 	public void datasourceAdded(OBDADataSource source) {
-		DefaultComboBoxModel model = (DefaultComboBoxModel) cboDatasource.getModel();
+		DefaultComboBoxModel<OBDADataSource> model = (DefaultComboBoxModel<OBDADataSource>) cboDatasource.getModel();
 		model.addElement(source);
 	}
 
@@ -116,7 +116,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	}
 
 	@Override
-	public void datasourcParametersUpdated() {
+	public void datasourceParametersUpdated() {
 		// TODO Change the interface?
 	}
 
@@ -133,7 +133,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        cboDatasource = new JComboBox();
+        cboDatasource = new JComboBox<>();
 
         setMinimumSize(new Dimension(23, 21));
         setPreferredSize(new Dimension(28, 21));
@@ -143,46 +143,39 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
         cboDatasource.setMinimumSize(new Dimension(23, 23));
         cboDatasource.setPreferredSize(new Dimension(28, 23));
         cboDatasource.setRenderer(cboRendererDatasource);
-        cboDatasource.setSelectedIndex(-1);
-        cboDatasource.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                cboDatasourceSelected(evt);
-            }
-        });
+        cboDatasource.addActionListener(this::cboDatasourceSelected);
         add(cboDatasource, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 	private void cboDatasourceSelected(ActionEvent evt) {// GEN-FIRST:event_cboDatasourceSelected
-		JComboBox cb = (JComboBox) evt.getSource();
-		OBDADataSource currentSource = (OBDADataSource) cb.getSelectedItem();
+        OBDADataSource currentSource = cboDatasource.getItemAt(cboDatasource.getSelectedIndex());
 		for (DatasourceSelectorListener listener : listeners) {
 			listener.datasourceChanged(previousSource, currentSource);
 		}
 		// After the listeners have been notified, update the previousSource
 		// to be as the same as the currentSource, so that we have a historical
 		// record of data sources.
-		previousSource = (OBDADataSource) cb.getSelectedItem();
+		previousSource = currentSource;
 	}// GEN-LAST:event_cboDatasourceSelected
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JComboBox cboDatasource;
+    private JComboBox<OBDADataSource> cboDatasource;
     // End of variables declaration//GEN-END:variables
 
-	private class DatasourceCellRenderer extends JLabel implements ListCellRenderer {
+    private class DatasourceCellRenderer extends JLabel implements ListCellRenderer<OBDADataSource> {
 
-		private static final long	serialVersionUID	= -8521494988522078279L;
+        private static final long serialVersionUID = -8521494988522078279L;
 
-		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-			if (value == null) {
-				setText("<Select a datasource>");
-			} 
-			else {
-				OBDADataSource datasource = (OBDADataSource) value;
-				String datasourceUri = datasource.getSourceID().toString();
-				setText(datasourceUri);
-			}
-			return this;
-		}
-	}
+        @Override
+        public Component getListCellRendererComponent(JList<? extends OBDADataSource> list, OBDADataSource value,
+                                                      int index, boolean isSelected, boolean cellHasFocus) {
+            if (value == null) {
+                setText("<Select a datasource>");
+            } else {
+                String datasourceUri = value.getSourceID().toString();
+                setText(datasourceUri);
+            }
+            return this;
+        }
+    }
 }

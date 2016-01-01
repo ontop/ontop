@@ -55,7 +55,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
 		addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
 		addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
-		addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
+		//addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
 	}
 
 	@Override

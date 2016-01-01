@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -242,19 +243,19 @@ public class AnnotationTest {
         double time = (end - start) / 1000;
         String result = "";
         int count = 0;
-                while (res.nextRow()) {
-                    count += 1;
-                    if(count == 1) {
-                    for (int i = 1; i <= res.getColumnCount(); i++) {
-                         log.debug("Example result " + res.getSignature().get(i-1) + " = " + res.getOWLObject(i));
+        while (res.nextRow()) {
+            count += 1;
+            if (count == 1) {
+                for (int i = 1; i <= res.getColumnCount(); i++) {
+                    log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
 
-                      }
-                        result = res.getOWLObject("r").toString();
-                    }
                 }
-                log.debug("Total results: {}", count);
+                result = ToStringRenderer.getInstance().getRendering(res.getOWLObject("r"));
+            }
+        }
+        log.debug("Total results: {}", count);
 
-                assertFalse(count == 0);
+        assertFalse(count == 0);
 
         log.debug("Elapsed time: {} ms", time);
 

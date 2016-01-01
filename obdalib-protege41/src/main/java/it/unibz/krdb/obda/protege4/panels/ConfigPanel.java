@@ -71,14 +71,16 @@ public class ConfigPanel extends javax.swing.JPanel {
 //        }
 
         value = (String) preference.getCurrentValue(QuestPreferences.DBTYPE);
-        if (value.equals(QuestConstants.DIRECT)) {
-            radDirect.setSelected(true);
-        }
-        else if (value.equals(QuestConstants.UNIVERSAL)) {
-            radUniversal.setSelected(true);
-        }
-        else if (value.equals(QuestConstants.SEMANTIC_INDEX)) {
-            radSemanticIndex.setSelected(true);
+        switch (value) {
+            case QuestConstants.DIRECT:
+                radDirect.setSelected(true);
+                break;
+            case QuestConstants.UNIVERSAL:
+                radUniversal.setSelected(true);
+                break;
+            case QuestConstants.SEMANTIC_INDEX:
+                radSemanticIndex.setSelected(true);
+                break;
         }
 
         bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);

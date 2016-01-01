@@ -29,7 +29,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-quest-owlapi3</artifactId>
+            <artifactId>ontop-quest-owlapi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
