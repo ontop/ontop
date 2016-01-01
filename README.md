@@ -19,30 +19,20 @@ project.
 Links
 --------------------
 
-Official Website: http://ontop.inf.unibz.it/
-
-Download: http://sourceforge.net/projects/ontop4obda/files/
-
-Google Group: https://groups.google.com/forum/#!forum/ontop4obda
-
-Source Code: https://github.com/ontop/ontop
-
-Issue Tracker: https://github.com/ontop/ontop/issues
-
-Travis CI: https://travis-ci.org/ontop/ontop
-
-Wiki: https://github.com/ontop/ontop/wiki
-
-
-
-Facebook: https://www.facebook.com/obdaontop/
-
-Twitter: https://twitter.com/ontop4obda
-
+- Official Website: http://ontop.inf.unibz.it/
+- Download: http://sourceforge.net/projects/ontop4obda/files/
+- Wiki: https://github.com/ontop/ontop/wiki
+- Google Group: https://groups.google.com/forum/#!forum/ontop4obda
+- Source Code: https://github.com/ontop/ontop
+- Facebook: https://www.facebook.com/obdaontop/
+- Twitter: https://twitter.com/ontop4obda
+- Issue Tracker: https://github.com/ontop/ontop/issues
+- Travis CI: https://travis-ci.org/ontop/ontop
 
 
 License
 -------
+
 The -ontop- framework is available under the Apache License, Version 2.0
 
 ```
