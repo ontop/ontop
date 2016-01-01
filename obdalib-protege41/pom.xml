@@ -69,7 +69,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-quest-owlapi3</artifactId>
+			<artifactId>ontop-quest-owlapi</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
@@ -90,7 +90,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>

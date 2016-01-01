@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

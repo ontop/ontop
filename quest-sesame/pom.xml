@@ -37,7 +37,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
@@ -52,7 +52,7 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-quest-owlapi3</artifactId>
+			<artifactId>ontop-quest-owlapi</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
