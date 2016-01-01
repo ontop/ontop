@@ -15,7 +15,6 @@
 		</license>
 	</licenses>
 
-
 	<inceptionYear>2009</inceptionYear>
 	<organization>
 		<name>Free University of Bozen-Bolzano</name>
@@ -614,7 +613,6 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	
-	
+
 </project>
 			

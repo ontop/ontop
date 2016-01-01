@@ -7,7 +7,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>ontop-protege4</artifactId>
+	<artifactId>ontop-protege</artifactId>
 	<name>ontop-protege</name>
 
 
@@ -16,8 +16,6 @@
     </properties>
 
 	<dependencies>
-
-        <!-- ** DO NOT INCLUDE slf4j/logback/guava. They are part of Protege now ** -->
 
         <dependency>
             <groupId>org.slf4j</groupId>

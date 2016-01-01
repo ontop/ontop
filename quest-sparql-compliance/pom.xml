@@ -105,8 +105,7 @@
 	</dependencies>
                           
 	<repositories>
-		
-		<repository>
+        <repository>
 			<id>bolzano-nexus-public</id>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
 			<releases>
@@ -117,16 +116,9 @@
 			</snapshots>
 		</repository>
 	</repositories>
+
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
@@ -136,4 +128,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
