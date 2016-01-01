@@ -17,9 +17,11 @@ All documentation is licensed under the
 
 Compiling, packing, testing, etc.
 --------------------
-The project is a [Maven](http://maven.apache.org/) project. Compiling, running the unit tests, building the release binaries all can be done using maven. To make it more practical we created several .sh scripts that you can run on any unix environment that has maven installed. The scripts are located in the folder 'scripts', look at that folder for more information.
 
-Currently we use Maven 3 and Java 7 to build the project.
+The project is a [Maven](http://maven.apache.org/) project. Compiling,
+running the unit tests, building the release binaries all can be done
+using maven.  Currently we use Maven 3 and Java 8 to build the
+project.
 
 
 Links
@@ -40,5 +42,20 @@ Facebook: https://www.facebook.com/obdaontop/
 Twitter: https://twitter.com/ontop4obda
 
 
+License
+-------
 
+  Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 
