@@ -6,15 +6,6 @@ Ontop
 Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
 virtual RDF graphs defined through mappings to RDBMS. 
 
-Licensing terms 
---------------------
-The -ontop- framework is available under the Apache License, Version 2.0
-
-All documentation is licensed under the 
-[Creative Commons](http://creativecommons.org/licenses/by/4.0/)
-(attribute)  license.
-
-
 Compiling, packing, testing, etc.
 --------------------
 
@@ -27,7 +18,9 @@ project.
 Links
 --------------------
 
-official website and documentations: http://ontop.inf.unibz.it/
+Official Website: http://ontop.inf.unibz.it/
+
+Download: http://sourceforge.net/projects/ontop4obda/files/
 
 Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 
@@ -35,17 +28,24 @@ Source Code: https://github.com/ontop/ontop
 
 Issue Tracker: https://github.com/ontop/ontop/issues
 
+Travis CI: https://travis-ci.org/ontop/ontop
+
 Wiki: https://github.com/ontop/ontop/wiki
+
+
 
 Facebook: https://www.facebook.com/obdaontop/
 
 Twitter: https://twitter.com/ontop4obda
 
 
+
 License
 -------
+The -ontop- framework is available under the Apache License, Version 2.0
 
-  Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+```
+  Copyright (C) 2009 - 2016 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -58,4 +58,8 @@ License
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
+```
 
+All documentation is licensed under the 
+[Creative Commons](http://creativecommons.org/licenses/by/4.0/)
+(attribute)  license.
