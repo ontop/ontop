@@ -114,23 +114,20 @@
             <artifactId>monetdb-jdbc</artifactId>
         </dependency>
 
-
 	</dependencies>
-                          
-	<repositories>
-		<repository>
-			<id>bolzano-nexus-public</id>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
-	<build>
+    <repositories>
+        <!-- for monetdb -->
+        <repository>
+            <id>clojars.org</id>
+            <url>http://clojars.org/repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

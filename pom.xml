@@ -507,16 +507,6 @@
 	</dependencyManagement>
 
 	<repositories>
-
-        <repository>
-            <!-- for monetdb -->
-            <id>clojars.org</id>
-            <url>http://clojars.org/repo</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-
 		<repository>
 			<!-- for R2RML api -->
 			<id>bolzano-nexus-public</id>
