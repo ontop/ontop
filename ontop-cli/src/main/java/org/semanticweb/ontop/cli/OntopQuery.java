@@ -20,9 +20,12 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-import com.github.rvesse.airline.Command;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
+
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Joiner;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -30,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -47,15 +51,13 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",
             description = "SPARQL query file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     private String queryFile;
-
 
     public OntopQuery() { }
 
     @Override
     public void run() {
-
-
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology;
 
@@ -140,7 +142,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
         while (result.nextRow()) {
             for (int c = 0; c < columns; c++) {
-                String value = result.getOWLObject(c + 1).toString();
+                String value = ToStringRenderer.getInstance().getRendering(result.getOWLObject(c + 1));
                 wr.append(value);
                 if (c + 1 < columns)
                     wr.append(",");
@@ -150,7 +152,6 @@ public class OntopQuery extends OntopReasoningCommandBase {
         wr.flush();
 
         result.close();
-
     }
 
 

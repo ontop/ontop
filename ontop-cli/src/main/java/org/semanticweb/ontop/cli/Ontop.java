@@ -1,17 +1,18 @@
 package org.semanticweb.ontop.cli;
 
-
 import com.github.rvesse.airline.Cli;
 import com.github.rvesse.airline.builder.CliBuilder;
-import com.github.rvesse.airline.parser.ParseArgumentsUnexpectedException;
-import com.github.rvesse.airline.parser.ParseCommandMissingException;
-import com.github.rvesse.airline.parser.ParseCommandUnrecognizedException;
-import com.github.rvesse.airline.parser.ParseOptionMissingException;
+import com.github.rvesse.airline.parser.errors.ParseArgumentsUnexpectedException;
+import com.github.rvesse.airline.parser.errors.ParseCommandMissingException;
+import com.github.rvesse.airline.parser.errors.ParseCommandUnrecognizedException;
+import com.github.rvesse.airline.parser.errors.ParseOptionMissingException;
+
 
 public class Ontop {
 
     public static void main(String... args)
     {
+        //noinspection unchecked
         CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
                 .withDescription("Ontop system for Ontology based Data Access")
                 .withCommands(

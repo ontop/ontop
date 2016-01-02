@@ -42,6 +42,10 @@
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.rvesse</groupId>
+            <artifactId>airline-help-bash</artifactId>
+        </dependency>
 
         <!--
         <dependency>
