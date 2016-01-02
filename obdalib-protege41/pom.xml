@@ -321,13 +321,13 @@
 						<Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
 
 						<Bundle-Name>-ontopPro-</Bundle-Name>
-						<!-- necessary for protege 4 plugins -->
+						<!-- necessary for protege plugins -->
 						<Bundle-Category>protege</Bundle-Category>
 
 						<!-- general information -->
 						<Bundle-ContactAddress>gh.xiao@gmail.com</Bundle-ContactAddress>
 						<Bundle-DocURL>http://ontop.inf.unibz.it</Bundle-DocURL>
-						<Bundle-Description>The -ontop- plugin for Protegeq</Bundle-Description>
+						<Bundle-Description>The -ontop- plugin for Protege</Bundle-Description>
 						<Bundle-Vendor>KRDB Research Centre, Free University of Bozen-Bolzano. </Bundle-Vendor>
 						<Implementation-Version>${project.version}</Implementation-Version>
 
