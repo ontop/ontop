@@ -1,6 +1,13 @@
 [![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)
 [![Maven Central](https://img.shields.io/maven-central/v/it.unibz.inf.ontop/ontop.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22it.unibz.inf.ontop%22)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
+[![SourceForge](https://img.shields.io/sourceforge/dm/ontop4obda.svg)](http://sourceforge.net/projects/ontop4obda/files/)
+[![Twitter](https://img.shields.io/twitter/follow/ontop4obda.svg?style=social)](https://twitter.com/ontop4obda)
+
+
+
+
+
 Ontop
 ==================
 
@@ -19,30 +26,20 @@ project.
 Links
 --------------------
 
-Official Website: http://ontop.inf.unibz.it/
-
-Download: http://sourceforge.net/projects/ontop4obda/files/
-
-Google Group: https://groups.google.com/forum/#!forum/ontop4obda
-
-Source Code: https://github.com/ontop/ontop
-
-Issue Tracker: https://github.com/ontop/ontop/issues
-
-Travis CI: https://travis-ci.org/ontop/ontop
-
-Wiki: https://github.com/ontop/ontop/wiki
-
-
-
-Facebook: https://www.facebook.com/obdaontop/
-
-Twitter: https://twitter.com/ontop4obda
-
+- Official Website: http://ontop.inf.unibz.it/
+- Download: http://sourceforge.net/projects/ontop4obda/files/
+- Wiki: https://github.com/ontop/ontop/wiki
+- Google Group: https://groups.google.com/forum/#!forum/ontop4obda
+- Source Code: https://github.com/ontop/ontop
+- Facebook: https://www.facebook.com/obdaontop/
+- Twitter: https://twitter.com/ontop4obda
+- Issue Tracker: https://github.com/ontop/ontop/issues
+- Travis CI: https://travis-ci.org/ontop/ontop
 
 
 License
 -------
+
 The -ontop- framework is available under the Apache License, Version 2.0
 
 ```
