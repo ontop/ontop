@@ -4,12 +4,10 @@
 [![SourceForge](https://img.shields.io/sourceforge/dm/ontop4obda.svg)](http://sourceforge.net/projects/ontop4obda/files/)
 [![Twitter](https://img.shields.io/twitter/follow/ontop4obda.svg?style=social)](https://twitter.com/ontop4obda)
 
-
-
-
-
 Ontop
 ==================
+
+
 
 Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
 virtual RDF graphs defined through mappings to RDBMS. 
@@ -26,15 +24,15 @@ project.
 Links
 --------------------
 
-- Official Website: http://ontop.inf.unibz.it/
-- Download: http://sourceforge.net/projects/ontop4obda/files/
-- Wiki: https://github.com/ontop/ontop/wiki
-- Google Group: https://groups.google.com/forum/#!forum/ontop4obda
-- Source Code: https://github.com/ontop/ontop
-- Facebook: https://www.facebook.com/obdaontop/
-- Twitter: https://twitter.com/ontop4obda
-- Issue Tracker: https://github.com/ontop/ontop/issues
-- Travis CI: https://travis-ci.org/ontop/ontop
+- [Official Website](http://ontop.inf.unibz.it/)
+- [SourceForge Download](http://sourceforge.net/projects/ontop4obda/files/)
+- [GitHub](https://github.com/ontop/ontop/)
+- [GitHub Wiki](https://github.com/ontop/ontop/wiki)
+- [GitHub Issues](https://github.com/ontop/ontop/issues)
+- [Google Group](https://groups.google.com/forum/#!forum/ontop4obda)
+- [Facebook](https://www.facebook.com/obdaontop/)
+- [Twitter](https://twitter.com/ontop4obda)
+- [Travis CI](https://travis-ci.org/ontop/ontop)
 
 
 License
