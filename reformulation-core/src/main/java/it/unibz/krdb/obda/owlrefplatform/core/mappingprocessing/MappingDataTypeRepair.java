@@ -279,7 +279,7 @@ public class MappingDataTypeRepair {
 		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
 		IndexedPosititon ip = list.get(0);
 
-		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(ip.atom.getFunctionSymbol());
+		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 

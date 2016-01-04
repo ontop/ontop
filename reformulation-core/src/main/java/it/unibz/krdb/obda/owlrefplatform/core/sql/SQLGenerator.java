@@ -1163,7 +1163,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					RelationID value = entry.getValue();
 					if (value.equals(def.getRelation())) {
 						tableId = Relation2DatalogPredicate
-									.createRelationFromPredicateName(entry.getKey().getFunctionSymbol());
+									.createRelationFromPredicateName(metadata.getQuotedIDFactory(), entry.getKey().getFunctionSymbol());
 						break;
 					}
 				}
@@ -1563,7 +1563,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			}
 
-			RelationID id = Relation2DatalogPredicate.createRelationFromPredicateName(atom.getFunctionSymbol());
+			RelationID id = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), atom.getFunctionSymbol());
 			RelationDefinition def = metadata.getRelation(id);
 			if (def == null) {
 				// There is no definition for this atom, its not a database

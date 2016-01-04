@@ -207,11 +207,11 @@ public class Mapping2DatalogConverter {
         	// HACKY WAY OF DEALING WITH VARIABLES THAT ARE CASE-SENSITIVE 
             RelationID relationId;
             if (tableName != null)
-            	relationId = idfac.createRelationID(quote(schemaName), quote(tableName));
+            	relationId = idfac.createRelationID(quote(idfac, schemaName), quote(idfac, tableName));
             else
             	relationId = null;
             QualifiedAttributeID a = new QualifiedAttributeID(relationId, 
-            						idfac.createAttributeID(quote(attributeName)));         
+            						idfac.createAttributeID(quote(idfac, attributeName)));         
             Term termR = lookupTable.get(a);
             
             if (termR == null) {
@@ -226,7 +226,7 @@ public class Mapping2DatalogConverter {
             // ROMAN (10 Oct 2015): hack for FQDN
             if (termR == null)
             	termR = lookupTable.get(new QualifiedAttributeID(null, 
-						idfac.createAttributeID(quote(attributeName))));
+						idfac.createAttributeID(quote(idfac, attributeName))));
             
             if (termR == null)
             	termR = lookupTable.get(new QualifiedAttributeID(null, 
@@ -258,10 +258,10 @@ public class Mapping2DatalogConverter {
         throw new RuntimeException("Unknown term type");
     }
 
-    private static String quote(String s) {
+    private static String quote(QuotedIDFactory idfac, String s) {
     	if (s == null)
     		return s;
-    	return QuotedID.QUOTATION + s + QuotedID.QUOTATION;
+    	return idfac.getIDQuotationString() + s + idfac.getIDQuotationString();
     }
     
     private static final class AttributeLookupTable {
