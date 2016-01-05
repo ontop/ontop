@@ -34,7 +34,8 @@ export OPENRDF_SESAME_PATH=$ONTOP_DEP_HOME
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
 export OPENRDF_SESAME_FILENAME=openrdf-sesame
 export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
-                
+export ONTOP_SESAME_WEBAPPS=ontop-sesame-webapps
+
 # folder names of the output
 export PROTEGE_DIST=ontop-protege
 export QUEST_SESAME_DIST=ontop-sesame
@@ -47,7 +48,7 @@ export PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
 export VERSION=1.16
 export REVISION=2-SNAPSHOT
 
-
+#
 # Start building the packages
 #
 
@@ -55,7 +56,7 @@ cd $BUILD_ROOT
 
 echo ""
 echo "========================================="
-echo " Cleaning Ontop
+echo " Cleaning                                "
 echo "-----------------------------------------"
 echo ""
 
@@ -63,7 +64,7 @@ mvn clean
 
 echo ""
 echo "========================================="
-echo " Compiling Ontop
+echo " Compiling Ontop $VERSION.$REVISION      "
 echo "-----------------------------------------"
 echo ""
 
@@ -74,7 +75,7 @@ mvn install -DskipTests
 #
 echo ""
 echo "========================================="
-echo " Making Ontop Protege  distribution package"
+echo " Building Protege distribution package   "
 echo "-----------------------------------------"
 echo ""
 
@@ -105,8 +106,10 @@ cd $BUILD_ROOT/quest-distribution
 #
 echo ""
 echo "========================================="
-echo " Making Sesame distribution package"
+echo " Buidling Sesame distribution package    "
 echo "-----------------------------------------"
+echo ""
+
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
 mvn assembly:assembly -DskipTests
@@ -123,7 +126,7 @@ jar -uf $OPENRDF_SESAME_FILENAME.war WEB-INF/lib/*
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
 jar -uf $OPENRDF_WORKBENCH_FILENAME.war WEB-INF/lib/*
 
-zip ontop-webapps-$VERSION.$REVISION.zip $OPENRDF_SESAME_FILENAME.war $OPENRDF_WORKBENCH_FILENAME.war
+zip ONTOP_SESAME_WEBAPPS-$VERSION.$REVISION.zip $OPENRDF_SESAME_FILENAME.war $OPENRDF_WORKBENCH_FILENAME.war
 
 rm -fr WEB-INF
 cd $BUILD_ROOT/quest-distribution
@@ -132,7 +135,7 @@ cd $BUILD_ROOT/quest-distribution
 #
 echo ""
 echo "========================================="
-echo " Making Sesame Jetty distribution package"
+echo " Building Sesame Jetty distribution package"
 echo "-----------------------------------------"
 rm -fr $QUEST_JETTY_DIST
 mkdir $QUEST_JETTY_DIST
