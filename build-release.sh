@@ -8,11 +8,29 @@
 #
 #######################################################################################################################
 
+
+export VERSION=1.16
+export REVISION=2-SNAPSHOT
+
 # location for the build ROOT folder (i.e. the directory of this script)
 export BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home 
 export ONTOP_DEP_HOME=${BUILD_ROOT}/ontop-build-dependencies
+
+
+if [ -d "${ONTOP_DEP_HOME}" ] && [ -f "${ONTOP_DEP_HOME}/.git" ]
+then
+  echo ""
+  echo "========================================="
+  echo " Starting Ontop build script ... "
+  echo "-----------------------------------------"
+  echo ""
+else
+  echo "ERROR: git submodule 'ontop-build-dependencies' is missing or uninitiated!"
+  echo "Please run 'git submodule init && git submodule update'"
+  exit 0
+fi
 
 # location for protege clean folder
 export PROTEGE_COPY_FILENAME=protege-5.0.0-beta-21-platform-independent
@@ -36,9 +54,6 @@ export ONTOP_DIST=ontop-dist
 
 # jar name of the pretege plugin
 export PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
-
-export VERSION=1.16
-export REVISION=2-SNAPSHOT
 
 #
 # Start building the packages
@@ -150,7 +165,7 @@ cd ${BUILD_ROOT}/quest-distribution
 #
 echo ""
 echo "========================================="
-echo " Making OWL-API distribution package"
+echo " Building Ontop distribution package"
 echo "-----------------------------------------"
 rm -fr ${ONTOP_DIST}
 mkdir ${ONTOP_DIST}
@@ -158,5 +173,7 @@ echo "[INFO] Copying files..."
 cp target/ontop-distribution-${VERSION}.${REVISION}-bin.zip ${ONTOP_DIST}/ontop-distribution-${VERSION}.${REVISION}.zip
 
 echo ""
-echo "Done."
+echo "========================================="
+echo " Done."
+echo "-----------------------------------------"
 echo ""
