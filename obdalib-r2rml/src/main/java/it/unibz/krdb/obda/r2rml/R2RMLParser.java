@@ -29,6 +29,7 @@ import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.DatatypePredicateImpl;
@@ -59,7 +60,7 @@ public class R2RMLParser {
 	 * empty constructor
 	 */
 	public R2RMLParser() {
-		mapManager = R2RMLMappingManagerFactory.getSesameMappingManager();
+        mapManager = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
 	}

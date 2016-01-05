@@ -35,6 +35,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import java.io.File;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -107,7 +108,7 @@ public class QuestOWLExample {
 			while (rs.nextRow()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
 					OWLObject binding = rs.getOWLObject(idx);
-					System.out.print(binding.toString() + ", ");
+					System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
 				}
 				System.out.print("\n");
 			}

@@ -34,7 +34,9 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.antlr.runtime.RecognitionException;
+import org.junit.Ignore;
 
+@Ignore
 public class DatalogParserTest extends TestCase {
 
 	/** Test inputs */

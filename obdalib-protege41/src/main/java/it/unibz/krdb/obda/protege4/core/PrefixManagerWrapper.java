@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
@@ -35,9 +36,9 @@ import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
  */
 public class PrefixManagerWrapper extends AbstractPrefixManager {
 
-	PrefixOWLOntologyFormat owlmapper;
+    PrefixDocumentFormat owlmapper;
 
-	public PrefixManagerWrapper(PrefixOWLOntologyFormat owlmapper) {
+	public PrefixManagerWrapper(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
 	
@@ -78,7 +79,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 
 	@Override
 	public void clear() {
-		owlmapper.clearPrefixes();
+		owlmapper.clear();
 	}
 
 	@Override

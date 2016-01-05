@@ -240,7 +240,7 @@ public class SelectDB extends javax.swing.JDialog {
 	// }
 
 	// @Override
-	// public void datasourcParametersUpdated() {
+	// public void datasourceParametersUpdated() {
 	// if(isVisible()){
 	// addExistingDataSourcesToCombo();
 	// }

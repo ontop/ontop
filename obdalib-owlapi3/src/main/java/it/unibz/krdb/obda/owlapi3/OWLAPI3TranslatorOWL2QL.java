@@ -1,24 +1,17 @@
 package it.unibz.krdb.obda.owlapi3;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.ClassImpl;
 import it.unibz.krdb.obda.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.*;
 
 /**
  * 
@@ -968,18 +961,6 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			return dpe.getDomainRestriction(datatype);
 		}				
 	}
-
-	
-	
-
-	
-	
-	
-
-	
-	
-	
-	
 	
 	@Override
 	public void visit(OWLDisjointUnionAxiom ax) {
@@ -1058,8 +1039,19 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	
 	@Override
-	public void visit(OWLAnnotationAssertionAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
+	public void visit(OWLAnnotationAssertionAxiom ax) {
+		try {
+			AnnotationAssertion a = helper.translate(ax);
+			if (a != null)
+				dl_onto.addAnnotationAssertion(a);
+		}
+		catch (TranslationException e) {
+			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 
 	@Override
@@ -1088,6 +1080,7 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	private final Set<String> objectproperties = new HashSet<>();
 	private final Set<String> dataproperties = new HashSet<>();
+	private final Set<String> annotationproperties = new HashSet<>();
 	private final Set<String> punnedPredicates = new HashSet<>();
 	
 	
@@ -1127,7 +1120,14 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 					dataproperties.add(uri);
 					vb.createDataProperty(uri);
 				}
-			}			
+			}
+
+			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature())  {
+				String uri = prop.getIRI().toString();
+					annotationproperties.add(uri);
+					vb.createAnnotationProperty(uri);
+			}
+
 		}
 		return ofac.createOntology(vb);		
 	}

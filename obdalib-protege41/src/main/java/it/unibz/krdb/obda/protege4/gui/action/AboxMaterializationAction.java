@@ -58,8 +58,9 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -165,7 +166,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 					OWLOntology newOnto = cloneOnto(file);
 					OWLOntologyManager newMan = newOnto.getOWLOntologyManager();
 					materializeOnto(newOnto, newMan);
-					newMan.saveOntology(newOnto, new RDFXMLOntologyFormat(), new FileOutputStream(file));
+					newMan.saveOntology(newOnto, new RDFXMLDocumentFormat(), new FileOutputStream(file));
 				//	OWLOntology o = newMan.loadOntologyFromOntologyDocument((file));
 				//	modelManager.setActiveOntology(o);
 				//	materializeOnto(o, modelManager.getOWLOntologyManager());
@@ -240,7 +241,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
 						while (iterator.hasNext())
 							manager.addAxiom(ontology, iterator.next());
-						manager.saveOntology(ontology, new OWLXMLOntologyFormat(),
+						manager.saveOntology(ontology, new OWLXMLDocumentFormat(),
 								new WriterDocumentTarget(fileWriter));
 
 						count = materializer.getTriplesCount();

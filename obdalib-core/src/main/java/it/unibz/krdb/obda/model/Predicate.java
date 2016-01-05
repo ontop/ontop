@@ -114,6 +114,8 @@ public interface Predicate {
 
 	boolean isObjectProperty();
 
+	boolean isAnnotationProperty();
+
 	boolean isDataProperty();
 	
 	

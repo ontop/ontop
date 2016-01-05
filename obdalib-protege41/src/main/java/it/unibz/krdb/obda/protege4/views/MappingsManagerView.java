@@ -98,10 +98,17 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 			}
 		});
 
-		datasourceSelector = new DatasourceSelector(controller.getActiveOBDAModel());
+		datasourceSelector = new DatasourceSelector(obdaModel);
 		datasourceSelector.addDatasourceListListener(mappingPanel);
 
-		// Construt the layout of the panel.
+        /**
+         * Selects the first datasource if it exists
+         */
+        if (obdaModel.getSources().size() > 0) {
+            datasourceSelector.set(obdaModel.getSources().get(0));
+        }
+
+		// Construct the layout of the panel.
 		JPanel selectorPanel = new JPanel();
 		selectorPanel.setLayout(new GridBagLayout());
 

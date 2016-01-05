@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.model;
+package it.unibz.krdb.obda.ontology;
 
 /*
  * #%L
@@ -20,17 +20,24 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-import java.io.Serializable;
 
-public interface OBDAModelListener extends Serializable {
+/**
+ * Represents AnnotationAssertion from the OWL 2 QL Specification
+ *
+ * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
+ * AnnotationSubject := IRI | AnonymousIndividual
+ * AnnotationValue := AnonymousIndividual | IRI | Literal
+ * 
+ *
+ *
+ */
 
-	public void datasourceAdded(OBDADataSource source);
 
-	public void datasourceDeleted(OBDADataSource source);
+public interface AnnotationAssertion extends Assertion {
 
-	public void datasourceUpdated(String oldname, OBDADataSource currendata);
-
-	public void alldatasourcesDeleted();
-
-	public void datasourceParametersUpdated();
+	public AnnotationProperty getProperty();
+	
+//	public ObjectConstant getSubject();
+	
+//	public Constant getValue();
 }

@@ -114,20 +114,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		cmdInsertMapping.setEnabled(false);
 		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery, validator);
-		painter.addValidatorListener(new ValidatorListener() {
+		painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
-			@Override
-			public void validated(boolean result) {
-				cmdInsertMapping.setEnabled(result);
-			}
-		});
-
-		cmdInsertMapping.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				cmdInsertMappingActionPerformed(e);
-			}
-		});
+		cmdInsertMapping.addActionListener(this::cmdInsertMappingActionPerformed);
 
 		txtTargetQuery.addKeyListener(new TABKeyListener());
 		txtSourceQuery.addKeyListener(new TABKeyListener());
@@ -148,39 +137,37 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
 	}
 
-	private class TABKeyListener implements KeyListener {
-		@Override
-		public void keyTyped(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_TAB) {
-				if (e.getModifiers() == KeyEvent.SHIFT_MASK) {
-					e.getComponent().transferFocusBackward();
-				} else {
-					e.getComponent().transferFocus();
-				}
-				e.consume();
-			}
-		}
+    private class TABKeyListener implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent e) {
+            typedOrPressed(e);
+        }
 
-		@Override
-		public void keyReleased(KeyEvent e) {
-			// if (e.getKeyCode() == KeyEvent.VK_TAB) {
-			// e.getComponent().transferFocus();
-			// e.consume();
-			// }
-		}
+        @Override
+        public void keyReleased(KeyEvent e) {
+            // if (e.getKeyCode() == KeyEvent.VK_TAB) {
+            // e.getComponent().transferFocus();
+            // e.consume();
+            // }
+        }
 
-		@Override
-		public void keyPressed(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_TAB) {
-				if (e.getModifiers() == KeyEvent.SHIFT_MASK) {
-					e.getComponent().transferFocusBackward();
-				} else {
-					e.getComponent().transferFocus();
-				}
-				e.consume();
-			}
-		}
-	}
+        @Override
+        public void keyPressed(KeyEvent e) {
+            typedOrPressed(e);
+        }
+
+        private void typedOrPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_TAB) {
+                if (e.getModifiers() == KeyEvent.SHIFT_MASK) {
+                    e.getComponent().transferFocusBackward();
+                } else {
+                    e.getComponent().transferFocus();
+                }
+                e.consume();
+            }
+        }
+
+    }
 
 	private class CTRLEnterKeyListener implements KeyListener {
 		@Override

@@ -156,5 +156,10 @@ public enum ExpressionOperation implements OperationPredicate {
 	@Override
 	public boolean isTriplePredicate() {
 		return false;
+	}
+	
+	@Override
+	public boolean isAnnotationProperty() {
+		return false;
 	}	
 }

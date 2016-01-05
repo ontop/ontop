@@ -24,8 +24,6 @@ import it.unibz.krdb.obda.model.*;
 
 public class PredicateImpl implements Predicate {
 
-	private static final long serialVersionUID = -7096056207721170465L;
-
 	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);	
 	
 	private int arity = -1;
@@ -84,17 +82,22 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isClass() {
-		return (arity == 1 && types[0] == COL_TYPE.OBJECT);
+		return (arity == 1 && getType(0) == COL_TYPE.OBJECT);
 	}
 
 	@Override
 	public boolean isObjectProperty() {
-		return (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.OBJECT); 
+		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT); 
+	}
+
+	@Override
+	public boolean isAnnotationProperty() {
+		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.NULL);
 	}
 
 	@Override
 	public boolean isDataProperty() {
-		return (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.LITERAL); 
+		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.LITERAL); 
 	}
 
     @Override
