@@ -5,16 +5,15 @@
 
 
 Build Status
-------------
 
 |           |    Java 8     |
 |-----------|---------------|
 | **master**  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
 | **develop** |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
 
-Ontop
-==================
 
+Ontop
+=====
 
 Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
 virtual RDF graphs defined through mappings to RDBMS. 
@@ -40,7 +39,6 @@ Links
 - [Facebook](https://www.facebook.com/obdaontop/)
 - [Twitter](https://twitter.com/ontop4obda)
 - [Travis CI](https://travis-ci.org/ontop/ontop)
-
 
 License
 -------

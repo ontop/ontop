@@ -1,8 +1,10 @@
 package org.semanticweb.ontop.cli;
 
 
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Preconditions;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
@@ -32,6 +34,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
             title = "output", description = "output file (default) or directory (for --separate-files)")
+    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
     protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
