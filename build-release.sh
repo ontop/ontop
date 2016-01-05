@@ -12,7 +12,9 @@
 ########################################################################################################################
 
 # location for the build ROOT folder
-export BUILD_ROOT=/build/ontop
+# export BUILD_ROOT=/build/ontop
+# get the dirctory of the script
+export BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home 
 export ONTOP_DEP_HOME=/build/dependencies

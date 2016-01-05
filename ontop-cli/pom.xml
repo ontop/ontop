@@ -45,6 +45,7 @@
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline-help-bash</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!--

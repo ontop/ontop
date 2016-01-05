@@ -12,12 +12,12 @@ public class Ontop {
 
     public static void main(String... args)
     {
-        Cli<OntopCommand> ontopParser = getOntopCommandCLI();
+        Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
 
         OntopCommand command;
 
         try {
-            command = ontopParser.parse(args);
+            command = ontopCommandCLI.parse(args);
             command.run();
         } catch (ParseCommandMissingException e){
             main("help");
