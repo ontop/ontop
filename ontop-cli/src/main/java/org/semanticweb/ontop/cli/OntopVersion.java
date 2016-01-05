@@ -1,7 +1,18 @@
 package org.semanticweb.ontop.cli;
 
-/**
- * Created by xiao on 05/01/16.
- */
-public class OntopVersion {
+import com.github.rvesse.airline.annotations.Command;
+import it.unibz.krdb.obda.utils.VersionInfo;
+
+@Command(name = "--version",
+        description = "Show version of ontop")
+public class OntopVersion implements OntopCommand{
+
+    @Override
+    public void run() {
+        //String version = getClass().getPackage().getImplementationVersion();
+
+        VersionInfo versionInfo = VersionInfo.getVersionInfo();
+
+        System.out.println(String.format("ontop version %s", versionInfo.toString()));
+    }
 }

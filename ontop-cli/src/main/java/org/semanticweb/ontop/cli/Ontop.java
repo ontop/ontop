@@ -12,32 +12,7 @@ public class Ontop {
 
     public static void main(String... args)
     {
-        //noinspection unchecked
-        CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
-                .withDescription("Ontop system for Ontology based Data Access")
-                .withCommands(
-                        /**
-                         * visible commands
-                         */
-                        OntopHelp.class,
-                        OntopQuery.class,
-                        OntopMaterialize.class,
-                        OntopBootstrap.class,
-                        /**
-                         * hidden commands
-                         */
-                        OntopCompile.class
-                        // OntopServer.class
-                );
-
-
-        builder.withGroup("mapping")
-                .withDescription("Manipulate mapping files")
-                .withCommand(OntopOBDAToR2RML.class)
-                .withCommand(OntopR2RMLToOBDA.class)
-                .withCommand(OntopR2RMLPrettify.class);
-
-        Cli<OntopCommand> ontopParser = builder.build();
+        Cli<OntopCommand> ontopParser = getOntopCommandCLI();
 
         OntopCommand command;
 
@@ -56,6 +31,36 @@ public class Ontop {
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    static Cli<OntopCommand> getOntopCommandCLI() {
+        //noinspection unchecked
+        CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
+                .withDescription("Ontop system for Ontology based Data Access")
+                .withCommands(
+                        /**
+                         * visible commands
+                         */
+                        OntopVersion.class,
+                        OntopHelp.class,
+                        OntopQuery.class,
+                        OntopMaterialize.class,
+                        OntopBootstrap.class,
+                        /**
+                         * hidden commands
+                         */
+                        OntopCompile.class
+                        // OntopServer.class
+                );
+
+
+        builder.withGroup("mapping")
+                .withDescription("Manipulate mapping files")
+                .withCommand(OntopOBDAToR2RML.class)
+                .withCommand(OntopR2RMLToOBDA.class)
+                .withCommand(OntopR2RMLPrettify.class);
+
+        return builder.build();
     }
 
 }
