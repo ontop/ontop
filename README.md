@@ -4,9 +4,6 @@
 [![Twitter](https://img.shields.io/twitter/follow/ontop4obda.svg?style=social)](https://twitter.com/ontop4obda)
 
 
-Build Status
-
-|           |    Java 8     |
 |-----------|---------------|
 | **master**  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
 | **develop** |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
