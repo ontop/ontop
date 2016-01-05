@@ -3,10 +3,10 @@
 [![SourceForge](https://img.shields.io/sourceforge/dm/ontop4obda.svg)](http://sourceforge.net/projects/ontop4obda/files/)
 [![Twitter](https://img.shields.io/twitter/follow/ontop4obda.svg?style=social)](https://twitter.com/ontop4obda)
 
-
+| Branch    | build status  |
 |-----------|---------------|
-| **master**  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
-| **develop** |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
+| [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
+| [develop](https://github.com/ontop/ontop/tree/develop) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
 
 
 Ontop
