@@ -1,36 +1,26 @@
 #!/bin/sh
 
-########################################################################################################################
-# README:                                                                                                              #
-#                                                                                                                      #
-# The required components for building the release can be found: http://obda.inf.unibz.it/files/dev/Dependencies.zip   #
-# Unzip it and locate the folder in ONTOP_DEP_HOME variable.                                                           #
-#                                                                                                                      #
-# Clone the repository from GitHub: https://github.com/ontop/ontop. Locate the source folder in BUILD_ROOT variable    #
-# Update the repository to the TAG release for stable version.                                                         #
-#                                                                                                                      #
-########################################################################################################################
+#######################################################################################################################
+#
+#  Ontop Build Script
+#
+#######################################################################################################################
 
-# location for the build ROOT folder
-# export BUILD_ROOT=/build/ontop
+# location for the build ROOT folder (i.e. the directory of this script)
 # get the dirctory of the script
 export BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home 
-export ONTOP_DEP_HOME=/build/dependencies
-
-#------------------------------------------# 
-# DO NOT touch the following command lines #
-#------------------------------------------#
+export ONTOP_DEP_HOME=$BUILD_ROOT/ontop-build-dependencies
 
 # location for the JDBC plugin jars
 export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME
 
-# location for protege clean folder (Protege 4.3)
+# location for protege clean folder
 export PROTEGE_COPY_PATH=$ONTOP_DEP_HOME
 export PROTEGE_COPY_FILENAME=protege-5.0.0-beta-21-platform-independent
 export PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0-beta-21
-export PROTEGE_MAIN_PLUGIN=ontopPro-plugin
+export PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
 
 # location and name for jetty distribution (should be ZIP)
 export JETTY_COPY_PATH=$ONTOP_DEP_HOME
@@ -46,10 +36,10 @@ export OPENRDF_SESAME_FILENAME=openrdf-sesame
 export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
                 
 # folder names of the output
-export PROTEGE_DIST=ontopPro
-export QUEST_SESAME_DIST=QuestSesame
-export QUEST_JETTY_DIST=QuestJetty
-export OWL_API_DIST=QuestOWL
+export PROTEGE_DIST=ontop-protege
+export QUEST_SESAME_DIST=ontop-sesame
+export QUEST_JETTY_DIST=ontop-jetty
+export ONTOP_DIST=ontop-dist
 
 # jar name of the pretege plugin
 export PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
@@ -60,18 +50,35 @@ export REVISION=2-SNAPSHOT
 
 # Start building the packages
 #
+
 cd $BUILD_ROOT
+
+echo ""
+echo "========================================="
+echo " Cleaning Ontop
+echo "-----------------------------------------"
+echo ""
+
 mvn clean
 
-# Packing the -ontopPro- distribution
+echo ""
+echo "========================================="
+echo " Compiling Ontop
+echo "-----------------------------------------"
+echo ""
+
+echo "pluginVersion=$VERSION.$REVISION" >  $BUILD_ROOT/obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
+
+mvn install -DskipTests
+
 #
 echo ""
 echo "========================================="
-echo " Making -ontopPro- distribution package"
+echo " Making Ontop Protege  distribution package"
 echo "-----------------------------------------"
-echo "pluginVersion=$VERSION.$REVISION" >  $BUILD_ROOT/obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
+echo ""
+
 rm -fr $BUILD_ROOT/obdalib-protege41/dist
-mvn install -DskipTests
 cd $BUILD_ROOT/obdalib-protege41/
 mvn bundle:bundle -DskipTests
 
@@ -148,10 +155,10 @@ echo ""
 echo "========================================="
 echo " Making OWL-API distribution package"
 echo "-----------------------------------------"
-rm -fr $OWL_API_DIST
-mkdir $OWL_API_DIST
+rm -fr $ONTOP_DIST
+mkdir $ONTOP_DIST
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-$VERSION.$REVISION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
+cp target/ontop-distribution-$VERSION.$REVISION-bin.zip $ONTOP_DIST/ontop-distribution-$VERSION.$REVISION.zip
 
 echo ""
 echo "Done."
