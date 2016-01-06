@@ -61,7 +61,7 @@ public class SPARQLQueryFlattener {
 		for (CQIE rule : program.getRules()) {
 			Predicate headPredicate = rule.getHead().getFunctionSymbol();
 
-			if (headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
+			if (headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
 				inputQueryRules.add(rule.clone());
 			}
 			else {
@@ -84,7 +84,7 @@ public class SPARQLQueryFlattener {
 		extensionalPredicates.removeAll(ruleIndex.keySet());
 	}
 
-	private final void collectPredicates(Set<Predicate> predicates, Function atom) {
+	private void collectPredicates(Set<Predicate> predicates, Function atom) {
 		if (atom.isAlgebraFunction()) {
 			for (Term innerTerm : atom.getTerms()) 
 				if (innerTerm instanceof Function)
@@ -230,7 +230,7 @@ public class SPARQLQueryFlattener {
 	 * one or more rules. The list contains the result of the resolution steps
 	 * against those rules.
 	 * 
-	 * @param currentTerms
+	 * @param atoms
 	 * @param rule
 	 * @param termidx
 	 * @return
@@ -330,7 +330,7 @@ public class SPARQLQueryFlattener {
 	 * <li>Create a clone r' of r</li>
 	 * <li>We replace a in r' with the body of s
 	 * <li>
-	 * <li>We apply mgu to r' (see {@link UnifierUtilities#applyUnifier(it.unibz.krdb.obda.model.CQIE, it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier)} )</li>
+	 * <li>We apply mgu to r' (see {@code UnifierUtilities#applyUnifier(it.unibz.krdb.obda.model.CQIE, it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier)} )</li>
 	 * <li>return r'
 	 * </ul>
 	 * 

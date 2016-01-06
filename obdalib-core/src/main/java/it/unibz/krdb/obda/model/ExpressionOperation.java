@@ -90,25 +90,25 @@ public enum ExpressionOperation implements OperationPredicate {
 
 
 	// 0-ary operations
-	private ExpressionOperation(String name, COL_TYPE exprType) {
+    ExpressionOperation(String name, COL_TYPE exprType) {
 		this.name = name;
 		this.exprType = exprType;
 		this.argTypes = new COL_TYPE[] { };
 	}
 	// unary operations
-	private ExpressionOperation(String name, COL_TYPE exprType, COL_TYPE arg1) {
+    ExpressionOperation(String name, COL_TYPE exprType, COL_TYPE arg1) {
 		this.name = name;
 		this.exprType = exprType;
 		this.argTypes = new COL_TYPE[] { arg1 };
 	}
 	// binary operations
-	private ExpressionOperation(String name, COL_TYPE exprType, COL_TYPE arg1, COL_TYPE arg2) {
+    ExpressionOperation(String name, COL_TYPE exprType, COL_TYPE arg1, COL_TYPE arg2) {
 		this.name = name;
 		this.exprType = exprType;
 		this.argTypes = new COL_TYPE[] { arg1, arg2 };
 	}
 	// ternary operations
-	private ExpressionOperation(String name, COL_TYPE exprType, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
+    ExpressionOperation(String name, COL_TYPE exprType, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
 		this.name = name;
 		this.exprType = exprType;
 		this.argTypes = new COL_TYPE[] { arg1, arg2, arg3 };
