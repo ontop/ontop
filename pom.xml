@@ -72,9 +72,8 @@
 		<module>quest-sesame</module>
 		<module>quest-db</module>
 		<module>quest-rdb2rdf-compliance</module>
-
+        <module>ontop-cli</module>
 		<module>quest-test</module>
-		<module>ontop-cli</module>
 
 		<module>ontop-docker-test-env</module>
 	</modules>
@@ -137,6 +136,7 @@
         <logback.version>1.1.3</logback.version>
         <antlr.version>3.5.2</antlr.version>
         <airline.version>2.1.0</airline.version>
+        <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
     </properties>
 
 	<build>
@@ -309,8 +309,13 @@
 			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>tomcat-jdbc</artifactId>
-				<version>9.0.0.M1</version>
+				<version>${tomcat-jdbc.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-juli</artifactId>
+                <version>${tomcat-jdbc.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
