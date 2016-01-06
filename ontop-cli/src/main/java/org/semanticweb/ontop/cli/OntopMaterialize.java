@@ -20,9 +20,11 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-import com.github.rvesse.airline.Command;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
+
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -47,10 +49,10 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
-            allowedValues = {"rdfxml", "owlxml", "turtle"},
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, owlxml, turtle. " +
                     "Default: rdfxml")
+    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle"})
     public String format;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
