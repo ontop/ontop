@@ -20,16 +20,12 @@ package it.unibz.krdb.obda.protege4.utils;
  * #L%
  */
 
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.protege4.utils.ProgressPanel;
-
 import java.util.Vector;
 
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-public class OBDAProgessMonitor {
+public class OBDAProgressMonitor {
 
 	private JDialog parent = new JDialog();
 	
@@ -40,7 +36,7 @@ public class OBDAProgessMonitor {
 
 	private Vector<OBDAProgressListener> listeners = new Vector<OBDAProgressListener>();
 	
-	public OBDAProgessMonitor(String msg) {
+	public OBDAProgressMonitor(String msg) {
 		this.msg = msg;
 	}
 	
@@ -51,7 +47,7 @@ public class OBDAProgessMonitor {
 				if (bFinish) {
 					return;
 				}
-				ProgressPanel panel = new ProgressPanel(OBDAProgessMonitor.this, msg);
+				ProgressPanel panel = new ProgressPanel(OBDAProgressMonitor.this, msg);
 				parent.setModal(true);
 				parent.setContentPane(panel);
 				parent.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);

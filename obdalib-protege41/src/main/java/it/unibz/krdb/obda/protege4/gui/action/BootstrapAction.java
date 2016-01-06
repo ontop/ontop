@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 
 import java.awt.Component;
@@ -126,7 +126,7 @@ public class BootstrapAction extends ProtegeAction {
 						@Override
 						public void run() {
 							try {
-								OBDAProgessMonitor monitor = new OBDAProgessMonitor(
+								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
 										"Bootstrapping ontology and mappings...");
 								BootstrapperThread t = new BootstrapperThread();
 								monitor.addProgressListener(t);

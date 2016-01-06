@@ -565,7 +565,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
+		OBDAMappingAxiom mapping = mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}

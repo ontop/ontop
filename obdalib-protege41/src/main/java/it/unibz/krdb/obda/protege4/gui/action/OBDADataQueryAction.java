@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 
 import java.awt.Component;
@@ -87,7 +87,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 
 	/**
 	 * This function displays or handles the result
-	 * @param result THe result object ot be handles
+	 * @param res THe result object ot be handles
 	 */
 	public abstract void handleResult(T res) throws OWLException;
 
@@ -97,9 +97,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 		this.actionStarted = true;
 		this.isCanceled = false;
 		this.queryExecError = false;
-		OBDAProgessMonitor monitor = null;
+		OBDAProgressMonitor monitor = null;
 		try {
-			monitor = new OBDAProgessMonitor(this.msg);
+			monitor = new OBDAProgressMonitor(this.msg);
 			monitor.start();
 			latch = new CountDownLatch(1);
 			OWLEditorKit kit = this.getEditorKit();

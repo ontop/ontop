@@ -39,7 +39,7 @@ import it.unibz.krdb.obda.protege4.gui.component.SQLResultTable;
 import it.unibz.krdb.obda.protege4.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 
 import it.unibz.krdb.sql.Attribute;
@@ -709,7 +709,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private void executeQuery() {
 		try {
 			releaseResultset();
-			OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
+			OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
 			CountDownLatch latch = new CountDownLatch(1);
 			ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 			progMonitor.addProgressListener(action);

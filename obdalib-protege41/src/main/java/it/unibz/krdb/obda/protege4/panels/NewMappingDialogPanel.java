@@ -37,10 +37,9 @@ import it.unibz.krdb.obda.protege4.gui.treemodels.IncrementalResultSetTableModel
 import it.unibz.krdb.obda.protege4.utils.CustomTraversalPolicy;
 import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.protege4.utils.QueryPainter;
-import it.unibz.krdb.obda.protege4.utils.QueryPainter.ValidatorListener;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -48,7 +47,6 @@ import it.unibz.krdb.sql.JDBCConnectionManager;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URI;
@@ -451,7 +449,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		// Cleaning the existing table and releasing resources
 		releaseResultset();
 
-		OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
+		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
 		CountDownLatch latch = new CountDownLatch(1);
 		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 		progMonitor.addProgressListener(action);

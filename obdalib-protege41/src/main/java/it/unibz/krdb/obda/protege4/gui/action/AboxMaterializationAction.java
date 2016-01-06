@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressMonitor;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -296,7 +296,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 					@Override
 					public void run() {
 						try {
-							OBDAProgessMonitor monitor = new OBDAProgessMonitor("Materializing data instances...");
+							OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...");
 							CountDownLatch latch = new CountDownLatch(1);
 							action.setCountdownLatch(latch);
 							monitor.addProgressListener(action);

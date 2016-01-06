@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.protege4.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
-import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.protege4.utils.OBDAProgressMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -166,7 +166,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 			if (selectedSource == null) {
 				JOptionPane.showMessageDialog(this, "Please select data source first", "Error", JOptionPane.ERROR_MESSAGE);
 			} else {
-				OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
+				OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
 				CountDownLatch latch = new CountDownLatch(1);
 				ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 				progMonitor.addProgressListener(action);

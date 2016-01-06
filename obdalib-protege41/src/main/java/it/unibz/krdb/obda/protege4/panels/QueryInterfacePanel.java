@@ -393,7 +393,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		}
 	}
 	
-	public void selectedQuerychanged(String new_group, String new_query, String new_id) {
+	public void selectedQueryChanged(String new_group, String new_query, String new_id) {
 			Runnable runner = new QueryChanger(new_query);
 			SwingUtilities.invokeLater(runner);
 			currentGroup = new_group;

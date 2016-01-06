@@ -342,7 +342,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
 	public void fireQueryChanged(String newgroup, String newquery, String newid) {
 		for (SavedQueriesPanelListener listener : listeners) {
-			listener.selectedQuerychanged(newgroup, newquery, newid);
+			listener.selectedQueryChanged(newgroup, newquery, newid);
 		}
 	}
 
