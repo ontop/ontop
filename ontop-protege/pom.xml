@@ -389,6 +389,9 @@
 
 						<!-- Not needed anymore, it was necessary when we were not using import-package 
 							<Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi</Require-Bundle> -->
+
+                        <Bundle-Activator>org.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
+
 					</instructions>
 				</configuration>
 			</plugin>
