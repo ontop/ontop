@@ -35,7 +35,7 @@ if [[ "$JAVA_VER" -ne "8" ]]; then
 fi
 
 echo 'mvn -version'
-mvn -version || exit 1
+mvn -version || (echo "ERROR: maven is not installed!" && exit 1)
 echo ""
 
 echo "git --version"
@@ -43,7 +43,7 @@ git --version || exit 1
 echo ""
 
 echo "git lfs env"
-git lfs env || exit 1
+git lfs env ||  (echo "ERROR: git-lfs is not installed or not configured!" && exit 1)
 echo ""
 
 
