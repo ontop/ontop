@@ -86,8 +86,8 @@ echo " Building Protege distribution package   "
 echo "-----------------------------------------"
 echo ""
 
-rm -fr ${BUILD_ROOT}/obdalib-protege41/dist
-cd ${BUILD_ROOT}/obdalib-protege41/
+rm -fr ${BUILD_ROOT}/ontop-protege/dist
+cd ${BUILD_ROOT}/ontop-protege/
 mvn bundle:bundle -DskipTests
 
 rm -fr ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
