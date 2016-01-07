@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -422,7 +421,7 @@ public class TreeWitnessSet {
 			if (properties == null) {
 				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 				for (Function a : edge.getBAtoms()) {
-					if (a.getFunctionSymbol() instanceof BooleanOperationPredicateImpl) {
+					if (a.isOperation()) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
 						properties.setToBottom();
 						break;

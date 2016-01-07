@@ -36,7 +36,7 @@ import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 
 public class SesameConstructTemplate {
-	private TupleExpr sesameAlgebra = null;
+	private final TupleExpr sesameAlgebra;
 	private TupleExpr projection = null;
 	private TupleExpr extension = null;
 	

@@ -131,12 +131,12 @@ public class R2rmlCheckerTest {
 	
 	@Test 
 	public void testMappings() throws Exception {
-		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolder().getRules()) {
-			if (!reasonerR2rml.getQuestInstance().getUnfolder().getRules().contains(q)) 
+		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
+			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q)) 
 				System.out.println("NOT IN R2RML: " + q);
 		}
-		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolder().getRules()) {
-			if (!reasonerOBDA.getQuestInstance().getUnfolder().getRules().contains(q))
+		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
+			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
 				System.out.println("NOT IN OBDA: " + q);
 		}
 	}

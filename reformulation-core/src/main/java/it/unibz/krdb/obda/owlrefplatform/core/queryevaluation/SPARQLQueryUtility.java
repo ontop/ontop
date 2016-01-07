@@ -49,19 +49,19 @@ public class SPARQLQueryUtility {
 	}
 	
 	public boolean isAskQuery() {
-		return query.toLowerCase().contains(ASK_KEYWORD);
+		return isAskQuery(query);
 	}
 	
 	public boolean isSelectQuery() {
-		return query.toLowerCase().contains(SELECT_KEYWORD);
+		return isSelectQuery(query);
 	}
 	
 	public boolean isConstructQuery() {
-		return query.toLowerCase().contains(CONSTRUCT_KEYWORD);
+		return isConstructQuery(query);
 	}
 	
 	public boolean isDescribeQuery() {
-		return query.toLowerCase().contains(DESCRIBE_KEYWORD);
+		return isDescribeQuery(query);
 	}
 	
 	public static boolean isAskQuery(String query) {
@@ -89,11 +89,11 @@ public class SPARQLQueryUtility {
 	}
 	
 	public static boolean isConstructQuery(ParsedQuery query) {
-		return (query instanceof ParsedGraphQuery) && query.getSourceString().toLowerCase().contains(CONSTRUCT_KEYWORD);
+		return (query instanceof ParsedGraphQuery) && isConstructQuery(query.getSourceString());
 	}
 	
 	public static boolean isDescribeQuery(ParsedQuery query) {
-		return (query instanceof ParsedGraphQuery) && query.getSourceString().toLowerCase().contains(DESCRIBE_KEYWORD);
+		return (query instanceof ParsedGraphQuery) && isDescribeQuery(query.getSourceString());
 	}
 	
 	public static boolean isVarDescribe(String strquery) {

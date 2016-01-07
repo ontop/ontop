@@ -34,29 +34,35 @@ import java.sql.ResultSet;
 import java.text.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class QuestResultset implements TupleResultSet {
 
-	//private boolean isSemIndex = false;
-	private ResultSet set = null;
-	QuestStatement st;
-	private List<String> signature;
-	private final DecimalFormat formatter = new DecimalFormat("0.0###E0");
+	private final ResultSet rs;
+	private final QuestStatement st;
+	private final List<String> signature;
+	
+	private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-	private final HashMap<String, Integer> columnMap;
+	static {
+		DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
+		symbol.setDecimalSeparator('.');
+		formatter.setDecimalFormatSymbols(symbol);
+	}
+	
+	private final Map<String, Integer> columnMap;
+	private final Map<String, String> bnodeMap;
 
-	private final HashMap<String, String> bnodeMap;
-
-	// private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
 	private int bnodeCounter = 0;
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private final SemanticIndexURIMap uriMap;
 	
-	private final String vendor;
 	private final boolean isOracle;
     private final boolean isMsSQL;
-	private final String version;
+	
+	private final DateFormat dateFormat;
+
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -71,7 +77,7 @@ public class QuestResultset implements TupleResultSet {
 	 * @throws OBDAException
 	 */
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
-		this.set = set;
+		this.rs = set;
 		this.st = st;
 		this.uriMap = st.questInstance.getUriMap();
 		this.signature = signature;
@@ -83,18 +89,25 @@ public class QuestResultset implements TupleResultSet {
 			columnMap.put(signature.get(j - 1), j);
 		}
 
-		DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
-		symbol.setDecimalSeparator('.');
-		formatter.setDecimalFormatSymbols(symbol);
-
 		DBMetadata metadata = st.questInstance.getMetaData();
-		vendor =  metadata.getDriverName();
+		String vendor =  metadata.getDriverName();
 		isOracle = vendor.contains("Oracle");
-		version = metadata.getDriverVersion();
 		isMsSQL = vendor.contains("SQL Server");
-						
 
+		if (isOracle) {
+			String version = metadata.getDriverVersion();
+			int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
 
+			if (versionInt >= 12) 
+				dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+			else 
+				dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+		}
+		else if (isMsSQL) {
+			dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
+		}
+		else
+			dateFormat = null;
 	}
 
 	public int getColumnCount() throws OBDAException {
@@ -103,7 +116,7 @@ public class QuestResultset implements TupleResultSet {
 
 	public int getFetchSize() throws OBDAException {
 		try {
-			return set.getFetchSize();
+			return rs.getFetchSize();
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		}
@@ -115,7 +128,7 @@ public class QuestResultset implements TupleResultSet {
 
 	public boolean nextRow() throws OBDAException {
 		try {
-			return set.next();
+			return rs.next();
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}
@@ -123,7 +136,7 @@ public class QuestResultset implements TupleResultSet {
 
 	public void close() throws OBDAException {
 		try {
-			set.close();
+			rs.close();
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}
@@ -135,16 +148,13 @@ public class QuestResultset implements TupleResultSet {
 	}
 
 	public Object getRawObject(int column) throws OBDAException {
-
-		Object realValue;
-
 		try {
-			realValue = set.getObject(column);
-		} catch (SQLException e) {
+			Object realValue = rs.getObject(column);
+			return realValue;
+		} 
+		catch (SQLException e) {
 			throw new OBDAException(e);
 		}
-
-		return realValue;
 	}
 
 	/***
@@ -157,207 +167,148 @@ public class QuestResultset implements TupleResultSet {
 								// 3rd column, the 2nd is the language, the 1st is the type code (an integer)
 
 		Constant result = null;
-		String realValue = "";
+		String value = "";
 
 		try {
-			realValue = set.getString(column);
-			COL_TYPE type = getQuestType( set.getInt(column - 2));
-
-			if (type == COL_TYPE.NULL || realValue == null) {
+			value = rs.getString(column);
+		    
+			if (value == null) {
 				return null;
-			} else {
-				if (type == COL_TYPE.OBJECT) {
+			} 
+			else {
+				int t = rs.getInt(column - 2);
+			    COL_TYPE type = COL_TYPE.getQuestType(t);
+			    if (type == null)
+			    	throw new RuntimeException("typeCode unknown: " + t);
+			    
+				switch (type) {
+				case NULL:
+					result = null;
+					break;
+					
+				case OBJECT:
 					if (uriMap != null) {
 						try {
-							Integer id = Integer.parseInt(realValue);
-							realValue = uriMap.getURI(id);
-						} catch (NumberFormatException e) {
-							/*
-							 * If its not a number, then it has to be a URI, so
-							 * we leave realValue as it is.
-							 */
+							Integer id = Integer.parseInt(value);
+							value = uriMap.getURI(id);
+						} 
+						catch (NumberFormatException e) {
+							 // If its not a number, then it has to be a URI, so
+							 // we leave realValue as it is.
 						}
 					}
-
-					result = fac.getConstantURI(realValue.trim());
-
-				} else if (type == COL_TYPE.BNODE) {
-					String rawLabel = set.getString(column);
-					String scopedLabel = this.bnodeMap.get(rawLabel);
+					result = fac.getConstantURI(value.trim());
+					break;
+					
+				case BNODE:
+					String scopedLabel = this.bnodeMap.get(value);
 					if (scopedLabel == null) {
 						scopedLabel = "b" + bnodeCounter;
 						bnodeCounter += 1;
-						bnodeMap.put(rawLabel, scopedLabel);
+						bnodeMap.put(value, scopedLabel);
 					}
 					result = fac.getConstantBNode(scopedLabel);
-				} else {
-					/*
-					 * The constant is a literal, we need to find if its
-					 * rdfs:Literal or a normal literal and construct it
-					 * properly.
-					 */
-					if (type == COL_TYPE.LITERAL) {
-						String value = set.getString(column);
-						String language = set.getString(column - 1);
-						if (language == null || language.trim().equals("")) {
-							result = fac.getConstantLiteral(value);
-						} else {
-							result = fac.getConstantLiteral(value, language);
-						}
-					} else if (type == COL_TYPE.BOOLEAN) {
-						boolean value = set.getBoolean(column);
-						result = fac.getBooleanConstant(value);
-					} else if (type == COL_TYPE.DOUBLE) {
-						double d = set.getDouble(column);
-						// format name into correct double representation
-
-						String s = formatter.format(d);
-						result = fac.getConstantLiteral(s, COL_TYPE.DOUBLE);
-
-					} else if (type == COL_TYPE.DATETIME) {
-
-                        /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
-                         MySQL DateFormat ("MMM DD YYYY HH:mmaa");
-                         Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
-                         Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
-                         To overcome the problem we create a new Timestamp */
-
+					break;
+					
+				case LITERAL:
+					// The constant is a literal, we need to find if its
+					// rdfs:Literal or a normal literal and construct it
+					// properly.
+					String language = rs.getString(column - 1);
+					if (language == null || language.trim().equals("")) 
+						result = fac.getConstantLiteral(value);
+					else 
+						result = fac.getConstantLiteral(value, language);
+					break;
+					
+				case BOOLEAN:
+					boolean bvalue = rs.getBoolean(column);
+					result = fac.getBooleanConstant(bvalue);
+					break;
+				
+				case DOUBLE:
+					double d = rs.getDouble(column);
+					String s = formatter.format(d); // format name into correct double representation
+					result = fac.getConstantLiteral(s, COL_TYPE.DOUBLE);
+					break;
+					
+				case DATETIME:
+                    /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
+                    MySQL DateFormat ("MMM DD YYYY HH:mmaa");
+                    Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
+                    Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
+                    To overcome the problem we create a new Timestamp */
                     try {
-
-
-                        Timestamp value = set.getTimestamp(column);
-                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
-
+                        Timestamp tsvalue = rs.getTimestamp(column);
+                        result = fac.getConstantLiteral(tsvalue.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
                     }
-                    catch (Exception e){
-
-                        if (isMsSQL) {
-                            String value = set.getString(column);
-
-                            DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
-                            java.util.Date date;
+                    catch (Exception e) {
+                        if (isMsSQL || isOracle) {
                             try {
-                                date = df.parse(value);
+                            	java.util.Date date = dateFormat.parse(value);
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
-
-                            } catch (ParseException pe) {
-
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                            } 
+                            catch (ParseException pe) {
                                 throw new RuntimeException(pe);
                             }
-                        } else {
-                            if (isOracle) {
-
-                                String value = set.getString(column);
-                                //Oracle driver - this date format depends on the version of the driver
-								int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
-
-								DateFormat df;
-								if(versionInt >= 12) {
-									df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
-								}
-								else {
-                                	df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
-									}
-                                java.util.Date date;
-
-                                try {
-                                    date = df.parse(value);
-                                } catch (ParseException pe) {
-                                    throw new RuntimeException(pe);
-                                }
-
-                                Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
-                            }
-                            else{
-                                throw new RuntimeException(e);
-                            }
-                        }
-
-                        }
-
-
+                        } 
+                        else
+                            throw new RuntimeException(e);
                     }
-					 else if (type == COL_TYPE.DATETIME_STAMP) {
-
-						if (isOracle) {
-
-							/*
-							oracle has the type timestamptz. The format returned by getString is not a valid xml format
-							we need to transform it. We first take the information about the timezone value, that is lost
-							during the conversion in java.util.Date and then we proceed with the conversion.
-							*/
-
-							String value = set.getString(column);
-
+                    break;
+               
+				case DATETIME_STAMP:    
+					if (!isOracle) {
+						result = fac.getConstantLiteral(value.replaceFirst(" ", "T").replaceAll(" ", ""), COL_TYPE.DATETIME_STAMP);					
+					}
+					else {
+						/* oracle has the type timestamptz. The format returned by getString is not a valid xml format
+						we need to transform it. We first take the information about the timezone value, that is lost
+						during the conversion in java.util.Date and then we proceed with the conversion. */
+						try {
 							int indexTimezone = value.lastIndexOf(" ");
 							String timezone = value.substring(indexTimezone+1);
 							String datetime = value.substring(0, indexTimezone);
-
-
-							//Oracle driver - this date format depends on the version of the driver
-							int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
-
-							DateFormat df;
-							if(versionInt >= 12) {
-								df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
-							}
-							else {
-								df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
-							}
-							java.util.Date date;
-							try {
-								date = df.parse(datetime);
-							} catch (ParseException pe) {
-								throw new RuntimeException(pe);
-							}
-
+							
+							java.util.Date date = dateFormat.parse(datetime);
 							Timestamp ts = new Timestamp(date.getTime());
-
-							result = fac.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, type);
-
-
-						}
-
-						else {
-
-							String value = set.getString(column);
-
-
-
-							result = fac.getConstantLiteral(value.replaceFirst(" ", "T").replaceAll(" ", ""), type);
-						}
-
-					}
-					else if (type == COL_TYPE.DATE) {
-						if (!isOracle) {
-							Date value = set.getDate(column);
-							result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
+							result = fac.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, COL_TYPE.DATETIME_STAMP);
 						} 
-						else {
-							String value = set.getString(column);
-							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
-							try {
-								java.util.Date date = df.parse(value);
-							} catch (ParseException e) {
-								throw new RuntimeException(e);
-							}
-							result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
+						catch (ParseException pe) {
+							throw new RuntimeException(pe);
 						}
-						
-						
-					} 
-                    else if (type == COL_TYPE.TIME) {
-						Time value = set.getTime(column);						
-						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.TIME);
+					}
+					break;
+					
+				case DATE:
+					if (!isOracle) {
+						Date dvalue = rs.getDate(column);
+						result = fac.getConstantLiteral(dvalue.toString(), COL_TYPE.DATE);
 					} 
 					else {
-						result = fac.getConstantLiteral(realValue, type);
+						try {
+							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+							java.util.Date date = df.parse(value);
+						} 
+						catch (ParseException e) {
+							throw new RuntimeException(e);
+						}
+						result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
 					}
+					break;
+					
+				case TIME:
+					Time tvalue = rs.getTime(column);						
+					result = fac.getConstantLiteral(tvalue.toString().replace(' ', 'T'), COL_TYPE.TIME);
+					break;
+				
+				default:
+					result = fac.getConstantLiteral(value, type);
 				}
 			}
-		} catch (IllegalArgumentException e) {
+		} 
+		catch (IllegalArgumentException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof URISyntaxException) {
 				OBDAException ex = new OBDAException(
@@ -370,99 +321,25 @@ public class QuestResultset implements TupleResultSet {
 								+ "Detailed message: " + cause.getMessage());
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
-			} else {
-				OBDAException ex = new OBDAException("Quest couldn't parse the data value to Java object: " + realValue + "\n"
+			} 
+			else {
+				OBDAException ex = new OBDAException("Quest couldn't parse the data value to Java object: " + value + "\n"
 						+ "Please review the mapping rules to have the datatype assigned properly.");
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
 			}
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e) {
 			throw new OBDAException(e);
 		}
 
 		return result;
 	}
 
-	// @Override
-	// public ValueConstant getLiteral(int column) throws OBDAException {
-	// return getLiteral(signature.get(column - 1));
-	// }
-	//
-	// @Override
-	// public BNode getBNode(int column) throws OBDAException {
-	// return getBNode(signature.get(column - 1));
-	// }
 
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
 		Integer columnIndex = columnMap.get(name);
 		return getConstant(columnIndex);
 	}
-
-    /**
-     * Numbers codetype are defined see also  #getTypeColumnForSELECT SQLGenerator
-     */
-
-	private COL_TYPE getQuestType(int typeCode) {
-
-        COL_TYPE questType = COL_TYPE.getQuestType(typeCode);
-
-        if (questType == null)
-        	throw new RuntimeException("typeCode unknown: " + typeCode);
-        
-        return questType;
-	}
-
-	// @Override
-	// public URI getURI(String name) throws OBDAException {
-	// String result = "";
-	// try {
-	// result = set.getString(name);
-	//
-	// return URI.create(result);// .replace(' ', '_'));
-	//
-	// } catch (SQLException e) {
-	// throw new OBDAException(e);
-	// }
-	// }
-	//
-	// @Override
-	// public IRI getIRI(String name) throws OBDAException {
-	// int id = -1;
-	// try {
-	// String result = set.getString(name);
-	// if (isSemIndex) {
-	// try {
-	// id = Integer.parseInt(result);
-	// } catch (NumberFormatException e) {
-	// // its not a number - its a URI
-	// IRI iri = irif.create(result);
-	// return iri;
-	// }
-	//
-	// result = uriMap.get(id);
-	// }
-	//
-	// IRI iri = irif.create(result);
-	// return iri;
-	// } catch (Exception e) {
-	// throw new OBDAException(e);
-	// }
-	// }
-	//
-	// @Override
-	// public ValueConstant getLiteral(String name) throws OBDAException {
-	// Constant result;
-	//
-	// result = getConstant(name);
-	//
-	// return (ValueConstant) result;
-	// }
-	//
-	// @Override
-	// public BNode getBNode(String name) throws OBDAException {
-	// Constant result;
-	// result = getConstant(name);
-	// return (BNode) result;
-	// }
 }

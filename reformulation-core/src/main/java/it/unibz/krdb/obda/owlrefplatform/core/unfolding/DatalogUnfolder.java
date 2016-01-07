@@ -65,10 +65,14 @@ public class DatalogUnfolder {
 	 */
 	private final Set<Predicate> extensionalPredicates = new HashSet<>();
 
+	// LeftJoinUnfoldingTest only
+	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram) {
 		this(unfoldingProgram, HashMultimap.<Predicate, List<Integer>>create());
 	}
 
+	// QuestUnfilder only 
+	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
 		this.primaryKeys = primaryKeys;
 		
@@ -96,14 +100,15 @@ public class DatalogUnfolder {
 	}
 
 	private final void collectPredicates(Set<Predicate> predicates, Function atom) {
-		Predicate pred = atom.getFunctionSymbol();
-		if (pred instanceof AlgebraOperatorPredicate) {
+		if (atom.isAlgebraFunction()) {
 			for (Term innerTerm : atom.getTerms()) 
 				if (innerTerm instanceof Function)
 					collectPredicates(predicates, (Function) innerTerm);
 		} 
-		else if (!(pred instanceof BooleanOperationPredicate))
+		else if (!(atom.isOperation())) {
+			Predicate pred = atom.getFunctionSymbol();
 			predicates.add(pred);
+		}
 	}
 
 	/***
@@ -1530,10 +1535,7 @@ public class DatalogUnfolder {
 			for (int newatomidx = 0; newatomidx < innerAtoms.size(); newatomidx++) {
 
 				Function newatom = innerAtoms.get(newatomidx);
-				if (!newatom.isBooleanFunction())
-					continue;
-
-				if (!newatom.getFunctionSymbol().equals(OBDAVocabulary.IS_NOT_NULL))
+				if (newatom.getFunctionSymbol() != ExpressionOperation.IS_NOT_NULL)
 					continue;
 
 				Function replacement = null;

@@ -1,12 +1,18 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-#######################################################################################################################
+########################################################################
 #
-#  Ontop Build Script
+#                       Ontop build script
 # 
-#  <xiao(a)inf.unibz.it>
+#                      <xiao(a)inf.unibz.it>
 #
-#######################################################################################################################
+#   Build Requirements
+#   - Java 8
+#   - Maven
+#   - git 
+#   - git-lfs
+#
+########################################################################
 
 
 VERSION=1.16
@@ -46,6 +52,41 @@ echo "git lfs env"
 git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
 echo ""
 
+if type -p java; then
+    export JAVA=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
+    export JAVA="$JAVA_HOME/bin/java"
+else
+    echo "ERROR: Java is not installed!"
+    exit 1
+fi
+
+echo 'java -version'
+
+${JAVA} -version || exit 1
+
+echo ""
+
+JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
+#echo version "$version"
+if [[ "$JAVA_VER" -ne "8" ]]; then
+    echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
+    exit 1
+fi
+
+echo 'mvn -version'
+mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }
+echo ""
+
+echo "git --version"
+git --version || exit 1
+echo ""
+
+echo "git lfs env"
+git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
+echo ""
+
+
 # location for the build ROOT folder (i.e. the directory of this script)
 BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -63,7 +104,7 @@ then
 else
   echo "ERROR: git submodule 'ontop-build-dependencies' is missing or uninitiated!"
   echo "Please run 'git submodule init && git submodule update'"
-  exit 0
+  exit 1
 fi
 
 # location for protege clean folder
@@ -111,7 +152,7 @@ echo ""
 
 echo "pluginVersion=$VERSION.$REVISION" >  ${BUILD_ROOT}/obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
 
-mvn install -DskipTests
+mvn install -DskipTests || exit 1
 
 #
 echo ""
@@ -122,14 +163,14 @@ echo ""
 
 rm -fr ${BUILD_ROOT}/ontop-protege/dist
 cd ${BUILD_ROOT}/ontop-protege/
-mvn bundle:bundle -DskipTests
+mvn bundle:bundle -DskipTests  || exit 1
 
 rm -fr ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
 mkdir ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
 cp target/${PROTEGE_PLUGIN_NAME}-${VERSION}.${REVISION}.jar \
   ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.${REVISION}.jar
 
-cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/
+cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/  || exit 1
 
 cd ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/
 
@@ -151,21 +192,21 @@ echo ""
 
 rm -fr ${QUEST_SESAME_DIST}
 mkdir -p ${QUEST_SESAME_DIST}/WEB-INF/lib
-mvn assembly:assembly -DskipTests
-cp target/ontop-distribution-${VERSION}.${REVISION}-sesame-bin.jar ${QUEST_SESAME_DIST}/WEB-INF/lib/ontop-distribution-${VERSION}.${REVISION}.jar
-unzip -q -d ${QUEST_SESAME_DIST}/WEB-INF/lib/ target/ontop-distribution-${VERSION}.${REVISION}-dependencies.zip
+mvn assembly:assembly -DskipTests  || exit 1
+cp target/ontop-distribution-${VERSION}.${REVISION}-sesame-bin.jar ${QUEST_SESAME_DIST}/WEB-INF/lib/ontop-distribution-${VERSION}.${REVISION}.jar || exit 1
+unzip -q -d ${QUEST_SESAME_DIST}/WEB-INF/lib/ target/ontop-distribution-${VERSION}.${REVISION}-dependencies.zip || exit 1
 cp ${ONTOP_DEP_HOME}/${OPENRDF_SESAME_FILENAME}.war ${QUEST_SESAME_DIST}/
 cp ${ONTOP_DEP_HOME}/${OPENRDF_WORKBENCH_FILENAME}.war ${QUEST_SESAME_DIST}/
 
 cd ${QUEST_SESAME_DIST}
 echo ""
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-sesame.war"
-jar -uf ${OPENRDF_SESAME_FILENAME}.war WEB-INF/lib/*
+jar -uf ${OPENRDF_SESAME_FILENAME}.war WEB-INF/lib/* || exit 1
 
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
-jar -uf ${OPENRDF_WORKBENCH_FILENAME}.war WEB-INF/lib/*
+jar -uf ${OPENRDF_WORKBENCH_FILENAME}.war WEB-INF/lib/* || exit 1
 
-zip ${ONTOP_SESAME_WEBAPPS}-${VERSION}.${REVISION}.zip ${OPENRDF_SESAME_FILENAME}.war ${OPENRDF_WORKBENCH_FILENAME}.war
+zip ${ONTOP_SESAME_WEBAPPS}-${VERSION}.${REVISION}.zip ${OPENRDF_SESAME_FILENAME}.war ${OPENRDF_WORKBENCH_FILENAME}.war || exit 1
 
 rm -fr WEB-INF
 cd ${BUILD_ROOT}/quest-distribution
@@ -178,7 +219,7 @@ echo " Building Sesame Jetty distribution package"
 echo "-----------------------------------------"
 rm -fr ${QUEST_JETTY_DIST}
 mkdir ${QUEST_JETTY_DIST}
-cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.${REVISION}.zip
+cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.${REVISION}.zip || exit 1
 
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${QUEST_JETTY_DIST}
@@ -186,7 +227,7 @@ mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
 cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_SESAME_FILENAME}.war ${JETTY_FOLDER}/webapps
 cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_WORKBENCH_FILENAME}.war ${JETTY_FOLDER}/webapps
 
-zip ontop-jetty-bundle-${VERSION}.${REVISION}.zip ${JETTY_FOLDER}/webapps/*
+zip ontop-jetty-bundle-${VERSION}.${REVISION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
 
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/quest-distribution

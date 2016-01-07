@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  */
 
 import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -42,10 +41,6 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
@@ -372,6 +367,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
+		
+		//EquivalentTriplePredicateIterator data = new EquivalentTriplePredicateIterator(sData, reasonerDag);
+		
 		log.debug("Inserting data into DB");
 
 		// The precondition for the limit number must be greater or equal to one.
@@ -508,9 +506,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		if (ope0.isInverse()) 
 			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
 		
-		// TODO: could use EquivalentTriplePredicateIterator instead
-		
-		ObjectPropertyExpression ope = reasonerDag.getObjectPropertyDAG().getVertex(ope0).getRepresentative();
+		ObjectPropertyExpression ope = reasonerDag.getObjectPropertyDAG().getCanonicalForm(ope0);
 				
 		ObjectConstant o1, o2;
 		if (ope.isInverse()) {
@@ -555,7 +551,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		// replace the property by its canonical representative 
 		DataPropertyExpression dpe0 = ax.getProperty();
-		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getVertex(dpe0).getRepresentative();		
+		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getCanonicalForm(dpe0);		
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
 		ObjectConstant subject = ax.getSubject();
@@ -638,7 +634,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept0 = ax.getConcept();
-		OClass concept = (OClass)reasonerDag.getClassDAG().getVertex(concept0).getRepresentative();	
+		OClass concept = (OClass)reasonerDag.getClassDAG().getCanonicalForm(concept0);	
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
 		ObjectConstant c1 = ax.getIndividual();
