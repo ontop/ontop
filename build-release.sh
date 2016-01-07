@@ -9,14 +9,48 @@
 #######################################################################################################################
 
 
-export VERSION=1.16
-export REVISION=2-SNAPSHOT
+VERSION=1.16
+REVISION=2-SNAPSHOT
+
+if type -p java; then
+    JAVA=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    echo "ERROR: Java is not installed!"
+    exit 1
+fi
+
+echo 'java -version'
+
+${JAVA} -version || exit 1
+
+echo ""
+
+JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
+#echo version "$version"
+if [[ "$JAVA_VER" -ne "8" ]]; then
+    echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
+    exit 1
+fi
+
+echo 'mvn -version'
+mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }
+echo ""
+
+echo "git --version"
+git --version || exit 1
+echo ""
+
+echo "git lfs env"
+git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
+echo ""
 
 # location for the build ROOT folder (i.e. the directory of this script)
-export BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home 
-export ONTOP_DEP_HOME=${BUILD_ROOT}/ontop-build-dependencies
+ONTOP_DEP_HOME=${BUILD_ROOT}/ontop-build-dependencies
 
 
 if [ -d "${ONTOP_DEP_HOME}" ] && [ -f "${ONTOP_DEP_HOME}/.git" ]
@@ -33,27 +67,27 @@ else
 fi
 
 # location for protege clean folder
-export PROTEGE_COPY_FILENAME=protege-5.0.0-beta-21-platform-independent
-export PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0-beta-21
-export PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
+PROTEGE_COPY_FILENAME=protege-5.0.0-beta-21-platform-independent
+PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0-beta-21
+PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
 
 # location and name for jetty distribution (should be ZIP)
-export JETTY_COPY_FILENAME=jetty-distribution-8.1.9
-export JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9
+JETTY_COPY_FILENAME=jetty-distribution-8.1.9
+JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9
 
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
-export OPENRDF_SESAME_FILENAME=openrdf-sesame
-export OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
-export ONTOP_SESAME_WEBAPPS=ontop-sesame-webapps
+OPENRDF_SESAME_FILENAME=openrdf-sesame
+OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
+ONTOP_SESAME_WEBAPPS=ontop-sesame-webapps
 
 # folder names of the output
-export PROTEGE_DIST=ontop-protege
-export QUEST_SESAME_DIST=ontop-sesame
-export QUEST_JETTY_DIST=ontop-jetty
-export ONTOP_DIST=ontop-dist
+PROTEGE_DIST=ontop-protege
+QUEST_SESAME_DIST=ontop-sesame
+QUEST_JETTY_DIST=ontop-jetty
+ONTOP_DIST=ontop-dist
 
 # jar name of the pretege plugin
-export PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
+PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
 
 #
 # Start building the packages
@@ -150,7 +184,7 @@ rm -fr ${QUEST_JETTY_DIST}
 mkdir ${QUEST_JETTY_DIST}
 cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.${REVISION}.zip
 
-export JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
+JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${QUEST_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
 cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_SESAME_FILENAME}.war ${JETTY_FOLDER}/webapps
