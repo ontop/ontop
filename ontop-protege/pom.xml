@@ -345,7 +345,7 @@
 							javax.naming.*,javax.management.*,javax.sql.*,
 							javax.xml.parsers.*,org.xml.sax.*,
 							it.unibz.krdb.obda.*,
-							org.protege.osgi.jdbc, org.protege.osgi.*,
+							org.protege.osgi.*,
 							uk.ac.manchester.*,
 							org.protege.*,
 							org.semanticweb.*,

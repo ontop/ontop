@@ -18,18 +18,20 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
+
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.RegistryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EditorPanel extends JDialog {
     private static final long serialVersionUID = -8958695683502439830L;
 
-    private Logger log = Logger.getLogger(EditorPanel.class);
-    
+    private final Logger log = LoggerFactory.getLogger(EditorPanel.class);
+
     private ServiceTracker jdbcRegistryTracker;
     
     private JLabel status = new JLabel();

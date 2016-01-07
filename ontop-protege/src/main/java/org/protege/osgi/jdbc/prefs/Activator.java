@@ -2,7 +2,9 @@ package org.protege.osgi.jdbc.prefs;
 
 import java.net.MalformedURLException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
@@ -12,7 +14,9 @@ import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.RegistryException;
 
 public class Activator implements BundleActivator {
-	public static final Logger LOGGER = Logger.getLogger(Activator.class);
+
+    private final Logger log = LoggerFactory.getLogger(Activator.class);
+
 	private BundleContext context;
 	private static Activator instance;
 	private ServiceListener listener = new ServiceListener() {
@@ -23,7 +27,7 @@ public class Activator implements BundleActivator {
 					installDrivers(event.getServiceReference());
 				}
 				catch (Exception e) {
-					LOGGER.warn("Exception caught installing jdbc drivers.", e);
+                    log.warn("Exception caught installing jdbc drivers.", e);
 				}
 			}
 		}

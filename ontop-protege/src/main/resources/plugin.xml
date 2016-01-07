@@ -165,4 +165,12 @@
     <name value="Quest 1.16.2-SNAPSHOT (ontop)"/>
     <class value="org.semanticweb.ontop.protege.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
+
+    <!-- JDBC Preferences-->
+    <extension id="jdbc.prefs"
+               point="org.protege.editor.core.application.preferencespanel">
+        <label value="JDBC Drivers"/>
+        <class value="org.protege.osgi.jdbc.prefs.PreferencesPanel"/>
+    </extension>
+
 </plugin>

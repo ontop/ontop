@@ -15,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.apache.log4j.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
@@ -25,8 +24,7 @@ import org.protege.osgi.jdbc.JdbcRegistry;
 
 public class PreferencesPanel extends OWLPreferencesPanel {
     private static final long serialVersionUID = 2892884854196959326L;
-    private Logger log = Logger.getLogger(PreferencesPanel.class);
-    
+
     public static final String PREFERENCES_SET="org.protege.osgi.jdbc.prefs";
     public static final String DRIVER_PREFERENCES_KEY="driver.list";
     public static final String DEFAULT_DRIVER_DIR="driver.dir";
