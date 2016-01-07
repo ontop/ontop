@@ -12,6 +12,27 @@
 export VERSION=1.16
 export REVISION=2-SNAPSHOT
 
+if type -p java; then
+    echo Found java executable in PATH
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    echo Found java executable in JAVA_HOME
+    _java="$JAVA_HOME/bin/java"
+else
+    echo "ERROR: Java is not installed!"
+    exit 1
+fi
+
+if [[ "$_java" ]]; then
+    JAVA_VER=$(java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
+    #echo version "$version"
+    if [[ "$JAVA_VER" -ne "8" ]]; then
+        echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
+        exit 1
+    fi
+fi
+
+
 # location for the build ROOT folder (i.e. the directory of this script)
 export BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -29,7 +50,7 @@ then
 else
   echo "ERROR: git submodule 'ontop-build-dependencies' is missing or uninitiated!"
   echo "Please run 'git submodule init && git submodule update'"
-  exit 0
+  exit 1
 fi
 
 # location for protege clean folder
