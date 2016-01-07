@@ -1,12 +1,18 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-#######################################################################################################################
+########################################################################
 #
-#  Ontop Build Script
+#                       Ontop build script
 # 
-#  <xiao(a)inf.unibz.it>
+#                      <xiao(a)inf.unibz.it>
 #
-#######################################################################################################################
+#   Build Requirements
+#   - Java 8
+#   - Maven
+#   - git 
+#   - git-lfs
+#
+########################################################################
 
 
 export VERSION=1.16
@@ -35,7 +41,7 @@ if [[ "$JAVA_VER" -ne "8" ]]; then
 fi
 
 echo 'mvn -version'
-mvn -version || (echo "ERROR: maven is not installed!" && exit 1)
+mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }
 echo ""
 
 echo "git --version"
@@ -43,7 +49,7 @@ git --version || exit 1
 echo ""
 
 echo "git lfs env"
-git lfs env ||  (echo "ERROR: git-lfs is not installed or not configured!" && exit 1)
+git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
 echo ""
 
 
