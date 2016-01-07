@@ -35,7 +35,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
@@ -157,10 +156,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
 			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getVocabulary());
-			EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
-			
-			int count = st.insertData(aBoxNormalIter, 5000, 500);
+			int count = st.insertData(aBoxIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}
 		if (bObtainFromMappings) {
@@ -180,7 +176,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (!conn.getAutoCommit())
 			conn.commit();
 		
-		questInstance.updateSemanticIndexMappings();
+		//questInstance.updateSemanticIndexMappings();
 
 		log.debug("Store {} has been created successfully", name);
 	}

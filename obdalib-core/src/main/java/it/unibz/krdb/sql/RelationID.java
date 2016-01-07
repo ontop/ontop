@@ -55,10 +55,10 @@ public class RelationID {
 	 * @return
 	 */
 	
-	public static RelationID createRelationIdFromDatabaseRecord(String schema, String table) {
+	public static RelationID createRelationIdFromDatabaseRecord(QuotedIDFactory idfac, String schema, String table) {
 		// both IDs are as though they are quoted -- DB stores names as is 
-		return new RelationID(QuotedID.createIdFromDatabaseRecord(schema), 
-								QuotedID.createIdFromDatabaseRecord(table));			
+		return new RelationID(QuotedID.createIdFromDatabaseRecord(idfac, schema), 
+								QuotedID.createIdFromDatabaseRecord(idfac, table));			
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public class RelationID {
 	 */
 	
 	public RelationID getSchemalessID() {
-		return new RelationID(QuotedID.createIdFromDatabaseRecord(null), table);
+		return new RelationID(QuotedID.EMPTY_ID, table);
 	}
 	
 	/**

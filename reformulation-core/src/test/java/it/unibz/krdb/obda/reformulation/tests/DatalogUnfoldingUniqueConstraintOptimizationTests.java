@@ -24,10 +24,10 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
-
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestUnfolder;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DBMetadataExtractor;
@@ -40,6 +40,8 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.google.common.collect.Multimap;
 
 public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
 
@@ -150,7 +152,8 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		DatalogUnfolder unfolder = QuestUnfolder.createDatalogUnfolder(unfoldingProgram.getRules(), metadata);
+		Multimap<Predicate, List<Integer>> pkeys = DBMetadataUtil.extractPKs(metadata);
+		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
         // q(m, n, p) :-  id(m, p), id1(n, p)
 		LinkedList<Term> headterms = new LinkedList<Term>();

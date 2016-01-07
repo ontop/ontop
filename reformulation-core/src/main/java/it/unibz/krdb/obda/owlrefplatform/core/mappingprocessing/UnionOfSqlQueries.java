@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
@@ -101,11 +102,11 @@ public class UnionOfSqlQueries {
 		
 		boolean nonSPJ = false;
 		for (Function f : cq.getBody()) {
-			if (!f.isDataFunction() && !f.isBooleanFunction()) {
+			if (!f.isDataFunction() && !f.isOperation()) {
 				nonSPJ = true;
 				break;
 			}
-			if (f.getFunctionSymbol() == OBDAVocabulary.NOT) {
+			if (f.getFunctionSymbol() == ExpressionOperation.NOT) {
 				nonSPJ = true;
 				break;
 			}

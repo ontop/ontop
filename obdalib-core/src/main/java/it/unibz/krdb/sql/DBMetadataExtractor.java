@@ -120,7 +120,7 @@ public class DBMetadataExtractor {
 	}
 	
 	public static DBMetadata createDummyMetadata(String driver_class) {
-		return new DBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL());
+		return new DBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL("\""));
 	}
 	
 	
@@ -140,19 +140,21 @@ public class DBMetadataExtractor {
 		// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
 		if (md.supportsMixedCaseIdentifiers()) {
 			 //  MySQL
-			if (productName.contains("MySQL")) 
-				idfac = new QuotedIDFactoryMySQL(); 
+			if (productName.contains("MySQL"))  {
+				//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
+				idfac = new QuotedIDFactoryMySQL("`"); 
+			}
 			else
 				// "SQL Server" = MS SQL Server
-				idfac = new QuotedIDFactoryIdentity();
+				idfac = new QuotedIDFactoryIdentity("\"");
 		}
 		else {
 			if (md.storesLowerCaseIdentifiers())
 				// PostgreSQL treats unquoted identifiers as lower-case
-				idfac = new QuotedIDFactoryLowerCase();
+				idfac = new QuotedIDFactoryLowerCase("\"");
 			else if (md.storesUpperCaseIdentifiers())
 				// Oracle, DB2, H2, HSQL 
-				idfac = new QuotedIDFactoryStandardSQL();
+				idfac = new QuotedIDFactoryStandardSQL("\"");
 			else {
 				log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
 				log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
@@ -165,7 +167,7 @@ public class DBMetadataExtractor {
 				log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
 				log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
 				
-				idfac = new QuotedIDFactoryStandardSQL();
+				idfac = new QuotedIDFactoryStandardSQL("\"");
 			}
 		}
 		
@@ -199,7 +201,7 @@ public class DBMetadataExtractor {
 		if (productName.contains("Oracle")) {
 			String defaultSchema = getOracleDefaultOwner(conn);
 			if (realTables == null || realTables.isEmpty())
-				seedRelationIds = getTableList(conn, new OracleRelationListProvider(defaultSchema), idfac);
+				seedRelationIds = getTableList(conn, new OracleRelationListProvider(idfac, defaultSchema), idfac);
 			else
 				seedRelationIds = getTableList(defaultSchema, realTables, idfac);		
 		} 
@@ -208,15 +210,15 @@ public class DBMetadataExtractor {
 				if (productName.contains("DB2")) 
 					// select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1
 					seedRelationIds = getTableListDefault(md, 
-							ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT"));
+							ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT"), idfac);
 				else if (productName.contains("SQL Server"))  // MS SQL Server
 					// SELECT SCHEMA_NAME() would give default schema name
 					// https://msdn.microsoft.com/en-us/library/ms175068.aspx
 					seedRelationIds = getTableListDefault(md, 
-							ImmutableSet.of("sys", "INFORMATION_SCHEMA"));
+							ImmutableSet.of("sys", "INFORMATION_SCHEMA"), idfac);
 				else 
 					// for other database engines, including H2, HSQL, PostgreSQL and MySQL
-					seedRelationIds = getTableListDefault(md, ImmutableSet.<String>of());
+					seedRelationIds = getTableListDefault(md, ImmutableSet.<String>of(), idfac);
 			}
 			else 
 				seedRelationIds = getTableList(null, realTables, idfac);
@@ -238,9 +240,9 @@ public class DBMetadataExtractor {
 			// catalog is ignored for now (rs.getString("TABLE_CAT"))
 			try (ResultSet rs = md.getColumns(null, seedId.getSchemaName(), seedId.getTableName(), null)) {
 				while (rs.next()) {
-					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), 
+					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(idfac, rs.getString("TABLE_SCHEM"), 
 										rs.getString("TABLE_NAME"));
-					QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
+					QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
 					if (printouts)
 						System.out.println("         " + relationId + "." + attributeId);
 					
@@ -261,8 +263,8 @@ public class DBMetadataExtractor {
 		}
 			
 		for (DatabaseRelationDefinition relation : extractedRelations)	{
-			getPrimaryKey(md, relation);
-			getUniqueAttributes(md, relation);
+			getPrimaryKey(md, relation, metadata.getQuotedIDFactory());
+			getUniqueAttributes(md, relation, metadata.getQuotedIDFactory());
 			getForeignKeys(md, relation, metadata);
 			if (printouts) {
 				System.out.println(relation + ";");
@@ -300,7 +302,7 @@ public class DBMetadataExtractor {
 	/**
 	 * Retrieve the table and view list from the JDBC driver (works for most database engines, e.g., MySQL and PostgreSQL)
 	 */
-	private static List<RelationID> getTableListDefault(DatabaseMetaData md, ImmutableSet<String> ignoredSchemas) throws SQLException {
+	private static List<RelationID> getTableListDefault(DatabaseMetaData md, ImmutableSet<String> ignoredSchemas, QuotedIDFactory idfac) throws SQLException {
 		List<RelationID> relationIds = new LinkedList<>();
 		try (ResultSet rs = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {	
 			while (rs.next()) {
@@ -310,7 +312,7 @@ public class DBMetadataExtractor {
 				if (ignoredSchemas.contains(schema)) {
 					continue;
 				}
-				RelationID id = RelationID.createRelationIdFromDatabaseRecord(schema, table);
+				RelationID id = RelationID.createRelationIdFromDatabaseRecord(idfac, schema, table);
 				relationIds.add(id);
 			}
 		} 
@@ -364,9 +366,11 @@ public class DBMetadataExtractor {
 	private static final class OracleRelationListProvider implements RelationListProvider {
 		
 		private final String defaultTableOwner; 
+		private final QuotedIDFactory idfac;
 		
-		public OracleRelationListProvider(String defaultTableOwner) {
+		public OracleRelationListProvider(QuotedIDFactory idfac, String defaultTableOwner) {
 			this.defaultTableOwner = defaultTableOwner;
+			this.idfac = idfac;
 		}
 		
 		@Override
@@ -389,7 +393,7 @@ public class DBMetadataExtractor {
 
 		@Override
 		public RelationID getTableID(ResultSet rs) throws SQLException {
-			return RelationID.createRelationIdFromDatabaseRecord(defaultTableOwner, rs.getString("object_name"));
+			return RelationID.createRelationIdFromDatabaseRecord(idfac, defaultTableOwner, rs.getString("object_name"));
 		}
 	};
 	
@@ -526,7 +530,7 @@ public class DBMetadataExtractor {
 	 * Retrieves the primary key for the table 
 	 * 
 	 */
-	private static void getPrimaryKey(DatabaseMetaData md, DatabaseRelationDefinition relation) throws SQLException {
+	private static void getPrimaryKey(DatabaseMetaData md, DatabaseRelationDefinition relation, QuotedIDFactory idfac) throws SQLException {
 		RelationID id = relation.getID();
 		// Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
 		try (ResultSet rs = md.getPrimaryKeys(null, id.getSchemaName(), id.getTableName())) {
@@ -534,7 +538,8 @@ public class DBMetadataExtractor {
 			String currentName = null;
 			while (rs.next()) {
 				// TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-				RelationID id2 = RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));		
+				RelationID id2 = RelationID.createRelationIdFromDatabaseRecord(idfac, 
+									rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));		
 				if (id2.equals(id)) {
 					currentName = rs.getString("PK_NAME"); // may be null			
 					String attr = rs.getString("COLUMN_NAME");
@@ -546,7 +551,7 @@ public class DBMetadataExtractor {
 				// use the KEY_SEQ values to restore the correct order of attributes in the PK
 				UniqueConstraint.Builder builder = UniqueConstraint.builder(relation);
 				for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
-					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(primaryKeyAttributes.get(i));
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, primaryKeyAttributes.get(i));
 					builder.add(relation.getAttribute(attrId));
 				}
 				relation.addUniqueConstraint(builder.build(currentName, true));
@@ -560,8 +565,8 @@ public class DBMetadataExtractor {
 	 * @return
 	 * @throws SQLException 
 	 */
-	private static void getUniqueAttributes(DatabaseMetaData md, DatabaseRelationDefinition relation) throws SQLException {
-
+	private static void getUniqueAttributes(DatabaseMetaData md, DatabaseRelationDefinition relation, QuotedIDFactory idfac) throws SQLException {
+		
 		RelationID id = relation.getID();
 		// extracting unique 
 		try (ResultSet rs = md.getIndexInfo(null, id.getSchemaName(), id.getTableName(), true, true)) {
@@ -595,7 +600,7 @@ public class DBMetadataExtractor {
 				}
 				
 				if (builder != null) {
-					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("COLUMN_NAME"));
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
 					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending, 
 					//        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
 					// CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table; 
@@ -617,12 +622,14 @@ public class DBMetadataExtractor {
 	 */
 	private static void getForeignKeys(DatabaseMetaData md, DatabaseRelationDefinition relation, DBMetadata metadata) throws SQLException {
 		
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+		
 		RelationID relationId = relation.getID();	
 		try (ResultSet rs = md.getImportedKeys(null, relationId.getSchemaName(), relationId.getTableName())) {
 			ForeignKeyConstraint.Builder builder = null;
 			String currentName = null;
 			while (rs.next()) {
-				RelationID refId = RelationID.createRelationIdFromDatabaseRecord(
+				RelationID refId = RelationID.createRelationIdFromDatabaseRecord(idfac,
 										rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
 				DatabaseRelationDefinition ref = metadata.getDatabaseRelation(refId);
 				// FKTABLE_SCHEM and FKTABLE_NAME are ignored for now  
@@ -643,8 +650,8 @@ public class DBMetadataExtractor {
 					}
 				}
 				if (builder != null) {
-					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(rs.getString("FKCOLUMN_NAME"));
-					QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(rs.getString("PKCOLUMN_NAME"));
+					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("FKCOLUMN_NAME"));
+					QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("PKCOLUMN_NAME"));
 					builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
 				}
 			}

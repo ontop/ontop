@@ -53,6 +53,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 public class Mapping2DatalogConverter {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -62,7 +64,7 @@ public class Mapping2DatalogConverter {
 	 */
 	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
 		
-		List<CQIE> datalogProgram = new LinkedList<CQIE>();
+		List<CQIE> datalogProgram = new LinkedList<>();
 		List<String> errorMessages = new ArrayList<>();
 		
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
@@ -205,11 +207,11 @@ public class Mapping2DatalogConverter {
         	// HACKY WAY OF DEALING WITH VARIABLES THAT ARE CASE-SENSITIVE 
             RelationID relationId;
             if (tableName != null)
-            	relationId = idfac.createRelationID(quote(schemaName), quote(tableName));
+            	relationId = idfac.createRelationID(quote(idfac, schemaName), quote(idfac, tableName));
             else
             	relationId = null;
             QualifiedAttributeID a = new QualifiedAttributeID(relationId, 
-            						idfac.createAttributeID(quote(attributeName)));         
+            						idfac.createAttributeID(quote(idfac, attributeName)));         
             Term termR = lookupTable.get(a);
             
             if (termR == null) {
@@ -224,7 +226,7 @@ public class Mapping2DatalogConverter {
             // ROMAN (10 Oct 2015): hack for FQDN
             if (termR == null)
             	termR = lookupTable.get(new QualifiedAttributeID(null, 
-						idfac.createAttributeID(quote(attributeName))));
+						idfac.createAttributeID(quote(idfac, attributeName))));
             
             if (termR == null)
             	termR = lookupTable.get(new QualifiedAttributeID(null, 
@@ -256,10 +258,10 @@ public class Mapping2DatalogConverter {
         throw new RuntimeException("Unknown term type");
     }
 
-    private static String quote(String s) {
+    private static String quote(QuotedIDFactory idfac, String s) {
     	if (s == null)
     		return s;
-    	return QuotedID.QUOTATION + s + QuotedID.QUOTATION;
+    	return idfac.getIDQuotationString() + s + idfac.getIDQuotationString();
     }
     
     private static final class AttributeLookupTable {
@@ -339,6 +341,22 @@ public class Mapping2DatalogConverter {
 		return lookupTable;
 	}
       
+    
+	private static final ImmutableMap<String, OperationPredicate> operations = 
+			new ImmutableMap.Builder<String, OperationPredicate>()
+				.put("=", ExpressionOperation.EQ)
+				.put(">=", ExpressionOperation.GTE)
+				.put(">", ExpressionOperation.GT)
+				.put("<=", ExpressionOperation.LTE)
+				.put("<", ExpressionOperation.LT)
+				.put("<>", ExpressionOperation.NEQ)
+				.put("!=", ExpressionOperation.NEQ)
+				.put("+", ExpressionOperation.ADD)
+				.put("-", ExpressionOperation.SUBTRACT)
+				.put("*", ExpressionOperation.MULTIPLY)
+				.put("/", ExpressionOperation.DIVIDE)
+				.build();
+
 
     /**
      * This visitor class converts the SQL Expression to a Function
@@ -378,46 +396,24 @@ public class Mapping2DatalogConverter {
 
             Term t2 = visitEx(right);
 
+            Function compositeTerm;
+            
             //get boolean operation
             String op = expression.getStringExpression();
-            Function compositeTerm;
-            switch (op) {
-                case "=":
-                    compositeTerm = fac.getFunctionEQ(t1, t2);
-                    break;
-                case ">":
-                    compositeTerm = fac.getFunctionGT(t1, t2);
-                    break;
-                case "<":
-                    compositeTerm = fac.getFunctionLT(t1, t2);
-                    break;
-                case ">=":
-                    compositeTerm = fac.getFunctionGTE(t1, t2);
-                    break;
-                case "<=":
-                    compositeTerm = fac.getFunctionLTE(t1, t2);
-                    break;
-                case "<>":
-                case "!=":
-                    compositeTerm = fac.getFunctionNEQ(t1, t2);
-                    break;
+            Predicate p = operations.get(op);
+            if (p != null) {
+            	compositeTerm = fac.getFunction(p, t1, t2);
+            }
+            else {
+                switch (op) {
                 case "AND":
                     compositeTerm = fac.getFunctionAND(t1, t2);
                     break;
                 case "OR":
                     compositeTerm = fac.getFunctionOR(t1, t2);
                     break;
-                case "+":
-                    compositeTerm = fac.getFunctionAdd(t1, t2);
-                    break;
-                case "-":
-                    compositeTerm = fac.getFunctionSubstract(t1, t2);
-                    break;
-                case "*":
-                    compositeTerm = fac.getFunctionMultiply(t1, t2);
-                    break;
                 case "LIKE":
-                    compositeTerm = fac.getFunctionLike(t1, t2);
+                    compositeTerm = fac.getSQLFunctionLike(t1, t2);
                     break;
                 case "~":
                     compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral(""));
@@ -439,8 +435,8 @@ public class Mapping2DatalogConverter {
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown operator: " + op);
+                }
             }
-
             result = compositeTerm;
         }
 
@@ -817,7 +813,7 @@ public class Mapping2DatalogConverter {
         	Expression right = concat.getRightExpression();
         	Term l = visitEx(left);
         	Term r = visitEx(right);
-        	result = fac.getFunction(OBDAVocabulary.CONCAT, l, r);
+        	result = fac.getFunction(ExpressionOperation.CONCAT, l, r);
         }
 
         @Override

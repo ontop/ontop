@@ -48,4 +48,7 @@ public interface QuotedIDFactory {
 	 */
 	
 	RelationID createRelationID(String schema, String table);	
+	
+	
+	String getIDQuotationString();
 }
