@@ -135,10 +135,6 @@ cd ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/
 
 mkdir -p ${PROTEGE_MAIN_FOLDER_NAME}/plugins
 cp ${PROTEGE_PLUGIN_NAME}-${VERSION}.${REVISION}.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
-cp ${ONTOP_DEP_HOME}/org.protege.osgi.jdbc.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
-cp ${ONTOP_DEP_HOME}/org.protege.osgi.jdbc.prefs.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
-zip ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/${PROTEGE_MAIN_PLUGIN}-${VERSION}.${REVISION}.zip ${PROTEGE_MAIN_FOLDER_NAME}/plugins/*.*
-
 zip ${PROTEGE_COPY_FILENAME}.zip ${PROTEGE_MAIN_FOLDER_NAME}/plugins/*
 mv ${PROTEGE_COPY_FILENAME}.zip ontop-protege-bundle-${VERSION}.${REVISION}.zip
 

@@ -13,7 +13,7 @@ By downloading these packages you are agreeing with them.
 
 - `ontop-distribution.zip`: Libraries/scripts to use ontop with the OWLAPI or Sesame and from the command line.
 
-- `ontop-protege-plugin.zip`: plugin for Protege 5.x installation files (drop them in Protege’s plugins folder).
+- `it.unibz.inf.ontop.protege.jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
 
 - `ontop-sesame-webapps.zip`: WAR files required to create a Quest SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server (currently ONLY Jetty is supported).
 
