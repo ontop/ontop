@@ -19,24 +19,18 @@ public class Activator implements BundleActivator {
 
 	private BundleContext context;
 	private static Activator instance;
-	private ServiceListener listener = new ServiceListener() {
+	private ServiceListener listener = event -> {
+        if (event.getType() == ServiceEvent.REGISTERED) {
+            try {
+                installDrivers(event.getServiceReference());
+            }
+            catch (Exception e) {
+                log.warn("Exception caught installing jdbc drivers.", e);
+            }
+        }
+    };
 
-		public void serviceChanged(ServiceEvent event) {
-			if (event.getType() == ServiceEvent.REGISTERED) {
-				try {
-					installDrivers(event.getServiceReference());
-				}
-				catch (Exception e) {
-                    log.warn("Exception caught installing jdbc drivers.", e);
-				}
-			}
-		}
-	};
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		instance = this;
 		this.context = context;
@@ -50,10 +44,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
+    @Override
 	public void stop(BundleContext context) throws Exception {
 		this.context = null;
 	}

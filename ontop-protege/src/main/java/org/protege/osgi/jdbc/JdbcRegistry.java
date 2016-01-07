@@ -6,10 +6,8 @@ import java.util.Collection;
 
 public interface JdbcRegistry {
 	void addJdbcDriver(String className, URL location) throws RegistryException;
-	
-	void addJdbcDriver(Driver driver);
-	
-	void removeJdbcDriver(String className);
+
+    void removeJdbcDriver(String className);
 
     Collection<Driver> getJdbcDrivers();
 }

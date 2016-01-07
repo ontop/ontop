@@ -26,7 +26,7 @@ public class OSGiJdbcDriver implements Driver {
 	}
 
 	public boolean acceptsURL(String url) throws SQLException {
-		for (Driver delegate : registry.getJdbcDrivers()) {
+        for (Driver delegate : registry.getJdbcDrivers()) {
 			if (delegate.acceptsURL(url)) {
 				return true;
 			}
@@ -53,13 +53,9 @@ public class OSGiJdbcDriver implements Driver {
 		return null;
 	}
 
+    @Override
 	public boolean jdbcCompliant() {
-		for (Driver delegate : registry.getJdbcDrivers()) {
-			if (!delegate.jdbcCompliant()) {
-				return false;
-			}
-		}
-		return true;
+        return registry.getJdbcDrivers().stream().allMatch(Driver::jdbcCompliant);
 	}
 
     @Override

@@ -15,8 +15,8 @@ import org.protege.osgi.jdbc.JdbcRegistry;
 public class DriverTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -7588371899390500462L;
     
-    private List<DriverInfo> drivers = new ArrayList<DriverInfo>();
-    private Set<String> foundDrivers = new HashSet<String>();
+    private List<DriverInfo> drivers = new ArrayList<>();
+    private Set<String> foundDrivers = new HashSet<>();
     private ServiceTracker jdbcRegistryTracker;
     
 	public enum Column {
@@ -24,7 +24,7 @@ public class DriverTableModel extends AbstractTableModel {
 		
 		private String name;
 		
-		private Column(String name) {
+		Column(String name) {
 			this.name = name;
 		}
 		

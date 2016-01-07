@@ -10,15 +10,12 @@ import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.OSGiJdbcDriver;
 
 public class Activator implements BundleActivator {
-	private JdbcRegistry registry;
-	private OSGiJdbcDriver driver;
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext context) throws SQLException {
+    private OSGiJdbcDriver driver;
+
+	@Override
+    public void start(BundleContext context) throws SQLException {
 		try {
-			registry = new JdbcRegistryImpl();
+            JdbcRegistry registry = new JdbcRegistryImpl();
 			context.registerService(JdbcRegistry.class.getName(), registry, new Hashtable<String, String>());
 			driver = new OSGiJdbcDriver(context, registry);
 			DriverManager.registerDriver(driver);
@@ -28,10 +25,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
+    @Override
 	public void stop(BundleContext context) throws Exception {
 		DriverManager.deregisterDriver(driver);
 		driver = null;

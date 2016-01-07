@@ -114,41 +114,37 @@ public class EditorPanel extends JDialog {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
         JButton ok = new JButton("Ok");
-        ok.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String className = classField.getText();
-                File f  = new File(fileField.getText());
-                try {
-                    jdbcRegistryTracker.open();
-                    for (Object o : jdbcRegistryTracker.getServices()) {
-                        JdbcRegistry registry = (JdbcRegistry) o;
-                        try {
-                            registry.addJdbcDriver(className, f.toURI().toURL());
-                            info = new DriverInfo(nameField.getText(), className, f);
-                            dispose();
-                            return;
-                        }
-                        catch (RegistryException re) {
-                            log.info("Could not add driver to jdbc",re);
-                            status.setText(re.getMessage());
-                        } catch (MalformedURLException ex) {
-                            log.error("Unexpected URL misconfiguration", ex);
-                            status.setText(ex.getMessage());
-                        }
+        ok.addActionListener(e -> {
+            String className = classField.getText();
+            File f  = new File(fileField.getText());
+            try {
+                jdbcRegistryTracker.open();
+                for (Object o : jdbcRegistryTracker.getServices()) {
+                    JdbcRegistry registry = (JdbcRegistry) o;
+                    try {
+                        registry.addJdbcDriver(className, f.toURI().toURL());
+                        info = new DriverInfo(nameField.getText(), className, f);
+                        dispose();
+                        return;
+                    }
+                    catch (RegistryException re) {
+                        log.info("Could not add driver to jdbc",re);
+                        status.setText(re.getMessage());
+                    } catch (MalformedURLException ex) {
+                        log.error("Unexpected URL misconfiguration", ex);
+                        status.setText(ex.getMessage());
                     }
                 }
-                finally {
-                    jdbcRegistryTracker.close();
-                }
+            }
+            finally {
+                jdbcRegistryTracker.close();
             }
         });
         panel.add(ok);
         JButton cancel = new JButton("Cancel");
-        cancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                info = null;
-                dispose();
-            }
+        cancel.addActionListener(e -> {
+            info = null;
+            dispose();
         });
         panel.add(cancel);
         return panel;

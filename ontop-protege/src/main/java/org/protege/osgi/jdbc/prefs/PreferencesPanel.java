@@ -31,15 +31,9 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     
     private JTable table;
     private DriverTableModel driverTableModel;
-    private JButton add;
-    private JButton remove;
-    private JButton edit;
     private ServiceTracker jdbcRegistryTracker;
 
-
-    /* *******************************************************
-     * OWLPreferencesPanel methods
-     */
+    @Override
     public void initialise() throws Exception {
         BundleContext context = Activator.getInstance().getContext();
         jdbcRegistryTracker = new ServiceTracker(context, JdbcRegistry.class.getName(), null);
@@ -48,25 +42,19 @@ public class PreferencesPanel extends OWLPreferencesPanel {
         add(createButtons(), BorderLayout.SOUTH);
     }
 
-
-
     @Override
     public void applyChanges() {
         setDrivers(driverTableModel.getDrivers());
     }
-    
-    public void dispose() throws Exception {
 
-    }
-    
-    /* *******************************************************
-     * Preferences
-     */
-    
+    @Override
+    public void dispose()  { }
+
+
     public static List<DriverInfo> getDrivers() {
-    	List<DriverInfo> drivers  = new ArrayList<DriverInfo>();
+    	List<DriverInfo> drivers  = new ArrayList<>();
     	Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(PREFERENCES_SET, DRIVER_PREFERENCES_KEY);
-    	Iterator<String> driverStrings  = prefs.getStringList(DRIVER_PREFERENCES_KEY, new ArrayList<String>()).iterator();
+    	Iterator<String> driverStrings  = prefs.getStringList(DRIVER_PREFERENCES_KEY, new ArrayList<>()).iterator();
     	while (driverStrings.hasNext()) {
     		drivers.add(new DriverInfo(driverStrings.next(), driverStrings.next(), new File(driverStrings.next())));
     	}
@@ -75,7 +63,7 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     
     private void setDrivers(List<DriverInfo> drivers) {
     	Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(PREFERENCES_SET, DRIVER_PREFERENCES_KEY);
-    	List<String>  prefsStringList = new ArrayList<String>();
+    	List<String>  prefsStringList = new ArrayList<>();
     	for  (DriverInfo driver : drivers) {
     		prefsStringList.add(driver.getDescription());
     		prefsStringList.add(driver.getClassName());
@@ -85,9 +73,7 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     	prefs.putStringList(DRIVER_PREFERENCES_KEY, prefsStringList);
     }
     
-    /* *******************************************************
-     * impl
-     */
+
     private JComponent createList() {
     	driverTableModel = new DriverTableModel(getDrivers(), jdbcRegistryTracker);
         table = new JTable(driverTableModel);
@@ -97,56 +83,44 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     private JComponent createButtons() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout());
-        add = new JButton("Add");
-        add.addActionListener(new AddActionListener());
+        JButton add = new JButton("Add");
+        add.addActionListener(this::handleAdd);
         panel.add(add);
-        remove = new JButton("Remove");
+        JButton remove = new JButton("Remove");
         panel.add(remove);
-        remove.addActionListener(new RemoveActionListener());
-        edit = new JButton("Edit");
+        remove.addActionListener(this::handleRemove);
+        JButton edit = new JButton("Edit");
         panel.add(edit);
-        edit.addActionListener(new EditActionListener());
+        edit.addActionListener(this::handleEdit);
         return panel;
     }
 
-    private class AddActionListener implements ActionListener {
-
-        public void actionPerformed(ActionEvent e) {
-            final EditorPanel editor = new EditorPanel(jdbcRegistryTracker);
-            DriverInfo info = editor.askUserForDriverInfo();
-            if (info != null) {
-                driverTableModel.addDriver(info);
-            }
+    public void handleAdd(ActionEvent e) {
+        final EditorPanel editor = new EditorPanel(jdbcRegistryTracker);
+        DriverInfo info = editor.askUserForDriverInfo();
+        if (info != null) {
+            driverTableModel.addDriver(info);
         }
-        
     }
-    
-    private class RemoveActionListener implements ActionListener {
 
-        public void actionPerformed(ActionEvent e) {
-            int [] rows = table.getSelectedRows();
-            List<Integer> rowList = new ArrayList<Integer>();
-            for (int row  : rows) {
-                rowList.add(row);
-            }
-            driverTableModel.removeDrivers(rowList);
+    public void handleRemove(ActionEvent e) {
+        int[] rows = table.getSelectedRows();
+        List<Integer> rowList = new ArrayList<>();
+        for (int row : rows) {
+            rowList.add(row);
         }
-        
+        driverTableModel.removeDrivers(rowList);
     }
-    
-    private class EditActionListener implements ActionListener {
 
-        public void actionPerformed(ActionEvent e) {
-            int row = table.getSelectedRow();
-            DriverInfo existing = driverTableModel.getDrivers().get(row);
-            EditorPanel editor = new EditorPanel(jdbcRegistryTracker,
-                                                 existing.getDescription(),
-                                                 existing.getClassName(),
-                                                 existing.getDriverLocation());
-            DriverInfo info = editor.askUserForDriverInfo();
-            driverTableModel.replaceDriver(row, info);
-        }
-        
+    public void handleEdit(ActionEvent e) {
+        int row = table.getSelectedRow();
+        DriverInfo existing = driverTableModel.getDrivers().get(row);
+        EditorPanel editor = new EditorPanel(jdbcRegistryTracker,
+                existing.getDescription(),
+                existing.getClassName(),
+                existing.getDriverLocation());
+        DriverInfo info = editor.askUserForDriverInfo();
+        driverTableModel.replaceDriver(row, info);
     }
-    
+
 }

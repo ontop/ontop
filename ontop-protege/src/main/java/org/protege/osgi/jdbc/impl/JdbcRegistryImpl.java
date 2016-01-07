@@ -11,7 +11,8 @@ import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.RegistryException;
 
 public class JdbcRegistryImpl implements JdbcRegistry {
-	private List<Driver> drivers = new ArrayList<Driver>();
+
+	private List<Driver> drivers = new ArrayList<>();
 
 	public void addJdbcDriver(String className, URL location)
 			throws RegistryException {
@@ -21,29 +22,12 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 			Driver driver = (Driver) driverClass.newInstance();
 			drivers.add(driver);
 		}
-		catch (InstantiationException ie) {
+		catch (InstantiationException | ClassNotFoundException | IllegalAccessException ie) {
 			throw new RegistryException(ie);
-		} catch (ClassNotFoundException e) {
-			throw new RegistryException(e);
-		} catch (IllegalAccessException e) {
-			throw new RegistryException(e);
 		}
-	}
-	
-	public void addJdbcDriver(Driver d) {
-	    boolean alreadyPresent = false;
-	    String driverClassName = d.getClass().getCanonicalName();
-	    for (Driver other : drivers) {
-	        if (other.getClass().getCanonicalName().equals(driverClassName)) {
-	            alreadyPresent = true;
-	        }
-	    }
-	    if (!alreadyPresent) {
-	        drivers.add(d);
-	    }
-	}
+    }
 
-	public void removeJdbcDriver(String className) {
+    public void removeJdbcDriver(String className) {
 		Driver found = null;
 		for (Driver driver : drivers) {
 			if (driver.getClass().toString().equals(className)) {
