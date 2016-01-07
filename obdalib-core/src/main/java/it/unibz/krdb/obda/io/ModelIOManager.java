@@ -334,7 +334,7 @@ public class ModelIOManager {
                     /**
                      * This is harmless when you do not need to do query answering
                      */
-                    log.warn("JDBC driver \"{}\" is not available on the class path! Query answering service will be unavailable!", inputParamter );
+                    // log.warn("JDBC driver \"{}\" is not available on the class path! Query answering service will be unavailable!", inputParamter );
 
                 }
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);
