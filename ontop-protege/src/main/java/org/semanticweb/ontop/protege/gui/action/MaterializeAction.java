@@ -22,18 +22,16 @@ package org.semanticweb.ontop.protege.gui.action;
 
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-
-import java.awt.Container;
-import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
 
 public class MaterializeAction implements OBDAProgressListener {
 

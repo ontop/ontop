@@ -22,12 +22,12 @@ package org.semanticweb.ontop.protege.gui.action;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import it.unibz.krdb.obda.r2rml.R2RMLWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

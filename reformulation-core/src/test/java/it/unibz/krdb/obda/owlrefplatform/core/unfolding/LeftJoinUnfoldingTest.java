@@ -25,10 +25,9 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import junit.framework.TestCase;
 
 import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 public class LeftJoinUnfoldingTest extends TestCase {
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();

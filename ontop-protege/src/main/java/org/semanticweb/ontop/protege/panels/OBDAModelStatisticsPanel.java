@@ -22,11 +22,9 @@ package org.semanticweb.ontop.protege.panels;
 
 import it.unibz.krdb.obda.utils.VirtualABoxStatistics;
 
-import java.util.HashMap;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.HashMap;
 
 public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
 

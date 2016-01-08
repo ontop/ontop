@@ -20,11 +20,9 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JTable;
-import javax.swing.KeyStroke;
 
 public class EditableCellFocusAction extends WrappedAction implements ActionListener {
 	

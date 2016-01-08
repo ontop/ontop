@@ -20,9 +20,9 @@ package org.semanticweb.ontop.protege.views;
  * #L%
  */
 
-import java.util.ArrayList;
-
 import org.protege.editor.core.Disposable;
+
+import java.util.ArrayList;
 
 /**
  * This is a holder for all QueryView objects instantiated in protege. We keep

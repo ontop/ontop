@@ -24,31 +24,22 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.bootstrapping.DirectMappingBootstrapper;
-import org.semanticweb.ontop.protege.core.OBDAModelManager;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
-import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
+import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BootstrapAction extends ProtegeAction {
 

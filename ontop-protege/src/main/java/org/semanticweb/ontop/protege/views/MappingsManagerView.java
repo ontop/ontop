@@ -24,29 +24,20 @@ import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.TargetQueryValidator;
-import org.semanticweb.ontop.protege.core.OBDAModelManager;
-import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
-import org.semanticweb.ontop.protege.panels.DatasourceSelector;
-import org.semanticweb.ontop.protege.panels.MappingManagerPanel;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.List;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
+import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
+import org.semanticweb.ontop.protege.panels.DatasourceSelector;
+import org.semanticweb.ontop.protege.panels.MappingManagerPanel;
 import org.semanticweb.owlapi.model.OWLEntity;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.util.List;
 
 public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, Findable<OWLEntity> {
 

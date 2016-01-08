@@ -23,10 +23,9 @@ package org.semanticweb.ontop.protege.panels;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 
-import java.util.List;
-
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.List;
 
 public class EmptiesCheckPanel extends javax.swing.JPanel {
 

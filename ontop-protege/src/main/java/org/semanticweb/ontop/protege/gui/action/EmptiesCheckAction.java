@@ -22,23 +22,17 @@ package org.semanticweb.ontop.protege.gui.action;
 
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
-import org.semanticweb.ontop.protege.panels.EmptiesCheckPanel;
-import org.semanticweb.ontop.protege.utils.DialogUtils;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.ontop.protege.panels.EmptiesCheckPanel;
+import org.semanticweb.ontop.protege.utils.DialogUtils;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class EmptiesCheckAction extends ProtegeAction {
 

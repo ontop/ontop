@@ -20,28 +20,21 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.krdb.obda.querymanager.*;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.QueryControllerTreeModel;
 import org.semanticweb.ontop.protege.gui.treemodels.QueryGroupTreeElement;
 import org.semanticweb.ontop.protege.gui.treemodels.QueryTreeElement;
 import org.semanticweb.ontop.protege.gui.treemodels.TreeElement;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerListener;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
-import java.awt.Dialog.ModalityType;
-import java.util.Vector;
-
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.awt.Dialog.ModalityType;
+import java.util.Vector;
 
 /**
  * This class represents the display of stored queries using a tree structure.

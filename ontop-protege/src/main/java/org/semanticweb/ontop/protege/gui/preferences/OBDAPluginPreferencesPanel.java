@@ -20,15 +20,13 @@ package org.semanticweb.ontop.protege.gui.preferences;
  * #L%
  */
 
-import org.semanticweb.ontop.protege.panels.OBDAPreferencesPanel;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-
-import java.awt.GridBagConstraints;
-
-import javax.swing.JLabel;
-
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+import org.semanticweb.ontop.protege.panels.OBDAPreferencesPanel;
+
+import javax.swing.*;
+import java.awt.*;
 
 /***
  * This class is deprecated

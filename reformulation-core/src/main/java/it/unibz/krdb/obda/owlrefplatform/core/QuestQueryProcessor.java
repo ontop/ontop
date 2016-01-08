@@ -85,7 +85,7 @@ public class QuestQueryProcessor {
 	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
 		
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates() );
 		DatalogProgram program = translator.translate(pq);
 
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
@@ -118,7 +118,7 @@ public class QuestQueryProcessor {
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
 			DatalogProgram translation = translator.translate(pq);
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);

@@ -26,11 +26,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.utils.CustomTraversalPolicy;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import javax.swing.*;
 import java.awt.*;

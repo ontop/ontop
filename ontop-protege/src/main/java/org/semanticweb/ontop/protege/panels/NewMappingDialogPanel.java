@@ -23,29 +23,25 @@ package org.semanticweb.ontop.protege.panels;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
-import org.semanticweb.ontop.protege.gui.IconLoader;
-import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
-import org.semanticweb.ontop.protege.utils.CustomTraversalPolicy;
-import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
-import org.semanticweb.ontop.protege.utils.DialogUtils;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
-import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-import org.semanticweb.ontop.protege.utils.QueryPainter;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import org.semanticweb.ontop.protege.gui.IconLoader;
+import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import org.semanticweb.ontop.protege.utils.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.Component;
-import java.awt.Font;
+import javax.swing.*;
+import javax.swing.table.TableModel;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -57,16 +53,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.table.TableModel;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NewMappingDialogPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 

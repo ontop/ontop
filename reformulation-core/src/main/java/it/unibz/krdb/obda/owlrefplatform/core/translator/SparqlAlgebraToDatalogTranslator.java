@@ -899,23 +899,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 
-	/**
-	 * Used only in QuestStatement
-	 *
-	 * TODO: to be removed
-	 *
-	 * @param query
-	 * @return
-	 */
-
-	public List<String> getSignature(ParsedQuery query) {
-		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
-			TupleExpr te = query.getTupleExpr();
-			List<String> signatureContainer = new ArrayList<>(te.getBindingNames());
-			return signatureContainer;
-		}
-		return Collections.emptyList();
-	}
 
     private Function addSameAs(Function leftAtom, DatalogProgram pr, String newHeadName){
 
@@ -1003,7 +986,7 @@ public class SparqlAlgebraToDatalogTranslator {
         Function rightAtomJoin2 = ofac.getFunction(sameAs, sTerm2, oTerm2);
 
         //create join rule
-        List<Term> varListJoin2 = getUnionOfVariables(unboundleftAtom, rightAtomJoin2);
+        List<Term> varListJoin2 = getUnion(getVariables(unboundleftAtom), getVariables(rightAtomJoin2));
         CQIE joinRule2 = createRule(pr, newHeadName + "0" , varListJoin2, unboundleftAtom, rightAtomJoin2);
 
         Function joinRight = joinRule2.getHead();
@@ -1019,7 +1002,7 @@ public class SparqlAlgebraToDatalogTranslator {
         Function leftAtomJoin = ofac.getFunction(sameAs, sTerm, oTerm);
 
         //create join rule
-        List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, joinRight);
+        List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(joinRight));
         CQIE joinRule = createRule(pr, newHeadName , varListJoin, leftAtomJoin, joinRight);
 
         return joinRule.getHead();
@@ -1071,7 +1054,7 @@ public class SparqlAlgebraToDatalogTranslator {
         rightAtomJoin.setTerm(0, ofac.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
 
         //create join rule
-        List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, rightAtomJoin);
+        List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(rightAtomJoin));
         CQIE joinRule = createRule(pr, newHeadName  , varListJoin, leftAtomJoin, rightAtomJoin);
 
         bnode++;
@@ -1097,7 +1080,7 @@ public class SparqlAlgebraToDatalogTranslator {
         Function rightAtomJoin2 = ofac.getFunction(predicate, sTerm2, oTerm2);
 
         //create join rule
-        List<Term> varListJoin2 = getUnionOfVariables(leftAtomJoin2, rightAtomJoin2);
+        List<Term> varListJoin2 = getUnion(getVariables(leftAtomJoin2), getVariables(rightAtomJoin2));
         CQIE joinRule2 = createRule(pr, newHeadName , varListJoin2, leftAtomJoin2, rightAtomJoin2);
 
         bnode++;

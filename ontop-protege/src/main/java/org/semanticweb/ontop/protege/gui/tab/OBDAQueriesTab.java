@@ -20,13 +20,12 @@ package org.semanticweb.ontop.protege.gui.tab;
  * #L%
  */
 
+import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import org.semanticweb.ontop.protege.views.QueryInterfaceView;
 import org.semanticweb.ontop.protege.views.QueryManagerView;
 
 import java.util.HashSet;
 import java.util.Iterator;
-
-import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 
 public class OBDAQueriesTab extends OWLWorkspaceViewsTab {
 

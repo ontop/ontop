@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
+import com.google.common.collect.Multimap;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
@@ -10,8 +11,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import com.google.common.collect.Multimap;
 
 public class UniqueConstraintOptimizer {
 

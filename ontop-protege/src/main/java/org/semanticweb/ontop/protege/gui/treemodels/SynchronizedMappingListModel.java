@@ -24,11 +24,10 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 
+import javax.swing.*;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.swing.AbstractListModel;
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 

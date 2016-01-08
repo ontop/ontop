@@ -23,25 +23,12 @@ package org.semanticweb.ontop.protege.utils;
  */
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.protege.gui.treemodels.MappingFunctorTreeModelFilter;
-import org.semanticweb.ontop.protege.gui.treemodels.MappingHeadVariableTreeModelFilter;
-import org.semanticweb.ontop.protege.gui.treemodels.MappingIDTreeModelFilter;
-import org.semanticweb.ontop.protege.gui.treemodels.MappingPredicateTreeModelFilter;
-import org.semanticweb.ontop.protege.gui.treemodels.MappingSQLStringTreeModelFilter;
-import org.semanticweb.ontop.protege.gui.treemodels.MappingStringTreeModelFilter;
-import org.semanticweb.ontop.protege.gui.treemodels.TreeModelFilter;
+import org.antlr.runtime.*;
+import org.semanticweb.ontop.protege.gui.treemodels.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class MappingFilterParser extends Parser {
