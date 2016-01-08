@@ -62,6 +62,18 @@ public interface TargetQueryVocabularyValidator {
 	 */
 	public boolean isDataProperty(Predicate predicate);
 
+
+	/**
+	 * Checks whether the predicate is an annotation property assertion.
+	 *
+	 * @param predicate
+	 *            The target predicate.
+	 * @return Returns true if the predicate is an annotation property assertion from
+	 *         the input ontology, or false otherwise.
+	 */
+	public boolean isAnnotProperty(Predicate predicate);
+
+
 	/**
 	 * Checks whether the predicate is a "triple", which is used for meta mapping
 	 * 

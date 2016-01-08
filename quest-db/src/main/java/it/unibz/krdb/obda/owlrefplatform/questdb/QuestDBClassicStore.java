@@ -30,23 +30,13 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.*;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
+import it.unibz.krdb.obda.owlrefplatform.core.Quest;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.Dataset;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.BasicParserSettings;
-import org.openrdf.rio.helpers.RDFHandlerBase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.AutoIRIMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +46,28 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+
+import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.query.Dataset;
+import org.openrdf.rio.ParserConfig;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.BasicParserSettings;
+import org.openrdf.rio.helpers.RDFHandlerBase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /***
  * An instance of Store that encapsulates all the functionality needed for a
@@ -144,10 +156,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
 			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getVocabulary());
-			EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
-			
-			int count = st.insertData(aBoxNormalIter, 5000, 500);
+			int count = st.insertData(aBoxIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}
 		if (bObtainFromMappings) {
@@ -167,7 +176,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (!conn.getAutoCommit())
 			conn.commit();
 		
-		questInstance.updateSemanticIndexMappings();
+		//questInstance.updateSemanticIndexMappings();
 
 		log.debug("Store {} has been created successfully", name);
 	}

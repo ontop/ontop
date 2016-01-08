@@ -63,6 +63,6 @@ public class VersionInfo {
 	
 	@Override
 	public String toString() {
-		return "Using -ontopCore- API v" + version;
+		return version;
 	}
 }

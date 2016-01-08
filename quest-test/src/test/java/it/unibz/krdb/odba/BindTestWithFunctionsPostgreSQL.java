@@ -323,10 +323,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL Tutorial\"");
-        expectedValues.add("\"e Semantic Web\"");
-        expectedValues.add("\"ime and Punishment\"");
-        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"");
+        expectedValues.add("\"ARQL Tutorial\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Semantic Web\"@en");
+        expectedValues.add("\"ime and Punishment\"@en");
+        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -350,10 +350,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL T\"");
-        expectedValues.add("\"e Sema\"");
-        expectedValues.add("\"ime an\"");
-        expectedValues.add("\"e Logi\"");
+        expectedValues.add("\"ARQL T\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Sema\"@en");
+        expectedValues.add("\"ime an\"@en");
+        expectedValues.add("\"e Logi\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
@@ -458,8 +458,8 @@ public class BindTestWithFunctionsPostgreSQL {
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\""); 
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"");        
+        expectedValues.add("\"The Semantic Web\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");        
 
         checkReturnedValues(p, queryBind, expectedValues);
     }
@@ -571,10 +571,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
          List<String> expectedValues = new ArrayList<>();
-         expectedValues.add("\"\"");
-         expectedValues.add("\"The Seman\"");
-         expectedValues.add("\"\"");
-         expectedValues.add("\"The Logic Book: Introduc\"");
+         expectedValues.add("\"\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+         expectedValues.add("\"The Seman\"@en"); 
+         expectedValues.add("\"\"@en");
+         expectedValues.add("\"The Logic Book: Introduc\"@en");
          checkReturnedValues(p, queryBind, expectedValues);
 
     }
@@ -600,10 +600,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-         expectedValues.add("\"\"");
-         expectedValues.add("\" Semantic Web\"");
-         expectedValues.add("\"\"");
-         expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
+         expectedValues.add("\"\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+         expectedValues.add("\" Semantic Web\"@en");
+         expectedValues.add("\"\"@en");
+         expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
 
     } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,

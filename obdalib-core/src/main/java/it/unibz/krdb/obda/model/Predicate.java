@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ import java.util.Map;
  * (3) logical operators (e.g. join, left join)
  *
  */
-public interface Predicate extends Cloneable, Serializable {
+public interface Predicate {
 
 	public static enum COL_TYPE {
 		
@@ -110,32 +109,16 @@ public interface Predicate extends Cloneable, Serializable {
 	 */
 	public COL_TYPE getType(int column);
 
-	/**
-	 * Duplicate the object by performing a deep cloning.
-	 * 
-	 * @return the copy of the object.
-	 */
-	public Predicate clone();
 
 	boolean isClass();
 
 	boolean isObjectProperty();
 
+	boolean isAnnotationProperty();
+
 	boolean isDataProperty();
 	
-	boolean isDataPredicate();
 	
-	boolean isBooleanPredicate();
 	
-	boolean isAlgebraPredicate();
-	
-	boolean isArithmeticPredicate();
-	
-	boolean isDataTypePredicate();
-
-    boolean isStringOperationPredicate();
-
 	boolean isTriplePredicate();
-
-	boolean isDateTimePredicate();
 }

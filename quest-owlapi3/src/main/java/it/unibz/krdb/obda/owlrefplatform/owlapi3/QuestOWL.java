@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.*;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.utils.VersionInfo;
@@ -37,6 +36,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.impl.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
 import org.semanticweb.owlapi.util.Version;
@@ -315,10 +315,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure, questInstance.getVocabulary());
-					EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
-					
-					int count = st.insertData(aBoxNormalIter, 5000, 500);
+					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {
@@ -339,7 +336,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (!conn.getAutoCommit())
 				conn.commit();
 				
-				questInstance.updateSemanticIndexMappings();
+				//questInstance.updateSemanticIndexMappings();
 			} else {
 				// VIRTUAL MODE - NO-OP
 			}
@@ -1866,7 +1863,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		public Collection<OWLDataProperty> getParents(OWLDataProperty child) {
 			Set<OWLDataProperty> properties = new HashSet<OWLDataProperty>();
-			for (OWLDataPropertyExpression prop : child.getSuperProperties(getRootOntology().getImportsClosure())) {
+            for (OWLDataPropertyExpression prop : EntitySearcher.getSuperProperties(child,getRootOntology().getImportsClosure())) {
 				properties.add(prop.asOWLDataProperty());
 			}
 			return properties;
@@ -1874,7 +1871,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		public Collection<OWLDataProperty> getChildren(OWLDataProperty parent) {
 			Set<OWLDataProperty> properties = new HashSet<OWLDataProperty>();
-			for (OWLDataPropertyExpression prop : parent.getSubProperties(getRootOntology().getImportsClosure())) {
+			for (OWLDataPropertyExpression prop : EntitySearcher.getSubProperties(parent, getRootOntology().getImportsClosure())) {
 				properties.add(prop.asOWLDataProperty());
 			}
 			return properties;

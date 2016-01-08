@@ -1,0 +1,3 @@
+[submodule "ontop-build-dependencies"]
+	path = ontop-build-dependencies
+	url = https://github.com/ontop/ontop-build-dependencies.git

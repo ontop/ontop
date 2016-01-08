@@ -46,11 +46,13 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	final Map<String, OClass> concepts = new HashMap<>();
 	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
 	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
+	final Map<String, AnnotationProperty> annotationProperties = new HashMap<>();
 
 	
 	private static final String CLASS_NOT_FOUND = "Class not found: ";	
 	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
 	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
+	private static final String ANNOTATION_PROPERTY_NOT_FOUND = "AnnotationProperty not found" ;
 	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
 	
 	public OntologyVocabularyImpl() {		
@@ -97,6 +99,15 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
+	public AnnotationProperty getAnnotationProperty(String uri) {
+		AnnotationProperty ap = annotationProperties.get(uri);
+		if (ap != null)
+			return ap;
+		else
+			throw new RuntimeException(ANNOTATION_PROPERTY_NOT_FOUND + uri);
+	}
+
+	@Override
 	public Datatype getDatatype(String uri) {
 		Datatype dt = OntologyImpl.OWL2QLDatatypes.get(uri);
 		if (dt == null)
@@ -120,9 +131,12 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return dataProperties.values();
 	}
 
-	
-	
-	
+	@Override
+	public Collection<AnnotationProperty> getAnnotationProperties() {
+		return annotationProperties.values();
+	}
+
+
 	@Override
 	public boolean isEmpty() {
 		return concepts.isEmpty() && objectProperties.isEmpty() && dataProperties.isEmpty();
@@ -148,6 +162,13 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
+	public AnnotationProperty createAnnotationProperty(String uri) {
+		AnnotationProperty ap = new AnnotationPropertyImpl(uri);
+			annotationProperties.put(uri, ap);
+		return ap;
+	}
+
+	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		ObjectPropertyExpression rd = new ObjectPropertyExpressionImpl(uri);
 		if (!rd.isBottom() && !rd.isTop()) 
@@ -163,6 +184,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			concepts.putAll(vi.concepts);
 			objectProperties.putAll(vi.objectProperties);
 			dataProperties.putAll(vi.dataProperties);
+			annotationProperties.putAll(vi.annotationProperties);
 		}
 		else {
 			for (OClass oc : v.getClasses())
@@ -174,6 +196,8 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			for (DataPropertyExpression dpe : v.getDataProperties())
 				if (!dpe.isTop() && !dpe.isBottom())
 					dataProperties.put(dpe.getName(), dpe);
+			for (AnnotationProperty ap : v.getAnnotationProperties())
+					annotationProperties.put(ap.getName(), ap);
 		}
 	}
 	
@@ -193,6 +217,11 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
+	public void removeAnnotationProperty(String property) {
+		annotationProperties.remove(property);
+	}
+
+	@Override
 	public boolean containsClass(String uri) {
 		return concepts.containsKey(uri);
 	}
@@ -205,5 +234,10 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public boolean containsDataProperty(String uri) {
 		return dataProperties.containsKey(uri);
+	}
+
+	@Override
+	public boolean containsAnnotationProperty(String uri) {
+		return annotationProperties.containsKey(uri);
 	}
 }

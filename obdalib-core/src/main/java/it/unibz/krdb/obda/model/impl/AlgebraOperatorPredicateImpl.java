@@ -32,8 +32,6 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements Algeb
 	 * 
 	 * @param name
 	 *            The predicate name.
-	 * @param type
-	 *            The datatype that the term holds.
 	 */
 	protected AlgebraOperatorPredicateImpl(String name) {
 		// TODO (ROMAN): why does it have arity two but one STRING argument?

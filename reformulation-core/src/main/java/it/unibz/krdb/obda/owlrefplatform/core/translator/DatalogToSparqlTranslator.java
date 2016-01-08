@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
@@ -70,6 +71,36 @@ public class DatalogToSparqlTranslator {
 		this.prefixManager = prefixManager;
 	}
 
+	
+	private static final String PREFIX = "PREFIX";
+	private static final String SELECT = "SELECT";
+	private static final String DISTINCT = "DISTINCT";
+	private static final String FROM = "FROM";
+	private static final String WHERE = "WHERE";
+	private static final String FILTER = "FILTER";
+	private static final String UNION = "UNION";
+	private static final String OPTIONAL = "OPTIONAL";
+	private static final String LIMIT = "LIMIT";
+	private static final String OFFSET = "OFFSET";
+	private static final String ORDER_BY = "ORDER BY";
+	private static final String ASCENDING = "ASC";
+	private static final String DESCENDING = "DESC";
+	
+	// Operator
+	private static final String AND = "&&";
+	private static final String OR = "||";
+	private static final String EQUALS = "=";
+	private static final String NOT_EQUALS = "!=";
+	private static final String GREATER_THAN = ">";
+	private static final String GREATER_THAN_AND_EQUALS = ">=";
+	private static final String LESS_THAN = "<";
+	private static final String LESS_THAN_AND_EQUALS = "<=";
+	private static final String ADD = "+";
+	private static final String SUBTRACT = "-";
+	private static final String MULTIPLY = "*";
+
+	
+	
 	/**
 	 * Produces SPARQL string given a valid datalog program.
 	 */
@@ -135,12 +166,9 @@ public class DatalogToSparqlTranslator {
 			final Term object = (isClass(function) ? getPredicate(function) : getObject(function));
 
 			// Check the function symbols
-			if (functionSymbol.isArithmeticPredicate()) {
-				final String expressionGraph = printTripleGraph(toSparql(subject), getArithmeticSymbol(functionSymbol), toSparql(object));
-				sb.append(enclosedBrackets(expressionGraph));
-			} else if (functionSymbol.isBooleanPredicate()) {
+			if (function.isOperation()) {
 				final String expressionGraph = printTripleGraph(toSparql(subject), getBooleanSymbol(functionSymbol), toSparql(object));
-				if (functionSymbol.equals(OBDAVocabulary.AND) || functionSymbol.equals(OBDAVocabulary.OR)) {
+				if (functionSymbol == ExpressionOperation.AND || functionSymbol == ExpressionOperation.OR) {
 					sb.append(enclosedBrackets(expressionGraph));
 				} else {
 					sb.append(expressionGraph);
@@ -166,39 +194,31 @@ public class DatalogToSparqlTranslator {
 	}
 
 	/**
-	 * Returns the arithmetic symbols for binary operations given its function symbol.
-	 */
-	private String getArithmeticSymbol(Predicate functionSymbol) {
-		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
-			return SparqlKeyword.ADD;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
-			return SparqlKeyword.SUBTRACT;
-		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
-			return SparqlKeyword.MULTIPLY;
-		}
-		throw new UnknownArithmeticSymbolException(functionSymbol.getName());
-	}
-
-	/**
 	 * Returns the boolean symbols for binary operations given its function symbol.
 	 */
 	private String getBooleanSymbol(Predicate functionSymbol) {
-		if (functionSymbol.equals(OBDAVocabulary.AND)) {
-			return SparqlKeyword.AND;
-		} else if (functionSymbol.equals(OBDAVocabulary.OR)) {
-			return SparqlKeyword.OR;
-		} else if (functionSymbol.equals(OBDAVocabulary.EQ)) {
-			return SparqlKeyword.EQUALS;
-		} else if (functionSymbol.equals(OBDAVocabulary.NEQ)) {
-			return SparqlKeyword.NOT_EQUALS;
-		} else if (functionSymbol.equals(OBDAVocabulary.GT)) {
-			return SparqlKeyword.GREATER_THAN;
-		} else if (functionSymbol.equals(OBDAVocabulary.GTE)) {
-			return SparqlKeyword.GREATER_THAN_AND_EQUALS;
-		} else if (functionSymbol.equals(OBDAVocabulary.LT)) {
-			return SparqlKeyword.LESS_THAN;
-		} else if (functionSymbol.equals(OBDAVocabulary.LTE)) {
-			return SparqlKeyword.LESS_THAN_AND_EQUALS;
+		if (functionSymbol == ExpressionOperation.AND) {
+			return AND;
+		} else if (functionSymbol == ExpressionOperation.OR) {
+			return OR;
+		} else if (functionSymbol == ExpressionOperation.EQ) {
+			return EQUALS;
+		} else if (functionSymbol == ExpressionOperation.NEQ) {
+			return NOT_EQUALS;
+		} else if (functionSymbol == ExpressionOperation.GT) {
+			return GREATER_THAN;
+		} else if (functionSymbol == ExpressionOperation.GTE) {
+			return GREATER_THAN_AND_EQUALS;
+		} else if (functionSymbol == ExpressionOperation.LT) {
+			return LESS_THAN;
+		} else if (functionSymbol == ExpressionOperation.LTE) {
+			return LESS_THAN_AND_EQUALS;
+		} else if (functionSymbol == ExpressionOperation.ADD) {
+			return ADD;
+		} else if (functionSymbol == ExpressionOperation.SUBTRACT) {
+			return SUBTRACT;
+		} else if (functionSymbol == ExpressionOperation.MULTIPLY) {
+			return MULTIPLY;
 		}
 		throw new UnknownBooleanSymbolException(functionSymbol.getName());
 	}
@@ -252,7 +272,7 @@ public class DatalogToSparqlTranslator {
 	private void printPrefixDeclaration(StringBuilder sb) {
 		for (String prefix : prefixManager.getPrefixMap().keySet()) {
 			String iri = prefixManager.getURIDefinition(prefix);
-			sb.append(SparqlKeyword.PREFIX + " " + prefix);
+			sb.append(PREFIX + " " + prefix);
 			sb.append("\t");
 			sb.append("<" + iri + ">");
 			sb.append("\n");
@@ -260,9 +280,9 @@ public class DatalogToSparqlTranslator {
 	}
 
 	private void printQueryProjection(DatalogProgram datalog, StringBuilder sb) {
-		sb.append(SparqlKeyword.SELECT + " ");
+		sb.append(SELECT + " ");
 		if (queryModifiers.isDistinct()) {
-			sb.append(SparqlKeyword.DISTINCT + " ");
+			sb.append(DISTINCT + " ");
 		}
 		CQIE mainQuery = datalog.getRules().get(0);  // assume the first rule contains the projection
 		for (Term term : mainQuery.getHead().getTerms()) {
@@ -273,7 +293,7 @@ public class DatalogToSparqlTranslator {
 	}
 
 	private void printQueryBody(DatalogProgram datalog, StringBuilder sb) {
-		sb.append(SparqlKeyword.WHERE + " {");
+		sb.append(WHERE + " {");
 		sb.append("\n");
 		List<CQIE> mainQueries = getMainQueries(datalog);
 		
@@ -288,10 +308,9 @@ public class DatalogToSparqlTranslator {
 	private void printGraphPattern(CQIE query, DatalogProgram datalog, StringBuilder sb, int indentLevel) {
 		List<Function> queryBody = query.getBody();
 		for (Function graph : queryBody) {
-			Predicate graphPredicate = graph.getFunctionSymbol();
-			if (graphPredicate.isAlgebraPredicate()) {
+			if (graph.isAlgebraFunction()) {
 				printJoinExpression(graph, datalog, sb, indentLevel);
-			} else if (graphPredicate.isBooleanPredicate()) {
+			} else if (graph.isOperation()) {
 				printBooleanFilter(graph, sb, indentLevel);
 			} else {
 				printGraph(graph, datalog, sb, indentLevel);
@@ -308,7 +327,7 @@ public class DatalogToSparqlTranslator {
 		else if (joinPredicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
-			sb.append(SparqlKeyword.OPTIONAL + " {\n");
+			sb.append(OPTIONAL + " {\n");
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel+1);
 			sb.append(indent(indentLevel));
 			sb.append("}");
@@ -339,7 +358,7 @@ public class DatalogToSparqlTranslator {
 
 	private void printBooleanFilter(Function graph, StringBuilder sb, int indentLevel) {
 		sb.append(indent(indentLevel));
-		sb.append(SparqlKeyword.FILTER + " ");
+		sb.append(FILTER + " ");
 		sb.append("( ");
 		sb.append(toSparql(graph));
 		sb.append(" ) .");
@@ -350,7 +369,7 @@ public class DatalogToSparqlTranslator {
 		boolean needUnion = false;
 		for (CQIE query : queries) {
 			if (needUnion) {
-				sb.append(indent(indentLevel) + SparqlKeyword.UNION);
+				sb.append(indent(indentLevel) + UNION);
 				sb.append("\n");
 			}
 			sb.append(indent(1) + "{");
@@ -368,20 +387,20 @@ public class DatalogToSparqlTranslator {
 	private void printQueryModifier(DatalogProgram datalog, StringBuilder sb) {
 		sb.append("\n");
 		if (queryModifiers.hasLimit()) {
-			sb.append(SparqlKeyword.LIMIT + " " + queryModifiers.getLimit());
+			sb.append(LIMIT + " " + queryModifiers.getLimit());
 			sb.append("\n");
 		}
 		if (queryModifiers.hasOffset()) {
-			sb.append(SparqlKeyword.OFFSET + " " + queryModifiers.getOffset());
+			sb.append(OFFSET + " " + queryModifiers.getOffset());
 			sb.append("\n");
 		}
 		if (queryModifiers.hasOrder()) {
-			sb.append(SparqlKeyword.ORDER_BY + " ");
+			sb.append(ORDER_BY + " ");
 			for (OrderCondition condition : queryModifiers.getSortConditions()) {
 				String var = toSparql(condition.getVariable());
 				switch (condition.getDirection()) {
-					case OrderCondition.ORDER_ASCENDING: sb.append(SparqlKeyword.ASCENDING + " (" + var + ")"); break;
-					case OrderCondition.ORDER_DESCENDING: sb.append(SparqlKeyword.DESCENDING + " (" + var + ")"); break;
+					case OrderCondition.ORDER_ASCENDING: sb.append(ASCENDING + " (" + var + ")"); break;
+					case OrderCondition.ORDER_DESCENDING: sb.append(DESCENDING + " (" + var + ")"); break;
 					default: sb.append(var);
 				}
 				sb.append(" ");

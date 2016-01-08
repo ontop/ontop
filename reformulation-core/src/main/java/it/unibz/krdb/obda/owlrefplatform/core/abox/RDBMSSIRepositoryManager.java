@@ -20,22 +20,57 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.BNode;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Store ABox assertions in the DB
@@ -332,6 +367,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
+		
+		//EquivalentTriplePredicateIterator data = new EquivalentTriplePredicateIterator(sData, reasonerDag);
+		
 		log.debug("Inserting data into DB");
 
 		// The precondition for the limit number must be greater or equal to one.
@@ -468,9 +506,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		if (ope0.isInverse()) 
 			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
 		
-		// TODO: could use EquivalentTriplePredicateIterator instead
-		
-		ObjectPropertyExpression ope = reasonerDag.getObjectPropertyDAG().getVertex(ope0).getRepresentative();
+		ObjectPropertyExpression ope = reasonerDag.getObjectPropertyDAG().getCanonicalForm(ope0);
 				
 		ObjectConstant o1, o2;
 		if (ope.isInverse()) {
@@ -515,7 +551,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		// replace the property by its canonical representative 
 		DataPropertyExpression dpe0 = ax.getProperty();
-		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getVertex(dpe0).getRepresentative();		
+		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getCanonicalForm(dpe0);		
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
 		ObjectConstant subject = ax.getSubject();
@@ -598,7 +634,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept0 = ax.getConcept();
-		OClass concept = (OClass)reasonerDag.getClassDAG().getVertex(concept0).getRepresentative();	
+		OClass concept = (OClass)reasonerDag.getClassDAG().getCanonicalForm(concept0);	
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
 		ObjectConstant c1 = ax.getIndividual();

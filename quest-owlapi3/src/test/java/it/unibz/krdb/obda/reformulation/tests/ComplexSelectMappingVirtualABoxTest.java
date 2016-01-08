@@ -31,6 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -185,7 +186,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 			conn.close();
 			reasoner.dispose();
 		}
-        return val.toString();
+        return ToStringRenderer.getInstance().getRendering(val);
 	}
 
     @Test

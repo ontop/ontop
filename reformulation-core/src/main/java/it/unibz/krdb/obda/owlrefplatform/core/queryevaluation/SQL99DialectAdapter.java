@@ -21,41 +21,35 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  */
 
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
+import it.unibz.krdb.obda.parser.EncodeForURI;
 
 import java.sql.Types;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");  
     
-  
+    protected static final String ENCODE_FOR_URI_START, ENCODE_FOR_URI_END;
+    
+    static {
+    	StringBuilder sb1 = new StringBuilder();
+    	StringBuilder sb2 = new StringBuilder();
+    	for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+    		sb1.append("REPLACE(");
+    		sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
+    	}
+    	ENCODE_FOR_URI_START = sb1.toString();
+    	ENCODE_FOR_URI_END = sb2.toString();
+    }
+    
     
     @Override 
     public String strEncodeForUri(String str){
-      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
-            "'!', '%21')," +
-            "'@', '%40')," +
-            "'#', '%23')," +
-            "'$', '%24')," +
-            "'&', '%26')," +
-            "'*', '%42'), " +
-            "'(', '%28'), " +
-            "')', '%29'), " +
-            "'[', '%5B'), " +
-            "']', '%5D'), " +
-            "',', '%2C'), " +
-            "';', '%3B'), " +
-            "':', '%3A'), " +
-            "'?', '%3F'), " +
-            "'=', '%3D'), " +
-            "'+', '%2B'), " +
-            "'''', '%22'), " +
-            "'/', '%2F')"; 
-
+      return ENCODE_FOR_URI_START + str + ENCODE_FOR_URI_END; 
     }
     
     

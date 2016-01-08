@@ -48,6 +48,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private TBoxReasoner reasoner;
 	private ImmutableOntologyVocabulary voc;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
+	private LinearInclusionDependencies sigma;
 	
 	private Collection<TreeWitnessGenerator> generators;
 	
@@ -57,6 +58,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 		this.reasoner = reasoner;
 		this.voc = voc;
+		this.sigma = sigma;
 		
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
 		
@@ -317,6 +319,8 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
 		DatalogProgram output = fac.getDatalogProgram(dp.getQueryModifiers(), outputRules);
+		for (CQIE cq : output.getRules())
+			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

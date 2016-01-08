@@ -23,19 +23,35 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAMappingListener;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAModelListener;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.querymanager.QueryController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OBDAModelImpl implements OBDAModel {
 
@@ -164,7 +180,7 @@ public class OBDAModelImpl implements OBDAModel {
 	@Override
 	public void fireSourceParametersUpdated() {
 		for (OBDAModelListener listener : sourceslisteners) {
-			listener.datasourcParametersUpdated();
+			listener.datasourceParametersUpdated();
 		}
 	}
 

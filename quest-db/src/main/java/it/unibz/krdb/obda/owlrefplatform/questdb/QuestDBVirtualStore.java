@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Properties;
 
 /***
@@ -198,8 +199,16 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		//obtain datasource
 		OBDADataSource source = getDataSourceFromConfig(config);
 		//obtain obdaModel
-		R2RMLReader reader = new R2RMLReader(mappings);
-		OBDAModel obdaModel = reader.readModel(source.getSourceID());
+		OBDAModel obdaModel;
+		if (mappings != null) {
+			R2RMLReader reader = new R2RMLReader(mappings);
+			obdaModel = reader.readModel(source.getSourceID());
+		}
+		else {
+			String baseIRI = Objects.requireNonNull(config.getProperty(QuestPreferences.BASE_IRI), "Base IRI is requires for direct mappings");
+			DirectMappingEngine dm = new DirectMappingEngine(baseIRI, 0);
+			obdaModel = dm.extractMappings(source);
+		}
 		//add data source to model
 		obdaModel.addSource(source);
 		//OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);

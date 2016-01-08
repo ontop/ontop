@@ -46,15 +46,22 @@ public class OWLAPI3TranslatorHelper {
 	}	
 	
 	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
-		OWLLiteral object = ax.getObject();		
+		OWLLiteral object = ax.getObject();
 		Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
 		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
-		
+
 		URIConstant c1 = getIndividual(ax.getSubject());
 
 		DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
-		
-		return ofac.createDataPropertyAssertion(dpe, c1, c2);	
+
+		return ofac.createDataPropertyAssertion(dpe, c1, c2);
+	}
+
+	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
+
+		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
+
+		return ofac.createAnnotationAssertion(ap);
 	}
 	
 	/**
@@ -95,7 +102,7 @@ public class OWLAPI3TranslatorHelper {
 	/**
 	 * DataPropertyExpression := DataProperty
 	 * 
-	 * @param rolExpression
+	 * @param dpeExpression
 	 * @return
 	 */
 	
@@ -103,8 +110,20 @@ public class OWLAPI3TranslatorHelper {
 		assert (dpeExpression instanceof OWLDataProperty); 
 		return voc.getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
 	}
-	
-	
+
+
+	/**
+	 * AnnotationProperty
+	 *
+	 * @param ap
+	 * @return
+	 */
+
+	public AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap)  {
+		return voc.getAnnotationProperty(ap.getIRI().toString());
+	}
+
+
 
 	public static URIConstant getIndividual(OWLIndividual ind) {
 		if (ind.isAnonymous()) 

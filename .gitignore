@@ -32,3 +32,4 @@ plugin-runtime
 
 ontop-optique-test
 tmp
+*.log

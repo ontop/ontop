@@ -961,18 +961,6 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 			return dpe.getDomainRestriction(datatype);
 		}				
 	}
-
-	
-	
-
-	
-	
-	
-
-	
-	
-	
-	
 	
 	@Override
 	public void visit(OWLDisjointUnionAxiom ax) {
@@ -1051,8 +1039,19 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	
 	@Override
-	public void visit(OWLAnnotationAssertionAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
+	public void visit(OWLAnnotationAssertionAxiom ax) {
+		try {
+			AnnotationAssertion a = helper.translate(ax);
+			if (a != null)
+				dl_onto.addAnnotationAssertion(a);
+		}
+		catch (TranslationException e) {
+			log.warn(NOT_SUPPORTED_EXT, ax, e);
+		}
+		catch (InconsistentOntologyException e) {
+			log.warn(INCONSISTENT_ONTOLOGY, ax);
+			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
+		}
 	}
 
 	@Override
@@ -1081,6 +1080,7 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	private final Set<String> objectproperties = new HashSet<>();
 	private final Set<String> dataproperties = new HashSet<>();
+	private final Set<String> annotationproperties = new HashSet<>();
 	private final Set<String> punnedPredicates = new HashSet<>();
 	
 	
@@ -1120,7 +1120,14 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 					dataproperties.add(uri);
 					vb.createDataProperty(uri);
 				}
-			}			
+			}
+
+			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature())  {
+				String uri = prop.getIRI().toString();
+					annotationproperties.add(uri);
+					vb.createAnnotationProperty(uri);
+			}
+
 		}
 		return ofac.createOntology(vb);		
 	}
