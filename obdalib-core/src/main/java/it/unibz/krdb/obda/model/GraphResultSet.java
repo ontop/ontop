@@ -33,10 +33,9 @@ public interface GraphResultSet extends ResultSet, Iterator<List<Assertion>> {
 	@Override
     List<Assertion> next() throws OBDAException;
 
-	void close() throws OBDAException;
+	@Override
+    void close() throws OBDAException;
 
     void addNewResultSet(List<Assertion> result);
-	
-	//Template getTemplate();
-	
+
 }

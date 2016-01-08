@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QuestResultSet implements TupleResultSet {
+public class QuestTupleResultSet implements TupleResultSet {
 
 	private final ResultSet rs;
 	private final QuestStatement st;
@@ -76,7 +76,7 @@ public class QuestResultSet implements TupleResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestResultSet(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
+	public QuestTupleResultSet(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.rs = set;
 		this.st = st;
 		this.uriMap = st.questInstance.getUriMap();

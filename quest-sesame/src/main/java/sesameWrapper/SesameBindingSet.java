@@ -37,105 +37,93 @@ import java.util.Set;
 
 public class SesameBindingSet implements BindingSet {
 
-	private static final long serialVersionUID = -8455466574395305166L;
-	private TupleResultSet set = null;
-	private int count = 0;
-	private final Set<String> bindingnames;
+    private static final long serialVersionUID = -8455466574395305166L;
+    private TupleResultSet set = null;
+    private int count = 0;
+    private final Set<String> bindingnames;
 //	private List<String> signature;
 
-	private final SesameHelper helper = new SesameHelper();
-	
-	public SesameBindingSet(TupleResultSet set, Set<String> bindingnames) {
-		this.bindingnames = bindingnames;
+    private final SesameHelper helper = new SesameHelper();
+
+    public SesameBindingSet(TupleResultSet set, Set<String> bindingnames) {
+        this.bindingnames = bindingnames;
 //		this.signature = signature;
-		this.set = set;
-		this.count = bindingnames.size();
-		
-	}
+        this.set = set;
+        this.count = bindingnames.size();
 
-	@Override
-	public Binding getBinding(String bindingName) {
-		// return the Binding with bindingName
-		return createBinding(bindingName);
-	}
+    }
 
-	@Override	
-	public Set<String> getBindingNames() {
-		return bindingnames;
-//		try {
-//
-//			List<String> sign = set.getSignature();
-//			Set<String> bnames = new HashSet<String>(sign.size());
-//			for (String s : sign)
-//				bnames.add(s);
-//			return bnames;
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-	}
+    @Override
+    public Binding getBinding(String bindingName) {
+        // return the Binding with bindingName
+        return createBinding(bindingName);
+    }
 
-	@Override
-	public Value getValue(String bindingName) {
-		return createBinding(bindingName).getValue();
-	}
+    @Override
+    public Set<String> getBindingNames() {
+        return bindingnames;
+    }
 
-	private Binding createBinding(String bindingName) {
-		Value value = null;
-		try {
-			if (hasBinding(bindingName)) {
+    @Override
+    public Value getValue(String bindingName) {
+        return createBinding(bindingName).getValue();
+    }
+
+    private Binding createBinding(String bindingName) {
+        Value value = null;
+        try {
+            if (hasBinding(bindingName)) {
 //				int column = set.getSignature().indexOf(bindingName) + 1;
-				Constant c = set.getConstant(bindingName);
-				if (c == null) {
-					return null;
-				} 
-				else {
-					if (c instanceof ValueConstant) {
-						value = helper.getLiteral((ValueConstant)c);
-					}
-					else {
-						value = helper.getResource((ObjectConstant)c);
-					}
-				}
-			}
-			return new BindingImpl(bindingName, value);
-		} 
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+                Constant c = set.getConstant(bindingName);
+                if (c == null) {
+                    return null;
+                }
+                else {
+                    if (c instanceof ValueConstant) {
+                        value = SesameHelper.getLiteral((ValueConstant)c);
+                    }
+                    else {
+                        value = SesameHelper.getResource((ObjectConstant)c);
+                    }
+                }
+            }
+            return new BindingImpl(bindingName, value);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 //		return null;
-	}
+    }
 
-	@Override
-	public boolean hasBinding(String bindingName) {
-		return bindingnames.contains(bindingName);
+    @Override
+    public boolean hasBinding(String bindingName) {
+        return bindingnames.contains(bindingName);
 //		try {
 //			return set.getSignature().contains(bindingName);
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
 //		return false;
-	}
+    }
 
-	@Override
-	public Iterator<Binding> iterator() {
+    @Override
+    public Iterator<Binding> iterator() {
 
-		List<Binding> allBindings = new LinkedList<Binding>();
-		List<String> bindings;
-		try {
-			bindings = set.getSignature();
-			for (String s : bindings)
-				allBindings.add(createBinding(s));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        List<Binding> allBindings = new LinkedList<Binding>();
+        List<String> bindings;
+        try {
+            bindings = set.getSignature();
+            for (String s : bindings)
+                allBindings.add(createBinding(s));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		return allBindings.iterator();
-	}
+        return allBindings.iterator();
+    }
 
-	@Override
-	public int size() {
-		return count;
-	}
+    @Override
+    public int size() {
+        return count;
+    }
 }

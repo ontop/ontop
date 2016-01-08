@@ -28,13 +28,14 @@ public interface TupleResultSet extends ResultSet{
 	 * ResultSet management functions
 	 */
 
-	int getColumnCount() throws OBDAException;
+	int getColumnCount();
 
-	List<String> getSignature() throws OBDAException;
+	List<String> getSignature();
 
 	int getFetchSize() throws OBDAException;
 
-	void close() throws OBDAException;
+	@Override
+    void close() throws OBDAException;
 
 	OBDAStatement getStatement();
 

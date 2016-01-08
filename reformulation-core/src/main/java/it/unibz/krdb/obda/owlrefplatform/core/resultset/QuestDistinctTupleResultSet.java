@@ -37,48 +37,46 @@ import java.util.Set;
  * See test case DistinctResultSetTest
  */
 
-public class QuestDistinctResultset implements TupleResultSet {
+public class QuestDistinctTupleResultSet implements TupleResultSet {
 
-    private QuestResultSet questResultSet;
-
-
+    private QuestTupleResultSet questTupleResultSet;
 
     private Set<List<Object>> distinctKeys;
 
-    public QuestDistinctResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
+    public QuestDistinctTupleResultSet(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 
-        questResultSet = new QuestResultSet(set, signature, st);
+        questTupleResultSet = new QuestTupleResultSet(set, signature, st);
 
-        distinctKeys = new HashSet<List<Object>>();
+        distinctKeys = new HashSet<>();
 
     }
 
 
     @Override
     public int getColumnCount() throws OBDAException {
-        return questResultSet.getColumnCount();
+        return questTupleResultSet.getColumnCount();
     }
 
     @Override
     public List<String> getSignature() throws OBDAException {
-        return questResultSet.getSignature();
+        return questTupleResultSet.getSignature();
     }
 
     @Override
     public int getFetchSize() throws OBDAException {
-        return questResultSet.getFetchSize();
+        return questTupleResultSet.getFetchSize();
     }
 
     @Override
     public void close() throws OBDAException {
         distinctKeys.clear();
-        questResultSet.close();
+        questTupleResultSet.close();
 
     }
 
     @Override
     public OBDAStatement getStatement() {
-        return questResultSet.getStatement();
+        return questTupleResultSet.getStatement();
     }
 
     @Override
@@ -89,15 +87,15 @@ public class QuestDistinctResultset implements TupleResultSet {
         
         List<Object> row = null; 
         do{
-            next = questResultSet.nextRow();
+            next = questTupleResultSet.nextRow();
             if (next) {
                 row = new ArrayList<>();
                 for (int i = 1; i <= getSignature().size();  i ++ ) {
                     
                     int column = i * 3;
-                    row.add(questResultSet.getRawObject(column-2));  //type
-                    row.add(questResultSet.getRawObject(column-1)); //lang
-                    row.add(questResultSet.getRawObject(column)); //value
+                    row.add(questTupleResultSet.getRawObject(column-2));  //type
+                    row.add(questTupleResultSet.getRawObject(column-1)); //lang
+                    row.add(questTupleResultSet.getRawObject(column)); //value
                     
                 }
             }
@@ -112,12 +110,12 @@ public class QuestDistinctResultset implements TupleResultSet {
 
     @Override
     public Constant getConstant(int column) throws OBDAException {
-        return questResultSet.getConstant(column);
+        return questTupleResultSet.getConstant(column);
     }
 
     @Override
     public Constant getConstant(String name) throws OBDAException {
-        return questResultSet.getConstant(name);
+        return questTupleResultSet.getConstant(name);
     }
 
 }
