@@ -345,7 +345,7 @@
 							javax.naming.*,javax.management.*,javax.sql.*,
 							javax.xml.parsers.*,org.xml.sax.*,
 							it.unibz.krdb.obda.*,
-							org.protege.osgi.jdbc, org.protege.osgi.*,
+							org.protege.osgi.*,
 							uk.ac.manchester.*,
 							org.protege.*,
 							org.semanticweb.*,
@@ -389,6 +389,9 @@
 
 						<!-- Not needed anymore, it was necessary when we were not using import-package 
 							<Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi</Require-Bundle> -->
+
+                        <Bundle-Activator>org.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
+
 					</instructions>
 				</configuration>
 			</plugin>
@@ -401,7 +404,13 @@
 				<configuration> <skip>false</skip> </configuration> </plugin> -->
 
 		</plugins>
-	</build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 	<url>http://ontop.inf.unibz.it/</url>
 	<description>The -ontop- plugin for Protege</description>
 	<organization>
