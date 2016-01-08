@@ -162,7 +162,7 @@
 	<!-- Reasoner plugins -->
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
-    <name value="Quest 1.16.2-SNAPSHOT (ontop)"/>
+    <name value="Ontop ${project.version}"/>
     <class value="org.semanticweb.ontop.protege.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
 

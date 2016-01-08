@@ -404,7 +404,13 @@
 				<configuration> <skip>false</skip> </configuration> </plugin> -->
 
 		</plugins>
-	</build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 	<url>http://ontop.inf.unibz.it/</url>
 	<description>The -ontop- plugin for Protege</description>
 	<organization>
