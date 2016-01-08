@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -34,19 +35,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.parser.EncodeForURI;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.QualifiedAttributeID;
-import it.unibz.krdb.sql.QuotedID;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.ParserViewDefinition;
-
+import it.unibz.krdb.sql.*;
 import org.openrdf.model.Literal;
-
-import com.google.common.collect.ImmutableMap;
 
 import java.sql.Types;
 import java.util.*;
@@ -1040,7 +1030,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is actually a template. The first parameter is a
 			 * string of the form http://.../.../ or empty "{}" with place holders of the form
 			 * {}. The rest are variables or constants that should be put in
-			 * place of the palce holders. We need to tokenize and form the
+			 * place of the place holders. We need to tokenize and form the
 			 * CONCAT
 			 */
 			String literalValue;			
@@ -1073,10 +1063,26 @@ public class SQLGenerator implements SQLQueryGenerator {
 				for (int termIndex = 1; termIndex < size; termIndex++) {
 					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl;
+
 					if (isStringColType(currentTerm, index)) {
-						repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						//empty place holders: the correct uri is in the column of DB no need to replace
+						if(split.length == 0)
+						{
+							repl = getSQLString(currentTerm, index, false) ;
+						}
+						else
+						{
+							repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						}
+
 					} else {
-						repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
+						if(split.length == 0)
+						{
+							repl = sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) ;
+						}
+						else {
+							repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
+						}
 					}
 					vex.add(repl);
 					if (termIndex < split.length) {
