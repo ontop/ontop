@@ -140,7 +140,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 		prepareReasoner();
 
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, getBufferingMode());
+
 	}
 	
 	/***
@@ -149,6 +149,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences) {
 		super(rootOntology, configuration, bufferingMode);
+        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
 		this.init(rootOntology, obdaModel, configuration, preferences);
 
 	}
@@ -161,7 +162,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraintsReader userConstraints) {
 		super(rootOntology, configuration, bufferingMode);
-		
+        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
+
 		this.userConstraints = userConstraints;
 		assert(userConstraints != null);
 		this.applyUserConstraints = true;
@@ -178,7 +180,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, TMappingExclusionConfig excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
-		
+		this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
 		// Davide> T-Mappings handling
 		this.excludeFromTMappings = excludeFromTMappings;
 		assert(excludeFromTMappings != null);
@@ -197,7 +199,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			Properties preferences, ImplicitDBConstraintsReader userConstraints, 
 			TMappingExclusionConfig excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
-		
+        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
 		this.userConstraints = userConstraints;
 		assert(userConstraints != null);
 		this.applyUserConstraints = true;
