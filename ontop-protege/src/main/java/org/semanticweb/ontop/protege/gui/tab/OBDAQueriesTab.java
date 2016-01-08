@@ -50,11 +50,11 @@ public class OBDAQueriesTab extends OWLWorkspaceViewsTab {
 	 */
 	public void addQueryInterface(QueryInterfaceView newQueryInterface) {
 		if (queryManagerComponent == null) {
-			queryManagerComponent = new HashSet<QueryManagerView>();
+			queryManagerComponent = new HashSet<>();
 		}
 		for (Iterator<QueryManagerView> iterator = queryManagerComponent.iterator(); iterator.hasNext();) {
 			try {
-				QueryManagerView manager = (QueryManagerView) iterator.next();
+				QueryManagerView manager = iterator.next();
 				manager.addListener(newQueryInterface);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -62,7 +62,7 @@ public class OBDAQueriesTab extends OWLWorkspaceViewsTab {
 		}
 
 		if (queryInterfaceComponent == null) {
-			queryInterfaceComponent = new HashSet<QueryInterfaceView>();
+			queryInterfaceComponent = new HashSet<>();
 		}
 		queryInterfaceComponent.add(newQueryInterface);
 	}
@@ -75,11 +75,11 @@ public class OBDAQueriesTab extends OWLWorkspaceViewsTab {
 	 */
 	public void addQueryManager(QueryManagerView newQueryManager) {
 		if (queryInterfaceComponent == null) {
-			queryInterfaceComponent = new HashSet<QueryInterfaceView>();
+			queryInterfaceComponent = new HashSet<>();
 		}
 		for (Iterator<QueryInterfaceView> iterator = queryInterfaceComponent.iterator(); iterator.hasNext();) {
 			try {
-				QueryInterfaceView cinterface = (QueryInterfaceView) iterator.next();
+				QueryInterfaceView cinterface = iterator.next();
 				newQueryManager.addListener(cinterface);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -87,7 +87,7 @@ public class OBDAQueriesTab extends OWLWorkspaceViewsTab {
 		}
 
 		if (queryManagerComponent == null) {
-			queryManagerComponent = new HashSet<QueryManagerView>();
+			queryManagerComponent = new HashSet<>();
 		}
 		queryManagerComponent.add(newQueryManager);
 	}
