@@ -1,15 +1,13 @@
 # Ontop  
 
-The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project available under the terms of the 
-[Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
-By downloading these packages you are agreeing with them.
+Ontop is a framework for ontology based data access (OBDA). It supports SPARQL over
+virtual RDF graphs defined through mappings to RDBMS. 
 
 * Current version: 1.17
 * Release date:  TBD
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 ## Links
-
 
 - Official Website: http://ontop.inf.unibz.it/
 - Download: http://sourceforge.net/projects/ontop4obda/files/
