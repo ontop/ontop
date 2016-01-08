@@ -66,7 +66,7 @@
 		</class>
 		<index value="X"></index>
 		<editorKitId value="OWLEditorKit"></editorKitId>
-		<defaultViewConfigFileName value="viewconfig-obdatab.xml">
+		<defaultViewConfigFileName value="viewconfig-mappings-tab.xml">
 		</defaultViewConfigFileName>
 	</extension>
 	
@@ -78,7 +78,7 @@
 		</class>
 		<index value="X"></index>
 		<editorKitId value="OWLEditorKit"></editorKitId>
-		<defaultViewConfigFileName value="viewconfig-indqueriesTab.xml">
+		<defaultViewConfigFileName value="viewconfig-sparql-tab.xml">
 		</defaultViewConfigFileName>
 	</extension>
 
