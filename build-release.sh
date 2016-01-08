@@ -15,9 +15,6 @@
 ########################################################################
 
 
-VERSION=1.16
-REVISION=2-SNAPSHOT
-
 if type -p java; then
     JAVA=java
 elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
@@ -146,13 +143,14 @@ mvn clean
 
 echo ""
 echo "========================================="
-echo " Compiling Ontop $VERSION.$REVISION      "
+echo " Compiling                               "
 echo "-----------------------------------------"
 echo ""
 
-echo "pluginVersion=$VERSION.$REVISION" >  ${BUILD_ROOT}/obdalib-core/src/main/resources/it/unibz/krdb/obda/utils/version.properties
 
 mvn install -DskipTests || exit 1
+
+VERSION=$(cat ${BUILD_ROOT}/obdalib-core/target/classes/version.properties | sed 's/version=\(.*\)/\1/')
 
 #
 echo ""
@@ -167,17 +165,17 @@ mvn bundle:bundle -DskipTests  || exit 1
 
 rm -fr ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
 mkdir ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
-cp target/${PROTEGE_PLUGIN_NAME}-${VERSION}.${REVISION}.jar \
-  ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.${REVISION}.jar
+cp target/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar \
+  ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar
 
 cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/  || exit 1
 
 cd ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/
 
 mkdir -p ${PROTEGE_MAIN_FOLDER_NAME}/plugins
-cp ${PROTEGE_PLUGIN_NAME}-${VERSION}.${REVISION}.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
+cp ${PROTEGE_PLUGIN_NAME}-${VERSION}.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
 zip ${PROTEGE_COPY_FILENAME}.zip ${PROTEGE_MAIN_FOLDER_NAME}/plugins/*
-mv ${PROTEGE_COPY_FILENAME}.zip ontop-protege-bundle-${VERSION}.${REVISION}.zip
+mv ${PROTEGE_COPY_FILENAME}.zip ontop-protege-bundle-${VERSION}.zip
 
 rm -fr ${PROTEGE_MAIN_FOLDER_NAME}
 cd ${BUILD_ROOT}/quest-distribution
@@ -193,8 +191,8 @@ echo ""
 rm -fr ${QUEST_SESAME_DIST}
 mkdir -p ${QUEST_SESAME_DIST}/WEB-INF/lib
 mvn assembly:assembly -DskipTests  || exit 1
-cp target/ontop-distribution-${VERSION}.${REVISION}-sesame-bin.jar ${QUEST_SESAME_DIST}/WEB-INF/lib/ontop-distribution-${VERSION}.${REVISION}.jar || exit 1
-unzip -q -d ${QUEST_SESAME_DIST}/WEB-INF/lib/ target/ontop-distribution-${VERSION}.${REVISION}-dependencies.zip || exit 1
+cp target/ontop-distribution-${VERSION}-sesame-bin.jar ${QUEST_SESAME_DIST}/WEB-INF/lib/ontop-distribution-${VERSION}.jar || exit 1
+unzip -q -d ${QUEST_SESAME_DIST}/WEB-INF/lib/ target/ontop-distribution-${VERSION}-dependencies.zip || exit 1
 cp ${ONTOP_DEP_HOME}/${OPENRDF_SESAME_FILENAME}.war ${QUEST_SESAME_DIST}/
 cp ${ONTOP_DEP_HOME}/${OPENRDF_WORKBENCH_FILENAME}.war ${QUEST_SESAME_DIST}/
 
@@ -206,7 +204,7 @@ jar -uf ${OPENRDF_SESAME_FILENAME}.war WEB-INF/lib/* || exit 1
 echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
 jar -uf ${OPENRDF_WORKBENCH_FILENAME}.war WEB-INF/lib/* || exit 1
 
-zip ${ONTOP_SESAME_WEBAPPS}-${VERSION}.${REVISION}.zip ${OPENRDF_SESAME_FILENAME}.war ${OPENRDF_WORKBENCH_FILENAME}.war || exit 1
+zip ${ONTOP_SESAME_WEBAPPS}-${VERSION}.zip ${OPENRDF_SESAME_FILENAME}.war ${OPENRDF_WORKBENCH_FILENAME}.war || exit 1
 
 rm -fr WEB-INF
 cd ${BUILD_ROOT}/quest-distribution
@@ -215,11 +213,11 @@ cd ${BUILD_ROOT}/quest-distribution
 #
 echo ""
 echo "========================================="
-echo " Building Sesame Jetty distribution package"
+echo " Building  Jetty distribution package    "
 echo "-----------------------------------------"
 rm -fr ${QUEST_JETTY_DIST}
 mkdir ${QUEST_JETTY_DIST}
-cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.${REVISION}.zip || exit 1
+cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.zip || exit 1
 
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${QUEST_JETTY_DIST}
@@ -227,7 +225,7 @@ mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
 cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_SESAME_FILENAME}.war ${JETTY_FOLDER}/webapps
 cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_WORKBENCH_FILENAME}.war ${JETTY_FOLDER}/webapps
 
-zip ontop-jetty-bundle-${VERSION}.${REVISION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
+zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
 
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/quest-distribution
@@ -236,15 +234,15 @@ cd ${BUILD_ROOT}/quest-distribution
 #
 echo ""
 echo "========================================="
-echo " Building Ontop distribution package"
+echo " Building Ontop distribution package     "
 echo "-----------------------------------------"
 rm -fr ${ONTOP_DIST}
 mkdir ${ONTOP_DIST}
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-${VERSION}.${REVISION}-bin.zip ${ONTOP_DIST}/ontop-distribution-${VERSION}.${REVISION}.zip
+cp target/ontop-distribution-${VERSION}-bin.zip ${ONTOP_DIST}/ontop-distribution-${VERSION}.zip
 
 echo ""
 echo "========================================="
-echo " Done."
+echo " Done.                                   "
 echo "-----------------------------------------"
 echo ""
