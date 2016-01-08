@@ -33,16 +33,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.AssertionFactory;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import java.util.ArrayList;
@@ -62,7 +54,7 @@ import org.openrdf.query.algebra.Var;
 
 public class QuestGraphResultSet implements GraphResultSet {
 
-	private List<List<Assertion>> results = new ArrayList<List<Assertion>>();
+	private List<List<Assertion>> results = new ArrayList<>();
 
 	private TupleResultSet tupleResultSet;
 
@@ -87,12 +79,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 		processResultSet(tupleResultSet, sesameTemplate);
 	}
 
-	@Override
-	public TupleResultSet getTupleResultSet() {
-		return tupleResultSet;
-	}
-
-	private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
+    private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
 			throws OBDAException {
 		if (storeResults) {
 			//process current result set into local buffer, 
@@ -126,17 +113,17 @@ public class QuestGraphResultSet implements GraphResultSet {
 	
 	private List<Assertion> processResults(TupleResultSet result,
 			SesameConstructTemplate template) throws OBDAException {
-		List<Assertion> tripleAssertions = new ArrayList<Assertion>();
+		List<Assertion> tripleAssertions = new ArrayList<>();
 		List<ProjectionElemList> peLists = template.getProjectionElemList();
 		
 		Extension ex = template.getExtension();
 		if (ex != null) 
 			{
 				extList = ex.getElements();
-				HashMap <String, ValueExpr> newExtMap = new HashMap<String, ValueExpr>();
-				for (int i = 0; i < extList.size(); i++) {
-					newExtMap.put(extList.get(i).getName(), extList.get(i).getExpr());
-				}
+				HashMap <String, ValueExpr> newExtMap = new HashMap<>();
+                for (ExtensionElem anExtList : extList) {
+                    newExtMap.put(anExtList.getName(), anExtList.getExpr());
+                }
 				extMap = newExtMap;
 			}
 		for (ProjectionElemList peList : peLists) {

@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
@@ -88,7 +88,7 @@ public class QuestDBStatement implements OBDAStatement {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				
-				OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontos, st.questInstance.getVocabulary());
+				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.questInstance.getVocabulary());
 				result = st.insertData(aBoxIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				

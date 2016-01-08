@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
 
@@ -110,7 +110,7 @@ class QuestSesameMaterializerCMD {
 			
 			if (owlFile != null) {
 			// Loading the OWL ontology from the file as with normal OWLReasoners
-				 onto =  OWLAPI3TranslatorUtility.loadOntologyFromFile(owlFile);
+				 onto =  OWLAPITranslatorUtility.loadOntologyFromFile(owlFile);
 				 model.getOntologyVocabulary().merge(onto.getVocabulary());
 			}
 

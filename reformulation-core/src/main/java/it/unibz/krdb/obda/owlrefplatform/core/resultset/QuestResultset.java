@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QuestResultset implements TupleResultSet {
+public class QuestResultSet implements TupleResultSet {
 
 	private final ResultSet rs;
 	private final QuestStatement st;
@@ -76,14 +76,14 @@ public class QuestResultset implements TupleResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
+	public QuestResultSet(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.rs = set;
 		this.st = st;
 		this.uriMap = st.questInstance.getUriMap();
 		this.signature = signature;
 		
-		columnMap = new HashMap<String, Integer>(signature.size() * 2);
-		bnodeMap = new HashMap<String, String>(1000);
+		columnMap = new HashMap<>(signature.size() * 2);
+		bnodeMap = new HashMap<>(1000);
 
 		for (int j = 1; j <= signature.size(); j++) {
 			columnMap.put(signature.get(j - 1), j);
@@ -110,11 +110,13 @@ public class QuestResultset implements TupleResultSet {
 			dateFormat = null;
 	}
 
-	public int getColumnCount() throws OBDAException {
+	@Override
+    public int getColumnCount() throws OBDAException {
 		return signature.size();
 	}
 
-	public int getFetchSize() throws OBDAException {
+	@Override
+    public int getFetchSize() throws OBDAException {
 		try {
 			return rs.getFetchSize();
 		} catch (SQLException e) {
@@ -122,11 +124,13 @@ public class QuestResultset implements TupleResultSet {
 		}
 	}
 
-	public List<String> getSignature() throws OBDAException {
+	@Override
+    public List<String> getSignature() throws OBDAException {
 		return signature;
 	}
 
-	public boolean nextRow() throws OBDAException {
+	@Override
+    public boolean nextRow() throws OBDAException {
 		try {
 			return rs.next();
 		} catch (SQLException e) {
@@ -134,7 +138,8 @@ public class QuestResultset implements TupleResultSet {
 		}
 	}
 
-	public void close() throws OBDAException {
+	@Override
+    public void close() throws OBDAException {
 		try {
 			rs.close();
 		} catch (SQLException e) {

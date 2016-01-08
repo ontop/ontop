@@ -128,7 +128,7 @@ public class QuestStatement implements OBDAStatement {
 					if (type != QueryType.ASK) 
 						tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this); 
 					else
-						tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
+						tupleResult = new BooleanResultSet(false, QuestStatement.this);
 				} 
 				else {
 					try {
@@ -148,20 +148,20 @@ public class QuestStatement implements OBDAStatement {
 							if (questInstance.hasDistinctResultSet()) 
 								tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this);
 							else 
-								tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+								tupleResult = new QuestResultSet(set, signature, QuestStatement.this);
 							break;
 						
 						case ASK:
-							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
+							tupleResult = new BooleanResultSet(set, QuestStatement.this);
 							break;
 						
 						case CONSTRUCT:
-							TupleResultSet tuples = new QuestResultset(set, signature, QuestStatement.this);
+							TupleResultSet tuples = new QuestResultSet(set, signature, QuestStatement.this);
 							graphResult = new QuestGraphResultSet(tuples, templ, false);
 							break;
 							
 						case DESCRIBE:
-							tuples = new QuestResultset(set, signature, QuestStatement.this);
+							tuples = new QuestResultSet(set, signature, QuestStatement.this);
 							graphResult = new QuestGraphResultSet(tuples, templ, true);
 							break;
 						}
@@ -217,8 +217,8 @@ public class QuestStatement implements OBDAStatement {
 					ResultSet resultSet = executeTupleQuery(sel, engine.getParsedQuery(sel), QueryType.SELECT);
 					if (resultSet instanceof EmptyQueryResultSet)
 						return null;
-					else if (resultSet instanceof QuestResultset) {
-						QuestResultset res = (QuestResultset) resultSet;
+					else if (resultSet instanceof QuestResultSet) {
+						QuestResultSet res = (QuestResultSet) resultSet;
 						while (res.nextRow()) {
 							Constant constant = res.getConstant(1);
 							if (constant instanceof URIConstant) {

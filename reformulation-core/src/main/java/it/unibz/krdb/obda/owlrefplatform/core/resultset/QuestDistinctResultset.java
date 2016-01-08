@@ -39,7 +39,7 @@ import java.util.Set;
 
 public class QuestDistinctResultset implements TupleResultSet {
 
-    private QuestResultset questResultset;
+    private QuestResultSet questResultSet;
 
 
 
@@ -47,7 +47,7 @@ public class QuestDistinctResultset implements TupleResultSet {
 
     public QuestDistinctResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 
-        questResultset = new QuestResultset(set, signature, st);
+        questResultSet = new QuestResultSet(set, signature, st);
 
         distinctKeys = new HashSet<List<Object>>();
 
@@ -56,29 +56,29 @@ public class QuestDistinctResultset implements TupleResultSet {
 
     @Override
     public int getColumnCount() throws OBDAException {
-        return questResultset.getColumnCount();
+        return questResultSet.getColumnCount();
     }
 
     @Override
     public List<String> getSignature() throws OBDAException {
-        return questResultset.getSignature();
+        return questResultSet.getSignature();
     }
 
     @Override
     public int getFetchSize() throws OBDAException {
-        return questResultset.getFetchSize();
+        return questResultSet.getFetchSize();
     }
 
     @Override
     public void close() throws OBDAException {
         distinctKeys.clear();
-        questResultset.close();
+        questResultSet.close();
 
     }
 
     @Override
     public OBDAStatement getStatement() {
-        return questResultset.getStatement();
+        return questResultSet.getStatement();
     }
 
     @Override
@@ -89,15 +89,15 @@ public class QuestDistinctResultset implements TupleResultSet {
         
         List<Object> row = null; 
         do{
-            next = questResultset.nextRow();
+            next = questResultSet.nextRow();
             if (next) {
                 row = new ArrayList<>();
                 for (int i = 1; i <= getSignature().size();  i ++ ) {
                     
                     int column = i * 3;
-                    row.add(questResultset.getRawObject(column-2));  //type
-                    row.add(questResultset.getRawObject(column-1)); //lang
-                    row.add(questResultset.getRawObject(column)); //value
+                    row.add(questResultSet.getRawObject(column-2));  //type
+                    row.add(questResultSet.getRawObject(column-1)); //lang
+                    row.add(questResultSet.getRawObject(column)); //value
                     
                 }
             }
@@ -112,12 +112,12 @@ public class QuestDistinctResultset implements TupleResultSet {
 
     @Override
     public Constant getConstant(int column) throws OBDAException {
-        return questResultset.getConstant(column);
+        return questResultSet.getConstant(column);
     }
 
     @Override
     public Constant getConstant(String name) throws OBDAException {
-        return questResultset.getConstant(name);
+        return questResultSet.getConstant(name);
     }
 
 }

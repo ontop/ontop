@@ -25,8 +25,8 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.*;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
@@ -37,15 +37,11 @@ import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.impl.*;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
-import org.semanticweb.owlapi.search.EntitySearcher;
-import org.semanticweb.owlapi.util.CollectionFactory;
-import org.semanticweb.owlapi.util.OWLObjectPropertyManager;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.*;
 
 /**
@@ -309,7 +305,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure, questInstance.getVocabulary());
+					OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(importsClosure, questInstance.getVocabulary());
 					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
@@ -382,7 +378,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-        Ontology mergeOntology = OWLAPI3TranslatorUtility.translateImportsClosure(ontology);
+        Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
         return mergeOntology;
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}

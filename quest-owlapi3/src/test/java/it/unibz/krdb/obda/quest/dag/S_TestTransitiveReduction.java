@@ -25,14 +25,13 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -107,7 +106,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	
 	public void testR() throws Exception{
-		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
 		ClassExpression A = onto.getVocabulary().getClass("http://www.kro.com/ontologies/A");
@@ -125,7 +124,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 	public void testR2() throws Exception{
-		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
 		ClassExpression A = onto.getVocabulary().getClass("http://www.kro.com/ontologies/A");
@@ -151,7 +150,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl dag2 = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPI3TranslatorUtility.loadOntologyFromFile(fileInput));
+			TBoxReasonerImpl dag2 = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );

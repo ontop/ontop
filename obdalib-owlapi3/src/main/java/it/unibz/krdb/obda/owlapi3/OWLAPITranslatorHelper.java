@@ -7,10 +7,10 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorOWL2QL.TranslationException;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorOWL2QL.TranslationException;
 import org.semanticweb.owlapi.model.*;
 
-public class OWLAPI3TranslatorHelper {
+public class OWLAPITranslatorHelper {
 
 	private final ImmutableOntologyVocabulary voc;
 	
@@ -18,7 +18,7 @@ public class OWLAPI3TranslatorHelper {
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	
 	
-	OWLAPI3TranslatorHelper(ImmutableOntologyVocabulary voc) {
+	OWLAPITranslatorHelper(ImmutableOntologyVocabulary voc) {
 		this.voc = voc;
 	}
 

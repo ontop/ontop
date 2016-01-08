@@ -18,7 +18,7 @@ import java.util.*;
  * @author Roman Kontchakov
  */
 
-public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
+public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 
 	
 	
@@ -28,7 +28,7 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private static final Logger log = LoggerFactory.getLogger(OWLAPI3TranslatorOWL2QL.class);
+	private static final Logger log = LoggerFactory.getLogger(OWLAPITranslatorOWL2QL.class);
 	
 	private static final String INCONSISTENT_ONTOLOGY = "The OWL 2 QL ontology is inconsistent due to axiom {}";
 	private static final String INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE = "Inconsistency due to axiom ";
@@ -37,15 +37,15 @@ public class OWLAPI3TranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	
 	private final Ontology dl_onto;
-	private final OWLAPI3TranslatorHelper helper;
+	private final OWLAPITranslatorHelper helper;
 	
 	private final boolean functionalityAxioms = true; // TEMPORARY FIX
 	private final boolean minCardinalityClassExpressions = true; // TEMPORARY FIX
 	private final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
 	
-	public OWLAPI3TranslatorOWL2QL(Collection<OWLOntology> owls) {
+	public OWLAPITranslatorOWL2QL(Collection<OWLOntology> owls) {
 		dl_onto = createOntology(owls);
-		helper = new OWLAPI3TranslatorHelper(dl_onto.getVocabulary());
+		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary());
 	}
 	
 	public ImmutableOntologyVocabulary getVocabulary() {

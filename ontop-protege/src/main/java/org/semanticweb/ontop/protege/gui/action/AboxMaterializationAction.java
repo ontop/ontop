@@ -23,8 +23,8 @@ package org.semanticweb.ontop.protege.gui.action;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 
@@ -201,7 +201,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OWLOntology ontology = modelManager.getActiveOntology();
 				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-				Ontology onto = OWLAPI3TranslatorUtility.translate(ontology);
+				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
 				obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
 				
 				final long startTime = System.currentTimeMillis();
@@ -236,7 +236,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 				else {
 					// owlxml, OWL materializer
-					try (OWLAPI3Materializer materializer = new OWLAPI3Materializer(
+					try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(
 							obdaModel, onto, DO_STREAM_RESULTS)) {
 						Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
 						while (iterator.hasNext())
@@ -288,7 +288,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		if (response == JOptionPane.YES_OPTION) {			
 			try {
 			
-				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel, DO_STREAM_RESULTS);
+				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
 				

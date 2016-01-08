@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlapi3;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorOWL2QL.TranslationException;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorOWL2QL.TranslationException;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,23 +38,23 @@ import org.semanticweb.owlapi.model.OWLOntology;
 /***
  * A read only iterator that will translate OWLAPI data assertions into ABox
  * assertions in ontop's API. This is used in our Statement classes (e.g.,
- * {@link QuestOWLStatement} and SemanticIndexManager to iterate over the input
+ * {@code QuestOWLStatement} and SemanticIndexManager to iterate over the input
  * and then insert it into the semantic index database.
  * 
  * @author Mariano Rodriguez Muro
  * 
  */
-public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
+public class OWLAPIABoxIterator implements Iterator<Assertion> {
 
 	private final Iterator<OWLOntology> ontologiesIterator;
 	
 	private Iterator<OWLAxiom> owlaxiomIterator = null;
 	private Assertion next = null;
 	
-	private final OWLAPI3TranslatorHelper helper;
+	private final OWLAPITranslatorHelper helper;
 
-	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc) {
-		helper = new OWLAPI3TranslatorHelper(voc);
+	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc) {
+		helper = new OWLAPITranslatorHelper(voc);
 		ontologiesIterator = ontologies.iterator();
 		if (ontologiesIterator.hasNext()) 
 			owlaxiomIterator = ontologiesIterator.next().getAxioms().iterator();

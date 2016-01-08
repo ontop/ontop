@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
@@ -85,7 +85,7 @@ public class R2rmlCheckerTest {
 		ontology = manager
 				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		onto = OWLAPI3TranslatorUtility.translate(ontology);
+		onto = OWLAPITranslatorUtility.translate(ontology);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

@@ -48,7 +48,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
-public class OWLAPI3IndividualTranslator {
+public class OWLAPIIndividualTranslator {
 
 	private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 

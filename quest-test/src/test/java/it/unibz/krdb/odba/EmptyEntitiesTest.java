@@ -23,7 +23,6 @@ package it.unibz.krdb.odba;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -32,7 +31,7 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -144,7 +143,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPI3TranslatorUtility.translate(ontology);
+		onto = OWLAPITranslatorUtility.translate(ontology);
 	}
 
 	@After

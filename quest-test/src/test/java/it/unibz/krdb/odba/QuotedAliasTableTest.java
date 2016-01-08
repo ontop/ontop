@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
@@ -75,7 +75,7 @@ public class QuotedAliasTableTest {
 		ontology = manager
 				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		onto = OWLAPI3TranslatorUtility.translate(ontology);
+		onto = OWLAPITranslatorUtility.translate(ontology);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

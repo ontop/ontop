@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @throws Exception
 	 */
 	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
-		this.onto = OWLAPI3TranslatorUtility.translate(onto);
+		this.onto = OWLAPITranslatorUtility.translate(onto);
 		this.conn = conn;
 		runQueries();
 

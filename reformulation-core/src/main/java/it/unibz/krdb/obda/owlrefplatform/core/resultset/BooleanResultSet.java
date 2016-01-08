@@ -40,7 +40,7 @@ import java.util.Vector;
  * 
  */
 
-public class BooleanOWLOBDARefResultSet implements TupleResultSet {
+public class BooleanResultSet implements TupleResultSet {
 
 	private ResultSet set = null;
 	private boolean isTrue = false;
@@ -50,7 +50,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private ValueConstant valueConstant;
 
-	public BooleanOWLOBDARefResultSet(ResultSet set, OBDAStatement st) {
+	public BooleanResultSet(ResultSet set, OBDAStatement st) {
 		this.set = set;
 		this.st = st;
 		try {
@@ -62,7 +62,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 		
 	}
 
-	public BooleanOWLOBDARefResultSet(boolean value, OBDAStatement st) {
+	public BooleanResultSet(boolean value, OBDAStatement st) {
 		this.set = null;
 		this.st = st;
 
