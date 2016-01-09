@@ -175,11 +175,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>commons-io</groupId>-->
+			<!--<artifactId>commons-io</artifactId>-->
+			<!--<version>2.4</version>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
@@ -286,9 +286,7 @@
           			<skipTests>true</skipTests>
         		</configuration>
       		</plugin>
-			<!-- <plugin> <artifactId>maven-jar-plugin</artifactId> <configuration> 
-				<archive> <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile> 
-				</archive> </configuration> </plugin> -->
+
 			<plugin>
 				<!-- This is the main plugin to build the bundle. Informattion about 
 					this plugin can be found here: http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html 
@@ -297,10 +295,6 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 
-				<!-- <executions> <execution> <id>bundle-manifest</id> <phase>process-classes</phase> 
-					<goals> <goal>manifest</goal> </goals> </execution> </executions> -->
-
-				<!-- <version>2.3.4</version> -->
 				<extensions>true</extensions>
 				<configuration>
 
@@ -320,7 +314,7 @@
 						<!-- <Embed-Dependency>*;groupId=it.unibz.inf.ontop;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
 						<Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
 
-						<Bundle-Name>-ontopPro-</Bundle-Name>
+						<Bundle-Name>Ontop OBDA Plugin</Bundle-Name>
 						<!-- necessary for protege plugins -->
 						<Bundle-Category>protege</Bundle-Category>
 
@@ -331,77 +325,21 @@
 						<Bundle-Vendor>KRDB Research Centre, Free University of Bozen-Bolzano. </Bundle-Vendor>
 						<Implementation-Version>${project.version}</Implementation-Version>
 
-						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>${project.version}</Bundle-Version>
-						<Build-Number>0</Build-Number>
-						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
-						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>it.unibz.krdb.obda.protege4.*,
-							!org.json,
-							!org.codehaus.groovy.*,
-							!groovy.*,
-							javax.xml.datatype, javax.swing.*,
-							javax.accessibility,
-							javax.naming.*,javax.management.*,javax.sql.*,
-							javax.xml.parsers.*,org.xml.sax.*,
-							it.unibz.krdb.obda.*,
-							org.protege.osgi.*,
-							uk.ac.manchester.*,
-							org.protege.*,
-							org.semanticweb.*,
-							com.hp.hpl.jena.query.*,
-							org.apache.tomcat.*,
-							org.openrdf.sesame.*,
-							org.openrdf.query*,
-							org.openrdf.query.parser*,
-							org.openrdf.query.algebra*,
-							org.openrdf.query.resultio.*,
-							org.openrdf.rio.n3*,
-							info.aduna.*,
-							info.aduna.commons.*,
-							!au.com.bytecode.opencsv*,
-							!com.touchgraph*,
-							!org.codehaus.janino, org.codehaus.*
-							!org.w3c.dom*,
-							!org.xml.*,!sun.*,!jena.*, !junit.*, !org.antl*,
-							!org.apache*,
-							!org.ietf.*, !javax.*, !com.hp.*,
-							!arq*, !antlr*,
-							!EDU.oswego.cs.dl.util.concurrent,
-							!osgi.wiring.package,
-							!org.w3c.dom.ranges,!org.w3c.dom.traversal, *</Import-Package>
-						<Eclipse-LazyStart>false</Eclipse-LazyStart>
+						<Export-Package><!-- No need to export any package --></Export-Package>
+
+                        <Import-Package>!au.com.bytecode.opencsv*,!org.antlr.stringtemplate,*</Import-Package>
+
+						<!--<Eclipse-LazyStart>false</Eclipse-LazyStart>-->
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
 							or protege wont load it -->
                         <Bundle-SymbolicName>it.unibz.inf.ontop.protege;singleton:=true</Bundle-SymbolicName>
-						<!-- This makes sure ONLY the necessary dependencies are imported. 
-							If this is not supplied, maven-bundle-plugin will attempt to import ALL classes 
-							in the dependencies (even transitive ones) This will lead to class not found 
-							exceptions. It's very important to assure only the needed depdencies are 
-							imported. -->
-						<!-- <Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package> -->
-						<!-- <Import-Package>!osgi.wiring.package,!org.w3c.dom.ranges,javax.accessibility.*,org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package> -->
-
-						<!-- This makes sure all OBDA classes are exported and available in 
-							dependent projects -->
-						<!-- <Export-Package>it.unibz.krdb.*</Export-Package> -->
-
-						<!-- Not needed anymore, it was necessary when we were not using import-package 
-							<Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi</Require-Bundle> -->
 
                         <Bundle-Activator>org.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
 
 					</instructions>
 				</configuration>
 			</plugin>
-
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>buildnumber-maven-plugin</artifactId> 
-				<executions> <execution> <phase>validate</phase> <goals> <goal>create</goal> 
-				</goals> </execution> </executions> </plugin> -->
-
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-deploy-plugin</artifactId> 
-				<configuration> <skip>false</skip> </configuration> </plugin> -->
 
 		</plugins>
         <resources>

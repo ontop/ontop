@@ -74,8 +74,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 *  This function must do the call to e.g. statement.query()
-	 * @param queryString
-	 * @return
 	 */
 	public abstract T executeQuery(QuestOWLStatement st, String queryString) throws OWLException;
 
