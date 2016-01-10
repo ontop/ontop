@@ -24,31 +24,25 @@ package org.semanticweb.ontop.protege.gui.preferences;
 import java.awt.BorderLayout;
 
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.protege.panels.ConfigPanel;
+import org.semanticweb.ontop.protege.panels.QuestConfigPanel;
 
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 
-public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel {
+public class QuestPreferencesPanel extends OWLPreferencesPanel {
 
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 2017399622537704497L;
-	private QuestPreferences preference = null;
-	private ConfigPanel configPanel = null;
-	
-	@Override
+
+    @Override
 	public void applyChanges() {
 		// Do nothing.
 	}
 
 	@Override
 	public void initialise() throws Exception {
-		preference = (QuestPreferences)
-			getEditorKit().get(QuestPreferences.class.getName());
+        QuestPreferences preference = (QuestPreferences)getEditorKit().get(QuestPreferences.class.getName());
 		
 		this.setLayout(new BorderLayout());
-		configPanel = new ConfigPanel(preference);
+        QuestConfigPanel configPanel = new QuestConfigPanel(preference);
 		this.add(configPanel,BorderLayout.CENTER);
 	}
 

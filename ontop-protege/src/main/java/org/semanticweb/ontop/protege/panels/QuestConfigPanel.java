@@ -25,15 +25,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
 import java.awt.Dimension;
 
-public class ConfigPanel extends javax.swing.JPanel {
+public class QuestConfigPanel extends javax.swing.JPanel {
 
     private static final long serialVersionUID = 602382682995021070L;
-    private QuestPreferences preference;
+    private final QuestPreferences preference;
 
     /**
      * The constructor.
      */
-    public ConfigPanel(QuestPreferences preference) {
+    public QuestConfigPanel(final QuestPreferences preference) {
         this.preference = preference;
         initComponents();
         setSelections(preference);
@@ -41,7 +41,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         this.setMinimumSize(new Dimension(1024,768));
     }
 
-    private void setSelections(QuestPreferences preference) {
+    private void setSelections(final QuestPreferences preference) {
 
 //        String value = (String) preference.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
 //        if (value.equals(QuestConstants.UCQBASED)) {
@@ -168,7 +168,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         setPreferredSize(new java.awt.Dimension(525, 485));
         setLayout(new java.awt.GridBagLayout());
 
-        labelNote.setText("<html><b>Note:</b> You will need to restart Quest for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Quest\" in Protege's menu)</html>");
+        labelNote.setText("<html><b>Note:</b> You will need to restart Ontop Reasoner for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Ontop\" in Protege's menu)</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -236,8 +236,8 @@ public class ConfigPanel extends javax.swing.JPanel {
         pnlABoxConfiguration.add(radVirtualObda, gridBagConstraints);
 
         AboxMode.add(radClassicObda);
+        radClassicObda.setText("Classic ABox (Deprecated)");
         radClassicObda.setActionCommand("Classic ABox (= uses pre-defined ABox in the ontology)");
-        radClassicObda.setLabel("Classic ABox ");
         radClassicObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radClassicObdaActionPerformed(evt);
@@ -420,17 +420,17 @@ public class ConfigPanel extends javax.swing.JPanel {
 
     private void chkObtainFromMappingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromMappingsActionPerformed
         if (chkObtainFromMappings.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, Boolean.TRUE.toString());
         } else {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, Boolean.FALSE.toString());
         }
     }//GEN-LAST:event_chkObtainFromMappingsActionPerformed
 
     private void chkObtainFromOntologyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromOntologyActionPerformed
         if (chkObtainFromOntology.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, Boolean.TRUE.toString());
         } else {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, Boolean.FALSE.toString());
         }
     }//GEN-LAST:event_chkObtainFromOntologyActionPerformed
 
@@ -468,9 +468,9 @@ public class ConfigPanel extends javax.swing.JPanel {
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
         if (chkRewrite.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+            preference.setCurrentValueOf(QuestPreferences.REWRITE, Boolean.TRUE.toString());
         } else {
-            preference.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+            preference.setCurrentValueOf(QuestPreferences.REWRITE, Boolean.FALSE.toString());
         }
     }//GEN-LAST:event_chkRewriteActionPerformed
 

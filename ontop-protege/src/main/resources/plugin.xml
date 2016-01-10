@@ -90,8 +90,8 @@
   </extension>
   
   <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
-    <label value="Quest"/>
-    <class value="org.semanticweb.ontop.protege.gui.preferences.OBDAOWLReformulationPlatformConfigPanel"/>
+    <label value="Ontop Reasoner"/>
+    <class value="org.semanticweb.ontop.protege.gui.preferences.QuestPreferencesPanel"/>
   </extension>
   
   <!-- MENUS -->
