@@ -20,19 +20,19 @@ package org.semanticweb.ontop.protege.gui.tab;
  * #L%
  */
 
+import org.semanticweb.ontop.protege.views.QueryInterfaceView;
+import org.semanticweb.ontop.protege.views.QueryManagerView;
+
+import java.util.HashSet;
+import java.util.Iterator;
+
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 
-public class OBDATab extends OWLWorkspaceViewsTab {
-	private static final long	serialVersionUID	= -4896884982262745722L;
+public class OntopSPARQLTab extends OWLWorkspaceViewsTab {
 
 	@Override
-	public void initialise() {
+    public void initialise() {
 		super.initialise();
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
 	}
 
 }

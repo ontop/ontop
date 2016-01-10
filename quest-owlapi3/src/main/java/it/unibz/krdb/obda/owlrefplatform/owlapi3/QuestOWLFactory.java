@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.reasoner.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Properties;
 
 /***
@@ -123,7 +124,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 		return name;
 	}
 
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -146,7 +148,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 		
 	}
 
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
 			throws IllegalConfigurationException {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
@@ -174,7 +177,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 		}
 	}
 	
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createReasoner(OWLOntology ontology) {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -202,7 +206,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 		
 	}
 
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);

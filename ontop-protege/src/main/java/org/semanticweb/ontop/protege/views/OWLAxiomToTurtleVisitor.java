@@ -31,13 +31,13 @@ import java.util.Map;
 
 public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 
-	private StringBuilder parentBuffer = new StringBuilder();
+	private final StringBuilder parentBuffer = new StringBuilder();
 
-	private StringBuilder classAssertionBuffer = new StringBuilder();
-	private StringBuilder objectPropertyAssertionBuffer = new StringBuilder();
-	private StringBuilder dataPropertyAssertionBuffer = new StringBuilder();
+	private final StringBuilder classAssertionBuffer = new StringBuilder();
+	private final StringBuilder objectPropertyAssertionBuffer = new StringBuilder();
+	private final StringBuilder dataPropertyAssertionBuffer = new StringBuilder();
 
-	private PrefixManager prefixManager;
+	private final PrefixManager prefixManager;
 
 	public OWLAxiomToTurtleVisitor(PrefixManager prefixManager) {
 		this.prefixManager = prefixManager;
