@@ -50,7 +50,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OBDAModelManager instance = null;
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
-	ProtegeOBDAPreferences obdaPref = null;
+	DisposableOBDAPreferences obdaPref = null;
 	DisposableQuestPreferences refplatPref = null;
 	
 	@Override
@@ -80,7 +80,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		/***
 		 * Preferences for the OBDA plugin (gui, etc)
 		 */
-		obdaPref = new ProtegeOBDAPreferences();
+		obdaPref = new DisposableOBDAPreferences();
 		getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
 
 		/***

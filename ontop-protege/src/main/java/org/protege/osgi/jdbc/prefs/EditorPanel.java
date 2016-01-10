@@ -32,7 +32,7 @@ public class EditorPanel extends JDialog {
 
     private final Logger log = LoggerFactory.getLogger(EditorPanel.class);
 
-    private ServiceTracker jdbcRegistryTracker;
+    private final ServiceTracker jdbcRegistryTracker;
     
     private JLabel status = new JLabel();
     private JTextField nameField;
@@ -43,7 +43,7 @@ public class EditorPanel extends JDialog {
     private DriverInfo info;
     
     private File defaultDir;
-    private Preferences prefs;
+    private final Preferences prefs;
     
     public EditorPanel(ServiceTracker jdbcRegistryTracker) {
         this.jdbcRegistryTracker = jdbcRegistryTracker;
@@ -95,16 +95,14 @@ public class EditorPanel extends JDialog {
         centerPane.add(new JLabel());
         fileButton = new JButton("Browse");
         centerPane.add(fileButton);
-        fileButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc  = new JFileChooser(defaultDir);
-                int retVal = fc.showOpenDialog(EditorPanel.this);
-                if (retVal == JFileChooser.APPROVE_OPTION)  {
-                    File file = fc.getSelectedFile();
-                    defaultDir = file.getParentFile();
-                    prefs.putString(PreferencesPanel.DEFAULT_DRIVER_DIR, defaultDir.getAbsolutePath());
-                    fileField.setText(file.getPath());
-                }
+        fileButton.addActionListener(e -> {
+            JFileChooser fc  = new JFileChooser(defaultDir);
+            int retVal = fc.showOpenDialog(EditorPanel.this);
+            if (retVal == JFileChooser.APPROVE_OPTION)  {
+                File file = fc.getSelectedFile();
+                defaultDir = file.getParentFile();
+                prefs.putString(PreferencesPanel.DEFAULT_DRIVER_DIR, defaultDir.getAbsolutePath());
+                fileField.setText(file.getPath());
             }
         });
         return centerPane;
