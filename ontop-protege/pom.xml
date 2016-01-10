@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>ontop-protege</artifactId>
-    <name>Ontop OBDA Protégé plugin</name>
+    <name>ontop-protege</name>
     <url>http://ontop.inf.unibz.it/</url>
     <description>Ontop OBDA plugin for protégé</description>
     <organization>
@@ -325,7 +325,7 @@
 
                         <Bundle-ContactAddress>gh.xiao@gmail.com</Bundle-ContactAddress>
                         <Bundle-DocURL>${project.url}</Bundle-DocURL>
-                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-Name>Ontop OBDA Protégé plugin</Bundle-Name>
                         <Bundle-Description>${project.description}</Bundle-Description>
                         <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                         <Implementation-Version>${project.version}</Implementation-Version>
