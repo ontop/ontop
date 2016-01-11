@@ -20,21 +20,16 @@ package it.unibz.krdb.obda.api.io;
  * #L%
  */
 
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.io.PrefixManager;
+import junit.framework.TestCase;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
 
@@ -124,5 +119,33 @@ public class PrefixRendererTest extends TestCase {
 		atom0 = (Function) query.getRules().get(0).getBody().get(0);
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("onto:person-individual"));
+
+	}
+
+	/**
+	 * This test checks if the prefix are properly handled. The prefix inside uri should not be modified
+	 */
+	public void testPrefixInsideURI() {
+		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+		pm.addPrefix("obdap:", "http://obda.org/predicates#");
+
+		String uri = "http://obda.org/onto.owl#redirect=http://obda.org/predicates#";
+
+		String shortForm = pm.getShortForm(uri, false);
+		System.out.println(shortForm);
+
+		assertEquals(":redirect=http://obda.org/predicates#", shortForm);
+
+
+		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://example.com/resource/");
+		pm.addPrefix("movie:", "http://www.movieontology.org/2009/10/01/movieontology.owl/");
+
+		String uri2 = "http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951";
+		String shortForm2 = pm.getShortForm(uri2, false);
+		System.out.println(shortForm2);
+		assertEquals(":?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951", shortForm2);
+
+
+
 	}
 }
