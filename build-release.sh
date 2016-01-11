@@ -24,65 +24,30 @@ else
     exit 1
 fi
 
-echo 'java -version'
+echo '$ java -version'
 
 ${JAVA} -version || exit 1
 
 echo ""
 
-JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
+JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
 #echo version "$version"
 if [[ "$JAVA_VER" -ne "8" ]]; then
     echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
     exit 1
 fi
 
-echo 'mvn -version'
+echo '$ mvn -version'
 mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }
 echo ""
 
-echo "git --version"
+echo "$ git --version"
 git --version || exit 1
 echo ""
 
-echo "git lfs env"
+echo "$ git lfs env"
 git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
 echo ""
-
-if type -p java; then
-    export JAVA=java
-elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
-    export JAVA="$JAVA_HOME/bin/java"
-else
-    echo "ERROR: Java is not installed!"
-    exit 1
-fi
-
-echo 'java -version'
-
-${JAVA} -version || exit 1
-
-echo ""
-
-JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
-#echo version "$version"
-if [[ "$JAVA_VER" -ne "8" ]]; then
-    echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
-    exit 1
-fi
-
-echo 'mvn -version'
-mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }
-echo ""
-
-echo "git --version"
-git --version || exit 1
-echo ""
-
-echo "git lfs env"
-git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
-echo ""
-
 
 # location for the build ROOT folder (i.e. the directory of this script)
 BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
