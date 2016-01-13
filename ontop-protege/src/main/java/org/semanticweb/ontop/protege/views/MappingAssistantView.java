@@ -44,66 +44,71 @@ import org.slf4j.LoggerFactory;
 
 public class MappingAssistantView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private DatasourceSelector datasourceSelector;
+    private DatasourceSelector datasourceSelector;
 
-	private OBDAModelManager apic;
+    private OBDAModelManager obdaModelManager;
 
-	private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
-	
-	@Override
-	protected void disposeOWLView() {
-		apic.removeListener(this);
-	}
+    private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
 
-	@Override
-	protected void initialiseOWLView() throws Exception {
+    @Override
+    protected void disposeOWLView() {
+        obdaModelManager.removeListener(this);
+    }
 
-		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
-		apic.addListener(this);
+    @Override
+    protected void initialiseOWLView() throws Exception {
 
-		OBDAModel dsController = apic.getActiveOBDAModel();
+        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+        obdaModelManager.addListener(this);
 
-		MappingAssistantPanel queryPanel = new MappingAssistantPanel(dsController);
-		datasourceSelector = new DatasourceSelector(dsController);
-		datasourceSelector.addDatasourceListListener(queryPanel);
+        OBDAModel activeOBDAModel = obdaModelManager.getActiveOBDAModel();
 
-		JPanel selectorPanel = new JPanel();
-		selectorPanel.setLayout(new GridBagLayout());
+        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel);
+        datasourceSelector = new DatasourceSelector(activeOBDAModel);
+        datasourceSelector.addDatasourceListListener(queryPanel);
+        /**
+         * Selects the first datasource if it exists
+         */
+        if (activeOBDAModel.getSources().size() > 0) {
+            datasourceSelector.set(activeOBDAModel.getSources().get(0));
+        }
+        JPanel selectorPanel = new JPanel();
+        selectorPanel.setLayout(new GridBagLayout());
 
-		JLabel label = new JLabel("Select datasource: ");
+        JLabel label = new JLabel("Select datasource: ");
 
-		label.setFont(new Font("Dialog", Font.BOLD, 12));
-		label.setForeground(new Color(53, 113, 163));
+        label.setFont(new Font("Dialog", Font.BOLD, 12));
+        label.setForeground(new Color(53, 113, 163));
 
-		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		selectorPanel.add(label, gridBagConstraints);
+        GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+        selectorPanel.add(label, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		selectorPanel.add(datasourceSelector, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+        selectorPanel.add(datasourceSelector, gridBagConstraints);
 
-		selectorPanel.setBorder(new TitledBorder("Datasource selection"));
-		queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
+        selectorPanel.setBorder(new TitledBorder("Datasource selection"));
+        queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 
-		setLayout(new BorderLayout());
-		add(queryPanel, BorderLayout.CENTER);
-		add(selectorPanel, BorderLayout.NORTH);
+        setLayout(new BorderLayout());
+        add(queryPanel, BorderLayout.CENTER);
+        add(selectorPanel, BorderLayout.NORTH);
 
-		log.debug("SQL Query view initialized");
-	}
+        log.debug("SQL Query view initialized");
+    }
 
-	@Override
-	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel());
-	}
+    @Override
+    public void activeOntologyChanged() {
+        datasourceSelector.setDatasourceController(obdaModelManager.getActiveOBDAModel());
+    }
 }

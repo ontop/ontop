@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.protege.core;
 
+import javax.annotation.Nonnull;
 import javax.swing.JOptionPane;
 
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -24,7 +25,8 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		JOptionPane.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
 	}
 			
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology, config);
@@ -33,7 +35,8 @@ public class OntopOWLFactory extends QuestOWLFactory {
 			throw e;
 		}
 	}
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology);
@@ -43,7 +46,8 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 	
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology, config);
@@ -52,7 +56,8 @@ public class OntopOWLFactory extends QuestOWLFactory {
 			throw e;
 		}
 	}
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology);

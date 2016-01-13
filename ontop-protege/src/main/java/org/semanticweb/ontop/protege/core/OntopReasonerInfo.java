@@ -29,7 +29,7 @@ import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
-public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeOWLReasonerInfo {
+public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
 	OntopOWLFactory factory = new OntopOWLFactory();
 

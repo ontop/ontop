@@ -36,7 +36,7 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="labelNote">
       <Properties>
-        <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Note:&lt;/b&gt; You will need to restart Quest for any changes to take effect.&lt;p/&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;&amp;nbsp; (i.e., select &quot;Reasoner-&gt; None&quot; and then &quot;Reasoner -&gt; Quest&quot; in Protege&apos;s menu)&lt;/html&gt;"/>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Note:&lt;/b&gt; You will need to restart Ontop Reasoner for any changes to take effect.&lt;p/&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;&amp;nbsp; (i.e., select &quot;Reasoner-&gt; None&quot; and then &quot;Reasoner -&gt; Ontop&quot; in Protege&apos;s menu)&lt;/html&gt;"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -156,8 +156,8 @@
             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
               <ComponentRef name="AboxMode"/>
             </Property>
+            <Property name="text" type="java.lang.String" value="Classic ABox (Deprecated)"/>
             <Property name="actionCommand" type="java.lang.String" value="Classic ABox (= uses pre-defined ABox in the ontology)"/>
-            <Property name="label" type="java.lang.String" value="Classic ABox "/>
           </Properties>
           <AccessibilityProperties>
             <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Classic ABox. Uses pre-defined ABox in the ontology."/>

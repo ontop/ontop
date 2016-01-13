@@ -29,7 +29,6 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -44,14 +43,14 @@ import org.slf4j.LoggerFactory;
  * @author Roman Kontchakov
  * 
  */
-public class OWLAPI3TranslatorUtility {
+public class OWLAPITranslatorUtility {
 
-	private static final Logger log = LoggerFactory.getLogger(OWLAPI3TranslatorUtility.class);
+	private static final Logger log = LoggerFactory.getLogger(OWLAPITranslatorUtility.class);
 
 	/***
 	 * Load all the imports of the ontology and merges into a single ontop internal representation
 	 * 
-	 * @param ontologies
+	 * @param ontology
 	 * @return
 	 */
 	
@@ -71,7 +70,7 @@ public class OWLAPI3TranslatorUtility {
 	public static Ontology mergeTranslateOntologies(Collection<OWLOntology> ontologies)   {
 		log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
 
-		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(ontologies);
+		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(ontologies);
 		for (OWLOntology owl : ontologies) {
 			translator.setCurrentOWLOntology(owl);
 			for (OWLAxiom axiom : owl.getAxioms())  {
@@ -94,7 +93,7 @@ public class OWLAPI3TranslatorUtility {
 	 */
 	
 	public static Ontology translate(OWLOntology owl) {
-		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(Collections.singleton(owl));
+		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl));
 		translator.setCurrentOWLOntology(owl);
 
 		for (OWLAxiom axiom : owl.getAxioms()) 
@@ -113,7 +112,7 @@ public class OWLAPI3TranslatorUtility {
 	public static Ontology loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		OWLAPI3TranslatorOWL2QL translator = new OWLAPI3TranslatorOWL2QL(Collections.singleton(owl));
+		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl));
 		translator.setCurrentOWLOntology(owl);
 
 		for (OWLAxiom axiom : owl.getAxioms()) 

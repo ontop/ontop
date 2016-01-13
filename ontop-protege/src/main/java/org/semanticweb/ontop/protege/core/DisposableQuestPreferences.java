@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.protege.gui.tab;
+package org.semanticweb.ontop.protege.core;
 
 /*
  * #%L
@@ -20,19 +20,16 @@ package org.semanticweb.ontop.protege.gui.tab;
  * #L%
  */
 
-import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
-public class OBDATab extends OWLWorkspaceViewsTab {
-	private static final long	serialVersionUID	= -4896884982262745722L;
+import org.protege.editor.core.Disposable;
 
-	@Override
-	public void initialise() {
-		super.initialise();
-	}
+public class DisposableQuestPreferences extends QuestPreferences implements Disposable {
+
+	private static final long	serialVersionUID	= -1699795366967423089L;
 
 	@Override
-	public void dispose() {
-		super.dispose();
+    public void dispose() {
+		// Do nothing.
 	}
-
 }

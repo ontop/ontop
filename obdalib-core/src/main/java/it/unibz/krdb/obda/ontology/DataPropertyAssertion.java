@@ -46,9 +46,9 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface DataPropertyAssertion extends Assertion {
 
-	public DataPropertyExpression getProperty();
+	DataPropertyExpression getProperty();
 	
-	public ObjectConstant getSubject();
+	ObjectConstant getSubject();
 	
-	public ValueConstant getValue();	
+	ValueConstant getValue();
 }

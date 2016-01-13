@@ -53,12 +53,7 @@ public class QuestUnfolder {
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	
-	
-	/**
-	 * @throws SQLException 
-	 * @throws JSQLParserException 
-	 */
+
 	public QuestUnfolder(DBMetadata metadata)  {
 
 		this.metadata = metadata;

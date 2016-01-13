@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestDistinctResultset}
+ * Use the class {@link QuestDistinctTupleResultSet}
  */
 
 public class DistinctResultSetTest { //

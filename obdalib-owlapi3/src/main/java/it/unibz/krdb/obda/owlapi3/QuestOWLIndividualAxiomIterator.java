@@ -31,7 +31,7 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAxiom> {
 
-	private final OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+	private final OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 	
 	private final Iterator<Assertion> assertions;
 

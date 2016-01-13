@@ -22,30 +22,30 @@ package it.unibz.krdb.obda.model;
 
 public interface OBDAStatement extends AutoCloseable {
 
-	public void cancel() throws OBDAException;
+	void cancel() throws OBDAException;
 
 	@Override
-	public void close() throws OBDAException;
+    void close() throws OBDAException;
 
-	public ResultSet execute(String query) throws OBDAException;
+	ResultSet execute(String query) throws OBDAException;
 
-	public int executeUpdate(String query) throws OBDAException;
+	int executeUpdate(String query) throws OBDAException;
 
-	public int getFetchSize() throws OBDAException;
+	int getFetchSize() throws OBDAException;
 
-	public int getMaxRows() throws OBDAException;
+	int getMaxRows() throws OBDAException;
 
-	public void getMoreResults() throws OBDAException;
+	void getMoreResults() throws OBDAException;
 
-	public ResultSet getResultSet() throws OBDAException;
+	ResultSet getResultSet() throws OBDAException;
 
-	public int getQueryTimeout() throws OBDAException;
+	int getQueryTimeout() throws OBDAException;
 
-	public void setFetchSize(int rows) throws OBDAException;
+	void setFetchSize(int rows) throws OBDAException;
 
-	public void setMaxRows(int max) throws OBDAException;
+	void setMaxRows(int max) throws OBDAException;
 
-	public boolean isClosed() throws OBDAException;
+	boolean isClosed() throws OBDAException;
 
 	/**
 	 * Sets the number of seconds the driver will wait for a Statement object to
@@ -56,7 +56,7 @@ public interface OBDAStatement extends AutoCloseable {
 	 *            the new query timeout limit in seconds; zero means no limit.
 	 * @throws Exception
 	 */
-	public void setQueryTimeout(int seconds) throws Exception;
+    void setQueryTimeout(int seconds) throws Exception;
 	
 	/**
 	 * Produces an expanded SPARQL string given the initial <code>query</code> input.
@@ -67,5 +67,5 @@ public interface OBDAStatement extends AutoCloseable {
 	 * @return SPARQL query expansion.
 	 * @throws OBDAException
 	 */
-	public String getSPARQLRewriting(String query) throws OBDAException;
+    String getSPARQLRewriting(String query) throws OBDAException;
 }

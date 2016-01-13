@@ -30,9 +30,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
@@ -120,7 +120,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             OBDAModel obdaModel = loadMappingFile(mappingFile);
 
-            Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
+            Ontology inputOntology = OWLAPITranslatorUtility.translate(ontology);
 
             obdaModel.getOntologyVocabulary().merge(inputOntology.getVocabulary());
 
@@ -148,7 +148,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                                            Predicate predicate, String outputFile, String format) throws Exception {
         final long startTime = System.currentTimeMillis();
 
-        OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
+        OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
         QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
         System.err.println("Starts writing triples into files.");
@@ -224,7 +224,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             OWLOntology ontology = null;
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            OWLAPI3Materializer materializer = null;
+            OWLAPIMaterializer materializer = null;
 
             if (owlFile != null) {
             // Loading the OWL ontology from the file as with normal OWLReasoners
@@ -237,12 +237,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     ontology = extractDeclarations(manager, ontology);
                 }
 
-                Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
+                Ontology onto =  OWLAPITranslatorUtility.translate(ontology);
                 obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
-                materializer = new OWLAPI3Materializer(obdaModel, onto, DO_STREAM_RESULTS);
+                materializer = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS);
             } else {
                 ontology = manager.createOntology();
-                materializer = new OWLAPI3Materializer(obdaModel, DO_STREAM_RESULTS);
+                materializer = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
             }
 
 

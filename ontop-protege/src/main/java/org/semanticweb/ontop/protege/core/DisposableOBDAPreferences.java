@@ -20,18 +20,20 @@ package org.semanticweb.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import org.protege.editor.core.Disposable;
 
-public class ProtegeReformulationPlatformPreferences extends QuestPreferences implements Disposable {
+/**
+ * TODO: Guohui Xiao (2016-01-10) Check if this class and it related classes are really needed or not
+ */
+public class DisposableOBDAPreferences extends OBDAPreferences
+		implements Disposable {
 
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= -1699795366967423089L;
+	private static final long serialVersionUID = -4772516758684293329L;
 
-	public void dispose() {
+	@Override
+    public void dispose() {
 		// Do nothing.
 	}
 }

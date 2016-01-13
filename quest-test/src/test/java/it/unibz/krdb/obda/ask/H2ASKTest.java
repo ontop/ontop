@@ -99,7 +99,7 @@ public class H2ASKTest {
 
 		factory.setPreferenceHolder(p);
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

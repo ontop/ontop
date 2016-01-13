@@ -221,7 +221,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				
 			} else {
 				// List of invalid predicates that are found by the validator.
-				Vector<String> invalidPredicates = validator.getInvalidPredicates();
+				List<String> invalidPredicates = validator.getInvalidPredicates();
 				String invalidList = "";
 				for (String predicate : invalidPredicates) {
 					invalidList += "- " + predicate + "\n";

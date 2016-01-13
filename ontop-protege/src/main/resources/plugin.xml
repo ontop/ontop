@@ -62,7 +62,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop Mappings"/>
 		<class
-			value="org.semanticweb.ontop.protege.gui.tab.OBDATab">
+			value="org.semanticweb.ontop.protege.gui.tab.OntopMappingsTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -74,7 +74,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop SPARQL"/>
 		<class
-			value="org.semanticweb.ontop.protege.gui.tab.OBDAQueriesTab">
+			value="org.semanticweb.ontop.protege.gui.tab.OntopSPARQLTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -90,8 +90,8 @@
   </extension>
   
   <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
-    <label value="Quest"/>
-    <class value="org.semanticweb.ontop.protege.gui.preferences.OBDAOWLReformulationPlatformConfigPanel"/>
+    <label value="Ontop Reasoner"/>
+    <class value="org.semanticweb.ontop.protege.gui.preferences.QuestPreferencesPanel"/>
   </extension>
   
   <!-- MENUS -->
@@ -163,7 +163,7 @@
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
     <name value="Ontop ${project.version}"/>
-    <class value="org.semanticweb.ontop.protege.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
+    <class value="org.semanticweb.ontop.protege.core.OntopReasonerInfo"/>
   </extension>
 
     <!-- JDBC Preferences-->
