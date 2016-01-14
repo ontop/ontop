@@ -33,205 +33,80 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Properties;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /***
+ * TODO: rewrite the doc
+ * <p>
  * Implementation of an OWLReasonerFactory that can create instances of Quest.
  * Note, to create an instance of Quest first you must call the method
- * {@link #setPreferenceHolder(Properties)} with your parameters see Quest.java
+ * {@code #setPreferenceHolder(Properties)} with your parameters see Quest.java
  * for a description of the preferences. Also, if you use Quest in Virtual ABox
  * mode you must set an {@link OBDAModel} with your mappings.
- * 
+ *
  * @see OBDAModel
- * 
- * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
- * 
  */
 public class QuestOWLFactory implements OWLReasonerFactory {
 
-	private OBDAModel mappingManager = null;
-	private Properties preferences = null;
-	
-	/**
-	 * The user can supply information about keys that are not in the
-	 * database metadata. 
-	 */
-	private ImplicitDBConstraintsReader userConstraints = null;
-	private boolean applyUserConstraints = false;
-	
-	/**
-	 * @author Davide>
-	 * 
-	 * The user can specify predicates for which the T-Mappings 
-	 * algorithm should not do its job. This is useful in those
-	 * cases where we know that a concept is already "complete", 
-	 * and where adding individuals from mapping assertions 
-	 * identified by the TMapping algorithm would NOT add any
-	 * new individual.
-	 */
-	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
-	
-	private String name = "Quest";
+    @SuppressWarnings("unused")
+    private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
 
-	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
-
-	/***
-	 * Sets the mappings that will be used to create instances of Quest. If this
-	 * is not set, mappings will be null and Quest will be started in
-	 * "classic ABox" mode. If the mappings are not null, then the mode must be
-	 * "Virtual ABox" model.
-	 * 
-	 * @param apic
-	 */
-	public void setOBDAController(OBDAModel apic) {
-		this.mappingManager = apic;
-	}
-
-	/***
-	 * Sets the user-supplied database constraints, i.e.
-	 * Foreign and primary keys that are not in the database
-	 * 
-	 * @param userConstraints
-	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints) {
-		if(userConstraints == null)
-			throw new NullPointerException();
-		this.userConstraints = userConstraints;
-		this.applyUserConstraints = true;
-	}
-	
-	public void setPreferenceHolder(Properties preference) {
-		this.preferences = preference;
-	}
-
-	/**
-	 * @author Davide>
-	 * 
-	 * The user can specify predicates for which the T-Mappings 
-	 * algorithm should not do its job. This is useful in those
-	 * cases where we know that a concept is already "complete", 
-	 * that means where adding individuals from mapping assertions 
-	 * identified by the TMapping algorithm would NOT add any
-	 * new individual in the concept.
-	 */
-	public void setExcludeFromTMappingsPredicates(TMappingExclusionConfig excludeFromTMappings){
-		
-		if( excludeFromTMappings == null ) throw new NullPointerException(); 
-		
-		this.excludeFromTMappings = excludeFromTMappings;
-	}
-	
-	@Override
-	public String getReasonerName() {
-		return name;
-	}
-
-	@Nonnull
+    @Nonnull
     @Override
-	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) {
-		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.CLASSIC + "'");
-		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
-		}
-		if(this.applyUserConstraints){
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
-		}
-		else{
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
-		}
-		
-		
-	}
+    public String getReasonerName() {
+        return "Ontop/Quest";
+    }
 
-	@Nonnull
+    @Nonnull
     @Override
-	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
-			throws IllegalConfigurationException {
-		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.CLASSIC + "'");
-		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
-		}
-		if(this.applyUserConstraints){
-			//if( this.applyExcludeFromTMappings )
-				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			//else
-		    //		return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
-		}
-		else{
-			//if( this.applyExcludeFromTMappings )
-				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
-		}
-	}
-	
-	@Nonnull
-    @Override
-	public QuestOWL createReasoner(OWLOntology ontology) {
-		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.CLASSIC + "'");
-		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
-		}
-		if(this.applyUserConstraints){
-			//if( this.applyExcludeFromTMappings )
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
-		}
-		else{
-			//if( this.applyExcludeFromTMappings )
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
-		}
-		
-	}
+    public QuestOWL createNonBufferingReasoner(@Nonnull OWLOntology ontology) {
+        throw new UnsupportedOperationException("Quest is a buffering reasoner");
+    }
 
-	@Nonnull
+    @Nonnull
     @Override
-	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.CLASSIC + "'");
-		} else if (mappingManager != null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			log.warn("You specified mappings, Quest will assume you want to work in 'virtual ABox' mode' even though you set the ABox mode to: '"
-					+ preferences.get(QuestPreferences.ABOX_MODE) + "'");
-			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
-		}
-		if(this.applyUserConstraints){
-			//if( this.applyExcludeFromTMappings )
-				return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			//else
-			//	return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
-		}
-		else{
-			//if( this.applyExcludeFromTMappings )
-				return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
-		}
-	}
+    public QuestOWL createNonBufferingReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config)
+            throws IllegalConfigurationException {
+        throw new UnsupportedOperationException("Quest is a buffering reasoner");
+    }
+
+    @Nonnull
+    @Override
+    public QuestOWL createReasoner(@Nonnull OWLOntology ontology) {
+        return createReasoner(ontology, QuestOWLConfig.builder().build());
+
+    }
+
+    @Nonnull
+    @Override
+    @Deprecated
+    public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
+        checkArgument(config instanceof QuestOWLConfig, "config %s is not an instance of QuestOWLConfig", config);
+        return createReasoner(ontology, (QuestOWLConfig) config);
+    }
+
+
+    @Nonnull
+    public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull QuestOWLConfig config) throws IllegalConfigurationException {
+        OBDAModel obdaModel = config.getObdaModel();
+        Properties preferences = config.getPreferences();
+
+        ImplicitDBConstraintsReader userConstraints = config.getUserConstraints();
+
+        TMappingExclusionConfig excludeFromTMappings = config.getExcludeFromTMappings();
+
+        if (obdaModel == null && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
+            throw new IllegalConfigurationException("mappings are not specified in virtual mode", config);
+        } else if (obdaModel != null && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+            throw new IllegalConfigurationException("mappings are specified in classic mode", config);
+        }
+
+        if (userConstraints != null) {
+            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
+        } else {
+            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
+        }
+
+    }
 
 }
