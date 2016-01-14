@@ -48,6 +48,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
@@ -923,7 +924,7 @@ public class BindTestWithFunctions {
 
             String value = "Jan 31 2013 9:32AM";
 
-            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+            DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.CHINA);
             java.util.Date date;
             try {
                 date = df.parse(value);

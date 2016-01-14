@@ -34,6 +34,7 @@ import java.sql.ResultSet;
 import java.text.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class QuestResultset implements TupleResultSet {
@@ -62,6 +63,7 @@ public class QuestResultset implements TupleResultSet {
     private final boolean isMsSQL;
 	
 	private final DateFormat dateFormat;
+
 
 
 	/***
@@ -99,12 +101,12 @@ public class QuestResultset implements TupleResultSet {
 			int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
 
 			if (versionInt >= 12) 
-				dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+				dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS" , Locale.ENGLISH); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
 			else 
-				dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+				dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa" , Locale.ENGLISH); // For oracle driver v.11 and less
 		}
 		else if (isMsSQL) {
-			dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
+			dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH );
 		}
 		else
 			dateFormat = null;
@@ -288,7 +290,7 @@ public class QuestResultset implements TupleResultSet {
 					} 
 					else {
 						try {
-							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+							DateFormat df = new SimpleDateFormat("dd-MMM-yy" ,  Locale.ENGLISH);
 							java.util.Date date = df.parse(value);
 						} 
 						catch (ParseException e) {
