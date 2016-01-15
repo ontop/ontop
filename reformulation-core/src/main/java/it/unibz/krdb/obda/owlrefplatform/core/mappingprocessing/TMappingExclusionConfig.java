@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -49,7 +50,7 @@ public class TMappingExclusionConfig {
         return EMPTY;
     }
 
-    public static TMappingExclusionConfig parseFile(String fileName) throws IOException {
+    public static TMappingExclusionConfig parseFile(String fileName) {
         Set<String> classes = new HashSet<>();
         Set<String> properties = new HashSet<>();
 
@@ -83,6 +84,8 @@ public class TMappingExclusionConfig {
                     throw new IllegalArgumentException("cannot parse line (wrong arity): " + s);
                 }
             }
+        } catch(IOException ex){
+        	throw new OBDAException(ex);
         }
 
         TMappingExclusionConfig conf = new TMappingExclusionConfig(classes, properties);

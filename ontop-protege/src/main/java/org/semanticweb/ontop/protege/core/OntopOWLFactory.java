@@ -27,7 +27,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 			
 	@Nonnull
     @Override
-	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology, config);
 		} catch (Exception e){
@@ -48,7 +48,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	
 	@Nonnull
     @Override
-	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology, config);
 		} catch (Exception e){
@@ -58,7 +58,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	}
 	@Nonnull
     @Override
-	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
+	public QuestOWL createNonBufferingReasoner(@Nonnull OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology);
 		} catch (Exception e){
