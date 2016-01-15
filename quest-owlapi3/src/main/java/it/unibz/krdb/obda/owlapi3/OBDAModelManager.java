@@ -1,8 +1,9 @@
-package it.unibz.krdb.obda.io;
+package it.unibz.krdb.obda.owlapi3;
 
 
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -10,6 +11,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import java.io.IOException;
 
 public class OBDAModelManager {
+
+    public OBDAModelManager() {
+    }
 
     public OBDAModel loadOBDAModel(String obdafile) throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         OBDADataFactory fac = OBDADataFactoryImpl.getInstance();

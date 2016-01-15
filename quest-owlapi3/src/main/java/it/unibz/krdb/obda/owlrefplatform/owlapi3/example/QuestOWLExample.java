@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.OBDAModelManager;
+import it.unibz.krdb.obda.owlapi3.OBDAModelManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
