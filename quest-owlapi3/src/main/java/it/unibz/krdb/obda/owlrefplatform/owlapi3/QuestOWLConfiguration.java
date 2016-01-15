@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
+import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import javax.annotation.Nonnull;
@@ -40,7 +41,7 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
     }
 
     private QuestOWLConfiguration(Builder builder) {
-        super();
+        super(builder.progressMonitor);
 
         if (builder.excludeFromTMappings == null)
             excludeFromTMappings = TMappingExclusionConfig.empty();
@@ -54,6 +55,8 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
         userConstraints = builder.userConstraints;
         obdaModel = builder.obdaModel;
+
+
     }
 
     public static Builder builder() {
@@ -66,6 +69,7 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
         private ImplicitDBConstraintsReader userConstraints;
         private OBDAModel obdaModel;
         private QuestPreferences preferences;
+        private ReasonerProgressMonitor progressMonitor;
 
         private Builder() {
         }
@@ -80,13 +84,18 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
             return this;
         }
 
-        public Builder obdaModel(OBDAModel val) {
-            obdaModel = val;
+        public Builder obdaModel(OBDAModel obdaModel) {
+            this.obdaModel = obdaModel;
             return this;
         }
 
-        public Builder preferences(QuestPreferences val) {
-            preferences = val;
+        public Builder preferences(QuestPreferences preferences) {
+            this.preferences = preferences;
+            return this;
+        }
+
+        public Builder progressMonitor(@Nonnull ReasonerProgressMonitor progressMonitor){
+            this.progressMonitor = progressMonitor;
             return this;
         }
 

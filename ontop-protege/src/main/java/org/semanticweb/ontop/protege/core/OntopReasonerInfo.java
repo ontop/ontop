@@ -67,12 +67,10 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		if(uc == null)
 			throw new NullPointerException();
         configBuilder.dbConstraintsReader(uc);
-		//factory.setImplicitDBConstraints(uc);
 	}
 
     @Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-        return configBuilder.build();
-        //return new SimpleConfiguration(monitor);
+        return configBuilder.progressMonitor(monitor).build();
     }
 }
