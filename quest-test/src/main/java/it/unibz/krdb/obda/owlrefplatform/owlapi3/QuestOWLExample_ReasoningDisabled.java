@@ -13,7 +13,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -382,17 +381,21 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
+//        QuestOWLFactory factory = new QuestOWLFactory();
+//        factory.setOBDAController(obdaModel);
+//        factory.setPreferenceHolder(preference);
+//
+//        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
+//        factory.setExcludeFromTMappingsPredicates(config);
+
+
+        //QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
+
+        
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(preference);
-
-        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
-        factory.setExcludeFromTMappingsPredicates(config);
-
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-        this.reasoner = reasoner;
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).tMappingExclusionConfig(tMapConfig).build();
+        this.reasoner = factory.createReasoner(ontology, config);
 		/*
 		 * Prepare the data connection for querying.
 		 */

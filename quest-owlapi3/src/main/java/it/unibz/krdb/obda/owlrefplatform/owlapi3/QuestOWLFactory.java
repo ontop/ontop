@@ -73,21 +73,22 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     @Nonnull
     @Override
     public QuestOWL createReasoner(@Nonnull OWLOntology ontology) {
-        return createReasoner(ontology, QuestOWLConfig.builder().build());
-
+    	QuestPreferences preferences = new QuestPreferences();
+    	preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
+        return createReasoner(ontology, QuestOWLConfiguration.builder().preferences(preferences).build());
     }
 
     @Nonnull
     @Override
     @Deprecated
     public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
-        checkArgument(config instanceof QuestOWLConfig, "config %s is not an instance of QuestOWLConfig", config);
-        return createReasoner(ontology, (QuestOWLConfig) config);
+        checkArgument(config instanceof QuestOWLConfiguration, "config %s is not an instance of QuestOWLConfiguration", config);
+        return createReasoner(ontology, (QuestOWLConfiguration) config);
     }
 
 
     @Nonnull
-    public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull QuestOWLConfig config) throws IllegalConfigurationException {
+    public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull QuestOWLConfiguration config) throws IllegalConfigurationException {
         OBDAModel obdaModel = config.getObdaModel();
         Properties preferences = config.getPreferences();
 

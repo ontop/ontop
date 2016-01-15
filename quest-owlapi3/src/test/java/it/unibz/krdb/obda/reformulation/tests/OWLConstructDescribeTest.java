@@ -26,15 +26,13 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
-import java.sql.Connection;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -44,7 +42,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 /**
  * This unit test is for testing correctness of construct and describe queries
@@ -98,9 +95,13 @@ public class OWLConstructDescribeTest{
 			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 			QuestOWLFactory factory = new QuestOWLFactory();
 //			factory.setOBDAController(obdaModel);
-			factory.setPreferenceHolder(p);
+			//factory.setPreferenceHolder(p);
 			//reasoner.setPreferences(preferences);
-			reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+			//reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+			
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+	        reasoner = factory.createReasoner(ontology, config);
+
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
 		

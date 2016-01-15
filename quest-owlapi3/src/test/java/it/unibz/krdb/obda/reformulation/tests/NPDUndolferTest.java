@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
@@ -23,7 +24,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class NPDUndolferTest extends TestCase {
 	
@@ -257,11 +257,9 @@ public class NPDUndolferTest extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(pref);
-		
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        
 		QuestOWLConnection qconn =  reasoner.getConnection();
 		QuestOWLStatement st = qconn.createStatement();
 		
@@ -301,11 +299,9 @@ public class NPDUndolferTest extends TestCase {
 		// pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(pref);
-		
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-		
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        
 		QuestOWLConnection qconn =  reasoner.getConnection();
 		QuestOWLStatement st = qconn.createStatement();
 		
@@ -336,7 +332,7 @@ public class NPDUndolferTest extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
-		fac.setPreferenceHolder(pref);
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
 
 		QuestOWL quest = fac.createReasoner(ontology);
 		QuestOWLConnection qconn =  quest.getConnection();

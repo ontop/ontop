@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
 import it.unibz.krdb.obda.io.OBDAModelManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfig;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
@@ -66,7 +66,7 @@ public class QuestOWLExample {
          * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfig config = QuestOWLConfig.builder().obdaModel(obdaModel).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		/*

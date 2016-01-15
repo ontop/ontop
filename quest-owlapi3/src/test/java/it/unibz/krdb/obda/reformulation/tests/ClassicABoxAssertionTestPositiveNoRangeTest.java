@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
@@ -65,11 +66,15 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		
-		QuestOWLFactory fac = new QuestOWLFactory();
-		fac.setPreferenceHolder(pref);
+//		QuestOWLFactory fac = new QuestOWLFactory();
+//		fac.setPreferenceHolder(pref);
+//
+//		reasoner = (QuestOWL) fac.createReasoner(ontology);
+//		reasoner.flush();
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-		reasoner = (QuestOWL) fac.createReasoner(ontology);
-		reasoner.flush();
 
 		conn = reasoner.getConnection();
 		st = conn.createStatement();

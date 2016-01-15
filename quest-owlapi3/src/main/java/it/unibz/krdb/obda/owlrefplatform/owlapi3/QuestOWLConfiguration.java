@@ -9,7 +9,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("serial")
-public class QuestOWLConfig extends SimpleConfiguration {
+public class QuestOWLConfiguration extends SimpleConfiguration {
 
     private final TMappingExclusionConfig excludeFromTMappings;
 
@@ -39,7 +39,7 @@ public class QuestOWLConfig extends SimpleConfiguration {
         return preferences;
     }
 
-    private QuestOWLConfig(Builder builder) {
+    private QuestOWLConfiguration(Builder builder) {
         super();
 
         if (builder.excludeFromTMappings == null)
@@ -90,8 +90,8 @@ public class QuestOWLConfig extends SimpleConfiguration {
             return this;
         }
 
-        public QuestOWLConfig build() {
-            return new QuestOWLConfig(this);
+        public QuestOWLConfiguration build() {
+            return new QuestOWLConfiguration(this);
         }
     }
 }

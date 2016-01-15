@@ -12,7 +12,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,21 +56,15 @@ public class InteractiveExample {
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(preference);
-
 //		/*
 //		 * T-Mappings Handling!!
 //		 */
 //		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 
 		String outFile = "src/main/resources/davide/QueriesStdout/prova";

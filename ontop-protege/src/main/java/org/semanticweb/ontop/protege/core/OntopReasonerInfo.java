@@ -21,19 +21,26 @@ package org.semanticweb.ontop.protege.core;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 
 import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
+import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
 	OntopOWLFactory factory = new OntopOWLFactory();
 
-	@Override
+    private final QuestOWLConfiguration.Builder configBuilder = QuestOWLConfiguration.builder();
+
+    @Override
 	public BufferingMode getRecommendedBuffering() {
 		return BufferingMode.BUFFERING;
 	}
@@ -43,12 +50,12 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		return factory;
 	}
 
-	public void setPreferences(Properties preferences) {
-		factory.setPreferenceHolder(preferences);
+	public void setPreferences(QuestPreferences preferences) {
+        configBuilder.preferences(preferences);
 	}
 
 	public void setOBDAModel(OBDAModel model) {
-		factory.setOBDAController(model);
+        configBuilder.obdaModel(model);
 	}
 
 	/**
@@ -59,6 +66,13 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 	public void setImplicitDBConstraints(ImplicitDBConstraintsReader uc) {
 		if(uc == null)
 			throw new NullPointerException();
-		factory.setImplicitDBConstraints(uc);
+        configBuilder.dbConstraintsReader(uc);
+		//factory.setImplicitDBConstraints(uc);
 	}
+
+    @Override
+    public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
+        return configBuilder.build();
+        //return new SimpleConfiguration(monitor);
+    }
 }
