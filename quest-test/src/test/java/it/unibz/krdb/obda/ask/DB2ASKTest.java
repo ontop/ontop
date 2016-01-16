@@ -70,7 +70,7 @@ public class DB2ASKTest {
 		
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

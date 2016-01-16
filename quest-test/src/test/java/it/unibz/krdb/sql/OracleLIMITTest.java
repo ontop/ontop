@@ -58,8 +58,7 @@ public class OracleLIMITTest  {
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
-	private QuestOWLFactory factory;
-	
+
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String obdafile1 = "resources/oraclesql/o1.obda";
 	final String obdafile2 = "resources/oraclesql/o2.obda";
@@ -67,20 +66,13 @@ public class OracleLIMITTest  {
 
 	@Before
 	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
+        // Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 		// Loading the OBDA data
 		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
-		
-
-
-
-		
 	}
 
 	@After
@@ -99,7 +91,7 @@ public class OracleLIMITTest  {
 	    // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        reasoner = factory.createReasoner(ontology, config);
         
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
