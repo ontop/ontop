@@ -465,8 +465,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			 * Compute the an ontology with the merge of all the vocabulary and
 			 * axioms of the closure of the root ontology
 			 */
-
-			this.translatedOntologyMerge = loadOntologies(getRootOntology());
+            this.translatedOntologyMerge = loadOntologies(getRootOntology());
 
 			questready = false;
 			questException = null;
@@ -484,7 +483,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				log.error(e.getMessage(), e);
 				throw e;
 			}
-
 		} catch (Exception e) {
 			throw new ReasonerInternalException(e);
 		} finally {
