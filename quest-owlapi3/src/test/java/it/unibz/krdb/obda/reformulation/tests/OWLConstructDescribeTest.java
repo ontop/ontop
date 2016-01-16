@@ -37,6 +37,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -51,6 +52,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * both constant and uri objects. It must be clear if it's a data property or
  * object property.
  */
+@Ignore // GUOHUI: 2016-01-16 SI+Mapping mode is disabled
 public class OWLConstructDescribeTest{
 
     OWLOntology ontology = null;
