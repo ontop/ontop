@@ -138,16 +138,36 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 
 	}
-	
+
+
+    public QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration) {
+        super(rootOntology, configuration, BufferingMode.BUFFERING);
+        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
+
+        this.obdaModel = configuration.getObdaModel();
+
+        if (configuration.getUserConstraints() != null){
+            this.applyUserConstraints = true;
+            this.userConstraints = configuration.getUserConstraints();
+        }
+
+        this.excludeFromTMappings = configuration.getExcludeFromTMappings();
+
+        this.preferences = configuration.getPreferences();
+
+        this.init(rootOntology, obdaModel, configuration, preferences);
+    }
+
+
 	/***
 	 * Default constructor.
 	 */
+    @Deprecated
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences) {
 		super(rootOntology, configuration, bufferingMode);
         this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
 		this.init(rootOntology, obdaModel, configuration, preferences);
-
 	}
 
 	/**
@@ -155,6 +175,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * supplied 
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
+    @Deprecated
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraintsReader userConstraints) {
 		super(rootOntology, configuration, bufferingMode);
@@ -173,6 +194,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * should be disallowed is supplied 
 	 * @param excludeFromTMappings from TMappings User-supplied predicates for which TMappings should be forbidden
 	 */
+    @Deprecated
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, TMappingExclusionConfig excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
@@ -191,6 +213,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * supplied 
 	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
 	 */
+    @Deprecated
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraintsReader userConstraints, 
 			TMappingExclusionConfig excludeFromTMappings) {
@@ -309,7 +332,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
-				if (bObtainFromMappings) {
+				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
 
