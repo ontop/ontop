@@ -135,8 +135,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		extractVersion();
 		
 		prepareReasoner();
-
-
 	}
 
 
@@ -159,76 +157,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
     }
 
 
-	/***
-	 * Default constructor.
-	 */
-    @Deprecated
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
-		super(rootOntology, configuration, bufferingMode);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-		this.init(rootOntology, obdaModel, configuration, preferences);
-	}
-
-	/**
-	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
-	 * supplied 
-	 * @param userConstraints User-supplied primary and foreign keys
-	 */
-    @Deprecated
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraintsReader userConstraints) {
-		super(rootOntology, configuration, bufferingMode);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-
-		this.userConstraints = userConstraints;
-		assert(userConstraints != null);
-		this.applyUserConstraints = true;
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-	}
-	
-	/**
-	 * This constructor is the same as the default constructor, 
-	 * plus the list of predicates for which TMappings reasoning 
-	 * should be disallowed is supplied 
-	 * @param excludeFromTMappings from TMappings User-supplied predicates for which TMappings should be forbidden
-	 */
-    @Deprecated
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, TMappingExclusionConfig excludeFromTMappings) {
-		super(rootOntology, configuration, bufferingMode);
-		this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-		// Davide> T-Mappings handling
-		this.excludeFromTMappings = excludeFromTMappings;
-		assert(excludeFromTMappings != null);
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-
-	}
-	
-	/**
-	 * This constructor is the same as the default constructor plus the extra constraints, 
-	 * but the list of predicates for which TMappings reasoning should be disallowed is 
-	 * supplied 
-	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
-	 */
-    @Deprecated
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraintsReader userConstraints, 
-			TMappingExclusionConfig excludeFromTMappings) {
-		super(rootOntology, configuration, bufferingMode);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-		this.userConstraints = userConstraints;
-		assert(userConstraints != null);
-		this.applyUserConstraints = true;
-
-		this.excludeFromTMappings = excludeFromTMappings;
-		assert(excludeFromTMappings != null);
-		//this.applyExcludeFromTMappings = true;
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-	}
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
