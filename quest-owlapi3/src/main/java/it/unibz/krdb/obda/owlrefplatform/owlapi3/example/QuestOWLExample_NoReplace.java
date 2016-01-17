@@ -20,10 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlapi3.OBDAModelManager;
+
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.MappingLoader;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
@@ -62,7 +63,7 @@ public class QuestOWLExample_NoReplace {
 		/*
          * Load the OBDA model from an external .obda file
 		 */
-        OBDAModel obdaModel = new OBDAModelManager().loadOBDAModel(obdafile);
+        OBDAModel obdaModel = new MappingLoader().loadFromOBDAFile(obdafile);
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
