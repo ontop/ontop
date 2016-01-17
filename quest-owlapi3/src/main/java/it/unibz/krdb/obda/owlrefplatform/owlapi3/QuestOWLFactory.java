@@ -92,21 +92,19 @@ public class QuestOWLFactory implements OWLReasonerFactory {
         OBDAModel obdaModel = config.getObdaModel();
         Properties preferences = config.getPreferences();
 
-        ImplicitDBConstraintsReader userConstraints = config.getUserConstraints();
-
-        TMappingExclusionConfig excludeFromTMappings = config.getExcludeFromTMappings();
-
         if (obdaModel == null && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
             throw new IllegalConfigurationException("mappings are not specified in virtual mode", config);
         } else if (obdaModel != null && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
             throw new IllegalConfigurationException("mappings are specified in classic mode", config);
         }
 
-        if (userConstraints != null) {
-            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
-        } else {
-            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
-        }
+        return new QuestOWL(ontology, config);
+
+//        if (userConstraints != null) {
+//            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
+//        } else {
+//            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
+//        }
 
     }
 

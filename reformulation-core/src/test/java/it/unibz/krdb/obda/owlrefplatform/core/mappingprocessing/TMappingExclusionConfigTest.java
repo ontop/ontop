@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -32,7 +33,8 @@ public class TMappingExclusionConfigTest {
         assertFalse(conf.contains(voc.createClass("http://wwww.example.org/P")));
     }
 
-    @Test(expected = FileNotFoundException.class)
+    // File not found
+    @Test(expected = OBDAException.class)
     public void testNotExistingFile() throws Exception {
         TMappingExclusionConfig.parseFile("not_existing.conf");
     }

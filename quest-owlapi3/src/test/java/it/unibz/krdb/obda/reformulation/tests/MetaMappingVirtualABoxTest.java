@@ -50,6 +50,7 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,7 +173,7 @@ public class MetaMappingVirtualABoxTest {
 
 		}
 
-        try (QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();
@@ -200,7 +201,7 @@ public class MetaMappingVirtualABoxTest {
 		runTests(p);
 	}
 
-	@Test
+	@Test(expected = IllegalConfigurationException.class)
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

@@ -183,7 +183,7 @@ public class QuotedAliasTableTest {
 
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        reasonerOBDA = factory.createReasoner(ontology, config);
 
 	}
 

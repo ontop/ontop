@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
+import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
@@ -16,7 +17,6 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
     private final ImplicitDBConstraintsReader userConstraints;
 
-    @Nonnull
     private final OBDAModel obdaModel;
 
     private final QuestPreferences preferences;
@@ -30,7 +30,6 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
         return userConstraints;
     }
 
-    @Nonnull
     public OBDAModel getObdaModel() {
         return obdaModel;
     }
@@ -69,7 +68,7 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
         private ImplicitDBConstraintsReader userConstraints;
         private OBDAModel obdaModel;
         private QuestPreferences preferences;
-        private ReasonerProgressMonitor progressMonitor;
+        private ReasonerProgressMonitor progressMonitor = new NullReasonerProgressMonitor();
 
         private Builder() {
         }

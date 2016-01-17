@@ -171,7 +171,7 @@ public class ReverseURITestH2 {
 		    // Creating a new instance of the reasoner
 	        QuestOWLFactory factory = new QuestOWLFactory();
 	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-	        QuestOWL reasoner = factory.createReasoner(ontology, config);
+	        reasoner = factory.createReasoner(ontology, config);
 	        
 			// Now we are ready for querying
 			conn = reasoner.getConnection();
