@@ -74,7 +74,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	/**
 	 * 
-	 * @param templateMatcher
+	 * @param uriTemplateMatcher
 	 * @param uriRef is used only in the Semantic Index mode
 	 */
 	
@@ -578,7 +578,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
 		}
 
-		Function orAtom = buildBooleanTree(bindingCompositeTerms, OBDAVocabulary.OR);
+		Function orAtom = buildBooleanTree(bindingCompositeTerms, ExpressionOperation.OR);
 		return orAtom;
 	}
 
@@ -605,7 +605,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			Term valueTerm = getConstantExpression(binding.getValue());
 
-			Function equalityTerm = ofac.getFunction(OBDAVocabulary.EQ, variable, valueTerm);
+			Function equalityTerm = ofac.getFunction(ExpressionOperation.EQ, variable, valueTerm);
 			bindingEqualityTerms.add(equalityTerm);
 		}
 
@@ -614,7 +614,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			throw new RuntimeException("Empty binding sets are not accepted.");
 
 		}
-		return buildBooleanTree(bindingEqualityTerms, OBDAVocabulary.AND);
+		return buildBooleanTree(bindingEqualityTerms, ExpressionOperation.AND);
 	}
 
 	/**
@@ -623,7 +623,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
 	 *
 	 */
-	private Function buildBooleanTree(List<Function> booleanFctTerms, BooleanOperationPredicate booleanFunctionSymbol) {
+	private Function buildBooleanTree(List<Function> booleanFctTerms, ExpressionOperation booleanFunctionSymbol) {
 		Function topFunction = null;
 		int termNb = booleanFctTerms.size();
 		for(int i=0; i < termNb; i+=2) {

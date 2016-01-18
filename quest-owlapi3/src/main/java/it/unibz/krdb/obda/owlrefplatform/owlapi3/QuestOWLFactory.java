@@ -78,6 +78,12 @@ public class QuestOWLFactory implements OWLReasonerFactory {
         return createReasoner(ontology, QuestOWLConfiguration.builder().preferences(preferences).build());
     }
 
+    /**
+     *
+     * @deprecated use {@link #createReasoner(OWLOntology, QuestOWLConfiguration)} instead
+     *
+     * @throws IllegalConfigurationException
+     */
     @Nonnull
     @Override
     @Deprecated
@@ -99,12 +105,6 @@ public class QuestOWLFactory implements OWLReasonerFactory {
         }
 
         return new QuestOWL(ontology, config);
-
-//        if (userConstraints != null) {
-//            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
-//        } else {
-//            return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
-//        }
 
     }
 

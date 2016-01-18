@@ -76,11 +76,10 @@ public class ValuesTestVirtual {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
 
-		factory.setPreferenceHolder(new QuestPreferences());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
 
-		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
