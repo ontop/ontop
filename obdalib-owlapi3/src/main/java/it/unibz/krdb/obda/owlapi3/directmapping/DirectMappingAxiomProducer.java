@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.parser.EncodeForURI;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
@@ -29,7 +30,6 @@ import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
 import it.unibz.krdb.sql.UniqueConstraint;
 import it.unibz.krdb.sql.ForeignKeyConstraint.Component;
-
 
 import com.google.common.base.Joiner;
 
@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -258,33 +259,20 @@ public class DirectMappingAxiomProducer {
 			return df.getBNodeTemplate(vars);
 		}
 	}
-
+    
 
 	/*
 	 * percent encoding for a String
 	 */
 	private static String percentEncode(String pe) {
-		pe = pe.replace("#", "%23");
-		pe = pe.replace(".", "%2E");
-		pe = pe.replace("-", "%2D");
-		pe = pe.replace("/", "%2F");
-		pe = pe.replace(" ", "%20");
-		pe = pe.replace("!", "%21");
-		pe = pe.replace("$", "%24");
-		pe = pe.replace("&", "%26");
+
 		pe = pe.replace("'", "%27");
-		pe = pe.replace("(", "%28");
-		pe = pe.replace(")", "%29");
-		pe = pe.replace("*", "%2A");
-		pe = pe.replace("+", "%2B");
-		pe = pe.replace(",", "%2C");
-		pe = pe.replace(":", "%3A");
-		pe = pe.replace(";", "%3B");
-		pe = pe.replace("=", "%3D");
-		pe = pe.replace("?", "%3F");
-		pe = pe.replace("@", "%40");
-		pe = pe.replace("[", "%5B");
-		pe = pe.replace("]", "%5D");
+		pe = pe.replace("-", "%2D");
+		pe = pe.replace(".", "%2E");
+		for (Entry<String, String> e : EncodeForURI.TABLE.entrySet())
+			if (!e.getKey().equals("%22"))
+				pe = pe.replace(e.getValue(), e.getKey());
+
 		return pe;
 	}
 

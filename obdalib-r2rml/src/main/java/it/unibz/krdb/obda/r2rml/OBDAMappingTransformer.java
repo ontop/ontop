@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.r2rml;
 
 import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -37,8 +38,10 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 /**
@@ -212,7 +215,8 @@ public class OBDAMappingTransformer {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-					}else if (objectPred instanceof DatatypePredicate) {
+					}
+					else if (objectPred instanceof DatatypePredicate) {
 						Term objectTerm = ((Function) object).getTerm(0);
 
 						if (objectTerm instanceof Variable) {
@@ -263,7 +267,7 @@ public class OBDAMappingTransformer {
 			mapping_id = "http://example.org/" + mapping_id;
 		Resource mainNode = vf.createURI(mapping_id);
 
-		R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
 		
 		//Table
@@ -343,7 +347,8 @@ public class OBDAMappingTransformer {
                             obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
                             //set the datatype for the typed literal
 
-                            Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            //Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            Collection<OWLDataRange> ranges = EntitySearcher.getRanges(dataProperty, ontology);
                             //assign the datatype if present
                             if (ranges.size() == 1) {
                                 IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
@@ -357,16 +362,19 @@ public class OBDAMappingTransformer {
                     //we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
-				} else if (object instanceof Function) { //we create a template
+				} 
+ 				else if (object instanceof Function) { //we create a template
 					//check if uritemplate
- 					Predicate objectPred = ((Function) object).getFunctionSymbol();
+ 					Function o = (Function) object;
+ 					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
 						//obm.setTemplate(mfact.createTemplate(objectURI));
 						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-					}else if (objectPred.isDataTypePredicate()) {
+					}
+					else if (o.isDataTypeFunction()) {
 						Term objectTerm = ((Function) object).getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
@@ -410,8 +418,7 @@ public class OBDAMappingTransformer {
 							StringBuilder sb = new StringBuilder();
 							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
 							
-							if (functionSymbol instanceof StringOperationPredicate){ //concat
-								
+							if (functionSymbol == ExpressionOperation.CONCAT) { //concat						
 								List<Term> terms = ((Function)objectTerm).getTerms();
 								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
 								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));

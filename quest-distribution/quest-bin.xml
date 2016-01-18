@@ -72,13 +72,7 @@
 		<dependencySet>
 			<outputDirectory>/lib</outputDirectory>
 			<excludes>
-				<exclude>quest-distribution*</exclude>
-				<exclude>antlr*</exclude>
-				<exclude>postgres*</exclude>
-				<exclude>mysql*</exclude>
 				<exclude>com.h2database:h2*</exclude>
-				<exclude>log4j*</exclude>
-				<exclude>org.slf4j:slf4j-log4j12*</exclude>
 			</excludes>
 		</dependencySet>
 
@@ -86,7 +80,6 @@
 			<outputDirectory>/jdbc</outputDirectory>
 			<includes>
 				<include>com.h2database:h2*</include>
-				<include>postgres*</include>
 			</includes>
 		</dependencySet>
 

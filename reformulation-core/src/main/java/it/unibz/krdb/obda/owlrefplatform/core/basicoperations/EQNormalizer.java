@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -35,7 +36,7 @@ public class EQNormalizer {
 			Function atom = body.get(i);
 			SubstitutionUtilities.applySubstitution(atom, mgu);
 
-            if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
+            if (atom.getFunctionSymbol() == ExpressionOperation.EQ) {
                 if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
                     continue;
 
@@ -43,7 +44,7 @@ public class EQNormalizer {
                 i--;
             }
             //search for nested equalities in AND function
-            else if (atom.getFunctionSymbol() == OBDAVocabulary.AND) {
+            else if (atom.getFunctionSymbol() == ExpressionOperation.AND) {
                 nestedEQSubstitutions(atom, mgu);
 
                 //we remove the function if empty because all its terms were equalities
@@ -82,7 +83,7 @@ public class EQNormalizer {
                 SubstitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
-                if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                if (t2.getFunctionSymbol() == ExpressionOperation.EQ) {
                     if (!mgu.composeTerms(t2.getTerm(0), t2.getTerm(1)))
                         continue;
                     
@@ -91,7 +92,7 @@ public class EQNormalizer {
                 }
                 //consider the case of  AND function. Calls recursive method to consider nested equalities
                 else {
-                    if (t2.getFunctionSymbol() == OBDAVocabulary.AND) {
+                    if (t2.getFunctionSymbol() == ExpressionOperation.AND) {
                         nestedEQSubstitutions(t2, mgu);
 
                         //we remove the function if empty because all its terms were equalities

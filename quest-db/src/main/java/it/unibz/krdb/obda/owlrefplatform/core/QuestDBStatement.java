@@ -28,22 +28,16 @@ import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.QueryParser;
-import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -94,18 +88,12 @@ public class QuestDBStatement implements OBDAStatement {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				
-				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos, st.questInstance.getVocabulary()), 
-								st.questInstance.getReasoner());
-				
-				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.questInstance.getVocabulary());
+				result = st.insertData(aBoxIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
-				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
-				
-				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+				result = st.insertData(it, /*useFile,*/ commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -214,7 +202,8 @@ public class QuestDBStatement implements OBDAStatement {
 	 */
 	
 	public String getSQL(String query) throws Exception {
-		return st.getUnfolding(query);
+		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 
+		return st.questInstance.getEngine().getSQL(pq);
 	}
 
 	@Override
@@ -223,13 +212,7 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getRewriting(String query) throws Exception {
-		
-		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-		
-		//SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
-		//List<String> signatureContainer = tr.getSignature(pq);
-		
-		return st.getRewriting(pq/*, signatureContainer*/);
+		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 
+		return st.questInstance.getEngine().getRewriting(pq);
 	}
 }

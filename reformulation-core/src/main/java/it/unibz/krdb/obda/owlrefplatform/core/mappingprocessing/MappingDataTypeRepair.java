@@ -23,20 +23,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.*;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.Relation2DatalogPredicate;
-
+import it.unibz.krdb.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class MappingDataTypeRepair {
 
@@ -133,7 +133,7 @@ public class MappingDataTypeRepair {
      * the data-type in the mapping, this method simply accepts the function
      * symbol.
      *
-     * @param mappingRules
+     * @param rule
      *            The set of mapping axioms.
      * @throws OBDAException
      */
@@ -165,7 +165,7 @@ public class MappingDataTypeRepair {
              if present or the information from the database will be used.
              */
 
-            else if (functionSymbol.isStringOperationPredicate() || functionSymbol.isArithmeticPredicate()) {
+            else if (function.isOperation()) {
 
             	Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
@@ -184,7 +184,7 @@ public class MappingDataTypeRepair {
                         insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
             } 
-            else if (functionSymbol.isDataTypePredicate()) {
+            else if (function.isDataTypeFunction()) {
 
                 Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
@@ -205,6 +205,7 @@ public class MappingDataTypeRepair {
                         //No Boolean datatype in DB2 database, the value in the database is used
                         Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                         Term newTerm = fac.getTypedTerm(variable, type);
+                        log.warn("Datatype for the value " +variable + "of the property "+ predicate+ "has been inferred from the database");
                         atom.setTerm(position, newTerm);
                     }
                 }
@@ -228,6 +229,7 @@ public class MappingDataTypeRepair {
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
                 Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                 newTerm = fac.getTypedTerm(variable, type);
+                log.warn("Datatype for the value " +variable + "of the property "+ predicate+ "has been inferred from the database");
             } 
             else {
                 Predicate replacement = dataType.getPredicate();
@@ -271,6 +273,8 @@ public class MappingDataTypeRepair {
      */
     
 	private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable) throws OBDAException {
+
+
 		List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
 		if (list == null) 
 			throw new OBDAException("Unknown term in head");
@@ -279,7 +283,7 @@ public class MappingDataTypeRepair {
 		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
 		IndexedPosititon ip = list.get(0);
 
-		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(ip.atom.getFunctionSymbol());
+		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 

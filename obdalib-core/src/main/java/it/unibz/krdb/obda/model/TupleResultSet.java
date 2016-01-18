@@ -28,17 +28,18 @@ public interface TupleResultSet extends ResultSet{
 	 * ResultSet management functions
 	 */
 
-	public int getColumnCount() throws OBDAException;
+	int getColumnCount();
 
-	public List<String> getSignature() throws OBDAException;
+	List<String> getSignature();
 
-	public int getFetchSize() throws OBDAException;
+	int getFetchSize() throws OBDAException;
 
-	public void close() throws OBDAException;
+	@Override
+    void close() throws OBDAException;
 
-	public OBDAStatement getStatement();
+	OBDAStatement getStatement();
 
-	public boolean nextRow() throws OBDAException;
+	boolean nextRow() throws OBDAException;
 
 	/*
 	 * Main data fetching functions
@@ -48,11 +49,11 @@ public interface TupleResultSet extends ResultSet{
 	 * Returns the constant at column "column" recall that columns start at index 1.
 	 * 
 	 * @param column The column index of the value to be returned, start at 1
-	 * @return
+	 * @return a constant
 	 * @throws OBDAException
 	 */
-	public Constant getConstant(int column) throws OBDAException;
+    Constant getConstant(int column) throws OBDAException;
 
-	public Constant getConstant(String name) throws OBDAException;
+	Constant getConstant(String name) throws OBDAException;
 
 }

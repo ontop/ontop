@@ -28,14 +28,13 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
@@ -121,7 +120,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		}
 		closure = man.getImportsClosure(owlontology);
-		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
+		return OWLAPITranslatorUtility.mergeTranslateOntologies(closure);
 	}
 
 
@@ -156,11 +155,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getVocabulary());
-			EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
-			
-			int count = st.insertData(aBoxNormalIter, 5000, 500);
+			OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(closure, questInstance.getVocabulary());
+			int count = st.insertData(aBoxIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}
 		if (bObtainFromMappings) {
@@ -180,7 +176,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (!conn.getAutoCommit())
 			conn.commit();
 		
-		questInstance.updateSemanticIndexMappings();
+		//questInstance.updateSemanticIndexMappings();
 
 		log.debug("Store {} has been created successfully", name);
 	}

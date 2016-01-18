@@ -20,40 +20,16 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Datatype;
-import it.unibz.krdb.obda.ontology.DescriptionBT;
-import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
-import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.ontology.NaryAxiom;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.BinaryAxiom;
+import it.unibz.krdb.obda.ontology.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.*;
 
 public class OntologyImpl implements Ontology {
 
@@ -155,6 +131,7 @@ public class OntologyImpl implements Ontology {
 	private final List<ClassAssertion> classAssertions = new ArrayList<>();
 	private final List<ObjectPropertyAssertion> objectPropertyAssertions = new ArrayList<>();
 	private final List<DataPropertyAssertion> dataPropertyAssertions = new ArrayList<>();
+	private final List<AnnotationAssertion> annotationAssertions = new ArrayList<>();
 
 	// auxiliary symbols (for normalization)
 	
@@ -169,6 +146,7 @@ public class OntologyImpl implements Ontology {
 	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
 	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
 	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
+	private static final String ANNOTATION_PROPERTY_NOT_FOUND = "AnnotationProperty not found: ";
 	
 	public static final ImmutableMap<String, Datatype> OWL2QLDatatypes;
 	
@@ -241,6 +219,7 @@ public class OntologyImpl implements Ontology {
 		final ImmutableMap<String, OClass> concepts;
 		final ImmutableMap<String, ObjectPropertyExpression> objectProperties;
 		final ImmutableMap<String, DataPropertyExpression> dataProperties;
+		final ImmutableMap<String, AnnotationProperty> annotationProperties;
 		
 		ImmutableOntologyVocabularyImpl(OntologyVocabularyImpl voc) {
 			concepts = ImmutableMap.<String, OClass>builder()
@@ -255,6 +234,8 @@ public class OntologyImpl implements Ontology {
 				.putAll(voc.dataProperties)
 				.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty)
 				.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty).build();
+			annotationProperties  = ImmutableMap.<String, AnnotationProperty>builder()
+					.putAll(voc.annotationProperties).build();
 		}
 		
 		@Override
@@ -281,8 +262,15 @@ public class OntologyImpl implements Ontology {
 			return dpe;
 		}
 
-		
-		
+		@Override
+		public AnnotationProperty getAnnotationProperty(String uri) {
+			AnnotationProperty ap = annotationProperties.get(uri);
+			if (ap == null)
+				throw new RuntimeException(ANNOTATION_PROPERTY_NOT_FOUND + uri);
+			return ap;
+		}
+
+
 		@Override
 		public boolean containsClass(String uri) {
 			return concepts.containsKey(uri);
@@ -299,6 +287,11 @@ public class OntologyImpl implements Ontology {
 		}
 
 		@Override
+		public boolean containsAnnotationProperty(String uri) {
+			return annotationProperties.containsKey(uri);
+		}
+
+		@Override
 		public Collection<OClass> getClasses() {
 			return concepts.values();
 		}
@@ -311,6 +304,11 @@ public class OntologyImpl implements Ontology {
 		@Override
 		public Collection<DataPropertyExpression> getDataProperties() {
 			return dataProperties.values();
+		}
+
+		@Override
+		public Collection<AnnotationProperty> getAnnotationProperties() {
+			return annotationProperties.values();
 		}
 
 		@Override
@@ -589,8 +587,14 @@ public class OntologyImpl implements Ontology {
 		checkSignature(assertion.getProperty());
 		dataPropertyAssertions.add(assertion);
 	}
-	
-	
+
+	@Override
+	public void addAnnotationAssertion(AnnotationAssertion assertion) {
+		checkSignature(assertion.getProperty());
+		annotationAssertions.add(assertion);
+	}
+
+
 	@Override 
 	public List<ClassAssertion> getClassAssertions() {
 		return Collections.unmodifiableList(classAssertions);
@@ -604,6 +608,11 @@ public class OntologyImpl implements Ontology {
 	@Override 
 	public List<DataPropertyAssertion> getDataPropertyAssertions() {
 		return Collections.unmodifiableList(dataPropertyAssertions);
+	}
+
+	@Override
+	public List<AnnotationAssertion> getAnnotationAssertions() {
+		return Collections.unmodifiableList(annotationAssertions);
 	}
 
 	@Override
@@ -672,7 +681,8 @@ public class OntologyImpl implements Ontology {
 		 			objectPropertyAxioms.inclusions.size() + dataPropertyAxioms.inclusions.size()))
 			.append(String.format(" Classes: %d", vocabulary.getClasses().size()))
 			.append(String.format(" Object Properties: %d", vocabulary.getObjectProperties().size()))
-			.append(String.format(" Data Properties: %d]", vocabulary.getDataProperties().size()));
+			.append(String.format(" Data Properties: %d]", vocabulary.getDataProperties().size()))
+		    .append(String.format(" Annotation Properties: %d]", vocabulary.getAnnotationProperties().size()));
 		return str.toString();
 	}
 
@@ -729,6 +739,11 @@ public class OntologyImpl implements Ontology {
 	private void checkSignature(DataPropertyExpression prop) {
 		if (!vocabulary.containsDataProperty(prop.getName()))
 			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
+	}
+
+	private void checkSignature(AnnotationProperty prop) {
+		if (!vocabulary.containsAnnotationProperty(prop.getName()))
+			throw new IllegalArgumentException(ANNOTATION_PROPERTY_NOT_FOUND + prop);
 	}
 
 }

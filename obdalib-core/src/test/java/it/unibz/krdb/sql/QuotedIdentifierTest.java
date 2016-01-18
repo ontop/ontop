@@ -18,11 +18,11 @@ public class QuotedIdentifierTest {
 	@Test
 	public void test1() {
 		
-		assertEquals(QuotedID.createIdFromDatabaseRecord("A").getSQLRendering(), "\"A\"");
+		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "A").getSQLRendering(), "\"A\"");
 
-		assertEquals(QuotedID.createIdFromDatabaseRecord("abc").getSQLRendering(), "\"abc\"");
+		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "abc").getSQLRendering(), "\"abc\"");
 
-		assertEquals(QuotedID.createIdFromDatabaseRecord(null).getSQLRendering(), null);
+		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, null).getSQLRendering(), null);
 
 		assertEquals(fac.createAttributeID("A").getSQLRendering(), "A");
 
@@ -34,9 +34,9 @@ public class QuotedIdentifierTest {
 
 		assertEquals(fac.createAttributeID(null).getSQLRendering(), null);
 
-		assertEquals(RelationID.createRelationIdFromDatabaseRecord(null, "A").getSQLRendering(), "\"A\"");
+		assertEquals(RelationID.createRelationIdFromDatabaseRecord(fac, null, "A").getSQLRendering(), "\"A\"");
 		
-		assertEquals(RelationID.createRelationIdFromDatabaseRecord("S", "A").getSQLRendering(), "\"S\".\"A\"");
+		assertEquals(RelationID.createRelationIdFromDatabaseRecord(fac, "S", "A").getSQLRendering(), "\"S\".\"A\"");
 		
 		//assertEquals(fac.createRelationFromString("S.A").getSQLRendering(), "S.A");
 		

@@ -44,9 +44,7 @@ import java.util.*;
  * 
  * @author mariano
  */
-public class DatalogUnfolder implements UnfoldingMechanism {
-
-	private static final long serialVersionUID = 6088558456135748487L;
+public class DatalogUnfolder {
 
 	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
@@ -67,10 +65,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	private final Set<Predicate> extensionalPredicates = new HashSet<>();
 
+	// LeftJoinUnfoldingTest only
+	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram) {
 		this(unfoldingProgram, HashMultimap.<Predicate, List<Integer>>create());
 	}
 
+	// QuestUnfilder only 
+	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
 		this.primaryKeys = primaryKeys;
 		
@@ -98,14 +100,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	private final void collectPredicates(Set<Predicate> predicates, Function atom) {
-		Predicate pred = atom.getFunctionSymbol();
-		if (pred instanceof AlgebraOperatorPredicate) {
+		if (atom.isAlgebraFunction()) {
 			for (Term innerTerm : atom.getTerms()) 
 				if (innerTerm instanceof Function)
 					collectPredicates(predicates, (Function) innerTerm);
 		} 
-		else if (!(pred instanceof BooleanOperationPredicate))
+		else if (!(atom.isOperation())) {
+			Predicate pred = atom.getFunctionSymbol();
 			predicates.add(pred);
+		}
 	}
 
 	/***
@@ -170,10 +173,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * with respect to the program given when this unfolder was initialized. The goal for
 	 * this partial evaluation is the predicate <b>ans1</b>
 	 * 
-	 * @param targetPredicate IS IGNORED
 	 */
-	@Override
-	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
+	public DatalogProgram unfold(DatalogProgram inputquery) {
 
 		List<CQIE> workingSet = new LinkedList<>();
 		for (CQIE query : inputquery.getRules()) 
@@ -186,9 +187,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		
 		// We need to enforce equality again, because at this point it is 
 		//  possible that there is still some EQ(...) 
-		for (CQIE query : workingSet)
+		for (CQIE query : workingSet) {
 			EQNormalizer.enforceEqualities(query);
-
+			UniqueConstraintOptimizer.selfJoinElimination(query, primaryKeys);
+		}
+			
 		DatalogProgram result = termFactory.getDatalogProgram(inputquery.getQueryModifiers());
 		result.appendRule(workingSet);
 
@@ -1446,29 +1449,25 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			Collection<List<Integer>> pKeys = primaryKeys.get(newatom.getFunctionSymbol());
 
             for(List<Integer> pKey : pKeys){
-
-                if (!(pKey != null && !pKey.isEmpty())) {
-                    // no pkeys for this predicate
+                // no pkeys for this predicate
+                if (pKey == null || pKey.isEmpty()) 
                     continue;
-                }
+                
                 /*
                  * the predicate has a primary key, looking for candidates for
                  * unification, when we find one we can stop, since the application
                  * of this optimization at each step of the derivation tree
                  * guarantees there wont be any other redundant atom.
                  */
-                Function replacement = null;
-
-				Substitution mgu1 = null;
+				Substitution mgu = null;
+				
                 for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
                     Function tempatom = innerAtoms.get(idx2);
 
-                    if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) {
-                        /*
-                         * predicates are different, atoms cant be unified
-                         */
+                    // predicates are different, atoms cannot be unified
+                    if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) 
                         continue;
-                    }
+                    
 
                     boolean redundant = true;
                     for (Integer termidx2 : pKey) {
@@ -1477,29 +1476,24 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                             break;
                         }
                     }
-
+                    
                     if (redundant) {
-                        /* found a candidate replacement atom */
-                        mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
-                        if (mgu1 != null) {
-                            replacement = tempatom;
+                        // found a candidate replacement atom */
+                        mgu = UnifierUtilities.getMGU(newatom, tempatom);
+                        if (mgu != null) 
                             break;
-                        }
                     }
 
                 }
 
-                if (replacement == null)
+                if (mgu == null)
                     continue;
-
-                if (mgu1 == null)
-                    throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
 
 				if (currentAtom.isAlgebraFunction() && (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)) {
 					continue;
                 }
 
-				SubstitutionUtilities.applySubstitution(partialEvalution, mgu1, false);
+				SubstitutionUtilities.applySubstitution(partialEvalution, mgu, false);
                 innerAtoms.remove(newatomidx);
                 newatomidx -= 1;
                 newatomcount -= 1;
@@ -1541,10 +1535,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			for (int newatomidx = 0; newatomidx < innerAtoms.size(); newatomidx++) {
 
 				Function newatom = innerAtoms.get(newatomidx);
-				if (!newatom.isBooleanFunction())
-					continue;
-
-				if (!newatom.getFunctionSymbol().equals(OBDAVocabulary.IS_NOT_NULL))
+				if (newatom.getFunctionSymbol() != ExpressionOperation.IS_NOT_NULL)
 					continue;
 
 				Function replacement = null;

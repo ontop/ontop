@@ -90,7 +90,8 @@ public class QuestDB {
 		 * Called when System.exit() is called or Control+C happens.
 		 */
 		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
+			@Override
+            public void run() {
 				log.info("Shutting down.");
 
 				/*
@@ -102,7 +103,7 @@ public class QuestDB {
 		});
 	}
 
-	public static void main(String argsp[]) {
+	public static void main(String args[]) {
 		QuestDB db = new QuestDB();
 	}
 

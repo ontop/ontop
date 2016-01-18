@@ -33,14 +33,12 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
 import java.security.MessageDigest;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
@@ -80,15 +78,12 @@ public class BindTestWithFunctionsPostgreSQL {
 	}
 
 
-    private void runTests(Properties p, String query) throws Exception {
+    private void runTests(QuestPreferences p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -323,10 +318,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL Tutorial\"");
-        expectedValues.add("\"e Semantic Web\"");
-        expectedValues.add("\"ime and Punishment\"");
-        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"");
+        expectedValues.add("\"ARQL Tutorial\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Semantic Web\"@en");
+        expectedValues.add("\"ime and Punishment\"@en");
+        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -350,10 +345,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"ARQL T\"");
-        expectedValues.add("\"e Sema\"");
-        expectedValues.add("\"ime an\"");
-        expectedValues.add("\"e Logi\"");
+        expectedValues.add("\"ARQL T\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Sema\"@en");
+        expectedValues.add("\"ime an\"@en");
+        expectedValues.add("\"e Logi\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
@@ -458,8 +453,8 @@ public class BindTestWithFunctionsPostgreSQL {
              + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\""); 
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"");        
+        expectedValues.add("\"The Semantic Web\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly 
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");        
 
         checkReturnedValues(p, queryBind, expectedValues);
     }
@@ -571,10 +566,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
          List<String> expectedValues = new ArrayList<>();
-         expectedValues.add("\"\"");
-         expectedValues.add("\"The Seman\"");
-         expectedValues.add("\"\"");
-         expectedValues.add("\"The Logic Book: Introduc\"");
+         expectedValues.add("\"\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+         expectedValues.add("\"The Seman\"@en"); 
+         expectedValues.add("\"\"@en");
+         expectedValues.add("\"The Logic Book: Introduc\"@en");
          checkReturnedValues(p, queryBind, expectedValues);
 
     }
@@ -600,10 +595,10 @@ public class BindTestWithFunctionsPostgreSQL {
 
 
         List<String> expectedValues = new ArrayList<>();
-         expectedValues.add("\"\"");
-         expectedValues.add("\" Semantic Web\"");
-         expectedValues.add("\"\"");
-         expectedValues.add("\" Logic Book: Introduction, Second Edition\"");
+         expectedValues.add("\"\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
+         expectedValues.add("\" Semantic Web\"@en");
+         expectedValues.add("\"\"@en");
+         expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
 
     } //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
@@ -895,13 +890,9 @@ public class BindTestWithFunctionsPostgreSQL {
         private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
+        	QuestOWLFactory factory = new QuestOWLFactory();
+            QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+            QuestOWL reasoner = factory.createReasoner(ontology, config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();

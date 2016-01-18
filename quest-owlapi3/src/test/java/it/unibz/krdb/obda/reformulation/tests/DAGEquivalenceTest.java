@@ -24,7 +24,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
@@ -59,7 +59,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/test.owl#";
-		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
@@ -116,7 +116,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/Ontology1314774461138.owl#";
-		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
@@ -173,7 +173,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG

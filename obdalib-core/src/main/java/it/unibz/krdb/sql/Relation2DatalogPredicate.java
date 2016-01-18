@@ -11,8 +11,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 public class Relation2DatalogPredicate {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	
-	public static Function getAtom(RelationDefinition r, List<Term> terms) {
+
+	public static Predicate createPredicateFromRelation(RelationDefinition r) {
 		RelationID id = r.getID();
 		
 		String name = id.getSchemaName();
@@ -21,10 +21,15 @@ public class Relation2DatalogPredicate {
 		else
 			name = name + "." + id.getTableName();
 		
+		Predicate pred = fac.getPredicate(name, r.getAttributes().size());
+		return pred;
+	}
+	
+	public static Function getAtom(RelationDefinition r, List<Term> terms) {
 		if (r.getAttributes().size() != terms.size())
 			throw new IllegalArgumentException("The number of terms does not match the ariry of relation");
 		
-		Predicate pred = fac.getPredicate(name, terms.size());
+		Predicate pred = createPredicateFromRelation(r);
 		return fac.getFunction(pred, terms);
 	}
 	
@@ -35,14 +40,14 @@ public class Relation2DatalogPredicate {
 	 */
 	
 	
-	public static RelationID createRelationFromPredicateName(Predicate predicate) {
+	public static RelationID createRelationFromPredicateName(QuotedIDFactory idfac, Predicate predicate) {
 		String s = predicate.getName();
 		
 		// ROMAN (7 Oct 2015): a better way of splitting is probably needed here
 		String[] names = s.split("\\.");
 		if (names.length == 1)
-			return RelationID.createRelationIdFromDatabaseRecord(null, s);
+			return RelationID.createRelationIdFromDatabaseRecord(idfac, null, s);
 		else
-			return RelationID.createRelationIdFromDatabaseRecord(names[0], names[1]);			
+			return RelationID.createRelationIdFromDatabaseRecord(idfac, names[0], names[1]);			
 	}	
 }

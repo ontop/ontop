@@ -26,9 +26,9 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.StringOperationPredicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
@@ -157,11 +157,11 @@ public class TargetQueryRenderer {
 	 */
 	private static String getDisplayName(Term term, PrefixManager prefixManager) {
 		StringBuilder sb = new StringBuilder();
-		if (term instanceof FunctionalTermImpl) {
-			FunctionalTermImpl function = (FunctionalTermImpl) term;
+		if (term instanceof Function) {
+			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
-			if (functionSymbol instanceof DatatypePredicate) {
+			if (function.isDataTypeFunction()) {
 				// if the function symbol is a data type predicate
 				if (dtfac.isLiteral(functionSymbol)) {
 					// if it is rdfs:Literal
@@ -218,13 +218,15 @@ public class TargetQueryRenderer {
 					sb.append(">");
 				}		
 				}
-			} else if (functionSymbol instanceof StringOperationPredicate) { //Concat
+			} 
+			else if (functionSymbol == ExpressionOperation.CONCAT) { //Concat
 				List<Term> terms = function.getTerms();
 				sb.append("\"");
 				getNestedConcats(sb, terms.get(0),terms.get(1));
 				sb.append("\"");
 				//sb.append("^^rdfs:Literal");
-			} else { // for any ordinary function symbol
+			} 
+			else { // for any ordinary function symbol
 				sb.append(fname);
 				sb.append("(");
 				boolean separator = false;

@@ -33,12 +33,14 @@ package it.unibz.krdb.sql;
 
 public class QuotedIDFactoryIdentity implements QuotedIDFactory {
 
+	private final String quotationString; 
+	
 	/**
 	 * used only in DBMetadataExtractor
 	 */
 	
-	QuotedIDFactoryIdentity() {
-		// NO-OP
+	QuotedIDFactoryIdentity(String quotationString) {
+		this.quotationString = quotationString;
 	}
 
 	@Override
@@ -56,14 +58,19 @@ public class QuotedIDFactoryIdentity implements QuotedIDFactory {
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
 		if (s.startsWith("\"") && s.endsWith("\"")) 
-			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
 		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
 		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
 		if (s.startsWith("'") && s.endsWith("'")) 
-			return new QuotedID(s.substring(1, s.length() - 1), QuotedID.QUOTATION);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION);
+	}
+
+	@Override
+	public String getIDQuotationString() {
+		return quotationString;
 	}
 }

@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -43,7 +43,7 @@ public class DAGLoopTest {
 	Ontology onto;
 	@Before
 	public void setUp() throws Exception {
-		onto = OWLAPI3TranslatorUtility.loadOntologyFromFile("src/test/resources/test/dag/final_project_original.owl");
+		onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/dag/final_project_original.owl");
 	}
 
 	

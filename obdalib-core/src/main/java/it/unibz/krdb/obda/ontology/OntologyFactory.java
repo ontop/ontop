@@ -89,4 +89,14 @@ public interface OntologyFactory {
 	 */
 	
 	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
+
+	/**
+	 * Creates an annotation property assertion
+	 *Temporary solution without information about the values
+	 */
+
+//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
+
+
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
 }

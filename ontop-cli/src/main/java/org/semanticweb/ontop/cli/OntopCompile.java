@@ -20,7 +20,7 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-import com.github.rvesse.airline.Command;
+import com.github.rvesse.airline.annotations.Command;
 
 @Command(name = "compile",
         description = "compile the ontology axioms into  mappings",

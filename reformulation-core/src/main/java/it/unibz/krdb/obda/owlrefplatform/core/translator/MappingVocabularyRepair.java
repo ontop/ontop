@@ -20,30 +20,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatatypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import it.unibz.krdb.obda.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
@@ -92,7 +75,11 @@ public class MappingVocabularyRepair {
 		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
 			urimap.put(p.getName(), p.getPredicate());
 
-		Collection<OBDAMappingAxiom> result = new LinkedList<>();
+		for (AnnotationProperty p : vocabulary.getAnnotationProperties())
+			urimap.put(p.getName(), p.getPredicate());
+
+
+		Collection<OBDAMappingAxiom> result = new ArrayList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			List<Function> targetQuery = mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
@@ -101,7 +88,7 @@ public class MappingVocabularyRepair {
 				Predicate p = atom.getFunctionSymbol();
 
 				/* Fixing terms */
-				List<Term> newTerms = new LinkedList<>();
+				List<Term> newTerms = new ArrayList<>();
 				for (Term term : atom.getTerms()) {
 					newTerms.add(fixTerm(term));
 				}
@@ -143,8 +130,15 @@ public class MappingVocabularyRepair {
 								}
 							} 
 							else  {
-								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
-								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName());
+								// In case we want to support as data property the cases that we don't understand how they have been defined.
+//								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
+//								System.err.println("refers to mapping:" + mapping);
+//								System.err.println("Treated as a data property");
+//								Predicate pred = dfac.getDataPropertyPredicate(p.getName());
+//								newatom = dfac.getFunction(pred, getNormalTerm(t1), t2);
+
+								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName()
+								                                   +"\n refers to mapping: \n" + mapping);
 							}
 						}
 						else  {
@@ -162,19 +156,33 @@ public class MappingVocabularyRepair {
 					if (newTerms.size() == 1) {
 						newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)));
 					}
-					else if (newTerms.size() == 2) {
-						if (predicate.isObjectProperty()) {
-							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));							
+					else if (newTerms.size() == 2)
+					{
+						if (predicate.isObjectProperty())
+						{
+							newatom = dfac.getFunction(p, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));
 						}
-						else {
-							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));							
+						else
+						{
+								if(predicate.isAnnotationProperty())
+								{
+									//use the value of p as defined in the mappings (can be object or data property)
+
+									newatom = dfac.getFunction(p, getNormalTerm(newTerms.get(0)), newTerms.get(1));
+								}
+							else
+								{
+								newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));
+								}
 						}
 					}
-					else 
-						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());			
+					else
+					{
+						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
+					}
 				}
 
-				newbody.add(newatom);
+ 				newbody.add(newatom);
 			} //end for
 			
 			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), 

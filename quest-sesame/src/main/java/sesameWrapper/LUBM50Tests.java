@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
@@ -177,8 +178,6 @@ public class LUBM50Tests {
 
 	public void test3InitializingQuest() throws Exception {
 
-		QuestOWLFactory fac = new QuestOWLFactory();
-
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -190,9 +189,11 @@ public class LUBM50Tests {
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
 
-		fac.setPreferenceHolder(pref);
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL quest = factory.createReasoner(ontology, config);
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		
 
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
 

@@ -1,9 +1,11 @@
-sudo: required
+#sudo: required
+
+sudo: false
 
 language: java
 
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
 services:
   - docker

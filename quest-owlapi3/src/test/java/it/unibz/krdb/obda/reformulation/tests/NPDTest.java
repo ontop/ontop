@@ -22,6 +22,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
@@ -31,7 +32,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,13 +106,12 @@ public class NPDTest {
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 		pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.FALSE);
 
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(pref);
-		
 		setupDatabase();
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(owlOnto, config);
 		
-		QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
+		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
 	
 
 			String q12 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
