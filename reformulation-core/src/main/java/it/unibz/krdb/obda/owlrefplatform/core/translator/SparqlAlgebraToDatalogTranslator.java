@@ -36,6 +36,8 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.query.Binding;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.parser.ParsedGraphQuery;
@@ -72,7 +74,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	/**
 	 * 
-	 * @param templateMatcher
+	 * @param uriTemplateMatcher
 	 * @param uriRef is used only in the Semantic Index mode
 	 */
 	
@@ -175,7 +177,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		} 
 		else if (te instanceof Extension) { 
 			return translate((Extension) te, pr, newHeadName);
-		} 
+		}
+		else if (te instanceof BindingSetAssignment) {
+			return createFilterValuesAtom((BindingSetAssignment)te);
+		}
 		
 		try {
 			throw new QueryEvaluationException("Operation not supported: " + te);
@@ -252,7 +257,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		Function newHeadAtom = ofac.getFunction(rule.getHead().getFunctionSymbol(), varList);
 		return newHeadAtom;
-	}		    
+	}
+
 
 	/**
 	 * EXPR_1 UNION EXPR_2
@@ -550,6 +556,91 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		
 		return result;
+	}
+
+	/**
+	 * Creates a "FILTER" atom out of VALUES bindings.
+	 */
+	private Function createFilterValuesAtom(BindingSetAssignment expression) {
+		Map<String, Variable> variableIndex = createVariableIndex(expression.getBindingNames());
+
+		/**
+		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
+		 */
+		List<Function> bindingCompositeTerms = new ArrayList<>();
+
+		for (BindingSet bindingSet : expression.getBindingSets()) {
+			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
+		}
+
+		if(bindingCompositeTerms.isEmpty()) {
+			// TODO: find a better exception
+			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
+		}
+
+		Function orAtom = buildBooleanTree(bindingCompositeTerms, ExpressionOperation.OR);
+		return orAtom;
+	}
+
+	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
+		Map<String, Variable> variableIndex = new HashMap<>();
+		for (String varName: variableNames) {
+			variableIndex.put(varName, ofac.getVariable(varName));
+		}
+		return variableIndex;
+	}
+
+	/**
+	 * Used for VALUES bindings
+	 */
+	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
+		List<Function> bindingEqualityTerms = new ArrayList<>();
+
+		for (Binding binding : bindingSet) {
+			Variable variable = variableIndex.get(binding.getName());
+			if (variable == null) {
+				//TODO: find a better exception
+				throw new RuntimeException("Unknown variable " + binding.getName() + " used in the VALUES clause.");
+			}
+
+			Term valueTerm = getConstantExpression(binding.getValue());
+
+			Function equalityTerm = ofac.getFunction(ExpressionOperation.EQ, variable, valueTerm);
+			bindingEqualityTerms.add(equalityTerm);
+		}
+
+		if(bindingEqualityTerms.isEmpty()) {
+			//TODO: find a better exception
+			throw new RuntimeException("Empty binding sets are not accepted.");
+
+		}
+		return buildBooleanTree(bindingEqualityTerms, ExpressionOperation.AND);
+	}
+
+	/**
+	 * Builds a boolean tree (e.g. AND or OR-tree) out of boolean expressions.
+	 *
+	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
+	 *
+	 */
+	private Function buildBooleanTree(List<Function> booleanFctTerms, ExpressionOperation booleanFunctionSymbol) {
+		Function topFunction = null;
+		int termNb = booleanFctTerms.size();
+		for(int i=0; i < termNb; i+=2) {
+			Function newFunction;
+			if ((termNb - i) >= 2 ) {
+				newFunction = ofac.getFunction(booleanFunctionSymbol, booleanFctTerms.get(i), booleanFctTerms.get(i + 1));
+			}
+			else {
+				newFunction = booleanFctTerms.get(i);
+			}
+
+			if (topFunction == null)
+				topFunction = newFunction;
+			else
+				topFunction = ofac.getFunction(booleanFunctionSymbol, topFunction, newFunction);
+		}
+		return topFunction;
 	}
 	
 	

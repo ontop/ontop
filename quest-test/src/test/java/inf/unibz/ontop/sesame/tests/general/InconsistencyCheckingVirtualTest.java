@@ -20,11 +20,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 
 import java.io.File;
-
-import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,14 +88,16 @@ public class InconsistencyCheckingVirtualTest {
 	}
 	
 	private void startReasoner(){
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setPreferenceHolder(p);
+		
 		obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 		ModelIOManager mng = new ModelIOManager(obdaModel);
 		try {
 			mng.load(new File(obdafile));
-			questOWLFactory.setOBDAController(obdaModel);
-			reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
+	        // Creating a new instance of the reasoner
+	        QuestOWLFactory factory = new QuestOWLFactory();
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+	        reasoner = factory.createReasoner(ontology, config);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

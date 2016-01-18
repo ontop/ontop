@@ -38,6 +38,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontol
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import junit.framework.TestCase;
 
@@ -90,9 +91,9 @@ public class InconsistencyCheckingTest extends TestCase{
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setPreferenceHolder(p);
-		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).build();
+        reasoner = factory.createReasoner(ontology, config);
 	}
 	
 	@Test

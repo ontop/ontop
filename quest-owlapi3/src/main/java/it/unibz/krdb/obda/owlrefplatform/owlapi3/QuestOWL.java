@@ -135,77 +135,28 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		extractVersion();
 		
 		prepareReasoner();
-
-
-	}
-	
-	/***
-	 * Default constructor.
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
-		super(rootOntology, configuration, bufferingMode);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-		this.init(rootOntology, obdaModel, configuration, preferences);
-
 	}
 
-	/**
-	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
-	 * supplied 
-	 * @param userConstraints User-supplied primary and foreign keys
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraintsReader userConstraints) {
-		super(rootOntology, configuration, bufferingMode);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
 
-		this.userConstraints = userConstraints;
-		assert(userConstraints != null);
-		this.applyUserConstraints = true;
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-	}
-	
-	/**
-	 * This constructor is the same as the default constructor, 
-	 * plus the list of predicates for which TMappings reasoning 
-	 * should be disallowed is supplied 
-	 * @param excludeFromTMappings from TMappings User-supplied predicates for which TMappings should be forbidden
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, TMappingExclusionConfig excludeFromTMappings) {
-		super(rootOntology, configuration, bufferingMode);
-		this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-		// Davide> T-Mappings handling
-		this.excludeFromTMappings = excludeFromTMappings;
-		assert(excludeFromTMappings != null);
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
+    public QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration) {
+        super(rootOntology, configuration, BufferingMode.BUFFERING);
+        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
 
-	}
-	
-	/**
-	 * This constructor is the same as the default constructor plus the extra constraints, 
-	 * but the list of predicates for which TMappings reasoning should be disallowed is 
-	 * supplied 
-	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraintsReader userConstraints, 
-			TMappingExclusionConfig excludeFromTMappings) {
-		super(rootOntology, configuration, bufferingMode);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, bufferingMode);
-		this.userConstraints = userConstraints;
-		assert(userConstraints != null);
-		this.applyUserConstraints = true;
+        this.obdaModel = configuration.getObdaModel();
 
-		this.excludeFromTMappings = excludeFromTMappings;
-		assert(excludeFromTMappings != null);
-		//this.applyExcludeFromTMappings = true;
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-	}
+        if (configuration.getUserConstraints() != null){
+            this.applyUserConstraints = true;
+            this.userConstraints = configuration.getUserConstraints();
+        }
+
+        this.excludeFromTMappings = configuration.getExcludeFromTMappings();
+
+        this.preferences = configuration.getPreferences();
+
+        this.init(rootOntology, obdaModel, configuration, preferences);
+    }
+
+
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -309,7 +260,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
-				if (bObtainFromMappings) {
+				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
 
@@ -465,8 +416,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			 * Compute the an ontology with the merge of all the vocabulary and
 			 * axioms of the closure of the root ontology
 			 */
-
-			this.translatedOntologyMerge = loadOntologies(getRootOntology());
+            this.translatedOntologyMerge = loadOntologies(getRootOntology());
 
 			questready = false;
 			questException = null;
@@ -484,7 +434,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				log.error(e.getMessage(), e);
 				throw e;
 			}
-
 		} catch (Exception e) {
 			throw new ReasonerInternalException(e);
 		} finally {

@@ -32,7 +32,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -252,17 +251,20 @@ public class QuestOWLExample_OntowisTests {
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(preference);
+//		factory.setOBDAController(obdaModel);
+//		factory.setPreferenceHolder(preference);
 
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-
+		QuestOWLConfiguration config;
 		if (manualKeys){
 			System.out.println();
 			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
-			factory.setImplicitDBConstraints(constr);
+			//factory.setImplicitDBConstraints(constr);
+			config = QuestOWLConfiguration.builder().obdaModel(obdaModel).dbConstraintsReader(constr).build();
+		} else {
+			config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
 		}
 		/*
 		 * T-Mappings Handling!!
@@ -270,8 +272,10 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, config);
 
+		
+		
 		this.reasoner = reasoner;
 		/*
 		 * Prepare the data connection for querying.

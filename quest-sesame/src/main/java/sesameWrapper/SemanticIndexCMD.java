@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
@@ -154,11 +155,16 @@ public class SemanticIndexCMD {
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 		
 
-		fac.setPreferenceHolder(pref);
+//		fac.setPreferenceHolder(pref);
+//
+//		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
 
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
+		QuestOWLConnection qconn = (QuestOWLConnection) reasoner.getConnection();
 
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
 
