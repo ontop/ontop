@@ -46,6 +46,7 @@ public class Ontop {
                         OntopQuery.class,
                         OntopMaterialize.class,
                         OntopBootstrap.class,
+                        OntopValidate.class,
                         /**
                          * hidden commands
                          */

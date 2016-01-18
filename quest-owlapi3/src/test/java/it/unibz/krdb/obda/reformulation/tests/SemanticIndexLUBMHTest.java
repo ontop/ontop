@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
@@ -63,16 +64,18 @@ public class SemanticIndexLUBMHTest extends TestCase {
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
 	
-		QuestOWLFactory fac = new QuestOWLFactory();
-
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
-		fac.setPreferenceHolder(pref);
+//		fac.setPreferenceHolder(pref);
+//
+//		QuestOWL quest = fac.createReasoner(ontology);
 
-		QuestOWL quest = fac.createReasoner(ontology);
-
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL quest = factory.createReasoner(ontology, config);
+		
 		QuestOWLConnection qconn =  quest.getConnection();
 
 		QuestOWLStatement st = qconn.createStatement();
