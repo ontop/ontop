@@ -312,6 +312,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
+		return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
+	}
+
+	@Override
 	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
 		return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
 	}

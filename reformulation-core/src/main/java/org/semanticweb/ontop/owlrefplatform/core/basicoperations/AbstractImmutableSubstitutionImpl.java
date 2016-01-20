@@ -126,6 +126,20 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
     }
 
+    @Override
+    public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
+            throws ConversionException {
+        DistinctVariableDataAtom newDataAtom = applyToDistinctVariableDataAtom(dataAtom);
+
+        if (newDataAtom instanceof DistinctVariableOnlyDataAtom) {
+            return (DistinctVariableOnlyDataAtom) newDataAtom;
+        }
+        else {
+            throw new ConversionException("The substitution has transformed a DistinctVariableOnlyDataAtom into" +
+                    "a DistinctVariableDataAtom containing GroundTerm-s: " + newDataAtom);
+        }
+    }
+
 
     /**
      *" "this o g"
