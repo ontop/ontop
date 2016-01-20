@@ -50,6 +50,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
             throws ConversionException;
 
+    DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
+        throws ConversionException;
+
     /**
      * Returns "f o g" where f is this substitution
      */

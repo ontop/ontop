@@ -259,6 +259,7 @@ public class IntermediateQueryUtils {
         return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, optionalTransformer);
     }
 
+
     /**
      * TODO: replace this implementation by a non-recursive one.
      */

@@ -158,6 +158,9 @@ public interface OBDADataFactory extends Serializable {
 																ImmutableList<? extends VariableOrGroundTerm> arguments);
 	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm ... arguments);
 
+	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
+																 ImmutableList<Variable> arguments);
+
 
 	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
 
