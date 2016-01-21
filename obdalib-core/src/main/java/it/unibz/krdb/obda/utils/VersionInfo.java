@@ -34,11 +34,11 @@ public class VersionInfo {
 		Properties prop = new Properties();
     	try {
             // Load the properties file
-    		InputStream inputStream = VersionInfo.class.getResourceAsStream("version.properties");
+    		InputStream inputStream = VersionInfo.class.getResourceAsStream("/version.properties");
     		prop.load(inputStream);
  
             // Get the property value
-            version = prop.getProperty("pluginVersion"); 
+            version = prop.getProperty("version");
     	} catch (IOException ex) {
     		ex.printStackTrace();
         }
@@ -58,7 +58,9 @@ public class VersionInfo {
 	 * @return The version info string (if available).
 	 */
 	public String getVersion() {
-		return version;
+        // the following does not work in IDEs
+        // return getClass().getPackage().getImplementationVersion();
+		return  version;
 	}
 	
 	@Override

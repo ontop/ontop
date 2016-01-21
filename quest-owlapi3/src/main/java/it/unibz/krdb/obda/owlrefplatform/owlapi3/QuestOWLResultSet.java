@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIIndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 
 import java.util.List;
@@ -50,7 +50,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 
 	private final QuestOWLStatement owlst;
 
-	public QuestOWLResultSet(TupleResultSet res, QuestOWLStatement owlst) {
+    public QuestOWLResultSet(TupleResultSet res, QuestOWLStatement owlst) {
 		if (res == null)
 			throw new IllegalArgumentException("The result set must not be null");
 		this.res = res;
@@ -81,7 +81,8 @@ public class QuestOWLResultSet implements AutoCloseable {
 		}
 	}
 
-	public void close() throws OWLException {
+	@Override
+    public void close() throws OWLException {
 		try {
 			res.close();
 		} catch (OBDAException e) {
@@ -102,7 +103,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 		}
 	}
 
-	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+	private OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 	
 	private OWLPropertyAssertionObject translate(Constant c) {
 		if (c instanceof ObjectConstant) 
@@ -170,7 +171,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 
 	public OWLObject getOWLObject(int column) throws OWLException {
 		try {
-			return (OWLObject) translate(res.getConstant(column));
+			return translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -178,7 +179,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 
 	public OWLObject getOWLObject(String column) throws OWLException {
 		try {
-			return (OWLObject) translate(res.getConstant(column));
+			return translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

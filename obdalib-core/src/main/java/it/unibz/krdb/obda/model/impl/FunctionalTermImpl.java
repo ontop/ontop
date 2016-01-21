@@ -20,7 +20,10 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
@@ -219,31 +222,22 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public boolean isDataFunction() {
-		return this.functor.isDataPredicate();
+		return (!(isOperation() || isAlgebraFunction() || isDataTypeFunction()));
 	}
 
 	@Override
-	public boolean isBooleanFunction() {
-		return this.functor.isBooleanPredicate();
+	public boolean isOperation() {
+		return functor instanceof OperationPredicate;
 	}
 
 	@Override
 	public boolean isAlgebraFunction() {
-		return this.functor.isAlgebraPredicate();
+		return functor instanceof AlgebraOperatorPredicate;
 	}
-
-	@Override
-	public boolean isArithmeticFunction() {
-		return this.functor.isArithmeticPredicate();
-	}
-
-	@Override
-	public boolean isDateTimeFunction(){
-		return this.functor.isDateTimePredicate();
-	}
-
+	
 	@Override
 	public boolean isDataTypeFunction() {
-		return this.functor.isDataTypePredicate();
+		return functor instanceof DatatypePredicate;
 	}
+	
 }

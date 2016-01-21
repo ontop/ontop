@@ -131,7 +131,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints){
 		if(userConstraints == null)
 			throw new NullPointerException();
-		if(this.isinitialized)
+		if(this.initialized)
 			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		this.virtualStore.setImplicitDBConstraints(userConstraints);
 	}
@@ -190,7 +190,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 */
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
-		if(!super.isinitialized)
+		if(!super.initialized)
 			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		
 		questDBConn = this.virtualStore.getConnection();

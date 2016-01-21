@@ -123,14 +123,6 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm);
-
-	public Function getFunctionGT(Term firstTerm, Term secondTerm);
-
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm);
-
-	public Function getFunctionLT(Term firstTerm, Term secondTerm);
-
 	public Function getFunctionNEQ(Term firstTerm, Term secondTerm);
 
 	public Function getFunctionNOT(Term term);
@@ -147,74 +139,23 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getLANGMATCHESFunction(Term term1, Term term2);
 	
-	public Function getFunctionLike(Term term1, Term term2);
+	// ROMAN (23 Dec 2015): LIKE comes only from mappings
+	public Function getSQLFunctionLike(Term term1, Term term2);
 	
 	public Function getFunctionRegex(Term term1, Term term2, Term term3);
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
-	public Function getFunctionSHA1(Term arg);
-
-	public Function getFunctionSHA256(Term arg);
-
-	public Function getFunctionSHA512(Term arg);
-
-	public Function getFunctionMD5(Term arg);
-	
-
-	/*
-	 * Numerical arithmethic functions
-	 */
-
-	public Function getFunctionMinus(Term term1);
-
-	public Function getFunctionAdd(Term term1, Term term2);
-
-	public Function getFunctionSubstract(Term term1, Term term2);
-
-	public Function getFunctionMultiply(Term term1, Term term2);
-	
-	public Function getFunctionAbs(Term term1);
-	
-	public Function getFunctionCeil(Term term1);
-	
-	public Function getFunctionFloor(Term term1);
-	
-	public Function getFunctionRound(Term term1);
-	
-	public Function getFunctionRand();
-	
-	public Function getFunctionUUID();
-
-	public Function getFunctionstrUUID();
-
 	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
     
  // added by Nika: 
     
-    public Function getFunctionLength(Term term1); 
-    
 	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
 
 	public Function getFunctionSubstring(Term term1, Term term2);
 
-	public Function getFunctionUpper(Term term1);
-	
-	public Function getFunctionLower(Term term1);
-	
-	public Function getFunctionStrBefore(Term term1, Term term2);
-	
-	public Function getFunctionStrAfter(Term term1, Term term2);
-	
-	public Function getFunctionStrStarts(Term term1, Term term2);
-	
-	public Function getFunctionStrEnds(Term term1, Term term2);
-	
-	public Function getFunctionContains(Term term1, Term term2);
-	
-	public Function getFunctionEncodeForUri(Term term);
 	
 
 
@@ -349,21 +290,4 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getSPARQLLeftJoin(Function t1, Function t2);
 
-	/* time functions */
-	
-	public Function getFunctionNow();
-
-	public Function getFunctionYear(Term arg);
-	
-	public Function getFunctionDay(Term arg);
-	
-	public Function getFunctionMinutes(Term arg);
-	
-	public Function getFunctionSeconds(Term arg);
-	
-	public Function getFunctionHours(Term arg);
-	
-	public Function getFunctionTZ(Term arg);
-
-	public Function getFunctionMonth(Term arg);
 }

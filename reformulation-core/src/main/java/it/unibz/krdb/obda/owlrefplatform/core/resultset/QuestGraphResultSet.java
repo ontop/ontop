@@ -33,21 +33,14 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.AssertionFactory;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
@@ -58,20 +51,18 @@ import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.ValueExpr;
 import org.openrdf.query.algebra.Var;
 
-
-
 public class QuestGraphResultSet implements GraphResultSet {
 
-	private List<List<Assertion>> results = new ArrayList<List<Assertion>>();
+	private List<List<Assertion>> results = new ArrayList<>();
 
 	private TupleResultSet tupleResultSet;
 
 
 	private SesameConstructTemplate sesameTemplate;
 
-	List <ExtensionElem> extList = null;
+	List<ExtensionElem> extList = null;
 	
-	HashMap <String, ValueExpr> extMap = null;
+	Map<String, ValueExpr> extMap = null;
 	
 	//store results in case of describe queries
 	private boolean storeResults = false;
@@ -87,12 +78,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 		processResultSet(tupleResultSet, sesameTemplate);
 	}
 
-	@Override
-	public TupleResultSet getTupleResultSet() {
-		return tupleResultSet;
-	}
-
-	private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
+    private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
 			throws OBDAException {
 		if (storeResults) {
 			//process current result set into local buffer, 
@@ -109,12 +95,6 @@ public class QuestGraphResultSet implements GraphResultSet {
 		results.add(result);
 	}
 
-//	@Override
-//	public Template getTemplate() {
-//		return template;
-//	}
-
-	
 	/**
 	 * The method to actually process the current result set Row.
 	 * Construct a list of assertions from the current result set row.
@@ -123,20 +103,19 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-	
 	private List<Assertion> processResults(TupleResultSet result,
 			SesameConstructTemplate template) throws OBDAException {
-		List<Assertion> tripleAssertions = new ArrayList<Assertion>();
+		List<Assertion> tripleAssertions = new ArrayList<>();
 		List<ProjectionElemList> peLists = template.getProjectionElemList();
 		
 		Extension ex = template.getExtension();
 		if (ex != null) 
 			{
 				extList = ex.getElements();
-				HashMap <String, ValueExpr> newExtMap = new HashMap<String, ValueExpr>();
-				for (int i = 0; i < extList.size(); i++) {
-					newExtMap.put(extList.get(i).getName(), extList.get(i).getExpr());
-				}
+				Map<String, ValueExpr> newExtMap = new HashMap<>();
+                for (ExtensionElem anExtList : extList) {
+                    newExtMap.put(anExtList.getName(), anExtList.getExpr());
+                }
 				extMap = newExtMap;
 			}
 		for (ProjectionElemList peList : peLists) {

@@ -154,7 +154,6 @@ public class ModelIOManager {
      * @param file
      *          The target file object from which the model is loaded.
      * @throws IOException
-     * @throws InvalidPredicateDeclarationException
      * @throws InvalidMappingException 
      */
     public void load(File file) throws IOException, InvalidMappingException {
@@ -334,7 +333,7 @@ public class ModelIOManager {
                     /**
                      * This is harmless when you do not need to do query answering
                      */
-                    log.warn("JDBC driver \"{}\" is not available on the class path! Query answering service will be unavailable!", inputParamter );
+                    // log.warn("JDBC driver \"{}\" is not available on the class path! Query answering service will be unavailable!", inputParamter );
 
                 }
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, inputParamter);

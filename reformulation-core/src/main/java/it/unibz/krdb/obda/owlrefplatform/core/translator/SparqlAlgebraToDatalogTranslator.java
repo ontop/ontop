@@ -29,11 +29,15 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import it.unibz.krdb.obda.parser.EncodeForURI;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.query.Binding;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.parser.ParsedGraphQuery;
@@ -41,6 +45,8 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 
@@ -68,12 +74,12 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	/**
 	 * 
-	 * @param templateMatcher
+	 * @param uriTemplateMatcher
 	 * @param uriRef is used only in the Semantic Index mode
 	 */
 	
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef) {
-		uriTemplateMatcher = templateMatcher;
+	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher uriTemplateMatcher, SemanticIndexURIMap uriRef) {
+		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = uriRef;
 	}
 	
@@ -91,19 +97,19 @@ public class SparqlAlgebraToDatalogTranslator {
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
 
-		List<Term> vars;
+		List<Term> answerVariables;
 		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
 			Set<String> signature = te.getBindingNames();
-			vars = new ArrayList<>(signature.size());
+			answerVariables = new ArrayList<>(signature.size());
 			for (String vs : signature) 
-				vars.add(ofac.getVariable(vs));
+				answerVariables.add(ofac.getVariable(vs));
 		}
 		else
-			vars = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
+			answerVariables = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
 		
 		DatalogProgram result = ofac.getDatalogProgram();
 		Function bodyAtom = translateTupleExpr(te, result, OBDAVocabulary.QUEST_QUERY + "0");
-		createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom); // appends rule to the result
+		createRule(result, OBDAVocabulary.QUEST_QUERY, answerVariables, bodyAtom); // appends rule to the result
 		
 		return result;
 	}
@@ -138,7 +144,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				ValueExpr expression = c.getExpr();
 				if (!(expression instanceof Var)) {
 					throw new IllegalArgumentException("Error translating ORDER BY. "
-							+ "The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
+							+ "The current implementation can only sort by variables, this query has a more complex expression '" + expression + "'");
 				}
 				Var v = (Var) expression;
 				Variable var = ofac.getVariable(v.getName());
@@ -171,7 +177,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		} 
 		else if (te instanceof Extension) { 
 			return translate((Extension) te, pr, newHeadName);
-		} 
+		}
+		else if (te instanceof BindingSetAssignment) {
+			return createFilterValuesAtom((BindingSetAssignment)te);
+		}
 		
 		try {
 			throw new QueryEvaluationException("Operation not supported: " + te);
@@ -183,7 +192,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		return null;
 	}
 
-	private Set<Variable> getVariables(Function atom) {
+	private static Set<Variable> getVariables(Function atom) {
 		Set<Variable> set = new HashSet<>();
 		for (Term t : atom.getTerms())
 			if (t instanceof Variable)
@@ -191,26 +200,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		return set;
 	}
 	
-	private List<Term> getUnion(Set<Variable> s1, Set<Variable> s2) {
+	private static List<Term> getUnion(Set<Variable> s1, Set<Variable> s2) {
 		// take the union of the *sets* of variables
 		Set<Term> vars = new HashSet<>();
 		vars.addAll(s1);
 		vars.addAll(s2);
-		// order is chosen arbitrarily but this is not a problem
-		// because it is chosen once and for all
-		List<Term> varList = new ArrayList<>(vars);
-		return varList;
-	}
-
-	private List<Term> getUnionOfVariables(Function a1, Function a2) {
-		// take the union of the *sets* of variables
-		Set<Term> vars = new HashSet<>();
-		for (Term t : a1.getTerms())
-			if (t instanceof Variable)
-				vars.add(t);
-		for (Term t : a2.getTerms())
-			if (t instanceof Variable)
-				vars.add(t);
 		// order is chosen arbitrarily but this is not a problem
 		// because it is chosen once and for all
 		List<Term> varList = new ArrayList<>(vars);
@@ -263,26 +257,18 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		Function newHeadAtom = ofac.getFunction(rule.getHead().getFunctionSymbol(), varList);
 		return newHeadAtom;
-	}		    
+	}
+
 
 	/**
 	 * EXPR_1 UNION EXPR_2
 	 * 
-	 * adds the following rules
+	 * adds the following two rules
 	 * 
-	 * ans_i(X * NULL_1) :- ans_{i.0}(X_1)
-	 * ans_i(X * NULL_2) :- ans_{i.1}(X_2)
+	 * ans_i(X * X_1 * NULL_2) :- ans_{i.0}(X * X_1)
+	 * ans_i(X * NULL_1 * X_2) :- ans_{i.1}(X * X_2)
 	 * 
-		 * Adding the UNION to the program, i.e., two rules Note, we need to
-		 * make null any head variables that do not appear in the body of the
-		 * components of the union, e.g,
-		 * 
-		 * q(x,y,z) <- Union(R(x,y), R(x,z))
-		 * 
-		 * results in
-		 * 
-		 * q(x,y,null) :- ... R(x,y) ... 
-		 * q(x,null,z) :- ... R(x,z) ...
+	 * where NULL_i is the padding of X_i with NULLs 
 	 * 
 	 * @param union
 	 * @param pr
@@ -339,7 +325,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function leftAtom = translateTupleExpr(join.getLeftArg(), pr, newHeadName + "0");
 		Function rightAtom = translateTupleExpr(join.getRightArg(), pr, newHeadName + "1");
 
-		List<Term> varList = getUnionOfVariables(leftAtom, rightAtom);
+		List<Term> varList = getUnion(getVariables(leftAtom), getVariables(rightAtom));
 		CQIE rule = createRule(pr, newHeadName, varList, leftAtom, rightAtom);
 		return rule.getHead();
 	}
@@ -369,7 +355,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			joinTerms.add((Function) getExpression(filter));
 		}
 		
-		List<Term> varList = getUnionOfVariables(leftAtom, rightAtom);
+		List<Term> varList = getUnion(getVariables(leftAtom), getVariables(rightAtom));
 		CQIE rule = createRule(pr, newHeadName, varList, joinAtom);
 		return rule.getHead();
 	}
@@ -564,107 +550,99 @@ public class SparqlAlgebraToDatalogTranslator {
 				result = ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 			} 
 			else {
-				String subject_URI = decodeURIEscapeCodes(s.stringValue());
+				String subject_URI = EncodeForURI.decodeURIEscapeCodes(s.stringValue());
 				result = uriTemplateMatcher.generateURIFunction(subject_URI);
 			}
 		}
 		
 		return result;
 	}
-	
-	/***
-	 * Given a string representing a URI, this method will return a new String 
-	 * in which all percent encoded characters (e.g., %20) will
-	 * be restored to their original characters (e.g., ' '). 
-	 * This is necessary to transform some URIs into the original database values.
-	 * 
-	 * @param encodedURI
-	 * @return
+
+	/**
+	 * Creates a "FILTER" atom out of VALUES bindings.
 	 */
-	
-	private String decodeURIEscapeCodes(String encodedURI) {
-		int length = encodedURI.length();
-		StringBuilder strBuilder = new StringBuilder(length+20);
-		
-		char[] codeBuffer = new char[3];
-		
-		for (int ci = 0; ci < length; ci++) {
-			char c = encodedURI.charAt(ci);
+	private Function createFilterValuesAtom(BindingSetAssignment expression) {
+		Map<String, Variable> variableIndex = createVariableIndex(expression.getBindingNames());
 
-			if (c != '%') {
-				// base case, the character is a normal character, just
-				// append
-				strBuilder.append(c);
-				continue;
+		/**
+		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
+		 */
+		List<Function> bindingCompositeTerms = new ArrayList<>();
+
+		for (BindingSet bindingSet : expression.getBindingSets()) {
+			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
+		}
+
+		if(bindingCompositeTerms.isEmpty()) {
+			// TODO: find a better exception
+			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
+		}
+
+		Function orAtom = buildBooleanTree(bindingCompositeTerms, ExpressionOperation.OR);
+		return orAtom;
+	}
+
+	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
+		Map<String, Variable> variableIndex = new HashMap<>();
+		for (String varName: variableNames) {
+			variableIndex.put(varName, ofac.getVariable(varName));
+		}
+		return variableIndex;
+	}
+
+	/**
+	 * Used for VALUES bindings
+	 */
+	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
+		List<Function> bindingEqualityTerms = new ArrayList<>();
+
+		for (Binding binding : bindingSet) {
+			Variable variable = variableIndex.get(binding.getName());
+			if (variable == null) {
+				//TODO: find a better exception
+				throw new RuntimeException("Unknown variable " + binding.getName() + " used in the VALUES clause.");
 			}
 
-			/*
-			 * found a escape, processing the code and replacing it by
-			 * the original value that should be found on the DB. This
-			 * should not be used all the time, only when working in
-			 * virtual mode... we need to fix this with a FLAG.
-			 */
+			Term valueTerm = getConstantExpression(binding.getValue());
 
-			// First we get the 2 chars next to %
-			codeBuffer[0] = '%';
-			codeBuffer[1] = encodedURI.charAt(ci + 1);
-			codeBuffer[2] = encodedURI.charAt(ci + 2);
+			Function equalityTerm = ofac.getFunction(ExpressionOperation.EQ, variable, valueTerm);
+			bindingEqualityTerms.add(equalityTerm);
+		}
 
-			// now we check if they match any of our escape codes, if
-			// they do the char to be inserted is put in codeBuffer
-			// otherwise
-			String code = String.copyValueOf(codeBuffer);
-			if (code.equals("%20")) {
-				strBuilder.append(' ');
-			} else if (code.equals("%21")) {
-				strBuilder.append('!');
-			} else if (code.equals("%40")) {
-				strBuilder.append('@');
-			} else if (code.equals("%23")) {
-				strBuilder.append('#');
-			} else if (code.equals("%24")) {
-				strBuilder.append('$');
-			} else if (code.equals("%26")) {
-				strBuilder.append('&');
-			} else if (code.equals("%42")) {
-				strBuilder.append('*');
-			} else if (code.equals("%28")) {
-				strBuilder.append('(');
-			} else if (code.equals("%29")) {
-				strBuilder.append(')');
-			} else if (code.equals("%5B")) {
-				strBuilder.append('[');
-			} else if (code.equals("%5C")) {
-				strBuilder.append(']');
-			} else if (code.equals("%2C")) {
-				strBuilder.append(',');
-			} else if (code.equals("%3B")) {
-				strBuilder.append(';');
-			} else if (code.equals("%3A")) {
-				strBuilder.append(':');
-			} else if (code.equals("%3F")) {
-				strBuilder.append('?');
-			} else if (code.equals("%3D")) {
-				strBuilder.append('=');
-			} else if (code.equals("%2B")) {
-				strBuilder.append('+');
-			} else if (code.equals("%22")) {
-				strBuilder.append("''");
-			} else if (code.equals("%2F")) {
-				strBuilder.append('/');
-			} else {
-				// This was not an escape code, so we just append the
-				// characters and continue;
-				log.warn("Error decoding an encoded URI from the query. Problematic code: {}", code);
-				log.warn("Problematic URI: {}", encodedURI);
-				strBuilder.append(codeBuffer);
-			}
-			ci += 2;
+		if(bindingEqualityTerms.isEmpty()) {
+			//TODO: find a better exception
+			throw new RuntimeException("Empty binding sets are not accepted.");
 
 		}
-		return strBuilder.toString();
-
+		return buildBooleanTree(bindingEqualityTerms, ExpressionOperation.AND);
 	}
+
+	/**
+	 * Builds a boolean tree (e.g. AND or OR-tree) out of boolean expressions.
+	 *
+	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
+	 *
+	 */
+	private Function buildBooleanTree(List<Function> booleanFctTerms, ExpressionOperation booleanFunctionSymbol) {
+		Function topFunction = null;
+		int termNb = booleanFctTerms.size();
+		for(int i=0; i < termNb; i+=2) {
+			Function newFunction;
+			if ((termNb - i) >= 2 ) {
+				newFunction = ofac.getFunction(booleanFunctionSymbol, booleanFctTerms.get(i), booleanFctTerms.get(i + 1));
+			}
+			else {
+				newFunction = booleanFctTerms.get(i);
+			}
+
+			if (topFunction == null)
+				topFunction = newFunction;
+			else
+				topFunction = ofac.getFunction(booleanFunctionSymbol, topFunction, newFunction);
+		}
+		return topFunction;
+	}
+	
 	
 
 
@@ -691,376 +669,97 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	private Term getConcat(List<ValueExpr> values) {
+		
         Iterator<ValueExpr> iterator = values.iterator();
-
-        ValueExpr first = iterator.next();
-        Term topConcat = getExpression(first);
+        Term topConcat = getExpression(iterator.next());
         
         if (!iterator.hasNext())
             throw new UnsupportedOperationException("Wrong number of arguments (found " + values.size() + 
             					", at least 1) of SQL function CONCAT");
  	  	
         while (iterator.hasNext()) {
-            ValueExpr second = iterator.next();
-            Term second_string = getExpression(second);
-
+            Term second_string = getExpression(iterator.next());
             topConcat = ofac.getFunctionConcat(topConcat, second_string);                	
         }
         
         return topConcat;		
 	}
 	
-	private Term getLength(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL LENGTH function");					
-		}
-		ValueExpr arg = args.get(0); 
-		Term term = getExpression(arg);
-		term = ofac.getFunctionLength(term);
-		return term;
-	}
-	
 	private Term getSubstring(List<ValueExpr> args) {
-		Term term = null;
 
-		switch (args.size()){
-			case 2 :
-				ValueExpr string = args.get(0);
-				ValueExpr start = args.get(1);
-				Term str = getExpression(string);
-				Term st = getExpression(start);
-				term  = ofac.getFunctionSubstring(str, st);
-				break;
-
-			case 3 :
-				string = args.get(0);
-				start = args.get(1);
-				ValueExpr end = args.get(2);
-				str = getExpression(string);
-				st = getExpression(start);
-				Term en = getExpression(end);
-				term = ofac.getFunctionSubstring(str, st, en);
-				break;
-			default:
-				throw new UnsupportedOperationException("Wrong number of arguments (found "
-						+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
-
+		if (args.size() == 2) {
+			Term str = getExpression(args.get(0));
+			Term st = getExpression(args.get(1));
+			return ofac.getFunctionSubstring(str, st);
 		}
-
-		return term;
-	}
-	
-	private Term getLower(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL LOWER function");					
+		else if (args.size() == 3) {
+			Term str = getExpression(args.get(0));
+			Term st = getExpression(args.get(1));
+			Term en = getExpression(args.get(2));
+			return ofac.getFunctionSubstring(str, st, en);
 		}
-		ValueExpr arg = args.get(0); 
-		Term term = getExpression(arg);
-		term = ofac.getFunctionLower(term);
-		return term;
-	}
-
-	private Term getUpper(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL UPPER function");					
-		}
-		ValueExpr arg = args.get(0); 
-		Term term = getExpression(arg);
-		term = ofac.getFunctionUpper(term);
-		return term;
-	}
-	
-	private Term getEncodeForUri(List<ValueExpr> args) {
-		ValueExpr arg = args.get(0); 
-		Term term = getExpression(arg);
-		term = ofac.getFunctionEncodeForUri(term);
-		return term;
-	} 
-	
-	private Term getStrBefore(List<ValueExpr> args) {
-		if (args.size() != 2){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 2 supported) for SQL STRBEFORE function");					
-		}
-		ValueExpr string = args.get(0); 
-		ValueExpr before = args.get(1); 
-		Term str = getExpression(string);
-		Term be = getExpression(before);
-		Term term = ofac.getFunctionStrBefore(str, be);
-		return term;
-	}
-	
-	private Term getStrAfter(List<ValueExpr> args) {
-		if (args.size() != 2){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 2 supported) for SQL STRAFTER function");					
-		}
-		ValueExpr string = args.get(0); 
-		ValueExpr after = args.get(1); 
-		Term str = getExpression(string);
-		Term af = getExpression(after);
-		Term term = ofac.getFunctionStrAfter(str, af);
-		return term;
-	}
-	
-	private Term getStrStarts(List<ValueExpr> args) {
-		if (args.size() != 2){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 2 supported) for SQL STRSTARTS function");					
-		}
-		ValueExpr string = args.get(0); 
-		ValueExpr start = args.get(1); 
-		Term str = getExpression(string);
-		Term sta = getExpression(start);
-		Term term = ofac.getFunctionStrStarts(str, sta);
-		return term;
-	}
-	
-	private Term getStrEnds(List<ValueExpr> args) {
-		if (args.size() != 2){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 2 supported) for SQL STRENDS function");					
-		}
-		ValueExpr string = args.get(0); 
-		ValueExpr start = args.get(1); 
-		Term str = getExpression(string);
-		Term sta = getExpression(start);
-		Term term = ofac.getFunctionStrEnds(str, sta);
-		return term;
-	}
-	
-	private Term getContains(List<ValueExpr> args) {
-		if (args.size() != 2){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 2 supported) for SQL CONTAINS function");					
-		}
-		ValueExpr string = args.get(0); 
-		ValueExpr start = args.get(1); 
-		Term str = getExpression(string);
-		Term sta = getExpression(start);
-		Term term = ofac.getFunctionContains(str, sta);
-		return term;
-	}
-	
-	private Term getAbs(List<ValueExpr> args) {	
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL ABS function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionAbs(arg);
-		return term;	
-	}
-	
-	private Term getCeil(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL CEIL function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionCeil(arg);
-		return term;	
-	}
-	
-	private Term getFloor(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL FLOOR function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionFloor(arg);
-		return term;	
-	}
-	
-	private Term getRound(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL ROUND function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionRound(arg);
-		return term;	
-	}
-	
-
-	
-	private Term getRand() {
-		Term term = ofac.getFunctionRand();
-		return term;	
-	}
-
-	private Term getUUID() {
-		Term term = ofac.getFunctionUUID();
-		return term;	
-	}
-
-	private Term getstrUUID() {
-		Term term = ofac.getFunctionstrUUID();
-		return term;
-	}
-	
-	private Term getNow() {	
-		Term term = ofac.getFunctionNow();
-		return term;	
-	}
-	
-	private Term getYear(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL YEAR function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionYear(arg);
-		return term;	
-	}
-	
-	private Term getDay(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL DAY function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionDay(arg);
-		return term;	
-	}
-	
-	private Term getMonth(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL MONTH function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionMonth(arg);
-		return term;	
-	}
-	
-	private Term getHours(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL HOURS function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionHours(arg);
-		return term;	
-	}
-	
-	
-	private Term getMinutes(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL MINUTES function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionMinutes(arg);
-		return term;	
-	}
-	
-	private Term getSeconds(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL SECONDS function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionSeconds(arg);
-		return term;	
-	}
-	
-	private Term getTZ(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL TZ function");
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionTZ(arg);
-		return term;	
-	}
-	
-	private Term getMD5(List<ValueExpr> args) {	
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL hash function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionMD5(arg);
-		return term;	
-	}
-	
-	private Term getSHA1(List<ValueExpr> args) {	
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL hash function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionSHA1(arg);
-		return term;	
-	}
-	
-	private Term getSHA256(List<ValueExpr> args) {	
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL hash function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionSHA256(arg);
-		return term;	
-	}
-	
-	private Term getSHA512(List<ValueExpr> args) {
-		if (args.size() != 1){
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-		+ args.size() + ", only 1 supported) for SQL hash function");					
-		}
-		ValueExpr argument = args.get(0);
-		Term arg = getExpression(argument);
-		Term term = ofac.getFunctionSHA512(arg);
-		return term;	
+		else 
+			throw new UnsupportedOperationException("Wrong number of arguments (found "
+					+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
 	}
 		
-	private Term getReplace(List<ValueExpr> expressions) {
-        if (expressions.size() == 2 || expressions.size() == 3) {
-
-            // first parameter is a function expression
-            ValueExpr first = expressions.get(0);
-            Term t1 = getExpression(first);
-
-            // second parameter is a string
-            ValueExpr second = expressions.get(1);
-            Term out_string = getExpression(second);
-
-            /*
-             * Term t3 is optional: no string means delete occurrences of second param
-	         */
-            Term in_string;
-            if (expressions.size() == 3) {
-                ValueExpr third = expressions.get(2);
-                in_string = getExpression(third);
-            } 
-            else {
-                in_string = ofac.getConstantLiteral("");
-            }
-
+	
+	private Term getReplace(List<ValueExpr> args) {
+		
+		if (args.size() == 2) {
+            Term t1 = getExpression(args.get(0));
+            Term out_string = getExpression(args.get(1));
+            Term in_string = ofac.getConstantLiteral("");
             return ofac.getFunctionReplace(t1, out_string, in_string);
-        } 
+		}
+		else if (args.size() == 3) {
+            Term t1 = getExpression(args.get(0));
+            Term out_string = getExpression(args.get(1));
+            Term in_string = getExpression(args.get(2));
+            return ofac.getFunctionReplace(t1, out_string, in_string);
+		}
         else
-            throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");		
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+            		+ args.size() + ", only 2 or 3 supported) to sql function REPLACE");		
 	}
+	
+	// XPath 1.0 functions (XPath 1.1 has variants with more arguments)
+	private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
+				new ImmutableMap.Builder<String, OperationPredicate>()
+						.put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
+						.put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
+						.put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN) 
+						.put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE) 
+						.put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER) 
+						.put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS) 
+						.put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS) 
+						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI) 
+						.put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS) 
+						.put("UUID", ExpressionOperation.UUID) 
+						.put("STRUUID", ExpressionOperation.STRUUID) 
+
+						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND) 
+						.put("RAND", ExpressionOperation.RAND) 
+						
+						.put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR) 
+						.put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY) 
+						.put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH) 
+						.put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS) 
+						.put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES) 
+						.put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS) 
+						.put("NOW", ExpressionOperation.NOW) 
+						.put("TZ", ExpressionOperation.TZ) 
+					
+						.put("MD5", ExpressionOperation.MD5) 
+						.put("SHA1", ExpressionOperation.SHA1) 
+						.put("SHA256", ExpressionOperation.SHA256) 
+						.put("SHA512", ExpressionOperation.SHA512) 
+						.build();
+	
+	
 	
 	
 	
@@ -1071,100 +770,36 @@ public class SparqlAlgebraToDatalogTranslator {
      */
     private Term getFunctionCallTerm(FunctionCall expr) {
     	
+    	OperationPredicate p = XPathFunctions.get(expr.getURI());
+    	if (p != null) {
+    		List<ValueExpr> args = expr.getArgs();
+    		if (args.size() != p.getArity()) {
+                throw new UnsupportedOperationException(
+                		"Wrong number of arguments (found " + args.size() + ", only " +
+                			 p.getArity() + "supported) for SPARQL " + expr.getURI() + "function");					
+    		}
+    		List<Term> terms = new ArrayList<>(args.size());
+    		for (ValueExpr a : args)
+    			terms.add(getExpression(a));
+    		Term fun = ofac.getFunction(p, terms);
+    		return fun;   		
+    	}
+    	
+    	// these are all special cases with **variable** number of arguments
+  
         switch(expr.getURI()){
          
+        	// at least one argument 
             case "http://www.w3.org/2005/xpath-functions#concat":
                 return getConcat(expr.getArgs());
 
+            // 3 or 4 arguments (ROMAN 16 Dec 2015): check the actual implementation
             case "http://www.w3.org/2005/xpath-functions#replace":
                 return getReplace(expr.getArgs());
                 
-            case "http://www.w3.org/2005/xpath-functions#string-length":
-                return getLength(expr.getArgs()); 
-                
+            // 2 or 3 arguments    
             case "http://www.w3.org/2005/xpath-functions#substring":
             	return getSubstring(expr.getArgs()); 
-            	
-            case "http://www.w3.org/2005/xpath-functions#upper-case":
-            	return getUpper(expr.getArgs());    
-            	
-            case "http://www.w3.org/2005/xpath-functions#lower-case":
-            	return getLower(expr.getArgs());  
-            	
-            case "http://www.w3.org/2005/xpath-functions#substring-before":
-            	return getStrBefore(expr.getArgs()); 
-            	
-            case "http://www.w3.org/2005/xpath-functions#substring-after":
-            	return getStrAfter(expr.getArgs()); 
-            	
-            case "http://www.w3.org/2005/xpath-functions#starts-with":
-            	return getStrStarts(expr.getArgs()); 
-            	
-            case "http://www.w3.org/2005/xpath-functions#ends-with":
-            	return getStrEnds(expr.getArgs()); 
-            	
-            case "http://www.w3.org/2005/xpath-functions#contains":
-            	return getContains(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
-            	return getEncodeForUri(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#numeric-abs":
-            	return getAbs(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#numeric-ceil":
-            	return getCeil(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#numeric-floor":
-            	return getFloor(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#numeric-round":
-            	return getRound(expr.getArgs());
-            	
-            case "RAND":
-            	return getRand();
-            	
-            case "UUID":
-            	return getUUID();
-
-			case "STRUUID":
-				return getstrUUID();
-                        
-            case "MD5":
-            	return getMD5(expr.getArgs()); 
-           
-            case "SHA1":
-            	return getSHA1(expr.getArgs()); 
-            	
-            case "SHA256":
-            	return getSHA256(expr.getArgs()); 
-            	
-            case "SHA512":
-            	return getSHA512(expr.getArgs());
-            	
-            case "NOW":
-            	return getNow();	
-            
-            case "http://www.w3.org/2005/xpath-functions#year-from-dateTime":
-            	return getYear(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#day-from-dateTime":
-            	return getDay(expr.getArgs());
-            	
-            case "http://www.w3.org/2005/xpath-functions#month-from-dateTime":
-            	return getMonth(expr.getArgs());	
-           
-            case "http://www.w3.org/2005/xpath-functions#hours-from-dateTime":
-            	return getHours(expr.getArgs());
-	
-            case "http://www.w3.org/2005/xpath-functions#minutes-from-dateTime":
-            	return getMinutes(expr.getArgs());
-               	
-            case "http://www.w3.org/2005/xpath-functions#seconds-from-dateTime":
-            	return getSeconds(expr.getArgs());	
-            	
-            case "TZ":
-            	return getTZ(expr.getArgs());
             	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
@@ -1251,39 +886,54 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getFunctionNOT(term);
 		}
 		else if (expr instanceof IsLiteral) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, term);	
+			return ofac.getFunction(ExpressionOperation.IS_LITERAL, term);	
 		} 
 		else if (expr instanceof IsURI) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, term);
+			return ofac.getFunction(ExpressionOperation.IS_IRI, term);
 		} 
 		else if (expr instanceof Str) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_STR, term);
+			return ofac.getFunction(ExpressionOperation.SPARQL_STR, term);
 		} 
 		else if (expr instanceof Datatype) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, term);
+			return ofac.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
 		} 
 		else if (expr instanceof IsBNode) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, term);
-		} 
-		
+			return ofac.getFunction(ExpressionOperation.IS_BLANK, term);
+		} 	
 		else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
 			if (arg instanceof Var) 
-				return ofac.getFunction(OBDAVocabulary.SPARQL_LANG, term);
+				return ofac.getFunction(ExpressionOperation.SPARQL_LANG, term);
 			else
 				throw new RuntimeException("A variable or a value is expected in " + expr);
 		}
 		
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
+	
+	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> relationalOperations = 
+			new ImmutableMap.Builder<Compare.CompareOp, ExpressionOperation>()
+				.put(Compare.CompareOp.EQ, ExpressionOperation.EQ)
+				.put(Compare.CompareOp.GE, ExpressionOperation.GTE)
+				.put(Compare.CompareOp.GT, ExpressionOperation.GT)
+				.put(Compare.CompareOp.LE, ExpressionOperation.LTE)
+				.put(Compare.CompareOp.LT, ExpressionOperation.LT)
+				.put(Compare.CompareOp.NE, ExpressionOperation.NEQ)
+				.build();
 
+	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> numericalOperations = 
+			new ImmutableMap.Builder<MathExpr.MathOp, ExpressionOperation>()
+			.put(MathExpr.MathOp.PLUS, ExpressionOperation.ADD)
+			.put(MathExpr.MathOp.MINUS, ExpressionOperation.SUBTRACT)
+			.put(MathExpr.MathOp.MULTIPLY, ExpressionOperation.MULTIPLY)
+			.put(MathExpr.MathOp.DIVIDE, ExpressionOperation.DIVIDE)
+			.build();
+			
+	
 	private Term getBinaryExpression(BinaryValueOperator expr) {
 		
-		ValueExpr arg1 = expr.getLeftArg(); // get the first argument
-		Term term1 = getExpression(arg1);
-		
-		ValueExpr arg2 = expr.getRightArg(); // get the second argument
-		Term term2 = getExpression(arg2);
+		Term term1 = getExpression(expr.getLeftArg());
+		Term term2 = getExpression(expr.getRightArg());
 		
 		if (expr instanceof And) {
 			return ofac.getFunctionAND(term1, term2);
@@ -1298,36 +948,15 @@ public class SparqlAlgebraToDatalogTranslator {
 			Regex reg = (Regex) expr;
 			ValueExpr flags = reg.getFlagsArg();
 			Term term3 = (flags != null) ? getExpression(flags) : OBDAVocabulary.NULL;
-			return ofac.getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
+			return ofac.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
 		}
 		else if (expr instanceof Compare) {
-			switch (((Compare) expr).getOperator()) {
-				case EQ:
-					return ofac.getFunctionEQ(term1, term2);
-				case GE:
-					return ofac.getFunctionGTE(term1, term2);
-				case GT:
-					return ofac.getFunctionGT(term1, term2);
-				case LE:
-					return ofac.getFunctionLTE(term1, term2);
-				case LT:
-					return ofac.getFunctionLT(term1, term2);
-				case NE:
-					return ofac.getFunctionNEQ(term1, term2);
-			}
+			ExpressionOperation p = relationalOperations.get(((Compare) expr).getOperator());
+			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof MathExpr) {
-			switch (((MathExpr)expr).getOperator()) {
-				case PLUS:
-					return ofac.getFunctionAdd(term1, term2);
-				case MINUS:
-					return ofac.getFunctionSubstract(term1, term2);
-				case MULTIPLY: 
-					return ofac.getFunctionMultiply(term1, term2);
-				case DIVIDE:
-					// TODO: NOT SUPPORTED?
-					break;
-			}
+			ExpressionOperation p = numericalOperations.get(((MathExpr)expr).getOperator());
+			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof LangMatches) {
 			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
@@ -1340,12 +969,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term output = term;
 		if (term instanceof Function) {
 			Function f = (Function) term;
-			Predicate functor = f.getFunctionSymbol();
-			if (functor instanceof DatatypePredicate) {
+			if (f.isDataTypeFunction()) {
 				Term functionTerm = f.getTerm(0);
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
-					output = ofac.getFunction(functor, 
+					output = ofac.getFunction(f.getFunctionSymbol(), 
 							 ofac.getConstantLiteral(c.getValue().toLowerCase(), 
 							 c.getType()));
 				}
@@ -1354,21 +982,4 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 	
-	/**
-	 * Used only in QuestStatement
-	 *  
-	 * TODO: to be removed
-	 * 
-	 * @param query
-	 * @return
-	 */
-	
-	public List<String> getSignature(ParsedQuery query) {
-		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
-			TupleExpr te = query.getTupleExpr();
-			List<String> signatureContainer = new ArrayList<>(te.getBindingNames());
-			return signatureContainer;
-		}
-		return Collections.emptyList();
-	}
 }

@@ -104,7 +104,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	}
 
 	
-	public void add(Statement st, Resource... contexts) throws RepositoryException {
+	@Override
+    public void add(Statement st, Resource... contexts) throws RepositoryException {
 		// Adds the supplied statement to this repository, optionally to one or
 		// more named contexts.
 		OpenRDFUtil.verifyContextNotNull(contexts);
@@ -124,7 +125,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		}
 	}
 
-	public void add(Iterable<? extends Statement> statements, Resource... contexts)
+	@Override
+    public void add(Iterable<? extends Statement> statements, Resource... contexts)
 			throws RepositoryException {
 		//Adds the supplied statements to this repository, optionally to one or more named contexts. 
 		 OpenRDFUtil.verifyContextNotNull(contexts);
@@ -152,7 +154,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 
 	}
 
-	public <E extends Exception> void add(
+	@Override
+    public <E extends Exception> void add(
 			Iteration<? extends Statement, E> statementIter, Resource... contexts)
 			throws RepositoryException, E {
 		//Adds the supplied statements to this repository, optionally to one or more named contexts. 
@@ -184,7 +187,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	}
 
 
-	public void add(File file, String baseURI, RDFFormat dataFormat, Resource... contexts)
+	@Override
+    public void add(File file, String baseURI, RDFFormat dataFormat, Resource... contexts)
 			throws IOException, RDFParseException, RepositoryException {
 		//Adds RDF data from the specified file to a specific contexts in the repository. 
 
@@ -202,8 +206,9 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		}
 	}
 
-	 public void add(URL url, String baseURI, RDFFormat dataFormat,
-             Resource... contexts) throws IOException,
+	 @Override
+     public void add(URL url, String baseURI, RDFFormat dataFormat,
+                     Resource... contexts) throws IOException,
              RDFParseException, RepositoryException {
 		// Adds the RDF data that can be found at the specified URL to the
 		// repository,
@@ -221,15 +226,17 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		}
      }
 
+     @Override
      public void add(InputStream in, String baseURI,
-             RDFFormat dataFormat, Resource... contexts)
+                     RDFFormat dataFormat, Resource... contexts)
              throws IOException, RDFParseException, RepositoryException {
  		//Adds RDF data from an InputStream to the repository, optionally to one or more named contexts. 
          addInputStreamOrReader(in, baseURI, dataFormat, contexts);
      }
 
+     @Override
      public void add(Reader reader, String baseURI,
-             RDFFormat dataFormat, Resource... contexts)
+                     RDFFormat dataFormat, Resource... contexts)
              throws IOException, RDFParseException, RepositoryException {
     	//Adds RDF data from a Reader to the repository, optionally to one or more 
  		//named contexts. Note: using a Reader to upload byte-based data means that 
@@ -239,7 +246,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
          addInputStreamOrReader(reader, baseURI, dataFormat, contexts);
      }
 
-	public void add(Resource subject, org.openrdf.model.URI predicate, Value object, Resource... contexts)
+	@Override
+    public void add(Resource subject, org.openrdf.model.URI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
 		//Adds a statement with the specified subject, predicate and object to this repository, 
 		//optionally to one or more named contexts. 
@@ -332,25 +340,13 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
             questStm.close();
                      
      
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | InterruptedException e) {
         	//System.out.println("exception, rolling back!");
             if (autoCommit) {
                 rollback();
             }
             throw new RepositoryException(e);
-        } catch (OBDAException e)
-        {
-        	 if (autoCommit) {
-                 rollback();
-             }
-        	 throw new RepositoryException(e);
-        } catch (InterruptedException e) {
-			 if (autoCommit) {
-	                rollback();
-	            }
-			 
-			 throw new RepositoryException(e);
-		} finally {
+        } finally {
             setAutoCommit(autoCommit);
             autoCommit();
         }
@@ -368,7 +364,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
         		  this.inputStreamOrReader = inputStreamOrReader;
         		  this.baseURI = baseURI;
         	  }
-        	  public void run() 
+        	  @Override
+              public void run()
         	  {
         		  try {
 					rdfParser.parse((InputStream) inputStreamOrReader, baseURI);
@@ -388,7 +385,8 @@ throw new RuntimeException(e);
         		  this.questStmt = qstm;
         	  }
         	  
-        	  public void run()
+        	  @Override
+              public void run()
         	  {
         		    try {
 						questStmt.add(iterator, boolToInt(autoCommit), 5000);
@@ -463,18 +461,21 @@ throw new RuntimeException(e);
 
 
 
-	public void clear(Resource... contexts) throws RepositoryException {
+	@Override
+    public void clear(Resource... contexts) throws RepositoryException {
 		//Removes all statements from a specific contexts in the repository. 
         remove(null, null, null, contexts);
 	}
 
-	public void clearNamespaces() throws RepositoryException {
+	@Override
+    public void clearNamespaces() throws RepositoryException {
 		//Removes all namespace declarations from the repository. 
 		remove(null, null, null,(Resource[]) null);
 		
 	}
 
-	public void close() throws RepositoryException {
+	@Override
+    public void close() throws RepositoryException {
 		//Closes the connection, freeing resources. 
 		//If the connection is not in autoCommit mode, 
 		//all non-committed operations will be lost. 
@@ -486,7 +487,8 @@ throw new RuntimeException(e);
 			}
 	} 
 	
-	public void commit() throws RepositoryException {
+	@Override
+    public void commit() throws RepositoryException {
 		// Commits all updates that have been performed as part of this
 		// connection sofar.
 		if (isActive()) {
@@ -503,14 +505,16 @@ throw new RuntimeException(e);
 		}
 	}
 
-	public void export(RDFHandler handler, Resource... contexts)
+	@Override
+    public void export(RDFHandler handler, Resource... contexts)
 			throws RepositoryException, RDFHandlerException {
 		//Exports all explicit statements in the specified contexts to the supplied RDFHandler. 
         exportStatements(null, null, null, false, handler, contexts);
 	}
 
-	public void exportStatements(Resource subj,  org.openrdf.model.URI  pred, Value obj,
-			boolean includeInferred, RDFHandler handler, Resource... contexts)
+	@Override
+    public void exportStatements(Resource subj, org.openrdf.model.URI  pred, Value obj,
+                                 boolean includeInferred, RDFHandler handler, Resource... contexts)
 			throws RepositoryException, RDFHandlerException {
 		//Exports all statements with a specific subject, predicate 
 		//and/or object from the repository, optionally from the specified contexts. 
@@ -531,7 +535,8 @@ throw new RuntimeException(e);
 
 	}
 
-	public RepositoryResult<Resource> getContextIDs()
+	@Override
+    public RepositoryResult<Resource> getContextIDs()
 			throws RepositoryException {
 		//Gets all resources that are used as content identifiers. 
 		//Care should be taken that the returned RepositoryResult 
@@ -540,12 +545,14 @@ throw new RuntimeException(e);
 		return new RepositoryResult<Resource>(new CloseableIteratorIteration<Resource, RepositoryException>(contexts.iterator()));
 	}
 
-	public String getNamespace(String prefix) throws RepositoryException {
+	@Override
+    public String getNamespace(String prefix) throws RepositoryException {
 		//Gets the namespace that is associated with the specified prefix, if any. 
 		return repository.getNamespace(prefix);
 	}
 
-	public RepositoryResult<Namespace> getNamespaces()
+	@Override
+    public RepositoryResult<Namespace> getNamespaces()
 			throws RepositoryException {
 		//Gets all declared namespaces as a RepositoryResult of Namespace objects. 
 		//Each Namespace object consists of a prefix and a namespace name. 
@@ -561,18 +568,21 @@ throw new RuntimeException(e);
                 namespSet.iterator()));
 	}
 
-	public ParserConfig getParserConfig() {
+	@Override
+    public ParserConfig getParserConfig() {
 		//Returns the parser configuration this connection uses for Rio-based operations. 
 		return rdfParser.getParserConfig();
 	}
 
-	public Repository getRepository() {
+	@Override
+    public Repository getRepository() {
 		//Returns the Repository object to which this connection belongs. 
 		return this.repository;
 	}
 
-	public RepositoryResult<Statement> getStatements(Resource subj, org.openrdf.model.URI pred,
-			Value obj, boolean includeInferred, Resource... contexts)
+	@Override
+    public RepositoryResult<Statement> getStatements(Resource subj, org.openrdf.model.URI pred,
+                                                     Value obj, boolean includeInferred, Resource... contexts)
 			throws RepositoryException {
 		//Gets all statements with a specific subject, 
 		//predicate and/or object from the repository.
@@ -633,12 +643,14 @@ throw new RuntimeException(e);
 		}
 	}
 
-	public ValueFactory getValueFactory() {
+	@Override
+    public ValueFactory getValueFactory() {
 		//Gets a ValueFactory for this RepositoryConnection. 
 		return new ValueFactoryImpl();
 	}
 
-	public boolean hasStatement(Statement st, boolean includeInferred, Resource... contexts)
+	@Override
+    public boolean hasStatement(Statement st, boolean includeInferred, Resource... contexts)
 			throws RepositoryException {
 		//Checks whether the repository contains the specified statement,
 		//optionally in the specified contexts. 
@@ -646,8 +658,9 @@ throw new RuntimeException(e);
                 .getObject(), includeInferred, contexts);
 	}
 
-	public boolean hasStatement(Resource subj, org.openrdf.model.URI pred, Value obj,
-			boolean includeInferred, Resource... contexts) throws RepositoryException {
+	@Override
+    public boolean hasStatement(Resource subj, org.openrdf.model.URI pred, Value obj,
+                                boolean includeInferred, Resource... contexts) throws RepositoryException {
 		//Checks whether the repository contains statements with a specific subject, 
 		//predicate and/or object, optionally in the specified contexts. 
 		    RepositoryResult<Statement> stIter = getStatements(subj, pred,
@@ -661,23 +674,27 @@ throw new RuntimeException(e);
 
 
 
-	public boolean isAutoCommit() throws RepositoryException {
+	@Override
+    public boolean isAutoCommit() throws RepositoryException {
 		//Checks whether the connection is in auto-commit mode. 
 		return this.autoCommit;
 	}
 
-	public boolean isEmpty() throws RepositoryException {
+	@Override
+    public boolean isEmpty() throws RepositoryException {
 		//Returns true if this repository does not contain any (explicit) statements. 
 		return size() == 0;
 	}
 
-	public boolean isOpen() throws RepositoryException {
+	@Override
+    public boolean isOpen() throws RepositoryException {
 		//Checks whether this connection is open. 
 		//A connection is open from the moment it is created until it is closed. 
 		return this.isOpen;
 	}
 
-	public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String query)
+	@Override
+    public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String query)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares true/false queries. In case the query contains 
 		//relative URIs that need to be resolved against an external base URI, 
@@ -685,8 +702,9 @@ throw new RuntimeException(e);
         return prepareBooleanQuery(ql, query, null);
     }
 
-	public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString,
-			String baseURI) throws RepositoryException, MalformedQueryException {
+	@Override
+    public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString,
+                                            String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares true/false queries. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
@@ -695,7 +713,8 @@ throw new RuntimeException(e);
 		
 	}
 
-	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString)
+	@Override
+    public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares queries that produce RDF graphs. In case the query 
 		//contains relative URIs that need to be resolved against an 
@@ -703,8 +722,9 @@ throw new RuntimeException(e);
 		return prepareGraphQuery(ql, queryString, null);
 	}
 
-	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
-			String baseURI) throws RepositoryException, MalformedQueryException {
+	@Override
+    public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
+                                        String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares queries that produce RDF graphs. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
@@ -713,7 +733,8 @@ throw new RuntimeException(e);
 			
 	}
 
-	public Query prepareQuery(QueryLanguage ql, String query)
+	@Override
+    public Query prepareQuery(QueryLanguage ql, String query)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares a query for evaluation on this repository (optional operation).
 		//In case the query contains relative URIs that need to be resolved against 
@@ -721,7 +742,8 @@ throw new RuntimeException(e);
         return prepareQuery(ql, query, null);
     }
 
-	public Query prepareQuery(QueryLanguage ql, String queryString, String baseURI)
+	@Override
+    public Query prepareQuery(QueryLanguage ql, String queryString, String baseURI)
 			throws RepositoryException, MalformedQueryException {
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected! ");
@@ -739,7 +761,8 @@ throw new RuntimeException(e);
 		
 	}
 
-	public TupleQuery prepareTupleQuery(QueryLanguage ql, String query)
+	@Override
+    public TupleQuery prepareTupleQuery(QueryLanguage ql, String query)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares a query that produces sets of value tuples. 
 		//In case the query contains relative URIs that need to be 
@@ -748,8 +771,9 @@ throw new RuntimeException(e);
         return this.prepareTupleQuery(ql, query, "");
     }
 
-	public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString,
-			String baseURI) throws RepositoryException, MalformedQueryException {
+	@Override
+    public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString,
+                                        String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares a query that produces sets of value tuples. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
@@ -758,21 +782,24 @@ throw new RuntimeException(e);
 
 	}
 
-	public Update prepareUpdate(QueryLanguage arg0, String arg1)
+	@Override
+    public Update prepareUpdate(QueryLanguage arg0, String arg1)
 			throws RepositoryException, MalformedQueryException {
 		// TODO Auto-generated method stub
 		//Prepares an Update operation. 
 		return null;
 	}
 
-	public Update prepareUpdate(QueryLanguage arg0, String arg1, String arg2)
+	@Override
+    public Update prepareUpdate(QueryLanguage arg0, String arg1, String arg2)
 			throws RepositoryException, MalformedQueryException {
 		// TODO Auto-generated method stub
 		//Prepares an Update operation. 
 		return null;
 	}
 
-	public void remove(Statement st, Resource... contexts)
+	@Override
+    public void remove(Statement st, Resource... contexts)
 			throws RepositoryException {
 		//Removes the supplied statement from the specified contexts in the repository. 
 		   OpenRDFUtil.verifyContextNotNull(contexts);
@@ -781,7 +808,8 @@ throw new RuntimeException(e);
 
 	}
 
-	public void remove(Iterable<? extends Statement> statements, Resource... contexts)
+	@Override
+    public void remove(Iterable<? extends Statement> statements, Resource... contexts)
 			throws RepositoryException {
 		//Removes the supplied statements from the specified contexts in this repository. 
 		 OpenRDFUtil.verifyContextNotNull(contexts);
@@ -792,12 +820,7 @@ throw new RuntimeException(e);
              for (Statement st : statements) {
                  remove(st, contexts);
              }
-         } catch (RepositoryException e) {
-             if (autoCommit) {
-                 rollback();
-             }
-             throw e;
-         } catch (RuntimeException e) {
+         } catch (RepositoryException | RuntimeException e) {
              if (autoCommit) {
                  rollback();
              }
@@ -808,7 +831,8 @@ throw new RuntimeException(e);
 
 	}
 
-	public <E extends Exception> void remove(
+	@Override
+    public <E extends Exception> void remove(
 			Iteration<? extends Statement, E> statementIter, Resource... contexts)
 			throws RepositoryException, E {
 		//Removes the supplied statements from a specific context in this repository, 
@@ -835,7 +859,8 @@ throw new RuntimeException(e);
 
 	}
 
-	public void remove(Resource subject, org.openrdf.model.URI predicate, Value object, Resource... contexts)
+	@Override
+    public void remove(Resource subject, org.openrdf.model.URI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
 		//Removes the statement(s) with the specified subject, predicate and object 
 		//from the repository, optionally restricted to the specified contexts. 
@@ -845,13 +870,15 @@ throw new RuntimeException(e);
 
 	}
 
-	public void removeNamespace(String key) throws RepositoryException {
+	@Override
+    public void removeNamespace(String key) throws RepositoryException {
 		//Removes a namespace declaration by removing the association between a prefix and a namespace name. 
 		repository.removeNamespace(key);
 		
 	}
 
-	public void rollback() throws RepositoryException {
+	@Override
+    public void rollback() throws RepositoryException {
 		// Rolls back all updates that have been performed as part of this
 		// connection sofar.
 		if (isActive()) {
@@ -867,7 +894,8 @@ throw new RuntimeException(e);
 		}
 	}
 
-	public void setAutoCommit(boolean autoCommit) throws RepositoryException {
+	@Override
+    public void setAutoCommit(boolean autoCommit) throws RepositoryException {
 		//Enables or disables auto-commit mode for the connection. 
 		//If a connection is in auto-commit mode, then all updates 
 		//will be executed and committed as individual transactions. 
@@ -899,20 +927,23 @@ throw new RuntimeException(e);
 
 	}
 
-	public void setNamespace(String key, String value)
+	@Override
+    public void setNamespace(String key, String value)
 			throws RepositoryException {
 		//Sets the prefix for a namespace. 
 		repository.setNamespace(key, value);
 		
 	}
 
-	public void setParserConfig(ParserConfig config) {
+	@Override
+    public void setParserConfig(ParserConfig config) {
 		//Set the parser configuration this connection should use for RDFParser-based operations. 
 		rdfParser.setParserConfig(config);
 		
 	}
 
-	public long size(Resource... contexts) throws RepositoryException {
+	@Override
+    public long size(Resource... contexts) throws RepositoryException {
 		//Returns the number of (explicit) statements that are in the specified contexts in this repository. 
 		return 0;
 	}

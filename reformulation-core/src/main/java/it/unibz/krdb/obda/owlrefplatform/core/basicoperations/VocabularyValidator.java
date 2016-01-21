@@ -64,7 +64,7 @@ public class VocabularyValidator {
 			if (t instanceof Function) {
 				Function atom = (Function)t;
 
-				if (atom.isBooleanFunction()) {
+				if (atom.isOperation()) {
 					nt = t;
 				}
 				else if (atom.isAlgebraFunction()) {

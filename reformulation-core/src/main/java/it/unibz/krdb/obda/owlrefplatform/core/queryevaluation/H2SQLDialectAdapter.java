@@ -31,30 +31,6 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public String strEncodeForUri(String str){
-	      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-	            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
-	            "'!', '%21')," +
-	            "'@', '%40')," +
-	            "'#', '%23')," +
-	            "'$', '%24')," +
-	            "'&', '%26')," +
-	            "'*', '%42'), " +
-	            "'(', '%28'), " +
-	            "')', '%29'), " +
-	            "'[', '%5B'), " +
-	            "']', '%5D'), " +
-	            "',', '%2C'), " +
-	            "';', '%3B'), " +
-	            "':', '%3A'), " +
-	            "'?', '%3F'), " +
-	            "'=', '%3D'), " +
-	            "'+', '%2B'), " +
-	            "'''', '%22'), " +
-	            "'/', '%2F')";
-	    }
-
-	@Override
 	public String uuid(){
 		return strConcat(new String[]{"'urn:uuid:'","RANDOM_UUID()"});
 	}

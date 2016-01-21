@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.ExpressionOperation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
@@ -148,9 +149,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
@@ -193,9 +194,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans6 = createRule(ANS6, x, e);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), ans2(x,a)
@@ -224,9 +225,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		Function cond6 = dataFactory.getFunctionAND(cond3, cond4);
 		Function cond7 = dataFactory.getFunctionOR(cond6, cond5);
 		

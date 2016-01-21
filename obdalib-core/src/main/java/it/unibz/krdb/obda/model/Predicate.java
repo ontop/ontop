@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +28,9 @@ import java.util.Map;
  * (3) logical operators (e.g. join, left join)
  *
  */
-public interface Predicate extends Cloneable, Serializable {
+public interface Predicate {
 
-	public static enum COL_TYPE {
+	enum COL_TYPE {
 		
 		UNSUPPORTED (-1), // created only in SesameRDFIterator, ignored by SI and exceptions in all other cases
 		NULL (0),
@@ -93,14 +92,14 @@ public interface Predicate extends Cloneable, Serializable {
 	 * 
 	 * @return the resource identifier (URI).
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Get the number of elements of the predicate.
 	 * 
 	 * @return an integer number.
 	 */
-	public int getArity();
+    int getArity();
 
 	/***
 	 * Returns the typing of the component given by component. Types can be
@@ -108,14 +107,8 @@ public interface Predicate extends Cloneable, Serializable {
 	 * 
 	 * @param column
 	 */
-	public COL_TYPE getType(int column);
+    COL_TYPE getType(int column);
 
-	/**
-	 * Duplicate the object by performing a deep cloning.
-	 * 
-	 * @return the copy of the object.
-	 */
-	public Predicate clone();
 
 	boolean isClass();
 
@@ -125,19 +118,7 @@ public interface Predicate extends Cloneable, Serializable {
 
 	boolean isDataProperty();
 	
-	boolean isDataPredicate();
 	
-	boolean isBooleanPredicate();
 	
-	boolean isAlgebraPredicate();
-	
-	boolean isArithmeticPredicate();
-	
-	boolean isDataTypePredicate();
-
-    boolean isStringOperationPredicate();
-
 	boolean isTriplePredicate();
-
-	boolean isDateTimePredicate();
 }

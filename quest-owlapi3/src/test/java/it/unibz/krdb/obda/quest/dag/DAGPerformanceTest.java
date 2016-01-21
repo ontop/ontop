@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -133,7 +133,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
+		Ontology o = OWLAPITranslatorUtility.translate(ont);
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
@@ -223,7 +223,7 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
+		Ontology o = OWLAPITranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
@@ -319,7 +319,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
+		Ontology o = OWLAPITranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 

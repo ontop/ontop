@@ -23,6 +23,7 @@ package sesameWrapper;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
+@Deprecated
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
 
 	private static QuestPreferences p = new QuestPreferences();

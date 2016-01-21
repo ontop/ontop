@@ -42,9 +42,7 @@ public class SesameStatement implements Statement {
 	private Value object = null;
 	private Resource context = null;
 
-	private SesameHelper helper = new SesameHelper();
-
-	public SesameStatement(Assertion assertion) {
+    public SesameStatement(Assertion assertion) {
 		
 		if (assertion instanceof ObjectPropertyAssertion) {
 			//object or data property assertion
@@ -54,9 +52,9 @@ public class SesameStatement implements Statement {
 			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
-			subject = helper.getResource(subj);
-			predicate = helper.createURI(pred); // URI	
-			object = helper.getResource(obj);
+			subject = SesameHelper.getResource(subj);
+			predicate = SesameHelper.createURI(pred); // URI
+			object = SesameHelper.getResource(obj);
 		} 
 		else if (assertion instanceof DataPropertyAssertion) {
 			//object or data property assertion
@@ -66,13 +64,9 @@ public class SesameStatement implements Statement {
 			ValueConstant obj = ba.getValue();
 			
 			// convert string into respective type
-			subject = helper.getResource(subj);	
-			predicate = helper.createURI(pred); // URI
-			
-			if (obj instanceof ValueConstant)
-				object = helper.getLiteral((ValueConstant)obj);		
-			else 
-				throw new RuntimeException("Invalid constant as object!" + obj);
+			subject = SesameHelper.getResource(subj);
+			predicate = SesameHelper.createURI(pred); // URI
+            object = SesameHelper.getLiteral(obj);
 		} 
 		else if (assertion instanceof ClassAssertion) { 
 			//class assertion
@@ -81,27 +75,30 @@ public class SesameStatement implements Statement {
 			String obj = ua.getConcept().getName();
 			
 			// convert string into respective type
-			subject = helper.getResource(subj);
-			predicate = helper.createURI(OBDAVocabulary.RDF_TYPE); // URI
-			object = helper.createURI(obj);	
+			subject = SesameHelper.getResource(subj);
+			predicate = SesameHelper.createURI(OBDAVocabulary.RDF_TYPE); // URI
+			object = SesameHelper.createURI(obj);
 		}
 	}
 	
 
-	public Resource getSubject() {
+	@Override
+    public Resource getSubject() {
 		return subject;
 	}
 
-	public URI getPredicate() {
+	@Override
+    public URI getPredicate() {
 		return predicate;
 	}
 
-	public Value getObject() {
+	@Override
+    public Value getObject() {
 		return object;
 	}
 
-	public Resource getContext() {
-		// TODO Auto-generated method stub
+	@Override
+    public Resource getContext() {
 		return context;
 	}
 
@@ -119,9 +116,8 @@ public class SesameStatement implements Statement {
         URI thatPredicate = that.getPredicate();
         if (predicate != null ? !predicate.equals(thatPredicate) : thatPredicate != null) return false;
         Resource thatSubject = that.getSubject();
-        if (subject != null ? !subject.equals(thatSubject) : thatSubject != null) return false;
+        return subject != null ? subject.equals(thatSubject) : thatSubject == null;
 
-        return true;
     }
 
     @Override

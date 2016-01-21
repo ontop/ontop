@@ -165,7 +165,7 @@ public class MappingDataTypeRepair {
              if present or the information from the database will be used.
              */
 
-            else if (functionSymbol.isStringOperationPredicate() || functionSymbol.isArithmeticPredicate()) {
+            else if (function.isOperation()) {
 
             	Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
@@ -184,7 +184,7 @@ public class MappingDataTypeRepair {
                         insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
             } 
-            else if (functionSymbol.isDataTypePredicate()) {
+            else if (function.isDataTypeFunction()) {
 
                 Function normal = qvv.getNormal(atom);
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
@@ -283,7 +283,7 @@ public class MappingDataTypeRepair {
 		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
 		IndexedPosititon ip = list.get(0);
 
-		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(ip.atom.getFunctionSymbol());
+		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 

@@ -21,15 +21,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ForeignKeyConstraint;
 import it.unibz.krdb.sql.Relation2DatalogPredicate;
 import it.unibz.krdb.sql.DatabaseRelationDefinition;
+import it.unibz.krdb.sql.UniqueConstraint;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,14 +39,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 
 public class DBMetadataUtil {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
+	
+	/***
+	 * Generates a map for each predicate in the body of the rules in 'program'
+	 * that contains the Primary Key data for the predicates obtained from the
+	 * info in the metadata.
+     *
+     * It also returns the columns with unique constraints
+     *
+     * For instance, Given the table definition
+     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
+     *
+     * The methods will return the following Multimap:
+     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
+     *
+	 * 
+	 * @param metadata
+	 * @param program
+	 */
+	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata) {
+		
+		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
+		for (DatabaseRelationDefinition relation : metadata.getDatabaseRelations()) {
+			Predicate predicate = Relation2DatalogPredicate.createPredicateFromRelation(relation);
+			
+			// primary key and unique constraints
+			for (UniqueConstraint uc : relation.getUniqueConstraints()) {
+				List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
+				for (Attribute att : uc.getAttributes()) 
+					pkeyIdx.add(att.getIndex());
+				
+				pkeys.put(predicate, pkeyIdx);
+			}
+		}
+		return pkeys;
+	}
+	
+	
 	
 	/*
 	 * generate CQIE rules from foreign key info of db metadata

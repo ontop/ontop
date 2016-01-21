@@ -39,7 +39,9 @@ public class QuotedID {
 	private final int hashCode;
 
 	public static final String NO_QUOTATION = "";
-	public static final String QUOTATION = "\"";
+//	public static final String QUOTATION = "\"";
+	
+	public static final QuotedID EMPTY_ID = new QuotedID(null, NO_QUOTATION);
 	
 	/**
 	 * (used only in QuotedIDFactory implementations)
@@ -69,9 +71,9 @@ public class QuotedID {
 	 * @return
 	 */
 	
-	public static QuotedID createIdFromDatabaseRecord(String s) {
+	public static QuotedID createIdFromDatabaseRecord(QuotedIDFactory idfac, String s) {
 		// ID is as though it is quoted -- DB stores names as is 
-		return new QuotedID(s, QUOTATION);
+		return new QuotedID(s, idfac.getIDQuotationString());
 	}
 	
 	/**
