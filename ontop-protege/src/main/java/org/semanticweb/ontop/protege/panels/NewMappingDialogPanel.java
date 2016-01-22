@@ -348,7 +348,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         scrTargetQuery.setMinimumSize(new java.awt.Dimension(600, 170));
         scrTargetQuery.setPreferredSize(new java.awt.Dimension(600, 170));
 
-        txtTargetQuery.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
+        txtTargetQuery.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 13)); // NOI18N
         txtTargetQuery.setFocusCycleRoot(false);
         txtTargetQuery.setMinimumSize(new java.awt.Dimension(600, 170));
         txtTargetQuery.setPreferredSize(new java.awt.Dimension(600, 170));
@@ -378,6 +378,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
         scrSourceQuery.setFocusable(false);
 
+        txtSourceQuery.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 13)); // NOI18N
         txtSourceQuery.setFocusCycleRoot(false);
         scrSourceQuery.setViewportView(txtSourceQuery);
 

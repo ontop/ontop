@@ -87,8 +87,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		initComponents();
 		addMenu();
 
-
-
 		// Setting up the mappings tree
 		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic, validator));
 		mappingList.setModel(new SynchronizedMappingListModel(apic));
@@ -143,6 +141,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		setOBDAModel(apic); // TODO Bad code! Change this later!
 	}
 
+    public OBDADataSource getSelectedSource() {
+        return selectedSource;
+    }
+
 	/**
 	 * A listener to trigger the context menu of the mapping list.
 	 */
@@ -165,12 +167,14 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-	public void setOBDAModel(OBDAModel omodel) {
+   
+
+    public void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
 		ListModel model = new SynchronizedMappingListModel(omodel);
-		
+
 		model.addListDataListener(new ListDataListener() {
 			@Override
 			public void intervalRemoved(ListDataEvent e) {
@@ -186,12 +190,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			}
 		});
 		mappingList.setModel(model);
-
-        if (apic.getSources().size() > 0) {
-
-            datasourceChanged(selectedSource, apic.getSources().get(0));
-        }
-    }
+	}
 
 	public void setTargetQueryValidator(TargetQueryVocabularyValidator validator) {
 		this.validatortrg = validator;
@@ -269,7 +268,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         txtFilter = new javax.swing.JTextField();
         chkFilter = new javax.swing.JCheckBox();
         mappingScrollPane = new javax.swing.JScrollPane();
-        mappingList = new javax.swing.JList<OBDAMappingAxiom>();
+        mappingList = new javax.swing.JList<>();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -430,6 +429,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
         pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
 
+        mappingList.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 12)); // NOI18N
         mappingScrollPane.setViewportView(mappingList);
 
         pnlMappingManager.add(mappingScrollPane, java.awt.BorderLayout.CENTER);

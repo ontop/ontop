@@ -70,7 +70,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		this.comboListener = new ComboBoxItemListener();
 		txtJdbcDriver.addItemListener(comboListener);
 
-		setEmptyDatasources(model);
+		setNewDatasource(model);
 //		enableFields(false);
 
 		List<Component> order = new ArrayList<>(7);
@@ -83,13 +83,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		order.add(cmdTestConnection);
 		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
 
-        /**
-         * Selects the first data source if it exists
-         */
-        if (obdaModel.getSources().size() > 0) {
-            
-            datasourceChanged(selectedDataSource, obdaModel.getSources().get(0));
-        }
+
     }
 
 	private void handleTimer() {
@@ -114,14 +108,21 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		}
 	}
 
-	public void setEmptyDatasources(OBDAModel model) {
+	public void setNewDatasource(OBDAModel model) {
 		obdaModel = model;	
 		resetTextFields();
+        /**
+         * Selects the first data source if it exists
+         */
+        if (obdaModel.getSources().size() > 0) {
+
+            datasourceChanged(selectedDataSource, obdaModel.getSources().get(0));
+        }
 	}
 
 
 	private void resetTextFields() {
-                txtDatabase.setText("");
+        txtDatabase.setText("");
 		txtJdbcUrl.setText("");
 		txtDatabasePassword.setText("");
 		txtDatabaseUsername.setText("");
@@ -392,9 +393,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         pnlCommandButton.setFocusable(false);
         pnlCommandButton.setMinimumSize(new java.awt.Dimension(210, 27));
         pnlCommandButton.setPreferredSize(new java.awt.Dimension(210, 27));
-        pnlCommandButton.setLayout(new java.awt.BorderLayout());
+        pnlCommandButton.setLayout(new java.awt.GridBagLayout());
 
-        cmdSave.setIcon(IconLoader.getImageIcon("images/plus.png"));
         cmdSave.setText("Save");
         cmdSave.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdSave.setContentAreaFilled(false);
@@ -403,8 +403,12 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         cmdSave.setMaximumSize(new java.awt.Dimension(105, 25));
         cmdSave.setMinimumSize(new java.awt.Dimension(105, 25));
         cmdSave.setPreferredSize(new java.awt.Dimension(105, 25));
-        cmdSave.addActionListener(evt -> cmdSaveActionPerformed(evt));
-        pnlCommandButton.add(cmdSave, java.awt.BorderLayout.CENTER);
+        cmdSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSaveActionPerformed(evt);
+            }
+        });
+        pnlCommandButton.add(cmdSave, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -647,9 +651,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             if (oldSource!=null ) {
                 obdaModel.removeSource(oldSource.getSourceID()); 
             }
-                obdaModel.addSource(newSource);
-                selectedDataSource = newSource;
-                enableFields(false);
+        obdaModel.addSource(newSource);
+        selectedDataSource = newSource;
+        enableFields(false);
 		currentDatasourceChange(newSource);
 		enableFields(true);
 

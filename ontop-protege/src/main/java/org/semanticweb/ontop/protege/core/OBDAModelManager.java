@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.protege.utils.DialogUtils;
 import it.unibz.krdb.obda.querymanager.*;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -41,28 +40,9 @@ import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
-
-
+import org.semanticweb.ontop.protege.utils.DialogUtils;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
-import org.semanticweb.owlapi.model.OWLOntologyID;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.model.SetOntologyID;
-
-
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -564,18 +544,24 @@ public class OBDAModelManager implements Disposable {
 					activeOBDAModel = getActiveOBDAModel();
 
 					String owlDocumentIri = source.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology).toString();
-					String obdaDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + OBDA_EXT;
-					String queryDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + QUERY_EXT;
 
-					// Save the OBDA model
-					File obdaFile = new File(URI.create(obdaDocumentIri));
-					ModelIOManager ModelIO = new ModelIOManager(activeOBDAModel);
-					ModelIO.save(obdaFile);
+					if(!activeOBDAModel.getSources().isEmpty()) {
 
-					// Save the queries
-					File queryFile = new File(URI.create(queryDocumentIri));
-					QueryIOManager queryIO = new QueryIOManager(queryController);
-					queryIO.save(queryFile);
+						String obdaDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + OBDA_EXT;
+						String queryDocumentIri = owlDocumentIri.substring(0, owlDocumentIri.length() - 3) + QUERY_EXT;
+
+						// Save the OBDA model
+						File obdaFile = new File(URI.create(obdaDocumentIri));
+						ModelIOManager ModelIO = new ModelIOManager(activeOBDAModel);
+						ModelIO.save(obdaFile);
+
+						if (! queryController.getElements().isEmpty()) {
+							// Save the queries
+							File queryFile = new File(URI.create(queryDocumentIri));
+							QueryIOManager queryIO = new QueryIOManager(queryController);
+							queryIO.save(queryFile);
+						}
+					}
 
 				} catch (IOException e) {
 					log.error(e.getMessage());
@@ -597,14 +583,14 @@ public class OBDAModelManager implements Disposable {
 				// Get the active OBDA model
 				activeOBDAModel = getActiveOBDAModel();
 
-				if ((!inititializing) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
+				if ((!inititializing) && (owlEditorKit != null) && (activeOBDAModel != null)) {
 					ProtegeOWLReasonerInfo fac = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 					if (fac instanceof OntopReasonerInfo) {
 						OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
 						DisposableQuestPreferences reasonerPreference = (DisposableQuestPreferences) owlEditorKit
 								.get(QuestPreferences.class.getName());
 						questfactory.setPreferences(reasonerPreference);
-						questfactory.setOBDAModel(getActiveOBDAModel());
+						questfactory.setOBDAModel(activeOBDAModel);
 					}
 					break;
 				}
