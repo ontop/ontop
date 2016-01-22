@@ -26,6 +26,8 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.event.EventType;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.utils.CustomTraversalPolicy;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
@@ -44,8 +46,9 @@ import java.util.List;
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = 3506358479342412849L;
+    private final OWLModelManager owlModelManager;
 
-	private OBDADataSource selectedDataSource;
+    private OBDADataSource selectedDataSource;
 
 	private OBDAModel obdaModel;
 
@@ -56,7 +59,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	/**
 	 * Creates new form DatasourceParameterEditorPanel
 	 */
-	public DatasourceParameterEditorPanel(OBDAModel model) {
+	public DatasourceParameterEditorPanel(OBDAModel model, OWLModelManager owlModelManager) {
+
+        this.owlModelManager = owlModelManager;
 
 		timer = new Timer(200, e -> handleTimer());
 		
@@ -398,11 +403,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         cmdSave.setMaximumSize(new java.awt.Dimension(105, 25));
         cmdSave.setMinimumSize(new java.awt.Dimension(105, 25));
         cmdSave.setPreferredSize(new java.awt.Dimension(105, 25));
-        cmdSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSaveActionPerformed(evt);
-            }
-        });
+        cmdSave.addActionListener(evt -> cmdSaveActionPerformed(evt));
         pnlCommandButton.add(cmdSave, java.awt.BorderLayout.CENTER);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -463,20 +464,20 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 			if (!name.isEmpty()) {
 				URI uri = createUri(name);
-				if (uri != null) {
-                                    
-                                    if (!obdaModel.containsSource(uri)) {
-                                        
-                                        if (obdaModel.getSources().size() > 0) { //if another datasource already exist remove first the previous one
-                                            int answer = JOptionPane.showConfirmDialog(this, "Are you sure want to delete previous data source?\n Datasource: "+ selectedDataSource.getSourceID(), "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
-                                            
-                                            if (answer != JOptionPane.OK_OPTION) {
-              
-                                                return;
-                                            }
-                                        }
-                                    }
-		            //create new datasource
+                if (uri != null) {
+
+                    if (!obdaModel.containsSource(uri)) {
+
+                        if (obdaModel.getSources().size() > 0) { //if another datasource already exist remove first the previous one
+                            int answer = JOptionPane.showConfirmDialog(this, "Are you sure want to delete previous data source?\n Datasource: " + selectedDataSource.getSourceID(), "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
+
+                            if (answer != JOptionPane.OK_OPTION) {
+
+                                return;
+                            }
+                        }
+                    }
+                    //create new datasource
                     OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
                     String username = txtDatabaseUsername.getText();
                     source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
@@ -488,18 +489,16 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
                     source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 
                     datasourceChanged(selectedDataSource, source);
-                    saveToFile();
+                    // save the obdaModel to an .obda file disk
+                    this.owlModelManager.fireEvent(EventType.ONTOLOGY_SAVED);
                     JOptionPane.showMessageDialog(this, "The specified data source has been saved. ", "Saved", JOptionPane.INFORMATION_MESSAGE);
                     return;
-                                    
-                                            
-                                    	
 				}
                                    
 			} else {
 				JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
-                                return;
-                                }
+                return;
+            }
 		}
 	}// GEN-LAST:event_cmdSaveActionPerformed
 
@@ -656,11 +655,4 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 	}
 
-    private void saveToFile(){
-//        File output = new File(fileLocation);
-//        BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-//        SaveQueryToFileAction action = new SaveQueryToFileAction(latch, data, writer);
-//        monitor.addProgressListener(action);
-//        action.run();
-    }
 }

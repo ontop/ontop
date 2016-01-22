@@ -22,6 +22,7 @@ package org.semanticweb.ontop.protege.views;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
@@ -41,7 +42,7 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	OBDAModelManager obdaModelManager = null;
         
-         private OBDAModel activeOBDAModel;
+    private OBDAModel activeOBDAModel;
 
 	@Override
 	protected void disposeOWLView() {
@@ -54,9 +55,11 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaModelManager.addListener(this);
 
-		setLayout(new BorderLayout());
+        OWLModelManager owlModelManager = getOWLEditorKit().getOWLModelManager();
 
-		editor = new DatasourceParameterEditorPanel(obdaModelManager.getActiveOBDAModel());
+        setLayout(new BorderLayout());
+
+		editor = new DatasourceParameterEditorPanel(obdaModelManager.getActiveOBDAModel(), owlModelManager);
 		add(editor, BorderLayout.NORTH);
 
 		log.debug("Datasource browser initialized");
