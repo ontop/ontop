@@ -387,7 +387,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         pnlCommandButton.setFocusable(false);
         pnlCommandButton.setMinimumSize(new java.awt.Dimension(210, 27));
         pnlCommandButton.setPreferredSize(new java.awt.Dimension(210, 27));
-        pnlCommandButton.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        pnlCommandButton.setLayout(new java.awt.BorderLayout());
 
         cmdSave.setIcon(IconLoader.getImageIcon("images/plus.png"));
         cmdSave.setText("Save");
@@ -403,7 +403,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
                 cmdSaveActionPerformed(evt);
             }
         });
-        pnlCommandButton.add(cmdSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 0, -1, -1));
+        pnlCommandButton.add(cmdSave, java.awt.BorderLayout.CENTER);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
