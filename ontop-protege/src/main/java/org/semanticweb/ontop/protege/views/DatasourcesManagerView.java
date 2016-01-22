@@ -20,16 +20,16 @@ package org.semanticweb.ontop.protege.views;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege.panels.DatasourceParameterEditorPanel;
-
-import java.awt.BorderLayout;
-
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.*;
 
 public class DatasourcesManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
@@ -39,22 +39,24 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	DatasourceParameterEditorPanel editor;
 
-	OBDAModelManager apic = null;
+	OBDAModelManager obdaModelManager = null;
+        
+         private OBDAModel activeOBDAModel;
 
 	@Override
 	protected void disposeOWLView() {
-		apic.removeListener(this);
+		obdaModelManager.removeListener(this);
 	}
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
 		
-		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
-		apic.addListener(this);
+		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		obdaModelManager.addListener(this);
 
 		setLayout(new BorderLayout());
 
-		editor = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel());
+		editor = new DatasourceParameterEditorPanel(obdaModelManager.getActiveOBDAModel());
 		add(editor, BorderLayout.NORTH);
 
 		log.debug("Datasource browser initialized");
@@ -62,6 +64,6 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	@Override
 	public void activeOntologyChanged() {
-		editor.setDatasourcesController(apic.getActiveOBDAModel());
+		 activeOBDAModel = obdaModelManager.getActiveOBDAModel();
 	}
 }

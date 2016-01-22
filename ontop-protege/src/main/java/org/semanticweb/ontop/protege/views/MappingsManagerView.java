@@ -24,29 +24,18 @@ import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.TargetQueryValidator;
-import org.semanticweb.ontop.protege.core.OBDAModelManager;
-import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
-import org.semanticweb.ontop.protege.panels.DatasourceSelector;
-import org.semanticweb.ontop.protege.panels.MappingManagerPanel;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.List;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
+import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
+import org.semanticweb.ontop.protege.panels.MappingManagerPanel;
 import org.semanticweb.owlapi.model.OWLEntity;
+
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.util.List;
 
 public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, Findable<OWLEntity> {
 
@@ -54,7 +43,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	OBDAModelManager controller = null;
 
-	DatasourceSelector datasourceSelector = null;
+	OBDAModel obdaModel;
 
 	MappingManagerPanel mappingPanel = null;
 
@@ -72,7 +61,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
 
-		OBDAModel obdaModel = controller.getActiveOBDAModel();
+		obdaModel = controller.getActiveOBDAModel();
 		
 		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
 		
@@ -98,59 +87,23 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 			}
 		});
 
-		datasourceSelector = new DatasourceSelector(obdaModel);
-		datasourceSelector.addDatasourceListListener(mappingPanel);
-
-        /**
-         * Selects the first datasource if it exists
-         */
-        if (obdaModel.getSources().size() > 0) {
-            datasourceSelector.set(obdaModel.getSources().get(0));
-        }
-
-		// Construct the layout of the panel.
-		JPanel selectorPanel = new JPanel();
-		selectorPanel.setLayout(new GridBagLayout());
-
-		JLabel label = new JLabel("Select datasource: ");
-		label.setFont(new Font("Dialog", Font.BOLD, 12));
-		label.setForeground(new Color(53,113,163));
-		// label.setBackground(new java.awt.Color(153, 153, 153));
-		// label.setFont(new java.awt.Font("Arial", 1, 11));
-		// label.setForeground(new java.awt.Color(153, 153, 153));
-		label.setPreferredSize(new Dimension(119, 14));
-
-		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		selectorPanel.add(label, gridBagConstraints);
-
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		selectorPanel.add(datasourceSelector, gridBagConstraints);
-
-		selectorPanel.setBorder(new TitledBorder("Datasource selection"));
+		
+		
 		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
 
 		setLayout(new BorderLayout());
-		add(mappingPanel, BorderLayout.CENTER);
-		add(selectorPanel, BorderLayout.NORTH);
+		add(mappingPanel, BorderLayout.NORTH);
+		
 	}
 
 	@Override
 	public void activeOntologyChanged() {
-		OBDAModel obdaModel = controller.getActiveOBDAModel();
+		obdaModel = controller.getActiveOBDAModel();
 		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
 
 		mappingPanel.setOBDAModel(obdaModel);
 		mappingPanel.setTargetQueryValidator(validator);
-		datasourceSelector.setDatasourceController(obdaModel);
+		
 	}
 
 	@Override
