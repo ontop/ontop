@@ -460,13 +460,10 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
             try {
                 NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(propagationProposal, true);
 
-                Optional<InnerJoinNode> optionalNewJoinNode = results.getOptionalNewNode();
-                if (optionalNewJoinNode.isPresent()) {
-                    return optionalNewJoinNode.get();
-                }
-                else {
-                    throw new RuntimeException("No focus node returned after the substitution propagation");
-                }
+                return results.getOptionalNewNode()
+                        .orElseThrow(() -> new IllegalStateException(
+                                "No focus node returned after the substitution propagation"));
+
             } catch (EmptyQueryException e) {
                 throw new IllegalStateException("Internal inconsistency error: propagation the substitution " +
                         "leads to an empty query: " + optionalSubstitution.get());

@@ -1,10 +1,11 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+
+import java.util.Optional;
 
 public class QueryNodeNavigationTools {
 
@@ -102,7 +103,7 @@ public class QueryNodeNavigationTools {
          * Nothing else to explore
          */
         else {
-            return new NextNodeAndQuery(Optional.<QueryNode>absent(), query);
+            return new NextNodeAndQuery(Optional.<QueryNode>empty(), query);
         }
     }
 
@@ -113,7 +114,10 @@ public class QueryNodeNavigationTools {
          * First choice: first child
          */
         if (!alreadyExplored) {
-            Optional<QueryNode> optionalFirstChild = query.getFirstChild(currentNode);
+            Optional<QueryNode> optionalFirstChild = query.getFirstChild(currentNode)
+                    .transform(Optional::of)
+                    .or(Optional.empty());
+
             if (optionalFirstChild.isPresent()) {
                 return optionalFirstChild;
             }
@@ -122,7 +126,9 @@ public class QueryNodeNavigationTools {
         /**
          * Second choice: next sibling
          */
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentNode);
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentNode)
+                .transform(Optional::of)
+                .or(Optional.empty());
         if (optionalNextSibling.isPresent()) {
             return optionalNextSibling;
         }
@@ -130,7 +136,9 @@ public class QueryNodeNavigationTools {
         /**
          * Otherwise, tries the closest next sibling of an ancestor (recursive call)
          */
-        Optional<QueryNode> optionalParent = query.getParent(currentNode);
+        Optional<QueryNode> optionalParent = query.getParent(currentNode)
+                .transform(Optional::of)
+                .or(Optional.empty());
         if (optionalParent.isPresent()) {
             // Recursive call
             return getDepthFirstNextNode(query, optionalParent.get(), true);
@@ -139,7 +147,7 @@ public class QueryNodeNavigationTools {
         /**
          * No more node to explore
          */
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

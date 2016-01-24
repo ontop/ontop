@@ -2,10 +2,7 @@ package org.semanticweb.ontop.executor;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.executor.join.JoinBooleanExpressionExecutor;
-import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 
@@ -17,7 +14,10 @@ public abstract class NodeCentricInternalCompositeExecutor<N extends QueryNode, 
 
     @Override
     protected Optional<P> createNewProposal(NodeCentricOptimizationResults<N> results) {
-        Optional<N> optionalNewNode = results.getOptionalNewNode();
+        Optional<N> optionalNewNode = results.getOptionalNewNode()
+                .map(Optional::of)
+                .orElse(Optional.absent());
+
         if (optionalNewNode.isPresent()) {
             return createNewProposalFromFocusNode(optionalNewNode.get());
         }

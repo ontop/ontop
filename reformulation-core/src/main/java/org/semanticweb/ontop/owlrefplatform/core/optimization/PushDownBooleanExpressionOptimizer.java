@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -10,6 +9,7 @@ import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
+import java.util.Optional;
 
 
 import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.*;
@@ -67,7 +67,8 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery) {
         // Non-final
-        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
+        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode())
+                .transform(Optional::of).or(Optional.empty());
 
         // Non-final
         IntermediateQuery currentQuery = initialQuery;
@@ -116,7 +117,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             try {
                 results = currentQuery.applyProposal(proposal);
             } catch (EmptyQueryException e) {
-                throw new RuntimeException("Unexpected empty query exception while pushing down boolean expressions");
+                throw new IllegalStateException("Unexpected empty query exception while pushing down boolean expressions");
             }
 
             return getNextNodeAndQuery(results);
@@ -143,7 +144,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
          * Left-join is not yet supported
          */
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -162,9 +163,11 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         /**
          * If there is no boolean expression, no proposal
          */
-        Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
+        Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition()
+                .transform(Optional::of).or(Optional.empty());
+
         if (!optionalNestedExpression.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         /**
@@ -225,7 +228,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
         for (QueryNode childNode : currentQuery.getChildren(sourceNode)) {
             candidateListBuilder.addAll(
-                    findCandidatesInSubTree(currentQuery, childNode, sourceNode, Optional.<SubTreeDelimiterNode>absent())
+                    findCandidatesInSubTree(currentQuery, childNode, sourceNode, Optional.<SubTreeDelimiterNode>empty())
             );
         }
         return candidateListBuilder.build();
@@ -341,7 +344,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
             JoinOrFilterNode focusNode, ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
             ImmutableList<ImmutableBooleanExpression> toKeepExpressions) {
         if (transferMap.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         else {
             PushDownBooleanExpressionProposal proposal = new PushDownBooleanExpressionProposalImpl(

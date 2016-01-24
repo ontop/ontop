@@ -41,7 +41,8 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     private IntermediateQuery pullOutSomeVariables(IntermediateQuery initialQuery)
             throws EmptyQueryException {
         // Non-final
-        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
+        java.util.Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode())
+                .transform(java.util.Optional::of).or(java.util.Optional.empty());
 
         // Non-final
         IntermediateQuery currentQuery = initialQuery;
@@ -84,7 +85,9 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         // Non-final variables
         IntermediateQuery currentQuery = initialQuery;
         QueryNode currentJoinLikeNode = initialJoinLikeNode;
-        Optional<QueryNode> optionalCurrentChildNode = currentQuery.getFirstChild(initialJoinLikeNode);
+        java.util.Optional<QueryNode> optionalCurrentChildNode = currentQuery.getFirstChild(initialJoinLikeNode)
+                .transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
 
         int startIndex = getStartIndex(initialQuery, Optional.of((QueryNode)initialJoinLikeNode));
 
@@ -117,18 +120,22 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                     currentQuery = results.getResultingQuery();
                     optionalCurrentChildNode = results.getOptionalNextSibling();
 
-                    Optional<QueryNode> optionalCurrentParent = results.getOptionalClosestAncestor();
+                    java.util.Optional<QueryNode> optionalCurrentParent = results.getOptionalClosestAncestor();
                     if (!optionalCurrentParent.isPresent()) {
                         throw new IllegalStateException("Missing parent of current node after pulling out some variables");
                     }
                     currentJoinLikeNode = optionalCurrentParent.get();
                 }
                 else {
-                    optionalCurrentChildNode = currentQuery.getNextSibling(childNode);
+                    optionalCurrentChildNode = currentQuery.getNextSibling(childNode)
+                            .transform(java.util.Optional::of)
+                            .or(java.util.Optional.empty());
                 }
             }
             else {
-                optionalCurrentChildNode = currentQuery.getNextSibling(childNode);
+                optionalCurrentChildNode = currentQuery.getNextSibling(childNode)
+                        .transform(java.util.Optional::of)
+                        .or(java.util.Optional.empty());
             }
         }
 
