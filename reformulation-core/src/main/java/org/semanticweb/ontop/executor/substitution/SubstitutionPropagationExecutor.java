@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.substitution;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;

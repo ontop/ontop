@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
@@ -38,7 +38,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public void addChild(QueryNode parentNode, QueryNode childNode) throws IntermediateQueryBuilderException {
         checkEditMode();
         try {
-            tree.addChild(parentNode, childNode, Optional.<ArgumentPosition>absent(), true, false);
+            tree.addChild(parentNode, childNode, Optional.<ArgumentPosition>empty(), true, false);
         } catch (IllegalTreeUpdateException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }

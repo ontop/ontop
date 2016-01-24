@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.executor.renaming.AlreadyExistingPredicateException;
 import org.semanticweb.ontop.executor.renaming.PredicateRenamingChecker;
@@ -44,7 +44,7 @@ public class IntermediateQueryUtils {
      */
     public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions)
             throws QueryMergingException {
-        return mergeDefinitions(predicateDefinitions, Optional.<ImmutableQueryModifiers>absent());
+        return mergeDefinitions(predicateDefinitions, Optional.<ImmutableQueryModifiers>empty());
     }
 
 
@@ -56,7 +56,7 @@ public class IntermediateQueryUtils {
                                                                Optional<ImmutableQueryModifiers> optionalTopModifiers)
             throws QueryMergingException {
         if (predicateDefinitions.isEmpty())
-            return Optional.absent();
+            return Optional.empty();
 
         IntermediateQuery firstDefinition = predicateDefinitions.get(0);
         if (predicateDefinitions.size() == 1) {
@@ -212,7 +212,7 @@ public class IntermediateQueryUtils {
             throws IntermediateQueryBuilderException {
         IntermediateQueryUtils utils = new IntermediateQueryUtils();
         try {
-            return utils.convertToBuilderAndTransform(originalQuery, Optional.<HomogeneousQueryNodeTransformer>absent());
+            return utils.convertToBuilderAndTransform(originalQuery, Optional.<HomogeneousQueryNodeTransformer>empty());
             /**
              * No transformer so should not be expected
              */

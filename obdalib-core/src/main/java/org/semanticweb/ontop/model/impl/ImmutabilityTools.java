@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.model.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 
@@ -109,7 +109,7 @@ public class ImmutabilityTools {
         final int size = conjunctionOfExpressions.size();
         switch (size) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
             case 1:
                 return Optional.of(conjunctionOfExpressions.get(0));
             case 2:

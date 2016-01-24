@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
@@ -18,7 +18,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
             ConstructionNode newRootNode;
             newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
             builder.init(newRootNode);
-            recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>absent());
+            recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>empty());
         } catch (IntermediateQueryBuilderException | NotNeededNodeException | QueryNodeTransformationException e) {
             e.printStackTrace();
         }
@@ -70,7 +70,8 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
                 builder.addChild(newParentNode, subNodeOfUnionClone, optionalPosition);
 
-                recursive(unionNode, targetNode, builder, query, subNodeOfUnion, subNodeOfUnionClone, Optional.<Integer>absent());
+                recursive(unionNode, targetNode, builder, query, subNodeOfUnion, subNodeOfUnionClone,
+                        Optional.<Integer>empty());
 
             } else {
 
@@ -129,7 +130,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
         } while (movingUp);
 
         if(target == unionNode){
-            return  Optional.absent();
+            return  Optional.empty();
         } else {
             return Optional.of(target);
         }

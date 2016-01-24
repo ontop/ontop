@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.DataNode;
 import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
@@ -51,7 +51,7 @@ public class GroundTermRemovalFromDataNodeReshaper implements IntermediateQueryO
 
         ImmutableList<DataNode> dataNodesToSimplify = dataNodesToSimplifyBuilder.build();
         if (dataNodesToSimplify.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         else {
             GroundTermRemovalFromDataNodeProposal proposal = new GroundTermRemovalFromDataNodeProposalImpl(

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;

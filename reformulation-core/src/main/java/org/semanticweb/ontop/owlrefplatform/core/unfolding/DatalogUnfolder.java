@@ -22,7 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -954,7 +954,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			}//end if
 
 		}//end for
-		return Optional.absent();
+		return Optional.empty();
 	}
 
 	/**

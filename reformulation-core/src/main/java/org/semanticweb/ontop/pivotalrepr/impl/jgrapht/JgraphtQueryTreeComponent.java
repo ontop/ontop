@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl.jgrapht;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.jgraph.graph.DefaultEdge;
@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
-    private static final Optional<ArgumentPosition> NO_POSITION = Optional.absent();
+    private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
 
@@ -35,7 +35,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         private final Optional<ArgumentPosition> optionalPosition;
 
         public LabeledEdge() {
-            this.optionalPosition = Optional.absent();
+            this.optionalPosition = Optional.empty();
         }
 
         public LabeledEdge(Optional<ArgumentPosition> optionalPosition) {
@@ -293,7 +293,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     public Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
         LabeledEdge edge = queryDAG.getEdge(childNode, parentNode);
         if (edge == null)
-            return Optional.absent();
+            return Optional.empty();
 
         return edge.getOptionalPosition();
     }
@@ -322,7 +322,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
         switch (toParentEdges.size()) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
             case 1:
                 return Optional.of(queryDAG.getEdgeTarget(toParentEdges.iterator().next()));
             default:
@@ -416,14 +416,14 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
                 return Optional.of(nextSibling);
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
         /**
          * No parent, no sibling.
          */
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -431,7 +431,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     public Optional<QueryNode> getFirstChild(QueryNode node) {
         ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
         if (children.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         else {
             return Optional.of(children.get(0));

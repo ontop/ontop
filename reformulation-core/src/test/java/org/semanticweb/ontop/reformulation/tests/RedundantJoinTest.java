@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.reformulation.tests;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import fj.P;
@@ -81,7 +81,7 @@ public class RedundantJoinTest {
         DataAtom ans1Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 1), y);
         ConstructionNode rootNode = new ConstructionNodeImpl(ans1Atom);
         queryBuilder.init(rootNode);
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>absent());
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
         queryBuilder.addChild(rootNode, joinNode);
 
         return P.p(queryBuilder, joinNode);

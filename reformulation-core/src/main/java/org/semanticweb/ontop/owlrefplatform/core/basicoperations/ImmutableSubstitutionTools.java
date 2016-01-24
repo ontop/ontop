@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -117,7 +117,7 @@ public class ImmutableSubstitutionTools {
             if ((!sourceVariable.equals(targetTerm))
                     && (targetTerm instanceof ImmutableFunctionalTerm)
                     && ((ImmutableFunctionalTerm)targetTerm).getVariables().contains(sourceVariable)) {
-                return Optional.absent();
+                return Optional.empty();
             }
 
             ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
@@ -133,7 +133,7 @@ public class ImmutableSubstitutionTools {
                         (ImmutableFunctionalTerm) targetTerm);
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
         /**
@@ -143,7 +143,7 @@ public class ImmutableSubstitutionTools {
             return Optional.of(EMPTY_SUBSTITUTION);
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -155,7 +155,7 @@ public class ImmutableSubstitutionTools {
          */
         if (!sourceFunctionalTerm.getFunctionSymbol().equals(
                 targetFunctionalTerm.getFunctionSymbol())) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
 
@@ -167,7 +167,7 @@ public class ImmutableSubstitutionTools {
                 return Optional.of(EMPTY_SUBSTITUTION);
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
 
@@ -179,7 +179,7 @@ public class ImmutableSubstitutionTools {
          */
         int sourceArity = sourceChildren.size();
         if (sourceArity != targetChildren.size()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         /**
@@ -196,7 +196,7 @@ public class ImmutableSubstitutionTools {
                     sourceChildren.get(i), targetChildren.get(i));
 
             if (!optionalChildUnifier.isPresent())
-                return Optional.absent();
+                return Optional.empty();
 
             ImmutableSubstitution<ImmutableTerm> childUnifier = optionalChildUnifier.get();
 
@@ -205,7 +205,7 @@ public class ImmutableSubstitutionTools {
                 unifier = optionalMergedUnifier.get();
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
 

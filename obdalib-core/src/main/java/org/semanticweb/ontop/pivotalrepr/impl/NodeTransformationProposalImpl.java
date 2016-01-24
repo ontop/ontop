@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.pivotalrepr.NodeTransformationProposal;
 import org.semanticweb.ontop.pivotalrepr.NodeTransformationProposedState;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -38,7 +38,7 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
                         "Please use the other constructor.");
         }
         this.state = state;
-        this.optionalNewNode = Optional.absent();
+        this.optionalNewNode = Optional.empty();
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationProposal;
@@ -16,13 +16,13 @@ public abstract class NodeCentricInternalCompositeExecutor<N extends QueryNode, 
     protected Optional<P> createNewProposal(NodeCentricOptimizationResults<N> results) {
         Optional<N> optionalNewNode = results.getOptionalNewNode()
                 .map(Optional::of)
-                .orElse(Optional.absent());
+                .orElse(Optional.empty());
 
         if (optionalNewNode.isPresent()) {
             return createNewProposalFromFocusNode(optionalNewNode.get());
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
 
     }

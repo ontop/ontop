@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;
@@ -36,7 +36,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public ConstructionNodeImpl(DataAtom dataAtom) {
         this.dataAtom = dataAtom;
         this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
-        this.optionalModifiers = Optional.absent();
+        this.optionalModifiers = Optional.empty();
     }
 
     @Override

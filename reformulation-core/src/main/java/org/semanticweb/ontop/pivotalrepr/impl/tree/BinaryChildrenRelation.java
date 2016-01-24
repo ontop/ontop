@@ -1,11 +1,12 @@
 package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+
+import java.util.Optional;
 
 /**
  * TODO: explain
@@ -24,8 +25,8 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         }
 
         this.parent = parent;
-        this.optionalLeftChild = Optional.absent();
-        this.optionalRightChild = Optional.absent();
+        this.optionalLeftChild = Optional.empty();
+        this.optionalRightChild = Optional.empty();
     }
 
 
@@ -94,11 +95,11 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     @Override
     public void removeChild(TreeNode childNode) {
         if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
-            optionalLeftChild = Optional.absent();
+            optionalLeftChild = Optional.empty();
         }
         // Compatible with the crazy case where the same node appears on the two sides.
         if (optionalRightChild.isPresent() && (optionalRightChild.get() == childNode)) {
-            optionalRightChild = Optional.absent();
+            optionalRightChild = Optional.empty();
         }
     }
 

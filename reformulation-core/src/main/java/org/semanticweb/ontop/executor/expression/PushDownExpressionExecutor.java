@@ -35,8 +35,6 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
         }
 
         QueryNode firstChild = query.getFirstChild(focusNode)
-                .transform(Optional::of)
-                .or(Optional.empty())
                 .orElseThrow(() -> new InvalidQueryOptimizationProposalException("The focus node has no children"));
 
         return updateFocusNode(treeComponent, focusNode, proposal.getExpressionsToKeep())
@@ -78,7 +76,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
     private void updateJoinOrFilterNode(QueryTreeComponent treeComponent, JoinOrFilterNode targetNode,
                                         Collection<ImmutableBooleanExpression> additionalExpressions) {
         ImmutableList.Builder<ImmutableBooleanExpression> expressionBuilder = ImmutableList.builder();
-        com.google.common.base.Optional<ImmutableBooleanExpression> optionalFormerExpression = targetNode.getOptionalFilterCondition();
+        Optional<ImmutableBooleanExpression> optionalFormerExpression = targetNode.getOptionalFilterCondition();
         if (optionalFormerExpression.isPresent()) {
             expressionBuilder.add(optionalFormerExpression.get());
         }
@@ -114,7 +112,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
      */
     private static Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableBooleanExpression> newExpressions) {
-        com.google.common.base.Optional<ImmutableBooleanExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableBooleanExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
                 newExpressions);
 
         if (formerNode instanceof JoinLikeNode) {

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.join;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -51,7 +51,7 @@ public class JoinExtractionUtils {
             }
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -94,7 +94,7 @@ public class JoinExtractionUtils {
         ImmutableList<ImmutableBooleanExpression> booleanExpressions) {
         switch (booleanExpressions.size()) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
             case 1:
                 return Optional.of(booleanExpressions.get(0));
             default:

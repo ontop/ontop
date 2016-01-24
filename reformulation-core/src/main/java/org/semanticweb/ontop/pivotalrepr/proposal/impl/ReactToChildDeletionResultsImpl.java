@@ -21,9 +21,7 @@ public class ReactToChildDeletionResultsImpl extends ProposalResultsImpl impleme
          * Checks the arguments
          */
         if (optionalNextSibling.isPresent()) {
-            Optional<QueryNode> optionalParent = resultingQuery.getParent(optionalNextSibling.get())
-                    .transform(java.util.Optional::of)
-                    .or(java.util.Optional.empty());
+            Optional<QueryNode> optionalParent = resultingQuery.getParent(optionalNextSibling.get());
             if ((!optionalParent.isPresent()) || optionalParent.get() != closestAncestor) {
                 throw new IllegalArgumentException("The closest ancestor must be the parent of the next sibling");
             }

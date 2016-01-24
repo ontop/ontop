@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
@@ -14,10 +13,7 @@ import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import org.semanticweb.ontop.pivotalrepr.impl.QueryTreeComponent;
 import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 
 /**
@@ -104,7 +100,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
-                                                                                       QueryNode childNode) {
+                                                                                     QueryNode childNode) {
         return tree.getOptionalPosition(parentNode, childNode);
     }
 
@@ -166,7 +162,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
                 return Optional.of(siblings.get(index + 1));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -175,7 +171,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
         switch(children.size()) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
             default:
                 return Optional.of(children.get(0));
         }

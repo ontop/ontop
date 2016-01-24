@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
@@ -80,6 +80,6 @@ public class StandardChildrenRelation implements ChildrenRelation {
 
     @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
-        return Optional.absent();
+        return Optional.empty();
     }
 }

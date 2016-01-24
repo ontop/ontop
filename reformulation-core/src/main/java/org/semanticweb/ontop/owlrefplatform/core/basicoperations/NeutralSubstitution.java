@@ -21,7 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.*;

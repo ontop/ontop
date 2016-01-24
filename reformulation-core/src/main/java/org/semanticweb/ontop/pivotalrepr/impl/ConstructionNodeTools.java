@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -75,7 +75,7 @@ public class ConstructionNodeTools {
 
         public Optional<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitutionToPropagate() {
             if (substitutionToPropagate.isEmpty()) {
-                return Optional.absent();
+                return Optional.empty();
             }
             return Optional.of(substitutionToPropagate);
         }
@@ -338,7 +338,7 @@ public class ConstructionNodeTools {
     private static Optional<ImmutableQueryModifiers> computeNewOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers,
                                                                                  ImmutableSubstitution<ImmutableTerm> bindingsToRemove) {
         if (!optionalModifiers.isPresent())
-            return Optional.absent();
+            return Optional.empty();
 
         throw new RuntimeException("TODO: support the update of modifiers");
     }

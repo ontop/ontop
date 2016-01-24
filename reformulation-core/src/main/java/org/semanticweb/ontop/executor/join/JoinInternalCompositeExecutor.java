@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.join;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.executor.NodeCentricInternalCompositeExecutor;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;

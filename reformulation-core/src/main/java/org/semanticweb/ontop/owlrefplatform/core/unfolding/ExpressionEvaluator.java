@@ -23,7 +23,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
@@ -421,7 +421,7 @@ public class ExpressionEvaluator {
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm.equals(OBDAVocabulary.FALSE)) {
-				return Optional.absent();
+				return Optional.empty();
 			}
 			else {
 				return Optional.of(fac.getImmutableBooleanExpression(OBDAVocabulary.AND, (Constant) evaluatedTerm,

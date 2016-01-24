@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
@@ -21,7 +21,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
      */
     public SubstitutionResultsImpl(T newNode) {
         this.optionalNewNode = Optional.of(newNode);
-        this.optionalSubstitution = Optional.absent();
+        this.optionalSubstitution = Optional.empty();
     }
 
     /**
@@ -29,7 +29,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
      * May happen for instance for a GroupNode.
      */
     public SubstitutionResultsImpl(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
-        this.optionalNewNode = Optional.absent();
+        this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.of(substitution);
     }
 

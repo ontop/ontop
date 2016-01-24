@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.datalog;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import fj.F;
 import fj.P2;
@@ -64,7 +64,7 @@ public class DatalogRule2QueryConverter {
 
             switch(groupAtoms.length()) {
                 case 0:
-                    return Optional.absent();
+                    return Optional.empty();
                 case 1:
                     return Optional.of(groupAtoms.head());
                 default:
@@ -99,7 +99,7 @@ public class DatalogRule2QueryConverter {
 
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private static final Optional<ArgumentPosition> NO_POSITION = Optional.absent();
+    private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
 
@@ -233,7 +233,7 @@ public class DatalogRule2QueryConverter {
          * No need to create a special root node (will be the unique data atom)
          */
         else {
-            optionalRootNode = Optional.absent();
+            optionalRootNode = Optional.empty();
         }
         return optionalRootNode;
     }
@@ -241,7 +241,7 @@ public class DatalogRule2QueryConverter {
 
     private static Optional<ImmutableBooleanExpression> createFilterExpression(List<Function> booleanAtoms) {
         if (booleanAtoms.isEmpty())
-            return Optional.absent();
+            return Optional.empty();
         return Optional.of(DATA_FACTORY.getImmutableBooleanExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
     }
 

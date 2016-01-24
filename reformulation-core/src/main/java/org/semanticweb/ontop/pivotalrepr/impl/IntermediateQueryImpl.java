@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * TODO: describe
@@ -203,7 +203,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
-                                                                                      QueryNode childNode) {
+                                                                                     QueryNode childNode) {
         return treeComponent.getOptionalPosition(parentNode, childNode);
     }
 
@@ -214,7 +214,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             return getOptionalPosition(optionalParent.get(), child);
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

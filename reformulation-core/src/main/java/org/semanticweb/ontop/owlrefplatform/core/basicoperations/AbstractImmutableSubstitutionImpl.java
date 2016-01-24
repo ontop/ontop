@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -202,7 +202,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
              * TODO: explain
              */
             if (isDefining(otherVariable) && (!get(otherVariable).equals(otherTerm))) {
-                return Optional.absent();
+                return Optional.empty();
             }
 
             mapBuilder.put(otherVariable, otherTerm);
@@ -223,7 +223,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get());
             return Optional.of(unionSubstitution);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -295,7 +295,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         switch(equalities.size()) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
             case 1:
                 return Optional.of(equalities.get(0));
             default:

@@ -67,8 +67,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery) {
         // Non-final
-        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode())
-                .transform(Optional::of).or(Optional.empty());
+        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
 
         // Non-final
         IntermediateQuery currentQuery = initialQuery;
@@ -163,8 +162,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         /**
          * If there is no boolean expression, no proposal
          */
-        Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition()
-                .transform(Optional::of).or(Optional.empty());
+        Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
 
         if (!optionalNestedExpression.isPresent()) {
             return Optional.empty();

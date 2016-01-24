@@ -1,10 +1,11 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
+
+import java.util.Optional;
 
 /**
  * Mutable component used for internal implementations of IntermediateQuery.
@@ -34,7 +35,7 @@ public interface QueryTreeComponent {
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
-                                                                               QueryNode childNode);
+                                                                              QueryNode childNode);
 
     /**
      * From the parent to the oldest ancestor.
