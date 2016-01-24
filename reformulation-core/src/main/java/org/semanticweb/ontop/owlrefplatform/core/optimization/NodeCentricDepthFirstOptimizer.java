@@ -12,14 +12,16 @@ import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNa
 import static org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
 
 /**
+ * Optimizer that evaluates the QueryNode-s one by one in a Depth-First order.
  *
+ * When evaluating one QueryNode, it can make one proposal.
  */
-public abstract class NodeCentricTopDownOptimizer<P extends NodeCentricOptimizationProposal<? extends QueryNode>>
+public abstract class NodeCentricDepthFirstOptimizer<P extends NodeCentricOptimizationProposal<? extends QueryNode>>
         implements IntermediateQueryOptimizer {
 
     private final boolean canEmptyQuery;
 
-    protected NodeCentricTopDownOptimizer(boolean canEmptyQuery) {
+    protected NodeCentricDepthFirstOptimizer(boolean canEmptyQuery) {
         this.canEmptyQuery = canEmptyQuery;
     }
 
@@ -65,6 +67,9 @@ public abstract class NodeCentricTopDownOptimizer<P extends NodeCentricOptimizat
         return currentQuery;
     }
 
+    /**
+     * TODO: do we need also the query?
+     */
     protected abstract Optional<P> evaluateNode(QueryNode node);
 
 }

@@ -12,7 +12,7 @@ import java.util.Optional;
  *
  * Top-down exploration.
  */
-public class BasicJoinOptimizer extends NodeCentricTopDownOptimizer<InnerJoinOptimizationProposal> {
+public class BasicJoinOptimizer extends NodeCentricDepthFirstOptimizer<InnerJoinOptimizationProposal> {
 
     public BasicJoinOptimizer() {
         super(true);
