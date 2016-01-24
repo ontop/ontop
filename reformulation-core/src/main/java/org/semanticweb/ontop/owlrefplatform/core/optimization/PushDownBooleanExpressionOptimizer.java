@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
@@ -57,11 +56,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      */
     @Override
     public IntermediateQuery optimize(final IntermediateQuery initialQuery) {
-        try {
-            return pushDownExpressions(initialQuery);
-        } catch (InvalidQueryOptimizationProposalException e) {
-            throw new RuntimeException("TODO: unexpected exception: " + e.getMessage());
-        }
+        return pushDownExpressions(initialQuery);
     }
 
     /**
@@ -70,8 +65,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * Navigates in a top-down fashion.
      *
      */
-    private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery)
-            throws InvalidQueryOptimizationProposalException {
+    private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery) {
         // Non-final
         Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
 
@@ -102,8 +96,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * Returns information for the continuing the navigation in the possibly new IntermediateQuery.
      *
      */
-    private NextNodeAndQuery optimizeJoinOrFilter(IntermediateQuery currentQuery, JoinOrFilterNode currentNode)
-            throws InvalidQueryOptimizationProposalException {
+    private NextNodeAndQuery optimizeJoinOrFilter(IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
 
         /**
          * Tries to build a PushDownBooleanExpressionProposal for the current node

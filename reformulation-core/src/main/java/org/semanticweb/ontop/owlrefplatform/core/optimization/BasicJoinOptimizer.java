@@ -6,7 +6,6 @@ import org.semanticweb.ontop.pivotalrepr.InnerJoinNode;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 
@@ -34,12 +33,7 @@ public class BasicJoinOptimizer extends TopDownOptimizer {
 
             if (currentNode instanceof InnerJoinNode) {
                 InnerJoinOptimizationProposal joinProposal = new InnerJoinOptimizationProposalImpl((InnerJoinNode) currentNode);
-                NodeCentricOptimizationResults<InnerJoinNode> optimizationResults;
-                try {
-                    optimizationResults = currentQuery.applyProposal(joinProposal);
-                } catch (InvalidQueryOptimizationProposalException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
+                NodeCentricOptimizationResults<InnerJoinNode> optimizationResults = currentQuery.applyProposal(joinProposal);
 
                 currentQuery = optimizationResults.getResultingQuery();
                 optionalNextNode = getNextNodeFromOptimizationResults(optimizationResults);

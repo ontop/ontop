@@ -7,7 +7,6 @@ import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.GroundTermRemovalFromDataNodeProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.GroundTermRemovalFromDataNodeProposalImpl;
 
@@ -30,8 +29,8 @@ public class GroundTermRemovalFromDataNodeReshaper implements IntermediateQueryO
                 ProposalResults results = query.applyProposal(proposal);
                 return results.getResultingQuery();
 
-            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
-                throw new RuntimeException("Unexpected exception: " + e.getMessage());
+            } catch (EmptyQueryException e) {
+                throw new IllegalStateException("Inconsistency: GroundTermRemovalFromDataNodeReshaper should empty the query ");
             }
         }
         else {

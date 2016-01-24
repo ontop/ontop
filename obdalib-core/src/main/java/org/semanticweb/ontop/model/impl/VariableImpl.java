@@ -21,7 +21,6 @@ package org.semanticweb.ontop.model.impl;
  */
 
 
-import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.Variable;
 
 public class VariableImpl implements Variable, Comparable<Variable> {
