@@ -7,17 +7,14 @@ import fj.data.List;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.ImmutableTerm;
 import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.VariableGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PartialUnion;
 import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.EmptyQueryException;
-import org.semanticweb.ontop.pivotalrepr.impl.VariableCollector;
 import org.semanticweb.ontop.pivotalrepr.proposal.BindingTransfer;
 import org.semanticweb.ontop.pivotalrepr.proposal.ConstructionNodeUpdate;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.SubstitutionLiftProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.BindingTransferImpl;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ConstructionNodeUpdateImpl;
@@ -25,7 +22,6 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.SubstitutionLiftProposalI
 
 import java.util.*;
 import java.util.HashMap;
-import java.util.Set;
 
 /**
  * TODO: explain
@@ -339,14 +335,7 @@ public class BasicTypeLiftOptimizer implements IntermediateQueryOptimizer {
                 }));
         SubstitutionLiftProposal proposal = new SubstitutionLiftProposalImpl(transfers, nodeUpdates);
 
-        IntermediateQuery newQuery;
-        try {
-            newQuery = query.applyProposal(proposal).getResultingQuery();
-        }
-        catch (InvalidQueryOptimizationProposalException e) {
-            throw new RuntimeException("Bad substitution lift proposal: " + e.getMessage());
-        }
-        return newQuery;
+        return query.applyProposal(proposal).getResultingQuery();
     }
 
     /**

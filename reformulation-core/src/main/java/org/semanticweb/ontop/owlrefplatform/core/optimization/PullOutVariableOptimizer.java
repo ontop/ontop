@@ -8,7 +8,6 @@ import org.semanticweb.ontop.model.VariableOrGroundTerm;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import org.semanticweb.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.UpdatedNodeAndQuery;
 import org.semanticweb.ontop.pivotalrepr.*;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.PullOutVariableProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PullOutVariableProposalImpl;
@@ -28,8 +27,8 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     public IntermediateQuery optimize(IntermediateQuery query) {
         try {
             return pullOutSomeVariables(query);
-        } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
-            throw new RuntimeException("Unexpected exception: " + e.getLocalizedMessage());
+        } catch (EmptyQueryException e) {
+            throw new IllegalStateException("Inconsistency: PullOutVariableOptimizer should not empty the query");
         }
     }
 
@@ -40,7 +39,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      *
      */
     private IntermediateQuery pullOutSomeVariables(IntermediateQuery initialQuery)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws EmptyQueryException {
         // Non-final
         Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
 
@@ -80,7 +79,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      * TODO: explain
      */
     private NextNodeAndQuery optimizeJoinLikeNodeChildren(IntermediateQuery initialQuery, JoinLikeNode initialJoinLikeNode)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws EmptyQueryException {
 
         // Non-final variables
         IntermediateQuery currentQuery = initialQuery;
@@ -202,7 +201,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      *
      */
     private NextNodeAndQuery optimizeDataNode(IntermediateQuery currentQuery, DataNode currentNode)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws EmptyQueryException {
 
         int startIndex = getStartIndex(currentQuery, currentQuery.getParent(currentNode));
 

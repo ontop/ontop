@@ -467,11 +467,9 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 else {
                     throw new RuntimeException("No focus node returned after the substitution propagation");
                 }
-
-
-            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
-                throw new RuntimeException("Internal error: not able to propagate the substitution "
-                        + optionalSubstitution.get() + "\n Reason: " + e.getMessage());
+            } catch (EmptyQueryException e) {
+                throw new IllegalStateException("Internal inconsistency error: propagation the substitution " +
+                        "leads to an empty query: " + optionalSubstitution.get());
             }
         }
         /**

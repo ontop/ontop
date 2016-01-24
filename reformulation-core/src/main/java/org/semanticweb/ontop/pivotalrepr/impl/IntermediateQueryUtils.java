@@ -12,7 +12,6 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VariableDispatc
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import org.semanticweb.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import org.semanticweb.ontop.pivotalrepr.proposal.PredicateRenamingProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.PredicateRenamingProposalImpl;
 
@@ -89,8 +88,8 @@ public class IntermediateQueryUtils {
             IntermediateQuery renamedDefinition;
             try {
                 renamedDefinition = originalDefinition.applyProposal(renamingProposal).getResultingQuery();
-            } catch (InvalidQueryOptimizationProposalException | EmptyQueryException e) {
-                throw new RuntimeException("Internal error: bad renaming proposal: " + e.getMessage());
+            } catch (EmptyQueryException e) {
+                throw new RuntimeException("Inconsistency: a bad renaming proposal should not empty the query");
             }
             mergedDefinition.mergeSubQuery(renamedDefinition);
         }
