@@ -22,9 +22,9 @@ package org.semanticweb.ontop.owlrefplatform.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -315,7 +315,7 @@ public abstract class QuestStatement implements IQuestStatement {
 				optionalConstructTemplate = Optional.of(new SesameConstructTemplate(strquery));
 			} catch (MalformedQueryException e) {
 				e.printStackTrace();
-				optionalConstructTemplate = Optional.absent();
+				optionalConstructTemplate = Optional.empty();
 			}
 			
 			// Here we replace CONSTRUCT query with SELECT query
@@ -365,7 +365,7 @@ public abstract class QuestStatement implements IQuestStatement {
 					optionalConstructTemplate = Optional.of(new SesameConstructTemplate(str));
 				} catch (MalformedQueryException e) {
 					e.printStackTrace();
-					optionalConstructTemplate = Optional.absent();
+					optionalConstructTemplate = Optional.empty();
 				}
 				str = SPARQLQueryUtility.getSelectFromConstruct(str);
 				ResultSet resultSet = executeInThread(str, QueryType.DESCRIBE, optionalConstructTemplate);
@@ -394,7 +394,7 @@ public abstract class QuestStatement implements IQuestStatement {
 					optionalConstructTemplate = Optional.of(new SesameConstructTemplate(str));
 				} catch (MalformedQueryException e) {
 					e.printStackTrace();
-					optionalConstructTemplate = Optional.absent();
+					optionalConstructTemplate = Optional.empty();
 				}
 				str = SPARQLQueryUtility.getSelectFromConstruct(str);
 				ResultSet resultSet = executeInThread(str, QueryType.DESCRIBE, optionalConstructTemplate);
@@ -669,7 +669,7 @@ public abstract class QuestStatement implements IQuestStatement {
 	 */
 	@Override
 	public ExecutableQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException {
-		return unfoldAndGenerateTargetQuery(sparqlQuery, Optional.<SesameConstructTemplate>absent());
+		return unfoldAndGenerateTargetQuery(sparqlQuery, Optional.<SesameConstructTemplate>empty());
 	}
 
 	protected ExecutableQuery unfoldAndGenerateTargetQuery(String sparqlQuery,

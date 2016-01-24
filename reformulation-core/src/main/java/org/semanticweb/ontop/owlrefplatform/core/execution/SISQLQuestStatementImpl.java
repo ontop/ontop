@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.execution;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;

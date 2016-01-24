@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -22,7 +22,7 @@ public class SQLExecutableQuery implements ExecutableQuery {
     }
 
     public SQLExecutableQuery(String sqlQuery, ImmutableList<String> signature) {
-        this(sqlQuery, signature, Optional.<SesameConstructTemplate>absent());
+        this(sqlQuery, signature, Optional.<SesameConstructTemplate>empty());
     }
 
     /**

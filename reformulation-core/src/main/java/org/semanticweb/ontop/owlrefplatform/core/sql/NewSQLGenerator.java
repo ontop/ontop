@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.mapping.QueryUtils;
 import org.semanticweb.ontop.model.*;

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.Multimap;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;

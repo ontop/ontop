@@ -20,7 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * #L%
  */
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -799,7 +799,7 @@ public class Quest implements Serializable, IQuest {
 
 	public Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository() {
 		if (dataRepository == null) {
-			return Optional.absent();
+			return Optional.empty();
 		}
 		else {
 			return Optional.of(dataRepository);

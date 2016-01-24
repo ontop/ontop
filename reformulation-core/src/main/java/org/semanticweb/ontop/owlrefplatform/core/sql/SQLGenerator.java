@@ -21,7 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
  */
 
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;

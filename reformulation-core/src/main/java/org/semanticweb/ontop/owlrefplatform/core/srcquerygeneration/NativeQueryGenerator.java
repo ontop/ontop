@@ -21,8 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration;
  */
 
 import java.io.Serializable;
+import java.util.Optional;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.ExecutableQuery;
