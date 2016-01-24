@@ -1,11 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
-import org.semanticweb.ontop.pivotalrepr.proposal.ProposalResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
-import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
+
+import java.util.Optional;
 
 public class ReactToChildDeletionProposalImpl implements ReactToChildDeletionProposal {
 

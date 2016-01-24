@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.executor.deletion;
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
 import org.semanticweb.ontop.pivotalrepr.*;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
@@ -9,6 +8,8 @@ import org.semanticweb.ontop.pivotalrepr.proposal.InvalidQueryOptimizationPropos
 import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
 import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
 import org.semanticweb.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionResultsImpl;
+
+import java.util.Optional;
 
 /**
  * TODO: explain
@@ -29,7 +30,7 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
      * Recursive!
      */
     private static ReactToChildDeletionResults analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode,
-                                                                Optional<QueryNode> optionalNextSibling,
+                                                                java.util.Optional<QueryNode> optionalNextSibling,
                                                                 QueryTreeComponent treeComponent)
             throws EmptyQueryException {
         ReactToChildDeletionTransformer transformer = new ReactToChildDeletionTransformer(query);
@@ -59,13 +60,17 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                                                                         QueryTreeComponent treeComponent,
                                                                         NodeTransformationProposal transformationProposal,
                                                                         boolean isReplacedByUniqueChild) {
-        Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode);
+        Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode)
+                .transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
 
         if (!optionalGrandParent.isPresent()) {
             throw new RuntimeException("The root of the tree is not expected to be replaced.");
         }
 
-        Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode();
+        Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode()
+                .transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
         if (!optionalReplacingNode.isPresent()) {
             throw new RuntimeException("Inconsistent transformation proposal: a replacing node must be given");
         }
@@ -88,7 +93,7 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
             optionalNextSibling = optionalReplacingNode;
         }
         else {
-            optionalNextSibling = Optional.absent();
+            optionalNextSibling = Optional.empty();
         }
         return new ReactToChildDeletionResultsImpl(query, optionalGrandParent.get(), optionalNextSibling);
     }
@@ -96,8 +101,11 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
     private static ReactToChildDeletionResults applyDeletionProposal(IntermediateQuery query, QueryNode parentNode,
                                                                      QueryTreeComponent treeComponent)
             throws EmptyQueryException {
-        Optional<QueryNode> optionalGrandParent = query.getParent(parentNode);
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(parentNode);
+        Optional<QueryNode> optionalGrandParent = query.getParent(parentNode)
+                .transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(parentNode).transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
 
         treeComponent.removeSubTree(parentNode);
 

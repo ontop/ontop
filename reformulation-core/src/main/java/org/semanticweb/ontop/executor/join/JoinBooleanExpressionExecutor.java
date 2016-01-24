@@ -46,12 +46,14 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
         }
         else {
             ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
-                    optionalParent.get(), optionalNextSibling);
+                    optionalParent.get(), optionalNextSibling
+                        .transform(java.util.Optional::of)
+                        .or(java.util.Optional.empty()));
 
             ReactToChildDeletionResults deletionResults = query.applyProposal(reactionProposal);
 
             return new NodeCentricOptimizationResultsImpl<>(deletionResults.getResultingQuery(),
-                    deletionResults.getOptionalNextSibling(), Optional.of(deletionResults.getClosestRemainingAncestor()));
+                    deletionResults.getOptionalNextSibling(), java.util.Optional.of(deletionResults.getClosestRemainingAncestor()));
         }
     }
 

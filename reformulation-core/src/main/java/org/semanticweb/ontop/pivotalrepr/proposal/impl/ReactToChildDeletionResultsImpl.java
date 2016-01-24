@@ -1,9 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
+
+import java.util.Optional;
 
 public class ReactToChildDeletionResultsImpl extends ProposalResultsImpl implements ReactToChildDeletionResults {
 
@@ -20,7 +21,9 @@ public class ReactToChildDeletionResultsImpl extends ProposalResultsImpl impleme
          * Checks the arguments
          */
         if (optionalNextSibling.isPresent()) {
-            Optional<QueryNode> optionalParent = resultingQuery.getParent(optionalNextSibling.get());
+            Optional<QueryNode> optionalParent = resultingQuery.getParent(optionalNextSibling.get())
+                    .transform(java.util.Optional::of)
+                    .or(java.util.Optional.empty());
             if ((!optionalParent.isPresent()) || optionalParent.get() != closestAncestor) {
                 throw new IllegalArgumentException("The closest ancestor must be the parent of the next sibling");
             }

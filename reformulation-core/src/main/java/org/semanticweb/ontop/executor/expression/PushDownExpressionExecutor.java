@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.executor.expression;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
@@ -14,6 +13,7 @@ import org.semanticweb.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationRe
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * TODO: explain
@@ -34,19 +34,14 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
             updateTarget(treeComponent, targetEntry.getKey(), targetEntry.getValue());
         }
 
-        Optional<QueryNode> optionalFirstChild = query.getFirstChild(focusNode);
-        if (!optionalFirstChild.isPresent()) {
-            throw new InvalidQueryOptimizationProposalException("The focus node has no children");
-        }
+        QueryNode firstChild = query.getFirstChild(focusNode)
+                .transform(Optional::of)
+                .or(Optional.empty())
+                .orElseThrow(() -> new InvalidQueryOptimizationProposalException("The focus node has no children"));
 
-        Optional<JoinOrFilterNode> optionalNewFocusNode = updateFocusNode(treeComponent, focusNode,
-                proposal.getExpressionsToKeep());
-        if (optionalNewFocusNode.isPresent()) {
-            return new NodeCentricOptimizationResultsImpl<>(query, optionalNewFocusNode.get());
-        }
-        else {
-            return new NodeCentricOptimizationResultsImpl<>(query, optionalFirstChild);
-        }
+        return updateFocusNode(treeComponent, focusNode, proposal.getExpressionsToKeep())
+                .map(n -> new NodeCentricOptimizationResultsImpl<>(query, n))
+                .orElse(new NodeCentricOptimizationResultsImpl<>(query, Optional.of(firstChild)));
     }
 
     /**
@@ -83,7 +78,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
     private void updateJoinOrFilterNode(QueryTreeComponent treeComponent, JoinOrFilterNode targetNode,
                                         Collection<ImmutableBooleanExpression> additionalExpressions) {
         ImmutableList.Builder<ImmutableBooleanExpression> expressionBuilder = ImmutableList.builder();
-        Optional<ImmutableBooleanExpression> optionalFormerExpression = targetNode.getOptionalFilterCondition();
+        com.google.common.base.Optional<ImmutableBooleanExpression> optionalFormerExpression = targetNode.getOptionalFilterCondition();
         if (optionalFormerExpression.isPresent()) {
             expressionBuilder.add(optionalFormerExpression.get());
         }
@@ -119,7 +114,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
      */
     private static Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableBooleanExpression> newExpressions) {
-        Optional<ImmutableBooleanExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
+        com.google.common.base.Optional<ImmutableBooleanExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
                 newExpressions);
 
         if (formerNode instanceof JoinLikeNode) {
@@ -131,7 +126,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
                 return Optional.of((JoinOrFilterNode) new FilterNodeImpl(optionalExpression.get()));
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
         else {

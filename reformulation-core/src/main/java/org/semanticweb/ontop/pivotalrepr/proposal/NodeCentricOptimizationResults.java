@@ -1,8 +1,8 @@
 package org.semanticweb.ontop.pivotalrepr.proposal;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+
+import java.util.Optional;
 
 /**
  * TODO: explain

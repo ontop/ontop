@@ -1,23 +1,23 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
+
+import java.util.Optional;
 
 /**
  * TODO: explain
  */
 public abstract class TopDownOptimizer implements IntermediateQueryOptimizer{
 
-
     protected Optional<QueryNode> getNaturalNextNode(IntermediateQuery currentQuery, QueryNode freshlyExploredNode) {
-        Optional<QueryNode> optionalFirstChild = currentQuery.getFirstChild(freshlyExploredNode);
-        if (optionalFirstChild.isPresent()) {
-            return optionalFirstChild;
-        }
-        else {
-            return getNextNodeSameOrUpperLevel(currentQuery, freshlyExploredNode);
-        }
+        Optional<QueryNode> optionalFirstChild = currentQuery.getFirstChild(freshlyExploredNode)
+                .transform(Optional::of)
+                .or(Optional.empty());
+
+        return optionalFirstChild.isPresent()
+                ? optionalFirstChild
+                : getNextNodeSameOrUpperLevel(currentQuery, freshlyExploredNode);
     }
 
     /**
@@ -32,14 +32,19 @@ public abstract class TopDownOptimizer implements IntermediateQueryOptimizer{
         while(optionalAlreadyExploredNode.isPresent()) {
             QueryNode currentAlreadyExploredNode = optionalAlreadyExploredNode.get();
 
-            Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAlreadyExploredNode);
+            Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAlreadyExploredNode)
+                    .transform(Optional::of)
+                    .or(Optional.empty());
+
             if (optionalNextSibling.isPresent()) {
                 return optionalNextSibling;
             }
             else {
-                optionalAlreadyExploredNode = query.getParent(currentAlreadyExploredNode);
+                optionalAlreadyExploredNode = query.getParent(currentAlreadyExploredNode)
+                        .transform(Optional::of)
+                        .or(Optional.empty());
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

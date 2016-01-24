@@ -1,9 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
-import com.google.common.base.Optional;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+
+import java.util.Optional;
 
 public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends ProposalResultsImpl
         implements NodeCentricOptimizationResults<N> {
@@ -16,10 +17,14 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               N newNode) {
         super(query);
-        this.optionalNextSibling = query.getNextSibling(newNode);
+        this.optionalNextSibling = query.getNextSibling(newNode)
+                .transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
         this.optionalNewNode = Optional.of(newNode);
-        this.optionalClosestAncestor = query.getParent(newNode);
-        this.optionalReplacingChild = Optional.absent();
+        this.optionalClosestAncestor = query.getParent(newNode)
+                .transform(java.util.Optional::of)
+                .or(java.util.Optional.empty());
+        this.optionalReplacingChild = Optional.empty();
     }
 
     /**
@@ -31,16 +36,18 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
                                               Optional<QueryNode> optionalClosestAncestor) {
         super(query);
         this.optionalNextSibling = optionalNextSibling;
-        this.optionalNewNode = Optional.absent();
+        this.optionalNewNode = Optional.empty();
         this.optionalClosestAncestor = optionalClosestAncestor;
-        this.optionalReplacingChild = Optional.absent();
+        this.optionalReplacingChild = Optional.empty();
 
         /**
          * Checks the closest ancestor is the parent of the next sibling
          * (if any of course).
          */
         if (optionalNextSibling.isPresent() && optionalClosestAncestor.isPresent()) {
-            Optional<QueryNode> optionalSiblingParent = query.getParent(optionalNextSibling.get());
+            Optional<QueryNode> optionalSiblingParent = query.getParent(optionalNextSibling.get())
+                    .transform(p -> Optional.of(p))
+                    .or(Optional.empty());
             if ((!optionalSiblingParent.isPresent()) || (optionalSiblingParent.get() != optionalClosestAncestor.get())) {
                 throw new IllegalArgumentException("The closest ancestor is not the parent of the next sibling");
             }
@@ -55,9 +62,9 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query, Optional<QueryNode> optionalReplacingChild) {
         super(query);
         this.optionalReplacingChild = optionalReplacingChild;
-        this.optionalNextSibling = Optional.absent();
-        this.optionalNewNode = Optional.absent();
-        this.optionalClosestAncestor = Optional.absent();
+        this.optionalNextSibling = Optional.empty();
+        this.optionalNewNode = Optional.empty();
+        this.optionalClosestAncestor = Optional.empty();
 
         if (!optionalReplacingChild.isPresent()) {
             throw new IllegalArgumentException("A replacing child must be given (not optional in practise)");
