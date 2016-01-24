@@ -441,11 +441,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
             treeComponent.removeSubTree(nodeToRemove);
         }
         for (DataNode newNode : proposal.getNewDataNodes()) {
-            try {
-                treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>empty(), false);
-            } catch (IllegalTreeUpdateException e) {
-                throw new RuntimeException("Unexpected: " + e.getMessage());
-            }
+            treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>empty(), false);
         }
 
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution = proposal.getOptionalSubstitution();

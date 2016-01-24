@@ -336,11 +336,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public IntermediateQuery clone() {
-        try {
-            return IntermediateQueryUtils.convertToBuilder(this).build();
-        } catch (IntermediateQueryBuilderException e) {
-            throw new RuntimeException("BUG (internal error)!" + e.getLocalizedMessage());
-        }
+        return IntermediateQueryUtils.convertToBuilder(this).build();
     }
 
     @Override

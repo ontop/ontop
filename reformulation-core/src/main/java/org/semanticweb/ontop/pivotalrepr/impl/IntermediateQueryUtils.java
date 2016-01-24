@@ -216,8 +216,8 @@ public class IntermediateQueryUtils {
             /**
              * No transformer so should not be expected
              */
-        } catch (QueryNodeTransformationException | NotNeededNodeException e) {
-            throw new RuntimeException("Should not be thrown: " + e.getMessage());
+        } catch (NotNeededNodeException e) {
+            throw new IllegalStateException("No transformer so no NotNeededNodeException");
         }
     }
 

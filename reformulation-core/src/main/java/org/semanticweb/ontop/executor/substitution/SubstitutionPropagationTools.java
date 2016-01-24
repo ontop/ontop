@@ -71,12 +71,7 @@ public class SubstitutionPropagationTools {
                      */
                     else {
                         nodesToVisit.addAll(treeComponent.getCurrentSubNodesOf(formerSubNode));
-                        try {
-                            treeComponent.removeOrReplaceNodeByUniqueChildren(formerSubNode);
-                        }
-                        catch (IllegalTreeUpdateException e1) {
-                            throw new RuntimeException(e1.getMessage());
-                        }
+                        treeComponent.removeOrReplaceNodeByUniqueChildren(formerSubNode);
                     }
                 }
                 /**
@@ -172,11 +167,7 @@ public class SubstitutionPropagationTools {
                  */
                 else {
                     nodesToVisit.addAll(query.getChildren(formerAncestor));
-                    try {
-                        treeComponent.removeOrReplaceNodeByUniqueChildren(formerAncestor);
-                    } catch (IllegalTreeUpdateException e1) {
-                        throw new RuntimeException(e1.getMessage());
-                    }
+                    treeComponent.removeOrReplaceNodeByUniqueChildren(formerAncestor);
                 }
             }
             /**

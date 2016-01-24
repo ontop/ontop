@@ -62,8 +62,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
             throws InvalidQueryOptimizationProposalException {
         try {
             return pullOut(proposal, query, treeComponent);
-        } catch (IllegalTreeUpdateException | QueryNodeTransformationException | NotNeededNodeException
-                | QueryNodeSubstitutionException e) {
+        } catch (NotNeededNodeException e) {
             throw new RuntimeException("Unexpected exception: " + e.getMessage());
         }
     }

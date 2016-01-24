@@ -31,7 +31,8 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
                 applyConstructionNodeUpdate(update, treeComponent);
             }
         } catch (QueryNodeSubstitutionException e) {
-            throw new RuntimeException("Unexpected exception: " + e.getLocalizedMessage());
+            // TODO: should we throw an InvalidProposalException instead?
+            throw e;
         }
 
         return new ProposalResultsImpl(query);
@@ -77,7 +78,8 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
                     try {
                         treeComponent.removeOrReplaceNodeByUniqueChildren(ancestor);
                     } catch (IllegalTreeUpdateException e1) {
-                        throw new RuntimeException("Internal error: invalid binding transfer application");
+                        throw new InvalidQueryOptimizationProposalException(
+                                "Internal error: invalid binding transfer application");
                     }
                 }
             }
@@ -112,11 +114,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
                 treeComponent.replaceNode(formerNode, mostRecentNode);
             }
             else {
-                try {
-                    treeComponent.removeOrReplaceNodeByUniqueChildren(formerNode);
-                } catch (IllegalTreeUpdateException e) {
-                    throw new RuntimeException("Internal error: " + e.getMessage());
-                }
+                treeComponent.removeOrReplaceNodeByUniqueChildren(formerNode);
             }
 
         }
