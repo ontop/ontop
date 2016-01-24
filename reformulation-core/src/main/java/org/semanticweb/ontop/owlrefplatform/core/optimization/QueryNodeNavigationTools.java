@@ -108,12 +108,12 @@ public class QueryNodeNavigationTools {
     }
 
     private static Optional<QueryNode> getDepthFirstNextNode(IntermediateQuery query, QueryNode currentNode,
-                                                            boolean alreadyExplored) {
+                                                            boolean alreadyExploredSubTree) {
 
         /**
          * First choice: first child
          */
-        if (!alreadyExplored) {
+        if (!alreadyExploredSubTree) {
             Optional<QueryNode> optionalFirstChild = query.getFirstChild(currentNode);
 
             if (optionalFirstChild.isPresent()) {
