@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -74,7 +74,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
             return renamingSubstitution.applyToQueryModifiers(optionalModifiers.get());
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -94,7 +94,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     private Optional<ImmutableBooleanExpression> renameOptionalBooleanExpression(
             Optional<ImmutableBooleanExpression> optionalExpression) {
         if (!optionalExpression.isPresent())
-            return Optional.absent();
+            return Optional.empty();
 
         ImmutableBooleanExpression expression = optionalExpression.get();
         return Optional.of(renameBooleanExpression(expression));

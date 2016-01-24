@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.pivotalrepr.impl.tree;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
@@ -8,10 +7,7 @@ import org.semanticweb.ontop.pivotalrepr.ConstructionNode;
 import org.semanticweb.ontop.pivotalrepr.QueryNode;
 import org.semanticweb.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * TODO: explain
@@ -194,7 +190,7 @@ public class DefaultTree implements QueryTree {
 
         TreeNode parentTreeNode = getParentTreeNode(childTreeNode);
         if (parentTreeNode == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         else {
             return Optional.of(parentTreeNode.getQueryNode());
@@ -244,7 +240,7 @@ public class DefaultTree implements QueryTree {
                                 "is not yet supported");
                     }
                     else {
-                        addChild(replacingNode, child, Optional.<ArgumentPosition>absent(), false, true);
+                        addChild(replacingNode, child, Optional.<ArgumentPosition>empty(), false, true);
                     }
                 }
             }
@@ -280,7 +276,7 @@ public class DefaultTree implements QueryTree {
         // Adds the new parent (must be new)
         addChild(formerParentNode, newParentNode, optionalPosition, true, false);
 
-        addChild(newParentNode, childNode, Optional.<ArgumentPosition>absent(), false, false);
+        addChild(newParentNode, childNode, Optional.<ArgumentPosition>empty(), false, false);
     }
 
     /**

@@ -11,9 +11,7 @@ import java.util.Optional;
 public abstract class TopDownOptimizer implements IntermediateQueryOptimizer{
 
     protected Optional<QueryNode> getNaturalNextNode(IntermediateQuery currentQuery, QueryNode freshlyExploredNode) {
-        Optional<QueryNode> optionalFirstChild = currentQuery.getFirstChild(freshlyExploredNode)
-                .transform(Optional::of)
-                .or(Optional.empty());
+        Optional<QueryNode> optionalFirstChild = currentQuery.getFirstChild(freshlyExploredNode);
 
         return optionalFirstChild.isPresent()
                 ? optionalFirstChild
@@ -32,17 +30,13 @@ public abstract class TopDownOptimizer implements IntermediateQueryOptimizer{
         while(optionalAlreadyExploredNode.isPresent()) {
             QueryNode currentAlreadyExploredNode = optionalAlreadyExploredNode.get();
 
-            Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAlreadyExploredNode)
-                    .transform(Optional::of)
-                    .or(Optional.empty());
+            Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAlreadyExploredNode);
 
             if (optionalNextSibling.isPresent()) {
                 return optionalNextSibling;
             }
             else {
-                optionalAlreadyExploredNode = query.getParent(currentAlreadyExploredNode)
-                        .transform(Optional::of)
-                        .or(Optional.empty());
+                optionalAlreadyExploredNode = query.getParent(currentAlreadyExploredNode);
             }
         }
         return Optional.empty();

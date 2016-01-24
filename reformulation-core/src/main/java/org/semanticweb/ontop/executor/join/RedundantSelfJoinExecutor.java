@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.join;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.*;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.*;
@@ -269,7 +269,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         try {
             optionalMergedSubstitution = mergeSubstitutions(predicateProposals, variablesToKeep);
         } catch (AtomUnificationException e) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         ImmutableSet.Builder<DataNode> removedDataNodeBuilder = ImmutableSet.builder();
@@ -310,7 +310,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions = extractSubstitutions(predicateProposals);
 
         // Non-final
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution = Optional.absent();
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution = Optional.empty();
 
         for (ImmutableSubstitution<VariableOrGroundTerm> substitution : substitutions) {
             if (!substitution.isEmpty()) {
@@ -442,7 +442,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         }
         for (DataNode newNode : proposal.getNewDataNodes()) {
             try {
-                treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>absent(), false);
+                treeComponent.addChild(topJoinNode, newNode, Optional.<ArgumentPosition>empty(), false);
             } catch (IllegalTreeUpdateException e) {
                 throw new RuntimeException("Unexpected: " + e.getMessage());
             }

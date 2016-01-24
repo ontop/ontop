@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.datalog;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -23,7 +23,7 @@ import static org.semanticweb.ontop.pivotalrepr.datalog.DatalogRule2QueryConvert
  */
 public class DatalogProgram2QueryConverter {
 
-    private static final Optional<ImmutableQueryModifiers> NO_QUERY_MODIFIER = Optional.absent();
+    private static final Optional<ImmutableQueryModifiers> NO_QUERY_MODIFIER = Optional.empty();
 
     /**
      * TODO: explain
@@ -108,7 +108,7 @@ public class DatalogProgram2QueryConverter {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
         switch(atomDefinitions.size()) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
                 return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers));
@@ -117,7 +117,7 @@ public class DatalogProgram2QueryConverter {
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
                             convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
-                                    Optional.<ImmutableQueryModifiers>absent()));
+                                    Optional.<ImmutableQueryModifiers>empty()));
                 }
                 try {
                     return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
@@ -135,7 +135,7 @@ public class DatalogProgram2QueryConverter {
             ImmutableQueryModifiers immutableQueryModifiers = new ImmutableQueryModifiersImpl(queryModifiers);
             return Optional.of(immutableQueryModifiers);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

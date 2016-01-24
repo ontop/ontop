@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.transformer.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
@@ -91,7 +91,7 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
             return Optional.of(transferredBindings.applyToBooleanExpression(optionalFilterCondition.get()));
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

@@ -114,9 +114,7 @@ public class QueryNodeNavigationTools {
          * First choice: first child
          */
         if (!alreadyExplored) {
-            Optional<QueryNode> optionalFirstChild = query.getFirstChild(currentNode)
-                    .transform(Optional::of)
-                    .or(Optional.empty());
+            Optional<QueryNode> optionalFirstChild = query.getFirstChild(currentNode);
 
             if (optionalFirstChild.isPresent()) {
                 return optionalFirstChild;
@@ -126,9 +124,7 @@ public class QueryNodeNavigationTools {
         /**
          * Second choice: next sibling
          */
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentNode)
-                .transform(Optional::of)
-                .or(Optional.empty());
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentNode);
         if (optionalNextSibling.isPresent()) {
             return optionalNextSibling;
         }
@@ -136,9 +132,7 @@ public class QueryNodeNavigationTools {
         /**
          * Otherwise, tries the closest next sibling of an ancestor (recursive call)
          */
-        Optional<QueryNode> optionalParent = query.getParent(currentNode)
-                .transform(Optional::of)
-                .or(Optional.empty());
+        Optional<QueryNode> optionalParent = query.getParent(currentNode);
         if (optionalParent.isPresent()) {
             // Recursive call
             return getDepthFirstNextNode(query, optionalParent.get(), true);

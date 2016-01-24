@@ -60,17 +60,13 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                                                                         QueryTreeComponent treeComponent,
                                                                         NodeTransformationProposal transformationProposal,
                                                                         boolean isReplacedByUniqueChild) {
-        Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode)
-                .transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
+        Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode);
 
         if (!optionalGrandParent.isPresent()) {
             throw new RuntimeException("The root of the tree is not expected to be replaced.");
         }
 
-        Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode()
-                .transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
+        Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode();
         if (!optionalReplacingNode.isPresent()) {
             throw new RuntimeException("Inconsistent transformation proposal: a replacing node must be given");
         }
@@ -101,11 +97,8 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
     private static ReactToChildDeletionResults applyDeletionProposal(IntermediateQuery query, QueryNode parentNode,
                                                                      QueryTreeComponent treeComponent)
             throws EmptyQueryException {
-        Optional<QueryNode> optionalGrandParent = query.getParent(parentNode)
-                .transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(parentNode).transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
+        Optional<QueryNode> optionalGrandParent = query.getParent(parentNode);
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(parentNode);
 
         treeComponent.removeSubTree(parentNode);
 

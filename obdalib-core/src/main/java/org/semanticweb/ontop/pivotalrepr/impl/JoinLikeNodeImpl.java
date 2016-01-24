@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;
@@ -18,7 +18,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         if (optionalFilterCondition.isPresent()) {
             return Optional.of(transformBooleanExpression(substitution, optionalFilterCondition.get()));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.intermediatequery;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.junit.Test;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.AtomPredicateImpl;
@@ -73,7 +73,7 @@ public class NodeDeletionTest {
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>absent());
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
 
         String table1Name = "table1";
@@ -216,7 +216,7 @@ public class NodeDeletionTest {
         ConstructionNode constructionNode3 = new ConstructionNodeImpl(subAtom);
         queryBuilder.addChild(topUnion, constructionNode3);
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>absent());
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
         queryBuilder.addChild(constructionNode3, joinNode2);
 
         ExtensionalDataNode table4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 2), x, y));
@@ -255,7 +255,7 @@ public class NodeDeletionTest {
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>absent());
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));

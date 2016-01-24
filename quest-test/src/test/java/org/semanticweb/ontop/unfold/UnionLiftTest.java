@@ -20,7 +20,7 @@ package org.semanticweb.ontop.unfold;
  * #L%
  */
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.semanticweb.ontop.model.*;
@@ -39,8 +39,8 @@ import static org.semanticweb.ontop.pivotalrepr.NonCommutativeOperatorNode.Argum
 public class UnionLiftTest {
 
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-	private static final Optional<ImmutableBooleanExpression> NO_EXPRESSION = Optional.absent();
-	private static final Optional<ImmutableQueryModifiers> NO_MODIFIER = Optional.absent();
+	private static final Optional<ImmutableBooleanExpression> NO_EXPRESSION = Optional.empty();
+	private static final Optional<ImmutableQueryModifiers> NO_MODIFIER = Optional.empty();
 	private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 
     private UnionNode unionAns2Node;

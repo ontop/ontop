@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr.impl.jgrapht;
 
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.semanticweb.ontop.pivotalrepr.*;

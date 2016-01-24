@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 import org.semanticweb.ontop.model.OrderCondition;
@@ -87,7 +87,7 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
             return Optional.of(newModifiers);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private boolean hasModifiers() {

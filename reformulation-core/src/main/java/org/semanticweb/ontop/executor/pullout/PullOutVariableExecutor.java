@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.pullout;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
@@ -255,7 +255,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
         DataAtom newAtom = generateNewStandardDataAtom(originalDataNode, renamingMap);
         DataNode newDataNode = originalDataNode.newAtom(newAtom);
 
-        return new FocusNodeUpdate(newDataNode, Optional.<InjectiveVar2VarSubstitution>absent(),
+        return new FocusNodeUpdate(newDataNode, Optional.<InjectiveVar2VarSubstitution>empty(),
                 convertIntoEqualities(renamingMap));
     }
 

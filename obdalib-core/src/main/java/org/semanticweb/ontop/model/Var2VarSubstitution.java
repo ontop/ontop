@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.model;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.pivotalrepr.ImmutableQueryModifiers;
 

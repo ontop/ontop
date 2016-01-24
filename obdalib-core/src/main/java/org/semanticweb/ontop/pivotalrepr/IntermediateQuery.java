@@ -1,9 +1,10 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.pivotalrepr.proposal.*;
+
+import java.util.Optional;
 
 /**
  *

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.join;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.executor.NodeCentricInternalExecutor;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
@@ -46,9 +46,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
         }
         else {
             ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
-                    optionalParent.get(), optionalNextSibling
-                        .transform(java.util.Optional::of)
-                        .or(java.util.Optional.empty()));
+                    optionalParent.get(), optionalNextSibling);
 
             ReactToChildDeletionResults deletionResults = query.applyProposal(reactionProposal);
 
@@ -76,7 +74,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
          */
         catch (InsatisfiedExpressionException e) {
             treeComponent.removeSubTree(topJoinNode);
-            return Optional.absent();
+            return Optional.empty();
         }
 
         InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);

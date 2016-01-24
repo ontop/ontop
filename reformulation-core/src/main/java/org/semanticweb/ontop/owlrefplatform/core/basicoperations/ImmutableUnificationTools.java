@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.*;
@@ -117,7 +117,7 @@ public class ImmutableUnificationTools {
         Substitution mutableSubstitution = UnifierUtilities.getMGU(term1, term2);
 
         if (mutableSubstitution == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(convertSubstitution(mutableSubstitution));
     }
@@ -126,7 +126,7 @@ public class ImmutableUnificationTools {
         Substitution mutableSubstitution = UnifierUtilities.getMGU(atom1, atom2);
 
         if (mutableSubstitution == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
@@ -181,7 +181,7 @@ public class ImmutableUnificationTools {
                     optionalMGUS.get()));
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -201,7 +201,7 @@ public class ImmutableUnificationTools {
             // Constraint
             if ((targetTerm instanceof ImmutableFunctionalTerm)
                     && ((ImmutableFunctionalTerm) targetTerm).getVariables().contains(sourceVariable)) {
-                return Optional.absent();
+                return Optional.empty();
             }
 
             ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
@@ -220,7 +220,7 @@ public class ImmutableUnificationTools {
 
                 // Constraint
                 if (sourceFunctionalTerm.getVariables().contains(targetVariable)) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 else {
                     ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
@@ -233,7 +233,7 @@ public class ImmutableUnificationTools {
                         (ImmutableFunctionalTerm) targetTerm);
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
         /**
@@ -250,7 +250,7 @@ public class ImmutableUnificationTools {
                 return Optional.of(EMPTY_SUBSTITUTION);
             }
             else {
-                return Optional.absent();
+                return Optional.empty();
             }
         }
         else {
@@ -268,7 +268,7 @@ public class ImmutableUnificationTools {
          */
         if (!sourceTerm.getFunctionSymbol().equals(
                 targetTerm.getFunctionSymbol())) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         ImmutableList<? extends ImmutableTerm> sourceChildren = sourceTerm.getArguments();
@@ -276,7 +276,7 @@ public class ImmutableUnificationTools {
 
         int childNb = sourceChildren.size();
         if (targetChildren.size() != childNb) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         final ImmutableList.Builder<TermPair> pairBuilder = ImmutableList.builder();
@@ -292,7 +292,7 @@ public class ImmutableUnificationTools {
              * no global unification is possible.
              */
             if (!optionalChildTermUnifier.isPresent()) {
-                return Optional.absent();
+                return Optional.empty();
             }
 
             /**
@@ -349,7 +349,7 @@ public class ImmutableUnificationTools {
             return Optional.of(convertPairs2Substitution(allPairs));
         }
         catch (UnificationException e) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

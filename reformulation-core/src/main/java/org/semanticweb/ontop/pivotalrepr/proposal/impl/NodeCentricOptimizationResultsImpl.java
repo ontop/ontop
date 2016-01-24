@@ -17,13 +17,9 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               N newNode) {
         super(query);
-        this.optionalNextSibling = query.getNextSibling(newNode)
-                .transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
+        this.optionalNextSibling = query.getNextSibling(newNode);
         this.optionalNewNode = Optional.of(newNode);
-        this.optionalClosestAncestor = query.getParent(newNode)
-                .transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
+        this.optionalClosestAncestor = query.getParent(newNode);
         this.optionalReplacingChild = Optional.empty();
     }
 
@@ -45,9 +41,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
          * (if any of course).
          */
         if (optionalNextSibling.isPresent() && optionalClosestAncestor.isPresent()) {
-            Optional<QueryNode> optionalSiblingParent = query.getParent(optionalNextSibling.get())
-                    .transform(p -> Optional.of(p))
-                    .or(Optional.empty());
+            Optional<QueryNode> optionalSiblingParent = query.getParent(optionalNextSibling.get());
             if ((!optionalSiblingParent.isPresent()) || (optionalSiblingParent.get() != optionalClosestAncestor.get())) {
                 throw new IllegalArgumentException("The closest ancestor is not the parent of the next sibling");
             }

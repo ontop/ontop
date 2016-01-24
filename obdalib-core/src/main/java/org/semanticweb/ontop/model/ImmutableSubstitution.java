@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.model;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.impl.VariableImpl;

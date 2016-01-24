@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.semanticweb.ontop.model.ImmutableBooleanExpression;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
 import org.semanticweb.ontop.model.VariableOrGroundTerm;

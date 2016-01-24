@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -360,7 +360,7 @@ public class SubQueryUnificationTools {
             ImmutableSubstitution<VariableOrGroundTerm> substitution1,
             ImmutableSubstitution<ImmutableTerm> substitution2) {
         if (!optionalModifiers.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         ImmutableQueryModifiers previousModifiers = optionalModifiers.get();
         ImmutableList.Builder<OrderCondition> conditionBuilder = ImmutableList.builder();

@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.executor.groundterm;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import org.semanticweb.ontop.executor.InternalProposalExecutor;
@@ -193,7 +193,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
                 }
             }
             else if (ancestor instanceof SubTreeDelimiterNode) {
-                return Optional.absent();
+                return Optional.empty();
             }
 
             /**
@@ -202,7 +202,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
             ancestorChild = ancestor;
             optionalAncestor = query.getParent(ancestor);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

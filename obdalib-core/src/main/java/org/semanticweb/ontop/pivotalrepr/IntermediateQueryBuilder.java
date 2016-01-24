@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 
 /**

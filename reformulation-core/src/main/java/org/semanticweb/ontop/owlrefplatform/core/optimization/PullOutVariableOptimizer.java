@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.DataAtom;
 import org.semanticweb.ontop.model.Variable;
@@ -41,8 +41,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     private IntermediateQuery pullOutSomeVariables(IntermediateQuery initialQuery)
             throws EmptyQueryException {
         // Non-final
-        java.util.Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode())
-                .transform(java.util.Optional::of).or(java.util.Optional.empty());
+        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
 
         // Non-final
         IntermediateQuery currentQuery = initialQuery;
@@ -85,9 +84,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         // Non-final variables
         IntermediateQuery currentQuery = initialQuery;
         QueryNode currentJoinLikeNode = initialJoinLikeNode;
-        java.util.Optional<QueryNode> optionalCurrentChildNode = currentQuery.getFirstChild(initialJoinLikeNode)
-                .transform(java.util.Optional::of)
-                .or(java.util.Optional.empty());
+        Optional<QueryNode> optionalCurrentChildNode = currentQuery.getFirstChild(initialJoinLikeNode);
 
         int startIndex = getStartIndex(initialQuery, Optional.of((QueryNode)initialJoinLikeNode));
 
@@ -127,15 +124,11 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                     currentJoinLikeNode = optionalCurrentParent.get();
                 }
                 else {
-                    optionalCurrentChildNode = currentQuery.getNextSibling(childNode)
-                            .transform(java.util.Optional::of)
-                            .or(java.util.Optional.empty());
+                    optionalCurrentChildNode = currentQuery.getNextSibling(childNode);
                 }
             }
             else {
-                optionalCurrentChildNode = currentQuery.getNextSibling(childNode)
-                        .transform(java.util.Optional::of)
-                        .or(java.util.Optional.empty());
+                optionalCurrentChildNode = currentQuery.getNextSibling(childNode);
             }
         }
 
@@ -199,7 +192,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             return Optional.of(proposal);
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

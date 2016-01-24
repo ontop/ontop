@@ -1,6 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr.proposal.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.model.ImmutableSubstitution;
@@ -30,15 +30,15 @@ public class ConstructionNodeUpdateImpl implements ConstructionNodeUpdate {
 
     public ConstructionNodeUpdateImpl(ConstructionNode formerConstructionNode) {
         this.formerNode = formerConstructionNode;
-        this.optionalNewNode = Optional.absent();
-        this.optionalSubstitutionToPropagate = Optional.absent();
+        this.optionalNewNode = Optional.empty();
+        this.optionalSubstitutionToPropagate = Optional.empty();
     }
 
     public ConstructionNodeUpdateImpl(ConstructionNode formerConstructionNode,
                                     ConstructionNode newConstructionNode) {
         this.formerNode = formerConstructionNode;
         this.optionalNewNode = Optional.of(newConstructionNode);
-        this.optionalSubstitutionToPropagate = Optional.absent();
+        this.optionalSubstitutionToPropagate = Optional.empty();
     }
 
     public ConstructionNodeUpdateImpl(ConstructionNode formerConstructionNode,
