@@ -66,11 +66,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
                 ImmutableList.copyOf(additionalExpressions)).get();
         FilterNode newFilterNode = new FilterNodeImpl(foldedExpression);
 
-        try {
-            treeComponent.insertParent(targetNode, newFilterNode);
-        } catch (IllegalTreeUpdateException e) {
-            throw new RuntimeException("Unexpected low-level exception: " + e);
-        }
+        treeComponent.insertParent(targetNode, newFilterNode);
     }
 
     private void updateJoinOrFilterNode(QueryTreeComponent treeComponent, JoinOrFilterNode targetNode,

@@ -79,14 +79,9 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
 
         InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
 
-        try {
-            QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
-            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
-            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode, optionalPosition);
-
-        } catch (IllegalTreeUpdateException | IllegalTreeException e) {
-            throw new RuntimeException("Internal error: " + e.getMessage());
-        }
+        QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
+        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
+        treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode, optionalPosition);
 
         return Optional.of(newJoinNode);
     }

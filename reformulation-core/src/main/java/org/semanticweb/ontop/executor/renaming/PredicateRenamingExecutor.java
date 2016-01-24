@@ -29,8 +29,8 @@ public class PredicateRenamingExecutor implements StandardProposalExecutor<Predi
             IntermediateQuery newQuery = IntermediateQueryUtils.convertToBuilderAndTransform(inputQuery, renamer).build();
             return new ProposalResultsImpl(newQuery);
         }
-        catch (IntermediateQueryBuilderException | QueryNodeTransformationException | NotNeededNodeException e) {
-            throw new RuntimeException("Unexpected error: " + e.getMessage());
+        catch (NotNeededNodeException e) {
+            throw new IllegalStateException("PredicateRenamingExecutor should not remove any node");
         }
     }
 }

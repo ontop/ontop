@@ -63,22 +63,18 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
         Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode);
 
         if (!optionalGrandParent.isPresent()) {
-            throw new RuntimeException("The root of the tree is not expected to be replaced.");
+            throw new InvalidQueryOptimizationProposalException("The root of the tree is not expected to be replaced.");
         }
 
         Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode();
         if (!optionalReplacingNode.isPresent()) {
-            throw new RuntimeException("Inconsistent transformation proposal: a replacing node must be given");
+            throw new InvalidQueryOptimizationProposalException("Inconsistent transformation proposal: a replacing node must be given");
         }
-        try {
-            if (isReplacedByUniqueChild) {
-                treeComponent.removeOrReplaceNodeByUniqueChildren(parentNode);
-            }
-            else {
-                treeComponent.replaceNode(parentNode, optionalReplacingNode.get());
-            }
-        } catch (IllegalTreeUpdateException e) {
-            throw new RuntimeException("Unexpected: " + e.getMessage());
+        if (isReplacedByUniqueChild) {
+            treeComponent.removeOrReplaceNodeByUniqueChildren(parentNode);
+        }
+        else {
+            treeComponent.replaceNode(parentNode, optionalReplacingNode.get());
         }
 
         /**

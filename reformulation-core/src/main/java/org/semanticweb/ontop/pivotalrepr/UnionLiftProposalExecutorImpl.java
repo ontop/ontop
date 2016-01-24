@@ -15,19 +15,13 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {
-            ConstructionNode newRootNode;
-            newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
+            ConstructionNode newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
             builder.init(newRootNode);
             recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>empty());
-        } catch (IntermediateQueryBuilderException | NotNeededNodeException | QueryNodeTransformationException e) {
-            e.printStackTrace();
+        } catch (NotNeededNodeException e) {
+            throw new IllegalStateException("UnionLiftProposalExecutor should not remove any node");
         }
-
-        try {
-            return builder.build();
-        } catch (IntermediateQueryBuilderException e) {
-            throw new RuntimeException(e);
-        }
+        return builder.build();
     }
 
 

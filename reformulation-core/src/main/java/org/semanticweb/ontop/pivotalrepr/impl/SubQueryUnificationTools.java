@@ -138,24 +138,16 @@ public class SubQueryUnificationTools {
         ConstructionNodeUnification rootUnification = unifyConstructionNode(renamer.transform(originalRootNode),
                 targetDataAtom);
 
-        try {
-            IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalSubQuery.getMetadata());
-            queryBuilder.init(rootUnification.unifiedNode);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalSubQuery.getMetadata());
+        queryBuilder.init(rootUnification.unifiedNode);
 
-            /**
-             * TODO: explain
-             */
-            queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, rootUnification.unifiedNode,
-                    rootUnification.substitutionToPropagate, renamer);
+        /**
+         * TODO: explain
+         */
+        queryBuilder = propagateToChildren(queryBuilder, originalSubQuery, originalRootNode, rootUnification.unifiedNode,
+                rootUnification.substitutionToPropagate, renamer);
 
-            return queryBuilder.build();
-
-            /**
-             * TODO: should we expect this exception? Not just an internal error?
-             */
-        } catch(IntermediateQueryBuilderException e) {
-            throw new RuntimeException(e.getLocalizedMessage());
-        }
+        return queryBuilder.build();
     }
 
     /**
@@ -175,8 +167,8 @@ public class SubQueryUnificationTools {
             QueryNode renamedChild;
             try {
                 renamedChild = originalChild.acceptNodeTransformer(renamer);
-            } catch (QueryNodeTransformationException | NotNeededNodeException e) {
-                throw new RuntimeException("Unexcepted exception while renaming a node: " + e.getLocalizedMessage());
+            } catch (NotNeededNodeException e) {
+                throw new IllegalStateException("A renamer should not remove a node: " + e);
             }
 
             Optional<? extends QueryNode> optionalNewChild;

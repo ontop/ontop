@@ -89,11 +89,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
             else {
                 ImmutableBooleanExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
                 FilterNode newFilterNode = new FilterNodeImpl(joiningCondition);
-                try {
-                    treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
-                } catch (IllegalTreeUpdateException e) {
-                    throw new RuntimeException("Unexpected exception: " + e);
-                }
+                treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
             }
         }
 
