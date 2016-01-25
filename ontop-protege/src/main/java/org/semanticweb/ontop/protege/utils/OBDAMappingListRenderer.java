@@ -369,7 +369,8 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		if (list.getParent() != null) {
-			preferredWidth = list.getParent().getWidth();
+			//preferredWidth = list.getParent().getWidth(); //TODO: UNDERSTAND WHY BROKEN
+            preferredWidth = list.getParent().getParent().getWidth();
 		}
 
 		minTextHeight = this.plainFontHeight + 6;
@@ -401,7 +402,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 
 		boolean debugColors = false;
 
-		if (debugColors) {
+      		if (debugColors) {
 			mapTextPane.setOpaque(true);
 			srcQueryTextPane.setOpaque(true);
 			trgQueryTextPane.setOpaque(true);

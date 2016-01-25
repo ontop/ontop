@@ -48,7 +48,9 @@ import java.util.List;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
-	private static final long serialVersionUID = -486013653814714526L;
+
+
+    private static final long serialVersionUID = -486013653814714526L;
 
 	private Thread validatorThread;
 
@@ -770,4 +772,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		
 		mappingList.revalidate();
 	}
+
+
 }

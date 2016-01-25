@@ -93,7 +93,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
 
 		setLayout(new BorderLayout());
-		add(mappingPanel, BorderLayout.NORTH);
+		//add(mappingPanel, BorderLayout.NORTH);
+        add(mappingPanel, BorderLayout.CENTER);
 		
 	}
 
@@ -117,4 +118,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 	public void show(OWLEntity owlEntity) {
 	//	System.out.println(owlEntity);
 	}
+
+
 }
