@@ -16,7 +16,7 @@ public abstract class NodeCentricInternalCompositeExecutor<N extends QueryNode, 
     protected Optional<P> createNewProposal(NodeCentricOptimizationResults<N> results) {
         Optional<N> optionalNewNode = results.getOptionalNewNode()
                 .map(Optional::of)
-                .orElse(Optional.empty());
+                .orElseGet(Optional::empty);
 
         if (optionalNewNode.isPresent()) {
             return createNewProposalFromFocusNode(optionalNewNode.get());

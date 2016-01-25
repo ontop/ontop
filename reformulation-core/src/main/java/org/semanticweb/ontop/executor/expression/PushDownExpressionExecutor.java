@@ -39,7 +39,7 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
 
         return updateFocusNode(treeComponent, focusNode, proposal.getExpressionsToKeep())
                 .map(n -> new NodeCentricOptimizationResultsImpl<>(query, n))
-                .orElse(new NodeCentricOptimizationResultsImpl<>(query, Optional.of(firstChild)));
+                .orElseGet(() -> new NodeCentricOptimizationResultsImpl<>(query, Optional.of(firstChild)));
     }
 
     /**
