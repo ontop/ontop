@@ -89,9 +89,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		initComponents();
 		addMenu();
 
+
+
 		// Setting up the mappings tree
 		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic, validator));
-		mappingList.setModel(new SynchronizedMappingListModel(apic));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		mappingList.addMouseListener(new PopupListener());
@@ -431,7 +432,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
         pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
 
-        mappingList.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 12)); // NOI18N
         mappingScrollPane.setViewportView(mappingList);
 
         pnlMappingManager.add(mappingScrollPane, java.awt.BorderLayout.CENTER);

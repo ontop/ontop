@@ -326,7 +326,7 @@ public class QueryPainter {
 	}
 
 	private void setupFont() {
-		plainFont = new Font("Dialog", Font.PLAIN, 14);
+		plainFont = new Font("Lucida Grande", Font.PLAIN, 14);
 		parent.setFont(plainFont);
 	}
 
