@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -30,7 +31,6 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.parser.EncodeForURI;
-
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -45,8 +45,6 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 

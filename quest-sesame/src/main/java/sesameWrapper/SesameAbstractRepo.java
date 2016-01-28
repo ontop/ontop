@@ -22,13 +22,13 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class SesameAbstractRepo implements
 		org.openrdf.repository.Repository, AutoCloseable {

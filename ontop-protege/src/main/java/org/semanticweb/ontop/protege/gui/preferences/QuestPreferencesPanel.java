@@ -21,12 +21,11 @@ package org.semanticweb.ontop.protege.gui.preferences;
  */
 
 
-import java.awt.BorderLayout;
-
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import org.semanticweb.ontop.protege.panels.QuestConfigPanel;
 
-import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+import java.awt.*;
 
 public class QuestPreferencesPanel extends OWLPreferencesPanel {
 

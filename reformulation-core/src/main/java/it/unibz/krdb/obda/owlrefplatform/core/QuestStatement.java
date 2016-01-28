@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
-
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;

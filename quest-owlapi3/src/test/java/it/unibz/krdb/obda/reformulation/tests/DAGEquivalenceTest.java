@@ -25,15 +25,10 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.*;
+import junit.framework.TestCase;
 
 import java.util.List;
-
-import junit.framework.TestCase;
 
 
 public class DAGEquivalenceTest extends TestCase {

@@ -21,7 +21,6 @@ package org.semanticweb.ontop.protege.core;
  */
 
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-
 import org.protege.editor.core.Disposable;
 
 /**

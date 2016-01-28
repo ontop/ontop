@@ -1,17 +1,12 @@
 package org.protege.osgi.jdbc.prefs;
 
-import java.net.MalformedURLException;
-
+import org.osgi.framework.*;
+import org.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.RegistryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-import org.protege.osgi.jdbc.JdbcRegistry;
-import org.protege.osgi.jdbc.RegistryException;
+import java.net.MalformedURLException;
 
 public class Activator implements BundleActivator {
 

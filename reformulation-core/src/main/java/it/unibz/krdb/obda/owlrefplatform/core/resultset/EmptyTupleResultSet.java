@@ -22,8 +22,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.TupleResultSet;
 
 import java.util.List;
 import java.util.NoSuchElementException;

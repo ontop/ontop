@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.utils;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author xiao

@@ -47,6 +47,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertTrue;
 
@@ -132,7 +133,7 @@ public class BindTestWithFunctions {
 		conn.commit();
 	}
 
-	
+
 
 	private void runTests(QuestPreferences p, String query) throws Exception {
 
@@ -141,7 +142,7 @@ public class BindTestWithFunctions {
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
         QuestOWL reasoner = factory.createReasoner(ontology, config);
-        
+
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
@@ -906,6 +907,25 @@ public class BindTestWithFunctions {
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
+    //    @Test see results of datetime with locale
+    public void testDatetime() throws Exception {
+
+        String value = "Jan 31 2013 9:32AM";
+
+        DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.CHINA);
+
+        java.util.Date date;
+        try {
+            date = df.parse(value);
+            Timestamp ts = new Timestamp(date.getTime());
+            System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+
+        } catch (ParseException pe) {
+
+            throw new RuntimeException(pe);
+        }
+    }
+
     private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -917,19 +937,7 @@ public class BindTestWithFunctions {
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
-            String value = "Jan 31 2013 9:32AM";
 
-            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
-            java.util.Date date;
-            try {
-                date = df.parse(value);
-                Timestamp ts = new Timestamp(date.getTime());
-                System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
-
-            } catch (ParseException pe) {
-
-                throw new RuntimeException(pe);
-            }
 
             int i = 0;
             List<String> returnedValues = new ArrayList<>();

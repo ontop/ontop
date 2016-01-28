@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
@@ -27,21 +27,26 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.sql.Connection;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /***
- * Tests that TMapping does not return error in case of symmetric properties.
- * Use to check that no concurrency error appears. 
+ * Tests that SQL Server returns the datetimes correctly
  */
-public class TMappingConcurrencyError extends TestCase {
+public class AdventureWorksDatetimeTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -50,57 +55,57 @@ public class TMappingConcurrencyError extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/exampleTMapping.owl";
-	final String obdafile = "src/test/resources/exampleTMapping.obda";
+	final String owlFile = "src/test/resources/datatype/adventureWorks.owl";
+	final String obdaFile = "src/test/resources/datatype/adventureWorks.obda";
 	private QuestOWL reasoner;
+	private Connection sqlConnection;
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		
-		
+
+		fac = OBDADataFactoryImpl.getInstance();
+
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
 		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
-		
+
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	
+		ioManager.load(obdaFile);
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+
+
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-		
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
-		
-		// Now we are ready for querying
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+		QuestOWL reasoner = factory.createReasoner(ontology, config);
+
+	    // Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		
+
 	}
 
 
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
+
 	
 
 	
 	private String runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		String retval=null;
+		String retval="";
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
-			retval = ind1.toString();
+//			while(rs.nextRow()) {
+				rs.nextRow();
+				OWLObject ind1 = rs.getOWLObject("y");
+				retval = ind1.toString();
+//			}
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -111,22 +116,29 @@ public class TMappingConcurrencyError extends TestCase {
 				assertTrue(false);
 			}
 			conn.close();
-			reasoner.dispose();
+
 		}
 		return retval;
 	}
 
-	/**
-	 * Test use of quoted mixed case table name
+
+
+    /**
+	 * Test use of datetime with jtds driver
 	 * @throws Exception
 	 */
-	public void test() throws Exception {
-		String query = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> SELECT ?y WHERE { ?y a :Man }";
+	@Test
+	public void testDatetime() throws Exception {
+
+		String query =  "PREFIX : <http://knova.ru/adventureWorks.owl#>\n" +
+				"SELECT DISTINCT ?x ?y { ?x :SpecialOffer_ModifiedDate ?y }";
 		String val = runTests(query);
-		
+		assertEquals("\"2005-05-02T00:00:00.0\"^^xsd:dateTime", val);
 	}
-	
 
 
-			
+
+
+
 }
+

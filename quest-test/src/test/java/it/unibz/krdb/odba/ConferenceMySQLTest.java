@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.sql.Connection;
 
-import static org.junit.Assert.assertFalse;
-
 /**
  * Test mysql jdbc driver.
  * The mappings do not correspond to the table in the database

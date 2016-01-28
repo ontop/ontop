@@ -35,14 +35,17 @@ import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
-import org.semanticweb.owlapi.reasoner.impl.*;
+import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is

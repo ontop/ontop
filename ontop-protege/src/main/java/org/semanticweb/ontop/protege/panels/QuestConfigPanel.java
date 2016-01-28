@@ -23,7 +23,7 @@ package org.semanticweb.ontop.protege.panels;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
-import java.awt.Dimension;
+import java.awt.*;
 
 public class QuestConfigPanel extends javax.swing.JPanel {
 

@@ -22,19 +22,16 @@ package org.semanticweb.ontop.protege.gui;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
-
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
+
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OWLResultSetTableModel implements TableModel {
 

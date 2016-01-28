@@ -21,29 +21,21 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
-import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import junit.framework.TestCase;
-
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Map.Entry;
 
 public class S_Indexes_Compare extends TestCase {
 	

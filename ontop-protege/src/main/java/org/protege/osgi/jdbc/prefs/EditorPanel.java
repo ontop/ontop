@@ -1,24 +1,5 @@
 package org.protege.osgi.jdbc.prefs;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -26,6 +7,11 @@ import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.RegistryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.net.MalformedURLException;
 
 public class EditorPanel extends JDialog {
     private static final long serialVersionUID = -8958695683502439830L;

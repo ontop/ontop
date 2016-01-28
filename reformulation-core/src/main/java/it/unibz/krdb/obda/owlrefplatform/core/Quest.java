@@ -21,12 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
@@ -48,13 +43,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.utils.MappingParser;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.ForeignKeyConstraint;
-import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.UniqueConstraint;
+import it.unibz.krdb.sql.*;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;

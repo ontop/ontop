@@ -20,14 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -36,20 +29,14 @@ import it.unibz.krdb.obda.ontology.AssertionFactory;
 import it.unibz.krdb.obda.ontology.InconsistentOntologyException;
 import it.unibz.krdb.obda.ontology.impl.AssertionFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.algebra.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.ProjectionElemList;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
 
 public class QuestGraphResultSet implements GraphResultSet {
 

@@ -27,16 +27,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
+import org.openrdf.model.Model;
+import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-
-import org.openrdf.model.Model;
-import org.openrdf.repository.RepositoryException;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 public class SesameVirtualRepo extends SesameAbstractRepo {
 

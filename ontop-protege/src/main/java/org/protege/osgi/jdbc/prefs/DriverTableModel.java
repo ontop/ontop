@@ -1,16 +1,11 @@
 package org.protege.osgi.jdbc.prefs;
 
-import java.sql.Driver;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.table.AbstractTableModel;
-
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.osgi.jdbc.JdbcRegistry;
+
+import javax.swing.table.AbstractTableModel;
+import java.sql.Driver;
+import java.util.*;
 
 public class DriverTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -7588371899390500462L;

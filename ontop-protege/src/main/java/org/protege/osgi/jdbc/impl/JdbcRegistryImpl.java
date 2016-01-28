@@ -1,14 +1,14 @@
 package org.protege.osgi.jdbc.impl;
 
+import org.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.RegistryException;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.protege.osgi.jdbc.JdbcRegistry;
-import org.protege.osgi.jdbc.RegistryException;
 
 public class JdbcRegistryImpl implements JdbcRegistry {
 

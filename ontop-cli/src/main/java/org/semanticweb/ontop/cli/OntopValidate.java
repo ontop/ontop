@@ -6,15 +6,10 @@ import com.google.common.collect.Sets;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLNamedObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
 import java.io.IOException;

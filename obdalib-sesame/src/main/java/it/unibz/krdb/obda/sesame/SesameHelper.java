@@ -1,19 +1,10 @@
 package it.unibz.krdb.obda.sesame;
 
 import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
+import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameHelper {

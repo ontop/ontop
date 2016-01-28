@@ -21,22 +21,12 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.ResultSet;
-import it.unibz.krdb.obda.model.TupleResultSet;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
-
-import java.net.URI;
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -44,6 +34,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Set;
 
 public class QuestDBStatement implements OBDAStatement {
 

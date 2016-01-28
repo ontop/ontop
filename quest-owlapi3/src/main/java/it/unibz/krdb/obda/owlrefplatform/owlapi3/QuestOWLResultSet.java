@@ -20,23 +20,12 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.owlapi3.OWLAPIIndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.List;
-
-import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
 /***
  * A wrapper for QuestResultSet that presents the results as OWLAPI objects.

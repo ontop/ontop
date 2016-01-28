@@ -19,12 +19,12 @@ package sesameWrapper;
  * limitations under the License.
  * #L%
  */
+
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
-
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.RepositoryException;
 

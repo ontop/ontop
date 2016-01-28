@@ -20,12 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.sql.ResultSet;

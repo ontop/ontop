@@ -27,30 +27,22 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-
-import java.io.File;
-import java.net.URI;
-import java.sql.Connection;
-
 import junit.framework.TestCase;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sesameWrapper.SemanticIndexManager;
+
+import java.io.File;
+import java.net.URI;
+import java.sql.Connection;
 
 /**
  * Tests if QuestOWL can be initialized on top of an existing semantic index

@@ -4,10 +4,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-
 import org.junit.Test;
-
-import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

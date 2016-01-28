@@ -1,16 +1,12 @@
 package org.protege.osgi.jdbc;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.Properties;
-import java.util.logging.Logger;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+
+import java.sql.*;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 public class OSGiJdbcDriver implements Driver {
 	private int majorVersion;

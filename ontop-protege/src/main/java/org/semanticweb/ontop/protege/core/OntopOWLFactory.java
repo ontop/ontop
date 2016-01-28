@@ -1,14 +1,13 @@
 package org.semanticweb.ontop.protege.core;
 
-import javax.annotation.Nonnull;
-import javax.swing.JOptionPane;
-
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import javax.annotation.Nonnull;
+import javax.swing.*;
 
 /**
  * Wrapper around QuestOWLFactory for use in the ontop Protege plugin

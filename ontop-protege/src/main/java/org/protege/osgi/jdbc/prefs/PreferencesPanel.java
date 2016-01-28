@@ -7,13 +7,8 @@ import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import org.protege.osgi.jdbc.JdbcRegistry;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
