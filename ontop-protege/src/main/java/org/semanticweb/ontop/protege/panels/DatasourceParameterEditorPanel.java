@@ -20,6 +20,7 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -460,57 +461,43 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	}// GEN-LAST:event_txtJdbcDriverActionPerformed
 
 	private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
-		while (true) {
-			String name = txtDatabase.getText();
-			if (name == null) {
-				return;
-			}
+        String name = txtDatabase.getText();
+        URI uri;
 
-			if (!name.isEmpty()) {
-				URI uri = createUri(name);
-                if (uri != null) {
+        if(Strings.isNullOrEmpty(name)){
+            JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-                    if (!obdaModel.containsSource(uri)) {
+        try {
+            uri = URI.create(name);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-                        if (obdaModel.getSources().size() > 0) { //if another datasource already exist remove first the previous one
-                            int answer = JOptionPane.showConfirmDialog(this, "Are you sure want to delete previous data source?\n Datasource: " + selectedDataSource.getSourceID(), "Delete Confirmation", JOptionPane.OK_CANCEL_OPTION);
+        //create new datasource
+        OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        String username = txtDatabaseUsername.getText();
+        source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+        String password = new String(txtDatabasePassword.getPassword());
+        source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+        String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
+        source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+        String url = txtJdbcUrl.getText();
+        source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 
-                            if (answer != JOptionPane.OK_OPTION) {
-
-                                return;
-                            }
-                        }
-                    }
-                    //create new datasource
-                    OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
-                    String username = txtDatabaseUsername.getText();
-                    source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-                    String password = new String(txtDatabasePassword.getPassword());
-                    source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-                    String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
-                    source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-                    String url = txtJdbcUrl.getText();
-                    source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-
-                    datasourceChanged(selectedDataSource, source);
-                    // save the obdaModel to an .obda file disk
-                    this.owlModelManager.fireEvent(EventType.ONTOLOGY_SAVED);
-                    JOptionPane.showMessageDialog(this, "The specified data source has been saved. ", "Saved", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-				}
-                                   
-			} else {
-				JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-		}
-	}// GEN-LAST:event_cmdSaveActionPerformed
+        datasourceChanged(selectedDataSource, source);
+        // save the obdaModel to an .obda file disk
+        this.owlModelManager.fireEvent(EventType.ONTOLOGY_SAVED);
+        JOptionPane.showMessageDialog(this, "The specified data source has been saved. ", "Saved", JOptionPane.INFORMATION_MESSAGE);
+    }// GEN-LAST:event_cmdSaveActionPerformed
 
 	private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
 		
 		OBDADataSource ds = selectedDataSource;
 		if (ds == null) {
-			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Create a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
 
@@ -546,16 +533,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         SwingUtilities.invokeLater(run);
 		
 	}// GEN-LAST:event_cmdTestConnectionActionPerformed
-
-	private URI createUri(String name) {
-		URI uri = null;
-		try {
-			uri = URI.create(name);
-		} catch (IllegalArgumentException e) {
-			JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
-		}
-		return uri;
-	}
 
 	private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
 		timer.restart();
@@ -617,46 +594,46 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JTextField txtDatabase;
     private javax.swing.JPasswordField txtDatabasePassword;
     private javax.swing.JTextField txtDatabaseUsername;
-    private javax.swing.JComboBox txtJdbcDriver;
+    private javax.swing.JComboBox<String> txtJdbcDriver;
     private javax.swing.JTextField txtJdbcUrl;
     // End of variables declaration//GEN-END:variables
 
 	private void currentDatasourceChange(OBDADataSource currentsource) {
 
 		comboListener.setNotify(false);
-		if (currentsource == null) {
-			selectedDataSource = null;
-                        txtDatabase.setText("");
-			txtJdbcDriver.setSelectedIndex(0);
-			txtDatabaseUsername.setText("");
-			txtDatabasePassword.setText("");
-			txtJdbcUrl.setText("");
-			lblConnectionStatus.setText("");
+        if (currentsource == null) {
+            selectedDataSource = null;
+            txtDatabase.setText("");
+            txtJdbcDriver.setSelectedIndex(0);
+            txtDatabaseUsername.setText("");
+            txtDatabasePassword.setText("");
+            txtJdbcUrl.setText("");
+            lblConnectionStatus.setText("");
 
-		} else {
-			selectedDataSource = currentsource;
+        } else {
+            selectedDataSource = currentsource;
             txtDatabase.setText(currentsource.getSourceID().toString());
-			txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
-			txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-			txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
-                        lblConnectionStatus.setText("");
-			
-		}
-		comboListener.setNotify(true);
+            txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+            txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
+            txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+            txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
+            lblConnectionStatus.setText("");
+
+        }
+        comboListener.setNotify(true);
 	}
 
 	@Override
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-            if (oldSource!=null ) {
-                obdaModel.removeSource(oldSource.getSourceID()); 
-            }
+    public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
+        if (oldSource != null) {
+            obdaModel.removeSource(oldSource.getSourceID());
+        }
         obdaModel.addSource(newSource);
         selectedDataSource = newSource;
         enableFields(false);
-		currentDatasourceChange(newSource);
-		enableFields(true);
+        currentDatasourceChange(newSource);
+        enableFields(true);
 
-	}
+    }
 
 }
