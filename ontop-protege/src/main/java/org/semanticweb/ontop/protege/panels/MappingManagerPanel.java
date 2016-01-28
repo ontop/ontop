@@ -25,20 +25,16 @@ import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.utils.IDGenerator;
+import it.unibz.krdb.obda.utils.SourceQueryValidator;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
 import org.semanticweb.ontop.protege.dialogs.MappingValidationDialog;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.FilteredModel;
 import org.semanticweb.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import org.semanticweb.ontop.protege.gui.treemodels.TreeModelFilter;
-import it.unibz.krdb.obda.utils.IDGenerator;
-import it.unibz.krdb.obda.utils.SourceQueryValidator;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
-import org.semanticweb.ontop.protege.utils.DialogUtils;
-import org.semanticweb.ontop.protege.utils.MappingFilterLexer;
-import org.semanticweb.ontop.protege.utils.MappingFilterParser;
-import org.semanticweb.ontop.protege.utils.OBDAMappingListRenderer;
+import org.semanticweb.ontop.protege.utils.*;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -52,7 +48,9 @@ import java.util.List;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
-	private static final long serialVersionUID = -486013653814714526L;
+
+
+    private static final long serialVersionUID = -486013653814714526L;
 
 	private Thread validatorThread;
 
@@ -91,9 +89,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		initComponents();
 		addMenu();
 
+
+
 		// Setting up the mappings tree
 		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic, validator));
-		mappingList.setModel(new SynchronizedMappingListModel(apic));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		mappingList.addMouseListener(new PopupListener());
@@ -145,6 +144,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		setOBDAModel(apic); // TODO Bad code! Change this later!
 	}
 
+    public OBDADataSource getSelectedSource() {
+        return selectedSource;
+    }
+
 	/**
 	 * A listener to trigger the context menu of the mapping list.
 	 */
@@ -167,12 +170,14 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-	public void setOBDAModel(OBDAModel omodel) {
+   
+
+    public void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
 		ListModel model = new SynchronizedMappingListModel(omodel);
-		
+
 		model.addListDataListener(new ListDataListener() {
 			@Override
 			public void intervalRemoved(ListDataEvent e) {
@@ -271,7 +276,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         setLayout(new java.awt.GridBagLayout());
 
         pnlMappingManager.setAutoscrolls(true);
-        pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
+        pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 300));
         pnlMappingManager.setLayout(new java.awt.BorderLayout());
 
         pnlMappingButtons.setEnabled(false);
@@ -755,10 +760,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-		
+
 		if (newSource == null) {
 			return;
-		}		
+		}
 		this.selectedSource = newSource;
 
 		// Update the mapping tree.
@@ -767,4 +772,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		
 		mappingList.revalidate();
 	}
+
+
 }

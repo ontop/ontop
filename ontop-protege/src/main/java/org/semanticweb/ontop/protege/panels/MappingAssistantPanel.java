@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
+import it.unibz.krdb.sql.*;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.MapItem;
 import org.semanticweb.ontop.protege.gui.PredicateItem;
@@ -39,16 +40,8 @@ import org.semanticweb.ontop.protege.gui.component.SQLResultTable;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-
-import it.unibz.krdb.sql.Attribute;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.RelationDefinition;
-import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.ParserViewDefinition;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalComboBoxButton;
@@ -92,6 +85,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		obdaModel = model;
 		prefixManager = obdaModel.getPrefixManager();
 		initComponents();
+                
+                if (obdaModel.getSources().size() > 0) {
+            
+                    datasourceChanged(selectedSource, obdaModel.getSources().get(0));
+                }
 	}
 
 	/**
@@ -646,6 +644,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return toReturn;
 	}
 
+
 	private interface FormatString {
 		int index();
 		String toString();
@@ -734,6 +733,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
+
 		selectedSource = newSource;
 		addDatabaseTableToDataSetComboBox();
 		releaseResultset();
