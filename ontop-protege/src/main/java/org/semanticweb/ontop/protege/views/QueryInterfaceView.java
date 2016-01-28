@@ -25,6 +25,9 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.OWLResultSetWriter;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.protege.editor.core.ProtegeManager;
+import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege.gui.OWLResultSetTableModel;
@@ -33,12 +36,9 @@ import org.semanticweb.ontop.protege.panels.QueryInterfacePanel;
 import org.semanticweb.ontop.protege.panels.ResultViewTablePanel;
 import org.semanticweb.ontop.protege.panels.SavedQueriesPanelListener;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.TextMessageFrame;
-import org.protege.editor.core.ProtegeManager;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
@@ -183,7 +183,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					return 0;
 				return getTableModel().getRowCount();
 			}
-			public boolean isRunning() {
+			@Override
+            public boolean isRunning() {
                 OWLResultSetTableModel tm = getTableModel();
                 return tm != null && tm.isFetching();
             }
@@ -317,7 +318,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			this.result = result;
 			this.action = action;
 		}
-		public void run(){
+		@Override
+        public void run(){
 			TextMessageFrame panel = new TextMessageFrame(title);
 			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
@@ -344,7 +346,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			this.result = result;
 		}
 		
-		public void run(){
+		@Override
+        public void run(){
 			queryEditorPanel.updateStatus(result);
 		}
 	}
@@ -361,7 +364,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		TableModelSetter(OWLResultSetTableModel currentTableModel){
 			this.currentTableModel = currentTableModel;
 		}
-		public void run(){
+		@Override
+        public void run(){
 				resultTablePanel.setTableModel(currentTableModel);
 		}
 	}
@@ -415,7 +419,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
         @Override
 		public void run(){
-			TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query Result");
+			TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result");
 			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
 			DialogUtils.installEscapeCloseOperation(panel);
@@ -440,7 +444,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 	}
 
-	public synchronized void selectedQueryChanged(String new_group, String new_query, String new_id) {
+	@Override
+    public synchronized void selectedQueryChanged(String new_group, String new_query, String new_id) {
 		this.queryEditorPanel.selectedQueryChanged(new_group, new_query, new_id);
 	}
 
@@ -473,10 +478,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 	private class SaveQueryToFileAction implements OBDAProgressListener {
 
-		private CountDownLatch latch;
+		private final CountDownLatch latch;
 		private Thread thread;
-		private List<String[]> rawData;
-		private Writer writer;
+		private final List<String[]> rawData;
+		private final Writer writer;
 		private boolean isCancelled;
 		private boolean errorShown;
 		

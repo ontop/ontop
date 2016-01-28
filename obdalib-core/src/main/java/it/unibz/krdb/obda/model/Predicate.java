@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public interface Predicate {
 
-	public static enum COL_TYPE {
+	enum COL_TYPE {
 		
 		UNSUPPORTED (-1), // created only in SesameRDFIterator, ignored by SI and exceptions in all other cases
 		NULL (0),
@@ -92,14 +92,14 @@ public interface Predicate {
 	 * 
 	 * @return the resource identifier (URI).
 	 */
-	public String getName();
+    String getName();
 
 	/**
 	 * Get the number of elements of the predicate.
 	 * 
 	 * @return an integer number.
 	 */
-	public int getArity();
+    int getArity();
 
 	/***
 	 * Returns the typing of the component given by component. Types can be
@@ -107,7 +107,7 @@ public interface Predicate {
 	 * 
 	 * @param column
 	 */
-	public COL_TYPE getType(int column);
+    COL_TYPE getType(int column);
 
 
 	boolean isClass();

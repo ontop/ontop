@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
@@ -44,15 +43,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.utils.MappingParser;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DBMetadataExtractor;
-import it.unibz.krdb.sql.ForeignKeyConstraint;
-import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-import it.unibz.krdb.sql.RelationID;
-import it.unibz.krdb.sql.DatabaseRelationDefinition;
-import it.unibz.krdb.sql.UniqueConstraint;
+import it.unibz.krdb.sql.*;
 import net.sf.jsqlparser.JSQLParserException;
-
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
@@ -98,10 +90,7 @@ public class Quest implements Serializable {
 	/* The active connection used to get metadata from the DBMS */
 	private transient Connection localConnection = null;
 
-	/* The active query evaluation engine */
-	protected EvaluationEngine evaluationEngine = null;
-
-	/* The merge and translation of all loaded ontologies */
+    /* The merge and translation of all loaded ontologies */
 	private final Ontology inputOntology;
 
 	/* The input OBDA model */
@@ -287,13 +276,6 @@ public class Quest implements Serializable {
 
 
 	public void dispose() {
-		try {
-			if (evaluationEngine != null)
-				this.evaluationEngine.dispose();
-		} catch (Exception e) {
-			log.debug("Error during disconnect: " + e.getMessage());
-		}
-
 		try {
 			if (localConnection != null && !localConnection.isClosed())
 				disconnect();

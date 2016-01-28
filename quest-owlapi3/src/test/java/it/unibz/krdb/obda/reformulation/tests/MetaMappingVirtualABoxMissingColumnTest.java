@@ -26,11 +26,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,11 +34,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +48,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -149,16 +142,13 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+       
 		String query1 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-        try (QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();

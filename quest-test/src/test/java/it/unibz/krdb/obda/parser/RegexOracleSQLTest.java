@@ -20,23 +20,13 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import static org.junit.Assert.*;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-
-import junit.framework.TestCase;
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +34,12 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+
+import static org.junit.Assert.assertEquals;
 
 /** 
  * Test to check if the sql parser supports regex correctly when written with oracle syntax. 
@@ -87,12 +80,9 @@ public class RegexOracleSQLTest {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

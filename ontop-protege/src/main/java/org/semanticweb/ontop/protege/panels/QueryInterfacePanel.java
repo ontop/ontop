@@ -23,11 +23,11 @@ package org.semanticweb.ontop.protege.panels;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.querymanager.QueryController;
+import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.action.OBDADataQueryAction;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -138,14 +138,13 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
 
-     // TODO Enable this after fixing the code in QuestStatement
-//        getSPARQLExpansion.setText("Get expansion this UCQ...");
-//        getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-//            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                getSPARQLExpansionActionPerformed(evt);
-//            }
-//        });
-//        sparqlPopupMenu.add(getSPARQLExpansion);
+        getSPARQLExpansion.setText("Get expansion this UCQ...");
+        getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                getSPARQLExpansionActionPerformed(evt);
+            }
+        });
+        sparqlPopupMenu.add(getSPARQLExpansion);
 
         getSPARQLSQLExpansion.setText("Get SQL translation...");
         getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
@@ -179,20 +178,19 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowAll.setText("All");
         chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        chkShowAll.setPreferredSize(new java.awt.Dimension(55, 23));
+        chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
         chkShowAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowAllActionPerformed(evt);
             }
         });
         pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
-        chkShowAll.doClick();
 
         chkShowShortURI.setText("Short IRI");
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        chkShowShortURI.setMaximumSize(new java.awt.Dimension(95, 23));
-        chkShowShortURI.setMinimumSize(new java.awt.Dimension(95, 23));
-        chkShowShortURI.setPreferredSize(new java.awt.Dimension(95, 23));
+        chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
+        chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
+        chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -267,7 +265,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         pnlQueryEditor.setLayout(new java.awt.BorderLayout());
 
-        jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11));
+        jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
         jLabelHeader.setForeground(new java.awt.Color(153, 153, 153));
         jLabelHeader.setText("  Query Editor");
         jLabelHeader.setMaximumSize(new java.awt.Dimension(68, 18));
@@ -275,7 +273,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         jLabelHeader.setPreferredSize(new java.awt.Dimension(68, 18));
         pnlQueryEditor.add(jLabelHeader, java.awt.BorderLayout.NORTH);
 
-        queryTextPane.setFont(new java.awt.Font("Lucida Grande", 0, 14));
+        queryTextPane.setFont(new java.awt.Font("Lucida Console", 0, 14)); // NOI18N
         queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
         jScrollQueryPane.setViewportView(queryTextPane);
 

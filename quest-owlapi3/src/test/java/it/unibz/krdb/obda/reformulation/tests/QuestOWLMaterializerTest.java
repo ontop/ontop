@@ -27,10 +27,14 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import junit.framework.Assert;
+import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,15 +46,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QuestOWLMaterializerTest extends TestCase {
 
@@ -150,7 +145,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			man.load(f);
 			
 			// read onto 
-			Ontology onto =  OWLAPI3TranslatorUtility.loadOntologyFromFile("src/test/resources/test/materializer/MaterializeTest.owl");
+			Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/materializer/MaterializeTest.owl");
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());

@@ -22,12 +22,10 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
 import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +42,7 @@ public class S_NewGraphTest  extends TestCase{
 
 		// Loading the OWL file
 		log.info("Translating");
-		Ontology o = OWLAPI3TranslatorUtility.loadOntologyFromFile(roleowlfile);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(roleowlfile);
 
 		log.info("Generating graph");
 		TBoxReasonerImpl r = (TBoxReasonerImpl)TBoxReasonerImpl.create(o);

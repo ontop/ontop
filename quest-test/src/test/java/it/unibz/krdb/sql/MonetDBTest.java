@@ -1,18 +1,19 @@
 package it.unibz.krdb.sql;
-        import it.unibz.krdb.obda.io.ModelIOManager;
-        import it.unibz.krdb.obda.model.OBDADataFactory;
-        import it.unibz.krdb.obda.model.OBDAModel;
-        import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-        import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-        import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-        import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-        import org.junit.Test;
-        import org.semanticweb.owlapi.apibinding.OWLManager;
-        import org.semanticweb.owlapi.model.OWLObject;
-        import org.semanticweb.owlapi.model.OWLOntology;
-        import org.semanticweb.owlapi.model.OWLOntologyManager;
-        import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-        import java.io.File;
+
+import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import java.io.File;
 
 public class MonetDBTest {
 
@@ -49,10 +50,8 @@ public class MonetDBTest {
             * Create the instance of Quest OWL reasoner. 
             */
             QuestOWLFactory factory = new QuestOWLFactory();
-            factory.setOBDAController(obdaModel);
-            factory.setPreferenceHolder(preference);
-
-            QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+            QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
+            QuestOWL reasoner = factory.createReasoner(ontology, config);
 
             /* 
             * Prepare the data connection for querying. 

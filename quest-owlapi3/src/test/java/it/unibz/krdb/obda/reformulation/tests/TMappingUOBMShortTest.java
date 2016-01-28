@@ -7,7 +7,12 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,12 +22,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class TMappingUOBMShortTest {
 
@@ -53,11 +52,8 @@ public class TMappingUOBMShortTest {
 		pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(pref);
-				
-		QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
-		
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWL reasoner = factory.createReasoner(owlOnto, config);		
 	}
 	
 	private static void execute(Connection conn, String filename) throws IOException, SQLException {		

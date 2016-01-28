@@ -76,15 +76,15 @@ public class AdventureWorksDatetimeTest {
 		ioManager.load(obdaFile);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
-		factory.setPreferenceHolder(p);
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+		QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 	    // Now we are ready for querying
 		conn = reasoner.getConnection();
 

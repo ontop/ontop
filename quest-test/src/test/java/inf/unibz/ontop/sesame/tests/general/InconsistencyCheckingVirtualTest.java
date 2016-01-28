@@ -1,42 +1,24 @@
 package inf.unibz.ontop.sesame.tests.general;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataPropertyAssertion;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointClasses;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointDataProperties;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointObjectProperties;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalDataProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalObjectProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Literal;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.NamedIndividual;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-
-import java.io.File;
-
-import junit.framework.TestCase;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
+
+import java.io.File;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class InconsistencyCheckingVirtualTest {
 
@@ -89,14 +71,16 @@ public class InconsistencyCheckingVirtualTest {
 	}
 	
 	private void startReasoner(){
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setPreferenceHolder(p);
+		
 		obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 		ModelIOManager mng = new ModelIOManager(obdaModel);
 		try {
 			mng.load(new File(obdafile));
-			questOWLFactory.setOBDAController(obdaModel);
-			reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
+	        // Creating a new instance of the reasoner
+	        QuestOWLFactory factory = new QuestOWLFactory();
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+	        reasoner = factory.createReasoner(ontology, config);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

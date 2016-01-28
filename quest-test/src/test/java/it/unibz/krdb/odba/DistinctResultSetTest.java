@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +20,6 @@ import org.openrdf.repository.RepositoryConnection;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sesameWrapper.SesameVirtualRepo;
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestDistinctResultset}
+ * Use the class {@link QuestDistinctTupleResultSet}
  */
 
 public class DistinctResultSetTest { //
@@ -68,12 +68,8 @@ public class DistinctResultSetTest { //
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();

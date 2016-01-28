@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public class OBDAException extends Exception {
+public class OBDAException extends RuntimeException {
 
 	private static final long serialVersionUID = -378610789773679125L;
 

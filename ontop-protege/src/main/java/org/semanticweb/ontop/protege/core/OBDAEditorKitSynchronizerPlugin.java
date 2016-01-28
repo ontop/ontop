@@ -24,16 +24,15 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -50,8 +49,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OBDAModelManager instance = null;
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
-	ProtegeOBDAPreferences obdaPref = null;
-	ProtegeReformulationPlatformPreferences refplatPref = null;
+	DisposableOBDAPreferences obdaPref = null;
+	DisposableQuestPreferences refplatPref = null;
 	
 	@Override
 	protected void setup(EditorKit editorKit) {
@@ -80,13 +79,13 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		/***
 		 * Preferences for the OBDA plugin (gui, etc)
 		 */
-		obdaPref = new ProtegeOBDAPreferences();
+		obdaPref = new DisposableOBDAPreferences();
 		getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
 
 		/***
 		 * Preferences for Quest
 		 */
-		refplatPref = new ProtegeReformulationPlatformPreferences();
+		refplatPref = new DisposableQuestPreferences();
 		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
 		loadPreferences();
 	}

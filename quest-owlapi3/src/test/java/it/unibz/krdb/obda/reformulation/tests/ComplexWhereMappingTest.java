@@ -27,13 +27,15 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +47,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /***
  * Test use of REPLACE in where clause
  */
-public class ComplexWhereMappingTest extends TestCase {
+public class ComplexWhereMappingTest {
 
 
 	private OBDADataFactory fac;
@@ -63,10 +67,10 @@ public class ComplexWhereMappingTest extends TestCase {
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexwheremapping.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		
-		
+
+
 		/*
 		 * Initializing and H2 database
 		 */
@@ -98,18 +102,18 @@ public class ComplexWhereMappingTest extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		
+
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-		
+
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
-	
+
 			dropTables();
 			conn.close();
-		
+
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -130,15 +134,10 @@ public class ComplexWhereMappingTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestOWLConfiguration config) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -147,7 +146,7 @@ public class ComplexWhereMappingTest extends TestCase {
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
-				QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");
@@ -155,39 +154,37 @@ public class ComplexWhereMappingTest extends TestCase {
 			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind2.toString());
 			assertEquals("\"value1\"", val.toString());
-			
+
 
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
 			conn.close();
 			reasoner.dispose();
 		}
 	}
 
+    @Test
 	public void testViEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
 
-		runTests(p);
+		runTests(config);
 	}
-	
-	public void testClassicEqSig() throws Exception {
+
+    @Test(expected = ReasonerInternalException.class)
+    public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).build();
 
-		runTests(p);
+		runTests(config);
 	}
 
 }

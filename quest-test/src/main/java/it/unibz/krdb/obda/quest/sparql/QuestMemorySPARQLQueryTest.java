@@ -21,17 +21,16 @@ package it.unibz.krdb.obda.quest.sparql;
  */
 
 import junit.framework.Test;
-
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.Repository;
-
 import sesameWrapper.SesameClassicInMemoryRepo;
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 
 	public static Test suite() throws Exception {
 		return QuestManifestTestUtils.suite(new Factory() {
-			public QuestMemorySPARQLQueryTest createSPARQLQueryTest(
+			@Override
+            public QuestMemorySPARQLQueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality) {
@@ -39,7 +38,8 @@ public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 						resultFileURL, dataSet, laxCardinality, false);
 			}
 
-			public QuestMemorySPARQLQueryTest createSPARQLQueryTest(
+			@Override
+            public QuestMemorySPARQLQueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {

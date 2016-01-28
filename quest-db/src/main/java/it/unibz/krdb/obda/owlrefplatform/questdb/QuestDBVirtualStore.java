@@ -31,7 +31,7 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -56,7 +55,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
 
 /***
  * A bean that holds all the data about a store, generates a store folder and
@@ -165,7 +163,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			//read owl file
 			OWLOntology owlontology = getOntologyFromFile(tboxFile);
 			//get transformation from owlontology into ontology
-			 tbox = OWLAPI3TranslatorUtility.translateImportsClosure(owlontology);
+			 tbox = OWLAPITranslatorUtility.translateImportsClosure(owlontology);
 
 		} else { 
 			// create empty ontology
@@ -197,7 +195,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		super(name);
 		
 		//obtain ontology
-		Ontology ontology = OWLAPI3TranslatorUtility.translateImportsClosure(tbox);
+		Ontology ontology = OWLAPITranslatorUtility.translateImportsClosure(tbox);
 		//obtain datasource
 		OBDADataSource source = getDataSourceFromConfig(config);
 		//obtain obdaModel

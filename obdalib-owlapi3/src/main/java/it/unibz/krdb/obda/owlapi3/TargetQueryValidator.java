@@ -30,8 +30,8 @@ import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 // TODO: move to a more appropriate package
 
@@ -44,8 +44,9 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	private final OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 	/** List of invalid predicates */
-	private Vector<String> invalidPredicates = new Vector<String>();
+	private List<String> invalidPredicates = new ArrayList<>();
 
+    @SuppressWarnings("unused")
     Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public TargetQueryValidator(ImmutableOntologyVocabulary voc) {
@@ -64,7 +65,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			boolean isClass = isClass(p);
 			boolean isObjectProp = isObjectProperty(p);
 			boolean isDataProp = isDataProperty(p);
-			boolean isAnnotProp = isAnnotProperty(p);
+			boolean isAnnotProp = isAnnotationProperty(p);
 			boolean isTriple = isTriple(p);
 
 
@@ -72,7 +73,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			// of these components (i.e., class, object property, data property).
 			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple;
 
-			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
+			String debugMsg = "The predicate: [" + p.getName() + "]";
 			if (isPredicateValid) {
 				Predicate predicate;
 				if (isClass) {
@@ -94,7 +95,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 				atom.setPredicate(predicate); // TODO Fix the API!
 //                log.debug(debugMsg);
 			} else {
-				invalidPredicates.add(p.getName().toString());
+				invalidPredicates.add(p.getName());
 			}
 		}
 		boolean isValid = true;
@@ -105,7 +106,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 
 	@Override
-	public Vector<String> getInvalidPredicates() {
+	public List<String> getInvalidPredicates() {
 		return invalidPredicates;
 	}
 
@@ -125,7 +126,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 
 	@Override
-	public boolean isAnnotProperty(Predicate predicate) {
+	public boolean isAnnotationProperty(Predicate predicate) {
 		return voc.containsAnnotationProperty(predicate.getName());
 	}
 	

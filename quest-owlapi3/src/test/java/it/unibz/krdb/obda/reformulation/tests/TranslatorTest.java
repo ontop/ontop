@@ -20,31 +20,14 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.BinaryAxiom;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.ontology.*;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
+import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class TranslatorTest extends TestCase {
 
@@ -62,7 +45,7 @@ public class TranslatorTest extends TestCase {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -87,7 +70,7 @@ public class TranslatorTest extends TestCase {
 		
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -110,7 +93,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
 		Iterator<BinaryAxiom<ObjectPropertyExpression>> assit = ass.iterator();
@@ -147,7 +130,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();

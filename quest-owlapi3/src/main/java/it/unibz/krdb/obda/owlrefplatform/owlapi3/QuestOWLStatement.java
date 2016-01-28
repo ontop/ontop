@@ -27,8 +27,8 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIIndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
@@ -143,7 +143,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPI3ABoxIterator(set, st.questInstance.getVocabulary());
+			aBoxIter = new OWLAPIABoxIterator(set, st.questInstance.getVocabulary());
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} 
 		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
@@ -188,24 +188,12 @@ public class QuestOWLStatement implements AutoCloseable {
 
 				return processor.getInsertCount();
 
-			} catch (RuntimeException e) {
+			} catch (RuntimeException | InterruptedException e) {
 				// System.out.println("exception, rolling back!");
 
 				if (autoCommit) {
 					conn.rollBack();
 				}
-				throw e;
-			} catch (OBDAException e) {
-
-				if (autoCommit) {
-					conn.rollBack();
-				}
-				throw e;
-			} catch (InterruptedException e) {
-				if (autoCommit) {
-					conn.rollBack();
-				}
-
 				throw e;
 			} finally {
 				conn.setAutoCommit(autoCommit);
@@ -374,7 +362,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {
 		
-		OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+		OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 		
 		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
 		if (resultSet != null) {

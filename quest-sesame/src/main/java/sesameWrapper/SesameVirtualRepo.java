@@ -27,16 +27,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
+import org.openrdf.model.Model;
+import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-
-import org.openrdf.model.Model;
-import org.openrdf.repository.RepositoryException;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
@@ -131,7 +130,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints){
 		if(userConstraints == null)
 			throw new NullPointerException();
-		if(this.isinitialized)
+		if(this.initialized)
 			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		this.virtualStore.setImplicitDBConstraints(userConstraints);
 	}
@@ -190,7 +189,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 */
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
-		if(!super.isinitialized)
+		if(!super.initialized)
 			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		
 		questDBConn = this.virtualStore.getConnection();

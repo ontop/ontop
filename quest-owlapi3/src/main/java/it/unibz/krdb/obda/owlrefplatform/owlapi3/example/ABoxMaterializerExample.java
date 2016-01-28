@@ -25,14 +25,13 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 /**
  * A very simple example that shows how to generate triples in an N-Triple file,
@@ -65,7 +64,7 @@ public class ABoxMaterializerExample {
 		 */
 
 		// TODO: try the streaming mode.
-		try (OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false)) {
+		try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, false)) {
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);

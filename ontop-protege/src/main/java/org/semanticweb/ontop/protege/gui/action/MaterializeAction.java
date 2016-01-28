@@ -20,20 +20,18 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-
-import java.awt.Container;
-import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
 
 public class MaterializeAction implements OBDAProgressListener {
 
@@ -43,13 +41,13 @@ public class MaterializeAction implements OBDAProgressListener {
 	
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
-	private OWLAPI3Materializer materializer = null;
+	private OWLAPIMaterializer materializer = null;
 	private Iterator<OWLIndividualAxiom> iterator = null;
 	private Container cont = null;
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
-	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer materialize, Container cont) {
+	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPIMaterializer materialize, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
 		this.materializer = materialize;

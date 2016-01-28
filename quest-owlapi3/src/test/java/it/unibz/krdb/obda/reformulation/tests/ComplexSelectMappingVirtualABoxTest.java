@@ -36,7 +36,6 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -141,15 +139,12 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	}
 
 //   test for self join count the number of occurrences
-	private String runTests(Properties p) throws Exception {
+	private String runTests(QuestPreferences p) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();

@@ -22,12 +22,18 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParseException;
+import org.openrdf.rio.turtle.TurtleParser;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -35,13 +41,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.turtle.TurtleParser;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
  * An utility to setup and maintain a semantic index repository independently
@@ -108,7 +107,7 @@ public class SemanticIndexManager {
 
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology), voc);
+		OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology), voc);
 		int result = dataRepository.insertData(conn, aBoxIter, commitInterval, batchSize);
 
 		log.info("Loaded {} items into the DB.", result);

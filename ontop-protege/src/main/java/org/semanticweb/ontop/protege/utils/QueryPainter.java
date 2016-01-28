@@ -173,7 +173,7 @@ public class QueryPainter {
 			throw parsingException;
 		}
 		if (!validator.validate(query)) {
-			Vector<String> invalidPredicates = validator.getInvalidPredicates();
+			List<String> invalidPredicates = validator.getInvalidPredicates();
 			String invalidList = "";
 			for (String predicate : invalidPredicates) {
 				invalidList += "- " + predicate + "\n";
@@ -326,7 +326,7 @@ public class QueryPainter {
 	}
 
 	private void setupFont() {
-		plainFont = new Font("Dialog", Font.PLAIN, 14);
+		plainFont = new Font("Lucida Grande", Font.PLAIN, 14);
 		parent.setFont(plainFont);
 	}
 
@@ -390,7 +390,7 @@ public class QueryPainter {
 			} else if (validator.isDataProperty(predicate)) {
 				ColorTask task = new ColorTask(predicateName, dataProp);
 				tasks.add(task);
-			} else if (validator.isAnnotProperty(predicate)) {
+			} else if (validator.isAnnotationProperty(predicate)) {
 				ColorTask task = new ColorTask(predicateName, annotProp);
 				tasks.add(task);
 			}
