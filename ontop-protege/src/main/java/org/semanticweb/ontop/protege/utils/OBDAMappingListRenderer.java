@@ -182,7 +182,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 
 	private void setupFont() {
 		plainFont = new Font("Lucida Grande", Font.PLAIN, 14);
-		plainFontHeight = 15;
+		plainFontHeight = trgQueryTextPane.getFontMetrics(plainFont).getHeight();
 
 		int[] widths = trgQueryTextPane.getFontMetrics(plainFont).getWidths();
 		int sum = 0;
@@ -219,7 +219,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		Insets rcInsets = renderingComponent.getInsets();
 
 		if (preferredWidth != -1) {
-			textWidth = preferredWidth  - rcInsets.left - rcInsets.right - 6;
+			textWidth = preferredWidth  - rcInsets.left - rcInsets.right - 10;
 
 			int maxChars = (textWidth / (plainFontWidth)) - 10;
 
