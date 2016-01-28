@@ -494,10 +494,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// GEN-LAST:event_cmdSaveActionPerformed
 
 	private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
-		
-		OBDADataSource ds = selectedDataSource;
-		if (ds == null) {
-			JOptionPane.showMessageDialog(this, "Create a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
+
+		if (selectedDataSource == null) {
+			JOptionPane.showMessageDialog(this, "Save a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
 
