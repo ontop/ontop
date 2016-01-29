@@ -25,10 +25,12 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.event.EventType;
+import org.protege.editor.core.ProtegeManager;
+import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.utils.CustomTraversalPolicy;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
@@ -46,105 +48,103 @@ import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-	private static final long serialVersionUID = 3506358479342412849L;
-    private final OWLModelManager owlModelManager;
+    private static final long serialVersionUID = 3506358479342412849L;
+    private final OWLEditorKit owlEditorKit;
 
-    private OBDADataSource selectedDataSource;
+    private OBDADataSource currentDataSource;
 
-	private OBDAModel obdaModel;
+    private OBDAModel obdaModel;
 
-	private ComboBoxItemListener comboListener;
+    private ComboBoxItemListener comboListener;
 
-	private Timer timer = null;
+    private Timer timer = null;
 
-	/**
-	 * Creates new form DatasourceParameterEditorPanel
-	 */
-	public DatasourceParameterEditorPanel(OBDAModel model, OWLModelManager owlModelManager) {
+    /**
+     * Creates new form DatasourceParameterEditorPanel
+     */
+    public DatasourceParameterEditorPanel(OWLEditorKit owlEditorKit) {
 
-        this.owlModelManager = owlModelManager;
+        this.owlEditorKit = owlEditorKit;
+        OBDAModelManager obdaModelManager = (OBDAModelManager) owlEditorKit.get(OBDAModelImpl.class.getName());
+        OBDAModel model = obdaModelManager.getActiveOBDAModel();
 
-		timer = new Timer(200, e -> handleTimer());
-		
-		initComponents();
+        timer = new Timer(200, e -> handleTimer());
 
-		this.comboListener = new ComboBoxItemListener();
-		txtJdbcDriver.addItemListener(comboListener);
+        initComponents();
 
-		setNewDatasource(model);
-//		enableFields(false);
+        this.comboListener = new ComboBoxItemListener();
+        txtJdbcDriver.addItemListener(comboListener);
 
-		List<Component> order = new ArrayList<>(7);
-                order.add(pnlDataSourceParameters);
-		order.add(txtDatabase);
-		order.add(txtJdbcUrl);
-		order.add(txtDatabaseUsername);
-		order.add(txtDatabasePassword);
-		order.add(txtJdbcDriver);
-		order.add(cmdTestConnection);
-		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
+        setNewDatasource(model);
 
-
+        List<Component> order = new ArrayList<>(7);
+        order.add(pnlDataSourceParameters);
+        order.add(txtDatabase);
+        order.add(txtJdbcUrl);
+        order.add(txtDatabaseUsername);
+        order.add(txtDatabasePassword);
+        order.add(txtJdbcDriver);
+        order.add(cmdTestConnection);
+        this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
     }
 
-	private void handleTimer() {
-		timer.stop();
-		updateSourceValues();
-	}
+    private void handleTimer() {
+        timer.stop();
+        updateSourceValues();
+    }
 
 
-	private class ComboBoxItemListener implements ItemListener {
+    private class ComboBoxItemListener implements ItemListener {
 
-		private boolean notify = false;
+        private boolean notify = false;
 
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-			if (notify) {
-				fieldChangeHandler(null);
-			}
-		}
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (notify) {
+                fieldChangeHandler(null);
+            }
+        }
 
-		public void setNotify(boolean notify) {
-			this.notify = notify;
-		}
-	}
+        public void setNotify(boolean notify) {
+            this.notify = notify;
+        }
+    }
 
-	public void setNewDatasource(OBDAModel model) {
-		obdaModel = model;	
-		resetTextFields();
+    public void setNewDatasource(OBDAModel model) {
+        obdaModel = model;
+        resetTextFields();
         /**
          * Selects the first data source if it exists
          */
         if (obdaModel.getSources().size() > 0) {
 
-            datasourceChanged(selectedDataSource, obdaModel.getSources().get(0));
+            datasourceChanged(currentDataSource, obdaModel.getSources().get(0));
         }
-	}
+    }
 
 
-	private void resetTextFields() {
+    private void resetTextFields() {
         txtDatabase.setText("");
-		txtJdbcUrl.setText("");
-		txtDatabasePassword.setText("");
-		txtDatabaseUsername.setText("");
-		comboListener.setNotify(false);
-		txtJdbcDriver.setSelectedIndex(0);
-		comboListener.setNotify(true);
-	}
+        txtJdbcUrl.setText("");
+        txtDatabasePassword.setText("");
+        txtDatabaseUsername.setText("");
+        comboListener.setNotify(false);
+        txtJdbcDriver.setSelectedIndex(0);
+        comboListener.setNotify(true);
+    }
 
-	private void enableFields(boolean value) {            
-		txtJdbcUrl.setEnabled(value);
-		txtDatabasePassword.setEnabled(value);
-		txtDatabaseUsername.setEnabled(value);
-		txtJdbcDriver.setEnabled(value);
-	}
+    private void enableFields(boolean value) {
+        txtJdbcUrl.setEnabled(value);
+        txtDatabasePassword.setEnabled(value);
+        txtDatabaseUsername.setEnabled(value);
+        txtJdbcDriver.setEnabled(value);
+    }
 
-	/**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
-	// <editor-fold defaultstate="collapsed"
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
@@ -154,7 +154,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         txtJdbcUrl = new javax.swing.JTextField();
         txtDatabaseUsername = new javax.swing.JTextField();
         txtDatabasePassword = new javax.swing.JPasswordField();
-        txtJdbcDriver = new javax.swing.JComboBox();
+        txtJdbcDriver = new javax.swing.JComboBox<>();
         cmdTestConnection = new javax.swing.JButton();
         lblDataSourceName = new javax.swing.JLabel();
         lblJdbcUrl = new javax.swing.JLabel();
@@ -254,7 +254,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         txtJdbcDriver.setEditable(true);
         txtJdbcDriver.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
+        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
         txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.addActionListener(new java.awt.event.ActionListener() {
@@ -452,66 +452,78 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         add(pnlInformation, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-	private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
-		DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
-	}// GEN-LAST:event_cmdHelpActionPerformed
+    private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
+        DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
+    }// GEN-LAST:event_cmdHelpActionPerformed
 
-	private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed
-		fieldChangeHandler(null);
-	}// GEN-LAST:event_txtJdbcDriverActionPerformed
+    private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed
+        fieldChangeHandler(null);
+    }// GEN-LAST:event_txtJdbcDriverActionPerformed
 
-	private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
+    private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
+        if (!createNewDatasource())
+            return;
+        // save the obdaModel to an .obda file disk
+        try {
+            ProtegeManager.getInstance().saveEditorKit(owlEditorKit);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Exception occurred while saving the mapping", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+
+    }// GEN-LAST:event_cmdSaveActionPerformed
+
+    private boolean createNewDatasource() {
         String name = txtDatabase.getText();
         URI uri;
 
-        if(Strings.isNullOrEmpty(name)){
+        if (Strings.isNullOrEmpty(name)) {
             JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
-            return;
+            return false;
         }
 
         try {
             uri = URI.create(name);
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
-            return;
+            return false;
         }
 
         //create new datasource
-        OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
         String username = txtDatabaseUsername.getText();
-        source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());
-        source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-        String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
-        source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
         String url = txtJdbcUrl.getText();
-        source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 
-        datasourceChanged(selectedDataSource, source);
-        // save the obdaModel to an .obda file disk
-        this.owlModelManager.fireEvent(EventType.ONTOLOGY_SAVED);
-        JOptionPane.showMessageDialog(this, "The specified data source has been saved. ", "Saved", JOptionPane.INFORMATION_MESSAGE);
-    }// GEN-LAST:event_cmdSaveActionPerformed
+        datasourceChanged(currentDataSource, newDatasource);
+        return true;
+    }
 
-	private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
+    private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
 
-		if (selectedDataSource == null) {
-			JOptionPane.showMessageDialog(this, "Save a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+        if (currentDataSource == null) {
+            if (!createNewDatasource()) {
+                return;
+            }
+        }
 
-		lblConnectionStatus.setText("Establishing connection...");
-		lblConnectionStatus.setForeground(Color.BLACK);
+        lblConnectionStatus.setText("Establishing connection...");
+        lblConnectionStatus.setForeground(Color.BLACK);
 
         Runnable run = () -> {
             JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
             try {
                 try {
-                    connm.closeConnection(selectedDataSource);
+                    connm.closeConnection(currentDataSource);
                 } catch (Exception e) {
                     // NO-OP
                 }
-                Connection conn = connm.getConnection(selectedDataSource);
+                Connection conn = connm.getConnection(currentDataSource);
                 if (conn == null)
                     throw new SQLException("Error connecting to the database");
                 lblConnectionStatus.setForeground(Color.GREEN.darker());
@@ -530,52 +542,51 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         };
         SwingUtilities.invokeLater(run);
-		
-	}// GEN-LAST:event_cmdTestConnectionActionPerformed
 
-	private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
-		timer.restart();
-	}// GEN-LAST:event_fieldChangeHandler
+    }// GEN-LAST:event_cmdTestConnectionActionPerformed
 
-	private void updateSourceValues() {
-		if (selectedDataSource == null) {
-//			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+    private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
+        timer.restart();
+    }// GEN-LAST:event_fieldChangeHandler
 
-		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-		try {
-			man.closeConnection(selectedDataSource);
-		} catch (OBDAException | SQLException e) {
-			// do nothing
-		}
+    private void updateSourceValues() {
+        if (currentDataSource == null) {
+            return;
+        }
+
+        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+        try {
+            man.closeConnection(currentDataSource);
+        } catch (OBDAException | SQLException e) {
+            // do nothing
+        }
 
         String username = txtDatabaseUsername.getText();
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		String password = new String(txtDatabasePassword.getPassword());
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		String url = txtJdbcUrl.getText();
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+        String password = new String(txtDatabasePassword.getPassword());
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+        String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+        String url = txtJdbcUrl.getText();
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 
-		if (url.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the URL ends with a white space, this can give rise to connection problems");
-		} else if (driver.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the Driver class ends with a white space, this can give rise to connection problems");
-		} else if (password.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
-		} else if (username.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
-		} else {
-			lblConnectionStatus.setText("");
-		}
-		obdaModel.fireSourceParametersUpdated();
-	}
+        if (url.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the URL ends with a white space, this can give rise to connection problems");
+        } else if (driver.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the Driver class ends with a white space, this can give rise to connection problems");
+        } else if (password.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
+        } else if (username.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
+        } else {
+            lblConnectionStatus.setText("");
+        }
+        obdaModel.fireSourceParametersUpdated();
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdHelp;
@@ -597,11 +608,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JTextField txtJdbcUrl;
     // End of variables declaration//GEN-END:variables
 
-	private void currentDatasourceChange(OBDADataSource currentsource) {
+    private void currentDatasourceChange(OBDADataSource currentsource) {
 
-		comboListener.setNotify(false);
+        comboListener.setNotify(false);
         if (currentsource == null) {
-            selectedDataSource = null;
+            currentDataSource = null;
             txtDatabase.setText("");
             txtJdbcDriver.setSelectedIndex(0);
             txtDatabaseUsername.setText("");
@@ -610,7 +621,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             lblConnectionStatus.setText("");
 
         } else {
-            selectedDataSource = currentsource;
+            currentDataSource = currentsource;
             txtDatabase.setText(currentsource.getSourceID().toString());
             txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
             txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
@@ -620,15 +631,15 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         }
         comboListener.setNotify(true);
-	}
+    }
 
-	@Override
+    @Override
     public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
         if (oldSource != null) {
             obdaModel.removeSource(oldSource.getSourceID());
         }
         obdaModel.addSource(newSource);
-        selectedDataSource = newSource;
+        currentDataSource = newSource;
         enableFields(false);
         currentDatasourceChange(newSource);
         enableFields(true);
