@@ -422,7 +422,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         cmdHelp.setForeground(new java.awt.Color(53, 113, 163));
         cmdHelp.setIcon(IconLoader.getImageIcon("images/gtk-help.png"));
         cmdHelp.setText("<HTML><U>Help</U></HTML>");
-        cmdHelp.setToolTipText("For information on JDBC connections go to: https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibPluginJDBC");
+        cmdHelp.setToolTipText("For information on JDBC connections go to: https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC");
         cmdHelp.setBorderPainted(false);
         cmdHelp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

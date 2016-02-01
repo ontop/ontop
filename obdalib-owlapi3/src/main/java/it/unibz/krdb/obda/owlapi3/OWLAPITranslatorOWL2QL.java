@@ -92,7 +92,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			addSubClassAxioms(subDescription, ax.getSuperClass());
 		} 
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -124,7 +124,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			dl_onto.addSubClassOfAxiom(previous, first);
 		} 
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -152,7 +152,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			dl_onto.addDisjointClassesAxiom(disjointProperties);		
 		}
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -174,7 +174,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				dl_onto.addClassAssertion(a);
 		}
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}		
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -299,7 +299,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			addSubClassAxioms(ope.getDomain(), ax.getDomain());
 		} 
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -322,7 +322,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			addSubClassAxioms(ope.getRange(), ax.getRange());
 		} 
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -524,7 +524,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			addSubClassAxioms(role.getDomainRestriction(DatatypeImpl.rdfsLiteral), ax.getDomain());		
 		} 
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -560,7 +560,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			}		
 		} 
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -1046,7 +1046,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				dl_onto.addAnnotationAssertion(a);
 		}
 		catch (TranslationException e) {
-			log.warn(NOT_SUPPORTED_EXT, ax, e);
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
