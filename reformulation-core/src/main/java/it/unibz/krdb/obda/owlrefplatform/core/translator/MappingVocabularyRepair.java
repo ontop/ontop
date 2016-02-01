@@ -115,7 +115,7 @@ public class MappingVocabularyRepair {
                         newatom = fixUndeclaredPredicate(mapping, predTarget, arguments);
                     } else {
 
-                        newatom = dfac.getTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
+                        newatom = fixTripleAtom(mapping, arguments, predicate);
                     }
                 } else {
 
@@ -130,6 +130,25 @@ public class MappingVocabularyRepair {
         }
 //		log.debug("Repair done. Returning {} mappings", result.size());
         return result;
+    }
+
+    private static Function fixTripleAtom(OBDAMappingAxiom mapping, List<Term> arguments, Predicate predicate) {
+        Function newatom;
+        Term t0 = arguments.get(0);
+        if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+                newatom = dfac.getTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
+
+        } else {
+            String message = String.format("" +
+                    "Error with triple atom\n" +
+                    "   %s \n" +
+                    "The reason is: \n" +
+                    "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", mapping, t0);
+
+            throw new IllegalArgumentException(message);
+        }
+        return newatom;
     }
 
     private static Function fixOntologyPredicate(OBDAMappingAxiom mapping, Predicate predTarget, List<Term> arguments, Predicate predicate) {
@@ -152,12 +171,12 @@ public class MappingVocabularyRepair {
             Term t0 = arguments.get(0);
             if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-                //object property or or annotation property used as object property
-                if (predTarget.isObjectProperty()) {
+                //object property
+                if (predicate.isObjectProperty()) {
 
                     Term t1 = arguments.get(1);
                     if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
-                        newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+                        newatom = dfac.getFunction(predicate, arguments.get(0), arguments.get(1));
 
                     } else {
 
@@ -171,9 +190,44 @@ public class MappingVocabularyRepair {
                     }
 
                 } else {
+                    //data property
+                    if (predicate.isDataProperty()) {
 
-                    //data property or annotation property used as data property
-                    newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+
+                        newatom = dfac.getFunction(predicate, arguments.get(0), arguments.get(1));
+
+                    } else { //case of annotation property
+
+                        //we understood from the mappings that the annotation property can be treated as object property
+                        if (predTarget.isObjectProperty()) {
+
+                            Term t1 = arguments.get(1);
+                            if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
+                                newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+
+                            } else {
+
+                                String message = String.format("" +
+                                        "Error with property <%s> used in the mapping\n" +
+                                        "   %s \n" +
+                                        "The reason is: \n" +
+                                        "the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", predicate, mapping, t1);
+
+                                throw new IllegalArgumentException(message);
+                            }
+
+                            //we understood from the mappings that the annotation property can be treated as data property
+                        } else if (predTarget.isDataProperty()) {
+
+                            newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+
+                        } else { //annotation property not clear, is treated as a data property
+
+                            Predicate pred = dfac.getDataPropertyPredicate(predTarget.getName());
+                            newatom = dfac.getFunction(pred, arguments.get(0), arguments.get(1));
+
+                        }
+                    }
 
                 }
             } else {

@@ -31,8 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
@@ -156,7 +155,7 @@ public class MetaMappingVirtualABoxTest {
              QuestOWLResultSet rs1 = st.executeTuple(query1);
         ) {
             assertTrue(rs1.nextRow());
-			OWLIndividual ind = rs1.getOWLIndividual("x");
+			OWLObject ind = rs1.getOWLObject("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind.toString());
@@ -173,9 +172,9 @@ public class MetaMappingVirtualABoxTest {
              QuestOWLResultSet rs2 = st.executeTuple(query2);
         ) {
             assertTrue(rs2.nextRow());
-            OWLIndividual ind1 = rs2.getOWLIndividual("x");
+			OWLObject ind1 = rs2.getOWLObject("x");
             //OWLIndividual ind2 = rs.getOWLIndividual("y");
-            OWLLiteral val = rs2.getOWLLiteral("y");
+			OWLObject val = rs2.getOWLObject("y");
             assertEquals("<uri1>", ind1.toString());
             //assertEquals("<uri1>", ind2.toString());
             assertEquals("\"A\"", val.toString());
