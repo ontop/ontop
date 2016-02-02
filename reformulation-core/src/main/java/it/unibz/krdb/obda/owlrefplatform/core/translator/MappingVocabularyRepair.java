@@ -267,13 +267,13 @@ public class MappingVocabularyRepair {
 
                 if ((t1 instanceof Function)) {
 
-                    Function ft1 = (Function) t0;
-                    Function ft2 = (Function) t1;
+                    Function ft0 = (Function) t0;
+                    Function ft1 = (Function) t1;
 
+                    boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
                     boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
-                    boolean t2uri = (ft2.getFunctionSymbol() instanceof URITemplatePredicate);
 
-                    if (t1uri && t2uri) {
+                    if (t0uri && t1uri) {
                         Predicate pred = dfac.getObjectPropertyPredicate(undeclaredPredicate.getName());
                         fixedTarget = dfac.getFunction(pred, t0, t1);
                     } else {
@@ -308,16 +308,7 @@ public class MappingVocabularyRepair {
         return fixedTarget;
     }
 
-    /**
-     * Fixing wrapping each variable with a URI function if the
-     * position corresponds to an URI only position
-     */
-//    private static Term getNormalTerm(Term t) {
-//        if (!(t instanceof Function)) {
-//            return dfac.getUriTemplate(t);
-//        } else
-//            return t;
-//    }
+
 
     /***
      * Fix functions that represent URI templates. Currently,the only fix

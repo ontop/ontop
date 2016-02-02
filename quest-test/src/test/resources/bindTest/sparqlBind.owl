@@ -24,7 +24,7 @@
         <Class IRI="#Book"/>
     </Declaration>
     <Declaration>
-        <ObjectProperty IRI="http://purl.org/dc/elements/1.1/title"/>
+        <DataProperty IRI="http://purl.org/dc/elements/1.1/title"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="http://example.org/ns#discount"/>

@@ -319,7 +319,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/point npdv:mainAreaLocation npd:ncs/main
 source		SELECT wlbNpdidWellbore FROM wellbore_coordinates WHERE wlbMainArea='North sea'
 
 mappingId	Mapping:00075:Literal:prlArea:prlFactUrl
-target		npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:factPageURL {prlFactUrl} . 
+target		npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:factPageURL <{prlFactUrl}> . 
 source		SELECT prlArea_id,prlNpdidLicence,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo,prlFactUrl FROM prlArea
 
 mappingId	Mapping:00076:Literal:wellbore_core:dateSyncNPD
@@ -339,7 +339,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:dateWellboreCompletion {wlbCompleti
 source		SELECT wlbNpdidWellbore,wlbCompletionDate FROM wellbore_exploration_all WHERE wlbCompletionDate <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00080:Literal:wellbore_development_all:wlbFactMapUrl
-target		npd:wellbore/{wlbNpdidWellbore} npdv:factMapURL {wlbFactMapUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore} npdv:factMapURL <{wlbFactMapUrl}> . 
 source		SELECT wlbNpdidWellbore,wlbFactMapUrl FROM wellbore_development_all
 
 mappingId	Mapping:00081:Literal:wellbore_shallow_all:wlbNamePart2
@@ -431,7 +431,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:dateUpdated {wlbDateUpdated}^^xsd:d
 source		SELECT wlbNpdidWellbore,wlbDateUpdated FROM wellbore_exploration_all WHERE wlbDateUpdated <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00103:Literal:discovery:dscFactMapUrl
-target		npd:discovery/{dscNpdidDiscovery} npdv:factMapURL {dscFactMapUrl} . 
+target		npd:discovery/{dscNpdidDiscovery} npdv:factMapURL <{dscFactMapUrl}> . 
 source		SELECT dscNpdidDiscovery,dscFactMapUrl FROM discovery
 
 mappingId	Mapping:00104:Literal:wellbore_dst:wlbDstDateUpdated
@@ -439,7 +439,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/test/drillstem/{wlbDstTestNumber} npdv:d
 source		SELECT wlbNpdidWellbore,wlbDstTestNumber,wlbDstDateUpdated FROM wellbore_dst WHERE wlbDstDateUpdated <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00105:Literal:licence:prlFactMapUrl
-target		npd:licence/{prlNpdidLicence} npdv:factMapURL {prlFactMapUrl} . 
+target		npd:licence/{prlNpdidLicence} npdv:factMapURL <{prlFactMapUrl}> . 
 source		SELECT prlNpdidLicence,prlFactMapUrl FROM licence
 
 mappingId	Mapping:00106:Literal:wellbore_dst:dateSyncNPD
@@ -927,7 +927,7 @@ target		npd:mainarea/{apaAreaGross_id} npdv:mapNo {apaMap_no}^^xsd:integer .
 source		SELECT apaAreaGross_id,apaMap_no FROM apaAreaGross
 
 mappingId	Mapping:00227:Literal:discovery:dscFactPageUrl
-target		npd:discovery/{dscNpdidDiscovery} npdv:factPageURL {dscFactPageUrl} . 
+target		npd:discovery/{dscNpdidDiscovery} npdv:factPageURL <{dscFactPageUrl}> . 
 source		SELECT dscNpdidDiscovery,dscFactPageUrl FROM discovery
 
 mappingId	Mapping:00228:Literal:wellbore_mud:wlbMD
@@ -951,7 +951,7 @@ target		npd:field/{fldNpdidField} npdv:name {fldName} .
 source		SELECT fldNpdidField,fldName FROM field
 
 mappingId	Mapping:00233:Literal:wellbore_exploration_all:wlbFactPageUrl
-target		npd:wellbore/{wlbNpdidWellbore} npdv:factPageURL {wlbFactPageUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore} npdv:factPageURL <{wlbFactPageUrl}> . 
 source		SELECT wlbNpdidWellbore,wlbFactPageUrl FROM wellbore_exploration_all
 
 mappingId	Mapping:00234:Literal:wellbore_exploration_all:wlbDiskosWellboreParent
@@ -1063,7 +1063,7 @@ target		npd:field/{prfNpdidInformationCarrier}/production/{prfYear} npdv:produce
 source		SELECT prfNpdidInformationCarrier,prfYear,prfPrdGasNetBillSm3 FROM field_production_yearly
 
 mappingId	Mapping:00261:Literal:field:fldFactPageUrl
-target		npd:field/{fldNpdidField} npdv:factPageURL {fldFactPageUrl} . 
+target		npd:field/{fldNpdidField} npdv:factPageURL <{fldFactPageUrl}> . 
 source		SELECT fldNpdidField,fldFactPageUrl FROM field
 
 mappingId	Mapping:00262:Literal:licence_petreg_licence_oper:ptlOperDateUpdated
@@ -1075,7 +1075,7 @@ target		npd:survey/{seaSurveyName}/area npdv:sensorNumbers {seaSensorNumbers}^^r
 source		SELECT seaArea_id,seaSurveyName,seaSensorNumbers FROM seaArea
 
 mappingId	Mapping:00264:Literal:wellbore_development_all:wlbFactPageUrl
-target		npd:wellbore/{wlbNpdidWellbore} npdv:factPageURL {wlbFactPageUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore} npdv:factPageURL <{wlbFactPageUrl}> . 
 source		SELECT wlbNpdidWellbore,wlbFactPageUrl FROM wellbore_development_all
 
 mappingId	Mapping:00265:Literal:licence_petreg_licence:ptlDateValidTo
@@ -1103,7 +1103,7 @@ target		npd:baa/{baaNpdidBsnsArrArea}/licensee/{cmpNpdidCompany}/history/{baaLic
 source		SELECT baaNpdidBsnsArrArea,cmpNpdidCompany,baaLicenseeDateValidFrom,baaLicenseeDateValidTo,baaLicenseeDateUpdated FROM bsns_arr_area_licensee_hst WHERE baaLicenseeDateUpdated <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00271:Literal:facility_moveable:fclFactPageUrl
-target		npd:facility/{fclNpdidFacility} npdv:factPageURL {fclFactPageUrl} . 
+target		npd:facility/{fclNpdidFacility} npdv:factPageURL <{fclFactPageUrl}> . 
 source		SELECT fclNpdidFacility,fclFactPageUrl FROM facility_moveable
 
 mappingId	Mapping:00272:Literal:bsns_arr_area_licensee_hst:baaLicenseeDateValidTo
@@ -1227,7 +1227,7 @@ target		npd:facility/{fclNpdidFacility} npdv:dateProductionStart {fclStartupDate
 source		SELECT fclNpdidFacility,fclStartupDate FROM facility_fixed WHERE fclStartupDate <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00302:Literal:bsns_arr_area:baaFactMapUrl
-target		npd:baa/{baaNpdidBsnsArrArea} npdv:factMapURL {baaFactMapUrl} . 
+target		npd:baa/{baaNpdidBsnsArrArea} npdv:factMapURL <{baaFactMapUrl}> . 
 source		SELECT baaNpdidBsnsArrArea,baaFactMapUrl FROM bsns_arr_area
 
 mappingId	Mapping:00303:Literal:wellbore_coordinates:wlbEwSec
@@ -1499,7 +1499,7 @@ target		npd:petreg/facility/{tufNpdidTuf}/licencee/{cmpNpdidCompany} npdv:dateSy
 source		SELECT tufNpdidTuf,cmpNpdidCompany,dateSyncNPD FROM tuf_petreg_licence_licencee WHERE dateSyncNPD <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00370:Literal:wellbore_core_photo:wlbCorePhotoImgUrl
-target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}/photo/{wellbore_core_photo_id}/{wlbCorePhotoTitle} npdv:corePhotoURL {wlbCorePhotoImgUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}/photo/{wellbore_core_photo_id}/{wlbCorePhotoTitle} npdv:corePhotoURL <{wlbCorePhotoImgUrl}> . 
 source		SELECT wellbore_core_photo_id,wlbNpdidWellbore,wlbCoreNumber,wlbCorePhotoTitle,wlbCorePhotoImgUrl FROM wellbore_core_photo
 
 mappingId	Mapping:00371:Literal:wellbore_development_all:wlbNsCode
@@ -1731,7 +1731,7 @@ target		npd:licence/{prlNpdidLicence}/phase/{prlPhase}/history/{prlDatePhaseVali
 source		SELECT prlNpdidLicence,prlPhase,prlDatePhaseValidFrom,prlDatePhaseValidTo,prlDateInitialPeriodExpires FROM licence_phase_hst WHERE prlDateInitialPeriodExpires <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00428:Literal:field:fldFactMapUrl
-target		npd:field/{fldNpdidField} npdv:factMapURL {fldFactMapUrl} . 
+target		npd:field/{fldNpdidField} npdv:factMapURL <{fldFactMapUrl}> . 
 source		SELECT fldNpdidField,fldFactMapUrl FROM field
 
 mappingId	Mapping:00429:Literal:strat_litho_wellbore_core:lsuNpdidLithoStrat
@@ -1771,7 +1771,7 @@ target		npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDate
 source		SELECT prlArea_id,prlNpdidLicence,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo FROM prlArea WHERE prlAreaPolyDateValidTo <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00438:Literal:bsns_arr_area:baaFactPageUrl
-target		npd:baa/{baaNpdidBsnsArrArea} npdv:factPageURL {baaFactPageUrl} . 
+target		npd:baa/{baaNpdidBsnsArrArea} npdv:factPageURL <{baaFactPageUrl}> . 
 source		SELECT baaNpdidBsnsArrArea,baaFactPageUrl FROM bsns_arr_area
 
 mappingId	Mapping:00439:Literal:bsns_arr_area_transfer_hst:dateSyncNPD
@@ -1835,7 +1835,7 @@ target		npd:field/{fldNpdidField}/reserve npdv:dateSyncNPD {dateSyncNPD}^^xsd:da
 source		SELECT fldNpdidField,dateSyncNPD FROM field_reserves WHERE dateSyncNPD <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00454:Literal:wellbore_exploration_all:wlbFactMapUrl
-target		npd:wellbore/{wlbNpdidWellbore} npdv:factMapURL {wlbFactMapUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore} npdv:factMapURL <{wlbFactMapUrl}> . 
 source		SELECT wlbNpdidWellbore,wlbFactMapUrl FROM wellbore_exploration_all
 
 mappingId	Mapping:00455:Literal:strat_litho_wellbore:lsuNpdidLithoStrat
@@ -2463,7 +2463,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:wellboreContent {wlbContent}^^xsd:s
 source		SELECT wlbNpdidWellbore,wlbContent FROM wellbore_development_all
 
 mappingId	Mapping:00611:Literal:licence:prlFactPageUrl
-target		npd:licence/{prlNpdidLicence} npdv:factPageURL {prlFactPageUrl} . 
+target		npd:licence/{prlNpdidLicence} npdv:factPageURL <{prlFactPageUrl}> . 
 source		SELECT prlNpdidLicence,prlFactPageUrl FROM licence
 
 mappingId	Mapping:00612:Literal:wellbore_oil_sample:wlbOilSampleFluidType
@@ -2647,7 +2647,7 @@ target		npd:pipeline/{pipNpdidPipe} geos:asWKT {pipLineGeometryWKT} .
 source		SELECT pipNpdidPipe,pipLineGeometryWKT FROM pipLine
 
 mappingId	Mapping:00657:Literal:apaAreaNet:urlNPD
-target		npd:quadrant/{qdrName}/block/{blkName}/award/{prvName}/area/{apaAreaNet_id} npdv:npdPageURL {urlNPD} . 
+target		npd:quadrant/{qdrName}/block/{blkName}/award/{prvName}/area/{apaAreaNet_id} npdv:npdPageURL  <{urlNPD}> . 
 source		SELECT apaAreaNet_id,qdrName,blkName,prvName,blkId,urlNPD FROM apaAreaNet
 
 mappingId	Mapping:00658:Literal:discovery_reserves:dscRecoverableGas
@@ -2699,7 +2699,7 @@ target		npd:petreg/facility/{tufNpdidTuf}/message/{ptlMessageDocumentNo} npdv:da
 source		SELECT tufNpdidTuf,ptlMessageDocumentNo,dateSyncNPD FROM tuf_petreg_message WHERE dateSyncNPD <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00670:Literal:wellbore_exploration_all:wlbPressReleaseUrl
-target		npd:wellbore/{wlbNpdidWellbore} npdv:pressReleaseURL {wlbPressReleaseUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore} npdv:pressReleaseURL <{wlbPressReleaseUrl}> . 
 source		SELECT wlbNpdidWellbore,wlbPressReleaseUrl FROM wellbore_exploration_all
 
 mappingId	Mapping:00671:Literal:discovery:dscNpdidDiscovery
@@ -2799,7 +2799,7 @@ target		npd:licence/{prlNpdidLicence} npdv:idNPD {prlNpdidLicence}^^xsd:integer 
 source		SELECT prlNpdidLicence FROM licence
 
 mappingId	Mapping:00695:Literal:facility_fixed:fclFactPageUrl
-target		npd:facility/{fclNpdidFacility} npdv:factPageURL {fclFactPageUrl} . 
+target		npd:facility/{fclNpdidFacility} npdv:factPageURL <{fclFactPageUrl}> . 
 source		SELECT fclNpdidFacility,fclFactPageUrl FROM facility_fixed
 
 mappingId	Mapping:00696:Literal:wellbore_development_all:wlbEwSec
@@ -2835,7 +2835,7 @@ target		npd:licence/{prlNpdidLicence}/block/{prlAreaPolyBlockName}/polyno/{prlAr
 source		SELECT prlNpdidLicence,prlAreaPolyBlockName,prlAreaPolyPolyNo,prlAreaPolyDateValidFrom,prlAreaPolyDateValidTo FROM licence_area_poly_hst
 
 mappingId	Mapping:00704:Literal:wellbore_document:wlbDocumentUrl
-target		npd:wellbore/{wlbNpdidWellbore}/document/{wellbore_document_id}/{wlbDocumentName} npdv:documentURL {wlbDocumentUrl} . 
+target		npd:wellbore/{wlbNpdidWellbore}/document/{wellbore_document_id}/{wlbDocumentName} npdv:documentURL <{wlbDocumentUrl}> . 
 source		SELECT wellbore_document_id,wlbNpdidWellbore,wlbDocumentName,wlbDocumentUrl FROM wellbore_document
 
 mappingId	Mapping:00705:Literal:licence_phase_hst:prlDateValidTo
@@ -2851,7 +2851,7 @@ target		npd:facility/{fclNpdidFacility} npdv:codeNS {fclNsCode}^^xsd:string .
 source		SELECT fclNpdidFacility,fclNsCode FROM facility_fixed
 
 mappingId	Mapping:00708:Literal:facility_fixed:fclFactMapUrl
-target		npd:facility/{fclNpdidFacility} npdv:factMapURL {fclFactMapUrl} . 
+target		npd:facility/{fclNpdidFacility} npdv:factMapURL <{fclFactMapUrl}> . 
 source		SELECT fclNpdidFacility,fclFactMapUrl FROM facility_fixed
 
 mappingId	Mapping:00709:Literal:tuf_owner_hst:tufOwnerShare

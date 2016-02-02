@@ -152,29 +152,35 @@ public class R2RMLParser {
 		// SubjectMap.getTemplateString() throws NullPointerException when
 		// template == null
 		//
-		if (sMap.getTemplate() == null) {
+		Template template = sMap.getTemplate();
+		if (template == null) {
 			subj = null;
 		} else {
 			subj = sMap.getTemplateString();
 		}
 
 		if (subj != null) {
-			// craete uri("...",var)
-			subjectAtom = getTermTypeAtom((subj), termType, joinCond);
+			// create uri("...",var)
+			subjectAtom = getTermTypeAtom(subj, termType, joinCond);
 		}
 
 		// process column declaration
 		subj = sMap.getColumn();
 		if (subj != null) {
-			// craete uri("...",var)
-			subjectAtom = getTermTypeAtom((subj), termType, joinCond);
+			if(template == null){
+				subjectAtom = fac.getUriTemplate(fac.getVariable(subj));
+			}
+			else {
+				// create uri("...",var)
+				subjectAtom = getTermTypeAtom(subj, termType, joinCond);
+			}
 		}
 
 		// process constant declaration
 		subj = sMap.getConstant();
 		if (subj != null) {
-			// craete uri("...",var)
-			subjectAtom = getURIFunction((subj), joinCond);
+			// create uri("...",var)
+			subjectAtom = getURIFunction(subj, joinCond);
 		}
 
 		// process termType declaration
@@ -307,8 +313,8 @@ public class R2RMLParser {
 			}
 		}
 
-		// we check if the object map is a column (can be only literal)
-		// if it has a datatype or language property we check it later
+		// we check if the object map is a column
+		// if it has a datatype or language property or its a iri we check it later
 		String col = om.getColumn();
 		if (col != null) {
 			col = trim(col);
@@ -355,6 +361,12 @@ public class R2RMLParser {
 					// node and create the function object
 					objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
 				}
+			}
+		}
+		else{
+			//assign iri template
+			if(typ.equals(R2RMLVocabulary.iri)) {
+				objectAtom = fac.getUriTemplate(objectAtom);
 			}
 		}
 
