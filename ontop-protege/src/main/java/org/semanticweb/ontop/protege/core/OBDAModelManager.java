@@ -21,7 +21,6 @@ package org.semanticweb.ontop.protege.core;
  */
 
 import com.google.common.base.Optional;
-import com.google.common.io.Files;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
@@ -521,15 +520,19 @@ public class OBDAModelManager implements Disposable {
 			initializing = false; // flag off
 		}
 
-		private void handleOntologyLoadedAndReLoaded(OWLModelManager source, OWLOntology activeOntology) {
+		private void handleOntologyLoadedAndReLoaded(OWLModelManager owlModelManager, OWLOntology activeOntology) {
 			OBDAModel activeOBDAModel;
 			loadingData = true; // flag on
 			try {
                 // Get the active OBDA model
                 activeOBDAModel = getActiveOBDAModel();
 
-                String owlName = Files.getNameWithoutExtension(source.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology).toString());
-                String obdaDocumentIri = owlName + OBDA_EXT;
+				IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+				String owlDocumentIriString = documentIRI.toString();
+				int i = owlDocumentIriString.lastIndexOf(".");
+				String owlName = owlDocumentIriString.substring(0,i);
+
+				String obdaDocumentIri = owlName + OBDA_EXT;
                 String queryDocumentIri = owlName + QUERY_EXT;
                 String dbprefsDocumentIri = owlName + DBPREFS_EXT;
 
