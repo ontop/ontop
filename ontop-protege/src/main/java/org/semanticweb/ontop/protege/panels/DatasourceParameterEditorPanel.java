@@ -24,7 +24,6 @@ import com.google.common.base.Strings;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -118,7 +117,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
          */
         if (obdaModel.getSources().size() > 0) {
 
-            datasourceChanged(currentDataSource, obdaModel.getSources().get(0));
+            currentDatasourceChange(obdaModel.getSources().get(0));
         }
     }
 
@@ -489,18 +488,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             return false;
         }
 
-        //create new datasource
-        OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
-        String username = txtDatabaseUsername.getText();
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-        String password = new String(txtDatabasePassword.getPassword());
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-        String url = txtJdbcUrl.getText();
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+        currentDataSource.setNewID(uri);
 
-        datasourceChanged(currentDataSource, newDatasource);
         return true;
     }
 
@@ -561,6 +550,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             // do nothing
         }
 
+
         String username = txtDatabaseUsername.getText();
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());
@@ -585,6 +575,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         } else {
             lblConnectionStatus.setText("");
         }
+
+
+
+
+
         obdaModel.fireSourceParametersUpdated();
     }
 
@@ -635,14 +630,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     @Override
     public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-        if (oldSource != null) {
-            obdaModel.removeSource(oldSource.getSourceID());
-        }
-        obdaModel.addSource(newSource);
-        currentDataSource = newSource;
-        enableFields(false);
+
         currentDatasourceChange(newSource);
-        enableFields(true);
+
 
     }
 
