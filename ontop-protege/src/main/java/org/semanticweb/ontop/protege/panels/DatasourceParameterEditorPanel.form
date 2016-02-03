@@ -456,7 +456,7 @@
               <Connection code="IconLoader.getImageIcon(&quot;images/gtk-help.png&quot;)" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;U&gt;Help&lt;/U&gt;&lt;/HTML&gt;"/>
-            <Property name="toolTipText" type="java.lang.String" value="For information on JDBC connections go to: https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibPluginJDBC"/>
+            <Property name="toolTipText" type="java.lang.String" value="For information on JDBC connections go to: https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
           <Events>

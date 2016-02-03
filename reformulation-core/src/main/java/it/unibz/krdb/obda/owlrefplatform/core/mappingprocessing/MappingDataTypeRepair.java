@@ -205,7 +205,7 @@ public class MappingDataTypeRepair {
                         //No Boolean datatype in DB2 database, the value in the database is used
                         Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                         Term newTerm = fac.getTypedTerm(variable, type);
-                        log.warn("Datatype for the value " +variable + "of the property "+ predicate+ "has been inferred from the database");
+                        log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
                         atom.setTerm(position, newTerm);
                     }
                 }
@@ -229,7 +229,7 @@ public class MappingDataTypeRepair {
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
                 Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                 newTerm = fac.getTypedTerm(variable, type);
-                log.warn("Datatype for the value " +variable + "of the property "+ predicate+ "has been inferred from the database");
+                log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
             } 
             else {
                 Predicate replacement = dataType.getPredicate();

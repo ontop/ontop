@@ -27,6 +27,9 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P">
+  		<rdfs:domain rdf:resource="http://it.unibz.krdb/obda/test/simple#C"/>
+  	</owl:ObjectProperty>
     
 
 
@@ -39,9 +42,6 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P">
-  		<rdfs:domain rdf:resource="http://it.unibz.krdb/obda/test/simple#C"/>
-  	</owl:ObjectProperty>	    
     
 
 

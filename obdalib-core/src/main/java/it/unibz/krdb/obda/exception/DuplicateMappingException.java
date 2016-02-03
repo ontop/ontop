@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.exception;
  * #L%
  */
 
-public class DuplicateMappingException extends Exception {
+public class DuplicateMappingException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
