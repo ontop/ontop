@@ -167,8 +167,10 @@ public class R2RMLParser {
 		// process column declaration
 		subj = sMap.getColumn();
 		if (subj != null) {
-			if(template == null){
+			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
+
 				subjectAtom = fac.getUriTemplate(fac.getVariable(subj));
+
 			}
 			else {
 				// create uri("...",var)
@@ -235,7 +237,7 @@ public class R2RMLParser {
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 			Template t = pm.getTemplate();
 			if (t != null) {
-				// craete uri("...",var)
+				// create uri("...",var)
 				Function predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
 			}
@@ -365,9 +367,15 @@ public class R2RMLParser {
 		}
 		else{
 			//assign iri template
-			if(typ.equals(R2RMLVocabulary.iri)) {
-				objectAtom = fac.getUriTemplate(objectAtom);
+			TermMapType termMapType = om.getTermMapType();
+			if(termMapType.equals(TermMapType.CONSTANT_VALUED)){
+
+			} else if(termMapType.equals(TermMapType.COLUMN_VALUED)){
+				if(typ.equals(R2RMLVocabulary.iri)) {
+					objectAtom = fac.getUriTemplate(objectAtom);
+				}
 			}
+
 		}
 
 		// we check if it is a literal with language tag
