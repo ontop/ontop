@@ -20,6 +20,7 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -36,14 +37,13 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
-import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sesameWrapper.SesameMaterializer;
-import uk.ac.manchester.cs.owl.owlapi.OWLOntologyImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -141,14 +141,13 @@ public class AboxMaterializationAction extends ProtegeAction {
 					fc.setSelectedFile(new File(fileName));
 					fc.showSaveDialog(workspace);
 					File file = fc.getSelectedFile();
-					if (file!=null){
-					OWLOntology newOnto = cloneOnto(file);
-					OWLOntologyManager newMan = newOnto.getOWLOntologyManager();
-					materializeOnto(newOnto, newMan);
-					newMan.saveOntology(newOnto, new RDFXMLDocumentFormat(), new FileOutputStream(file));
-				//	OWLOntology o = newMan.loadOntologyFromOntologyDocument((file));
-				//	modelManager.setActiveOntology(o);
-				//	materializeOnto(o, modelManager.getOWLOntologyManager());
+					if (file != null) {
+						OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
+						OWLOntology newOnto = cloneOnto(newMan);
+						materializeOnto(newOnto, newMan);
+						OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
+						newMan.saveOntology(newOnto, format, new FileOutputStream(file));
+
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -243,16 +242,20 @@ public class AboxMaterializationAction extends ProtegeAction {
 		}
 	}
 	
-	private OWLOntology cloneOnto(File file)
-	{
-		//create new onto by cloning this one
+	private OWLOntology cloneOnto(OWLOntologyManager newMan) throws OWLOntologyCreationException {
+
+		//clone current ontology
 		OWLOntology currentOnto = modelManager.getActiveOntology();
-		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();	
-		OWLOntologyID id = new OWLOntologyID(IRI.create(currentOnto.getOntologyID().getOntologyIRI().toString()));
-		OWLOntology newOnto = new OWLOntologyImpl(ontologyManager, id);
+		OWLOntologyID ontologyID = currentOnto.getOntologyID();
+		Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
+		Optional<IRI> versionIRI = ontologyID.getVersionIRI();
+		OWLOntologyID newOntologyID = new OWLOntologyID(Optional.of(IRI.create(ontologyIRI.toString())),Optional.of(IRI.create(versionIRI.toString())));
+		OWLOntology newOnto = newMan.createOntology(newOntologyID);
 		Set<OWLAxiom> axioms = currentOnto.getAxioms();
 		for(OWLAxiom axiom: axioms)
-			ontologyManager.addAxiom(newOnto, axiom);
+			newMan.addAxiom(newOnto, axiom);
+
+
 		return newOnto;
 	}
 	
