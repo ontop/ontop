@@ -4,8 +4,8 @@ The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project ava
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 1.17
-* Release date:  TBD
+* Current version: 1.17.0
+* Release date: 04/02/2016
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 
@@ -19,13 +19,13 @@ By downloading these packages you are agreeing with them.
 
 ## Bundles
 
-- `ontop-protege-bundle.zip` : Protege 5.0 bundled with Ontop and JDBC plugins. This is ready to run package, use the run.sh or run.bat start scripts.
+- `ontop-protege-bundle.zip` : Protege 5.0 bundled with Ontop and JDBC plugins. This is ready to run package, use the run.sh, run.command or run.bat start scripts.
 
 - `ontop-jetty-bundle.zip` : Jetty 8 + Sesame workbench + Ontop ready to run a SPARQL end-point.
 
 ## Samples
 
-- [H2 + tutorial databases](http://obda.inf.unibz.it/files/h2-ontop-050213.zip): H2 database server bundled with the databases used in the tutorials. Use this to avoid having to install a database to run the tutorials.
+- [H2 + tutorial databases](http://sourceforge.net/projects/ontop4obda/files/sample-data/): H2 database server bundled with the databases used in the tutorials. Use this to avoid having to install a database to run the tutorials.
 
 ## Links
 
