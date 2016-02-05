@@ -14,7 +14,7 @@ Setup
 
 Consider put the directory of ontop to your `PATH`.
 
-### jdbc configuratoin
+### jdbc configuration
 
 For jdbc drivers, you will need to manually download them and put them into the `jdbc` directory.
 
