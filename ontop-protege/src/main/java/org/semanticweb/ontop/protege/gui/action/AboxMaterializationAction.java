@@ -48,6 +48,8 @@ import sesameWrapper.SesameMaterializer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.*;
 import java.util.Iterator;
 import java.util.Set;
@@ -86,79 +88,122 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-			
+
+		//materialization panel
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel("Choose a materialization option: "), BorderLayout.NORTH);
-		
-		JPanel radioPanel = new JPanel();
-		radioPanel.setLayout(new BorderLayout());
-		
-		JRadioButton b1 = new JRadioButton("Add individuals to current ontology", true);
-		JRadioButton b2 = new JRadioButton("Write individuals to file in format:\t");
-		String[] fileoptions = {"RDFXML", "N3", "TTL", "OWLXML"};
-		JComboBox combo = new JComboBox(fileoptions);
-		JRadioButton b3 = new JRadioButton("Create a new ontology with the individuals");
-		
+
+		//panel for adding triples to ontology
+		JPanel radioAddPanel = new JPanel();
+		radioAddPanel.setLayout(new BorderLayout());
+		JRadioButton radioAdd = new JRadioButton("Add triples to current ontology", true);
+
+		//panel for exporting triples to file
+		JPanel radioExportPanel = new JPanel(new BorderLayout());
+		JRadioButton radioExport = new JRadioButton("Export triples to an external file");
+
 		ButtonGroup group = new ButtonGroup();
-		group.add(b1); group.add(b2); group.add(b3);
-		
-		radioPanel.add(b1, BorderLayout.NORTH);
-		radioPanel.add(b2, BorderLayout.CENTER);
-		radioPanel.add(combo, BorderLayout.EAST);
-		radioPanel.add(b3, BorderLayout.SOUTH);
-		
-		panel.add(radioPanel, BorderLayout.SOUTH);
-		
+		group.add(radioAdd); group.add(radioExport);
+
+		//combo box for output format,
+		JLabel lFormat = new JLabel("Output format:\t");
+		String[] fileOptions = {"RDFXML", "N3", "TTL", "OWLXML"};
+		final JComboBox comboFormats = new JComboBox(fileOptions);
+		//should be enabled only when radio button export is selected
+		comboFormats.setEnabled(false);
+
+		//check box for including axioms of the current ontology in a new ontology
+		final JCheckBox cbCreateOntology =  new JCheckBox("Include axioms of the current ontology", null, true);
+		//should be enabled only when radio button export is selected
+		cbCreateOntology.setEnabled(false);
+
+		//add a listener for the radio button, allows to enable combo box and check box when the radio button is selected
+
+		radioExport.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+
+				if (e.getStateChange() == ItemEvent.SELECTED)
+				{
+					cbCreateOntology.setEnabled(true);
+					comboFormats.setEnabled(true);
+
+				} else if (e.getStateChange() == ItemEvent.DESELECTED)
+				{
+					cbCreateOntology.setEnabled(false);
+//					comboFormats.setSelectedIndex(-1);
+					comboFormats.setEnabled(false);
+				}
+			}
+		});
+
+		//add values to the panels
+		radioAddPanel.add(radioAdd, BorderLayout.NORTH);
+
+		radioExportPanel.add(radioExport, BorderLayout.NORTH);
+		radioExportPanel.add(lFormat, BorderLayout.CENTER);
+		radioExportPanel.add(comboFormats, BorderLayout.EAST);
+		radioExportPanel.add(cbCreateOntology, BorderLayout.SOUTH);
+
+		panel.add(radioAddPanel, BorderLayout.CENTER);
+		panel.add(radioExportPanel, BorderLayout.SOUTH);
+
+
+		//actions when OK BUTTON has been pressed here
 		int res = JOptionPane.showOptionDialog(workspace, panel, "Materialization options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (res == JOptionPane.OK_OPTION)
 		{
-			//we got something to do 
-			//take radio button choice
 			
-			//add to current onto
-			if (b1.isSelected())
+			//add to current ontology
+			if (radioAdd.isSelected())
 			{
 				materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());	
 			}
-			//write to file
-			else if (b2.isSelected())
+			//write to file and create an ontology if requested
+			else if (radioExport.isSelected())
 			{
-				int outputFormat = combo.getSelectedIndex();
-				try {
-					materializeToFile(outputFormat);
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-					JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
-				}
-			}
-			//create new onto, add
-			else if (b3.isSelected())
-			{
-				//open new onto in new window
-				try {
-					String fileName = "";
-					final JFileChooser fc = new JFileChooser();
-					fc.setSelectedFile(new File(fileName));
-					fc.showSaveDialog(workspace);
-					File file = fc.getSelectedFile();
-					if (file != null) {
-						OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
-						OWLOntology newOnto = cloneOnto(newMan);
-						materializeOnto(newOnto, newMan);
-						OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
-						newMan.saveOntology(newOnto, format, new FileOutputStream(file));
+				int outputFormat = comboFormats.getSelectedIndex();
+				//create new ontology and add the materialized values
+				if (cbCreateOntology.isSelected())
+				{
 
+					try {
+						String fileName = "";
+						final JFileChooser fc = new JFileChooser();
+						fc.setSelectedFile(new File(fileName));
+						fc.showSaveDialog(workspace);
+
+						File file = fc.getSelectedFile();
+						if (file != null)
+						{
+							//clone the ontology
+							OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
+							OWLOntology newOnto = cloneOnto(newMan);
+							materializeOnto(newOnto, newMan);
+							OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
+							newMan.saveOntology(newOnto, format, new FileOutputStream(file));
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						log.error(e.getMessage(), e);
+						JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					log.error(e.getMessage(), e);
-					JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
 				}
+				else {
+
+					try {
+						materializeToFile(outputFormat);
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+						JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
+					}
+				}
+
 			}
 		}
-		
+
 	}
-	
+
+
 	private void materializeToFile(int format) throws Exception
 	{
 		String fileName = "";
