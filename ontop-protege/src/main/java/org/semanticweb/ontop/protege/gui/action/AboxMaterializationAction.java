@@ -49,7 +49,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.*;
 import java.util.Iterator;
 import java.util.Set;
@@ -57,7 +56,7 @@ import java.util.concurrent.CountDownLatch;
 
 /***
  * Action to create individuals into the currently open OWL Ontology using the
- * existing mappings from ALL datasources
+ * existing mappings from the current data source
  * 
  * @author Mariano Rodriguez Muro
  */
@@ -103,7 +102,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 		JRadioButton radioExport = new JRadioButton("Export triples to an external file");
 
 		ButtonGroup group = new ButtonGroup();
-		group.add(radioAdd); group.add(radioExport);
+		group.add(radioAdd);
+		group.add(radioExport);
 
 		//combo box for output format,
 		JLabel lFormat = new JLabel("Output format:\t");
@@ -113,30 +113,27 @@ public class AboxMaterializationAction extends ProtegeAction {
 		comboFormats.setEnabled(false);
 
 		//check box for including axioms of the current ontology in a new ontology
-		final JCheckBox cbCreateOntology =  new JCheckBox("Include axioms of the current ontology", null, true);
+		final JCheckBox cbCreateOntology = new JCheckBox("Include axioms of the current ontology", null, true);
 		//should be enabled only when radio button export is selected
 		cbCreateOntology.setEnabled(false);
 
 		//add a listener for the radio button, allows to enable combo box and check box when the radio button is selected
 
-		radioExport.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
+		radioExport.addItemListener(e -> {
 
-				if (e.getStateChange() == ItemEvent.SELECTED)
-				{
-					cbCreateOntology.setEnabled(true);
-					comboFormats.setEnabled(true);
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                cbCreateOntology.setEnabled(true);
+                comboFormats.setEnabled(true);
 
-				} else if (e.getStateChange() == ItemEvent.DESELECTED)
-				{
-					cbCreateOntology.setEnabled(false);
+            } else if (e.getStateChange() == ItemEvent.DESELECTED) {
+                cbCreateOntology.setEnabled(false);
 //					comboFormats.setSelectedIndex(-1);
-					comboFormats.setEnabled(false);
-				}
-			}
-		});
+                comboFormats.setEnabled(false);
+            }
+        });
 
 		//add values to the panels
+
 		radioAddPanel.add(radioAdd, BorderLayout.NORTH);
 
 		radioExportPanel.add(radioExport, BorderLayout.NORTH);
@@ -150,52 +147,22 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		//actions when OK BUTTON has been pressed here
 		int res = JOptionPane.showOptionDialog(workspace, panel, "Materialization options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (res == JOptionPane.OK_OPTION)
-		{
-			
+		if (res == JOptionPane.OK_OPTION) {
+
 			//add to current ontology
-			if (radioAdd.isSelected())
-			{
-				materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());	
+			if (radioAdd.isSelected()) {
+				materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());
 			}
 			//write to file and create an ontology if requested
-			else if (radioExport.isSelected())
-			{
+			else if (radioExport.isSelected()) {
 				int outputFormat = comboFormats.getSelectedIndex();
 				//create new ontology and add the materialized values
-				if (cbCreateOntology.isSelected())
-				{
+				if (cbCreateOntology.isSelected()) {
+					materializeNewOntoToFile();
+				} else {
+					//save materialized values in a new file
+					materializeToFile(outputFormat);
 
-					try {
-						String fileName = "";
-						final JFileChooser fc = new JFileChooser();
-						fc.setSelectedFile(new File(fileName));
-						fc.showSaveDialog(workspace);
-
-						File file = fc.getSelectedFile();
-						if (file != null)
-						{
-							//clone the ontology
-							OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
-							OWLOntology newOnto = cloneOnto(newMan);
-							materializeOnto(newOnto, newMan);
-							OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
-							newMan.saveOntology(newOnto, format, new FileOutputStream(file));
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
-					}
-				}
-				else {
-
-					try {
-						materializeToFile(outputFormat);
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
-					}
 				}
 
 			}
@@ -203,8 +170,48 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 	}
 
+	private void materializeNewOntoToFile() {
+		try {
+            String fileName = "";
+            final JFileChooser fc = new JFileChooser();
+            fc.setSelectedFile(new File(fileName));
+            fc.showSaveDialog(workspace);
 
-	private void materializeToFile(int format) throws Exception
+            File file = fc.getSelectedFile();
+            if (file != null)
+            {
+                //clone the ontology
+                OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
+                OWLOntology newOnto = cloneOnto(newMan);
+                materializeOnto(newOnto, newMan);
+                OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
+                newMan.saveOntology(newOnto, format, new FileOutputStream(file));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage(), e);
+            JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
+        }
+	}
+
+	private OWLOntology cloneOnto(OWLOntologyManager newMan) throws OWLOntologyCreationException {
+
+		//clone current ontology
+		OWLOntology currentOnto = modelManager.getActiveOntology();
+		OWLOntologyID ontologyID = currentOnto.getOntologyID();
+		Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
+		Optional<IRI> versionIRI = ontologyID.getVersionIRI();
+		OWLOntologyID newOntologyID = new OWLOntologyID(Optional.of(IRI.create(ontologyIRI.toString())),Optional.of(IRI.create(versionIRI.toString())));
+		OWLOntology newOnto = newMan.createOntology(newOntologyID);
+		Set<OWLAxiom> axioms = currentOnto.getAxioms();
+		for(OWLAxiom axiom: axioms)
+			newMan.addAxiom(newOnto, axiom);
+
+
+		return newOnto;
+	}
+
+	private void materializeToFile(int format)
 	{
 		String fileName = "";
 		long count = 0;
@@ -282,27 +289,13 @@ public class AboxMaterializationAction extends ProtegeAction {
 								+ "\nElapsed time: " + time + " ms.", "Done",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
-		} catch (FileNotFoundException e) {
-			throw e;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
 		}
+
 	}
-	
-	private OWLOntology cloneOnto(OWLOntologyManager newMan) throws OWLOntologyCreationException {
 
-		//clone current ontology
-		OWLOntology currentOnto = modelManager.getActiveOntology();
-		OWLOntologyID ontologyID = currentOnto.getOntologyID();
-		Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		Optional<IRI> versionIRI = ontologyID.getVersionIRI();
-		OWLOntologyID newOntologyID = new OWLOntologyID(Optional.of(IRI.create(ontologyIRI.toString())),Optional.of(IRI.create(versionIRI.toString())));
-		OWLOntology newOnto = newMan.createOntology(newOntologyID);
-		Set<OWLAxiom> axioms = currentOnto.getAxioms();
-		for(OWLAxiom axiom: axioms)
-			newMan.addAxiom(newOnto, axiom);
-
-
-		return newOnto;
-	}
 	
 	private void materializeOnto(OWLOntology onto, OWLOntologyManager ontoManager)
 	{
