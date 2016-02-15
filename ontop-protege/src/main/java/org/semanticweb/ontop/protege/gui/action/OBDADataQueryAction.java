@@ -4,20 +4,18 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.ontop.protege.utils.DialogUtils;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
-import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-
-import java.awt.Component;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-
 import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.ontop.protege.utils.DialogUtils;
+import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.concurrent.CountDownLatch;
 
 /*
  * #%L
@@ -74,8 +72,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 *  This function must do the call to e.g. statement.query()
-	 * @param queryString
-	 * @return
 	 */
 	public abstract T executeQuery(QuestOWLStatement st, String queryString) throws OWLException;
 

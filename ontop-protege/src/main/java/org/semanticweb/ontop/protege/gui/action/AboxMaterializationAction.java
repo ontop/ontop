@@ -20,35 +20,12 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import org.semanticweb.ontop.protege.core.OBDAModelManager;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
-
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.event.ActionEvent;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
@@ -58,21 +35,23 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
-import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
-
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyID;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sesameWrapper.SesameMaterializer;
-import uk.ac.manchester.cs.owl.owlapi.OWLOntologyImpl;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.*;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 /***
  * Action to create individuals into the currently open OWL Ontology using the
@@ -162,14 +141,13 @@ public class AboxMaterializationAction extends ProtegeAction {
 					fc.setSelectedFile(new File(fileName));
 					fc.showSaveDialog(workspace);
 					File file = fc.getSelectedFile();
-					if (file!=null){
-					OWLOntology newOnto = cloneOnto(file);
-					OWLOntologyManager newMan = newOnto.getOWLOntologyManager();
-					materializeOnto(newOnto, newMan);
-					newMan.saveOntology(newOnto, new RDFXMLDocumentFormat(), new FileOutputStream(file));
-				//	OWLOntology o = newMan.loadOntologyFromOntologyDocument((file));
-				//	modelManager.setActiveOntology(o);
-				//	materializeOnto(o, modelManager.getOWLOntologyManager());
+					if (file != null) {
+						OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
+						OWLOntology newOnto = cloneOnto(newMan);
+						materializeOnto(newOnto, newMan);
+						OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
+						newMan.saveOntology(newOnto, format, new FileOutputStream(file));
+
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -201,7 +179,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OWLOntology ontology = modelManager.getActiveOntology();
 				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-				Ontology onto = OWLAPI3TranslatorUtility.translate(ontology);
+				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
 				obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
 				
 				final long startTime = System.currentTimeMillis();
@@ -236,7 +214,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 				else {
 					// owlxml, OWL materializer
-					try (OWLAPI3Materializer materializer = new OWLAPI3Materializer(
+					try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(
 							obdaModel, onto, DO_STREAM_RESULTS)) {
 						Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
 						while (iterator.hasNext())
@@ -264,16 +242,20 @@ public class AboxMaterializationAction extends ProtegeAction {
 		}
 	}
 	
-	private OWLOntology cloneOnto(File file)
-	{
-		//create new onto by cloning this one
+	private OWLOntology cloneOnto(OWLOntologyManager newMan) throws OWLOntologyCreationException {
+
+		//clone current ontology
 		OWLOntology currentOnto = modelManager.getActiveOntology();
-		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();	
-		OWLOntologyID id = new OWLOntologyID(IRI.create(currentOnto.getOntologyID().getOntologyIRI().toString()));
-		OWLOntology newOnto = new OWLOntologyImpl(ontologyManager, id);
+		OWLOntologyID ontologyID = currentOnto.getOntologyID();
+		Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
+		Optional<IRI> versionIRI = ontologyID.getVersionIRI();
+		OWLOntologyID newOntologyID = new OWLOntologyID(Optional.of(IRI.create(ontologyIRI.toString())),Optional.of(IRI.create(versionIRI.toString())));
+		OWLOntology newOnto = newMan.createOntology(newOntologyID);
 		Set<OWLAxiom> axioms = currentOnto.getAxioms();
 		for(OWLAxiom axiom: axioms)
-			ontologyManager.addAxiom(newOnto, axiom);
+			newMan.addAxiom(newOnto, axiom);
+
+
 		return newOnto;
 	}
 	
@@ -288,7 +270,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		if (response == JOptionPane.YES_OPTION) {			
 			try {
 			
-				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel, DO_STREAM_RESULTS);
+				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
 				

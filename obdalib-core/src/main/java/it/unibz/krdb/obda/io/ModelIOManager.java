@@ -146,7 +146,6 @@ public class ModelIOManager {
      * @param file
      *          The target file object from which the model is loaded.
      * @throws IOException
-     * @throws InvalidPredicateDeclarationException
      * @throws InvalidMappingException 
      */
     public void load(File file) throws IOException, InvalidMappingException {

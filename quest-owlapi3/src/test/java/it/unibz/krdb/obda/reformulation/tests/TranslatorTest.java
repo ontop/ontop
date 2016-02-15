@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -45,7 +45,7 @@ public class TranslatorTest extends TestCase {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -70,7 +70,7 @@ public class TranslatorTest extends TestCase {
 		
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -93,7 +93,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
 		Iterator<BinaryAxiom<ObjectPropertyExpression>> assit = ass.iterator();
@@ -130,7 +130,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();

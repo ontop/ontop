@@ -1,13 +1,13 @@
 package org.semanticweb.ontop.protege.core;
 
-import javax.swing.JOptionPane;
-
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import javax.annotation.Nonnull;
+import javax.swing.*;
 
 /**
  * Wrapper around QuestOWLFactory for use in the ontop Protege plugin
@@ -24,8 +24,9 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		JOptionPane.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
 	}
 			
-	@Override
-	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	@Nonnull
+    @Override
+	public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology, config);
 		} catch (Exception e){
@@ -33,7 +34,8 @@ public class OntopOWLFactory extends QuestOWLFactory {
 			throw e;
 		}
 	}
-	@Override
+	@Nonnull
+    @Override
 	public QuestOWL createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology);
@@ -43,8 +45,9 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 	
-	@Override
-	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	@Nonnull
+    @Override
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology, config);
 		} catch (Exception e){
@@ -52,8 +55,9 @@ public class OntopOWLFactory extends QuestOWLFactory {
 			throw e;
 		}
 	}
-	@Override
-	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
+	@Nonnull
+    @Override
+	public QuestOWL createNonBufferingReasoner(@Nonnull OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology);
 		} catch (Exception e){

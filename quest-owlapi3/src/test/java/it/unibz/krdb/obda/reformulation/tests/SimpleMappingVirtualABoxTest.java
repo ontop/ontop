@@ -29,11 +29,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +55,6 @@ import java.util.Properties;
  * there and then query on top.
  */
 public class SimpleMappingVirtualABoxTest extends TestCase {
-
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -143,12 +139,9 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
@@ -169,12 +162,12 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 //			log.info("Elapsed time: {}", elapsed);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
+			OWLObject ind1 = rs.getOWLObject("x");
+			OWLObject ind2 = rs.getOWLObject("y");
+			OWLObject val = rs.getOWLObject("z");
+			assertEquals("<uri1>", ToStringRenderer.getInstance().getRendering(ind1));
+			assertEquals("<uri1>", ToStringRenderer.getInstance().getRendering(ind2));
+			assertEquals("\"value1\"", ToStringRenderer.getInstance().getRendering(val));
 			
 
 		} catch (Exception e) {

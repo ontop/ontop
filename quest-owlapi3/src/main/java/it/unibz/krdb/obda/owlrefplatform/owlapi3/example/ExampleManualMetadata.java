@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -57,7 +57,7 @@ private void setup()  throws Exception {
 	QuestPreferences preference = new QuestPreferences();
 	preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 	DBMetadata dbMetadata = getMeta();
-	Quest qest = new Quest(OWLAPI3TranslatorUtility.translateImportsClosure(ontology), obdaModel, dbMetadata, preference);
+	Quest qest = new Quest(OWLAPITranslatorUtility.translateImportsClosure(ontology), obdaModel, dbMetadata, preference);
 	qest.setupRepository();
 	
 	/*

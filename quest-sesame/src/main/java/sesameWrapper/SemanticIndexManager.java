@@ -22,7 +22,7 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -107,7 +107,7 @@ public class SemanticIndexManager {
 
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology), voc);
+		OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology), voc);
 		int result = dataRepository.insertData(conn, aBoxIter, commitInterval, batchSize);
 
 		log.info("Loaded {} items into the DB.", result);

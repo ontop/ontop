@@ -38,12 +38,12 @@ public class QuestConnection implements OBDAConnection {
 	
 	private Connection conn;
 
-	private final Quest questinstance;
+	private final Quest questInstance;
 	
 	private boolean isClosed;
 
-	public QuestConnection(Quest questisntance, Connection connection) {
-		this.questinstance = questisntance;
+	public QuestConnection(Quest questInstance, Connection connection) {
+		this.questInstance = questInstance;
 		this.conn = connection;
 		isClosed = false;
 	}
@@ -56,7 +56,7 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public void close() throws OBDAException {
 		try {
-			questinstance.releaseSQLPoolConnection(conn);		
+			questInstance.releaseSQLPoolConnection(conn);
 		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
@@ -68,9 +68,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect
-				conn = questinstance.getSQLPoolConnection();
+				conn = questInstance.getSQLPoolConnection();
 			}
-			QuestStatement st = new QuestStatement(this.questinstance, this,
+			QuestStatement st = new QuestStatement(this.questInstance, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 							java.sql.ResultSet.CONCUR_READ_ONLY));
 			//st.setFetchSize(400);
@@ -130,7 +130,7 @@ public class QuestConnection implements OBDAConnection {
 
 	@Override
 	public boolean isReadOnly() throws OBDAException {
-		if (this.questinstance.getSemanticIndexRepository() == null)
+		if (this.questInstance.getSemanticIndexRepository() == null)
 			return true;
 		try {
 			return conn.isReadOnly();

@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -131,12 +130,9 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        
 		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
 		
 		// Now we are ready for querying

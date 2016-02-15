@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.16.2-SNAPSHOT</version>
+	<version>1.17.0</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -228,6 +228,20 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>

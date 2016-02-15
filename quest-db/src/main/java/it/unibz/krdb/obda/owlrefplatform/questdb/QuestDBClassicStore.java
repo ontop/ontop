@@ -28,37 +28,15 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlapi3.OWLAPIABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.*;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
-
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.Dataset;
-import org.openrdf.rio.ParserConfig;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
+import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -68,6 +46,15 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
 
 /***
  * An instance of Store that encapsulates all the functionality needed for a
@@ -120,7 +107,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		}
 		closure = man.getImportsClosure(owlontology);
-		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
+		return OWLAPITranslatorUtility.mergeTranslateOntologies(closure);
 	}
 
 
@@ -155,7 +142,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getVocabulary());
+			OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(closure, questInstance.getVocabulary());
 			int count = st.insertData(aBoxIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}

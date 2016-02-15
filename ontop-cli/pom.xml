@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>1.16.2-SNAPSHOT</version>
+        <version>1.17.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline-help-bash</artifactId>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
         <!--
@@ -68,4 +68,21 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.semanticweb.ontop.cli.Ontop</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

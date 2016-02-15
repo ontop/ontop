@@ -26,24 +26,22 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
-import com.google.common.base.Joiner;
-import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import static java.util.stream.Collectors.joining;
 
 @Command(name = "query",
         description = "Query the RDF graph exposed by the mapping and the OWL ontology")
@@ -54,7 +52,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     private String queryFile;
 
-    public OntopQuery() { }
+    public OntopQuery() {
+    }
 
     @Override
     public void run() {
@@ -81,24 +80,36 @@ public class OntopQuery extends OntopReasoningCommandBase {
             return;
         }
 
+//        QuestOWLFactory factory = null;
+//        try {
+//            factory = createQueryOWLFactory(mappingFile);
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+
         QuestOWLFactory factory = null;
+        QuestOWLConfiguration config = null;
         try {
-            factory = createQueryOWLFactory(mappingFile);
-        } catch (Exception e1) {
-            e1.printStackTrace();
+            OBDAModel obdaModel = loadMappingFile(mappingFile);
+            config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+            factory = new QuestOWLFactory();
+        } catch (IOException | InvalidPredicateDeclarationException | InvalidMappingException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
 
-        try (
-                QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-                QuestOWLConnection conn = reasoner.getConnection();
-                QuestOWLStatement st = conn.createStatement();
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+             QuestOWLConnection conn = reasoner.getConnection();
+             QuestOWLStatement st = conn.createStatement();
         ) {
 
 			/*
              * Reading query file:
 			 */
-            String query = Joiner.on("\n").
-                    join(Files.readAllLines(Paths.get(queryFile), StandardCharsets.UTF_8));
+//            String query = Joiner.on("\n").
+//                    join(Files.readAllLines(Paths.get(queryFile), StandardCharsets.UTF_8));
+
+            String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
 
             QuestOWLResultSet result = st.executeTuple(query);
 
@@ -111,10 +122,6 @@ public class OntopQuery extends OntopReasoningCommandBase {
             printResult(out, result);
 
 
-        } catch (OBDAException e1) {
-            e1.printStackTrace();
-        } catch (OWLException e1) {
-            e1.printStackTrace();
         } catch (Exception e1) {
             e1.printStackTrace();
 
@@ -125,7 +132,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
 		/*
-		 * Printing the header
+         * Printing the header
 		 */
 
         int columns = result.getColumnCount();
@@ -136,9 +143,6 @@ public class OntopQuery extends OntopReasoningCommandBase {
                 wr.append(",");
         }
         wr.newLine();
-		/*
-		 * Printing the header
-		 */
 
         while (result.nextRow()) {
             for (int c = 0; c < columns; c++) {
@@ -155,27 +159,4 @@ public class OntopQuery extends OntopReasoningCommandBase {
     }
 
 
-    public QuestOWLFactory createQueryOWLFactory(String mappingFile) throws Exception {
-
-        OBDAModel obdaModel = loadMappingFile(mappingFile);
-
-		/*
-		 * Preparing the configuration for the new Quest instance, we need to
-		 * make sure it will be setup for "virtual ABox mode"
-		 */
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
-		/*
-		 * Creating the instance of the reasoner using the factory. Remember
-		 * that the RDBMS that contains the data must be already running and
-		 * accepting connections. The HelloWorld and Books tutorials at our wiki
-		 * show you how to do this.
-		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(p);
-
-        return factory;
-    }
 }

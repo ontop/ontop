@@ -26,18 +26,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public class QuestDB {
 
@@ -90,7 +84,8 @@ public class QuestDB {
 		 * Called when System.exit() is called or Control+C happens.
 		 */
 		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
+			@Override
+            public void run() {
 				log.info("Shutting down.");
 
 				/*
@@ -102,7 +97,7 @@ public class QuestDB {
 		});
 	}
 
-	public static void main(String argsp[]) {
+	public static void main(String args[]) {
 		QuestDB db = new QuestDB();
 	}
 

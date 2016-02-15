@@ -31,11 +31,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -142,24 +140,22 @@ public class MetaMappingVirtualABoxTest {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+       
 
 		String query1 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
 		String query2 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
-        try (QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs1 = st.executeTuple(query1);
         ) {
             assertTrue(rs1.nextRow());
-			OWLIndividual ind = rs1.getOWLIndividual("x");
+			OWLObject ind = rs1.getOWLObject("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind.toString());
@@ -169,16 +165,16 @@ public class MetaMappingVirtualABoxTest {
 
 		}
 
-        try (QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs2 = st.executeTuple(query2);
         ) {
             assertTrue(rs2.nextRow());
-            OWLIndividual ind1 = rs2.getOWLIndividual("x");
+			OWLObject ind1 = rs2.getOWLObject("x");
             //OWLIndividual ind2 = rs.getOWLIndividual("y");
-            OWLLiteral val = rs2.getOWLLiteral("y");
+			OWLObject val = rs2.getOWLObject("y");
             assertEquals("<uri1>", ind1.toString());
             //assertEquals("<uri1>", ind2.toString());
             assertEquals("\"A\"", val.toString());
@@ -197,7 +193,7 @@ public class MetaMappingVirtualABoxTest {
 		runTests(p);
 	}
 
-	@Test
+	@Test(expected = IllegalConfigurationException.class)
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

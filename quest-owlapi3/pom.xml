@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.16.2-SNAPSHOT</version>
+		<version>1.17.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ontop-quest-owlapi</artifactId>
@@ -78,7 +78,12 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>it.unibz.inf.ontop</groupId>
+            <artifactId>ontop-obdalib-r2rml</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+    </dependencies>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

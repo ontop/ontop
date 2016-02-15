@@ -23,24 +23,18 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-
-import java.io.File;
-
 import junit.framework.TestCase;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -63,16 +57,18 @@ public class SemanticIndexLUBMHTest extends TestCase {
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
 	
-		QuestOWLFactory fac = new QuestOWLFactory();
-
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
-		fac.setPreferenceHolder(pref);
+//		fac.setPreferenceHolder(pref);
+//
+//		QuestOWL quest = fac.createReasoner(ontology);
 
-		QuestOWL quest = fac.createReasoner(ontology);
-
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL quest = factory.createReasoner(ontology, config);
+		
 		QuestOWLConnection qconn =  quest.getConnection();
 
 		QuestOWLStatement st = qconn.createStatement();

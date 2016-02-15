@@ -20,13 +20,16 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAModelListener;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import org.protege.editor.core.ProtegeManager;
+import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.utils.CustomTraversalPolicy;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
@@ -44,148 +47,113 @@ import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-	private static final long serialVersionUID = 3506358479342412849L;
+    private static final long serialVersionUID = 3506358479342412849L;
+    private final OWLEditorKit owlEditorKit;
 
-	private OBDADataSource selectedDataSource;
+    private OBDADataSource currentDataSource;
 
-	private OBDAModel obdaModel;
+    private OBDAModel obdaModel;
 
-	private DatasourceSelector selector;
+    private ComboBoxItemListener comboListener;
 
-	private ComboBoxItemListener comboListener;
+    private Timer timer = null;
 
-	private Timer timer = null;
+    /**
+     * Creates new form DatasourceParameterEditorPanel
+     */
+    public DatasourceParameterEditorPanel(OWLEditorKit owlEditorKit) {
 
-	/**
-	 * Creates new form DatasourceParameterEditorPanel
-	 */
-	public DatasourceParameterEditorPanel(OBDAModel model) {
+        this.owlEditorKit = owlEditorKit;
+        OBDAModelManager obdaModelManager = (OBDAModelManager) owlEditorKit.get(OBDAModelImpl.class.getName());
+        OBDAModel model = obdaModelManager.getActiveOBDAModel();
 
-		timer = new Timer(200, e -> handleTimer());
-		
-		initComponents();
+        timer = new Timer(200, e -> handleTimer());
 
-		this.comboListener = new ComboBoxItemListener();
-		txtJdbcDriver.addItemListener(comboListener);
+        initComponents();
 
-		setDatasourcesController(model);
-		enableFields(false);
+        this.comboListener = new ComboBoxItemListener();
+        txtJdbcDriver.addItemListener(comboListener);
 
-		List<Component> order = new ArrayList<>(7);
-		order.add(pnlDataSourceParameters);
-		order.add(txtJdbcUrl);
-		order.add(txtDatabaseUsername);
-		order.add(txtDatabasePassword);
-		order.add(txtJdbcDriver);
-		order.add(cmdTestConnection);
-		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
+        setNewDatasource(model);
 
-		lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-		model.addSourcesListener(new OBDAModelListener() {
-			private static final long serialVersionUID = -415753131971100104L;
+        List<Component> order = new ArrayList<>(7);
+        order.add(pnlDataSourceParameters);
+        order.add(txtDatabase);
+        order.add(txtJdbcUrl);
+        order.add(txtDatabaseUsername);
+        order.add(txtDatabasePassword);
+        order.add(txtJdbcDriver);
+        order.add(cmdTestConnection);
+        this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
+    }
 
-			@Override
-			public void datasourceUpdated(String oldname, OBDADataSource currendata) {
-				// NO OP
-			}
+    private void handleTimer() {
+        timer.stop();
+        updateSourceValues();
+    }
 
-			@Override
-			public void datasourceDeleted(OBDADataSource source) {
-				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-			}
 
-			@Override
-			public void datasourceAdded(OBDADataSource source) {
-				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-			}
+    private class ComboBoxItemListener implements ItemListener {
 
-			@Override
-			public void datasourceParametersUpdated() {
-				// NO OP
-			}
+        private boolean notify = false;
 
-			@Override
-			public void alldatasourcesDeleted() {
-				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-			}
-		});
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            if (notify) {
+                fieldChangeHandler(null);
+            }
+        }
 
-        /**
-         * Selects the first datasource if it exists
-         */
-        if (obdaModel.getSources().size() > 0) {
-            selector.set(obdaModel.getSources().get(0));
+        public void setNotify(boolean notify) {
+            this.notify = notify;
         }
     }
 
-	private void handleTimer() {
-		timer.stop();
-		updateSourceValues();
-	}
+    public void setNewDatasource(OBDAModel model) {
+        obdaModel = model;
+        resetTextFields();
+        /**
+         * Selects the first data source if it exists
+         */
+        if (obdaModel.getSources().size() > 0) {
 
-	private class ComboBoxItemListener implements ItemListener {
+            currentDatasourceChange(obdaModel.getSources().get(0));
+        }
+    }
 
-		private boolean notify = false;
 
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-			if (notify) {
-				fieldChangeHandler(null);
-			}
-		}
+    private void resetTextFields() {
+        txtDatabase.setText("");
+        txtJdbcUrl.setText("");
+        txtDatabasePassword.setText("");
+        txtDatabaseUsername.setText("");
+        comboListener.setNotify(false);
+        txtJdbcDriver.setSelectedIndex(0);
+        comboListener.setNotify(true);
+    }
 
-		public void setNotify(boolean notify) {
-			this.notify = notify;
-		}
-	}
+    private void enableFields(boolean value) {
+        txtJdbcUrl.setEnabled(value);
+        txtDatabasePassword.setEnabled(value);
+        txtDatabaseUsername.setEnabled(value);
+        txtJdbcDriver.setEnabled(value);
+    }
 
-	public void setDatasourcesController(OBDAModel model) {
-		obdaModel = model;
-		addDataSourceSelector();
-		resetTextFields();
-	}
-
-	private void addDataSourceSelector() {
-		selector = new DatasourceSelector(obdaModel);
-		selector.addDatasourceListListener(this);
-		pnlDataSourceSelector.add(selector, BorderLayout.CENTER);
-	}
-
-	private void resetTextFields() {
-		txtJdbcUrl.setText("");
-		txtDatabasePassword.setText("");
-		txtDatabaseUsername.setText("");
-		comboListener.setNotify(false);
-		txtJdbcDriver.setSelectedIndex(0);
-		comboListener.setNotify(true);
-	}
-
-	private void enableFields(boolean value) {
-		txtJdbcUrl.setEnabled(value);
-		txtDatabasePassword.setEnabled(value);
-		txtDatabaseUsername.setEnabled(value);
-		txtJdbcDriver.setEnabled(value);
-	}
-
-	/**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
-	// <editor-fold defaultstate="collapsed"
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        pnlOBDAModelData = new javax.swing.JPanel();
-        lblSources = new javax.swing.JLabel();
-        lblSourcesNumber = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
         pnlDataSourceParameters = new javax.swing.JPanel();
+        txtDatabase = new javax.swing.JTextField();
         txtJdbcUrl = new javax.swing.JTextField();
         txtDatabaseUsername = new javax.swing.JTextField();
         txtDatabasePassword = new javax.swing.JPasswordField();
-        txtJdbcDriver = new javax.swing.JComboBox();
+        txtJdbcDriver = new javax.swing.JComboBox<>();
         cmdTestConnection = new javax.swing.JButton();
         lblDataSourceName = new javax.swing.JLabel();
         lblJdbcUrl = new javax.swing.JLabel();
@@ -193,10 +161,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblDatabasePassword = new javax.swing.JLabel();
         lblJdbcDriver = new javax.swing.JLabel();
         lblConnectionStatus = new javax.swing.JLabel();
-        pnlDataSourceSelector = new javax.swing.JPanel();
         pnlCommandButton = new javax.swing.JPanel();
-        cmdNew = new javax.swing.JButton();
-        cmdRemove = new javax.swing.JButton();
+        cmdSave = new javax.swing.JButton();
         cmdHelp = new javax.swing.JButton();
         pnlInformation = new javax.swing.JPanel();
 
@@ -204,49 +170,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         setMinimumSize(new java.awt.Dimension(640, 480));
         setPreferredSize(new java.awt.Dimension(640, 480));
         setLayout(new java.awt.GridBagLayout());
-
-        pnlOBDAModelData.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "OBDA Model information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Lucida Grande", 0, 13), new java.awt.Color(53, 113, 163))); // NOI18N
-        pnlOBDAModelData.setForeground(new java.awt.Color(53, 113, 163));
-        pnlOBDAModelData.setLayout(new java.awt.GridBagLayout());
-
-        lblSources.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
-        lblSources.setForeground(new java.awt.Color(53, 113, 163));
-        lblSources.setText("Number of sources:");
-        lblSources.setFocusTraversalKeysEnabled(false);
-        lblSources.setFocusable(false);
-        lblSources.setMaximumSize(new java.awt.Dimension(120, 24));
-        lblSources.setMinimumSize(new java.awt.Dimension(120, 24));
-        lblSources.setPreferredSize(new java.awt.Dimension(130, 24));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 10, 20);
-        pnlOBDAModelData.add(lblSources, gridBagConstraints);
-
-        lblSourcesNumber.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        lblSourcesNumber.setText("0");
-        lblSourcesNumber.setFocusable(false);
-        lblSourcesNumber.setPreferredSize(new java.awt.Dimension(150, 24));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 10, 20);
-        pnlOBDAModelData.add(lblSourcesNumber, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        pnlOBDAModelData.add(jPanel1, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        add(pnlOBDAModelData, gridBagConstraints);
 
         pnlDataSourceParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Connection parameters", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Lucida Grande", 0, 13), new java.awt.Color(53, 113, 163))); // NOI18N
         pnlDataSourceParameters.setForeground(new java.awt.Color(53, 113, 163));
@@ -258,6 +181,23 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(0, 0));
         pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(1, 300));
         pnlDataSourceParameters.setLayout(new java.awt.GridBagLayout());
+
+        txtDatabase.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
+        txtDatabase.setMaximumSize(new java.awt.Dimension(25, 2147483647));
+        txtDatabase.setMinimumSize(new java.awt.Dimension(180, 24));
+        txtDatabase.setPreferredSize(new java.awt.Dimension(180, 24));
+        txtDatabase.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fieldChangeHandler(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 2, 10);
+        pnlDataSourceParameters.add(txtDatabase, gridBagConstraints);
 
         txtJdbcUrl.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
         txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
@@ -313,7 +253,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         txtJdbcDriver.setEditable(true);
         txtJdbcDriver.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
+        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
         txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.addActionListener(new java.awt.event.ActionListener() {
@@ -364,7 +304,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 20);
         pnlDataSourceParameters.add(lblDataSourceName, gridBagConstraints);
 
         lblJdbcUrl.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
@@ -450,64 +390,38 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 10, 10);
         pnlDataSourceParameters.add(lblConnectionStatus, gridBagConstraints);
 
-        pnlDataSourceSelector.setFocusable(false);
-        pnlDataSourceSelector.setMinimumSize(new java.awt.Dimension(300, 27));
-        pnlDataSourceSelector.setPreferredSize(new java.awt.Dimension(300, 27));
-        pnlDataSourceSelector.setLayout(new java.awt.BorderLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        pnlDataSourceParameters.add(pnlDataSourceSelector, gridBagConstraints);
-
         pnlCommandButton.setFocusable(false);
         pnlCommandButton.setMinimumSize(new java.awt.Dimension(210, 27));
         pnlCommandButton.setPreferredSize(new java.awt.Dimension(210, 27));
-        pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 2));
+        pnlCommandButton.setLayout(new java.awt.GridBagLayout());
 
-        cmdNew.setIcon(IconLoader.getImageIcon("images/plus.png"));
-        cmdNew.setText("Create New...");
-        cmdNew.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdNew.setContentAreaFilled(false);
-        cmdNew.setIconTextGap(5);
-        cmdNew.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        cmdNew.setMaximumSize(new java.awt.Dimension(105, 25));
-        cmdNew.setMinimumSize(new java.awt.Dimension(105, 25));
-        cmdNew.setPreferredSize(new java.awt.Dimension(105, 25));
-        cmdNew.addActionListener(new java.awt.event.ActionListener() {
+        cmdSave.setText("Save");
+        cmdSave.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdSave.setContentAreaFilled(false);
+        cmdSave.setIconTextGap(5);
+        cmdSave.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        cmdSave.setMaximumSize(new java.awt.Dimension(105, 25));
+        cmdSave.setMinimumSize(new java.awt.Dimension(105, 25));
+        cmdSave.setPreferredSize(new java.awt.Dimension(105, 25));
+        cmdSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdNewActionPerformed(evt);
+                cmdSaveActionPerformed(evt);
             }
         });
-        pnlCommandButton.add(cmdNew);
-
-        cmdRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
-        cmdRemove.setText("Remove");
-        cmdRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdRemove.setContentAreaFilled(false);
-        cmdRemove.setIconTextGap(5);
-        cmdRemove.setMaximumSize(new java.awt.Dimension(85, 25));
-        cmdRemove.setMinimumSize(new java.awt.Dimension(85, 25));
-        cmdRemove.setPreferredSize(new java.awt.Dimension(85, 25));
-        cmdRemove.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdRemoveActionPerformed(evt);
-            }
-        });
-        pnlCommandButton.add(cmdRemove);
+        pnlCommandButton.add(cmdSave, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         pnlDataSourceParameters.add(pnlCommandButton, gridBagConstraints);
 
         cmdHelp.setFont(new java.awt.Font("Dialog", 1, 13)); // NOI18N
         cmdHelp.setForeground(new java.awt.Color(53, 113, 163));
         cmdHelp.setIcon(IconLoader.getImageIcon("images/gtk-help.png"));
         cmdHelp.setText("<HTML><U>Help</U></HTML>");
-        cmdHelp.setToolTipText("For information on JDBC connections go to: https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibPluginJDBC");
+        cmdHelp.setToolTipText("For information on JDBC connections go to: https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC");
         cmdHelp.setBorderPainted(false);
         cmdHelp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -537,73 +451,68 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         add(pnlInformation, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-	private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
-		DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
-	}// GEN-LAST:event_cmdHelpActionPerformed
+    private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
+        DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
+    }// GEN-LAST:event_cmdHelpActionPerformed
 
-	private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed
-		fieldChangeHandler(null);
-	}// GEN-LAST:event_txtJdbcDriverActionPerformed
+    private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed
+        fieldChangeHandler(null);
+    }// GEN-LAST:event_txtJdbcDriverActionPerformed
 
-	private void cmdNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
-		while (true) {
-			String name = JOptionPane.showInputDialog(this, "Insert an identifier for the new data source:", null);
-			if (name == null) {
-				return;
-			}
+    private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
+        if (!createNewDatasource())
+            return;
+        // save the obdaModel to an .obda file disk
+        try {
+            ProtegeManager.getInstance().saveEditorKit(owlEditorKit);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Exception occurred while saving the mapping", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
 
-			if (!name.isEmpty()) {
-				URI uri = createUri(name);
-				if (uri != null) {
-					if (!obdaModel.containsSource(uri)) {
-						OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
-						obdaModel.addSource(source);
-						selector.set(source);
-						return;
-					} else {
-						JOptionPane.showMessageDialog(this, "The specified data source ID already exists. \nPlease provide a different one.", "Warning", JOptionPane.WARNING_MESSAGE);
-					}
-				}
-			} else {
-				JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
-			}
-		}
-	}// GEN-LAST:event_cmdNewActionPerformed
+    }// GEN-LAST:event_cmdSaveActionPerformed
 
-	private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdRemoveActionPerformed
-		OBDADataSource ds = selector.getSelectedDataSource();
-		if (ds == null) {
-			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+    private boolean createNewDatasource() {
+        String name = txtDatabase.getText();
+        URI uri;
 
-		int answer = JOptionPane.showConfirmDialog(this, "Are you sure want to delete this data source?", "Delete Confirmation",
-				JOptionPane.OK_CANCEL_OPTION);
-		if (answer == JOptionPane.OK_OPTION) {
-			obdaModel.removeSource(ds.getSourceID());
-		}
-	}// GEN-LAST:event_cmdRemoveActionPerformed
+        if (Strings.isNullOrEmpty(name)) {
+            JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
 
-	private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
-		
-		OBDADataSource ds = selector.getSelectedDataSource();
-		if (ds == null) {
-			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+        try {
+            uri = URI.create(name);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
 
-		lblConnectionStatus.setText("Establishing connection...");
-		lblConnectionStatus.setForeground(Color.BLACK);
+        currentDataSource.setNewID(uri);
+
+        return true;
+    }
+
+    private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
+
+        if (currentDataSource == null) {
+            if (!createNewDatasource()) {
+                return;
+            }
+        }
+
+        lblConnectionStatus.setText("Establishing connection...");
+        lblConnectionStatus.setForeground(Color.BLACK);
 
         Runnable run = () -> {
             JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
             try {
                 try {
-                    connm.closeConnection(selectedDataSource);
+                    connm.closeConnection(currentDataSource);
                 } catch (Exception e) {
                     // NO-OP
                 }
-                Connection conn = connm.getConnection(selectedDataSource);
+                Connection conn = connm.getConnection(currentDataSource);
                 if (conn == null)
                     throw new SQLException("Error connecting to the database");
                 lblConnectionStatus.setForeground(Color.GREEN.darker());
@@ -622,125 +531,109 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         };
         SwingUtilities.invokeLater(run);
-		
-	}// GEN-LAST:event_cmdTestConnectionActionPerformed
 
-	private URI createUri(String name) {
-		URI uri = null;
-		try {
-			uri = URI.create(name);
-		} catch (IllegalArgumentException e) {
-			JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
-		}
-		return uri;
-	}
+    }// GEN-LAST:event_cmdTestConnectionActionPerformed
 
-	private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
-		timer.restart();
-	}// GEN-LAST:event_fieldChangeHandler
+    private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
+        timer.restart();
+    }// GEN-LAST:event_fieldChangeHandler
 
-	private void updateSourceValues() {
-		if (selectedDataSource == null) {
-//			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+    private void updateSourceValues() {
+        if (currentDataSource == null) {
+            return;
+        }
 
-		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-		try {
-			man.closeConnection(selectedDataSource);
-		} catch (OBDAException | SQLException e) {
-			// do nothing
-		}
+        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+        try {
+            man.closeConnection(currentDataSource);
+        } catch (OBDAException | SQLException e) {
+            // do nothing
+        }
+
 
         String username = txtDatabaseUsername.getText();
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		String password = new String(txtDatabasePassword.getPassword());
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		String url = txtJdbcUrl.getText();
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+        String password = new String(txtDatabasePassword.getPassword());
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+        String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+        String url = txtJdbcUrl.getText();
+        currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 
-		if (url.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the URL ends with a white space, this can give rise to connection problems");
-		} else if (driver.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the Driver class ends with a white space, this can give rise to connection problems");
-		} else if (password.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
-		} else if (username.endsWith(" ")) {
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
-		} else {
-			lblConnectionStatus.setText("");
-		}
-		obdaModel.fireSourceParametersUpdated();
-	}
+        if (url.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the URL ends with a white space, this can give rise to connection problems");
+        } else if (driver.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the Driver class ends with a white space, this can give rise to connection problems");
+        } else if (password.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
+        } else if (username.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning the password ends with a white space, this can give rise to connection problems");
+        } else {
+            lblConnectionStatus.setText("");
+        }
+
+
+
+
+
+        obdaModel.fireSourceParametersUpdated();
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdHelp;
-    private javax.swing.JButton cmdNew;
-    private javax.swing.JButton cmdRemove;
+    private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdTestConnection;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblConnectionStatus;
     private javax.swing.JLabel lblDataSourceName;
     private javax.swing.JLabel lblDatabasePassword;
     private javax.swing.JLabel lblDatabaseUsername;
     private javax.swing.JLabel lblJdbcDriver;
     private javax.swing.JLabel lblJdbcUrl;
-    private javax.swing.JLabel lblSources;
-    private javax.swing.JLabel lblSourcesNumber;
     private javax.swing.JPanel pnlCommandButton;
     private javax.swing.JPanel pnlDataSourceParameters;
-    private javax.swing.JPanel pnlDataSourceSelector;
     private javax.swing.JPanel pnlInformation;
-    private javax.swing.JPanel pnlOBDAModelData;
+    private javax.swing.JTextField txtDatabase;
     private javax.swing.JPasswordField txtDatabasePassword;
     private javax.swing.JTextField txtDatabaseUsername;
-    private javax.swing.JComboBox txtJdbcDriver;
+    private javax.swing.JComboBox<String> txtJdbcDriver;
     private javax.swing.JTextField txtJdbcUrl;
     // End of variables declaration//GEN-END:variables
 
-	private void currentDatasourceChange(OBDADataSource previousdatasource, OBDADataSource currentsource) {
+    private void currentDatasourceChange(OBDADataSource currentsource) {
 
-		comboListener.setNotify(false);
-		if (currentsource == null) {
-			selectedDataSource = null;
-			txtJdbcDriver.setSelectedIndex(0);
-			txtDatabaseUsername.setText("");
-			txtDatabasePassword.setText("");
-			txtJdbcUrl.setText("");
-			txtJdbcDriver.setEnabled(false);
-			txtDatabaseUsername.setEnabled(false);
-			txtDatabasePassword.setEnabled(false);
-			txtJdbcUrl.setEnabled(false);
-			lblConnectionStatus.setText("");
+        comboListener.setNotify(false);
+        if (currentsource == null) {
+            currentDataSource = null;
+            txtDatabase.setText("");
+            txtJdbcDriver.setSelectedIndex(0);
+            txtDatabaseUsername.setText("");
+            txtDatabasePassword.setText("");
+            txtJdbcUrl.setText("");
+            lblConnectionStatus.setText("");
 
-		} else {
-			selectedDataSource = currentsource;
-			txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
-			txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-			txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
-			txtJdbcDriver.setEnabled(true);
-			txtDatabaseUsername.setEnabled(true);
-			txtDatabasePassword.setEnabled(true);
-			txtJdbcUrl.setEnabled(true);
-			lblConnectionStatus.setText("");
-		}
-		comboListener.setNotify(true);
-	}
+        } else {
+            currentDataSource = currentsource;
+            txtDatabase.setText(currentsource.getSourceID().toString());
+            txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+            txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
+            txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+            txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
+            lblConnectionStatus.setText("");
 
-	@Override
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-		currentDatasourceChange(oldSource, newSource);
-		if (newSource == null) {
-			enableFields(false);
-		} else {
-			enableFields(true);
-		}
-	}
+        }
+        comboListener.setNotify(true);
+    }
+
+    @Override
+    public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
+
+        currentDatasourceChange(newSource);
+
+
+    }
+
 }

@@ -35,7 +35,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,7 +47,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Locale;
 
 import static org.junit.Assert.assertTrue;
 
@@ -134,15 +133,15 @@ public class BindTestWithFunctions {
 		conn.commit();
 	}
 
-	private void runTests(Properties p, String query) throws Exception {
+
+
+	private void runTests(QuestPreferences p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
+
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -907,33 +906,38 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0.0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-        private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 
-        // Creating a new instance of the reasoner
+    //    @Test see results of datetime with locale
+    public void testDatetime() throws Exception {
+
+        String value = "Jan 31 2013 9:32AM";
+
+        DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.CHINA);
+
+        java.util.Date date;
+        try {
+            date = df.parse(value);
+            Timestamp ts = new Timestamp(date.getTime());
+            System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+
+        } catch (ParseException pe) {
+
+            throw new RuntimeException(pe);
+        }
+    }
+
+    private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
+
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
-            String value = "Jan 31 2013 9:32AM";
 
-            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
-            java.util.Date date;
-            try {
-                date = df.parse(value);
-                Timestamp ts = new Timestamp(date.getTime());
-                System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
-
-            } catch (ParseException pe) {
-
-                throw new RuntimeException(pe);
-            }
 
             int i = 0;
             List<String> returnedValues = new ArrayList<>();

@@ -31,18 +31,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SesameConstructTemplate {
-	private final TupleExpr sesameAlgebra;
-	private TupleExpr projection = null;
+    private TupleExpr projection = null;
 	private TupleExpr extension = null;
-	
-	public SesameConstructTemplate(TupleExpr te) {
-		this.sesameAlgebra = te;
-	}
-	
-	public SesameConstructTemplate(String strquery) throws MalformedQueryException {
+
+    public SesameConstructTemplate(String strquery) throws MalformedQueryException {
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(strquery, null); // base URI is null
-		this.sesameAlgebra = pq.getTupleExpr();
+        TupleExpr sesameAlgebra = pq.getTupleExpr();
 		Reduced r = (Reduced) sesameAlgebra;
 		projection = r.getArg();
 		TupleExpr texpr = null;
@@ -57,7 +52,7 @@ public class SesameConstructTemplate {
 	}
 	
 	public List<ProjectionElemList> getProjectionElemList() {
-		List<ProjectionElemList> projElemList = new ArrayList<ProjectionElemList>();
+		List<ProjectionElemList> projElemList = new ArrayList<>();
 		if (projection instanceof Projection) {
 			projElemList.add(((Projection) projection).getProjectionElemList());
 		}

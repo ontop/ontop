@@ -40,7 +40,7 @@ public class QuestUnfolder {
 	private final DBMetadata metadata;
 	private final Multimap<Predicate, List<Integer>> pkeys;
 	private final CQContainmentCheckUnderLIDs foreignKeyCQC;
-
+	
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
 	 * queries into Functions, used by the SPARQL translator.
@@ -48,7 +48,7 @@ public class QuestUnfolder {
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
 	protected List<CQIE> ufp; // for TESTS ONLY
-
+	
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -64,7 +64,7 @@ public class QuestUnfolder {
 
 		this.metadata = metadata;
 		this.pkeys = DBMetadataUtil.extractPKs(metadata);
-
+		
 		// for eliminating redundancy from the unfolding program
 		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
@@ -74,7 +74,7 @@ public class QuestUnfolder {
 					throws SQLException, JSQLParserException, OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
-
+		
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
@@ -92,16 +92,16 @@ public class QuestUnfolder {
 		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
 		
 		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
-
-
+		
+		
 		log.debug("Original mapping size: {}", unfoldingProgram.size());
-
+		
 		 // Normalizing language tags and equalities
 		normalizeMappings(unfoldingProgram);
 
 		// Apply TMappings
 		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, true, excludeFromTMappings);
-
+		
        // Adding ontology assertions (ABox) as rules (facts, head with no body).
        addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
        		inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions());
@@ -122,25 +122,25 @@ public class QuestUnfolder {
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
-
+		
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
-
+		
 		this.ufp = unfoldingProgram;
 	}
 	
-
+		
 	/**
 	 * Setting up the unfolder and SQL generation
-	 * @param reformulationReasoner
-	 * @param collection
-	 * @throws OBDAException
+	 * @param reformulationReasoner 
+	 * @param collection 
+	 * @throws OBDAException 
 	 */
 
 	public void setupInSemanticIndexMode(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
-
+	
 		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
-
-		// this call is required to complete the T-mappings by rules taking account of
+		
+		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
 		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, false, TMappingExclusionConfig.empty());
 		
@@ -154,12 +154,12 @@ public class QuestUnfolder {
 
         log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
 		
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
-
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
+		
 		this.ufp = unfoldingProgram;
 	}
 
-
+	
 	private List<CQIE> applyTMappings(List<CQIE>  unfoldingProgram, TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
@@ -181,7 +181,7 @@ public class QuestUnfolder {
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());
 		log.debug("TMapping processing time: {} ms", (endTime - startTime));
-
+		
 		return unfoldingProgram;
 	}
 
@@ -228,10 +228,10 @@ public class QuestUnfolder {
 					Term originalLangTag = typedTerm.getTerm(1);
 					if (originalLangTag instanceof ValueConstant) {
 						ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-						Term normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+						Term normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(), 
 															originalLangConstant.getType());
 						typedTerm.setTerm(1, normalizedLangTag);
-					}
+					} 
 				}
 			}
 		}
@@ -245,7 +245,7 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	private void addAssertionsAsFacts(List<CQIE> unfoldingProgram, Iterable<ClassAssertion> cas,
+	private void addAssertionsAsFacts(List<CQIE> unfoldingProgram, Iterable<ClassAssertion> cas, 
 							Iterable<ObjectPropertyAssertion> pas, Iterable<DataPropertyAssertion> das) {
 		
 		int count = 0;
@@ -277,7 +277,7 @@ public class QuestUnfolder {
 			count++;
 		}
 		log.debug("Appended {} object property assertions as fact rules", count);
-
+			
 		
 //		int count = 0;
 //		for (DataPropertyAssertion a : assertions) {
@@ -300,7 +300,7 @@ public class QuestUnfolder {
 	
 	
 	
-
+	
 
 	
 	/***

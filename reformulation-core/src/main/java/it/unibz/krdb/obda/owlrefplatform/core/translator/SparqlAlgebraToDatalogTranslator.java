@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -30,12 +31,13 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.parser.EncodeForURI;
-
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.query.Binding;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.parser.ParsedGraphQuery;
@@ -43,8 +45,6 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 
@@ -183,7 +183,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		} 
 		else if (te instanceof Extension) { 
 			return translate((Extension) te, pr, newHeadName);
-		} 
+		}
+		else if (te instanceof BindingSetAssignment) {
+			return createFilterValuesAtom((BindingSetAssignment)te);
+		}
 		
 		try {
 			throw new QueryEvaluationException("Operation not supported: " + te);
@@ -260,7 +263,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		Function newHeadAtom = ofac.getFunction(rule.getHead().getFunctionSymbol(), varList);
 		return newHeadAtom;
-	}		    
+	}
+
 
 	/**
 	 * EXPR_1 UNION EXPR_2
@@ -270,7 +274,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * ans_i(X * X_1 * NULL_2) :- ans_{i.0}(X * X_1)
 	 * ans_i(X * NULL_1 * X_2) :- ans_{i.1}(X * X_2)
 	 * 
-	 * where NULL_i is the padding of X_i with NULLs
+	 * where NULL_i is the padding of X_i with NULLs 
 	 * 
 	 * @param union
 	 * @param pr
@@ -560,6 +564,91 @@ public class SparqlAlgebraToDatalogTranslator {
 		return result;
 	}
 
+	/**
+	 * Creates a "FILTER" atom out of VALUES bindings.
+	 */
+	private Function createFilterValuesAtom(BindingSetAssignment expression) {
+		Map<String, Variable> variableIndex = createVariableIndex(expression.getBindingNames());
+
+		/**
+		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
+		 */
+		List<Function> bindingCompositeTerms = new ArrayList<>();
+
+		for (BindingSet bindingSet : expression.getBindingSets()) {
+			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
+		}
+
+		if(bindingCompositeTerms.isEmpty()) {
+			// TODO: find a better exception
+			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
+		}
+
+		Function orAtom = buildBooleanTree(bindingCompositeTerms, ExpressionOperation.OR);
+		return orAtom;
+	}
+
+	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
+		Map<String, Variable> variableIndex = new HashMap<>();
+		for (String varName: variableNames) {
+			variableIndex.put(varName, ofac.getVariable(varName));
+		}
+		return variableIndex;
+	}
+
+	/**
+	 * Used for VALUES bindings
+	 */
+	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
+		List<Function> bindingEqualityTerms = new ArrayList<>();
+
+		for (Binding binding : bindingSet) {
+			Variable variable = variableIndex.get(binding.getName());
+			if (variable == null) {
+				//TODO: find a better exception
+				throw new RuntimeException("Unknown variable " + binding.getName() + " used in the VALUES clause.");
+			}
+
+			Term valueTerm = getConstantExpression(binding.getValue());
+
+			Function equalityTerm = ofac.getFunction(ExpressionOperation.EQ, variable, valueTerm);
+			bindingEqualityTerms.add(equalityTerm);
+		}
+
+		if(bindingEqualityTerms.isEmpty()) {
+			//TODO: find a better exception
+			throw new RuntimeException("Empty binding sets are not accepted.");
+
+		}
+		return buildBooleanTree(bindingEqualityTerms, ExpressionOperation.AND);
+	}
+
+	/**
+	 * Builds a boolean tree (e.g. AND or OR-tree) out of boolean expressions.
+	 *
+	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
+	 *
+	 */
+	private Function buildBooleanTree(List<Function> booleanFctTerms, ExpressionOperation booleanFunctionSymbol) {
+		Function topFunction = null;
+		int termNb = booleanFctTerms.size();
+		for(int i=0; i < termNb; i+=2) {
+			Function newFunction;
+			if ((termNb - i) >= 2 ) {
+				newFunction = ofac.getFunction(booleanFunctionSymbol, booleanFctTerms.get(i), booleanFctTerms.get(i + 1));
+			}
+			else {
+				newFunction = booleanFctTerms.get(i);
+			}
+
+			if (topFunction == null)
+				topFunction = newFunction;
+			else
+				topFunction = ofac.getFunction(booleanFunctionSymbol, topFunction, newFunction);
+		}
+		return topFunction;
+	}
+
 	
 
 
@@ -586,7 +675,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	private Term getConcat(List<ValueExpr> values) {
-
+		
         Iterator<ValueExpr> iterator = values.iterator();
         Term topConcat = getExpression(iterator.next());
         
@@ -601,7 +690,7 @@ public class SparqlAlgebraToDatalogTranslator {
         
         return topConcat;		
 	}
-
+	
 	private Term getSubstring(List<ValueExpr> args) {
 
 		if (args.size() == 2) {
@@ -615,14 +704,14 @@ public class SparqlAlgebraToDatalogTranslator {
 			Term en = getExpression(args.get(2));
 			return ofac.getFunctionSubstring(str, st, en);
 		}
-		else
+		else 
 			throw new UnsupportedOperationException("Wrong number of arguments (found "
 					+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
 	}
-
+		
 	
 	private Term getReplace(List<ValueExpr> args) {
-
+		
 		if (args.size() == 2) {
             Term t1 = getExpression(args.get(0));
             Term out_string = getExpression(args.get(1));
@@ -636,48 +725,48 @@ public class SparqlAlgebraToDatalogTranslator {
             return ofac.getFunctionReplace(t1, out_string, in_string);
 		}
         else
-            throw new UnsupportedOperationException("Wrong number of arguments (found "
-            		+ args.size() + ", only 2 or 3 supported) to sql function REPLACE");
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+            		+ args.size() + ", only 2 or 3 supported) to sql function REPLACE");		
 	}
-
+	
 	// XPath 1.0 functions (XPath 1.1 has variants with more arguments)
 	private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
 				new ImmutableMap.Builder<String, OperationPredicate>()
 						.put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
 						.put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
-						.put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN)
-						.put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE)
-						.put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER)
-						.put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS)
-						.put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS)
-						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI)
-						.put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS)
-						.put("UUID", ExpressionOperation.UUID)
-						.put("STRUUID", ExpressionOperation.STRUUID)
+						.put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN) 
+						.put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE) 
+						.put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER) 
+						.put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS) 
+						.put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS) 
+						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI) 
+						.put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS) 
+						.put("UUID", ExpressionOperation.UUID) 
+						.put("STRUUID", ExpressionOperation.STRUUID) 
 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS)
-						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL)
-						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR)
-						.put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND)
-						.put("RAND", ExpressionOperation.RAND)
-
-						.put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR)
-						.put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY)
-						.put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH)
-						.put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS)
-						.put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES)
-						.put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS)
-						.put("NOW", ExpressionOperation.NOW)
-						.put("TZ", ExpressionOperation.TZ)
-
-						.put("MD5", ExpressionOperation.MD5)
-						.put("SHA1", ExpressionOperation.SHA1)
-						.put("SHA256", ExpressionOperation.SHA256)
-						.put("SHA512", ExpressionOperation.SHA512)
+						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR) 
+						.put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND) 
+						.put("RAND", ExpressionOperation.RAND) 
+						
+						.put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR) 
+						.put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY) 
+						.put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH) 
+						.put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS) 
+						.put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES) 
+						.put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS) 
+						.put("NOW", ExpressionOperation.NOW) 
+						.put("TZ", ExpressionOperation.TZ) 
+					
+						.put("MD5", ExpressionOperation.MD5) 
+						.put("SHA1", ExpressionOperation.SHA1) 
+						.put("SHA256", ExpressionOperation.SHA256) 
+						.put("SHA512", ExpressionOperation.SHA512) 
 						.build();
-
-
-
+	
+	
+	
 	
 	
     /** Return the Functions supported at the moment only
@@ -693,20 +782,20 @@ public class SparqlAlgebraToDatalogTranslator {
     		if (args.size() != p.getArity()) {
                 throw new UnsupportedOperationException(
                 		"Wrong number of arguments (found " + args.size() + ", only " +
-                			 p.getArity() + "supported) for SPARQL " + expr.getURI() + "function");
+                			 p.getArity() + "supported) for SPARQL " + expr.getURI() + "function");					
     		}
     		List<Term> terms = new ArrayList<>(args.size());
     		for (ValueExpr a : args)
     			terms.add(getExpression(a));
     		Term fun = ofac.getFunction(p, terms);
-    		return fun;
+    		return fun;   		
     	}
-
+    	
     	// these are all special cases with **variable** number of arguments
-
+  
         switch(expr.getURI()){
          
-        	// at least one argument
+        	// at least one argument 
             case "http://www.w3.org/2005/xpath-functions#concat":
                 return getConcat(expr.getArgs());
 
@@ -714,10 +803,10 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#replace":
                 return getReplace(expr.getArgs());
                 
-            // 2 or 3 arguments
+            // 2 or 3 arguments    
             case "http://www.w3.org/2005/xpath-functions#substring":
             	return getSubstring(expr.getArgs()); 
-
+            	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
@@ -803,7 +892,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getFunctionNOT(term);
 		}
 		else if (expr instanceof IsLiteral) {
-			return ofac.getFunction(ExpressionOperation.IS_LITERAL, term);
+			return ofac.getFunction(ExpressionOperation.IS_LITERAL, term);	
 		} 
 		else if (expr instanceof IsURI) {
 			return ofac.getFunction(ExpressionOperation.IS_IRI, term);
@@ -816,7 +905,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		} 
 		else if (expr instanceof IsBNode) {
 			return ofac.getFunction(ExpressionOperation.IS_BLANK, term);
-		}
+		} 	
 		else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
 			if (arg instanceof Var) 
@@ -827,8 +916,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
-
-	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> relationalOperations =
+	
+	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> relationalOperations = 
 			new ImmutableMap.Builder<Compare.CompareOp, ExpressionOperation>()
 				.put(Compare.CompareOp.EQ, ExpressionOperation.EQ)
 				.put(Compare.CompareOp.GE, ExpressionOperation.GTE)
@@ -838,15 +927,15 @@ public class SparqlAlgebraToDatalogTranslator {
 				.put(Compare.CompareOp.NE, ExpressionOperation.NEQ)
 				.build();
 
-	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> numericalOperations =
+	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> numericalOperations = 
 			new ImmutableMap.Builder<MathExpr.MathOp, ExpressionOperation>()
 			.put(MathExpr.MathOp.PLUS, ExpressionOperation.ADD)
 			.put(MathExpr.MathOp.MINUS, ExpressionOperation.SUBTRACT)
 			.put(MathExpr.MathOp.MULTIPLY, ExpressionOperation.MULTIPLY)
 			.put(MathExpr.MathOp.DIVIDE, ExpressionOperation.DIVIDE)
 			.build();
-
-
+			
+	
 	private Term getBinaryExpression(BinaryValueOperator expr) {
 		
 		Term term1 = getExpression(expr.getLeftArg());
@@ -890,7 +979,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				Term functionTerm = f.getTerm(0);
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
-					output = ofac.getFunction(f.getFunctionSymbol(),
+					output = ofac.getFunction(f.getFunctionSymbol(), 
 							 ofac.getConstantLiteral(c.getValue().toLowerCase(), 
 							 c.getType()));
 				}

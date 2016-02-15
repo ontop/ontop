@@ -19,12 +19,12 @@ package sesameWrapper;
  * limitations under the License.
  * #L%
  */
+
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
-
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.RepositoryException;
 
@@ -50,7 +50,8 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo {
 		this.classicStore = new QuestDBClassicStore(name, data, config);
 	}
 	
-	public void initialize() throws RepositoryException {
+	@Override
+    public void initialize() throws RepositoryException {
 		super.initialize();
 		try {
 			classicStore.getConnection();
@@ -70,7 +71,8 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo {
 		return true;
 	}
 	
-	public  String getType() {
+	@Override
+    public  String getType() {
 		return QuestConstants.CLASSIC;
 	}
 }

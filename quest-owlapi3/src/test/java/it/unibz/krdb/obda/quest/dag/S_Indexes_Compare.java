@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -56,7 +56,7 @@ public class S_Indexes_Compare extends TestCase {
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPI3TranslatorUtility.loadOntologyFromFile(fileInput));
+		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
@@ -64,7 +64,7 @@ public class S_Indexes_Compare extends TestCase {
 		
 		testIndexes(engine, dag);
 
-		Ontology onto = OWLAPI3TranslatorUtility.loadOntologyFromFile(fileInput);
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
 		DAG dag2 = DAGConstructor.getISADAG(onto);
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);

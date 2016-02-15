@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -41,13 +41,13 @@ public class MaterializeAction implements OBDAProgressListener {
 	
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
-	private OWLAPI3Materializer materializer = null;
+	private OWLAPIMaterializer materializer = null;
 	private Iterator<OWLIndividualAxiom> iterator = null;
 	private Container cont = null;
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
-	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer materialize, Container cont) {
+	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPIMaterializer materialize, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
 		this.materializer = materialize;

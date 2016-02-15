@@ -33,7 +33,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,7 +44,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
@@ -93,7 +91,7 @@ public class BindTestWithFunctionsDb2 {
 		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-drop-postgresql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
+		String line = in.readLine();http://www.reinswald.com/cms/en/sportarten/rodeln.html
 		while (line != null) {
 			bf.append(line);
 			line = in.readLine();
@@ -105,15 +103,12 @@ public class BindTestWithFunctionsDb2 {
 		//conn.commit();
 	}
 
-	private void runTests(Properties p, String query) throws Exception {
+    private void runTests(QuestPreferences p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -935,11 +930,8 @@ public class BindTestWithFunctionsDb2 {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
-
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();

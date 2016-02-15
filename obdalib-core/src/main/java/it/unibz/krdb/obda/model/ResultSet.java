@@ -20,6 +20,9 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public interface ResultSet {
+/**
+ * A common interface for TupleResultSet and GraphResultSet
+ */
+public interface ResultSet extends AutoCloseable{
 	// NO-OP
 }
