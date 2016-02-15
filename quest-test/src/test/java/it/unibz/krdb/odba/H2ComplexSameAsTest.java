@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,11 +96,12 @@ public class H2ComplexSameAsTest {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+		QuestOWLConfiguration config;
 
-		factory.setPreferenceHolder(p);
+		config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

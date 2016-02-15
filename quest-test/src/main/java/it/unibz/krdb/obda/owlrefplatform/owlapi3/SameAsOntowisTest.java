@@ -11,7 +11,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+
 
 import java.io.*;
 import java.util.ArrayList;
@@ -300,13 +300,16 @@ public class SameAsOntowisTest {
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(preference);
+//        factory.setOBDAController(obdaModel);
+//        factory.setPreferenceHolder(preference);
+
+        QuestOWLConfiguration config;
+
+        config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
 
 
 
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWL reasoner = factory.createReasoner(ontology,config);
 
         this.reasoner = reasoner;
 		/*

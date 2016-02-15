@@ -97,11 +97,10 @@ public class H2SameAsTest {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
 
-		factory.setPreferenceHolder(p);
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
