@@ -149,16 +149,20 @@ public class AboxMaterializationAction extends ProtegeAction {
 		int res = JOptionPane.showOptionDialog(workspace, panel, "Materialization options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (res == JOptionPane.OK_OPTION) {
 
-			//add to current ontology
+
 			if (radioAdd.isSelected()) {
+				//add to current ontology
 				materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());
 			}
-			//write to file and create an ontology if requested
+
 			else if (radioExport.isSelected()) {
+				//write to file and create an ontology if requested
 				int outputFormat = comboFormats.getSelectedIndex();
-				//create new ontology and add the materialized values
+
 				if (cbCreateOntology.isSelected()) {
+					//create new ontology and add the materialized values
 					materializeNewOntoToFile();
+
 				} else {
 					//save materialized values in a new file
 					materializeToFile(outputFormat);
@@ -312,25 +316,22 @@ public class AboxMaterializationAction extends ProtegeAction {
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
 				
-				Thread th = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...");
-							CountDownLatch latch = new CountDownLatch(1);
-							action.setCountdownLatch(latch);
-							monitor.addProgressListener(action);
-							monitor.start();
-							action.run();
-							latch.await();
-							monitor.stop();
-						} 
-						catch (InterruptedException e) {
-							log.error(e.getMessage(), e);
-							JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances.");
-						}
-					}
-				});
+				Thread th = new Thread(() -> {
+                    try {
+                        OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...");
+                        CountDownLatch latch = new CountDownLatch(1);
+                        action.setCountdownLatch(latch);
+                        monitor.addProgressListener(action);
+                        monitor.start();
+                        action.run();
+                        latch.await();
+                        monitor.stop();
+                    }
+                    catch (InterruptedException e) {
+                        log.error(e.getMessage(), e);
+                        JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances.");
+                    }
+                });
 				th.start();
 			}
 			catch (Exception e) {
