@@ -24,6 +24,7 @@ import com.google.common.base.Strings;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -132,12 +133,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         comboListener.setNotify(true);
     }
 
-    private void enableFields(boolean value) {
-        txtJdbcUrl.setEnabled(value);
-        txtDatabasePassword.setEnabled(value);
-        txtDatabaseUsername.setEnabled(value);
-        txtJdbcDriver.setEnabled(value);
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -488,7 +483,23 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             return false;
         }
 
-        currentDataSource.setNewID(uri);
+        if(currentDataSource == null) {
+            //create new datasource
+            OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+            String username = txtDatabaseUsername.getText();
+            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+            String password = new String(txtDatabasePassword.getPassword());
+            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+            String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
+            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+            String url = txtJdbcUrl.getText();
+            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+            currentDataSource = newDatasource;
+            obdaModel.addSource(currentDataSource);
+        }
+        else {
+            currentDataSource.setNewID(uri);
+        }
 
         return true;
     }
