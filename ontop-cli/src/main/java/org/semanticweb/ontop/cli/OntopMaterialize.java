@@ -50,9 +50,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             description = "The format of the materialized ontology. " +
-                    //" Options: rdfxml, owlxml, turtle. " +
+                    //" Options: rdfxml, owlxml, turtle, n3. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle"})
+    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle", "n3"})
     public String format;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",

@@ -26,11 +26,6 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
-import org.openrdf.model.Statement;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.n3.N3Writer;
-import org.openrdf.rio.rdfxml.RDFXMLWriter;
-import org.openrdf.rio.turtle.TurtleWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -38,12 +33,14 @@ import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameMaterializer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -107,7 +104,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		//combo box for output format,
 		JLabel lFormat = new JLabel("Output format:\t");
-		String[] fileOptions = {"RDFXML", "N3", "TTL", "OWLXML"};
+		String[] fileOptions = {"rdfxml", "owlxml", "turtle", "n3"};
 		final JComboBox comboFormats = new JComboBox(fileOptions);
 		//should be enabled only when radio button export is selected
 		comboFormats.setEnabled(false);
@@ -127,7 +124,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 
             } else if (e.getStateChange() == ItemEvent.DESELECTED) {
                 cbCreateOntology.setEnabled(false);
-//					comboFormats.setSelectedIndex(-1);
                 comboFormats.setEnabled(false);
             }
         });
@@ -157,7 +153,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 			else if (radioExport.isSelected()) {
 				//write to file and create an ontology if requested
-				int outputFormat = comboFormats.getSelectedIndex();
+				String outputFormat = (String)comboFormats.getSelectedItem();
 
 				if (cbCreateOntology.isSelected()) {
 					//create new ontology and add the materialized values
@@ -192,7 +188,7 @@ public class AboxMaterializationAction extends ProtegeAction {
                 newMan.saveOntology(newOnto, format, new FileOutputStream(file));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
             log.error(e.getMessage(), e);
             JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
         }
@@ -215,8 +211,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		return newOnto;
 	}
 
-	private void materializeToFile(int format)
-	{
+	private void materializeToFile(String format) {
 		String fileName = "";
 		long count = 0;
 		long time = 0;
@@ -224,75 +219,66 @@ public class AboxMaterializationAction extends ProtegeAction {
 		final JFileChooser fc = new JFileChooser();
 		fc.setSelectedFile(new File(fileName));
 		fc.showSaveDialog(workspace);
-		
+
 		try {
 			File file = fc.getSelectedFile();
 			if (file != null) {
+
 				OutputStream out = new FileOutputStream(file);
 				BufferedWriter fileWriter = new BufferedWriter(
 						new OutputStreamWriter(out, "UTF-8"));
 
 				OWLOntology ontology = modelManager.getActiveOntology();
 				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
-				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+
 				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
 				obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
-				
+
 				final long startTime = System.currentTimeMillis();
-				if (format != 3) {
-					// we are going to use SESAME MATERIALIZER
-				
-					SesameMaterializer materializer = new SesameMaterializer(
-							obdaModel, onto, DO_STREAM_RESULTS);
-					Iterator<Statement> iterator = materializer.getIterator();
-					RDFWriter writer = null;
+				OWLDocumentFormat ontoFormat;
 
-					if (format == 0) // rdfxml
-					{
-						writer = new RDFXMLWriter(fileWriter);
-
-					} else if (format == 1) // n3
-					{
-						writer = new N3Writer(fileWriter);
-
-					} else if (format == 2) // ttl
-					{
-						writer = new TurtleWriter(fileWriter);
-					}
-					writer.startRDF();
-					while (iterator.hasNext())
-						writer.handleStatement(iterator.next());
-					writer.endRDF();
-					count = materializer.getTriplesCount();
-					vocab = materializer.getVocabularySize();
-					materializer.disconnect();
+				switch (format) {
+					case "rdfxml":
+						ontoFormat = new RDFXMLDocumentFormat();
+						break;
+					case "owlxml":
+						ontoFormat = new OWLXMLDocumentFormat();
+						break;
+					case "turtle":
+						ontoFormat = new TurtleDocumentFormat();
+						break;
+					case "n3":
+						ontoFormat = new N3DocumentFormat();
+						break;
+					default:
+						throw new Exception("Unknown format: " + format);
 				}
 
-				else {
-					// owlxml, OWL materializer
-					try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(
-							obdaModel, onto, DO_STREAM_RESULTS)) {
-						Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
-						while (iterator.hasNext())
-							manager.addAxiom(ontology, iterator.next());
-						manager.saveOntology(ontology, new OWLXMLDocumentFormat(),
-								new WriterDocumentTarget(fileWriter));
+				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS)) {
 
-						count = materializer.getTriplesCount();
-						vocab = materializer.getVocabularySize();
+					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
+					while (iterator.hasNext()) {
+						manager.addAxiom(ontology, iterator.next());
 					}
+					manager.saveOntology(ontology, ontoFormat, new WriterDocumentTarget(fileWriter));
+
+					count = materializer.getTriplesCount();
+					vocab = materializer.getVocabularySize();
 				}
 
 				fileWriter.close();
 				out.close();
 				final long endTime = System.currentTimeMillis();
 				time = endTime - startTime;
+
 				JOptionPane.showMessageDialog(this.workspace,
 						"Task is completed\nNr. of triples: " + count
 								+ "\nVocabulary size: " + vocab
 								+ "\nElapsed time: " + time + " ms.", "Done",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
+
+
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
@@ -337,8 +323,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 			catch (Exception e) {
 				Container container = getWorkspace().getRootPane().getParent();
 				JOptionPane.showMessageDialog(container, "Cannot create individuals! See the log information for the details.", "Error", JOptionPane.ERROR_MESSAGE);
-			
-				log.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			}
 		}
 	}
