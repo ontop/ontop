@@ -20,15 +20,15 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.parser.TargetQueryParserException;
-import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
-import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
-import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
+import it.unibz.krdb.ontop.exception.DuplicateMappingException;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.krdb.ontop.model.*;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.parser.TargetQueryParserException;
+import it.unibz.krdb.ontop.parser.TurtleOBDASyntaxParser;
+import it.unibz.krdb.ontop.renderer.SourceQueryRenderer;
+import it.unibz.krdb.ontop.renderer.TargetQueryRenderer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;

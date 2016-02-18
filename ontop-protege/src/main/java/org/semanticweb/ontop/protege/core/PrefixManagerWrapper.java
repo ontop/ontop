@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.AbstractPrefixManager;
+import it.unibz.krdb.ontop.io.AbstractPrefixManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
  * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any

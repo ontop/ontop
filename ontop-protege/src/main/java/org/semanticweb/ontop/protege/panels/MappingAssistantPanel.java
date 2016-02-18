@@ -20,15 +20,15 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
+import it.unibz.krdb.ontop.exception.DuplicateMappingException;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.model.*;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.ontop.ontology.OClass;
+import it.unibz.krdb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
+import it.unibz.krdb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.krdb.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.krdb.sql.*;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.MapItem;

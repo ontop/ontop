@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWL;
 
 import java.awt.event.ActionEvent;
 

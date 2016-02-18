@@ -20,8 +20,8 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.io.SimplePrefixManager;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
 
 import java.awt.Dimension;

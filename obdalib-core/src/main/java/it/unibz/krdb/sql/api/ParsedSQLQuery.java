@@ -20,13 +20,12 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
-import it.unibz.krdb.obda.parser.AggregationVisitor;
-import it.unibz.krdb.obda.parser.AliasMapVisitor;
-import it.unibz.krdb.obda.parser.ColumnsVisitor;
-import it.unibz.krdb.obda.parser.JoinConditionVisitor;
-import it.unibz.krdb.obda.parser.ProjectionVisitor;
-import it.unibz.krdb.obda.parser.WhereClauseVisitor;
-import it.unibz.krdb.obda.parser.TableNameVisitor;
+import it.unibz.krdb.ontop.parser.AliasMapVisitor;
+import it.unibz.krdb.ontop.parser.ColumnsVisitor;
+import it.unibz.krdb.ontop.parser.JoinConditionVisitor;
+import it.unibz.krdb.ontop.parser.ProjectionVisitor;
+import it.unibz.krdb.ontop.parser.WhereClauseVisitor;
+import it.unibz.krdb.ontop.parser.TableNameVisitor;
 import it.unibz.krdb.sql.QuotedID;
 import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;

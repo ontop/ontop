@@ -20,10 +20,10 @@ package org.semanticweb.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerListener;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
+import it.unibz.krdb.ontop.querymanager.QueryControllerEntity;
+import it.unibz.krdb.ontop.querymanager.QueryControllerGroup;
+import it.unibz.krdb.ontop.querymanager.QueryControllerListener;
+import it.unibz.krdb.ontop.querymanager.QueryControllerQuery;
 
 import java.util.Enumeration;
 import java.util.List;

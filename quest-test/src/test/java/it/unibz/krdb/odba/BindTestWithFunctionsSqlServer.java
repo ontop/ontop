@@ -20,13 +20,13 @@ package it.unibz.krdb.odba;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import it.unibz.krdb.ontop.io.ModelIOManager;
+import it.unibz.krdb.ontop.model.OBDADataFactory;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -49,9 +49,9 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
+ * Refer in particular to the class {@link it.unibz.krdb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
  *
- * It expands the tests from {@link it.unibz.krdb.obda.reformulation.test.BindTest}.
+ * It expands the tests from {@link it.unibz.krdb.ontop.reformulation.test.BindTest}.
  */
 
 public class BindTestWithFunctionsSqlServer {

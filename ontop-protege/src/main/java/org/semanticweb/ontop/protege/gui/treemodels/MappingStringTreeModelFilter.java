@@ -20,9 +20,9 @@ package org.semanticweb.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.ontop.model.Function;
+import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
+import it.unibz.krdb.ontop.model.OBDASQLQuery;
 
 import java.util.List;
 

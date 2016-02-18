@@ -20,15 +20,15 @@ package inf.unibz.ontp.sesame.repository.test;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.InvalidMappingException;
-import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
-import it.unibz.krdb.obda.sesame.SesameStatementIterator;
+import it.unibz.krdb.ontop.exception.InvalidMappingException;
+import it.unibz.krdb.ontop.io.ModelIOManager;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.ontology.Ontology;
+import it.unibz.krdb.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.krdb.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.krdb.ontop.sesame.SesameStatementIterator;
 import junit.framework.TestCase;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;

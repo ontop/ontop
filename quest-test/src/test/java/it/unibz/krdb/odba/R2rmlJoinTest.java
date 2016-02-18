@@ -1,18 +1,18 @@
 package it.unibz.krdb.odba;
 
 
-import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.QueryIOManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.obda.r2rml.R2RMLReader;
+import it.unibz.krdb.ontop.io.ModelIOManager;
+import it.unibz.krdb.ontop.io.QueryIOManager;
+import it.unibz.krdb.ontop.model.OBDADataFactory;
+import it.unibz.krdb.ontop.model.OBDADataSource;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.krdb.ontop.querymanager.QueryController;
+import it.unibz.krdb.ontop.querymanager.QueryControllerGroup;
+import it.unibz.krdb.ontop.querymanager.QueryControllerQuery;
+import it.unibz.krdb.ontop.r2rml.R2RMLReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;

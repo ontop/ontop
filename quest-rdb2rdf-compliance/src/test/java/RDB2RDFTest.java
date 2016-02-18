@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;

@@ -81,7 +81,7 @@ public class MappingFilterLexer extends Lexer {
     public MappingFilterLexer(CharStream input, RecognizerSharedState state) {
         super(input,state);
     }
-    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g"; }
+    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\ontop\\gui\\swing\\utils\\MappingFilter.g"; }
 
     // $ANTLR start "NOT"
     public final void mNOT() throws RecognitionException {

@@ -20,11 +20,11 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
+import it.unibz.krdb.ontop.model.OBDAException;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.questdb.QuestDBClassicStore;
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.RepositoryException;
 

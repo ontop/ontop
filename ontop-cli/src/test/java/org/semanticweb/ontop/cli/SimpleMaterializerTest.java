@@ -1,9 +1,9 @@
 package org.semanticweb.ontop.cli;
 
-import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.io.ModelIOManager;
+import it.unibz.krdb.ontop.model.OBDADataFactory;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

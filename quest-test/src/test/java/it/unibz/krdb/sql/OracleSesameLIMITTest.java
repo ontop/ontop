@@ -20,11 +20,11 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.r2rml.R2RMLManager;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.r2rml.R2RMLManager;
 
 import org.junit.After;
 import org.junit.Test;

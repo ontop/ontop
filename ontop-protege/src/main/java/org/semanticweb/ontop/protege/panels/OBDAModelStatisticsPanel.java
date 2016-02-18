@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.utils.VirtualABoxStatistics;
+import it.unibz.krdb.ontop.utils.VirtualABoxStatistics;
 
 import java.util.HashMap;
 

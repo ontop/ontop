@@ -21,11 +21,11 @@ package org.semanticweb.ontop.protege.gui.action;
  */
 
 import com.google.common.base.Optional;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
+import it.unibz.krdb.ontop.ontology.Ontology;
+import it.unibz.krdb.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;

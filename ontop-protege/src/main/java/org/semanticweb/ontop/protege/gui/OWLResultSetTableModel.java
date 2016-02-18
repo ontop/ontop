@@ -20,8 +20,8 @@ package org.semanticweb.ontop.protege.gui;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;

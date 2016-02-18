@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
 import org.protege.editor.core.Disposable;
 
 public class DisposableQuestPreferences extends QuestPreferences implements Disposable {

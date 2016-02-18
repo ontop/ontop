@@ -20,8 +20,8 @@ package ontop.org.tests.obda.docker;
  * #L%
  */
 
-import it.unibz.krdb.obda.quest.scenarios.QuestVirtualScenarioParent;
-import it.unibz.krdb.obda.quest.scenarios.ScenarioManifestTestUtils;
+import it.unibz.krdb.ontop.quest.scenarios.QuestVirtualScenarioParent;
+import it.unibz.krdb.ontop.quest.scenarios.ScenarioManifestTestUtils;
 import junit.framework.Test;
 
 public class DockerDB2Testsuite extends QuestVirtualScenarioParent {

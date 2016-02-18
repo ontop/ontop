@@ -20,12 +20,12 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.ontop.exception.DuplicateMappingException;
+import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
-import it.unibz.krdb.obda.r2rml.R2RMLReader;
+import it.unibz.krdb.ontop.r2rml.R2RMLReader;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;

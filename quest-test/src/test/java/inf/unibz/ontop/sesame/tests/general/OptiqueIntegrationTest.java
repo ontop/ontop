@@ -1,7 +1,7 @@
 package inf.unibz.ontop.sesame.tests.general;
 
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
 
 import java.io.File;
 import java.io.FileInputStream;

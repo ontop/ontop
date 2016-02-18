@@ -22,7 +22,7 @@ package org.semanticweb.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.protege.gui.treemodels.MappingFunctorTreeModelFilter;
 import org.semanticweb.ontop.protege.gui.treemodels.MappingHeadVariableTreeModelFilter;
 import org.semanticweb.ontop.protege.gui.treemodels.MappingIDTreeModelFilter;
@@ -88,7 +88,7 @@ public class MappingFilterParser extends Parser {
     }
 
     public String[] getTokenNames() { return MappingFilterParser.tokenNames; }
-    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g"; }
+    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\ontop\\gui\\swing\\utils\\MappingFilter.g"; }
 
 
 

@@ -20,9 +20,9 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.ontop.model.OBDADataSource;
+import it.unibz.krdb.ontop.model.OBDAException;
+import it.unibz.krdb.ontop.model.impl.RDBMSourceParameterConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -21,8 +21,8 @@ package sesameWrapper;
  */
 
 
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.TupleResultSet;
+import it.unibz.krdb.ontop.model.OBDAException;
+import it.unibz.krdb.ontop.model.TupleResultSet;
 
 import java.util.HashSet;
 import java.util.List;

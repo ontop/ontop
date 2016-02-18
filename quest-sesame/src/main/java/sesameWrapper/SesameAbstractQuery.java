@@ -22,7 +22,7 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.Query;
 import org.openrdf.query.impl.MapBindingSet;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
 
 public abstract class SesameAbstractQuery implements Query {
 

@@ -20,11 +20,11 @@ package org.semanticweb.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.parser.TargetQueryParserException;
-import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.krdb.ontop.model.*;
+import it.unibz.krdb.ontop.parser.TargetQueryParserException;
+import it.unibz.krdb.ontop.parser.TurtleOBDASyntaxParser;
 
 import javax.swing.*;
 import javax.swing.border.Border;

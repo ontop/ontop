@@ -20,18 +20,18 @@ package it.unibz.krdb.odba;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.obda.r2rml.R2RMLReader;
+import it.unibz.krdb.ontop.io.ModelIOManager;
+import it.unibz.krdb.ontop.model.*;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.ontology.DataPropertyExpression;
+import it.unibz.krdb.ontop.ontology.OClass;
+import it.unibz.krdb.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.ontop.ontology.Ontology;
+import it.unibz.krdb.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.krdb.ontop.r2rml.R2RMLReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

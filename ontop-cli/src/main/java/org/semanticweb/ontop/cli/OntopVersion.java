@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.cli;
 
 import com.github.rvesse.airline.annotations.Command;
-import it.unibz.krdb.obda.utils.VersionInfo;
+import it.unibz.krdb.ontop.utils.VersionInfo;
 
 @Command(name = "--version",
         description = "Show version of ontop")

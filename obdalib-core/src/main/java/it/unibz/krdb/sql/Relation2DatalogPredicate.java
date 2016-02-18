@@ -2,11 +2,11 @@ package it.unibz.krdb.sql;
 
 import java.util.List;
 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.model.Function;
+import it.unibz.krdb.ontop.model.OBDADataFactory;
+import it.unibz.krdb.ontop.model.Predicate;
+import it.unibz.krdb.ontop.model.Term;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
 
 public class Relation2DatalogPredicate {
 

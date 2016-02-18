@@ -24,10 +24,10 @@ import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
-import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
+import it.unibz.krdb.ontop.model.OBDAQueryModifiers;
+import it.unibz.krdb.ontop.model.TupleResultSet;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBStatement;
 
 public class SesameBooleanQuery extends SesameAbstractQuery implements BooleanQuery {
 

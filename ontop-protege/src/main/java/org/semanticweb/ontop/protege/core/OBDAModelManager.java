@@ -21,14 +21,14 @@ package org.semanticweb.ontop.protege.core;
  */
 
 import com.google.common.base.Optional;
-import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.io.QueryIOManager;
-import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.querymanager.*;
+import it.unibz.krdb.ontop.io.ModelIOManager;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.io.QueryIOManager;
+import it.unibz.krdb.ontop.model.*;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.owlapi3.OBDAModelValidator;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.querymanager.*;
 import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import org.protege.editor.core.Disposable;

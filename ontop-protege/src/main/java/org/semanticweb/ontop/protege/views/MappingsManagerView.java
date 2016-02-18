@@ -20,10 +20,10 @@ package org.semanticweb.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlapi3.TargetQueryValidator;
+import it.unibz.krdb.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
+import it.unibz.krdb.ontop.owlapi3.TargetQueryValidator;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;

@@ -20,8 +20,8 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
 
 @Deprecated
 public class SesameClassicJDBCRepo extends SesameClassicRepo {

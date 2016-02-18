@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
+import it.unibz.krdb.ontop.parser.SQLQueryDeepParser;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 
 import org.junit.Test;

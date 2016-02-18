@@ -20,13 +20,13 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.utils.IDGenerator;
-import it.unibz.krdb.obda.utils.SourceQueryValidator;
+import it.unibz.krdb.ontop.exception.DuplicateMappingException;
+import it.unibz.krdb.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.krdb.ontop.model.OBDADataSource;
+import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.utils.IDGenerator;
+import it.unibz.krdb.ontop.utils.SourceQueryValidator;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.semanticweb.ontop.protege.dialogs.MappingValidationDialog;

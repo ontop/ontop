@@ -3,11 +3,11 @@ package org.semanticweb.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import it.unibz.krdb.obda.exception.InvalidMappingException;
-import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.ontop.exception.InvalidMappingException;
+import it.unibz.krdb.ontop.exception.InvalidPredicateDeclarationException;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLConfiguration;
+import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 

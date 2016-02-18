@@ -20,8 +20,8 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.ontop.model.OBDAException;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;

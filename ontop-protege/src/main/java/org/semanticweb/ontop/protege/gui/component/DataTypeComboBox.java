@@ -20,10 +20,10 @@ package org.semanticweb.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.ontop.model.DatatypeFactory;
+import it.unibz.krdb.ontop.model.Predicate;
+import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 
 import java.awt.Component;

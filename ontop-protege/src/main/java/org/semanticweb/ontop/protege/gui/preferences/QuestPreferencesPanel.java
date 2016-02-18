@@ -21,7 +21,7 @@ package org.semanticweb.ontop.protege.gui.preferences;
  */
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import org.semanticweb.ontop.protege.panels.QuestConfigPanel;
 

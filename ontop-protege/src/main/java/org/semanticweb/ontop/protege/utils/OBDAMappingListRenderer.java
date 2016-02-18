@@ -20,14 +20,14 @@ package org.semanticweb.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
-import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
+import it.unibz.krdb.ontop.io.PrefixManager;
+import it.unibz.krdb.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.krdb.ontop.model.Function;
+import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
+import it.unibz.krdb.ontop.model.OBDAModel;
+import it.unibz.krdb.ontop.model.OBDASQLQuery;
+import it.unibz.krdb.ontop.renderer.SourceQueryRenderer;
+import it.unibz.krdb.ontop.renderer.TargetQueryRenderer;
 
 import javax.swing.*;
 import javax.swing.text.Style;

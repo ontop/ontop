@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
