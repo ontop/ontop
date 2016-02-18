@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi3;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;

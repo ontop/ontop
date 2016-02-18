@@ -26,7 +26,7 @@ import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableMod
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
-import it.unibz.inf.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege.utils.*;

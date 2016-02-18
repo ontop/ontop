@@ -25,12 +25,12 @@ import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.sql.Attribute;
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.ForeignKeyConstraint;
-import it.unibz.inf.sql.Relation2DatalogPredicate;
-import it.unibz.inf.sql.DatabaseRelationDefinition;
-import it.unibz.inf.sql.UniqueConstraint;
+import it.unibz.inf.ontop.sql.Attribute;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.ForeignKeyConstraint;
+import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.UniqueConstraint;
 
 import java.util.ArrayList;
 import java.util.Collection;

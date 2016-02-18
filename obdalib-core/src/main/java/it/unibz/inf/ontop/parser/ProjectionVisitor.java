@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
-import it.unibz.inf.sql.api.ProjectionJSQL;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.api.ProjectionJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;

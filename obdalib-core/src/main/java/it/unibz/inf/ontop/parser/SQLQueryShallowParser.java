@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.parser;
 
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.RelationID;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;

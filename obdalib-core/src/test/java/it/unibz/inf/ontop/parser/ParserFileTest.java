@@ -25,10 +25,10 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.DBMetadataExtractor;
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import java.net.URI;
 import java.net.URISyntaxException;

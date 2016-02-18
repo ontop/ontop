@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.utils.VersionInfo;
-import it.unibz.inf.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;

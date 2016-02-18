@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
@@ -43,7 +43,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.inf.ontop.utils.MappingParser;
-import it.unibz.inf.sql.*;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;

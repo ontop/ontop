@@ -342,7 +342,7 @@ public class BindTest {
 
         } catch (OntopOWLException e) {
 
-            assertEquals("it.unibz.inf.obda.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
         }
 
         //variable cannot be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
@@ -359,7 +359,7 @@ public class BindTest {
             price2 = runTests(p, querySelect2);
         } catch (OntopOWLException e) {
 
-            assertEquals("it.unibz.inf.obda.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
         }
 
     }
@@ -391,7 +391,7 @@ public class BindTest {
             OWLObject price = runTests(p, queryBind);
 
         } catch (OntopOWLException e) {
-            assertEquals("it.unibz.inf.obda.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
             // ROMAN: commented out -- now the message is different
             // assertEquals("Operator not supported: SingletonSet", e.getCause().getLocalizedMessage().trim());
         }
@@ -412,7 +412,7 @@ public class BindTest {
 
         } catch (OntopOWLException e) {
 
-            assertEquals("it.unibz.inf.obda.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
 
         }
 
@@ -559,7 +559,7 @@ public class BindTest {
 
         } catch (OntopOWLException e) {
 
-            assertEquals("it.unibz.inf.obda.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
 
         }
 

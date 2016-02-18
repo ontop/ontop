@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.sql;
  */
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -35,7 +36,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.inf.ontop.parser.EncodeForURI;
-import it.unibz.inf.sql.*;
 import org.openrdf.model.Literal;
 
 import java.sql.Types;

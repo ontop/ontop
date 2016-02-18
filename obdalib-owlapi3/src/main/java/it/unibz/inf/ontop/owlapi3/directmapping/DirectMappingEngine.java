@@ -33,10 +33,10 @@ import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.DBMetadataExtractor;
-import it.unibz.inf.sql.JDBCConnectionManager;
-import it.unibz.inf.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 
 import java.net.URI;
 import java.sql.Connection;

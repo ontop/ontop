@@ -32,12 +32,12 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
-import it.unibz.inf.sql.QualifiedAttributeID;
-import it.unibz.inf.sql.QuotedID;
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.RelationID;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
-import it.unibz.inf.sql.api.ProjectionJSQL;
+import it.unibz.inf.ontop.sql.QualifiedAttributeID;
+import it.unibz.inf.ontop.sql.QuotedID;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.api.ProjectionJSQL;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -32,7 +32,7 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

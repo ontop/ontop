@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.RelationID;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RelationID;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;

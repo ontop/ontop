@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
-import it.unibz.inf.sql.QualifiedAttributeID;
+import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 
 import java.util.*;
 

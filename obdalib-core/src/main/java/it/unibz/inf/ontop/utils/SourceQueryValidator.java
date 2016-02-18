@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.utils;
 
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

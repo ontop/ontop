@@ -29,11 +29,11 @@ import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.DBMetadataExtractor;
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.DatabaseRelationDefinition;
-import it.unibz.inf.sql.UniqueConstraint;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.UniqueConstraint;
 import junit.framework.TestCase;
 
 import java.sql.Types;

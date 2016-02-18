@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.DBMetadataExtractor;
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;

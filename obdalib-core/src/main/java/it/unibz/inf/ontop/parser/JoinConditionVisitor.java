@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import java.util.LinkedList;
 import java.util.List;

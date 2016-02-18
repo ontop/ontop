@@ -24,12 +24,12 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
-import it.unibz.inf.sql.Attribute;
-import it.unibz.inf.sql.ForeignKeyConstraint;
-import it.unibz.inf.sql.RelationID;
-import it.unibz.inf.sql.DatabaseRelationDefinition;
-import it.unibz.inf.sql.UniqueConstraint;
-import it.unibz.inf.sql.ForeignKeyConstraint.Component;
+import it.unibz.inf.ontop.sql.Attribute;
+import it.unibz.inf.ontop.sql.ForeignKeyConstraint;
+import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.UniqueConstraint;
+import it.unibz.inf.ontop.sql.ForeignKeyConstraint.Component;
 
 import com.google.common.base.Joiner;
 

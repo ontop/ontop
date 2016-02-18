@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.inf.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadata;
 
 import java.net.URISyntaxException;
 import java.sql.*;

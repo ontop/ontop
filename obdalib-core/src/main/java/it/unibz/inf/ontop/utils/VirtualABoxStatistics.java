@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.Connection;

@@ -23,7 +23,7 @@ package org.semanticweb.ontop.protege.core;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConfiguration;
-import it.unibz.inf.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;

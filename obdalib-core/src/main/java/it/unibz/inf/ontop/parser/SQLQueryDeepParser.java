@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.QualifiedAttributeID;
-import it.unibz.inf.sql.QuotedID;
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.RelationID;
-import it.unibz.inf.sql.ParserViewDefinition;
-import it.unibz.inf.sql.api.ParsedSQLQuery;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.QualifiedAttributeID;
+import it.unibz.inf.ontop.sql.QuotedID;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.sql.ParserViewDefinition;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import java.util.ArrayList;
 import java.util.List;

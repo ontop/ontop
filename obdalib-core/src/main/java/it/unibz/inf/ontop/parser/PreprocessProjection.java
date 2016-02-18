@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.parser;
 
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.sql.Attribute;
-import it.unibz.inf.sql.DBMetadata;
-import it.unibz.inf.sql.QuotedIDFactory;
-import it.unibz.inf.sql.RelationDefinition;
-import it.unibz.inf.sql.RelationID;
+import it.unibz.inf.ontop.sql.Attribute;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RelationDefinition;
+import it.unibz.inf.ontop.sql.RelationID;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;

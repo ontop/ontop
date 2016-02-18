@@ -19,7 +19,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * limitations under the License.
  * #L%
  */
-
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.ontology.Datatype;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
