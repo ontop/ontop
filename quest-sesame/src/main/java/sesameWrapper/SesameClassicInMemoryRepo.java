@@ -20,8 +20,8 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 
 import java.io.File;
 import java.io.FileInputStream;

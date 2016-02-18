@@ -20,18 +20,18 @@ package inf.unibz.ontp.sesame.repository.test;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.QueryIOManager;
-import it.unibz.krdb.ontop.model.OBDADataFactory;
-import it.unibz.krdb.ontop.model.OBDADataSource;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.ontop.querymanager.QueryController;
-import it.unibz.krdb.ontop.querymanager.QueryControllerEntity;
-import it.unibz.krdb.ontop.querymanager.QueryControllerQuery;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.sql.JDBCConnectionManager;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;

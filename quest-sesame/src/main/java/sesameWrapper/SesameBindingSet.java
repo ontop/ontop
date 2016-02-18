@@ -20,11 +20,11 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.Constant;
-import it.unibz.krdb.ontop.model.ObjectConstant;
-import it.unibz.krdb.ontop.model.TupleResultSet;
-import it.unibz.krdb.ontop.model.ValueConstant;
-import it.unibz.krdb.ontop.sesame.SesameHelper;
+import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.sesame.SesameHelper;
 import org.openrdf.model.Value;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;

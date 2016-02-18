@@ -20,14 +20,14 @@ package inf.unibz.ontop.tests.docker.sparql.filter;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.ModelIOManager;
-import it.unibz.krdb.ontop.model.OBDADataFactory;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.ontop.utils.SQLScriptRunner;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;

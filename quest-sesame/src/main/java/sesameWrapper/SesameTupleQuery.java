@@ -20,10 +20,10 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAException;
-import it.unibz.krdb.ontop.model.TupleResultSet;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 
 import java.util.List;
 

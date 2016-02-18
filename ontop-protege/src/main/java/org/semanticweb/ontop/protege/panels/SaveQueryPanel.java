@@ -21,8 +21,8 @@ package org.semanticweb.ontop.protege.panels;
  */
 
 import org.semanticweb.ontop.protege.gui.IconLoader;
-import it.unibz.krdb.ontop.querymanager.QueryController;
-import it.unibz.krdb.ontop.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

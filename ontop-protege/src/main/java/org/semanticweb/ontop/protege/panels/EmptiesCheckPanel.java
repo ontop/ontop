@@ -20,8 +20,8 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.Predicate;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 
 import java.util.List;
 

@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;

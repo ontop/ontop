@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDADataSource;
 
 public interface DatasourceSelectorListener
 {

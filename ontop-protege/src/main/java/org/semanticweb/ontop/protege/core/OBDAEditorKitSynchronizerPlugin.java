@@ -20,10 +20,10 @@ package org.semanticweb.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.ontop.utils.OBDAPreferences;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.utils.OBDAPreferences;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;

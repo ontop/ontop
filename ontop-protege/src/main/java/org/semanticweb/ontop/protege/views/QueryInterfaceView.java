@@ -20,11 +20,11 @@ package org.semanticweb.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.PrefixManager;
-import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
-import it.unibz.krdb.ontop.owlapi3.OWLResultSetWriter;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlapi3.OWLResultSetWriter;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;

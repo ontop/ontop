@@ -20,14 +20,14 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.krdb.ontop.ontology.Ontology;
-import it.unibz.krdb.ontop.owlapi3.OWLAPIABoxIterator;
-import it.unibz.krdb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.krdb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.ontop.sesame.SesameRDFIterator;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi3.OWLAPIABoxIterator;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.inf.ontop.sesame.SesameRDFIterator;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.turtle.TurtleParser;

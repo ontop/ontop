@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 
 import java.util.List;
 

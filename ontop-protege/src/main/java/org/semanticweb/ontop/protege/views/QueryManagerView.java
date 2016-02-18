@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege.panels.SavedQueriesPanel;

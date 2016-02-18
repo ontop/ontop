@@ -26,11 +26,11 @@ import org.semanticweb.ontop.protege.gui.treemodels.QueryGroupTreeElement;
 import org.semanticweb.ontop.protege.gui.treemodels.QueryTreeElement;
 import org.semanticweb.ontop.protege.gui.treemodels.TreeElement;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import it.unibz.krdb.ontop.querymanager.QueryController;
-import it.unibz.krdb.ontop.querymanager.QueryControllerEntity;
-import it.unibz.krdb.ontop.querymanager.QueryControllerGroup;
-import it.unibz.krdb.ontop.querymanager.QueryControllerListener;
-import it.unibz.krdb.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryControllerListener;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 
 import java.awt.Dialog.ModalityType;
 import java.util.Vector;

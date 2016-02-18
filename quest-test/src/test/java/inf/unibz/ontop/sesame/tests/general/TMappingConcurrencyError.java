@@ -20,13 +20,13 @@ package inf.unibz.ontop.sesame.tests.general;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.ModelIOManager;
-import it.unibz.krdb.ontop.model.OBDADataFactory;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;

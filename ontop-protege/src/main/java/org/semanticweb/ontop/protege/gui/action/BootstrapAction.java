@@ -20,10 +20,10 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDADataSource;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
-import it.unibz.krdb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;

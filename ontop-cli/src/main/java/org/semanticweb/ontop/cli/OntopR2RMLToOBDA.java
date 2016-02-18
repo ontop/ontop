@@ -5,12 +5,12 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
-import it.unibz.krdb.ontop.io.ModelIOManager;
-import it.unibz.krdb.ontop.model.OBDADataFactory;
-import it.unibz.krdb.ontop.model.OBDADataSource;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.r2rml.R2RMLReader;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.r2rml.R2RMLReader;
 
 import java.io.File;
 import java.net.URI;

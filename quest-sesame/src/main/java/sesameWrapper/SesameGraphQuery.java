@@ -20,12 +20,12 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.GraphResultSet;
-import it.unibz.krdb.ontop.model.OBDAException;
-import it.unibz.krdb.ontop.ontology.Assertion;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.krdb.ontop.sesame.SesameStatement;
+import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.sesame.SesameStatement;
 
 import java.util.HashMap;
 import java.util.LinkedList;

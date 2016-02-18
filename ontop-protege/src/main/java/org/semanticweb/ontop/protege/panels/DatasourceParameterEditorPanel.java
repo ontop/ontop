@@ -21,13 +21,13 @@ package org.semanticweb.ontop.protege.panels;
  */
 
 import com.google.common.base.Strings;
-import it.unibz.krdb.ontop.model.OBDADataSource;
-import it.unibz.krdb.ontop.model.OBDAException;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
-import it.unibz.krdb.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.sql.JDBCConnectionManager;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;

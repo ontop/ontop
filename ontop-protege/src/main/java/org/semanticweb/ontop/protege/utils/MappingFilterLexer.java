@@ -81,15 +81,15 @@ public class MappingFilterLexer extends Lexer {
     public MappingFilterLexer(CharStream input, RecognizerSharedState state) {
         super(input,state);
     }
-    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\ontop\\gui\\swing\\utils\\MappingFilter.g"; }
+    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\ontop\\gui\\swing\\utils\\MappingFilter.g"; }
 
     // $ANTLR start "NOT"
     public final void mNOT() throws RecognitionException {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:112:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:112:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:112:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:112:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -137,8 +137,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = ID;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:114:3: ( ( 'I' | 'i' ) ( 'D' | 'd' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:114:5: ( 'I' | 'i' ) ( 'D' | 'd' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:114:3: ( ( 'I' | 'i' ) ( 'D' | 'd' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:114:5: ( 'I' | 'i' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -176,8 +176,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = TEXT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:116:5: ( ( 'T' | 't' ) ( 'E' | 'e' ) ( 'X' | 'x' ) ( 'T' | 't' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:116:7: ( 'T' | 't' ) ( 'E' | 'e' ) ( 'X' | 'x' ) ( 'T' | 't' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:116:5: ( ( 'T' | 't' ) ( 'E' | 'e' ) ( 'X' | 'x' ) ( 'T' | 't' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:116:7: ( 'T' | 't' ) ( 'E' | 'e' ) ( 'X' | 'x' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
@@ -235,8 +235,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = TARGET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:118:7: ( ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'G' | 'g' ) ( 'E' | 'e' ) ( 'T' | 't' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:118:9: ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'G' | 'g' ) ( 'E' | 'e' ) ( 'T' | 't' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:118:7: ( ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'G' | 'g' ) ( 'E' | 'e' ) ( 'T' | 't' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:118:9: ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'G' | 'g' ) ( 'E' | 'e' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
@@ -314,8 +314,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = SOURCE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:120:7: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'R' | 'r' ) ( 'C' | 'c' ) ( 'E' | 'e' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:120:9: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'R' | 'r' ) ( 'C' | 'c' ) ( 'E' | 'e' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:120:7: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'R' | 'r' ) ( 'C' | 'c' ) ( 'E' | 'e' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:120:9: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'R' | 'r' ) ( 'C' | 'c' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -393,8 +393,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = FUNCT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:122:6: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:122:8: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:122:6: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:122:8: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -462,8 +462,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = PRED;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:124:5: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'D' | 'd' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:124:7: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'D' | 'd' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:124:5: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'D' | 'd' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:124:7: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
                 input.consume();
@@ -521,8 +521,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:126:6: ( ',' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:126:16: ','
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:126:6: ( ',' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:126:16: ','
             {
             match(','); 
 
@@ -542,8 +542,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:127:6: ( ':' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:127:16: ':'
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:127:6: ( ':' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:127:16: ':'
             {
             match(':'); 
 
@@ -563,8 +563,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:128:5: ( ';' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:128:16: ';'
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:128:5: ( ';' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:128:16: ';'
             {
             match(';'); 
 
@@ -584,8 +584,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:129:11: ( '_' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:129:16: '_'
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:129:11: ( '_' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:129:16: '_'
             {
             match('_'); 
 
@@ -605,8 +605,8 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = DASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:130:5: ( '-' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:130:16: '-'
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:130:5: ( '-' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:130:16: '-'
             {
             match('-'); 
 
@@ -624,8 +624,8 @@ public class MappingFilterLexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:132:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:132:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
@@ -650,8 +650,8 @@ public class MappingFilterLexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:134:15: ( '0' .. '9' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:134:15: ( '0' .. '9' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
                 input.consume();
@@ -676,8 +676,8 @@ public class MappingFilterLexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:136:18: ( ( ALPHA | DIGIT ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:136:18: ( ( ALPHA | DIGIT ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
@@ -702,8 +702,8 @@ public class MappingFilterLexer extends Lexer {
     // $ANTLR start "CHAR"
     public final void mCHAR() throws RecognitionException {
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:138:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:138:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:
             {
             if ( input.LA(1)=='-'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
@@ -728,8 +728,8 @@ public class MappingFilterLexer extends Lexer {
     // $ANTLR start "ECHAR"
     public final void mECHAR() throws RecognitionException {
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:141:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:141:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:141:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:141:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
             {
             match('\\'); 
 
@@ -758,13 +758,13 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = STRING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:145:3: ( ALPHA ( CHAR )* )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:145:5: ALPHA ( CHAR )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:145:3: ( ALPHA ( CHAR )* )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:145:5: ALPHA ( CHAR )*
             {
             mALPHA(); 
 
 
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:145:11: ( CHAR )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:145:11: ( CHAR )*
             loop1:
             do {
                 int alt1=2;
@@ -777,7 +777,7 @@ public class MappingFilterLexer extends Lexer {
 
                 switch (alt1) {
             	case 1 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:
             	    {
             	    if ( input.LA(1)=='-'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
             	        input.consume();
@@ -814,12 +814,12 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:149:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:149:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:149:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:149:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
             {
             match('\''); 
 
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:149:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:149:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop2:
             do {
                 int alt2=3;
@@ -838,7 +838,7 @@ public class MappingFilterLexer extends Lexer {
 
                 switch (alt2) {
             	case 1 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:149:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:149:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -853,7 +853,7 @@ public class MappingFilterLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:149:87: ECHAR
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:149:87: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -885,12 +885,12 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:153:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:153:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:153:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:153:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
             {
             match('\"'); 
 
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:153:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:153:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop3:
             do {
                 int alt3=3;
@@ -909,7 +909,7 @@ public class MappingFilterLexer extends Lexer {
 
                 switch (alt3) {
             	case 1 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:153:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:153:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -924,7 +924,7 @@ public class MappingFilterLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:153:87: ECHAR
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:153:87: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -956,10 +956,10 @@ public class MappingFilterLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt5=0;
             loop5:
             do {
@@ -986,23 +986,23 @@ public class MappingFilterLexer extends Lexer {
 
                 switch (alt5) {
             	case 1 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:6: ' '
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:10: '\\t'
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt4=2;
             	    int LA4_0 = input.LA(1);
 
@@ -1021,19 +1021,19 @@ public class MappingFilterLexer extends Lexer {
             	    }
             	    switch (alt4) {
             	        case 1 :
-            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:16: '\\n'
+            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:21: '\\r' ( '\\n' )
+            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
 
-            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:25: ( '\\n' )
-            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:156:26: '\\n'
+            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:25: ( '\\n' )
+            	            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:156:26: '\\n'
             	            {
             	            match('\n'); 
 
@@ -1073,7 +1073,7 @@ public class MappingFilterLexer extends Lexer {
     // $ANTLR end "WS"
 
     public void mTokens() throws RecognitionException {
-        // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:8: ( NOT | ID | TEXT | TARGET | SOURCE | FUNCT | PRED | COMMA | COLON | SEMI | UNDERSCORE | DASH | STRING | STRING_WITH_QUOTE | STRING_WITH_QUOTE_DOUBLE | WS )
+        // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:8: ( NOT | ID | TEXT | TARGET | SOURCE | FUNCT | PRED | COMMA | COLON | SEMI | UNDERSCORE | DASH | STRING | STRING_WITH_QUOTE | STRING_WITH_QUOTE_DOUBLE | WS )
         int alt6=16;
         switch ( input.LA(1) ) {
         case 'N':
@@ -1421,7 +1421,7 @@ public class MappingFilterLexer extends Lexer {
 
         switch (alt6) {
             case 1 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:10: NOT
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:10: NOT
                 {
                 mNOT(); 
 
@@ -1429,7 +1429,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 2 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:14: ID
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:14: ID
                 {
                 mID(); 
 
@@ -1437,7 +1437,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 3 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:17: TEXT
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:17: TEXT
                 {
                 mTEXT(); 
 
@@ -1445,7 +1445,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 4 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:22: TARGET
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:22: TARGET
                 {
                 mTARGET(); 
 
@@ -1453,7 +1453,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 5 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:29: SOURCE
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:29: SOURCE
                 {
                 mSOURCE(); 
 
@@ -1461,7 +1461,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 6 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:36: FUNCT
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:36: FUNCT
                 {
                 mFUNCT(); 
 
@@ -1469,7 +1469,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 7 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:42: PRED
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:42: PRED
                 {
                 mPRED(); 
 
@@ -1477,7 +1477,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 8 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:47: COMMA
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:47: COMMA
                 {
                 mCOMMA(); 
 
@@ -1485,7 +1485,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 9 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:53: COLON
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:53: COLON
                 {
                 mCOLON(); 
 
@@ -1493,7 +1493,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 10 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:59: SEMI
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:59: SEMI
                 {
                 mSEMI(); 
 
@@ -1501,7 +1501,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 11 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:64: UNDERSCORE
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:64: UNDERSCORE
                 {
                 mUNDERSCORE(); 
 
@@ -1509,7 +1509,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 12 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:75: DASH
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:75: DASH
                 {
                 mDASH(); 
 
@@ -1517,7 +1517,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 13 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:80: STRING
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:80: STRING
                 {
                 mSTRING(); 
 
@@ -1525,7 +1525,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 14 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:87: STRING_WITH_QUOTE
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:87: STRING_WITH_QUOTE
                 {
                 mSTRING_WITH_QUOTE(); 
 
@@ -1533,7 +1533,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 15 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:105: STRING_WITH_QUOTE_DOUBLE
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:105: STRING_WITH_QUOTE_DOUBLE
                 {
                 mSTRING_WITH_QUOTE_DOUBLE(); 
 
@@ -1541,7 +1541,7 @@ public class MappingFilterLexer extends Lexer {
                 }
                 break;
             case 16 :
-                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:1:130: WS
+                // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:1:130: WS
                 {
                 mWS(); 
 

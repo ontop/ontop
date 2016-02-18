@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.protege.core;
 
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;

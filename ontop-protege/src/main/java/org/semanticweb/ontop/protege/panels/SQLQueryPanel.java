@@ -20,13 +20,13 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.inf.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

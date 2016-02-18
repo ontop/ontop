@@ -20,11 +20,11 @@ package org.semanticweb.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.PrefixManager;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.Predicate;
-import it.unibz.krdb.ontop.ontology.DataPropertyExpression;
-import it.unibz.krdb.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.MapItem;
 import org.semanticweb.ontop.protege.gui.PredicateItem;

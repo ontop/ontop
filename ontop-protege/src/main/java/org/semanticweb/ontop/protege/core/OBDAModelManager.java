@@ -21,16 +21,16 @@ package org.semanticweb.ontop.protege.core;
  */
 
 import com.google.common.base.Optional;
-import it.unibz.krdb.ontop.io.ModelIOManager;
-import it.unibz.krdb.ontop.io.PrefixManager;
-import it.unibz.krdb.ontop.io.QueryIOManager;
-import it.unibz.krdb.ontop.model.*;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.owlapi3.OBDAModelValidator;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.ontop.querymanager.*;
-import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlapi3.OBDAModelValidator;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.querymanager.*;
+import it.unibz.inf.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.sql.JDBCConnectionManager;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -669,7 +669,7 @@ public class OBDAModelManager implements Disposable {
 			return;
 		}
 
-		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass6677841155"));
+		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/inf/obdaplugin#RandomClass6677841155"));
 		OWLAxiom axiom = owlmm.getOWLDataFactory().getOWLDeclarationAxiom(newClass);
 
 		try {

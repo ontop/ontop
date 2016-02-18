@@ -20,13 +20,13 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAException;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.krdb.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
+import it.unibz.inf.sql.DBMetadata;
+import it.unibz.inf.sql.ImplicitDBConstraintsReader;
 import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.owlapi.model.OWLOntology;

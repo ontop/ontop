@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://it.unibz.krdb/obda/test/simple#
+:		http://it.unibz.inf/obda/test/simple#
 
 [SourceDeclaration]
 sourceUri	h2

@@ -20,11 +20,11 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.krdb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.ontop.querymanager.QueryController;
-import it.unibz.krdb.ontop.utils.OBDAPreferenceChangeListener;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.action.OBDADataQueryAction;
 import org.semanticweb.ontop.protege.utils.DialogUtils;

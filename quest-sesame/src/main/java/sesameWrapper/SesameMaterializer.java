@@ -20,11 +20,11 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.ontology.Assertion;
-import it.unibz.krdb.ontop.ontology.Ontology;
-import it.unibz.krdb.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.krdb.ontop.sesame.SesameStatementIterator;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 
 import java.util.Iterator;
 

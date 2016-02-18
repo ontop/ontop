@@ -20,14 +20,14 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-import it.unibz.krdb.ontop.exception.InvalidMappingException;
-import it.unibz.krdb.ontop.io.ModelIOManager;
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.ontop.ontology.Ontology;
-import it.unibz.krdb.ontop.owlapi3.OWLAPITranslatorUtility;
-import it.unibz.krdb.ontop.r2rml.R2RMLReader;
-import it.unibz.krdb.ontop.sesame.SesameStatementIterator;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.r2rml.R2RMLReader;
+import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;

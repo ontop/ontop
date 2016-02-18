@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.krdb.ontop.utils.OBDAPreferences;
+import it.unibz.inf.ontop.utils.OBDAPreferences;
 
 import java.awt.Color;
 import java.awt.Font;

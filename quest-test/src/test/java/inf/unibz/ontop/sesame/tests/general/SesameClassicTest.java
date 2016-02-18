@@ -51,7 +51,7 @@ public class SesameClassicTest extends TestCase {
 
 	sesameWrapper.RepositoryConnection con = null;
 	Repository repo = null;
-	String baseURI = "http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#";
+	String baseURI = "http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#";
 	
 	public void setupInMemory() throws Exception 
 	{
@@ -105,7 +105,7 @@ public class SesameClassicTest extends TestCase {
 		// con.setNamespace("onto",
 		// "<http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#>");
 		// System.out.println(con.getNamespaces().next().toString());
-		String queryString = "PREFIX : \n<http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#>\n "
+		String queryString = "PREFIX : \n<http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#>\n "
 				+ "SELECT ?x ?y WHERE { ?x a :Person. ?x :age ?y } ";
 		// String queryString =
 		// "SELECT ?x ?y WHERE { ?x a onto:Person. ?x onto:age ?y } ";
@@ -142,7 +142,7 @@ public class SesameClassicTest extends TestCase {
 	{	
 		
 		// /query repo
-		String queryString = "PREFIX : \n<http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#>\n "
+		String queryString = "PREFIX : \n<http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#>\n "
 				+ "ASK { :Lisa a :Person} ";
 		BooleanQuery boolQuery = (con).prepareBooleanQuery(
 				QueryLanguage.SPARQL, queryString);

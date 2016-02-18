@@ -20,12 +20,12 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAModel;
-import it.unibz.krdb.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.panels.OBDAModelStatisticsPanel;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import it.unibz.krdb.ontop.utils.VirtualABoxStatistics;
+import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.AbstractPrefixManager;
+import it.unibz.inf.ontop.io.AbstractPrefixManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

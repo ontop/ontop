@@ -22,7 +22,7 @@ package org.semanticweb.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.krdb.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.protege.gui.treemodels.MappingFunctorTreeModelFilter;
 import org.semanticweb.ontop.protege.gui.treemodels.MappingHeadVariableTreeModelFilter;
 import org.semanticweb.ontop.protege.gui.treemodels.MappingIDTreeModelFilter;
@@ -88,12 +88,12 @@ public class MappingFilterParser extends Parser {
     }
 
     public String[] getTokenNames() { return MappingFilterParser.tokenNames; }
-    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\ontop\\gui\\swing\\utils\\MappingFilter.g"; }
+    public String getGrammarFileName() { return "C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\ontop\\gui\\swing\\utils\\MappingFilter.g"; }
 
 
 
     // $ANTLR start "parse"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:42:1: parse returns [ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList] : f1= filter ( SEMI f2= filter )* EOF ;
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:42:1: parse returns [ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList] : f1= filter ( SEMI f2= filter )* EOF ;
     public final ArrayList<TreeModelFilter<OBDAMappingAxiom>> parse() throws RecognitionException {
         ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList = null;
 
@@ -107,8 +107,8 @@ public class MappingFilterParser extends Parser {
           filterList = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:46:3: (f1= filter ( SEMI f2= filter )* EOF )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:46:5: f1= filter ( SEMI f2= filter )* EOF
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:46:3: (f1= filter ( SEMI f2= filter )* EOF )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:46:5: f1= filter ( SEMI f2= filter )* EOF
             {
             pushFollow(FOLLOW_filter_in_parse49);
             f1=filter();
@@ -118,7 +118,7 @@ public class MappingFilterParser extends Parser {
 
              filterList.add(f1); 
 
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:46:47: ( SEMI f2= filter )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:46:47: ( SEMI f2= filter )*
             loop1:
             do {
                 int alt1=2;
@@ -131,7 +131,7 @@ public class MappingFilterParser extends Parser {
 
                 switch (alt1) {
             	case 1 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:46:48: SEMI f2= filter
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:46:48: SEMI f2= filter
             	    {
             	    match(input,SEMI,FOLLOW_SEMI_in_parse54); 
 
@@ -173,7 +173,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "filter"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:51:1: filter returns [TreeModelFilter<OBDAMappingAxiom> value] : ( (not= NOT )? ( type COLON )? keyword ) ;
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:51:1: filter returns [TreeModelFilter<OBDAMappingAxiom> value] : ( (not= NOT )? ( type COLON )? keyword ) ;
     public final TreeModelFilter<OBDAMappingAxiom> filter() throws RecognitionException {
         TreeModelFilter<OBDAMappingAxiom> value = null;
 
@@ -185,13 +185,13 @@ public class MappingFilterParser extends Parser {
 
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:3: ( ( (not= NOT )? ( type COLON )? keyword ) )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:5: ( (not= NOT )? ( type COLON )? keyword )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:3: ( ( (not= NOT )? ( type COLON )? keyword ) )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:5: ( (not= NOT )? ( type COLON )? keyword )
             {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:5: ( (not= NOT )? ( type COLON )? keyword )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:6: (not= NOT )? ( type COLON )? keyword
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:5: ( (not= NOT )? ( type COLON )? keyword )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:6: (not= NOT )? ( type COLON )? keyword
             {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:9: (not= NOT )?
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:9: (not= NOT )?
             int alt2=2;
             int LA2_0 = input.LA(1);
 
@@ -200,7 +200,7 @@ public class MappingFilterParser extends Parser {
             }
             switch (alt2) {
                 case 1 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:9: not= NOT
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:9: not= NOT
                     {
                     not=(Token)match(input,NOT,FOLLOW_NOT_in_filter90); 
 
@@ -210,7 +210,7 @@ public class MappingFilterParser extends Parser {
             }
 
 
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:15: ( type COLON )?
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:15: ( type COLON )?
             int alt3=2;
             int LA3_0 = input.LA(1);
 
@@ -219,7 +219,7 @@ public class MappingFilterParser extends Parser {
             }
             switch (alt3) {
                 case 1 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:52:16: type COLON
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:52:16: type COLON
                     {
                     pushFollow(FOLLOW_type_in_filter94);
                     type1=type();
@@ -277,13 +277,13 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "type"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:68:1: type returns [TreeModelFilter<OBDAMappingAxiom> value] : ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED );
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:68:1: type returns [TreeModelFilter<OBDAMappingAxiom> value] : ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED );
     public final TreeModelFilter<OBDAMappingAxiom> type() throws RecognitionException {
         TreeModelFilter<OBDAMappingAxiom> value = null;
 
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:69:3: ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:69:3: ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED )
             int alt4=6;
             switch ( input.LA(1) ) {
             case ID:
@@ -326,7 +326,7 @@ public class MappingFilterParser extends Parser {
 
             switch (alt4) {
                 case 1 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:69:5: ID
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:69:5: ID
                     {
                     match(input,ID,FOLLOW_ID_in_type120); 
 
@@ -335,7 +335,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:70:5: TEXT
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:70:5: TEXT
                     {
                     match(input,TEXT,FOLLOW_TEXT_in_type133); 
 
@@ -344,7 +344,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:71:5: TARGET
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:71:5: TARGET
                     {
                     match(input,TARGET,FOLLOW_TARGET_in_type144); 
 
@@ -353,7 +353,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:72:5: SOURCE
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:72:5: SOURCE
                     {
                     match(input,SOURCE,FOLLOW_SOURCE_in_type153); 
 
@@ -362,7 +362,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:73:5: FUNCT
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:73:5: FUNCT
                     {
                     match(input,FUNCT,FOLLOW_FUNCT_in_type162); 
 
@@ -371,7 +371,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:74:5: PRED
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:74:5: PRED
                     {
                     match(input,PRED,FOLLOW_PRED_in_type172); 
 
@@ -397,7 +397,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "keyword"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:77:1: keyword returns [String[] value] : t1= input ( COMMA t2= input )* ;
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:77:1: keyword returns [String[] value] : t1= input ( COMMA t2= input )* ;
     public final String[] keyword() throws RecognitionException {
         String[] value = null;
 
@@ -411,8 +411,8 @@ public class MappingFilterParser extends Parser {
           List<String> inputList = new LinkedList<String>();
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:81:3: (t1= input ( COMMA t2= input )* )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:81:5: t1= input ( COMMA t2= input )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:81:3: (t1= input ( COMMA t2= input )* )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:81:5: t1= input ( COMMA t2= input )*
             {
             pushFollow(FOLLOW_input_in_keyword203);
             t1=input();
@@ -422,7 +422,7 @@ public class MappingFilterParser extends Parser {
 
              inputList.add(t1); 
 
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:81:44: ( COMMA t2= input )*
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:81:44: ( COMMA t2= input )*
             loop5:
             do {
                 int alt5=2;
@@ -435,7 +435,7 @@ public class MappingFilterParser extends Parser {
 
                 switch (alt5) {
             	case 1 :
-            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:81:45: COMMA t2= input
+            	    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:81:45: COMMA t2= input
             	    {
             	    match(input,COMMA,FOLLOW_COMMA_in_keyword208); 
 
@@ -478,7 +478,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "input"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:86:1: input returns [String value] : ( unquoted_string | quoted_string );
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:86:1: input returns [String value] : ( unquoted_string | quoted_string );
     public final String input() throws RecognitionException {
         String value = null;
 
@@ -489,7 +489,7 @@ public class MappingFilterParser extends Parser {
 
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:87:3: ( unquoted_string | quoted_string )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:87:3: ( unquoted_string | quoted_string )
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -508,7 +508,7 @@ public class MappingFilterParser extends Parser {
             }
             switch (alt6) {
                 case 1 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:87:5: unquoted_string
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:87:5: unquoted_string
                     {
                     pushFollow(FOLLOW_unquoted_string_in_input238);
                     unquoted_string3=unquoted_string();
@@ -521,7 +521,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:88:5: quoted_string
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:88:5: quoted_string
                     {
                     pushFollow(FOLLOW_quoted_string_in_input246);
                     quoted_string4=quoted_string();
@@ -551,7 +551,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "unquoted_string"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:91:1: unquoted_string returns [String value] : STRING ;
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:91:1: unquoted_string returns [String value] : STRING ;
     public final String unquoted_string() throws RecognitionException {
         String value = null;
 
@@ -559,8 +559,8 @@ public class MappingFilterParser extends Parser {
         Token STRING5=null;
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:92:3: ( STRING )
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:92:5: STRING
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:92:3: ( STRING )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:92:5: STRING
             {
             STRING5=(Token)match(input,STRING,FOLLOW_STRING_in_unquoted_string267); 
 
@@ -584,7 +584,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "quoted_string"
-    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:95:1: quoted_string returns [String value] : ( STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE );
+    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:95:1: quoted_string returns [String value] : ( STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE );
     public final String quoted_string() throws RecognitionException {
         String value = null;
 
@@ -593,7 +593,7 @@ public class MappingFilterParser extends Parser {
         Token STRING_WITH_QUOTE7=null;
 
         try {
-            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:96:3: ( STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE )
+            // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:96:3: ( STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE )
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -612,7 +612,7 @@ public class MappingFilterParser extends Parser {
             }
             switch (alt7) {
                 case 1 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:96:5: STRING_WITH_QUOTE_DOUBLE
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:96:5: STRING_WITH_QUOTE_DOUBLE
                     {
                     STRING_WITH_QUOTE_DOUBLE6=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_quoted_string288); 
 
@@ -625,7 +625,7 @@ public class MappingFilterParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\gui\\swing\\utils\\MappingFilter.g:101:5: STRING_WITH_QUOTE
+                    // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:101:5: STRING_WITH_QUOTE
                     {
                     STRING_WITH_QUOTE7=(Token)match(input,STRING_WITH_QUOTE,FOLLOW_STRING_WITH_QUOTE_in_quoted_string296); 
 

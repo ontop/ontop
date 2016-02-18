@@ -20,8 +20,8 @@ package org.semanticweb.ontop.protege.gui;
  * #L%
  */
 
-import it.unibz.krdb.ontop.io.PrefixManager;
-import it.unibz.krdb.ontop.model.Predicate;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.Predicate;
 
 public class PredicateItem {
 	
