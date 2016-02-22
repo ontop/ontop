@@ -78,7 +78,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.semanticweb.ontop.cli.Ontop</mainClass>
+                            <mainClass>it.inf.ontop.cli.Ontop</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
