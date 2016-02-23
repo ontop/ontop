@@ -7,8 +7,8 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>ontop-protege4</artifactId>
-	<name>ontop-protege4</name>
+	<artifactId>ontop-protege</artifactId>
+	<name>ontop-protege</name>
 
 
     <properties>

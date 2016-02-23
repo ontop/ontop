@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.quest.sparql1;
  * #L%
  */
 
+import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import junit.framework.Test;
 
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.Repository;
 
