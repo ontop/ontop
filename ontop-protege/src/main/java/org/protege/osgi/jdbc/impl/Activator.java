@@ -1,9 +1,9 @@
-package it.protege.osgi.jdbc.impl;
+package org.protege.osgi.jdbc.impl;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import it.protege.osgi.jdbc.JdbcRegistry;
-import it.protege.osgi.jdbc.OSGiJdbcDriver;
+import org.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.OSGiJdbcDriver;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;

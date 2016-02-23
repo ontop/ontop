@@ -1,11 +1,11 @@
-package it.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.prefs;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
-import it.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.JdbcRegistry;
 
 import javax.swing.*;
 import java.awt.*;

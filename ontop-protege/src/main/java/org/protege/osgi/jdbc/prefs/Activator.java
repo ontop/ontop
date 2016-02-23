@@ -1,8 +1,8 @@
-package it.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.prefs;
 
-import it.protege.osgi.jdbc.RegistryException;
+import org.protege.osgi.jdbc.RegistryException;
 import org.osgi.framework.*;
-import it.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.JdbcRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

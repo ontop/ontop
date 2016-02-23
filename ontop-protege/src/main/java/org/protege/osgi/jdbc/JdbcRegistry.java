@@ -1,4 +1,4 @@
-package it.protege.osgi.jdbc;
+package org.protege.osgi.jdbc;
 
 import java.net.URL;
 import java.sql.Driver;

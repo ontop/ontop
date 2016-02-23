@@ -1,7 +1,7 @@
-package it.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.prefs;
 
 import org.osgi.util.tracker.ServiceTracker;
-import it.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.JdbcRegistry;
 
 import javax.swing.table.AbstractTableModel;
 import java.sql.Driver;

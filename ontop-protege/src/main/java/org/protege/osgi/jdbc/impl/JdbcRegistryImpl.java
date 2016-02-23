@@ -1,7 +1,7 @@
-package it.protege.osgi.jdbc.impl;
+package org.protege.osgi.jdbc.impl;
 
-import it.protege.osgi.jdbc.JdbcRegistry;
-import it.protege.osgi.jdbc.RegistryException;
+import org.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.RegistryException;
 
 import java.net.URL;
 import java.net.URLClassLoader;

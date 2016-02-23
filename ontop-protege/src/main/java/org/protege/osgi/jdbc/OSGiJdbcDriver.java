@@ -1,4 +1,4 @@
-package it.protege.osgi.jdbc;
+package org.protege.osgi.jdbc;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;

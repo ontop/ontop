@@ -1,4 +1,4 @@
-package it.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.prefs;
 
 import java.io.File;
 

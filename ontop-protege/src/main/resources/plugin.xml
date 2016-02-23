@@ -170,7 +170,7 @@
     <extension id="jdbc.prefs"
                point="org.protege.editor.core.application.preferencespanel">
         <label value="JDBC Drivers"/>
-        <class value="it.protege.osgi.jdbc.prefs.PreferencesPanel"/>
+        <class value="org.protege.osgi.jdbc.prefs.PreferencesPanel"/>
     </extension>
 
 </plugin>

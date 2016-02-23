@@ -340,7 +340,7 @@
                             or protege wont load it -->
                         <Bundle-SymbolicName>${symbolic.name};singleton:=true</Bundle-SymbolicName>
 
-                        <Bundle-Activator>it.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
+                        <Bundle-Activator>org.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
