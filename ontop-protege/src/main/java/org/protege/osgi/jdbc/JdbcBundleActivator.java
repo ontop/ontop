@@ -4,6 +4,7 @@ package org.protege.osgi.jdbc;
 import com.google.common.collect.ImmutableList;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.protege.osgi.jdbc.prefs.Activator;
 
 import java.util.List;
 

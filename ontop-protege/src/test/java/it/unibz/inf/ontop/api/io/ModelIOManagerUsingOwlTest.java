@@ -96,7 +96,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     
     private void loadOntologyToModel(OBDAModel model) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        File file = new File("src/test/java/it/unibz/inf/ontop/api/io/School.owl");
+        File file = new File("src/test/resources/it/unibz/inf/ontop/api/io/School.owl");
         OWLOntology schoolOntology = manager.loadOntologyFromOntologyDocument(file);
         
         // Setup the entity declarations
@@ -123,7 +123,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     public void testLoadWithBlankMappingId() {
         resetCurrentModel();
         try {
-            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile5.ontop");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile5.obda");
         } catch (IOException e) {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
@@ -137,7 +137,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     public void testLoadWithBlankTargetQuery() {
         resetCurrentModel();
         try {
-            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile6.ontop");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile6.obda");
         } catch (IOException e) {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
@@ -151,7 +151,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     public void testLoadWithBlankSourceQuery() {
         resetCurrentModel();
         try {
-            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile7.ontop");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile7.obda");
         } catch (IOException e) {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
@@ -165,7 +165,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     public void testLoadWithBadTargetQuery() {
         resetCurrentModel();
         try {
-            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile8.ontop");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile8.obda");
         } catch (IOException e) {
         	assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
@@ -178,7 +178,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     public void testLoadWithPredicateDeclarations() {
         resetCurrentModel();
         try {
-            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile9.ontop");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile9.obda");
         } catch (IOException e) {
         	assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
@@ -191,7 +191,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     public void testLoadWithAllMistakes() {
         resetCurrentModel();
         try {
-            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile10.ontop");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/api/io/SchoolBadFile10.obda");
         } catch (IOException e) {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
@@ -208,7 +208,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void saveRegularFile() throws IOException {
         ioManager = new ModelIOManager(model);
-        ioManager.save("src/test/java/it/unibz/inf/ontop/api/io/SchoolRegularFile.ontop");
+        ioManager.save("src/test/resources/it/unibz/inf/ontop/api/io/SchoolRegularFile.obda");
     }
 
     private void saveFileWithMultipleDataSources() throws IOException {
@@ -223,7 +223,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
         // Save the model
         ioManager = new ModelIOManager(model);
-        ioManager.save("src/test/java/it/unibz/inf/ontop/api/io/SchoolMultipleDataSources.ontop");
+        ioManager.save("src/test/resources/it/unibz/inf/ontop/api/io/SchoolMultipleDataSources.obda");
     }
 
     /*
@@ -232,20 +232,20 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void loadRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         ioManager = new ModelIOManager(model);
-        ioManager.load("src/test/java/it/unibz/inf/ontop/api/io/SchoolRegularFile.ontop");
+        ioManager.load("src/test/resources/it/unibz/inf/ontop/api/io/SchoolRegularFile.obda");
 
         // Check the content
-        assertTrue(model.getPrefixManager().getPrefixMap().size() == 6);
+        assertTrue(model.getPrefixManager().getPrefixMap().size() == 5);
         assertTrue(model.getSources().size() == 1);
         assertTrue(countElement(model.getMappings()) == 3);
     }
 
     private void loadFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         ioManager = new ModelIOManager(model);
-        ioManager.load("src/test/java/it/unibz/inf/ontop/api/io/SchoolMultipleDataSources.ontop");
+        ioManager.load("src/test/resources/it/unibz/inf/ontop/api/io/SchoolMultipleDataSources.obda");
 
         // Check the content
-        assertTrue(model.getPrefixManager().getPrefixMap().size() == 6);
+        assertTrue(model.getPrefixManager().getPrefixMap().size() == 5);
         assertTrue(model.getSources().size() == 2);
         assertTrue(countElement(model.getMappings()) == 6);
     }
