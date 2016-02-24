@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.17.1</version>
+	<version>1.17.2-SNAPSHOT</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -137,6 +137,7 @@
         <antlr.version>3.5.2</antlr.version>
         <airline.version>2.1.0</airline.version>
         <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
+        <r2rml-api.version>0.2.1</r2rml-api.version>
     </properties>
 
 	<build>
@@ -548,32 +549,17 @@
 			<dependency>
 				<groupId>eu.optique-project</groupId>
 				<artifactId>r2rml-api</artifactId>
-				<version>0.2</version>
+				<version>${r2rml-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>eu.optique-project</groupId>
 				<artifactId>r2rml-api-sesame-bridge</artifactId>
-				<version>0.2</version>
+				<version>${r2rml-api.version}</version>
 			</dependency>
 
 		</dependencies>
 	</dependencyManagement>
-
-	<repositories>
-		<repository>
-			<!-- for R2RML api -->
-			<id>bolzano-nexus-public</id>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 
 	<reporting>
 		<plugins>

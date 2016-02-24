@@ -20,127 +20,132 @@ package it.unibz.krdb.obda.utils;
  * #L%
  */
 
+import com.google.common.base.Splitter;
 import it.unibz.krdb.obda.exception.InvalidPrefixWritingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * A utility class for URI templates
- * 
- * @author xiao
  *
+ * @author xiao
  */
 public class URITemplates {
-	
-	private static final String PLACE_HOLDER = "{}";
-	private static final int PLACE_HOLDER_LENGTH = PLACE_HOLDER.length();
-	
-	/**
-	 * This method instantiates the input uri template by arguments
-	 * 
-	 * <p>
-	 * 
-	 * Example:
-	 * <p>
-	 * 
-	 * If {@code args = ["A", 1]}, then
-	 * 
-	 * {@code  URITemplates.format("http://example.org/{}/{}", args)} 
-	 * results {@code "http://example.org/A/1" }
-	 * 
-	 * 
-	 * @see #format(String, Object...)
-	 * 
-	 * @param uriTemplate
-	 * @param args
-	 * @return
-	 */
-	public static String format(String uriTemplate, Collection<?> args) {
-		
-		StringBuilder sb = new StringBuilder();
-		
-		int beginIndex = 0;
-		
-		for(Object arg : args){
-			
-			int endIndex = uriTemplate.indexOf(PLACE_HOLDER, beginIndex);
-			
-			sb.append(uriTemplate.subSequence(beginIndex, endIndex)).append(arg);
-			
-			beginIndex = endIndex + PLACE_HOLDER_LENGTH;
-		}
-		
-		sb.append(uriTemplate.substring(beginIndex));
-		
-		return sb.toString();
-		
-	}
 
-	/**
-	 * This method instantiates the input uri template by arguments
-	 * 
-	 * <p>
-	 * 
-	 * Example:
-	 * <p>
-	 * 
-	 * {@code  URITemplates.format("http://example.org/{}/{}", "A", 1)} results {@code "http://example.org/A/1" }
-	 * 
-	 * @param uriTemplate
-	 * @param args
-	 * @return
-	 */
-	public static String format(String uriTemplate, Object... args) {
-		return format(uriTemplate, Arrays.asList(args));
-	}
+    private static final String PLACE_HOLDER = "{}";
+    private static final int PLACE_HOLDER_LENGTH = PLACE_HOLDER.length();
 
-	
-	public static String getUriTemplateString(Function uriFunction) {
-		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
-		String template = term.getValue();
-		List<Variable> varlist = new LinkedList<>();
-		TermUtils.addReferencedVariablesTo(varlist, uriFunction);
-		Iterator<Variable> vars = varlist.iterator();
-		String[] split = template.split("\\{\\}");
-		int i = 0;
-		template = "";
-		while (vars.hasNext()) {
-			template += split[i] + "{" + vars.next().toString() + "}";
-			i++;
-		}
-		//the number of place holdes should be equal to the number of variables.
-		if (split.length-i == 1){
-			template += split[i];
-		} else if(split.length == i){
-			// do nothing
-		} else{
-			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
-		}
-		
-		
-		return template;
-	}
+    /**
+     * This method instantiates the input uri template by arguments
+     * <p>
+     * Example:
+     * <p>
+     * If {@code args = ["A", 1]}, then
+     * <p>
+     * {@code  URITemplates.format("http://example.org/{}/{}", args)}
+     * results {@code "http://example.org/A/1" }
+     *
+     * @see #format(String, Object...)
+     */
+    public static String format(String uriTemplate, Collection<?> args) {
 
-	public static String getUriTemplateString(Function uriTemplate,
-			PrefixManager prefixmng) {
-		String template = getUriTemplateString(uriTemplate);
-		try{
-		template = prefixmng.getExpandForm(template);
-		} catch (InvalidPrefixWritingException ex){
-			// in this case, the we do not need to expand
-		}
-		return template;
-	}
+        StringBuilder sb = new StringBuilder();
+
+        int beginIndex = 0;
+
+        for (Object arg : args) {
+
+            int endIndex = uriTemplate.indexOf(PLACE_HOLDER, beginIndex);
+
+            sb.append(uriTemplate.subSequence(beginIndex, endIndex)).append(arg);
+
+            beginIndex = endIndex + PLACE_HOLDER_LENGTH;
+        }
+
+        sb.append(uriTemplate.substring(beginIndex));
+
+        return sb.toString();
+
+    }
+
+    /**
+     * This method instantiates the input uri template by arguments
+     * <p>
+     * <p>
+     * <p>
+     * Example:
+     * <p>
+     * <p>
+     * {@code  URITemplates.format("http://example.org/{}/{}", "A", 1)} results {@code "http://example.org/A/1" }
+     *
+     * @param uriTemplate String with placeholder
+     * @param args        args
+     * @return a formatted string
+     */
+    public static String format(String uriTemplate, Object... args) {
+        return format(uriTemplate, Arrays.asList(args));
+    }
+
+
+    /**
+     * Converts a URI function to a URI template
+     * <p>
+     * For instance:
+     * <pre>
+     * URI("http://example.org/{}/{}/{}", X, Y, X) -> "http://example.org/{X}/{Y}/{X}"
+     * </pre>
+     *
+     * @param uriFunction URI Function
+     * @return a URI template with variable names inside the placeholders
+     */
+    public static String getUriTemplateString(Function uriFunction) {
+        ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
+        final String template = term.getValue();
+        List<Variable> varList = new ArrayList<>();
+        TermUtils.addReferencedVariablesTo(varList, uriFunction);
+
+        List<String> splitParts = Splitter.on(PLACE_HOLDER).splitToList(template);
+
+        StringBuilder templateWithVars = new StringBuilder();
+
+        int numVars = varList.size();
+        int numParts = splitParts.size();
+
+        if (numParts != numVars + 1 && numParts != numVars) {
+            throw new IllegalArgumentException("the number of place holders should be equal to the number of variables.");
+        }
+
+        for (int i = 0; i < numVars; i++) {
+            templateWithVars.append(splitParts.get(i))
+                    .append("{")
+                    .append(varList.get(i))
+                    .append("}");
+        }
+
+        if (numParts == numVars + 1) {
+            templateWithVars.append(splitParts.get(numVars));
+        }
+
+        return templateWithVars.toString();
+    }
+
+    public static String getUriTemplateString(Function uriTemplate, PrefixManager prefixmng) {
+        String template = getUriTemplateString(uriTemplate);
+        try {
+            template = prefixmng.getExpandForm(template);
+        } catch (InvalidPrefixWritingException ex) {
+            // in this case, the we do not need to expand
+        }
+        return template;
+    }
 
 
 }
