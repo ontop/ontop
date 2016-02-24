@@ -137,6 +137,7 @@
         <antlr.version>3.5.2</antlr.version>
         <airline.version>2.1.0</airline.version>
         <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
+        <r2rml-api.version>0.2.1</r2rml-api.version>
     </properties>
 
 	<build>
@@ -548,13 +549,13 @@
 			<dependency>
 				<groupId>eu.optique-project</groupId>
 				<artifactId>r2rml-api</artifactId>
-				<version>0.2</version>
+				<version>${r2rml-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>eu.optique-project</groupId>
 				<artifactId>r2rml-api-sesame-bridge</artifactId>
-				<version>0.2</version>
+				<version>${r2rml-api.version}</version>
 			</dependency>
 
 		</dependencies>
