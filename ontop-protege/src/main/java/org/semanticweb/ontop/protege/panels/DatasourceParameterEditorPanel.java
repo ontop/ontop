@@ -44,7 +44,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -435,29 +434,20 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     private boolean createNewDatasource() {
 
-        URI uri;
+        URI uri = URI.create("datasource1");
 
-
-        try {
-            uri = URI.create("datasource-"+ UUID.randomUUID());
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-
-
-            //create new datasource
-            OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
-            String username = txtDatabaseUsername.getText();
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-            String password = new String(txtDatabasePassword.getPassword());
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-            String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-            String url = txtJdbcUrl.getText();
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-            currentDataSource = newDatasource;
-            obdaModel.addSource(currentDataSource);
+        //create new datasource
+        OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        String username = txtDatabaseUsername.getText();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+        String password = new String(txtDatabasePassword.getPassword());
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+        String url = txtJdbcUrl.getText();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+        currentDataSource = newDatasource;
+        obdaModel.addSource(currentDataSource);
 
 
         return true;
