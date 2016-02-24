@@ -81,4 +81,13 @@ public class URITemplatesTest {
                 FACTORY.getVariable("X"), FACTORY.getVariable("Y"));
         assertEquals("http://example.org/{X}/{Y}/", URITemplates.getUriTemplateString(f1));
     }
+
+    @Test
+    public void testGetUriTemplateString5(){
+        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+
+        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
+                FACTORY.getVariable("X"), FACTORY.getVariable("Y"),FACTORY.getVariable("X"));
+        assertEquals("http://example.org/{X}/{Y}/{X}", URITemplates.getUriTemplateString(f1));
+    }
 }
