@@ -105,12 +105,12 @@ public class URITemplates {
 		return format(uriTemplate, Arrays.asList(args));
 	}
 
-	
-	public static String getUriTemplateString(Function uriFunction) {
-		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
-		final String template = term.getValue();
-		List<Variable> varlist = new LinkedList<>();
-		TermUtils.addReferencedVariablesTo(varlist, uriFunction);
+
+    public static String getUriTemplateString(Function uriFunction) {
+        ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
+        final String template = term.getValue();
+        List<Variable> varlist = new LinkedList<>();
+        TermUtils.addReferencedVariablesTo(varlist, uriFunction);
 
         List<String> splitParts = Splitter.on("{}").splitToList(template);
 
@@ -122,8 +122,11 @@ public class URITemplates {
             throw new IllegalArgumentException("the number of place holders should be equal to the number of variables.");
         }
 
-        for (int i = 0; i < numVars; i++){
-            templateWithVars.append(splitParts.get(i)).append("{").append(varlist.get(i)).append("}");
+        for (int i = 0; i < numVars; i++) {
+            templateWithVars.append(splitParts.get(i))
+                    .append("{")
+                    .append(varlist.get(i))
+                    .append("}");
         }
 
         if (splitParts.size() == numVars + 1) {
@@ -131,18 +134,17 @@ public class URITemplates {
         }
 
         return templateWithVars.toString();
-	}
+    }
 
-	public static String getUriTemplateString(Function uriTemplate,
-			PrefixManager prefixmng) {
-		String template = getUriTemplateString(uriTemplate);
-		try{
-		template = prefixmng.getExpandForm(template);
-		} catch (InvalidPrefixWritingException ex){
-			// in this case, the we do not need to expand
-		}
-		return template;
-	}
+    public static String getUriTemplateString(Function uriTemplate, PrefixManager prefixmng) {
+        String template = getUriTemplateString(uriTemplate);
+        try {
+            template = prefixmng.getExpandForm(template);
+        } catch (InvalidPrefixWritingException ex) {
+            // in this case, the we do not need to expand
+        }
+        return template;
+    }
 
 
 }
