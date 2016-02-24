@@ -120,6 +120,18 @@
 	</dependencies>
 
     <repositories>
+        <!-- for 3rd party JDBC drivers -->
+        <repository>
+            <id>bolzano-nexus-public</id>
+            <url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
         <!-- for monetdb -->
         <repository>
             <id>clojars.org</id>
