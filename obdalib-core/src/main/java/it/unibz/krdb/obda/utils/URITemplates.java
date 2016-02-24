@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.utils;
  * #L%
  */
 
+import com.google.common.base.Splitter;
 import it.unibz.krdb.obda.exception.InvalidPrefixWritingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
@@ -107,28 +108,29 @@ public class URITemplates {
 	
 	public static String getUriTemplateString(Function uriFunction) {
 		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
-		String template = term.getValue();
+		final String template = term.getValue();
 		List<Variable> varlist = new LinkedList<>();
 		TermUtils.addReferencedVariablesTo(varlist, uriFunction);
-		Iterator<Variable> vars = varlist.iterator();
-		String[] split = template.split("\\{\\}");
-		int i = 0;
-		template = "";
-		while (vars.hasNext()) {
-			template += split[i] + "{" + vars.next().toString() + "}";
-			i++;
-		}
-		//the number of place holdes should be equal to the number of variables.
-		if (split.length-i == 1){
-			template += split[i];
-		} else if(split.length == i){
-			// do nothing
-		} else{
-			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
-		}
-		
-		
-		return template;
+
+        List<String> splitParts = Splitter.on("{}").splitToList(template);
+
+        StringBuilder templateWithVars = new StringBuilder();
+
+        int numVars = varlist.size();
+
+        if (splitParts.size() != numVars + 1 && splitParts.size() != numVars) {
+            throw new IllegalArgumentException("the number of place holders should be equal to the number of variables.");
+        }
+
+        for (int i = 0; i < numVars; i++){
+            templateWithVars.append(splitParts.get(i)).append("{").append(varlist.get(i)).append("}");
+        }
+
+        if (splitParts.size() == numVars + 1) {
+            templateWithVars.append(splitParts.get(numVars));
+        }
+
+        return templateWithVars.toString();
 	}
 
 	public static String getUriTemplateString(Function uriTemplate,
