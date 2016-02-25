@@ -416,9 +416,6 @@ public class OBDAModelManager implements Disposable {
 			OWLModelManager source = event.getSource();
 			OWLOntology activeOntology = source.getActiveOntology();
 
-			// Initialize the active OBDA model
-			OBDAModel activeOBDAModel;
-
 			// Perform a proper handling for each type of event
 			final EventType eventType = event.getType();
 			switch (eventType) {
@@ -587,9 +584,6 @@ public class OBDAModelManager implements Disposable {
 		private void handleOntologySaved(OWLModelManager owlModelManager, OWLOntology activeOntology) {
 			OBDAModel activeOBDAModel;
 			try {
-                // copied from org.protege.editor.core.ui.action.SaveAction
-                //ProtegeManager.getInstance().saveEditorKit(owlEditorKit);
-//                owlEditorKit.handleSave();
 
                 // Get the active OBDA model
                 activeOBDAModel = getActiveOBDAModel();

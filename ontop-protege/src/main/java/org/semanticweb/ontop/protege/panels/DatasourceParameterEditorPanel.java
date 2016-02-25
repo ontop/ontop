@@ -20,7 +20,6 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import com.google.common.base.Strings;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -79,7 +78,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         List<Component> order = new ArrayList<>(7);
         order.add(pnlDataSourceParameters);
-        order.add(txtDatabase);
         order.add(txtJdbcUrl);
         order.add(txtDatabaseUsername);
         order.add(txtDatabasePassword);
@@ -124,7 +122,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 
     private void resetTextFields() {
-        txtDatabase.setText("");
+
         txtJdbcUrl.setText("");
         txtDatabasePassword.setText("");
         txtDatabaseUsername.setText("");
@@ -144,13 +142,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         java.awt.GridBagConstraints gridBagConstraints;
 
         pnlDataSourceParameters = new javax.swing.JPanel();
-        txtDatabase = new javax.swing.JTextField();
         txtJdbcUrl = new javax.swing.JTextField();
         txtDatabaseUsername = new javax.swing.JTextField();
         txtDatabasePassword = new javax.swing.JPasswordField();
         txtJdbcDriver = new javax.swing.JComboBox<>();
         cmdTestConnection = new javax.swing.JButton();
-        lblDataSourceName = new javax.swing.JLabel();
         lblJdbcUrl = new javax.swing.JLabel();
         lblDatabaseUsername = new javax.swing.JLabel();
         lblDatabasePassword = new javax.swing.JLabel();
@@ -177,23 +173,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(1, 300));
         pnlDataSourceParameters.setLayout(new java.awt.GridBagLayout());
 
-        txtDatabase.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtDatabase.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-        txtDatabase.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtDatabase.setPreferredSize(new java.awt.Dimension(180, 24));
-        txtDatabase.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                fieldChangeHandler(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 2, 10);
-        pnlDataSourceParameters.add(txtDatabase, gridBagConstraints);
-
         txtJdbcUrl.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
         txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtJdbcUrl.setMinimumSize(new java.awt.Dimension(180, 24));
@@ -205,11 +184,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 2, 10);
+        gridBagConstraints.insets = new java.awt.Insets(30, 0, 2, 10);
         pnlDataSourceParameters.add(txtJdbcUrl, gridBagConstraints);
 
         txtDatabaseUsername.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
@@ -223,7 +202,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
@@ -240,7 +219,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 10);
@@ -258,7 +237,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 10);
@@ -279,28 +258,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(8, 10, 10, 20);
         pnlDataSourceParameters.add(cmdTestConnection, gridBagConstraints);
-
-        lblDataSourceName.setBackground(new java.awt.Color(153, 153, 153));
-        lblDataSourceName.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
-        lblDataSourceName.setForeground(new java.awt.Color(53, 113, 163));
-        lblDataSourceName.setText("Datasource Name:   ");
-        lblDataSourceName.setFocusTraversalKeysEnabled(false);
-        lblDataSourceName.setFocusable(false);
-        lblDataSourceName.setMaximumSize(new java.awt.Dimension(120, 27));
-        lblDataSourceName.setMinimumSize(new java.awt.Dimension(120, 27));
-        lblDataSourceName.setPreferredSize(new java.awt.Dimension(120, 27));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 20);
-        pnlDataSourceParameters.add(lblDataSourceName, gridBagConstraints);
 
         lblJdbcUrl.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         lblJdbcUrl.setForeground(new java.awt.Color(53, 113, 163));
@@ -312,10 +274,10 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblJdbcUrl.setPreferredSize(new java.awt.Dimension(130, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 20);
+        gridBagConstraints.insets = new java.awt.Insets(30, 10, 2, 20);
         pnlDataSourceParameters.add(lblJdbcUrl, gridBagConstraints);
 
         lblDatabaseUsername.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
@@ -328,7 +290,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblDatabaseUsername.setPreferredSize(new java.awt.Dimension(130, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(3, 10, 2, 20);
@@ -344,7 +306,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblDatabasePassword.setPreferredSize(new java.awt.Dimension(130, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(3, 10, 2, 20);
@@ -360,7 +322,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblJdbcDriver.setPreferredSize(new java.awt.Dimension(130, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(3, 10, 2, 20);
@@ -409,7 +371,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 0);
         pnlDataSourceParameters.add(pnlCommandButton, gridBagConstraints);
 
         cmdHelp.setFont(new java.awt.Font("Dialog", 1, 13)); // NOI18N
@@ -455,8 +417,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// GEN-LAST:event_txtJdbcDriverActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
-        if (!createNewDatasource())
-            return;
+        if (currentDataSource == null) {
+            if (!createNewDatasource()) {
+                return;
+            }
+        }
         // save the obdaModel to an .obda file disk
         try {
             ProtegeManager.getInstance().saveEditorKit(owlEditorKit);
@@ -468,38 +433,22 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// GEN-LAST:event_cmdSaveActionPerformed
 
     private boolean createNewDatasource() {
-        String name = txtDatabase.getText();
-        URI uri;
 
-        if (Strings.isNullOrEmpty(name)) {
-            JOptionPane.showMessageDialog(this, "The data source ID cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
+        URI uri = URI.create("datasource1");
 
-        try {
-            uri = URI.create(name);
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(null, "Invalid identifier string", "Warning", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
+        //create new datasource
+        OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        String username = txtDatabaseUsername.getText();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+        String password = new String(txtDatabasePassword.getPassword());
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+        String url = txtJdbcUrl.getText();
+        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+        currentDataSource = newDatasource;
+        obdaModel.addSource(currentDataSource);
 
-        if(currentDataSource == null) {
-            //create new datasource
-            OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
-            String username = txtDatabaseUsername.getText();
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-            String password = new String(txtDatabasePassword.getPassword());
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-            String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-            String url = txtJdbcUrl.getText();
-            newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-            currentDataSource = newDatasource;
-            obdaModel.addSource(currentDataSource);
-        }
-        else {
-            currentDataSource.setNewID(uri);
-        }
 
         return true;
     }
@@ -551,7 +500,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     private void updateSourceValues() {
         if (currentDataSource == null) {
+            createNewDatasource();
             return;
+
         }
 
         JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
@@ -561,12 +512,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             // do nothing
         }
 
-
         String username = txtDatabaseUsername.getText();
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-        String driver = txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem();
+        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
         String url = txtJdbcUrl.getText();
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -587,10 +537,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             lblConnectionStatus.setText("");
         }
 
-
-
-
-
         obdaModel.fireSourceParametersUpdated();
     }
 
@@ -599,7 +545,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdTestConnection;
     private javax.swing.JLabel lblConnectionStatus;
-    private javax.swing.JLabel lblDataSourceName;
     private javax.swing.JLabel lblDatabasePassword;
     private javax.swing.JLabel lblDatabaseUsername;
     private javax.swing.JLabel lblJdbcDriver;
@@ -607,7 +552,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JPanel pnlCommandButton;
     private javax.swing.JPanel pnlDataSourceParameters;
     private javax.swing.JPanel pnlInformation;
-    private javax.swing.JTextField txtDatabase;
     private javax.swing.JPasswordField txtDatabasePassword;
     private javax.swing.JTextField txtDatabaseUsername;
     private javax.swing.JComboBox<String> txtJdbcDriver;
@@ -619,7 +563,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         comboListener.setNotify(false);
         if (currentsource == null) {
             currentDataSource = null;
-            txtDatabase.setText("");
             txtJdbcDriver.setSelectedIndex(0);
             txtDatabaseUsername.setText("");
             txtDatabasePassword.setText("");
@@ -628,8 +571,15 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         } else {
             currentDataSource = currentsource;
-            txtDatabase.setText(currentsource.getSourceID().toString());
-            txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+            String driverClass = currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+            if(driverClass.isEmpty())
+            {
+                txtJdbcDriver.setSelectedIndex(0);
+            }
+            else
+            {
+                txtJdbcDriver.setSelectedItem(driverClass);
+            }
             txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
             txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
             txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
@@ -646,5 +596,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 
     }
+
 
 }

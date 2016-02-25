@@ -405,10 +405,20 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {
 		if (selectedSource == null) {
 			DialogUtils.showQuickErrorDialog(null, new Exception("Data source has not been defined."));
-		} else {
-			executeQuery();
-			txtClassUriTemplate.requestFocus();
 		}
+		else {
+			String sqlString = txtQueryEditor.getText();
+			if (sqlString.isEmpty()) {
+
+				JOptionPane.showMessageDialog(null, "SQL query cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			else
+			{
+				executeQuery();
+				txtClassUriTemplate.requestFocus();
+			}
+		}
+
 	}
 
 	private void txtClassUriTemplateFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_txtClassUriTemplateFocusGained
@@ -938,6 +948,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 
 		public void run() {
+
 			thread = new Thread() {
 				@Override
                 public void run() {
@@ -948,6 +959,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
                         //second parameter is database version, not relevant in this step
                         SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
 						String sqlString = txtQueryEditor.getText();
+
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter
 							if (sqlDialect instanceof SQLServerSQLDialectAdapter) {
@@ -971,7 +983,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					}
 				}
 			};
-			thread.start();
+
+				thread.start();
+
+
 		}
 
 		@Override
