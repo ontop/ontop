@@ -122,8 +122,8 @@ public class QuestUnfolder {
 		
 	/**
 	 * Setting up the unfolder and SQL generation
-	 * @param reformulationReasoner 
-	 * @param collection 
+	 * @param mappings
+	 * @param reformulationReasoner
 	 * @throws OBDAException 
 	 */
 
@@ -270,21 +270,19 @@ public class QuestUnfolder {
 		log.debug("Appended {} object property assertions as fact rules", count);
 			
 		
-//		int count = 0;
-//		for (DataPropertyAssertion a : assertions) {
-			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
-//			DataPropertyAssertion ca = (DataPropertyAssertion) assertion;
-//			ObjectConstant s = ca.getObject();
-//			ValueConstant o = ca.getValue();
-//			String typeURI = getURIType(o.getType());
-//			Predicate p = ca.getPredicate();
-//			Predicate urifuction = factory.getUriTemplatePredicate(1);
-//			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
-//			rule = factory.getCQIE(head, new LinkedList<Function>());
-//		} 	
-				
-//		}
-//		log.debug("Appended {} ABox assertions as fact rules", count);		
+		count = 0;
+		for (DataPropertyAssertion da : das) {
+			URIConstant s = (URIConstant)da.getSubject();
+			ValueConstant o = da.getValue();
+			Predicate p = da.getProperty().getPredicate();
+			Function head  = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI()), fac.getConstantLiteral(o.getValue())));
+			CQIE rule =  fac.getCQIE(head, Collections.<Function> emptyList());
+
+			unfoldingProgram.add(rule);
+			count++;
+		}
+
+		log.debug("Appended {} data property assertions as fact rules", count);
 	}		
 		
 
