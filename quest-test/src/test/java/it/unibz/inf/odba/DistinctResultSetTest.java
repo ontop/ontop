@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 import java.io.File;
 import java.util.List;

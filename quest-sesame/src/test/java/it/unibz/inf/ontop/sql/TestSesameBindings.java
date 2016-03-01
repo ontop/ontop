@@ -41,7 +41,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 public class TestSesameBindings {
 

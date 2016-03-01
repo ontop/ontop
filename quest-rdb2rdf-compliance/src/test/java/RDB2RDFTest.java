@@ -67,7 +67,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;

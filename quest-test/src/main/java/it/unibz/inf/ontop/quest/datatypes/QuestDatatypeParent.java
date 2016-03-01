@@ -57,7 +57,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 
 

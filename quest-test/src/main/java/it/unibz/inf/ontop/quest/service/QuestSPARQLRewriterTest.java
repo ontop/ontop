@@ -30,7 +30,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import junit.framework.TestCase;
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 /**
  * Test class using StockExchange scenario in MySQL

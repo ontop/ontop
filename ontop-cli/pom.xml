@@ -78,7 +78,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>it.inf.ontop.cli.Ontop</mainClass>
+                            <mainClass>it.unibz.inf.ontop.cli.Ontop</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -25,12 +25,12 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import sesameWrapper.RepositoryConnection;
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.RepositoryConnection;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 /**
  * Tests that user-applied constraints can be provided through
- * sesameWrapper.SesameVirtualRepo
+ * SesameVirtualRepo
  * with manually instantiated metadata.
  * <p>
  * This is quite similar to the setting in the optique platform

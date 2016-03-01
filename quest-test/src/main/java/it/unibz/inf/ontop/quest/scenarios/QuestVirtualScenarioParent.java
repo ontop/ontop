@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.quest.scenarios;
 
 import org.openrdf.repository.Repository;
 
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 

@@ -43,7 +43,7 @@ import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameMaterializer;
+import it.unibz.inf.ontop.sesame.SesameMaterializer;
 
 import javax.swing.*;
 import java.awt.*;

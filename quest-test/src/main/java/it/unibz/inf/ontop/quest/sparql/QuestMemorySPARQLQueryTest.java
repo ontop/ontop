@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.quest.sparql;
 import junit.framework.Test;
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.Repository;
-import sesameWrapper.SesameClassicInMemoryRepo;
+import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 
