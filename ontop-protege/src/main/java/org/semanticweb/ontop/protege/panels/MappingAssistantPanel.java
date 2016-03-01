@@ -72,7 +72,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	
 	private MapItem predicateSubjectMap;
 
-    private boolean isSubjectClassValid = false;
+    private boolean isSubjectClassValid = true;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
@@ -296,7 +296,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
             @Override
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cboClassAutoSuggestItemStateChanged(evt);
-            }
+             }
         });
         JTextField txtComboBoxEditor = (JTextField) cboClassAutoSuggest.getEditor().getEditorComponent();
         txtComboBoxEditor.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -405,10 +405,20 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {
 		if (selectedSource == null) {
 			DialogUtils.showQuickErrorDialog(null, new Exception("Data source has not been defined."));
-		} else {
-			executeQuery();
-			txtClassUriTemplate.requestFocus();
 		}
+		else {
+			String sqlString = txtQueryEditor.getText();
+			if (sqlString.isEmpty()) {
+
+				JOptionPane.showMessageDialog(null, "SQL query cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			else
+			{
+				executeQuery();
+				txtClassUriTemplate.requestFocus();
+			}
+		}
+
 	}
 
 	private void txtClassUriTemplateFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_txtClassUriTemplateFocusGained
@@ -452,11 +462,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			predicateSubjectMap = new MapItem(selectedItem);
 			predicateSubjectMap.setTargetMapping(txtClassUriTemplate.getText());
 			isSubjectClassValid = true;
+
 		} else if (item instanceof String) {
 			String className = item.toString();
 			if (!className.isEmpty()) {
 				isSubjectClassValid = false;
 			}
+			isSubjectClassValid = true;
 		}
 		validateSubjectClass();
 	}
@@ -480,11 +492,24 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			// Prepare the mapping source
 			String source = txtQueryEditor.getText();
-			
+
+			if (source.isEmpty()) {
+				JOptionPane.showMessageDialog(this, "ERROR: The SQL source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			String subjectTargetString = predicateSubjectMap.getTargetMapping();
+			if(subjectTargetString.equals(":")){
+				JOptionPane.showMessageDialog(this, "ERROR: Focus on URI cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			// Prepare the mapping target
             List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
 			List<Function> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
-			
+
+			if (target.isEmpty()) {
+				JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty. Add a class or a property", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			// Create the mapping axiom
 			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom);
@@ -748,8 +773,6 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			DBMetadata md = DBMetadataExtractor.createMetadata(conn);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			DBMetadataExtractor.loadMetadata(md, conn, null);
-			// ROMAN (7 Oct 2015): I'm not sure we need to add "views" -- they are 
-			// created by SQLQueryParser for complex queries that cannot be parsed
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
 				relationList.addElement(relation);
 			}
@@ -938,6 +961,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 
 		public void run() {
+
 			thread = new Thread() {
 				@Override
                 public void run() {
@@ -948,6 +972,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
                         //second parameter is database version, not relevant in this step
                         SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
 						String sqlString = txtQueryEditor.getText();
+
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter
 							if (sqlDialect instanceof SQLServerSQLDialectAdapter) {
@@ -971,7 +996,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					}
 				}
 			};
-			thread.start();
+
+				thread.start();
+
+
 		}
 
 		@Override
