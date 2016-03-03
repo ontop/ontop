@@ -20,12 +20,15 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import java.util.Iterator;
-
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.sesame.SesameStatementIterator;
+
+import java.util.Iterator;
+
+public class SesameMaterializer {
 
 public class SesameMaterializer {
 	

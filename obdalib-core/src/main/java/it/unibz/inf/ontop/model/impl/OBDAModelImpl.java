@@ -20,6 +20,22 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAMappingListener;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDAModelListener;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.inf.ontop.querymanager.QueryController;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -28,32 +44,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAMappingListener;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.OBDAModelListener;
-import it.unibz.inf.ontop.model.OBDAQuery;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.querymanager.QueryController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,26 +61,19 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private PrefixManager prefixManager;
 
-	private HashMap<URI, OBDADataSource> datasources;
+	private Map<URI, OBDADataSource> datasources;
 
-	private ArrayList<OBDAModelListener> sourceslisteners;
+	private List<OBDAModelListener> sourceslisteners;
 
 	private Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings;
 
-	private ArrayList<OBDAMappingListener> mappinglisteners;
+	private List<OBDAMappingListener> mappinglisteners;
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelImpl.class);
 
-	private final Set<OClass> declaredClasses = new LinkedHashSet<OClass>();
-
-	private final Set<ObjectPropertyExpression> declaredObjectProperties = new LinkedHashSet<ObjectPropertyExpression>();
-
-	private final Set<DataPropertyExpression> declaredDataProperties = new LinkedHashSet<DataPropertyExpression>();
-
-	// All other predicates (not classes or properties)
-	// private final LinkedHashSet<Predicate> declaredPredicates = new LinkedHashSet<Predicate>();
+	private final OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
 
 	/**
 	 * The default constructor
@@ -175,15 +164,14 @@ public class OBDAModelImpl implements OBDAModel {
 		sourceslisteners.add(listener);
 	}
 
-	@Override
-	public void fireSourceAdded(OBDADataSource source) {
+	
+	private void fireSourceAdded(OBDADataSource source) {
 		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceAdded(source);
 		}
 	}
 
-	@Override
-	public void fireSourceRemoved(OBDADataSource source) {
+	private void fireSourceRemoved(OBDADataSource source) {
 		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceDeleted(source);
 		}
@@ -192,12 +180,11 @@ public class OBDAModelImpl implements OBDAModel {
 	@Override
 	public void fireSourceParametersUpdated() {
 		for (OBDAModelListener listener : sourceslisteners) {
-			listener.datasourcParametersUpdated();
+			listener.datasourceParametersUpdated();
 		}
 	}
 
-	@Override
-	public void fireSourceNameUpdated(URI old, OBDADataSource neu) {
+	private void fireSourceNameUpdated(URI old, OBDADataSource neu) {
 		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceUpdated(old.toString(), neu);
 		}
@@ -258,7 +245,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public void removeAllMappings(URI datasource_uri) {
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
+		List<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
 		while (!mappings.isEmpty()) {
 			mappings.remove(0);
 		}
@@ -304,7 +291,7 @@ public class OBDAModelImpl implements OBDAModel {
 		if (pos == -1) {
 			return null;
 		}
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(source_uri);
+		List<OBDAMappingAxiom> mappings = getMappings(source_uri);
 		return mappings.get(pos);
 	}
 
@@ -314,10 +301,10 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public ArrayList<OBDAMappingAxiom> getMappings(URI datasource_uri) {
+	public List<OBDAMappingAxiom> getMappings(URI datasource_uri) {
 		if (datasource_uri == null)
 			return null;
-		ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+		List<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 		if (current_mappings == null) {
 			initMappingsArray(datasource_uri);
 		}
@@ -368,7 +355,7 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery) {
+	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		mapping.setSourceQuery(sourceQuery);
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
@@ -398,7 +385,7 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, OBDAQuery targetQuery) {
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, List<Function> targetQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		if (mapping == null) {
 			return;
@@ -455,8 +442,7 @@ public class OBDAModelImpl implements OBDAModel {
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
 			for (OBDAMappingAxiom mapping : mp) {
-				CQIE cq = (CQIE) mapping.getTargetQuery();
-				List<Function> body = cq.getBody();
+				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
 					if (!oldatom.getFunctionSymbol().equals(oldname)) {
@@ -478,8 +464,7 @@ public class OBDAModelImpl implements OBDAModel {
 		for (OBDADataSource source : datasources.values()) {
 			List<OBDAMappingAxiom> mp = new ArrayList<OBDAMappingAxiom>(mappings.get(source.getSourceID()));
 			for (OBDAMappingAxiom mapping : mp) {
-				CQIE cq = (CQIE) mapping.getTargetQuery();
-				List<Function> body = cq.getBody();
+				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
 					Function oldatom = body.get(idx);
 					if (!oldatom.getFunctionSymbol().equals(predicate)) {
@@ -506,123 +491,8 @@ public class OBDAModelImpl implements OBDAModel {
 		mappings.clear();
 	}
 
-/*	
 	@Override
-	public Set<Predicate> getDeclaredPredicates() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredClasses);
-		result.addAll(declaredObjectProperties);
-		result.addAll(declaredDataProperties);
-		result.addAll(declaredPredicates);
-		return result;
+	public OntologyVocabulary getOntologyVocabulary() {
+		return vocabulary;
 	}
-*/
-
-	@Override
-	public Set<OClass> getDeclaredClasses() {
-		return Collections.unmodifiableSet(declaredClasses);
-	}
-
-	@Override
-	public Set<ObjectPropertyExpression> getDeclaredObjectProperties() {
-		return Collections.unmodifiableSet(declaredObjectProperties);
-	}
-
-	@Override
-	public Set<DataPropertyExpression> getDeclaredDataProperties() {
-		return Collections.unmodifiableSet(declaredDataProperties);
-	}
-/*
-	@Override
-	public boolean declarePredicate(Predicate predicate) {
-		if (predicate.isClass()) {
-			return declaredClasses.add(predicate);
-		} else if (predicate.isObjectProperty()) {
-			return declaredObjectProperties.add(predicate);
-		} else if (predicate.isDataProperty()) {
-			return declaredDataProperties.add(predicate);
-		} else {
-			return declaredPredicates.add(predicate);
-		}
-	}
-*/
-	
-	@Override
-	public boolean declareClass(OClass classname) {
-//		if (!classname.isClass()) {
-//			throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + classname);
-//		}
-		return declaredClasses.add(classname);
-	}
-
-	@Override
-	public boolean declareObjectProperty(ObjectPropertyExpression property) {
-//		if (!property.getPredicate().isObjectProperty()) {
-//			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
-//		}
-		return declaredObjectProperties.add(property);
-	}
-
-	@Override
-	public boolean declareDataProperty(DataPropertyExpression property) {
-//		if (!property.getPredicate().isDataProperty()) {
-//			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
-//		}
-		return declaredDataProperties.add(property);
-	}
-	
-	@Override
-	public void declareAll(OntologyVocabulary vocabulary) {
-		for (OClass p : vocabulary.getClasses()) 
-			declareClass(p);
-		
-		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
-			declareObjectProperty(p);
-		
-		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
-			declareDataProperty(p);
-	}
-	
-/*
-	@Override
-	public boolean unDeclarePredicate(Predicate predicate) {
-		return declaredPredicates.remove(predicate);
-	}
-*/
-	@Override
-	public boolean unDeclareClass(OClass classname) {
-		return declaredClasses.remove(classname);
-	}
-
-	@Override
-	public boolean unDeclareObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.remove(property);
-	}
-
-	@Override
-	public boolean unDeclareDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.remove(property);
-	}
-	
-	@Override
-	public boolean isDeclaredClass(OClass classname) {
-		return declaredClasses.contains(classname);
-	}
-
-	@Override
-	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.contains(property);
-	}
-
-	@Override
-	public boolean isDeclaredDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.contains(property);
-	}
-
-/*
-	@Override
-	public boolean isDeclared(Predicate predicate) {
-		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate) || declaredPredicates.contains(predicate));
-	}
-*/	
 }

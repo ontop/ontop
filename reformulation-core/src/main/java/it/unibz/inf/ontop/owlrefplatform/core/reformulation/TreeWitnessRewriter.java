@@ -20,22 +20,37 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.ontology.ClassExpression;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.ontology.OClass;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
+import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.ontology.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -48,15 +63,19 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TBoxReasoner reasoner;
+	private ImmutableOntologyVocabulary voc;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
+	private LinearInclusionDependencies sigma;
 	
 	private Collection<TreeWitnessGenerator> generators;
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
+	public void setTBox(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
+		this.voc = voc;
+		this.sigma = sigma;
 		
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
 		
@@ -97,7 +116,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);
+		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<>(concepts.size());
 		
 		for (ClassExpression con : concepts) {
@@ -132,7 +151,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		List<CQIE> outputRules = new LinkedList<>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, voc, generators);
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
@@ -191,7 +210,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					log.debug("COMPATIBLE: {}", compatibleTWs);
 					LinkedList<Function> mainbody = new LinkedList<Function>(); 
 					
-					for (QueryConnectedComponent.Edge edge : cc.getEdges()) {
+					for (Edge edge : cc.getEdges()) {
 						boolean contained = false;
 						for (TreeWitness tw : compatibleTWs)
 							if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
@@ -218,7 +237,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				// no conflicting tree witnesses
 				// use polynomial tree witness rewriting by treating each edge independently 
 				LinkedList<Function> mainbody = new LinkedList<Function>(); 		
-				for (QueryConnectedComponent.Edge edge : cc.getEdges()) {
+				for (Edge edge : cc.getEdges()) {
 					log.debug("EDGE {}", edge);
 					
 					Function edgeAtom = null;
@@ -249,7 +268,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		else {
 			// degenerate connected component
 			LinkedList<Function> loopbody = new LinkedList<Function>();
-			QueryConnectedComponent.Loop loop = cc.getLoop();
+			Loop loop = cc.getLoop();
 			log.debug("LOOP {}", loop);
 			if (loop != null)
 				loopbody.addAll(loop.getAtoms());
@@ -317,6 +336,8 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
 		DatalogProgram output = fac.getDatalogProgram(dp.getQueryModifiers(), outputRules);
+		for (CQIE cq : output.getRules())
+			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

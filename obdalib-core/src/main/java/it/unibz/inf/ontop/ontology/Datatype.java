@@ -22,6 +22,14 @@ package it.unibz.inf.ontop.ontology;
 
 import it.unibz.inf.ontop.model.Predicate;
 
+/**
+ * Represents Datatype in OWL 2 Specification
+ * 
+ * @author roman
+ *
+ */
+
+
 public interface Datatype extends DataRangeExpression {
 	
 	public Predicate getPredicate();

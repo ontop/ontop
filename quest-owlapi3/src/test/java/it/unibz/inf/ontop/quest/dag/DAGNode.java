@@ -20,14 +20,13 @@ package it.unibz.inf.ontop.quest.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
+import it.unibz.inf.ontop.ontology.Datatype;
 import it.unibz.inf.ontop.ontology.Description;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
-import it.unibz.inf.ontop.ontology.Datatype;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
@@ -94,63 +93,35 @@ public class DAGNode implements Serializable {
 		if (description instanceof ObjectSomeValuesFrom) {
 			bf.append("E");
 			ObjectSomeValuesFrom prop = (ObjectSomeValuesFrom)description;
-			Predicate p =prop.getProperty().getPredicate();
-			String fragment = p.getName().toString();//.getFragment();
-			if (fragment != null)
-				bf.append(fragment);
-			else
-				bf.append(p.getName());
-			if (prop.getProperty().isInverse())
+			ObjectPropertyExpression ope = prop.getProperty();
+			bf.append(ope.getName());
+			if (ope.isInverse())
 				bf.append("^-");
 		} 
 		else if (description instanceof DataSomeValuesFrom) {
 			bf.append("E");
 			DataSomeValuesFrom prop = (DataSomeValuesFrom)description;
-			Predicate p =prop.getProperty().getPredicate();
-			String fragment = p.getName().toString();//.getFragment();
-			if (fragment != null)
-				bf.append(fragment);
-			else
-				bf.append(p.getName());
+			DataPropertyExpression dpe = prop.getProperty();
+			bf.append(dpe.getName());
 		} 
 		else if (description instanceof OClass) {
-			
-			Predicate p = ((OClass) description).getPredicate();
-			String fragment = p.getName().toString();//.getFragment();
-			if (fragment != null)
-				bf.append(fragment);
-			else
-				bf.append(p.getName());
-			
+			OClass ce = (OClass) description;
+			bf.append(ce.getName());	
 		} 
-		else if (description instanceof ObjectPropertyExpression) {
+		else if (description instanceof ObjectPropertyExpression) {		
+			ObjectPropertyExpression ope = (ObjectPropertyExpression) description;
+			bf.append(ope.getName());
 			
-			Predicate p = ((ObjectPropertyExpression) description).getPredicate();
-			String fragment = p.getName().toString();//.getFragment();
-			if (fragment != null)
-				bf.append(fragment);
-			else
-				bf.append(p.getName());
-			
-			if (((ObjectPropertyExpression) description).isInverse()) {
+			if (ope.isInverse()) 
 				bf.append("^-");
-			}
 		} 
 		else if (description instanceof DataPropertyExpression) {			
-			Predicate p = ((ObjectPropertyExpression) description).getPredicate();
-			String fragment = p.getName().toString();//.getFragment();
-			if (fragment != null)
-				bf.append(fragment);
-			else
-				bf.append(p.getName());
+			DataPropertyExpression dpe = (DataPropertyExpression) description;
+			bf.append(dpe.getName());
 		} 
 		else if (description instanceof DataPropertyRangeExpression) {
-			Predicate p = ((DataPropertyRangeExpression) description).getProperty().getPredicate();
-			String fragment = p.getName().toString();//.getFragment();
-			if (fragment != null)
-				bf.append(fragment);
-			else
-				bf.append(p.getName());			
+			DataPropertyExpression dpe = ((DataPropertyRangeExpression) description).getProperty();
+			bf.append(dpe.getName());			
 			bf.append("^-");
 		}
 		else if (description instanceof Datatype) {

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,13 +20,11 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.impl.CQIEImpl;
+
+import java.util.List;
 
 /**
  * This Filter receives a string and returns true if any mapping contains the
@@ -40,8 +38,7 @@ public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMapp
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		final CQIE headquery = (CQIEImpl) object.getTargetQuery();
-		final List<Function> atoms = headquery.getBody();
+		final List<Function> atoms = object.getTargetQuery();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

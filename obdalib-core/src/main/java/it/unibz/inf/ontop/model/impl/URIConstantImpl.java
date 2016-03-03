@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-
-import it.unibz.inf.ontop.model.URIConstant;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.URIConstant;
+
 
 /**
  * Provides a storage to put the URI constant.

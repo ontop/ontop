@@ -20,22 +20,17 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import java.io.File;
-
-import junit.framework.TestCase;
-
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import java.io.File;
 
 /**
  * This test check proper handling of ABox assertions, including handling of the
@@ -57,7 +52,6 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
@@ -65,18 +59,22 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		
-		QuestOWLFactory fac = new QuestOWLFactory();
-		fac.setPreferenceHolder(pref);
+//		QuestOWLFactory fac = new QuestOWLFactory();
+//		fac.setPreferenceHolder(pref);
+//
+//		reasoner = (QuestOWL) fac.createReasoner(ontology);
+//		reasoner.flush();
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-		reasoner = (QuestOWL) fac.createReasoner(ontology);
-		reasoner.flush();
 
 		conn = reasoner.getConnection();
 		st = conn.createStatement();
 	}
 
 	private int executeQuery(String q) throws OWLException {
-		String prefix = "PREFIX : <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+		String prefix = "PREFIX : <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
 		QuestOWLResultSet res = st.executeTuple(query);

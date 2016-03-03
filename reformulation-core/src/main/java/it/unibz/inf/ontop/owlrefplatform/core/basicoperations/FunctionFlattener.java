@@ -61,7 +61,7 @@ public class FunctionFlattener {
             public List<Function> f(Function atom) {
                 Predicate predicate = atom.getFunctionSymbol();
 
-                if (predicate.equals(OBDAVocabulary.AND)) {
+                if (predicate.equals(ExpressionOperation.AND)) {
                     return flattenAND(atom);
                 }
                 else if (predicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
@@ -88,7 +88,7 @@ public class FunctionFlattener {
                 /**
                  * Recursive call for nested AND(...)
                  */
-                if (subAtom.getFunctionSymbol().equals(OBDAVocabulary.AND)) {
+                if (subAtom.getFunctionSymbol().equals(ExpressionOperation.AND)) {
                     flattenedAtoms = flattenedAtoms.append(flattenAND(subAtom));
                 }
                 else {

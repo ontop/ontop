@@ -58,7 +58,7 @@ public class DatalogNormalizer {
 		/* Collecting all necessary conditions */
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = body.get(i);
-			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.AND) {
+			if (currentAtom.getFunctionSymbol() == ExpressionOperation.AND) {
 				body.remove(i);
 				body.addAll(getUnfolderAtomList(currentAtom));
 			}
@@ -457,7 +457,7 @@ public class DatalogNormalizer {
 		Iterator<Function> iter = boolSet.iterator();
 		while (iter.hasNext()) {
 			Function eq = iter.next();
-			if (eq.getFunctionSymbol() != OBDAVocabulary.EQ)
+			if (eq.getFunctionSymbol() != ExpressionOperation.EQ)
 				continue;
 			Term v1 = eq.getTerm(0);
 			Term v2 = eq.getTerm(1);
@@ -676,7 +676,7 @@ public class DatalogNormalizer {
 			Function atom = (Function) l;
 			// System.out
 			// .println(atom.getFunctionSymbol().getClass() + " " + atom);
-			if (!(atom.getFunctionSymbol() instanceof BooleanOperationPredicate))
+			if (!(atom.getFunctionSymbol() instanceof OperationPredicate))
 				continue;
 			Set<Variable> variables = new HashSet<>();
 			TermUtils.addReferencedVariablesTo(variables, atom); 
@@ -703,7 +703,7 @@ public class DatalogNormalizer {
 					// if (!(l2 instanceof Function))
 					// continue;
 					// Function f2 = (Function) l2;
-					// if (f2.getPredicate() != OBDAVocabulary.EQ)
+					// if (f2.getPredicate() != ExpressionOperation.EQ)
 					// continue;
 					// List<NewLiteral> equalityVariables = f2.getTerms();
 					// if (equalityVariables.contains(var)) {
@@ -750,7 +750,7 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	public static List<Function> getUnfolderAtomList(Function atom) {
-		if (atom.getFunctionSymbol() != OBDAVocabulary.AND) {
+		if (atom.getFunctionSymbol() != ExpressionOperation.AND) {
 			throw new InvalidParameterException();
 		}
 		List<Term> innerFunctionalTerms = new LinkedList<>();
@@ -777,7 +777,7 @@ public class DatalogNormalizer {
 
 		List<Term> result = new LinkedList<>();
 
-		if (term.getFunctionSymbol() != OBDAVocabulary.AND) {
+		if (term.getFunctionSymbol() != ExpressionOperation.AND) {
 			result.add(term);
 		} else {
 			List<Term> terms = term.getTerms();

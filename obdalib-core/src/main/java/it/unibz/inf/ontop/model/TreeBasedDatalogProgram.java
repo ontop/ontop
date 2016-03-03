@@ -7,8 +7,8 @@ import fj.*;
 import fj.data.*;
 import fj.data.List;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
-import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**

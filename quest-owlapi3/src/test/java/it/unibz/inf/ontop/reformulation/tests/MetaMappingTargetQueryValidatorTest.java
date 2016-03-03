@@ -20,6 +20,12 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlapi3.OBDAModelValidator;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -31,11 +37,6 @@ import java.sql.Statement;
 
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlapi3.OBDAModelValidator;
-import it.unibz.inf.ontop.io.ModelIOManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This test is adapted from {@link org.semanticweb.ontop.reformulation.tests#SimpleMappingVirtualABoxTest}.
+ * This test is adapted from {@link it.unibz.inf.ontop.reformulation.tests#SimpleMappingVirtualABoxTest}.
  *
  * A simple test that check if the system is able to handle Mappings for
  * classes/roles and attributes even if there are no URI templates. i.e., the
@@ -135,11 +136,11 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 	public void testValidate(){
 
-		// Creating a new instance of the reasoner
-		OBDAModelValidator obdaModelValidator = new OBDAModelValidator(obdaModel, ontology);
+		// run validador
 		try {
-			obdaModelValidator.run();
-		} catch (Exception e) {
+			OBDAModelValidator.validate(obdaModel);
+		} 
+		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
 		}
 		

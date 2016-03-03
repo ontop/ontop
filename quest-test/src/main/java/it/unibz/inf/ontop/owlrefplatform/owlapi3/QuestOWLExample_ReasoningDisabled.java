@@ -1,31 +1,20 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi3;
 
 
-
-//import it.it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
+import org.semanticweb.owlapi.model.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -358,10 +347,10 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     /**
-     * @throws it.unibz.krdb.obda.model.OBDAException
+     * @throws it.unibz.inf.ontop.model.OBDAException
      * @throws org.semanticweb.owlapi.model.OWLOntologyCreationException
-     * @throws it.unibz.krdb.obda.exception.InvalidMappingException
-     * @throws it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException
+     * @throws it.unibz.inf.ontop.exception.InvalidMappingException
+     * @throws it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException
      * @throws java.io.IOException
      * @throws OWLException
      */
@@ -392,17 +381,21 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
+//        QuestOWLFactory factory = new QuestOWLFactory();
+//        factory.setOBDAController(obdaModel);
+//        factory.setPreferenceHolder(preference);
+//
+//        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
+//        factory.setExcludeFromTMappingsPredicates(config);
+
+
+        //QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
+
+        
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(preference);
-
-        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
-        factory.setExcludeFromTMappingsPredicates(config);
-
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-        this.reasoner = reasoner;
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).tMappingExclusionConfig(tMapConfig).build();
+        this.reasoner = factory.createReasoner(ontology, config);
 		/*
 		 * Prepare the data connection for querying.
 		 */

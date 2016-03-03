@@ -20,22 +20,22 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.model.impl.CQIEImpl;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,18 +140,18 @@ public class VirtualABoxStatistics {
 
 		for (OBDADataSource database : sourceList) {
 			URI sourceUri = database.getSourceID();
-			ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
+			List<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 
 			HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
 			for (OBDAMappingAxiom mapping : mappingList) {
 				String mappingId = mapping.getId();
 				int triplesCount = 0;
 				try {
-					OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
+					OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 					int tuples = getTuplesCount(database, sourceQuery);
 
-					CQIEImpl targetQuery = (CQIEImpl) mapping.getTargetQuery();
-					int atoms = getAtomCount(targetQuery);
+					List<Function> targetQuery = mapping.getTargetQuery();
+					int atoms = targetQuery.size();
 
 					triplesCount = tuples * atoms;
 				} catch (Exception e) {
@@ -170,7 +170,7 @@ public class VirtualABoxStatistics {
 		ResultSet rs = null;
 		int count = -1;
 		try {
-			String sql = String.format("select COUNT(*) %s", getSelectionString(query));
+            String sql = String.format("select COUNT(*) %s", getSelectionString(query));
 			Connection c = conn.getConnection(sourceId);
 			st = c.createStatement();
 
@@ -195,10 +195,6 @@ public class VirtualABoxStatistics {
 			}
 		}
 		return count;
-	}
-
-	private int getAtomCount(CQIEImpl query) {
-		return query.getBody().size();
 	}
 
 	private String getSelectionString(OBDASQLQuery query) {

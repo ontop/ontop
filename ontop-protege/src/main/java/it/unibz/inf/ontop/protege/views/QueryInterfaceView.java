@@ -2,9 +2,9 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
+ * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen-Bolzano.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,48 +20,40 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi3.OWLResultSetWriter;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
-import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import org.protege.editor.core.ProtegeManager;
+import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
-import it.unibz.inf.ontop.protege.gui.action.OBDASaveQueryResultToFileAction;
 import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableModel;
-
-import org.protege.editor.core.ProtegeManager;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener, OBDAModelManagerListener {
 
@@ -81,9 +73,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
 
-	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
-
-	@Override
+    @Override
 	protected void disposeOWLView() {
 		this.getOWLModelManager().removeOntologyChangeListener(ontologyListener);
 
@@ -133,17 +123,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		
 
 		// Setting up model listeners
-		ontologyListener = new OWLOntologyChangeListener() {
-			@Override
-			public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-				Runnable runner = new Runnable(){
-					public void run(){
-						resultTablePanel.setTableModel(new DefaultTableModel());
-					}
-				};
-				SwingUtilities.invokeLater(runner);
-			}
-		};
+		ontologyListener = changes -> {
+            Runnable runner = () -> resultTablePanel.setTableModel(new DefaultTableModel());
+            SwingUtilities.invokeLater(runner);
+        };
 
 		this.getOWLModelManager().addOntologyChangeListener(ontologyListener);
 		setupListeners();
@@ -200,12 +183,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					return 0;
 				return getTableModel().getRowCount();
 			}
-			public boolean isRunning(){
-				OWLResultSetTableModel tm = getTableModel();
-				if (tm == null)
-					return false;
-				return tm.isFetching();
-			}
+			@Override
+            public boolean isRunning() {
+                OWLResultSetTableModel tm = getTableModel();
+                return tm != null && tm.isFetching();
+            }
 			@Override
 			public QuestOWLResultSet executeQuery(QuestOWLStatement st,
 					String queryString) throws OWLException {
@@ -214,7 +196,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		});
 
-		queryEditorPanel.setExecuteGraphQueryAction(new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...", QueryInterfaceView.this) {
+		queryEditorPanel.setExecuteGraphQueryAction(
+                new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -240,12 +223,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					return 0;
 				return getTableModel().getRowCount();
 			}
-			public boolean isRunning(){
-				OWLResultSetTableModel tm = getTableModel();
-				if (tm == null)
-					return false;
-				return tm.isFetching();
-			}
+
+            @Override
+			public boolean isRunning() {
+                OWLResultSetTableModel tm = getTableModel();
+                return tm != null && tm.isFetching();
+            }
 
 
 		});
@@ -302,29 +285,26 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
-		resultTablePanel.setOBDASaveQueryToFileAction(new OBDASaveQueryResultToFileAction() {
-			@Override
-			public void run(String fileLocation) {
-				OBDAProgessMonitor monitor = null;
-				try {
-					monitor = new OBDAProgessMonitor("Writing output files...");
-					monitor.start();
-					CountDownLatch latch = new CountDownLatch(1);
-					List<String[]> data = tableModel.getTabularData();
-					if(monitor.isCanceled())
-						return;
-					File output = new File(fileLocation);
-					BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-					SaveQueryToFileAction action = new SaveQueryToFileAction(latch, data, writer);
-					monitor.addProgressListener(action);
-					action.run();
-					latch.await();
-					monitor.stop();
-				} catch (Exception e) {
-					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-				}
-			}
-		});
+		resultTablePanel.setOBDASaveQueryToFileAction(fileLocation -> {
+            OBDAProgressMonitor monitor = null;
+            try {
+                monitor = new OBDAProgressMonitor("Writing output files...");
+                monitor.start();
+                CountDownLatch latch = new CountDownLatch(1);
+                List<String[]> data = tableModel.getTabularData();
+                if(monitor.isCanceled())
+                    return;
+                File output = new File(fileLocation);
+                BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
+                SaveQueryToFileAction action = new SaveQueryToFileAction(latch, data, writer);
+                monitor.addProgressListener(action);
+                action.run();
+                latch.await();
+                monitor.stop();
+            } catch (Exception e) {
+                DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+            }
+        });
 		log.debug("Query Manager view initialized");
 	}
 
@@ -338,7 +318,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			this.result = result;
 			this.action = action;
 		}
-		public void run(){
+		@Override
+        public void run(){
 			TextMessageFrame panel = new TextMessageFrame(title);
 			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
@@ -347,9 +328,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			panel.setTimeProcessingMessage(String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
 			panel.setVisible(true);
 		}
-	};
+	}
 
-	private void showActionResultInTextPanel(String title, String result) {
+    private void showActionResultInTextPanel(String title, String result) {
 		if (result == null) {
 			return;
 		}
@@ -365,7 +346,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			this.result = result;
 		}
 		
-		public void run(){
+		@Override
+        public void run(){
 			queryEditorPanel.updateStatus(result);
 		}
 	}
@@ -382,12 +364,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		TableModelSetter(OWLResultSetTableModel currentTableModel){
 			this.currentTableModel = currentTableModel;
 		}
-		public void run(){
+		@Override
+        public void run(){
 				resultTablePanel.setTableModel(currentTableModel);
 		}
-	};
-	
-	private int showTupleResultInTablePanel() throws OWLException {
+	}
+
+    private int showTupleResultInTablePanel() throws OWLException {
 		OWLResultSetTableModel currentTableModel = getTableModel();
 		if (currentTableModel != null) {
 			SwingUtilities.invokeLater(new TableModelSetter(currentTableModel));
@@ -400,15 +383,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 	private synchronized void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
 		if (result == null)
-			throw new NullPointerException("An error occured. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
-		if (result != null) {
-			tableModel = new OWLResultSetTableModel(result, prefixManager, 
-					queryEditorPanel.isShortURISelect(),
-					queryEditorPanel.isFetchAllSelect(),
-					queryEditorPanel.getFetchSize());
-			tableModel.addTableModelListener(queryEditorPanel);
-		}
-	}
+			throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
+        tableModel = new OWLResultSetTableModel(result, prefixManager,
+                queryEditorPanel.isShortURISelect(),
+                queryEditorPanel.isFetchAllSelect(),
+                queryEditorPanel.getFetchSize());
+        tableModel.addTableModelListener(queryEditorPanel);
+    }
 
 	/**
 	 * removes the result table. 
@@ -435,15 +416,18 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			super();
 			this.visitor = visitor;
 		}
+
+        @Override
 		public void run(){
-			TextMessageFrame panel = new TextMessageFrame("Query Result");
+			TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result");
 			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
 			DialogUtils.installEscapeCloseOperation(panel);
 			panel.setTextMessage(visitor.getString());
 			panel.setVisible(true);
 		}
-	};
+	}
+
 	private synchronized void showGraphResultInTextPanel(OWLAxiomToTurtleVisitor visitor) {
 		try {
 			ResultUpdater result_updater = new ResultUpdater(visitor);
@@ -456,14 +440,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private void populateResultUsingVisitor(List<OWLAxiom> result, OWLAxiomToTurtleVisitor visitor) {
 		if (result != null) {
-			for (OWLAxiom axiom : result) {
-				axiom.accept(visitor);
-			}
+            result.forEach(ax -> ax.accept(visitor));
 		}
 	}
 
-	public synchronized void selectedQuerychanged(String new_group, String new_query, String new_id) {
-		this.queryEditorPanel.selectedQuerychanged(new_group, new_query, new_id);
+	@Override
+    public synchronized void selectedQueryChanged(String new_group, String new_query, String new_id) {
+		this.queryEditorPanel.selectedQueryChanged(new_group, new_query, new_id);
 	}
 
 	/**
@@ -483,7 +466,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		// Adding the new instance (this)
 		queryInterfaceViews.add(this);
 
-		// Registring the current query view with all existing query manager views
+		// Registering the current query view with all existing query manager views
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
 			for (QueryManagerView queryInterfaceView : queryManagerViews) {
@@ -495,10 +478,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 	private class SaveQueryToFileAction implements OBDAProgressListener {
 
-		private CountDownLatch latch;
+		private final CountDownLatch latch;
 		private Thread thread;
-		private List<String[]> rawData;
-		private Writer writer;
+		private final List<String[]> rawData;
+		private final Writer writer;
 		private boolean isCancelled;
 		private boolean errorShown;
 		

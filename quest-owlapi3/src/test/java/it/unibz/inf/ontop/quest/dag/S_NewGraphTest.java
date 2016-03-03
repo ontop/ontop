@@ -22,16 +22,10 @@ package it.unibz.inf.ontop.quest.dag;
 
 
 import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import java.io.File;
-
 import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +41,11 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("Loading ontology");
 
 		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(roleowlfile)));
-
 		log.info("Translating");
-
-		Ontology o = OWLAPI3TranslatorUtility.translate(ontology);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(roleowlfile);
 
 		log.info("Generating graph");
-		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
+		TBoxReasonerImpl r = (TBoxReasonerImpl)TBoxReasonerImpl.create(o);
 		
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());

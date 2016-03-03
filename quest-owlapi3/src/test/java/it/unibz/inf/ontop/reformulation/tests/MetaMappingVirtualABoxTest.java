@@ -20,6 +20,24 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,38 +46,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
-import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*; 
-
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
- * This test is adapted from {@link SimpleMappingVirtualABoxTest}.
+ * This test is adapted from SimpleMappingVirtualABoxTest.
  *
  * A simple test that check if the system is able to handle Mappings for
  * classes/roles and attributes even if there are no URI templates. i.e., the
@@ -68,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MetaMappingVirtualABoxTest{
+public class MetaMappingVirtualABoxTest {
 
 
 	private OBDADataFactory fac;
@@ -83,13 +76,14 @@ public class MetaMappingVirtualABoxTest{
 
 	@Before
 	public void setUp() throws Exception {
-		
+
 		
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb_meta;DATABASE_TO_UPPER=FALSE";
+		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
+		String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
 
@@ -111,18 +105,16 @@ public class MetaMappingVirtualABoxTest{
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		
+
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-		
+
 	}
 
 	@After
-	public void tearDown() throws Exception {
-		
+    public void tearDown() throws Exception {
 			dropTables();
 			conn.close();
-		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -143,75 +135,65 @@ public class MetaMappingVirtualABoxTest{
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+       
 
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
-		String query1 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-		String query2 = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
-		try {
-
-			QuestOWLResultSet rs = st.executeTuple(query1);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind = rs.getOWLIndividual("x");
+		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
+		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+             // Now we are ready for querying
+             QuestOWLConnection conn = reasoner.getConnection();
+             QuestOWLStatement st = conn.createStatement();
+             QuestOWLResultSet rs1 = st.executeTuple(query1);
+        ) {
+            assertTrue(rs1.nextRow());
+			OWLObject ind = rs1.getOWLObject("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind.toString());
 			//assertEquals("<uri1>", ind2.toString());
 			//assertEquals("\"value1\"", val.toString());
-			
-			rs = st.executeTuple(query2);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			//OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs.getOWLLiteral("y");
-			assertEquals("<uri1>", ind1.toString());
-			//assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"A\"", val.toString());
-			
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
 
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
-			conn.close();
-			reasoner.dispose();
 		}
+
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+             // Now we are ready for querying
+             QuestOWLConnection conn = reasoner.getConnection();
+             QuestOWLStatement st = conn.createStatement();
+             QuestOWLResultSet rs2 = st.executeTuple(query2);
+        ) {
+            assertTrue(rs2.nextRow());
+			OWLObject ind1 = rs2.getOWLObject("x");
+            //OWLIndividual ind2 = rs.getOWLIndividual("y");
+			OWLObject val = rs2.getOWLObject("y");
+            assertEquals("<uri1>", ind1.toString());
+            //assertEquals("<uri1>", ind2.toString());
+            assertEquals("\"A\"", val.toString());
+        }
 	}
 
-	@Test
+
+
+    @Test
 	public void testViEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}
-	
-	@Test
+
+	@Test(expected = IllegalConfigurationException.class)
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);

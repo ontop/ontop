@@ -1,12 +1,11 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import it.unibz.inf.ontop.model.*;
 
 public class HomomorphismUtilities {
 
@@ -61,7 +60,8 @@ public class HomomorphismUtilities {
 			return sb.getSubstituition();
 
 		// stack of partial homomorphisms
-		Stack<SubstitutionBuilder> sbStack = new Stack<>();				
+		Stack<SubstitutionBuilder> sbStack = new Stack<>();	
+		sbStack.push(sb);
 		// set the capacity to reduce memory re-allocations
 		List<Stack<Function>> choicesMap = new ArrayList<>(fromSize); 
 		
@@ -82,27 +82,27 @@ public class HomomorphismUtilities {
 				choices = choicesMap.get(currentAtomIdx);
 			
 			boolean choiceMade = false;
-			while (!choices.isEmpty() && !choiceMade) {
+			while (!choices.isEmpty()) {
 				SubstitutionBuilder sb1 = sb.clone(); // clone!
 				choiceMade = extendHomomorphism(sb1, currentAtom, choices.pop());
-				if (choiceMade) 
+				if (choiceMade) {
+					// we reached the last atom
+					if (currentAtomIdx == fromSize - 1) 
+						return sb1.getSubstituition();
+					
+					// otherwise, save the partial homomorphism
+					sbStack.push(sb);  
 					sb = sb1;
+					currentAtomIdx++;  // move to the next atom
+					break;
+				}
 			}
 			if (!choiceMade) {
 				// backtracking
 				 // restore all choices for the current predicate symbol
 				choices.addAll(to.get(currentAtom.getFunctionSymbol()));
+				sb = sbStack.pop();   // restore the partial homomorphism
 				currentAtomIdx--;   // move to the previous atom
-				if (currentAtomIdx >= 0)
-					sb = sbStack.pop();   // restore the partial homomorphism
-			}
-			else {
-				if (currentAtomIdx == fromSize - 1) {
-					// we reached the last atom -- return the result
-					return sb.getSubstituition();
-				}
-				sbStack.push(sb);   // save the partial homomorphism
-				currentAtomIdx++;  // move to the next atom
 			}
 		}
 		

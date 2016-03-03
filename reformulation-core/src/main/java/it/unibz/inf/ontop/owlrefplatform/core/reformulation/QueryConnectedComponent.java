@@ -20,6 +20,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.TermUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,13 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.impl.TermUtils;
 
 /**
  * QueryConnectedComponent represents a connected component of a CQ
@@ -218,7 +217,7 @@ public class QueryConnectedComponent {
 		
 		for (Function a: cqie.getBody()) {
 			Predicate p = a.getFunctionSymbol();
-			if (p.isDataPredicate() && !p.isTriplePredicate()) { // if DL predicates 
+			if (a.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates 
 			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate (throws NullPointerException)
 				Term t0 = a.getTerm(0);				
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
@@ -246,7 +245,7 @@ public class QueryConnectedComponent {
 		}	
 
 		
-		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
+		List<QueryConnectedComponent> ccs = new LinkedList<>();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
@@ -258,8 +257,7 @@ public class QueryConnectedComponent {
 			//log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
 			Function f = nonDLAtoms.iterator().next(); 
 			Set<Variable> vars = new HashSet<>();
-            TermUtils.addReferencedVariablesTo(vars,f);
-
+			TermUtils.addReferencedVariablesTo(vars, f);
 			Variable v = vars.iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v));			
 		}

@@ -52,12 +52,7 @@ public class DatalogRule2QueryConverter {
 
         private static Optional<Function> extractOptionalGroupAtom(List<Function> atoms)
                 throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
-            List<Function> groupAtoms = atoms.filter(new F<Function, Boolean>() {
-                @Override
-                public Boolean f(Function atom) {
-                    return atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP);
-                }
-            });
+            List<Function> groupAtoms = atoms.filter(atom -> atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP));
 
             switch(groupAtoms.length()) {
                 case 0:

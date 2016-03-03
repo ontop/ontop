@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.component;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,12 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.DatatypeFactory;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.List;
@@ -27,12 +33,6 @@ import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 public class DataTypeComboBox extends JComboBox {
 
@@ -48,7 +48,7 @@ public class DataTypeComboBox extends JComboBox {
 	}
 	
 	private static Predicate[] getQuestDataTypePredicates() {
-		DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+		DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory(); 
 		
 		List<Predicate> prediacteList = dtfac.getDatatypePredicates();
 		

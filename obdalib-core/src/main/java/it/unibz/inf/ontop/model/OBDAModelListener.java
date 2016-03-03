@@ -32,5 +32,5 @@ public interface OBDAModelListener extends Serializable {
 
 	public void alldatasourcesDeleted();
 
-	public void datasourcParametersUpdated();
+	public void datasourceParametersUpdated();
 }

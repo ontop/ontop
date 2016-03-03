@@ -20,6 +20,14 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+
 
 import com.google.common.base.Preconditions;
 import java.net.URI;
@@ -110,7 +118,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL }); 
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 	}
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
@@ -176,31 +184,31 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
-		if (functor instanceof BooleanOperationPredicate) {
-			return getBooleanExpression((BooleanOperationPredicate)functor, arguments);
+		if (functor instanceof OperationPredicate) {
+			return getBooleanExpression((OperationPredicate)functor, arguments);
 		}
 
 		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}
-
+	
 	@Override
-	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments) {
+	public BooleanExpression getBooleanExpression(OperationPredicate functor, Term... arguments) {
 		return new BooleanExpressionImpl(functor, arguments);
 	}
 
 	@Override
-	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments) {
+	public BooleanExpression getBooleanExpression(OperationPredicate functor, List<Term> arguments) {
 		return new BooleanExpressionImpl(functor, arguments);
 	}
 
 	@Override
-	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments) {
+	public ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor, ImmutableTerm... arguments) {
 		return getImmutableBooleanExpression(functor, ImmutableList.copyOf(arguments));
 	}
 
 	@Override
-	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+	public ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor,
 																	ImmutableList<? extends ImmutableTerm> arguments) {
 		if (GroundTermTools.areGroundTerms(arguments)) {
 			return new GroundBooleanExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments);
@@ -222,8 +230,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
-		if (functor instanceof BooleanOperationPredicate) {
-			return getBooleanExpression((BooleanOperationPredicate) functor, arguments);
+		if (functor instanceof OperationPredicate) {
+			return getBooleanExpression((OperationPredicate) functor, arguments);
 		}
 
 		// Default constructor
@@ -232,8 +240,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
-		if (functor instanceof BooleanOperationPredicate) {
-			return getImmutableBooleanExpression((BooleanOperationPredicate)functor, terms);
+		if (functor instanceof OperationPredicate) {
+			return getImmutableBooleanExpression((OperationPredicate)functor, terms);
 		}
 
 		if (GroundTermTools.areGroundTerms(terms)) {
@@ -364,12 +372,14 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
+	
 	@Override
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		return p;
 	}
+	
 	@Override
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
@@ -377,10 +387,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
+	
 
 	@Override
-	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
+	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
+	}
+
+	@Override
+	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery) {
+		String id = IDGenerator.getNextUniqueID("MAPID-");
+		return getRDBMSMappingAxiom(id, sourceQuery, targetQuery);
 	}
 
 	@Override
@@ -389,17 +406,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery) {
-		return new RDBMSMappingAxiomImpl(id, new SQLQueryImpl(sql), targetQuery);
+	public Function getSPARQLJoin(Function t1, Function t2) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
-	@Override
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery) {
-		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
-		return getRDBMSMappingAxiom(id, sql, targetQuery);
-	}
-
-	
 	@Override
 	public Function getUriTemplate(Term... terms) {
 		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
@@ -431,69 +441,42 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(OBDAVocabulary.EQ, firstTerm, secondTerm);
+		return getBooleanExpression(ExpressionOperation.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(OBDAVocabulary.GTE, firstTerm, secondTerm);
+		return getBooleanExpression(ExpressionOperation.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
 	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(OBDAVocabulary.GT, firstTerm, secondTerm);
+		return getBooleanExpression(ExpressionOperation.GT, firstTerm, secondTerm);
 	}
 
 	@Override
 	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(OBDAVocabulary.LTE, firstTerm, secondTerm);
+		return getBooleanExpression(ExpressionOperation.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
 	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(OBDAVocabulary.LT, firstTerm, secondTerm);
+		return getBooleanExpression(ExpressionOperation.LT, firstTerm, secondTerm);
 	}
 
 	@Override
 	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(OBDAVocabulary.NEQ, firstTerm, secondTerm);
+		return getBooleanExpression(ExpressionOperation.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public BooleanExpression getFunctionNOT(Term term) {
-		return getBooleanExpression(OBDAVocabulary.NOT, term);
+		return getBooleanExpression(ExpressionOperation.NOT, term);
 	}
 
 	@Override
 	public BooleanExpression getFunctionAND(Term term1, Term term2) {
-		checkInnerBooleanExpressionTerm(term1);
-		checkInnerBooleanExpressionTerm(term2);
-
-		return getBooleanExpression(OBDAVocabulary.AND, term1, term2);
-	}
-
-	private static void checkInnerBooleanExpressionTerm(Term term) {
-		if (term instanceof Function) {
-			Function functionalTerm = (Function) term;
-
-			if (functionalTerm.isBooleanFunction()) {
-				return;
-			}
-
-			String functionSymbol = functionalTerm.getFunctionSymbol().getName();
-			if (functionSymbol.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-				return;
-			}
-		}
-		else if (term.equals(OBDAVocabulary.FALSE)
-				|| term.equals(OBDAVocabulary.TRUE)) {
-			return;
-		} else if (term instanceof Variable) {
-			return;
-		}
-
-		// Illegal argument given to the caller of this
-		throw new IllegalArgumentException(term + " is not a boolean expression");
+		return getBooleanExpression(ExpressionOperation.AND, term1, term2);
 	}
 
 //	@Override
@@ -504,21 +487,21 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //		LinkedList<Term> auxTerms = new LinkedList<Term>();
 //
 //		if (terms.size() == 2) {
-//			return getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+//			return getFunctionalTerm(ExpressionOperation.AND, terms.get(0), terms.get(1));
 //		}
-//		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
+//		Term nested = getFunctionalTerm(ExpressionOperation.AND, terms.get(0), terms.get(1));
 //		terms.remove(0);
 //		terms.remove(0);
 //		while (auxTerms.size() > 1) {
-//			nested = getFunctionalTerm(OBDAVocabulary.AND, nested, terms.get(0));
+//			nested = getFunctionalTerm(ExpressionOperation.AND, nested, terms.get(0));
 //			terms.remove(0);
 //		}
-//		return getFunctionalTerm(OBDAVocabulary.AND, nested, terms.get(0));
+//		return getFunctionalTerm(ExpressionOperation.AND, nested, terms.get(0));
 //	}
 
 	@Override
 	public BooleanExpression getFunctionOR(Term term1, Term term2) {
-		return getBooleanExpression(OBDAVocabulary.OR, term1, term2);
+		return getBooleanExpression(ExpressionOperation.OR,term1, term2);
 	}
 
 	
@@ -530,85 +513,75 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //		LinkedList<Term> auxTerms = new LinkedList<Term>();
 //
 //		if (terms.size() == 2) {
-//			return getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+//			return getFunctionalTerm(ExpressionOperation.OR, terms.get(0), terms.get(1));
 //		}
-//		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
+//		Term nested = getFunctionalTerm(ExpressionOperation.OR, terms.get(0), terms.get(1));
 //		terms.remove(0);
 //		terms.remove(0);
 //		while (auxTerms.size() > 1) {
-//			nested = getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
+//			nested = getFunctionalTerm(ExpressionOperation.OR, nested, terms.get(0));
 //			terms.remove(0);
 //		}
-//		return getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
+//		return getFunctionalTerm(ExpressionOperation.OR, nested, terms.get(0));
 //	}
 
 	@Override
 	public BooleanExpression getFunctionIsNull(Term term) {
-		return getBooleanExpression(OBDAVocabulary.IS_NULL, term);
+		return getBooleanExpression(ExpressionOperation.IS_NULL, term);
 	}
 
 	@Override
 	public BooleanExpression getFunctionIsNotNull(Term term) {
-		return getBooleanExpression(OBDAVocabulary.IS_NOT_NULL, term);
+		return getBooleanExpression(ExpressionOperation.IS_NOT_NULL, term);
 	}
 
 
 	@Override
 	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2) {
-		return getBooleanExpression(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
+		return getBooleanExpression(ExpressionOperation.LANGMATCHES, term1, term2);
 	}
 
 	@Override
-	public BooleanExpression getFunctionLike(Term term1, Term term2) {
-		return getBooleanExpression(OBDAVocabulary.SPARQL_LIKE, term1, term2);
+	public BooleanExpression getSQLFunctionLike(Term term1, Term term2) {
+		return getBooleanExpression(ExpressionOperation.SQL_LIKE, term1, term2);
 	}
 	
 	@Override
 	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getBooleanExpression(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
+		return getBooleanExpression(ExpressionOperation.REGEX, term1, term2, term3);
 	}
 	
 	@Override
 	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
-		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
+		return getFunction(ExpressionOperation.REPLACE, term1, term2, term3 );
 	}
 	
-	@Override
-	public Function getFunctionMinus(Term term1) {
-		return getFunction(OBDAVocabulary.MINUS, term1);
-	}
-
-	@Override
-	public Function getFunctionAdd(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.ADD, term1, term2);
-	}
-
-	@Override
-	public Function getFunctionSubstract(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SUBTRACT, term1, term2);
-	}
-
-	@Override
-	public Function getFunctionMultiply(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
-	}
-
     @Override
     public Function getFunctionConcat(Term term1, Term term2) {
-        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+        return getFunction(ExpressionOperation.CONCAT, term1, term2);
     }
 
+    @Override
+    public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
+        return getFunction(ExpressionOperation.SUBSTR, term1, term2, term3);
+    } //added by Nika
+
+	@Override
+	public Function getFunctionSubstring(Term term1, Term term2) {
+		return getFunction(ExpressionOperation.SUBSTR, term1, term2);
+	}
+        
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
-		return getFunction(OBDAVocabulary.QUEST_CAST, term1, term2);
+		return getFunction(ExpressionOperation.QUEST_CAST, term1, term2);
 	}
 	
 	@Override
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, 
 			String password, String driverclass) {
 		URI id = URI.create(UUID.randomUUID().toString());
-        return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
+		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
 	}
 
 	@Override
@@ -636,7 +609,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public BooleanExpression getFunctionIsTrue(Term term) {
-		return getBooleanExpression(OBDAVocabulary.IS_TRUE, term);
+		return getBooleanExpression(ExpressionOperation.IS_TRUE, term);
 	}
 
 	@Override
@@ -760,10 +733,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	 * <p>
 	 * This method can be used to generate "fresh" rules from a datalog program
 	 * so that it can be used during a resolution step.
-	 * 
-	 * @param rule
-	 * @param suffix
+	 * suffix
 	 *            The integer that will be apended to every variable name
+	 * @param rule
 	 * @return
 	 */
 	@Override

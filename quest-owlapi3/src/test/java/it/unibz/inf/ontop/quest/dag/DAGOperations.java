@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.quest.dag;
  * #L%
  */
 
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
 import it.unibz.inf.ontop.ontology.Description;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
+import it.unibz.inf.ontop.ontology.impl.DatatypeImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -257,13 +258,9 @@ public class DAGOperations {
 
 				DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
 
-				//DataPropertyExpression inverse = prop.getInverse();
-				DataSomeValuesFrom domain = prop.getDomain(); //fac.createPropertySomeRestriction(prop);
-				//DataSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+				DataSomeValuesFrom domain = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
 
-				//cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
-				//cycleheadrangeNode = dag.getNode(range);
 			}
 
 			/*
@@ -386,11 +383,8 @@ public class DAGOperations {
 					else {
 						DataPropertyExpression equiprop = (DataPropertyExpression) equivnode.getDescription();
 
-						//equivinverseNode = dag.getNode(equiprop.getInverse());
-						equivDomainNode = dag.getNode(equiprop.getDomain());
-						//DataPropertyExpression inv = equiprop.getInverse();
+						equivDomainNode = dag.getNode(equiprop.getDomainRestriction(DatatypeImpl.rdfsLiteral));
 						equivRangeNode = dag.getNode(equiprop.getRange());
-						//.createPropertySomeRestriction(inv)
 					}	
 					
 
@@ -453,7 +447,7 @@ public class DAGOperations {
 					//dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
 					//DAGNode equivinverseNode = dag.getNode(inverseequiprop);
-					DAGNode equivDomainNode = dag.getNode(equiprop.getDomain());
+					DAGNode equivDomainNode = dag.getNode(equiprop.getDomainRestriction(DatatypeImpl.rdfsLiteral));
 					//DataPropertyExpression inv = equiprop.getInverse();					
 					DAGNode equivRangeNode = dag.getNode(equiprop.getRange());
 					// .createPropertySomeRestriction(inv)

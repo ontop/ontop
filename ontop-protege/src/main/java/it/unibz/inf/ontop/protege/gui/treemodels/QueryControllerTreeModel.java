@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,11 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryControllerListener;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -28,11 +33,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerListener;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 
 public class QueryControllerTreeModel extends DefaultTreeModel implements QueryControllerListener {
 

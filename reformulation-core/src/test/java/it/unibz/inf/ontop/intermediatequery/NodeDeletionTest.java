@@ -35,7 +35,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
         queryBuilder.addChild(rootNode, joinNode);
@@ -70,7 +70,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
@@ -117,7 +117,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         UnionNode topUnion = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, topUnion);
@@ -187,7 +187,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         UnionNode topUnion = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, topUnion);
@@ -252,7 +252,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);

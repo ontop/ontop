@@ -1,30 +1,18 @@
-// $ANTLR 3.5.1 /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g 2014-11-19 19:58:47
+// $ANTLR 3.5.2 TurtleOBDA.g 2015-12-18 18:50:44
 
 package it.unibz.inf.ontop.parser;
 
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.QueryUtils;
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.*;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.IntStream;
-import org.antlr.runtime.MismatchedTokenException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-import it.unibz.inf.ontop.model.*;
-
-
-import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings("all")
 public class TurtleOBDAParser extends Parser {
@@ -135,7 +123,7 @@ public class TurtleOBDAParser extends Parser {
 	}
 
 	@Override public String[] getTokenNames() { return TurtleOBDAParser.tokenNames; }
-	@Override public String getGrammarFileName() { return "/Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g"; }
+	@Override public String getGrammarFileName() { return "TurtleOBDA.g"; }
 
 
 	/** Map of directives */
@@ -318,13 +306,20 @@ public class TurtleOBDAParser extends Parser {
 		
 		//this function returns nested concats 
 		//in case of more than two terms need to be concatted
-		private Function getNestedConcat(String str){
+		private Term getNestedConcat(String str){
 		   ArrayList<Term> terms = new ArrayList<Term>();
 		   terms = addToTermsList(str);
+		   if(terms.size() == 1){
+		      Variable v = (Variable) terms.get(0);
+	          variableSet.add(v);
+	          return v;
+		   }
+
 		   Function f = dfac.getFunctionConcat(terms.get(0),terms.get(1));
 	           for(int j=2;j<terms.size();j++){
 	              f = dfac.getFunctionConcat(f,terms.get(j));
 	           }
+
 		   return f;
 		}
 
@@ -405,19 +400,19 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "parse"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:311:1: parse returns [CQIE value] : ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF ;
-	public final CQIE parse() throws RecognitionException {
-		CQIE value = null;
+	// TurtleOBDA.g:388:1: parse returns [List<Function> value] : ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF ;
+	public final List<Function> parse() throws RecognitionException {
+		List<Function> value = null;
 
 
 		List<Function> t1 =null;
 		List<Function> t2 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:312:3: ( ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:312:5: ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF
+			// TurtleOBDA.g:389:3: ( ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF )
+			// TurtleOBDA.g:389:5: ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF
 			{
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:312:5: ( directiveStatement )*
+			// TurtleOBDA.g:389:5: ( directiveStatement )*
 			loop1:
 			while (true) {
 				int alt1=2;
@@ -428,7 +423,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt1) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:312:5: directiveStatement
+					// TurtleOBDA.g:389:5: directiveStatement
 					{
 					pushFollow(FOLLOW_directiveStatement_in_parse54);
 					directiveStatement();
@@ -447,15 +442,9 @@ public class TurtleOBDAParser extends Parser {
 			state._fsp--;
 
 
-			      int arity = variableSet.size();
-			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
-			      
-			      // Create a new rule
-			      List<Function> triples = t1;
-			      value = dfac.getCQIE(head, triples);
+			      value =  t1;
 			    
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:322:5: (t2= triplesStatement )*
+			// TurtleOBDA.g:393:7: (t2= triplesStatement )*
 			loop2:
 			while (true) {
 				int alt2=2;
@@ -466,7 +455,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt2) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:322:6: t2= triplesStatement
+					// TurtleOBDA.g:393:8: t2= triplesStatement
 					{
 					pushFollow(FOLLOW_triplesStatement_in_parse76);
 					t2=triplesStatement();
@@ -476,7 +465,7 @@ public class TurtleOBDAParser extends Parser {
 					      List<Function> additionalTriples = t2;
 					      if (additionalTriples != null) {
 					        // If there are additional triple statements then just add to the existing body
-					        List<Function> existingBody = value.getBody();
+					        List<Function> existingBody = value;
 					        existingBody.addAll(additionalTriples);
 					      }
 					    
@@ -506,11 +495,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "directiveStatement"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:332:1: directiveStatement : directive PERIOD ;
+	// TurtleOBDA.g:403:1: directiveStatement : directive PERIOD ;
 	public final void directiveStatement() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:333:3: ( directive PERIOD )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:333:5: directive PERIOD
+			// TurtleOBDA.g:404:3: ( directive PERIOD )
+			// TurtleOBDA.g:404:5: directive PERIOD
 			{
 			pushFollow(FOLLOW_directive_in_directiveStatement96);
 			directive();
@@ -533,7 +522,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "triplesStatement"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:336:1: triplesStatement returns [List<Function> value] : triples ( WS )* PERIOD ;
+	// TurtleOBDA.g:407:1: triplesStatement returns [List<Function> value] : triples ( WS )* PERIOD ;
 	public final List<Function> triplesStatement() throws RecognitionException {
 		List<Function> value = null;
 
@@ -541,14 +530,14 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> triples1 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:3: ( triples ( WS )* PERIOD )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:5: triples ( WS )* PERIOD
+			// TurtleOBDA.g:408:3: ( triples ( WS )* PERIOD )
+			// TurtleOBDA.g:408:5: triples ( WS )* PERIOD
 			{
 			pushFollow(FOLLOW_triples_in_triplesStatement115);
 			triples1=triples();
 			state._fsp--;
 
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:13: ( WS )*
+			// TurtleOBDA.g:408:13: ( WS )*
 			loop3:
 			while (true) {
 				int alt3=2;
@@ -559,7 +548,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt3) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:337:13: WS
+					// TurtleOBDA.g:408:13: WS
 					{
 					match(input,WS,FOLLOW_WS_in_triplesStatement117); 
 					}
@@ -589,10 +578,10 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "directive"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:340:1: directive : ( base | prefixID );
+	// TurtleOBDA.g:411:1: directive : ( base | prefixID );
 	public final void directive() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:341:3: ( base | prefixID )
+			// TurtleOBDA.g:412:3: ( base | prefixID )
 			int alt4=2;
 			int LA4_0 = input.LA(1);
 			if ( (LA4_0==AT) ) {
@@ -626,7 +615,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt4) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:341:5: base
+					// TurtleOBDA.g:412:5: base
 					{
 					pushFollow(FOLLOW_base_in_directive135);
 					base();
@@ -635,7 +624,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:342:5: prefixID
+					// TurtleOBDA.g:413:5: prefixID
 					{
 					pushFollow(FOLLOW_prefixID_in_directive141);
 					prefixID();
@@ -659,11 +648,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "base"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:345:1: base : AT BASE uriref ;
+	// TurtleOBDA.g:416:1: base : AT BASE uriref ;
 	public final void base() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:346:3: ( AT BASE uriref )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:346:5: AT BASE uriref
+			// TurtleOBDA.g:417:3: ( AT BASE uriref )
+			// TurtleOBDA.g:417:5: AT BASE uriref
 			{
 			match(input,AT,FOLLOW_AT_in_base154); 
 			match(input,BASE,FOLLOW_BASE_in_base156); 
@@ -687,7 +676,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "prefixID"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:349:1: prefixID : AT PREFIX ( namespace | defaultNamespace ) uriref ;
+	// TurtleOBDA.g:420:1: prefixID : AT PREFIX ( namespace | defaultNamespace ) uriref ;
 	public final void prefixID() throws RecognitionException {
 		ParserRuleReturnScope namespace2 =null;
 		ParserRuleReturnScope defaultNamespace3 =null;
@@ -697,12 +686,12 @@ public class TurtleOBDAParser extends Parser {
 		  String prefix = "";
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:3: ( AT PREFIX ( namespace | defaultNamespace ) uriref )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:5: AT PREFIX ( namespace | defaultNamespace ) uriref
+			// TurtleOBDA.g:424:3: ( AT PREFIX ( namespace | defaultNamespace ) uriref )
+			// TurtleOBDA.g:424:5: AT PREFIX ( namespace | defaultNamespace ) uriref
 			{
 			match(input,AT,FOLLOW_AT_in_prefixID176); 
 			match(input,PREFIX,FOLLOW_PREFIX_in_prefixID178); 
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:15: ( namespace | defaultNamespace )
+			// TurtleOBDA.g:424:15: ( namespace | defaultNamespace )
 			int alt5=2;
 			int LA5_0 = input.LA(1);
 			if ( (LA5_0==NAMESPACE) ) {
@@ -720,7 +709,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt5) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:16: namespace
+					// TurtleOBDA.g:424:16: namespace
 					{
 					pushFollow(FOLLOW_namespace_in_prefixID181);
 					namespace2=namespace();
@@ -730,7 +719,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:353:58: defaultNamespace
+					// TurtleOBDA.g:424:58: defaultNamespace
 					{
 					pushFollow(FOLLOW_defaultNamespace_in_prefixID187);
 					defaultNamespace3=defaultNamespace();
@@ -766,7 +755,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "triples"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:359:1: triples returns [List<Function> value] : subject predicateObjectList ;
+	// TurtleOBDA.g:430:1: triples returns [List<Function> value] : subject predicateObjectList ;
 	public final List<Function> triples() throws RecognitionException {
 		List<Function> value = null;
 
@@ -775,8 +764,8 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> predicateObjectList6 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:360:3: ( subject predicateObjectList )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:360:5: subject predicateObjectList
+			// TurtleOBDA.g:431:3: ( subject predicateObjectList )
+			// TurtleOBDA.g:431:5: subject predicateObjectList
 			{
 			pushFollow(FOLLOW_subject_in_triples211);
 			subject5=subject();
@@ -807,7 +796,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "predicateObjectList"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:365:1: predicateObjectList returns [List<Function> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
+	// TurtleOBDA.g:436:1: predicateObjectList returns [List<Function> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
 	public final List<Function> predicateObjectList() throws RecognitionException {
 		List<Function> value = null;
 
@@ -821,8 +810,8 @@ public class TurtleOBDAParser extends Parser {
 		   value = new LinkedList<Function>();
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:369:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:369:5: v1= verb l1= objectList ( SEMI v2= verb l2= objectList )*
+			// TurtleOBDA.g:440:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
+			// TurtleOBDA.g:440:5: v1= verb l1= objectList ( SEMI v2= verb l2= objectList )*
 			{
 			pushFollow(FOLLOW_verb_in_predicateObjectList241);
 			v1=verb();
@@ -838,7 +827,7 @@ public class TurtleOBDAParser extends Parser {
 			        value.add(atom);
 			      }
 			    
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:375:5: ( SEMI v2= verb l2= objectList )*
+			// TurtleOBDA.g:446:5: ( SEMI v2= verb l2= objectList )*
 			loop6:
 			while (true) {
 				int alt6=2;
@@ -849,7 +838,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt6) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:375:6: SEMI v2= verb l2= objectList
+					// TurtleOBDA.g:446:6: SEMI v2= verb l2= objectList
 					{
 					match(input,SEMI,FOLLOW_SEMI_in_predicateObjectList256); 
 					pushFollow(FOLLOW_verb_in_predicateObjectList260);
@@ -891,7 +880,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "verb"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:384:1: verb returns [Term value] : ( predicate | 'a' );
+	// TurtleOBDA.g:455:1: verb returns [Term value] : ( predicate | 'a' );
 	public final Term verb() throws RecognitionException {
 		Term value = null;
 
@@ -899,7 +888,7 @@ public class TurtleOBDAParser extends Parser {
 		Term predicate7 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:385:3: ( predicate | 'a' )
+			// TurtleOBDA.g:456:3: ( predicate | 'a' )
 			int alt7=2;
 			int LA7_0 = input.LA(1);
 			if ( (LA7_0==PREFIXED_NAME||LA7_0==STRING_WITH_BRACKET) ) {
@@ -917,7 +906,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt7) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:385:5: predicate
+					// TurtleOBDA.g:456:5: predicate
 					{
 					pushFollow(FOLLOW_predicate_in_verb288);
 					predicate7=predicate();
@@ -927,7 +916,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:386:5: 'a'
+					// TurtleOBDA.g:457:5: 'a'
 					{
 					match(input,77,FOLLOW_77_in_verb296); 
 
@@ -953,7 +942,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "objectList"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:392:1: objectList returns [List<Term> value] : o1= object ( COMMA o2= object )* ;
+	// TurtleOBDA.g:463:1: objectList returns [List<Term> value] : o1= object ( COMMA o2= object )* ;
 	public final List<Term> objectList() throws RecognitionException {
 		List<Term> value = null;
 
@@ -965,15 +954,15 @@ public class TurtleOBDAParser extends Parser {
 		  value = new ArrayList<Term>();
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:3: (o1= object ( COMMA o2= object )* )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:5: o1= object ( COMMA o2= object )*
+			// TurtleOBDA.g:467:3: (o1= object ( COMMA o2= object )* )
+			// TurtleOBDA.g:467:5: o1= object ( COMMA o2= object )*
 			{
 			pushFollow(FOLLOW_object_in_objectList322);
 			o1=object();
 			state._fsp--;
 
 			 value.add(o1); 
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:42: ( COMMA o2= object )*
+			// TurtleOBDA.g:467:42: ( COMMA o2= object )*
 			loop8:
 			while (true) {
 				int alt8=2;
@@ -984,7 +973,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt8) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:396:43: COMMA o2= object
+					// TurtleOBDA.g:467:43: COMMA o2= object
 					{
 					match(input,COMMA,FOLLOW_COMMA_in_objectList327); 
 					pushFollow(FOLLOW_object_in_objectList331);
@@ -1017,7 +1006,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "subject"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:399:1: subject returns [Term value] : ( resource | variable );
+	// TurtleOBDA.g:470:1: subject returns [Term value] : ( resource | variable );
 	public final Term subject() throws RecognitionException {
 		Term value = null;
 
@@ -1026,7 +1015,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable9 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:400:3: ( resource | variable )
+			// TurtleOBDA.g:471:3: ( resource | variable )
 			int alt9=2;
 			int LA9_0 = input.LA(1);
 			if ( (LA9_0==PREFIXED_NAME||LA9_0==STRING_WITH_BRACKET) ) {
@@ -1044,7 +1033,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt9) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:400:5: resource
+					// TurtleOBDA.g:471:5: resource
 					{
 					pushFollow(FOLLOW_resource_in_subject353);
 					resource8=resource();
@@ -1054,7 +1043,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:401:5: variable
+					// TurtleOBDA.g:472:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_subject361);
 					variable9=variable();
@@ -1080,7 +1069,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "predicate"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:406:1: predicate returns [Term value] : resource ;
+	// TurtleOBDA.g:477:1: predicate returns [Term value] : resource ;
 	public final Term predicate() throws RecognitionException {
 		Term value = null;
 
@@ -1088,8 +1077,8 @@ public class TurtleOBDAParser extends Parser {
 		Term resource10 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:407:3: ( resource )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:407:5: resource
+			// TurtleOBDA.g:478:3: ( resource )
+			// TurtleOBDA.g:478:5: resource
 			{
 			pushFollow(FOLLOW_resource_in_predicate382);
 			resource10=resource();
@@ -1122,7 +1111,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "object"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:419:1: object returns [Term value] : ( resource | literal | typedLiteral | variable );
+	// TurtleOBDA.g:490:1: object returns [Term value] : ( resource | literal | typedLiteral | variable );
 	public final Term object() throws RecognitionException {
 		Term value = null;
 
@@ -1133,7 +1122,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable14 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:420:3: ( resource | literal | typedLiteral | variable )
+			// TurtleOBDA.g:491:3: ( resource | literal | typedLiteral | variable )
 			int alt10=4;
 			switch ( input.LA(1) ) {
 			case PREFIXED_NAME:
@@ -1189,7 +1178,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt10) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:420:5: resource
+					// TurtleOBDA.g:491:5: resource
 					{
 					pushFollow(FOLLOW_resource_in_object401);
 					resource11=resource();
@@ -1199,7 +1188,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:421:5: literal
+					// TurtleOBDA.g:492:5: literal
 					{
 					pushFollow(FOLLOW_literal_in_object409);
 					literal12=literal();
@@ -1209,7 +1198,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:422:5: typedLiteral
+					// TurtleOBDA.g:493:5: typedLiteral
 					{
 					pushFollow(FOLLOW_typedLiteral_in_object418);
 					typedLiteral13=typedLiteral();
@@ -1219,7 +1208,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 4 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:423:5: variable
+					// TurtleOBDA.g:494:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_object426);
 					variable14=variable();
@@ -1245,7 +1234,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "resource"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:427:1: resource returns [Term value] : ( uriref | qname );
+	// TurtleOBDA.g:498:1: resource returns [Term value] : ( uriref | qname );
 	public final Term resource() throws RecognitionException {
 		Term value = null;
 
@@ -1254,7 +1243,7 @@ public class TurtleOBDAParser extends Parser {
 		String qname16 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:428:4: ( uriref | qname )
+			// TurtleOBDA.g:499:4: ( uriref | qname )
 			int alt11=2;
 			int LA11_0 = input.LA(1);
 			if ( (LA11_0==STRING_WITH_BRACKET) ) {
@@ -1272,7 +1261,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt11) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:428:6: uriref
+					// TurtleOBDA.g:499:6: uriref
 					{
 					pushFollow(FOLLOW_uriref_in_resource447);
 					uriref15=uriref();
@@ -1282,7 +1271,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:429:6: qname
+					// TurtleOBDA.g:500:6: qname
 					{
 					pushFollow(FOLLOW_qname_in_resource456);
 					qname16=qname();
@@ -1308,7 +1297,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "uriref"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:434:1: uriref returns [String value] : STRING_WITH_BRACKET ;
+	// TurtleOBDA.g:505:1: uriref returns [String value] : STRING_WITH_BRACKET ;
 	public final String uriref() throws RecognitionException {
 		String value = null;
 
@@ -1316,8 +1305,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_BRACKET17=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:435:3: ( STRING_WITH_BRACKET )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:435:5: STRING_WITH_BRACKET
+			// TurtleOBDA.g:506:3: ( STRING_WITH_BRACKET )
+			// TurtleOBDA.g:506:5: STRING_WITH_BRACKET
 			{
 			STRING_WITH_BRACKET17=(Token)match(input,STRING_WITH_BRACKET,FOLLOW_STRING_WITH_BRACKET_in_uriref481); 
 			 value = removeBrackets((STRING_WITH_BRACKET17!=null?STRING_WITH_BRACKET17.getText():null)); 
@@ -1338,7 +1327,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "qname"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:438:1: qname returns [String value] : PREFIXED_NAME ;
+	// TurtleOBDA.g:509:1: qname returns [String value] : PREFIXED_NAME ;
 	public final String qname() throws RecognitionException {
 		String value = null;
 
@@ -1346,8 +1335,8 @@ public class TurtleOBDAParser extends Parser {
 		Token PREFIXED_NAME18=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:439:3: ( PREFIXED_NAME )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:439:5: PREFIXED_NAME
+			// TurtleOBDA.g:510:3: ( PREFIXED_NAME )
+			// TurtleOBDA.g:510:5: PREFIXED_NAME
 			{
 			PREFIXED_NAME18=(Token)match(input,PREFIXED_NAME,FOLLOW_PREFIXED_NAME_in_qname500); 
 
@@ -1372,10 +1361,10 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "blank"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:446:1: blank : ( nodeID | BLANK );
+	// TurtleOBDA.g:517:1: blank : ( nodeID | BLANK );
 	public final void blank() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:447:3: ( nodeID | BLANK )
+			// TurtleOBDA.g:518:3: ( nodeID | BLANK )
 			int alt12=2;
 			int LA12_0 = input.LA(1);
 			if ( (LA12_0==BLANK_PREFIX) ) {
@@ -1393,7 +1382,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt12) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:447:5: nodeID
+					// TurtleOBDA.g:518:5: nodeID
 					{
 					pushFollow(FOLLOW_nodeID_in_blank515);
 					nodeID();
@@ -1402,7 +1391,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:448:5: BLANK
+					// TurtleOBDA.g:519:5: BLANK
 					{
 					match(input,BLANK,FOLLOW_BLANK_in_blank521); 
 					}
@@ -1423,7 +1412,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "variable"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:451:1: variable returns [Variable value] : STRING_WITH_CURLY_BRACKET ;
+	// TurtleOBDA.g:522:1: variable returns [Variable value] : STRING_WITH_CURLY_BRACKET ;
 	public final Variable variable() throws RecognitionException {
 		Variable value = null;
 
@@ -1431,8 +1420,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_CURLY_BRACKET19=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:452:3: ( STRING_WITH_CURLY_BRACKET )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:452:5: STRING_WITH_CURLY_BRACKET
+			// TurtleOBDA.g:523:3: ( STRING_WITH_CURLY_BRACKET )
+			// TurtleOBDA.g:523:5: STRING_WITH_CURLY_BRACKET
 			{
 			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable538); 
 
@@ -1456,7 +1445,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "function"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:458:1: function returns [Function value] : resource LPAREN terms RPAREN ;
+	// TurtleOBDA.g:529:1: function returns [Function value] : resource LPAREN terms RPAREN ;
 	public final Function function() throws RecognitionException {
 		Function value = null;
 
@@ -1465,8 +1454,8 @@ public class TurtleOBDAParser extends Parser {
 		Vector<Term> terms21 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:459:3: ( resource LPAREN terms RPAREN )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:459:5: resource LPAREN terms RPAREN
+			// TurtleOBDA.g:530:3: ( resource LPAREN terms RPAREN )
+			// TurtleOBDA.g:530:5: resource LPAREN terms RPAREN
 			{
 			pushFollow(FOLLOW_resource_in_function559);
 			resource20=resource();
@@ -1501,7 +1490,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "typedLiteral"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:467:1: typedLiteral returns [Function value] : ( variable AT language | variable REFERENCE resource );
+	// TurtleOBDA.g:538:1: typedLiteral returns [Function value] : ( variable AT language | variable REFERENCE resource );
 	public final Function typedLiteral() throws RecognitionException {
 		Function value = null;
 
@@ -1512,7 +1501,7 @@ public class TurtleOBDAParser extends Parser {
 		Term resource25 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:468:3: ( variable AT language | variable REFERENCE resource )
+			// TurtleOBDA.g:539:3: ( variable AT language | variable REFERENCE resource )
 			int alt13=2;
 			int LA13_0 = input.LA(1);
 			if ( (LA13_0==STRING_WITH_CURLY_BRACKET) ) {
@@ -1546,7 +1535,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt13) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:468:5: variable AT language
+					// TurtleOBDA.g:539:5: variable AT language
 					{
 					pushFollow(FOLLOW_variable_in_typedLiteral584);
 					variable22=variable();
@@ -1566,7 +1555,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:474:5: variable REFERENCE resource
+					// TurtleOBDA.g:545:5: variable REFERENCE resource
 					{
 					pushFollow(FOLLOW_variable_in_typedLiteral596);
 					variable24=variable();
@@ -1614,7 +1603,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "language"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:494:1: language returns [Term value] : ( languageTag | variable );
+	// TurtleOBDA.g:565:1: language returns [Term value] : ( languageTag | variable );
 	public final Term language() throws RecognitionException {
 		Term value = null;
 
@@ -1623,7 +1612,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable27 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:495:3: ( languageTag | variable )
+			// TurtleOBDA.g:566:3: ( languageTag | variable )
 			int alt14=2;
 			int LA14_0 = input.LA(1);
 			if ( (LA14_0==VARNAME) ) {
@@ -1641,19 +1630,19 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt14) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:495:5: languageTag
+					// TurtleOBDA.g:566:5: languageTag
 					{
 					pushFollow(FOLLOW_languageTag_in_language619);
 					languageTag26=languageTag();
 					state._fsp--;
 
 
-					    	value = dfac.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), Predicate.COL_TYPE.STRING);
+					    	value = dfac.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
 					    
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:498:5: variable
+					// TurtleOBDA.g:569:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_language627);
 					variable27=variable();
@@ -1681,7 +1670,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "terms"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:503:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
+	// TurtleOBDA.g:574:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
 	public final Vector<Term> terms() throws RecognitionException {
 		Vector<Term> value = null;
 
@@ -1693,15 +1682,15 @@ public class TurtleOBDAParser extends Parser {
 		  value = new Vector<Term>();
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:3: (t1= term ( COMMA t2= term )* )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:5: t1= term ( COMMA t2= term )*
+			// TurtleOBDA.g:578:3: (t1= term ( COMMA t2= term )* )
+			// TurtleOBDA.g:578:5: t1= term ( COMMA t2= term )*
 			{
 			pushFollow(FOLLOW_term_in_terms653);
 			t1=term();
 			state._fsp--;
 
 			 value.add(t1); 
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:40: ( COMMA t2= term )*
+			// TurtleOBDA.g:578:40: ( COMMA t2= term )*
 			loop15:
 			while (true) {
 				int alt15=2;
@@ -1712,7 +1701,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt15) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:507:41: COMMA t2= term
+					// TurtleOBDA.g:578:41: COMMA t2= term
 					{
 					match(input,COMMA,FOLLOW_COMMA_in_terms658); 
 					pushFollow(FOLLOW_term_in_terms662);
@@ -1745,7 +1734,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "term"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:510:1: term returns [Term value] : ( function | variable | literal );
+	// TurtleOBDA.g:581:1: term returns [Term value] : ( function | variable | literal );
 	public final Term term() throws RecognitionException {
 		Term value = null;
 
@@ -1755,7 +1744,7 @@ public class TurtleOBDAParser extends Parser {
 		Term literal30 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:511:3: ( function | variable | literal )
+			// TurtleOBDA.g:582:3: ( function | variable | literal )
 			int alt16=3;
 			switch ( input.LA(1) ) {
 			case PREFIXED_NAME:
@@ -1792,7 +1781,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt16) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:511:5: function
+					// TurtleOBDA.g:582:5: function
 					{
 					pushFollow(FOLLOW_function_in_term683);
 					function28=function();
@@ -1802,7 +1791,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:512:5: variable
+					// TurtleOBDA.g:583:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_term691);
 					variable29=variable();
@@ -1812,7 +1801,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:513:5: literal
+					// TurtleOBDA.g:584:5: literal
 					{
 					pushFollow(FOLLOW_literal_in_term699);
 					literal30=literal();
@@ -1838,7 +1827,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "literal"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:516:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
+	// TurtleOBDA.g:593:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
 	public final Term literal() throws RecognitionException {
 		Term value = null;
 
@@ -1846,11 +1835,11 @@ public class TurtleOBDAParser extends Parser {
 		Term language31 =null;
 		Term stringLiteral32 =null;
 		Term dataTypeString33 =null;
-		ValueConstant numericLiteral34 =null;
-		ValueConstant booleanLiteral35 =null;
+		Term numericLiteral34 =null;
+		Term booleanLiteral35 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
+			// TurtleOBDA.g:594:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
 			int alt18=4;
 			switch ( input.LA(1) ) {
 			case STRING_WITH_QUOTE_DOUBLE:
@@ -1903,13 +1892,13 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt18) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:5: stringLiteral ( AT language )?
+					// TurtleOBDA.g:594:5: stringLiteral ( AT language )?
 					{
 					pushFollow(FOLLOW_stringLiteral_in_literal719);
 					stringLiteral32=stringLiteral();
 					state._fsp--;
 
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:19: ( AT language )?
+					// TurtleOBDA.g:594:19: ( AT language )?
 					int alt17=2;
 					int LA17_0 = input.LA(1);
 					if ( (LA17_0==AT) ) {
@@ -1917,7 +1906,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					switch (alt17) {
 						case 1 :
-							// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:517:20: AT language
+							// TurtleOBDA.g:594:20: AT language
 							{
 							match(input,AT,FOLLOW_AT_in_literal722); 
 							pushFollow(FOLLOW_language_in_literal724);
@@ -1931,26 +1920,35 @@ public class TurtleOBDAParser extends Parser {
 
 
 					       Term lang = language31;
-					       if ((stringLiteral32) instanceof Function){
+					       Term literal = stringLiteral32;
+					       if (literal instanceof Function){
 					          Function f = (Function)stringLiteral32;
 					          if (lang != null){
 					             value = dfac.getTypedTerm(f,lang);
 					          }else{
-					             value = dfac.getTypedTerm(f, Predicate.COL_TYPE.LITERAL);
+					             value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
 					          }       
 					       }else{
+
+					       //if variable we cannot assign a datatype yet
+					       if (literal instanceof Variable)
+					       {
+					            value = dfac.getTypedTerm(literal, COL_TYPE.LITERAL);
+					       }
+					       else{
 					          ValueConstant constant = (ValueConstant)stringLiteral32;
 					          if (lang != null) {
 						     value = dfac.getTypedTerm(constant, lang);
 					          } else {
-					      	     value = dfac.getTypedTerm(constant, Predicate.COL_TYPE.LITERAL);
+					      	     value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
 					          }
+					       }
 					       }
 					    
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:526:5: dataTypeString
+					// TurtleOBDA.g:621:5: dataTypeString
 					{
 					pushFollow(FOLLOW_dataTypeString_in_literal734);
 					dataTypeString33=dataTypeString();
@@ -1960,7 +1958,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:527:5: numericLiteral
+					// TurtleOBDA.g:622:5: numericLiteral
 					{
 					pushFollow(FOLLOW_numericLiteral_in_literal742);
 					numericLiteral34=numericLiteral();
@@ -1970,7 +1968,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 4 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:528:5: booleanLiteral
+					// TurtleOBDA.g:623:5: booleanLiteral
 					{
 					pushFollow(FOLLOW_booleanLiteral_in_literal750);
 					booleanLiteral35=booleanLiteral();
@@ -1996,7 +1994,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "stringLiteral"
-	// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:616:1: stringLiteral returns [Term value] : STRING_WITH_QUOTE_DOUBLE ;
+	// TurtleOBDA.g:626:1: stringLiteral returns [Term value] : STRING_WITH_QUOTE_DOUBLE ;
 	public final Term stringLiteral() throws RecognitionException {
 		Term value = null;
 
@@ -2004,8 +2002,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_QUOTE_DOUBLE36=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:532:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:532:5: STRING_WITH_QUOTE_DOUBLE
+			// TurtleOBDA.g:627:3: ( STRING_WITH_QUOTE_DOUBLE )
+			// TurtleOBDA.g:627:5: STRING_WITH_QUOTE_DOUBLE
 			{
 			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral769); 
 
@@ -2013,7 +2011,7 @@ public class TurtleOBDAParser extends Parser {
 			      if (str.contains("{")){
 			      	value = getNestedConcat(str);
 			      }else{
-			      	value = dfac.getConstantLiteral(str.substring(1, str.length()-1), Predicate.COL_TYPE.LITERAL); // without the double quotes
+			      	value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
 			      }
 			    
 			}
@@ -2033,7 +2031,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "dataTypeString"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:538:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
+	// TurtleOBDA.g:637:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
 	public final Term dataTypeString() throws RecognitionException {
 		Term value = null;
 
@@ -2042,8 +2040,8 @@ public class TurtleOBDAParser extends Parser {
 		Term resource38 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:539:3: ( stringLiteral REFERENCE resource )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:539:6: stringLiteral REFERENCE resource
+			// TurtleOBDA.g:638:3: ( stringLiteral REFERENCE resource )
+			// TurtleOBDA.g:638:6: stringLiteral REFERENCE resource
 			{
 			pushFollow(FOLLOW_stringLiteral_in_dataTypeString789);
 			stringLiteral37=stringLiteral();
@@ -2055,22 +2053,21 @@ public class TurtleOBDAParser extends Parser {
 			state._fsp--;
 
 
-			      if ((stringLiteral37) instanceof Function){
-			          Function f = (Function)stringLiteral37;
-			          value = dfac.getTypedTerm(f, Predicate.COL_TYPE.LITERAL);
-			      }else{
-			          ValueConstant constant = (ValueConstant)stringLiteral37;
-			          String functionName = resource38.toString();
-			          Predicate functionSymbol = null;
+			      Term stringValue = stringLiteral37;
+
 			          if (resource38 instanceof Function){
-				    functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
+			          	    String functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
+
+			                    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
+			                    if (type == null) {
+			                      throw new RuntimeException("Unsupported datatype: " + functionName);
+			                    }
+			                    value = dfac.getTypedTerm(stringValue, type);
+			                    }
+			           else {
+			          value = dfac.getTypedTerm(stringValue, COL_TYPE.LITERAL);
 			          }
-			          Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
-			          if (type == null) {
-			            throw new RuntimeException("Unsupported datatype: " + functionName);
-			          }
-			          value = dfac.getTypedTerm(constant, type);
-			      }
+
 			  
 			}
 
@@ -2089,17 +2086,17 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericLiteral"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:555:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
-	public final ValueConstant numericLiteral() throws RecognitionException {
-		ValueConstant value = null;
+	// TurtleOBDA.g:656:1: numericLiteral returns [Term value] : ( numericUnsigned | numericPositive | numericNegative );
+	public final Term numericLiteral() throws RecognitionException {
+		Term value = null;
 
 
-		ValueConstant numericUnsigned39 =null;
-		ValueConstant numericPositive40 =null;
-		ValueConstant numericNegative41 =null;
+		Term numericUnsigned39 =null;
+		Term numericPositive40 =null;
+		Term numericNegative41 =null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:556:3: ( numericUnsigned | numericPositive | numericNegative )
+			// TurtleOBDA.g:657:3: ( numericUnsigned | numericPositive | numericNegative )
 			int alt19=3;
 			switch ( input.LA(1) ) {
 			case DECIMAL:
@@ -2130,7 +2127,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt19) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:556:5: numericUnsigned
+					// TurtleOBDA.g:657:5: numericUnsigned
 					{
 					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral809);
 					numericUnsigned39=numericUnsigned();
@@ -2140,7 +2137,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:557:5: numericPositive
+					// TurtleOBDA.g:658:5: numericPositive
 					{
 					pushFollow(FOLLOW_numericPositive_in_numericLiteral817);
 					numericPositive40=numericPositive();
@@ -2150,7 +2147,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:558:5: numericNegative
+					// TurtleOBDA.g:659:5: numericNegative
 					{
 					pushFollow(FOLLOW_numericNegative_in_numericLiteral825);
 					numericNegative41=numericNegative();
@@ -2176,11 +2173,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "nodeID"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:561:1: nodeID : BLANK_PREFIX name ;
+	// TurtleOBDA.g:662:1: nodeID : BLANK_PREFIX name ;
 	public final void nodeID() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:562:3: ( BLANK_PREFIX name )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:562:5: BLANK_PREFIX name
+			// TurtleOBDA.g:663:3: ( BLANK_PREFIX name )
+			// TurtleOBDA.g:663:5: BLANK_PREFIX name
 			{
 			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID840); 
 			pushFollow(FOLLOW_name_in_nodeID842);
@@ -2203,11 +2200,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "relativeURI"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:565:1: relativeURI : STRING_URI ;
+	// TurtleOBDA.g:666:1: relativeURI : STRING_URI ;
 	public final void relativeURI() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:566:3: ( STRING_URI )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:566:5: STRING_URI
+			// TurtleOBDA.g:667:3: ( STRING_URI )
+			// TurtleOBDA.g:667:5: STRING_URI
 			{
 			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI856); 
 			}
@@ -2229,14 +2226,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "namespace"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:569:1: namespace : NAMESPACE ;
+	// TurtleOBDA.g:670:1: namespace : NAMESPACE ;
 	public final TurtleOBDAParser.namespace_return namespace() throws RecognitionException {
 		TurtleOBDAParser.namespace_return retval = new TurtleOBDAParser.namespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:570:3: ( NAMESPACE )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:570:5: NAMESPACE
+			// TurtleOBDA.g:671:3: ( NAMESPACE )
+			// TurtleOBDA.g:671:5: NAMESPACE
 			{
 			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace869); 
 			}
@@ -2261,14 +2258,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "defaultNamespace"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:573:1: defaultNamespace : COLON ;
+	// TurtleOBDA.g:674:1: defaultNamespace : COLON ;
 	public final TurtleOBDAParser.defaultNamespace_return defaultNamespace() throws RecognitionException {
 		TurtleOBDAParser.defaultNamespace_return retval = new TurtleOBDAParser.defaultNamespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:574:3: ( COLON )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:574:5: COLON
+			// TurtleOBDA.g:675:3: ( COLON )
+			// TurtleOBDA.g:675:5: COLON
 			{
 			match(input,COLON,FOLLOW_COLON_in_defaultNamespace884); 
 			}
@@ -2290,11 +2287,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "name"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:577:1: name : VARNAME ;
+	// TurtleOBDA.g:678:1: name : VARNAME ;
 	public final void name() throws RecognitionException {
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:578:3: ( VARNAME )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:578:5: VARNAME
+			// TurtleOBDA.g:679:3: ( VARNAME )
+			// TurtleOBDA.g:679:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_name897); 
 			}
@@ -2316,14 +2313,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "languageTag"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:581:1: languageTag : VARNAME ;
+	// TurtleOBDA.g:682:1: languageTag : VARNAME ;
 	public final TurtleOBDAParser.languageTag_return languageTag() throws RecognitionException {
 		TurtleOBDAParser.languageTag_return retval = new TurtleOBDAParser.languageTag_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:582:3: ( VARNAME )
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:582:5: VARNAME
+			// TurtleOBDA.g:683:3: ( VARNAME )
+			// TurtleOBDA.g:683:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag910); 
 			}
@@ -2345,16 +2342,16 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "booleanLiteral"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:585:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
-	public final ValueConstant booleanLiteral() throws RecognitionException {
-		ValueConstant value = null;
+	// TurtleOBDA.g:686:1: booleanLiteral returns [Term value] : ( TRUE | FALSE );
+	public final Term booleanLiteral() throws RecognitionException {
+		Term value = null;
 
 
 		Token TRUE42=null;
 		Token FALSE43=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:586:3: ( TRUE | FALSE )
+			// TurtleOBDA.g:687:3: ( TRUE | FALSE )
 			int alt20=2;
 			int LA20_0 = input.LA(1);
 			if ( (LA20_0==TRUE) ) {
@@ -2372,17 +2369,22 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt20) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:586:5: TRUE
+					// TurtleOBDA.g:687:5: TRUE
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral927); 
-					 value = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), Predicate.COL_TYPE.BOOLEAN);
+
+					  ValueConstant trueConstant = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:587:5: FALSE
+					// TurtleOBDA.g:690:5: FALSE
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral936); 
-					 value = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), Predicate.COL_TYPE.BOOLEAN);
+
+					  ValueConstant falseConstant = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
+					  
 					}
 					break;
 
@@ -2402,9 +2404,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericUnsigned"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:590:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
-	public final ValueConstant numericUnsigned() throws RecognitionException {
-		ValueConstant value = null;
+	// TurtleOBDA.g:696:1: numericUnsigned returns [Term value] : ( INTEGER | DOUBLE | DECIMAL );
+	public final Term numericUnsigned() throws RecognitionException {
+		Term value = null;
 
 
 		Token INTEGER44=null;
@@ -2412,7 +2414,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL46=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:591:3: ( INTEGER | DOUBLE | DECIMAL )
+			// TurtleOBDA.g:697:3: ( INTEGER | DOUBLE | DECIMAL )
 			int alt21=3;
 			switch ( input.LA(1) ) {
 			case INTEGER:
@@ -2437,24 +2439,33 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt21) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:591:5: INTEGER
+					// TurtleOBDA.g:697:5: INTEGER
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned955); 
-					 value = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), Predicate.COL_TYPE.INTEGER);
+
+					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+					  
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:592:5: DOUBLE
+					// TurtleOBDA.g:701:5: DOUBLE
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned963); 
-					 value = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), Predicate.COL_TYPE.DOUBLE);
+
+					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+					  
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:593:5: DECIMAL
+					// TurtleOBDA.g:705:5: DECIMAL
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned972); 
-					 value = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), Predicate.COL_TYPE.DECIMAL);
+
+					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+					   
 					}
 					break;
 
@@ -2474,9 +2485,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericPositive"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:596:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
-	public final ValueConstant numericPositive() throws RecognitionException {
-		ValueConstant value = null;
+	// TurtleOBDA.g:711:1: numericPositive returns [Term value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
+	public final Term numericPositive() throws RecognitionException {
+		Term value = null;
 
 
 		Token INTEGER_POSITIVE47=null;
@@ -2484,7 +2495,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL_POSITIVE49=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:597:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
+			// TurtleOBDA.g:712:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
 			int alt22=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_POSITIVE:
@@ -2509,24 +2520,33 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt22) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:597:5: INTEGER_POSITIVE
+					// TurtleOBDA.g:712:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive991); 
-					 value = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), Predicate.COL_TYPE.INTEGER);
+
+					   ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.LITERAL);
+					   value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+					  
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:598:5: DOUBLE_POSITIVE
+					// TurtleOBDA.g:716:5: DOUBLE_POSITIVE
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive999); 
-					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), Predicate.COL_TYPE.DOUBLE);
+
+					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+					  
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:599:5: DECIMAL_POSITIVE
+					// TurtleOBDA.g:720:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1008); 
-					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), Predicate.COL_TYPE.DECIMAL);
+
+					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+					   
 					}
 					break;
 
@@ -2546,9 +2566,9 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericNegative"
-	// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:602:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
-	public final ValueConstant numericNegative() throws RecognitionException {
-		ValueConstant value = null;
+	// TurtleOBDA.g:726:1: numericNegative returns [Term value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
+	public final Term numericNegative() throws RecognitionException {
+		Term value = null;
 
 
 		Token INTEGER_NEGATIVE50=null;
@@ -2556,7 +2576,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL_NEGATIVE52=null;
 
 		try {
-			// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:603:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
+			// TurtleOBDA.g:727:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
 			int alt23=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_NEGATIVE:
@@ -2581,24 +2601,33 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt23) {
 				case 1 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:603:5: INTEGER_NEGATIVE
+					// TurtleOBDA.g:727:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1027); 
-					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), Predicate.COL_TYPE.INTEGER);
+
+					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+					  
 					}
 					break;
 				case 2 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:604:5: DOUBLE_NEGATIVE
+					// TurtleOBDA.g:731:5: DOUBLE_NEGATIVE
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1035); 
-					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), Predicate.COL_TYPE.DOUBLE);
+
+					   ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.LITERAL);
+					   value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+					  
 					}
 					break;
 				case 3 :
-					// /Users/xiao/Projects/ontop/obdalib-core/src/main/java/org/semanticweb/ontop/parser/TurtleOBDA.g:605:5: DECIMAL_NEGATIVE
+					// TurtleOBDA.g:735:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1044); 
-					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), Predicate.COL_TYPE.DECIMAL);
+
+					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.LITERAL);
+					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+					  
 					}
 					break;
 

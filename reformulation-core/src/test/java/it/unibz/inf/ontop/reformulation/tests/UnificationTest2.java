@@ -19,16 +19,16 @@ package it.unibz.inf.ontop.reformulation.tests;
  * limitations under the License.
  * #L%
  */
-import java.util.List;
-import java.util.Vector;
-
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+
+import java.util.List;
+import java.util.Vector;
 
 import junit.framework.TestCase;
 
@@ -36,7 +36,7 @@ public class UnificationTest2 extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.semanticweb.ontop.owlrefplatform.core.reformulation.DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
+	 * {@link it.unibz.inf.ontop.owlrefplatform.core.reformulation.DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
 	 * .
 	 *
 	 * Check if MGU generation/application works properly with multiple atoms sharing variables

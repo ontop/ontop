@@ -21,47 +21,14 @@ package it.unibz.inf.ontop.parser;
  */
 
 import it.unibz.inf.ontop.sql.api.AggregationJSQL;
-import it.unibz.inf.ontop.sql.api.TableJSQL;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.expression.*;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
-
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.FromItemVisitor;
-import net.sf.jsqlparser.statement.select.LateralSubSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.SubJoin;
-import net.sf.jsqlparser.statement.select.SubSelect;
-import net.sf.jsqlparser.statement.select.ValuesList;
-import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.*;
 
 
 /**
@@ -79,7 +46,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 	 */
 	public AggregationJSQL getAggregation(Select select, boolean deepParsing){
 		
-		
+
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
 				withItem.accept(this);
@@ -102,11 +69,11 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 //		plainSelect.getFromItem().accept(this);
 		
 		if(plainSelect.getGroupByColumnReferences()!=null){
-			
+
 				for(Expression express: plainSelect.getGroupByColumnReferences() ){
 					express.accept(this);
 				}
-			
+
 		}
 	}
 
@@ -325,19 +292,7 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 
 	@Override
 	public void visit(Column tableColumn) {
-		Table table= tableColumn.getTable();
-		if(table.getName()!=null){
-			
-			TableJSQL fixTable = new TableJSQL(table);
-			table.setAlias(fixTable.getAlias());
-			table.setName(fixTable.getTableName());
-			table.setSchemaName(fixTable.getSchema());
-		
-		}
-		String columnName= tableColumn.getColumnName();
-		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
-			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
-		
+		//TableJSQL.unquoteColumnAndTableName(tableColumn);
 	}
 
 	@Override
@@ -442,22 +397,23 @@ public class AggregationVisitor implements SelectVisitor, FromItemVisitor, Expre
 		
 	}
 
-    @Override
-    public void visit(JsonExpression jsonExpr) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void visit(RegExpMySQLOperator regExpMySQLOperator) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
+	@Override
 	public void visit(SignedExpression arg0) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	
 

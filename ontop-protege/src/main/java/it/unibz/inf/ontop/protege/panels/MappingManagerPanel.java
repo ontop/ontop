@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,54 +20,37 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.SourceQueryValidator;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
+import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
+import org.slf4j.LoggerFactory;
 
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import java.awt.event.*;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JDialog;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTree;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.MappingFilterParser;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
-import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.MappingFilterLexer;
-import it.unibz.inf.ontop.protege.utils.OBDAMappingListRenderer;
-import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.SourceQueryValidator;
-import org.slf4j.LoggerFactory;
-
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
-	private static final long serialVersionUID = -486013653814714526L;
+
+
+    private static final long serialVersionUID = -486013653814714526L;
 
 	private Thread validatorThread;
 
@@ -94,8 +77,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * 
 	 * @param apic
 	 *            The API controller object.
-	 * @param preference
-	 *            The preference object.
+         * @param validator
+         *            TargetQueryVocabularyValidator 
 	 */
 	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
 
@@ -106,51 +89,45 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		initComponents();
 		addMenu();
 
+
+
 		// Setting up the mappings tree
 		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic, validator));
-		mappingList.setModel(new SynchronizedMappingListModel(apic));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		mappingList.addMouseListener(new PopupListener());
-		
-		mappingList.addKeyListener(new KeyListener() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// Do nothing
-			}
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// Do nothing
-			}
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-					removeMapping();
-				} else if (e.getKeyCode() == KeyEvent.VK_INSERT) {
-					addMapping();
-				} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					editMapping();
-				}
-			}
-		});
 
-		mappingList.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// do nothing
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// do nothing
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// do nothing
-			}
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// do nothing
-			}
+        mappingList.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                // Do nothing
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // Do nothing
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_DELETE:
+                    case KeyEvent.VK_BACK_SPACE:
+                        removeMapping();
+                        break;
+                    case KeyEvent.VK_INSERT:
+                        addMapping();
+                        break;
+                    case KeyEvent.VK_SPACE:
+                        editMapping();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
+		mappingList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int count = e.getClickCount();
@@ -167,8 +144,12 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		setOBDAModel(apic); // TODO Bad code! Change this later!
 	}
 
+    public OBDADataSource getSelectedSource() {
+        return selectedSource;
+    }
+
 	/**
-	 * A listener to trigger the context meny of the mapping list.
+	 * A listener to trigger the context menu of the mapping list.
 	 */
 	class PopupListener extends MouseAdapter {
 		
@@ -189,12 +170,14 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-	public void setOBDAModel(OBDAModel omodel) {
+   
+
+    public void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
 		ListModel model = new SynchronizedMappingListModel(omodel);
-		
+
 		model.addListDataListener(new ListDataListener() {
 			@Override
 			public void intervalRemoved(ListDataEvent e) {
@@ -219,55 +202,29 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	private void addMenu() {
 		JMenuItem add = new JMenuItem();
 		add.setText("Create mapping...");
-		add.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addMapping();
-			}
-		});
+		add.addActionListener((ActionEvent e) -> addMapping());
 		menuMappings.add(add);
 
 		JMenuItem delete = new JMenuItem();
 		delete.setText("Remove mapping(s)...");
-		delete.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				removeMapping();
-			}
-		});
+		delete.addActionListener((ActionEvent e) -> removeMapping());
 		menuMappings.add(delete);
 
 		JMenuItem editMapping = new JMenuItem();
 		editMapping.setText("Edit mapping...");
-		editMapping.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editMapping();
-
-			}
-		});
+		editMapping.addActionListener((ActionEvent e) -> editMapping());
 		menuMappings.add(editMapping);
 
 		menuMappings.addSeparator();
 
 		menuValidateBody = new JMenuItem();
 		menuValidateBody.setText("Validate SQL");
-		menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuValidateBodyActionPerformed(evt);
-			}
-		});
+		menuValidateBody.addActionListener(this::menuValidateBodyActionPerformed);
 		menuMappings.add(menuValidateBody);
 
 		menuExecuteBody = new JMenuItem();
 		menuExecuteBody.setText("Execute SQL");
-		menuExecuteBody.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuExecuteBodyActionPerformed(evt);
-			}
-		});
+		menuExecuteBody.addActionListener(this::menuExecuteBodyActionPerformed);
 		menuMappings.add(menuExecuteBody);
 	}
 
@@ -294,11 +251,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * WARNING: Do NOT modify this code. The content of this method is always
 	 * regenerated by the Form Editor.
 	 */
-	// <editor-fold defaultstate="collapsed"
-	// <editor-fold defaultstate="collapsed"
-	// <editor-fold defaultstate="collapsed"
-	// <editor-fold defaultstate="collapsed"
-	// <editor-fold defaultstate="collapsed"
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
@@ -319,12 +271,12 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         txtFilter = new javax.swing.JTextField();
         chkFilter = new javax.swing.JCheckBox();
         mappingScrollPane = new javax.swing.JScrollPane();
-        mappingList = new javax.swing.JList();
+        mappingList = new javax.swing.JList<>();
 
         setLayout(new java.awt.GridBagLayout());
 
         pnlMappingManager.setAutoscrolls(true);
-        pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
+        pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 300));
         pnlMappingManager.setLayout(new java.awt.BorderLayout());
 
         pnlMappingButtons.setEnabled(false);
@@ -480,11 +432,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
         pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
 
-        mappingList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
         mappingScrollPane.setViewportView(mappingList);
 
         pnlMappingManager.add(mappingScrollPane, java.awt.BorderLayout.CENTER);
@@ -511,12 +458,12 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 */
 	private void processFilterAction() {
 		if (!(chkFilter.isSelected())) {
-			applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
+			applyFilters(new ArrayList<>());
 		}
 		if (chkFilter.isSelected()) {
 			if (txtFilter.getText().isEmpty()) {
 				chkFilter.setSelected(false);
-				applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
+				applyFilters(new ArrayList<>());
 				return;
 			}
 			try {
@@ -559,82 +506,75 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
 
 		outputField.setLocationRelativeTo(this);
-		Runnable action = new Runnable() {
-			@Override
-			public void run() {
-				canceled = false;
-				final List path = mappingList.getSelectedValuesList();
-				if (path == null) {
-					JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
-					return;
-				}
-				outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
-				for (int i = 0; i < path.size(); i++) {
-					final int index = i;
-					OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(index);
-					String id = o.getId();
-					outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
-					long timestart = System.nanoTime();
+		Runnable action = () -> {
+            canceled = false;
+            final List path = mappingList.getSelectedValuesList();
+            if (path == null) {
+                JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
+                return;
+            }
+            outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
+            for (int i = 0; i < path.size(); i++) {
+                OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(i);
+                String id = o.getId();
+                outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
+                validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
+                long timestart = System.nanoTime();
 
-					if (canceled) {
-						return;
-					}
-					if (validator.validate()) {
-						long timestop = System.nanoTime();
-						String output = " valid  \n";
-						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
-						outputField.addText(output, outputField.VALID);
-					} else {
-						long timestop = System.nanoTime();
-						String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
-						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
-						outputField.addText(output, outputField.CRITICAL_ERROR);
-					}
+                if (canceled) {
+                    return;
+                }
+                if (validator.validate()) {
+                    long timestop = System.nanoTime();
+                    String output = " valid  \n";
+                    outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
+                    outputField.addText(output, outputField.VALID);
+                } else {
+                    long timestop = System.nanoTime();
+                    String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
+                    outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
+                    outputField.addText(output, outputField.CRITICAL_ERROR);
+                }
 
-					if (canceled) {
-						return;
-					}
-				}
-				outputField.setVisible(true);
-			}
-		};
+                if (canceled) {
+                    return;
+                }
+            }
+            outputField.setVisible(true);
+        };
 		validatorThread = new Thread(action);
 		validatorThread.start();
 
-		Thread cancelThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (!outputField.closed) {
-					try {
-						Thread.currentThread();
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				if (validatorThread.isAlive()) {
-					try {
-						Thread.currentThread();
-						Thread.sleep(250);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					try {
-						canceled = true;
-						validator.cancelValidation();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
+		Thread cancelThread = new Thread(() -> {
+            while (!outputField.closed) {
+                try {
+                    Thread.currentThread();
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (validatorThread.isAlive()) {
+                try {
+                    Thread.currentThread();
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    canceled = true;
+                    validator.cancelValidation();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 		cancelThread.start();
 
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
+		OBDAMappingAxiom mapping = mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}
@@ -690,7 +630,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 				OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
 				OBDAMappingAxiom newmapping = null;
-				newmapping = (OBDAMappingAxiom) oldmapping.clone();
+				newmapping = oldmapping.clone();
 				newmapping.setId(new_id);
 				controller.addMapping(current_srcuri, newmapping);
 
@@ -738,8 +678,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			addMapping();
 		} else {
 			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+        }
 	}// GEN-LAST:event_addMappingButtonActionPerformed
 
 	private void addMapping() {
@@ -773,7 +712,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel labelMappings;
     private javax.swing.JLabel lblInsertFilter;
-    private javax.swing.JList mappingList;
+    private javax.swing.JList<OBDAMappingAxiom> mappingList;
     private javax.swing.JScrollPane mappingScrollPane;
     private javax.swing.JPopupMenu menuMappings;
     private javax.swing.JPanel pnlExtraButtons;
@@ -821,10 +760,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-		
+
 		if (newSource == null) {
 			return;
-		}		
+		}
 		this.selectedSource = newSource;
 
 		// Update the mapping tree.
@@ -833,4 +772,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		
 		mappingList.revalidate();
 	}
+
+
 }

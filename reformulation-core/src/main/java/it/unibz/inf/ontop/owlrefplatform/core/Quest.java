@@ -20,17 +20,18 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLGenerator;
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
@@ -39,54 +40,42 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
-import it.unibz.inf.ontop.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
-import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
-import it.unibz.inf.ontop.sql.TableDefinition;
-import it.unibz.inf.ontop.sql.api.Attribute;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.inf.ontop.utils.MappingParser;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.openrdf.query.parser.ParsedQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
-import it.unibz.inf.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-import it.unibz.inf.ontop.sql.api.RelationJSQL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.security.InvalidParameterException;
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
-public class Quest implements Serializable, RepositoryChangedListener {
+
+public class Quest implements Serializable {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-	private PoolProperties poolProperties;
-	private DataSource tomcatPool;
-
+	private PoolProperties poolProperties = null;
+	private DataSource tomcatPool = null;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
-	private int maxPoolSize = 20;
-	private int startPoolSize = 2;
-	private boolean removeAbandoned = true;
-	private boolean logAbandoned = false;
-	private int abandonedTimeout = 60; // 60 seconds
-	private boolean keepAlive = true;
-
+	protected int maxPoolSize = 20;
+	protected int startPoolSize = 2;
+	protected boolean removeAbandoned = true;
+	protected boolean logAbandoned = false;
+	protected int abandonedTimeout = 60; // 60 seconds
+	protected boolean keepAlive = true;
+	
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
 
@@ -94,54 +83,26 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * Internal components
 	 */
 
-	/* The active ABox repository, might be null */
-	private RDBMSSIRepositoryManager dataRepository;
-
-	private VocabularyValidator vocabularyValidator;
+	/* The active ABox repository (is null if there is no Semantic Index, i.e., in Virtual Mode) */
+	private RDBMSSIRepositoryManager dataRepository = null;
 
 	/* The active connection used to get metadata from the DBMS */
-	private transient Connection localConnection;
+	private transient Connection localConnection = null;
 
-	/* The active query rewriter */
-	private QueryRewriter rewriter;
-
-	/* The active SQL generator */
-	private SQLQueryGenerator datasourceQueryGenerator;
-
-	/* The active query evaluation engine */
-	//private EvaluationEngine evaluationEngine;
-
-	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
-	private TBoxReasoner reformulationReasoner;
-
-	private LinearInclusionDependencies sigma;
-
-	/* The merge and translation of all loaded ontologies */
+    /* The merge and translation of all loaded ontologies */
 	private final Ontology inputOntology;
 
 	/* The input OBDA model */
-	private OBDAModel inputOBDAModel;
+	private OBDAModel inputOBDAModel = null;
 
-	/* The input OBDA model */
-	private OBDAModel unfoldingOBDAModel;
-
-	private QuestUnfolder unfolder;
-
-	/*
-     * Index of the function symbols that have multiple types.
-     * This index, built from the mappings, is immutable.
-     *
-     * TODO: not in version 1, check if still relevant.
-     *
-     */
-	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
-
+	private QuestQueryProcessor engine;
+		
 	/**
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
 	 */
-	private ImplicitDBConstraints userConstraints;
-
+	private ImplicitDBConstraintsReader userConstraints = null;
+	
 	/*
 	 * Whether to apply the user-supplied database constraints given above
 	 * userConstraints must be initialized and non-null whenever this is true
@@ -168,21 +129,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * Configuration
 	 */
 
-	private boolean reformulate = false;
+	public boolean reformulate = false;
 
 	private String reformulationTechnique = QuestConstants.UCQBASED;
 
 	private boolean bOptimizeEquivalences = true;
 
-	private boolean bOptimizeTBoxSigma = true;
-
 	private boolean bObtainFromOntology = true;
 
 	private boolean bObtainFromMappings = true;
-
+	
 	private boolean obtainFullMetadata = false;
 
-	private boolean sqlGenerateReplace = true;
+    private boolean sqlGenerateReplace = true;
 
 	private boolean distinctResultSet = false;
 
@@ -204,21 +163,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private String aboxJdbcDriver;
 				
-	/*
-	 * The following are caches to queries that Quest has seen in the past. They
-	 * are used by the statements
-	 */
-
-	private final Map<String, String> querycache = new ConcurrentHashMap<String, String>();
-
-	private final Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
-
-	private final Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
-
-//	private final Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
-//	private final Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
-//	private final Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
-
+	
+	
 	private DBMetadata metadata;
 
 
@@ -254,7 +200,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param tbox
 	 *            . The TBox must not be null, even if its empty. At least, the
 	 *            TBox must define all the vocabulary of the system.
-	 * @param mappings
+	 * @param obdaModel
 	 *            . The mappings of the system. The vocabulary of the mappings
 	 *            must be subset or equal to the vocabulary of the ontology.
 	 * @param config
@@ -262,7 +208,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 *            QuestDefaults.properties for a description (in
 	 *            src/main/resources)
 	 */
-	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
+	public Quest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, Properties config) {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 		
@@ -271,20 +217,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		setPreferences(config);
 
-		if (mappings == null && !aboxMode.equals(QuestConstants.CLASSIC)) {
+		if (obdaModel == null && !aboxMode.equals(QuestConstants.CLASSIC)) {
 			throw new IllegalArgumentException(
 					"When working without mappings, you must set the ABox mode to \""
 							+ QuestConstants.CLASSIC
 							+ "\". If you want to work with no mappings in virtual ABox mode you must at least provide an empty but not null OBDAModel");
 		}
-		if (mappings != null && !aboxMode.equals(QuestConstants.VIRTUAL)) {
+		if (obdaModel != null && !aboxMode.equals(QuestConstants.VIRTUAL)) {
 			throw new IllegalArgumentException(
 					"When working with mappings, you must set the ABox mode to \""
 							+ QuestConstants.VIRTUAL
 							+ "\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
-		loadOBDAModel(mappings);
+		loadOBDAModel(obdaModel);
 	}
 	
 	
@@ -302,85 +248,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param userConstraints User supplied primary and foreign keys (only useful if these are not in the metadata)
 	 * 						May be used by ontop to eliminate self-joins
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints) {
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
 	}
 
-	protected String getCachedSQL(String query) {
-		return querycache.get(query);
-	}
 	
-	protected boolean hasCachedSQL(String query) {
-		return querycache.containsKey(query);
+	// TEST ONLY
+	public List<CQIE> getUnfolderRules() {
+		return engine.unfolder.ufp;
 	}
-
-	protected void cacheSQL(String strquery, String sql) {
-		querycache.put(strquery, sql);
-	}
-	
-	// TODO: replace by a couple of methods to get/set values
-	protected Map<String, List<String>> getSignatureCache() {
-		return signaturecache;
-	}
-	// TODO: replace by a couple of methods to get/set value 
-	// Note, however, that this one is never read (only put in QuestStatement)
-	protected Map<String, ParsedQuery> getSesameQueryCache() {
-		return sesameQueryCache;
-	}
-	
-	
-	public TBoxReasoner getReasoner() {
-		return reformulationReasoner;
-	}
-	
-	public DatalogProgram getRewriting(DatalogProgram cqie) throws OBDAException {
-		return rewriter.rewrite(cqie);
-	}
-
-	public DatalogProgram getOptimizedRewriting(DatalogProgram cqie) throws OBDAException {
-		// Query optimization w.r.t Sigma rules
-		for (CQIE cq : cqie.getRules())
-			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-		cqie = rewriter.rewrite(cqie);
-		for (CQIE cq : cqie.getRules())
-			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-		return cqie;
-	}
-	
-	public QuestUnfolder getUnfolder() {
-		return unfolder;
-	}
-
-	public ExpressionEvaluator getExpressionEvaluator() {
-		ExpressionEvaluator evaluator = new ExpressionEvaluator();
-		evaluator.setUriTemplateMatcher(unfolder.getUriTemplateMatcher());		
-		return evaluator;
-	}
-	
-	public SparqlAlgebraToDatalogTranslator getSparqlAlgebraToDatalogTranslator() {
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), getUriMap());
-		return translator;
-	}
-	
-	// used only once
-	public VocabularyValidator getVocabularyValidator() {
-		return vocabularyValidator;
-	}
-
-//	protected Map<String, Query> getJenaQueryCache() {
-//		return jenaQueryCache;
-//	}
-//	protected Map<String, Boolean> getIsBooleanCache() {
-//		return isbooleancache;
-//	}
-//	protected Map<String, Boolean> getIsConstructCache() {
-//		return isconstructcache;
-//	}
-//	public Map<String, Boolean> getIsDescribeCache() {
-//		return isdescribecache;
-//	}
 
 	private void loadOBDAModel(OBDAModel model) {
 
@@ -394,21 +272,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return inputOBDAModel;
 	}
 
-	/**
-	 * Returns a mutable copy of the index of the multi-typed function symbols.
-	 */
-	public Multimap<Predicate,Integer> copyMultiTypedFunctionSymbolIndex() {
-		return ArrayListMultimap.create(multiTypedFunctionSymbolIndex);
-	}
-
 	public void dispose() {
-/*		try {
-			if (evaluationEngine != null)
-				this.evaluationEngine.dispose();
-		} catch (Exception e) {
-			log.debug("Error during disconnect: " + e.getMessage());
-		}
-*/
 		try {
 			if (localConnection != null && !localConnection.isClosed())
 				disconnect();
@@ -420,7 +284,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Properties getPreferences() {
 		return preferences;
 	}
-
 
 	private void setPreferences(Properties preferences) {
 		this.preferences = preferences;
@@ -434,7 +297,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		reformulate = Boolean.valueOf((String) preferences.get(QuestPreferences.REWRITE));
 		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
-		bOptimizeTBoxSigma = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_TBOX_SIGMA));
 		bObtainFromOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FROM_ONTOLOGY));
 		bObtainFromMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FROM_MAPPINGS));
 		aboxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
@@ -464,7 +326,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			log.debug("Extensional query rewriting technique: {}", reformulationTechnique);
 		}
 		log.debug("Optimize TBox using class/property equivalences: {}", bOptimizeEquivalences);
-		log.debug("Optimize TBox using dependencies in ABox: {}", bOptimizeTBoxSigma);
 		log.debug("ABox mode: {}", aboxMode);
 		if (!aboxMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
@@ -537,47 +398,40 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			MappingVocabularyRepair.fixOBDAModel(inputOBDAModel, inputOntology.getVocabulary());
 		}
 
-		unfoldingOBDAModel = fac.getOBDAModel();
-
 
 		/*
 		 * Simplifying the vocabulary of the TBox
 		 */
 
-		reformulationReasoner = new TBoxReasonerImpl(inputOntology);
-		
-		if (bOptimizeEquivalences) {
-			// generate a new TBox with a simpler vocabulary
-			reformulationReasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reformulationReasoner);
-		} 
-		vocabularyValidator = new VocabularyValidator(reformulationReasoner);
+		final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(inputOntology, bOptimizeEquivalences);
 
 		try {
 
+			Collection<OBDAMappingAxiom> mappings = null;
+			
 			/*
 			 * Preparing the data source
 			 */
 
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
-				//isSemanticIdx = true;
-				
+				if (!aboxSchemaType.equals(QuestConstants.SEMANTIC_INDEX)) {
+					throw new Exception(aboxSchemaType
+							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
+				}
+
 				if (inmemory) {
-					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
 							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
-					String username = "sa";
-					String password = "";
 
 					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.h2.Driver");
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "sa");
 					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-				} else {
-					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-
+				} 
+				else {
 					if (aboxJdbcURL.trim().equals(""))
 						throw new OBDAException("Found empty JDBC_URL parametery. Quest in CLASSIC/JDBC mode requires a JDBC_URL value.");
 
@@ -585,6 +439,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 						throw new OBDAException(
 								"Found empty JDBC_DRIVER parametery. Quest in CLASSIC/JDBC mode requires a JDBC_DRIVER value.");
 
+					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver.trim());
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, aboxJdbcPassword);
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL.trim());
@@ -593,52 +448,34 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 				}
 
-				if (!aboxSchemaType.equals(QuestConstants.SEMANTIC_INDEX)) {
-					throw new Exception(aboxSchemaType
-							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
-				}
-
 				// TODO one of these is redundant??? check
 				connect();
-				// setup connection pool
+				
 				setupConnectionPool();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
-				dataRepository.addRepositoryChangedListener(this);
+				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
 
 				if (inmemory) {
-
-					/*
-					 * in this case we we work in memory (with H2), the database
-					 * is clean and Quest will insert new Abox assertions into
-					 * the database.
-					 */
+					// we work in memory (with H2), the database is clean and 
+					// Quest will insert new Abox assertions into the database.
 					dataRepository.generateMetadata();
 					
-					/* Creating the ABox repository */
+					// Creating the ABox repository 
 					dataRepository.createDBSchemaAndInsertMetadata(localConnection);
 				} 
 				else {
-					/*
-					 * Here we expect the repository to be already created in
-					 * the database, we will restore the repository and we will
-					 * NOT insert any data in the repo, it should have been
-					 * inserted already.
-					 */
+					// the repository has already been created in the database, 
+					// restore the repository and do NOT insert any data in the repo, 
+					// it should have been inserted already.
 					dataRepository.loadMetadata(localConnection);
 
 					// TODO add code to verify that the existing semantic index
-					// repository can be used
-					// with the current ontology, e.g., checking the vocabulary
-					// of URIs, checking the
-					// ranges w.r.t. to the ontology entailments, etc.
-
+					// repository can be used with the current ontology, e.g., 
+					// checking the vocabulary of URIs, ranges wrt the ontology entailments
 				}
 
-				/* Setting up the OBDA model */
-
-				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
+				// getting OBDA mapping axioms
+				mappings = dataRepository.getMappings();
 			} 
 			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 				// log.debug("Working in virtual mode");
@@ -652,194 +489,145 @@ public class Quest implements Serializable, RepositoryChangedListener {
 							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
 									+ sources.size() + " data sources. Please remove the aditional sources.");
 
-				/* Setting up the OBDA model */
+				// Setting up the OBDA model 
 
 				obdaSource = sources.iterator().next();
 
 				log.debug("Testing DB connection...");
 				connect();
 
-				// setup connection pool
 				setupConnectionPool();
 
-
-				/*
-				 * Processing mappings with respect to the vocabulary
-				 * simplification
-				 */
-
-				Collection<OBDAMappingAxiom> newMappings =
-						vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
-
-				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
+				mappings = inputOBDAModel.getMappings(obdaSource.getSourceID());
 			}
 
-			// NOTE: Currently the system only supports one data source.
-			//
-			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
-			URI sourceId = datasource.getSourceID();
-
-            SQLDialectAdapter sqladapter = SQLAdapterFactory
-                    .getSQLDialectAdapter(datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			
 			//if the metadata was not already set
 			if (metadata == null) {
+				metadata = DBMetadataExtractor.createMetadata(localConnection);
 				// if we have to parse the full metadata or just the table list in the mappings
 				if (obtainFullMetadata) {
-					metadata = JDBCConnectionManager.getMetaData(localConnection);
-				} else {
-					// This is the NEW way of obtaining part of the metadata
-					// (the schema.table names) by parsing the mappings
-
-					// Parse mappings. Just to get the table names in use
-					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
-
-					try{
-						List<RelationJSQL> realTables = mParser.getRealTables();
-
+					DBMetadataExtractor.loadMetadata(metadata, localConnection, null);
+				} 
+				else {
+					try {
+						// This is the NEW way of obtaining part of the metadata
+						// (the schema.table names) by parsing the mappings
+						
+						// Parse mappings. Just to get the table names in use
+						Set<RelationID> realTables = MappingParser.getRealTables(metadata.getQuotedIDFactory(), mappings);
+						
 						if (applyUserConstraints) {
 							// Add the tables referred to by user-supplied foreign keys
-							userConstraints.addReferredTables(realTables);
+							Set<RelationID> referredTables = userConstraints.getReferredTables(metadata.getQuotedIDFactory());
+							realTables.addAll(referredTables);
 						}
 
-						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
-					}catch (JSQLParserException e){
-						System.out.println("Error obtaining the tables"+ e);
-					}catch( SQLException e ){
-						System.out.println("Error obtaining the Metadata"+ e);
-
+						DBMetadataExtractor.loadMetadata(metadata, localConnection, realTables);
 					}
-
+					catch (JSQLParserException e) {
+						System.out.println("Error obtaining the tables" + e);
+					}
+					catch (SQLException e) {
+						System.out.println("Error obtaining the metadata " + e);
+					}
 				}
 			}
 
 			//Adds keys from the text file
 			if (applyUserConstraints) {
-				userConstraints.addConstraints(metadata);
+				userConstraints.insertUniqueConstraints(metadata);
+				userConstraints.insertForeignKeyConstraints(metadata);
 			}
-
+			
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
 			if (printKeys) { 
+				Collection<DatabaseRelationDefinition> table_list = metadata.getDatabaseRelations();
 				// Prints all primary keys
-				log.debug("\n====== Primary keys ==========");
-				Collection<TableDefinition> table_list = metadata.getTables();
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					for(Attribute attr : dd.getPrimaryKeys() ){
-						log.debug(attr.getName() + ",");
-					}
+				System.out.println("\n====== Unique constraints ==========");
+				for (DatabaseRelationDefinition dd : table_list) {
+					System.out.println(dd + ";");
+					for (UniqueConstraint uc : dd.getUniqueConstraints()) 
+						System.out.println(uc + ";");
+					System.out.println("");
 				}
 				// Prints all foreign keys
-				log.debug("\n====== Foreign keys ==========");
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-					for(String fkName : fkeys.keySet() ){
-						log.debug("(" + fkName + ":");
-						for(Attribute attr : fkeys.get(fkName)){
-							log.debug(attr.getName() + ",");
-						}
-						log.debug("),");
-					}
+				System.out.println("====== Foreign key constraints ==========");
+				for(DatabaseRelationDefinition dd : table_list) {
+					for (ForeignKeyConstraint fk : dd.getForeignKeys()) 
+						System.out.println(fk + ";");
 				}		
 			}
+			else
+				log.debug("DB Metadata: \n{}", metadata);
 
+            SQLDialectAdapter sqladapter = SQLAdapterFactory
+                   .getSQLDialectAdapter(obdaSource
+                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDbmsVersion());
+			
+            SQLQueryGenerator datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
-            /**
-             * TODO: what about distinctResultSet?
-             */
-			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, getUriMap());
+    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
+            
+            final QuestUnfolder unfolder = new QuestUnfolder(metadata);
 
-
-
-
-
-
-			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, localConnection, sourceId);
-
-			/***
+			/*
 			 * T-Mappings and Fact mappings
 			 */
+			if (aboxMode.equals(QuestConstants.VIRTUAL)) 
+				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings);
+			else
+				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 
-
-			if (aboxMode.equals(QuestConstants.VIRTUAL)) {
-				log.debug("Original mapping size: {}", unfolder.getRulesSize());
-
-				 // Normalizing language tags: make all LOWER CASE
-				unfolder.normalizeLanguageTagsinMappings();
-
-				 // Normalizing equalities
-				unfolder.normalizeEqualities();
-				
-				// Apply TMappings
-				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
-				// Davide> Option to disable T-Mappings (TODO: Test)
-				//if( tMappings ){
-				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
-				//}
-
-				
-                // Adding ontology assertions (ABox) as rules (facts, head with no body).
-                unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());
-                unfolder.addObjectPropertyAssertionsAsFacts(inputOntology.getObjectPropertyAssertions());
-                unfolder.addDataPropertyAssertionsAsFacts(inputOntology.getDataPropertyAssertions());
-
-				// Adding data typing on the mapping axioms.
-				unfolder.extendTypesWithMetadata(reformulationReasoner, metadata);
-
-				
-				 // Adding NOT NULL conditions to the variables used in the head
-				 // of all mappings to preserve SQL-RDF semantics
-				unfolder.addNOTNULLToMappings();
-			}
-
+			if (dataRepository != null)
+				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
+					@Override
+					public void repositoryChanged() {
+						engine.clearSQLCache();
+						try {
+							// 
+							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
+							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
+						} 
+						catch (Exception e) {
+							log.error("Error updating Semantic Index mappings", e);
+						}
+					}
+				});
 			
-			unfolder.setupUnfolder(metadata);
-
-			//if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
-			multiTypedFunctionSymbolIndex = ImmutableMultimap.copyOf(unfolder.processMultipleTemplatePredicates());
-			//}
-
-
-			log.debug("DB Metadata: \n{}", metadata);
-
+			
 			/* The active ABox dependencies */
-			sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
+			LinearInclusionDependencies sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
 			
-			/*
-			 * Setting up the TBox we will use for the reformulation
-			 */
-			TBoxReasoner reasoner = reformulationReasoner;
-			if (bOptimizeTBoxSigma) {
-				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
-				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
-			} 
+			
+			// Setting up the TBox we will use for the reformulation
+			//TBoxReasoner reasoner = reformulationReasoner;
+			//if (bOptimizeTBoxSigma) {
+			//	SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
+			//	reasoner = TBoxReasonerImpl.create(reducer.getReducedOntology());
+			//} 
 
-			/*
-			 * Setting up the reformulation engine
-			 */
-
-			if (reformulate == false) {
+			QueryRewriter rewriter;
+			// Setting up the reformulation engine
+			if (reformulate == false) 
 				rewriter = new DummyReformulator();
-			} 
-			else if (QuestConstants.TW.equals(reformulationTechnique)) {
+			else if (QuestConstants.TW.equals(reformulationTechnique)) 
 				rewriter = new TreeWitnessRewriter();
-			} 
-			else {
+			else 
 				throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
-			}
 
-			rewriter.setTBox(reasoner, sigma);
+			rewriter.setTBox(reformulationReasoner, inputOntology.getVocabulary(), sigma);
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
+			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(), datasourceQueryGenerator);
+			
 
 			log.debug("... Quest has been initialized.");
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			OBDAException ex = new OBDAException(e);
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
@@ -851,7 +639,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				}
 			}
 			throw ex;
-		} finally {
+		} 
+		finally {
 			if (!(aboxMode.equals(QuestConstants.CLASSIC) && (inmemory))) {
 				/*
 				 * If we are not in classic + inmemory mode we can disconnect
@@ -862,22 +651,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-
-
-
-	/**
-	 * Has side-effects! Dangerous for concurrency when is called by a Quest statement!
-	 *
-	 * TODO: isolate it if this feature is really needed
-	 */
-	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {
-		/* Setting up the OBDA model */
-
-		unfoldingOBDAModel.removeAllMappings(obdaSource.getSourceID());
-		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
-
-		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
-										reformulationReasoner, metadata);
+	public ImmutableOntologyVocabulary getVocabulary() {
+		return inputOntology.getVocabulary();
 	}
 
 
@@ -1007,11 +782,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return metadata;
 	}
 
-	public void repositoryChanged() {
-		// clear cache
-		this.querycache.clear();
-	}
-
 	public SemanticIndexURIMap getUriMap() {
 		if (dataRepository != null)
 			return dataRepository.getUriMap();
@@ -1023,22 +793,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return dataRepository;
 	}
 	
-	public SQLQueryGenerator getDatasourceQueryGenerator() {
-		return datasourceQueryGenerator;		
+	public boolean hasDistinctResultSet() {
+		return distinctResultSet;		
 	}
 
-    public QuestUnfolder getQuestUnfolder() {
-        return unfolder;
-    }
-
-    public SQLQueryGenerator cloneDataSourceQueryGenerator() {
-        return datasourceQueryGenerator.cloneGenerator();
-    }
-
-	/**
-	 * TODO: improve
-	 */
-	public MetadataForQueryOptimization getMetadataForQueryOptimization() {
-		return new MetadataForQueryOptimizationImpl(unfolder.getPrimaryKeys());
+	public QuestQueryProcessor getEngine() {
+		return engine;
 	}
+	
 }

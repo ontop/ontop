@@ -21,21 +21,20 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
-import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.Substitution;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import junit.framework.TestCase;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
@@ -656,14 +655,10 @@ public class ThetaGenerationTest extends TestCase {
 		Term t2 = termFactory.getVariable("y");
 
 		Predicate pred1 = predFactory.getClassPredicate("A");
-		List<Term> terms1 = new Vector<Term>();
-		terms1.add(t2);
-		Function atom1 = tfac.getFunction(pred1, terms1);
+		Function atom1 = tfac.getFunction(pred1, t2);
 
 		Predicate pred2 = predFactory.getClassPredicate("A");
-		List<Term> terms2 = new Vector<Term>();
-		terms2.add(ot);
-		Function atom2 = tfac.getFunction(pred2, terms2);
+		Function atom2 = tfac.getFunction(pred2, ot);
 
 		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
 		assertEquals(1, s.size());

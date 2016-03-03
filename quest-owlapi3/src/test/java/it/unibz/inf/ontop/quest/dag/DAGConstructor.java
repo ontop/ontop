@@ -1,4 +1,5 @@
 package it.unibz.inf.ontop.quest.dag;
+
 /*
  * #%L
  * ontop-reformulation-core
@@ -19,12 +20,12 @@ package it.unibz.inf.ontop.quest.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.Description;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.Description;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -41,11 +42,11 @@ public class DAGConstructor {
 		return new DAG(ontology);
 	}
 
-	public static DAG filterPureISA(DAG dag) {
+	public static DAG filterPureISA(DAG dag, ImmutableOntologyVocabulary voc) {
 
-		Map<Description, DAGNode> classes = new LinkedHashMap<Description, DAGNode>();
-		Map<Description, DAGNode> roles = new LinkedHashMap<Description, DAGNode>();
-		Map<Description, DAGNode> allnodes = new LinkedHashMap<Description, DAGNode>();
+		Map<Description, DAGNode> classes = new LinkedHashMap<>();
+		Map<Description, DAGNode> roles = new LinkedHashMap<>();
+		Map<Description, DAGNode> allnodes = new LinkedHashMap<>();
 
 		for (DAGNode node : dag.getClasses()) {
 
@@ -87,9 +88,9 @@ public class DAGConstructor {
 			if (node.getDescription() instanceof ObjectPropertyExpression) {
 				ObjectPropertyExpression nodeDesc = (ObjectPropertyExpression) node.getDescription();
 
-				if (OntologyVocabularyImpl.isAuxiliaryProperty(nodeDesc)) {
+				// auxiliary symbol
+				if (!voc.containsObjectProperty(nodeDesc.getName())) 
 					continue;
-				}
 
 				if (nodeDesc.isInverse()) {
 					ObjectPropertyExpression posNode = nodeDesc.getInverse();
@@ -112,9 +113,11 @@ public class DAGConstructor {
 				}
 				for (DAGNode child : node.getChildren()) {
 						ObjectPropertyExpression childDesc = (ObjectPropertyExpression) child.getDescription();
-						if (OntologyVocabularyImpl.isAuxiliaryProperty(childDesc)) {
+
+						// auxiliary symbol
+						if (!voc.containsObjectProperty(nodeDesc.getName())) 
 							continue;
-						}
+
 						if (childDesc.isInverse()) {
 							ObjectPropertyExpression posChild = childDesc.getInverse();
 							DAGNode newChild = roles.get(posChild);
@@ -143,9 +146,9 @@ public class DAGConstructor {
 			else {
 				DataPropertyExpression nodeDesc = (DataPropertyExpression) node.getDescription();
 
-				if (OntologyVocabularyImpl.isAuxiliaryProperty(nodeDesc)) {
+				// auxiliary symbol
+				if (!voc.containsDataProperty(nodeDesc.getName())) 
 					continue;
-				}
 
 				DAGNode newNode = roles.get(nodeDesc);
 
@@ -157,9 +160,9 @@ public class DAGConstructor {
 				}
 				for (DAGNode child : node.getChildren()) {
 						DataPropertyExpression childDesc = (DataPropertyExpression) child.getDescription();
-						if (OntologyVocabularyImpl.isAuxiliaryProperty(childDesc)) {
+						// auxiliary symbol
+						if (!voc.containsDataProperty(childDesc.getName())) 
 							continue;
-						}
 
 						DAGNode newChild = roles.get(childDesc);
 						if (newChild == null) {

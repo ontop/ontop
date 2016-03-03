@@ -20,28 +20,20 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import java.io.File;
-import java.sql.Connection;
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.junit.Assert;
-import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import org.junit.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+
+import java.io.File;
+import java.util.List;
 
 /**
  * This unit test is for testing correctness of construct and describe queries
@@ -51,10 +43,10 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
  * both constant and uri objects. It must be clear if it's a data property or
  * object property.
  */
-public class OWLConstructDescribeTest extends TestCase{
+@Ignore // GUOHUI: 2016-01-16 SI+Mapping mode is disabled
+public class OWLConstructDescribeTest{
 
-	Connection con = null;
-	OWLOntology ontology = null;
+    OWLOntology ontology = null;
 	OBDAModel obdaModel = null;
 	QuestOWL reasoner = null;
 	QuestOWLConnection conn = null;
@@ -62,7 +54,7 @@ public class OWLConstructDescribeTest extends TestCase{
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	String owlFile = "src/test/resources/describeConstruct.owl";
 	
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 			// Loading the OWL file
@@ -88,7 +80,6 @@ public class OWLConstructDescribeTest extends TestCase{
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
@@ -97,16 +88,20 @@ public class OWLConstructDescribeTest extends TestCase{
 			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 			QuestOWLFactory factory = new QuestOWLFactory();
 //			factory.setOBDAController(obdaModel);
-			factory.setPreferenceHolder(p);
+			//factory.setPreferenceHolder(p);
 			//reasoner.setPreferences(preferences);
-			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+			//reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+			
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+	        reasoner = factory.createReasoner(ontology, config);
+
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
 		
 
 	}
 	
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		st.close();
 		conn.close();
@@ -114,7 +109,7 @@ public class OWLConstructDescribeTest extends TestCase{
 	}
 	
 	@Test
-	public void testAInsertData() throws Exception {		
+	public void testAInsertData() throws Exception {
 		String query = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 		List<OWLAxiom> rs = st.executeGraph(query);
 		Assert.assertEquals(4, rs.size());

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.sesame;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 
+@Deprecated
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
 
 	private static QuestPreferences p = new QuestPreferences();
@@ -50,7 +51,6 @@ public class SesameClassicJDBCRepo extends SesameClassicRepo {
 		
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 

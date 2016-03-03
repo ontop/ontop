@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import java.io.Serializable;
-import java.util.Properties;
-
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+
+import java.io.Serializable;
+import java.util.Properties;
 
 public abstract class QuestDBAbstractStore implements Serializable {
 

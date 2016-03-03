@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,32 +32,32 @@ public class SemanticIndexViewsManager {
 		return Collections.unmodifiableList(classViews);
 	}
 
-	public SemanticIndexView getView(Predicate.COL_TYPE type) {
+	public SemanticIndexView getView(COL_TYPE type) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type);
 		return views.get(viewId);
 	}
 	
-	public SemanticIndexView getView(Predicate.COL_TYPE type1, Predicate.COL_TYPE type2) {
+	public SemanticIndexView getView(COL_TYPE type1, COL_TYPE type2) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
 		return views.get(viewId);
 	}
 	
 	
 	
-	private static final Predicate.COL_TYPE[] objectTypes = { Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.BNODE };
+	private static final COL_TYPE[] objectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
-	private static final Predicate.COL_TYPE[] typesAndObjectTypes = { Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.BNODE,
-		Predicate.COL_TYPE.LITERAL, Predicate.COL_TYPE.LITERAL_LANG, Predicate.COL_TYPE.BOOLEAN,
-		Predicate.COL_TYPE.DATETIME, Predicate.COL_TYPE.DATETIME_STAMP, Predicate.COL_TYPE.DECIMAL, Predicate.COL_TYPE.DOUBLE, Predicate.COL_TYPE.INTEGER, Predicate.COL_TYPE.INT,
-		Predicate.COL_TYPE.UNSIGNED_INT, Predicate.COL_TYPE.NEGATIVE_INTEGER, Predicate.COL_TYPE.NON_NEGATIVE_INTEGER,
-		Predicate.COL_TYPE.POSITIVE_INTEGER, Predicate.COL_TYPE.NON_POSITIVE_INTEGER, Predicate.COL_TYPE.FLOAT,  Predicate.COL_TYPE.LONG,
-		Predicate.COL_TYPE.STRING };
+	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
+		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
+		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
+		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
+		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
+		COL_TYPE.STRING };
 	
 	private final void init() {
 		
-		for (Predicate.COL_TYPE type1 : objectTypes) {
+		for (COL_TYPE type1 : objectTypes) {
 
-			String value =  (type1 == Predicate.COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+			String value =  (type1 == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
 			String filter = "ISBNODE = " + value + " AND ";
 			
 			{
@@ -71,7 +71,7 @@ public class SemanticIndexViewsManager {
 			}
 			
 			
-			for (Predicate.COL_TYPE type2 : typesAndObjectTypes) {
+			for (COL_TYPE type2 : typesAndObjectTypes) {
 				String select, insert;
 				
 				switch (type2) {
@@ -80,8 +80,8 @@ public class SemanticIndexViewsManager {
 						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value + ", FALSE");
 						break;
 					case BNODE:
-						select = RDBMSSIRepositoryManager.attributeTable.get(Predicate.COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
-						insert = RDBMSSIRepositoryManager.attributeTable.get(Predicate.COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
+						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
+						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
 						break;
 					case LITERAL:
 						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT("LANG IS NULL AND " + filter);
@@ -94,8 +94,8 @@ public class SemanticIndexViewsManager {
 						 * redundant since we have another stage in Quest where we add IS NOT
 						 * NULL for every variable in the head of a mapping.
 						 */
-						select = RDBMSSIRepositoryManager.attributeTable.get(Predicate.COL_TYPE.LITERAL).getSELECT("LANG IS NOT NULL AND " + filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(Predicate.COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
+						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getSELECT("LANG IS NOT NULL AND " + filter);
+						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
 						break;
 					default:
 						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter);
@@ -114,20 +114,20 @@ public class SemanticIndexViewsManager {
 	
 	// view id codes that are stored in DB (starts with 0)
 
-	private static final Predicate.COL_TYPE[] SITableToCOLTYPE = {
+	private static final COL_TYPE[] SITableToCOLTYPE = { 
 		null, // Class SITable 
-		Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.LITERAL, Predicate.COL_TYPE.STRING, Predicate.COL_TYPE.INTEGER,
-		Predicate.COL_TYPE.LONG, Predicate.COL_TYPE.DECIMAL, Predicate.COL_TYPE.DOUBLE, Predicate.COL_TYPE.DATETIME,
-		Predicate.COL_TYPE.INT, Predicate.COL_TYPE.UNSIGNED_INT, Predicate.COL_TYPE.NEGATIVE_INTEGER,
-		Predicate.COL_TYPE.NON_NEGATIVE_INTEGER, Predicate.COL_TYPE.POSITIVE_INTEGER, Predicate.COL_TYPE.NON_POSITIVE_INTEGER,
-		Predicate.COL_TYPE.FLOAT, Predicate.COL_TYPE.BOOLEAN, Predicate.COL_TYPE.DATETIME_STAMP, Predicate.COL_TYPE.LITERAL_LANG
+		COL_TYPE.OBJECT, COL_TYPE.LITERAL, COL_TYPE.STRING, COL_TYPE.INTEGER,
+		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
+		COL_TYPE.INT, COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, 
+		COL_TYPE.NON_NEGATIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER,
+		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LITERAL_LANG
 	};
 	
-	private static final Map<Predicate.COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
+	private static final Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
 	
 	static {
 		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
-		COLTYPEtoSITable.put(Predicate.COL_TYPE.BNODE, 1);
+		COLTYPEtoSITable.put(COL_TYPE.BNODE, 1);
 		// Class SITable has value 0 (skip it)
 		for (int i = 1; i < SITableToCOLTYPE.length; i++)
 			COLTYPEtoSITable.put(SITableToCOLTYPE[i], i);
@@ -137,12 +137,12 @@ public class SemanticIndexViewsManager {
 	private static final int OBJ_TYPE_URI = 0;
 	private static final int OBJ_TYPE_BNode = 1;
 	
-	private static int COLTYPEtoInt(Predicate.COL_TYPE t) {
-		return (t == Predicate.COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
+	private static int COLTYPEtoInt(COL_TYPE t) {
+		return (t == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
 	}
 	
-	private static Predicate.COL_TYPE IntToCOLTYPE(int t) {
-		return (t == OBJ_TYPE_BNode) ? Predicate.COL_TYPE.BNODE : Predicate.COL_TYPE.OBJECT;
+	private static COL_TYPE IntToCOLTYPE(int t) {
+		return (t == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
 	}
 
 	
@@ -195,7 +195,7 @@ public class SemanticIndexViewsManager {
 				int type2 = res.getInt(4);
 				int idx = res.getInt(2);
 				
-				Predicate.COL_TYPE coltype = SITableToCOLTYPE[sitable];
+				COL_TYPE coltype = SITableToCOLTYPE[sitable];
 				SemanticIndexView view;
 				if (coltype == null) {
 					// class view
@@ -203,7 +203,7 @@ public class SemanticIndexViewsManager {
 				}
 				else {
 					// property view
-					if (coltype ==  Predicate.COL_TYPE.OBJECT)
+					if (coltype ==  COL_TYPE.OBJECT)
 						coltype = IntToCOLTYPE(type2);
 					view = getView(IntToCOLTYPE(type1), coltype);
 				}

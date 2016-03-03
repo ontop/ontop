@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.testsuite;
  */
 
 import it.unibz.inf.ontop.quest.sparql.QuestMemorySPARQLQueryTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

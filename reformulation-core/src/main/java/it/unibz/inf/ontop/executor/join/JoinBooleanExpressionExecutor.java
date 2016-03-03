@@ -64,7 +64,8 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
 
         Optional<ImmutableBooleanExpression> optionalAggregatedFilterCondition;
         try {
-            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes);
+            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes,
+                    query.getMetadata());
         }
         /**
          * The filter condition can be satisfied --> the join node and its sub-tree is thus removed from the tree.

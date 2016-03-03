@@ -20,17 +20,18 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JSQLParserTest extends TestCase {
 	final static Logger log = LoggerFactory.getLogger(JSQLParserTest.class);
 
-	
 	public void test_1_1_1() {
 		final boolean result = parseJSQL("SELECT * FROM student");
 		printJSQL("test_1_1_1", result);
@@ -38,7 +39,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_1_1_2() {
 		final boolean result = parseJSQL("SELECT student.* FROM student");
 		printJSQL("test_1_1_2", result);
@@ -95,7 +96,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_1_5_extra() {
 
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
@@ -104,14 +105,14 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
 		assertTrue(result);
 
 	}
-	
+
 	public void test_1_5_extra_3() {
 		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
 		printJSQL("test_1_5_extra_3", result);
@@ -133,7 +134,7 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("test_1_5_extra_5", result);
 		assertTrue(result);
 	}
-	
+
 	public void test_1_6_1() {
 		final boolean result = parseJSQL("SELECT undergraduate.* FROM student as undergraduate");
 		printJSQL("test_1_6_1", result);
@@ -258,7 +259,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_2_11() {
 		final boolean result = parseJSQL("SELECT id, name FROM student WHERE class IN (7, 8, 9)");
 		printJSQL("test_2_11", result);
@@ -266,7 +267,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_2_12() {
 		final boolean result = parseJSQL("SELECT id, name, grade FROM student WHERE name IN ('John', 'Jack', 'Clara')");
 		printJSQL("test_2_12", result);
@@ -274,7 +275,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_3_1() {
 		final boolean result = parseJSQL("SELECT MAX(score) FROM grade");
 		printJSQL("test_3_1", result);
@@ -282,7 +283,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_3_2() {
 		final boolean result = parseJSQL("SELECT MIN(score) FROM grade");
 		printJSQL("test_3_2", result);
@@ -306,7 +307,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_3_5() {
 		final boolean result = parseJSQL("SELECT COUNT(*) FROM student");
 		printJSQL("test_3_5", result);
@@ -322,7 +323,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_3_7() {
 		final boolean result = parseJSQL("SELECT EVERY(id) FROM student");
 		printJSQL("test_3_7", result);
@@ -338,7 +339,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_3_8_1() {
 		// ANY AND SOME are the same
 		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
@@ -374,7 +375,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_4_2() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
 		printJSQL("test_4_2", result);
@@ -389,7 +390,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_4_4() {
 		final boolean result = parseJSQL("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
 				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)");
@@ -474,14 +475,14 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_5_9() {
 		final boolean result = parseJSQL("SELECT id, name, score FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
 		printJSQL("test_5_9", result);
 		assertTrue(result);
 	}
 
-	
+
 	public void test_5_10() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t2.score FROM (SELECT id, name FROM student WHERE student.name='John') AS t1 JOIN grade as t2 ON t1.id=t2.st_id");
 		printJSQL("test_5_10", result);
@@ -489,7 +490,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_5_11() {
 		final boolean result = parseJSQL("SELECT id, name, score FROM student JOIN grade USING (id)");
 		printJSQL("test_5_11", result);
@@ -497,7 +498,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_6_1() {
 		final boolean result = parseJSQL("SELECT t1.id, t1.name, t2.grade FROM (SELECT id, name FROM student) t1, (SELECT st_id, grade FROM grade) t2 WHERE t1.id=t2.sid");
 		printJSQL("test_6_1", result);
@@ -505,7 +506,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_6_2() {
 		final boolean result = parseJSQL("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1");
 		printJSQL("test_6_2", result);
@@ -513,7 +514,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_6_3() {
 		final boolean result = parseJSQL("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1 WHERE t1.score>=25");
 		printJSQL("test_6_3", result);
@@ -521,7 +522,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_7_1() {
 		final boolean result = parseJSQL("SELECT ('ID-' || student.id) as sid FROM student");
 		printJSQL("test_7_1", result);
@@ -529,7 +530,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
@@ -561,7 +562,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_8_4() {
 		final boolean result = parseJSQL("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus");
 		printJSQL("test_8_4", result);
@@ -569,7 +570,7 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_8_5() {
 		final boolean result = parseJSQL("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id "
 				+ "UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
@@ -661,7 +662,7 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 
 	}
-	
+
 	public void test_13() {
 		final boolean result = parseJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
@@ -670,7 +671,7 @@ public class JSQLParserTest extends TestCase {
 		assertTrue(result);
 
 	}
-	
+
 	//add support for CAST also in unquoted visited query
 	public void testUnquoted1(){
 		final boolean result = parseUnquotedJSQL("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
@@ -709,32 +710,32 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("testRegexMySQL", result);
 		assertTrue(result);
 	}
-	
+
 	public void testRegexBinaryMySQL(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
 		printJSQL("testRegexBinaryMySQL", result);
 		assertTrue(result);
 	}
-	
+
 	public void testRegexPostgres(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name ~ 'foo'");
 		printJSQL("testRegexPostgres", result);
 		assertTrue(result);
 	}
-	
+
 	//no support for similar to in postgres
 	public void testRegexPostgresSimilarTo(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
 		printJSQL("testRegexPostgresSimilarTo", result);
 		assertFalse(result);
 	}
-	
+
 	public void testRegexOracle(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
 		printJSQL("testRegexMySQL", result);
 		assertTrue(result);
 	}
-	
+
 	//no support for not without parenthesis
 	public void testRegexNotOracle(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
@@ -742,25 +743,25 @@ public class JSQLParserTest extends TestCase {
 		assertFalse(result);
 	}
 
-    public void test_md5() {
-        final boolean result = parseJSQL("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
-                "COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
-                "RAND()) )) AS locationID FROM northwind.Suppliers");
-        printJSQL("test_13", result);
-        assertTrue(result);
-    }
+	public void test_md5() {
+		final boolean result = parseJSQL("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
+				"COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
+				"RAND()) )) AS locationID FROM northwind.Suppliers");
+		printJSQL("test_13", result);
+		assertTrue(result);
+	}
 
-    public void test_concatOracle() {
-        final boolean result = parseJSQL("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
-        printJSQL("test_concatOracle()", result);
-        assertTrue(result);
-    }
+	public void test_concatOracle() {
+		final boolean result = parseJSQL("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
+		printJSQL("test_concatOracle()", result);
+		assertTrue(result);
+	}
 
-    public void test_RegexpReplace() {
-        final boolean result = parseJSQL("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
-        printJSQL("test_RegexpReplace()", result);
-        assertTrue(result);
-    }
+	public void test_RegexpReplace() {
+		final boolean result = parseJSQL("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
+		printJSQL("test_RegexpReplace()", result);
+		assertTrue(result);
+	}
 
 	private String queryText;
 
@@ -771,7 +772,9 @@ public class JSQLParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,false);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			queryP = new ParsedSQLQuery(input, false, idfac);
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -784,28 +787,25 @@ public class JSQLParserTest extends TestCase {
 	private void printJSQL(String title, boolean isSupported) {
 		if (isSupported) {
 			System.out.println(title + ": " + queryP.toString());
-			
+
 			try {
 				System.out.println("  Tables: " + queryP.getTables());
 				System.out.println("  Projection: " + queryP.getProjection());
 
 				System.out.println("  Selection: "
 						+ ((queryP.getWhereClause() == null) ? "--" : queryP
-								.getWhereClause()));
+						.getWhereClause()));
 
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
-								.getAliasMap()));
-				System.out.println("  GroupBy: " + queryP.getGroupByClause());
-				System.out.println("  SubSelect: "
-						+ (queryP.getSubSelects().isEmpty() ? "--" : queryP
-								.getSubSelects()));
+						.getAliasMap()));
+				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
-								.getJoinConditions()));
+						.getJoinConditions()));
 				System.out.println("  Columns: "
 						+ (queryP.getColumns().isEmpty() ? "--" : queryP
-								.getColumns()));
+						.getColumns()));
 			} catch (Exception e) {
 
 				e.printStackTrace();
@@ -817,13 +817,16 @@ public class JSQLParserTest extends TestCase {
 		System.out.println();
 	}
 
-	
+
 	private boolean parseUnquotedJSQL(String input) {
 
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

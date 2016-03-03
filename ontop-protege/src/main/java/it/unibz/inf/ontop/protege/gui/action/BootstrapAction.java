@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,14 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -34,17 +42,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +126,7 @@ public class BootstrapAction extends ProtegeAction {
 						@Override
 						public void run() {
 							try {
-								OBDAProgessMonitor monitor = new OBDAProgessMonitor(
+								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
 										"Bootstrapping ontology and mappings...");
 								BootstrapperThread t = new BootstrapperThread();
 								monitor.addProgressListener(t);
@@ -161,8 +162,7 @@ public class BootstrapAction extends ProtegeAction {
 		public void run(String baseUri, OWLOntology currentOnto,
 				OBDAModel currentModel, OBDADataSource currentSource)
 				throws Exception {
-			dm = new DirectMappingBootstrapper(baseUri, currentOnto,
-					currentModel, currentSource);
+			dm = new DirectMappingBootstrapper(baseUri, currentOnto, currentModel, currentSource);
 		}
 
 		@Override

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,8 +20,11 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Map;
@@ -33,10 +36,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-
-import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 public class SelectPrefixPanel extends javax.swing.JPanel {
 
@@ -81,7 +80,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	}
 
 	private boolean isBasePrefix(String prefix) {
-		return (prefix.equals(":")) ? true : false;
+		return prefix.equals(":");
 	}
 
 	private void drawCheckBoxes() {
@@ -136,49 +135,21 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		jPanel2.add(jPanel3, gridBagConstraints);
 
 		jButtonCancel.setToolTipText("Cancel the attachment of prefixes. (ESCAPE)");
-		jButtonCancel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				cancel();
-			}
-		});
+		jButtonCancel.addActionListener(e -> cancel());
 		jButtonSelectAll.setToolTipText("Select all shown prefixes. (CTRL+A)");
-		jButtonSelectAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectAll();
-			}
-		});
+		jButtonSelectAll.addActionListener(e -> selectAll());
 		jButtonSelectAll.setToolTipText("Unselect all shown prefixes. (CTRL+N)");
-		jButtonSelectNone.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectNone();
-			}
-		});
+		jButtonSelectNone.addActionListener(e -> selectNone());
 		jButtonAccept.setToolTipText("Add selected prefixes to query. (ENTER)");
-		jButtonAccept.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				accept();
-			}
-		});
+		jButtonAccept.addActionListener(e -> accept());
 
-		ActionListener actionListenerCancel = new ActionListener() {
-			public void actionPerformed(ActionEvent actionEvent) {
-				cancel();
-			}
-		};
+		ActionListener actionListenerCancel = actionEvent -> cancel();
 		KeyStroke ks_ecape = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		this.registerKeyboardAction(actionListenerCancel, ks_ecape, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		jButtonAccept.requestFocusInWindow();
 
-		ActionListener actionListenerAccept = new ActionListener() {
-			public void actionPerformed(ActionEvent actionEvent) {
-				accept();
-			}
-		};
+		ActionListener actionListenerAccept = actionEvent -> accept();
 		KeyStroke ks_enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 		this.registerKeyboardAction(actionListenerAccept, ks_enter, JComponent.WHEN_IN_FOCUSED_WINDOW);
 

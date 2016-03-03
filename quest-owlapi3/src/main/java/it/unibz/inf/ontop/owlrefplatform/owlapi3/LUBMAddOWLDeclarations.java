@@ -38,6 +38,7 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
 
 public class LUBMAddOWLDeclarations {
@@ -54,12 +55,12 @@ public class LUBMAddOWLDeclarations {
 			
 			
 			OWLOntologyMerger merger = new OWLOntologyMerger(manager);
-			ontology = merger.createMergedOntology(manager, IRI.create("http://www.unibz.it/krdb/obda/ontop/bench/lubmex20/declarations.owl"));
+			ontology = merger.createMergedOntology(manager, IRI.create("http://www.unibz.it/inf/obda/ontop/bench/lubmex20/declarations.owl"));
 			
 			OWLOntology dOntology = manager.createOntology();
 			OWLDataFactory f = manager.getOWLDataFactory();
 			
-			Set<OWLAxiom> axioms = ontology.getTBoxAxioms(true);
+			Set<OWLAxiom> axioms = ontology.getTBoxAxioms(Imports.INCLUDED);
 			for (OWLAxiom ax: axioms) {
 				
 				Set<OWLClass> classes= ax.getClassesInSignature();
@@ -104,7 +105,7 @@ public class LUBMAddOWLDeclarations {
 			}
 			FileDocumentTarget file = new FileDocumentTarget(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"));
 			OWLOntology merge = manager.createOntology();
-			manager.addAxioms(merge, ontology.getABoxAxioms(true));
+			manager.addAxioms(merge, ontology.getABoxAxioms(Imports.INCLUDED));
 			manager.addAxioms(merge, declarations);
 			manager.saveOntology(merge, file);
 			

@@ -21,21 +21,20 @@ package it.unibz.inf.ontop.quest.dag;
  */
 
 
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class S_HierarchyTestNewDAG extends TestCase {
 	ArrayList<String> input= new ArrayList<String>();
@@ -81,7 +80,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasoner reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasoner reasoner = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph

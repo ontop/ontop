@@ -21,14 +21,18 @@ package it.unibz.inf.ontop.ontology;
 */
 
 
+import java.io.Serializable;
+
 /**
- * Represents ClassAssertion, ObjectPropertyAssertion and DataPropertyAssertion 
- * from OWL 2 QL Specification.
+ * Represents 
+ * 		- ClassAssertion, 
+ * 		- ObjectPropertyAssertion 
+ * 		- DataPropertyAssertion 
+ * 	    - AnnotationAssertion
+ * from the OWL 2 QL Specification.
  * 
  * No implementation.
  */
-
-import java.io.Serializable;
 
 
 public interface Assertion extends Serializable {

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,10 +20,33 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.PredicateItem;
+import it.unibz.inf.ontop.protege.gui.SQLResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.component.AutoSuggestComboBox;
+import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.ontology.OClass;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
+import it.unibz.inf.ontop.protege.gui.MapItem;
+import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
-
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import javax.swing.plaf.metal.MetalComboBoxButton;
+import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -37,85 +60,36 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.plaf.metal.MetalComboBoxButton;
-import javax.swing.table.TableModel;
-
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.MapItem;
-import it.unibz.inf.ontop.protege.gui.PredicateItem;
-import it.unibz.inf.ontop.protege.gui.component.AutoSuggestComboBox;
-import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DataDefinition;
-import it.unibz.inf.ontop.sql.TableDefinition;
-import it.unibz.inf.ontop.sql.ViewDefinition;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.OBDAQuery;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.protege.gui.SQLResultSetTableModel;
-import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-import it.unibz.inf.ontop.sql.api.Attribute;
-
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private OBDAModel obdaModel;
+	private final OBDAModel obdaModel;
 	
-	private PrefixManager prefixManager;
+	private final PrefixManager prefixManager;
 	
 	private OBDADataSource selectedSource;
 	
 	private MapItem predicateSubjectMap;
-	
-	private List<MapItem> predicateObjectMapsList = new ArrayList<MapItem>();
-		
-	private boolean isSubjectClassValid = false;
-	
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	private static String EMPTY_TEXT = "";
+    private boolean isSubjectClassValid = false;
 	
-	private static Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
-	private static Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+
+	private static final String EMPTY_TEXT = "";
+	
+	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
+	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 	
 	public MappingAssistantPanel(OBDAModel model) {
 		obdaModel = model;
 		prefixManager = obdaModel.getPrefixManager();
 		initComponents();
+                
+                if (obdaModel.getSources().size() > 0) {
+            
+                    datasourceChanged(selectedSource, obdaModel.getSources().get(0));
+                }
 	}
 
 	/**
@@ -123,7 +97,6 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	 * WARNING: Do NOT modify this code. The content of this method is always
 	 * regenerated by the Form Editor.
 	 */
-	// <editor-fold defaultstate="collapsed"
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -193,11 +166,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         cboDataSet.setMinimumSize(new java.awt.Dimension(23, 23));
         cboDataSet.setPreferredSize(new java.awt.Dimension(240, 23));
         cboDataSet.setRenderer(new DataSetItemRenderer());
-        cboDataSet.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboDataSetActionPerformed(evt);
-            }
-        });
+        cboDataSet.addActionListener(this::cboDataSetActionPerformed);
         pnlDataSet.add(cboDataSet);
 
         cmdExecute.setToolTipText("Execute query");
@@ -205,11 +174,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         cmdExecute.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdExecute.setContentAreaFilled(false);
         cmdExecute.setPreferredSize(new java.awt.Dimension(25, 25));
-        cmdExecute.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdExecuteActionPerformed(evt);
-            }
-        });
+        cmdExecute.addActionListener(this::cmdExecuteActionPerformed);
         pnlDataSet.add(cmdExecute);
 
         pnlEditor.add(pnlDataSet, java.awt.BorderLayout.PAGE_START);
@@ -221,6 +186,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         txtQueryEditor.setMinimumSize(new java.awt.Dimension(100, 20));
         txtQueryEditor.setPreferredSize(new java.awt.Dimension(100, 20));
         txtQueryEditor.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtQueryEditorKeyPressed(evt);
             }
@@ -241,11 +207,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         txtRowCount.setMinimumSize(new java.awt.Dimension(25, 18));
         txtRowCount.setPreferredSize(new java.awt.Dimension(25, 18));
         txtRowCount.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
             public void focusLost(java.awt.event.FocusEvent evt) {
                 txtRowCountFocusLost(evt);
             }
         });
         txtRowCount.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtRowCountKeyPressed(evt);
             }
@@ -292,14 +260,17 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         txtClassUriTemplate.setMinimumSize(new java.awt.Dimension(240, 23));
         txtClassUriTemplate.setPreferredSize(new java.awt.Dimension(240, 23));
         txtClassUriTemplate.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtClassUriTemplateFocusGained(evt);
             }
+            @Override
             public void focusLost(java.awt.event.FocusEvent evt) {
                 txtClassUriTemplateFocusLost(evt);
             }
         });
         txtClassUriTemplate.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtClassUriTemplateKeyPressed(evt);
             }
@@ -313,8 +284,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (OClass c : obdaModel.getDeclaredClasses()) {
-        	Predicate pred = c.getPredicate();
+        for (OClass c : obdaModel.getOntologyVocabulary().getClasses()) {
+        	Predicate pred = c.getPredicate(); 
             v.addElement(new PredicateItem(pred, prefixManager));
         }
         cboClassAutoSuggest = new AutoSuggestComboBox(v);
@@ -322,12 +293,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         cboClassAutoSuggest.setMinimumSize(new java.awt.Dimension(195, 23));
         cboClassAutoSuggest.setPreferredSize(new java.awt.Dimension(195, 23));
         cboClassAutoSuggest.addItemListener(new java.awt.event.ItemListener () {
+            @Override
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cboClassAutoSuggestItemStateChanged(evt);
             }
         });
         JTextField txtComboBoxEditor = (JTextField) cboClassAutoSuggest.getEditor().getEditorComponent();
         txtComboBoxEditor.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 cboClassAutoSuggestKeyPressed(evt);
             }
@@ -376,22 +349,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         cmdClearAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdClearAll.setContentAreaFilled(false);
         cmdClearAll.setPreferredSize(new java.awt.Dimension(70, 25));
-        cmdClearAll.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdClearAllActionPerformed(evt);
-            }
-        });
+        cmdClearAll.addActionListener(this::cmdClearAllActionPerformed);
         pnlCommandButtons.add(cmdClearAll);
 
         cmdCreateMapping.setText("Create Mapping");
         cmdCreateMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdCreateMapping.setContentAreaFilled(false);
         cmdCreateMapping.setPreferredSize(new java.awt.Dimension(100, 25));
-        cmdCreateMapping.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdCreateMappingActionPerformed(evt);
-            }
-        });
+        cmdCreateMapping.addActionListener(this::cmdCreateMappingActionPerformed);
         pnlCommandButtons.add(cmdCreateMapping);
 
         pnlOntologyBrowser.add(pnlCommandButtons, java.awt.BorderLayout.SOUTH);
@@ -405,7 +370,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		txtQueryEditor.setText(EMPTY_TEXT); // clear the text editor
 		JComboBox cb = (JComboBox) evt.getSource();
 		if (cb.getSelectedIndex() != -1) {
-			DataDefinition dd = (DataDefinition) cb.getSelectedItem();
+			RelationDefinition dd = (RelationDefinition) cb.getSelectedItem();
 			if (dd != null) {
 				String sql = generateSQLString(dd);
 				txtQueryEditor.setText(sql);
@@ -517,11 +482,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			String source = txtQueryEditor.getText();
 			
 			// Prepare the mapping target
-			predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			OBDAQuery target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+            List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
+			List<Function> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 			
 			// Create the mapping axiom
-			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(source, target);
+			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom);
 			
 			// Clear the form afterwards
@@ -538,7 +503,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
 	
-	private CQIE prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
+	private List<Function> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
 		List<Function> body = new ArrayList<Function>();
 		
@@ -550,13 +515,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		
 		// Store attributes and roles in the body
-		List<Term> distinguishVariables = new ArrayList<Term>();
+		//List<Term> distinguishVariables = new ArrayList<Term>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
 				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
-				distinguishVariables.add(objectTerm);
+				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
 				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
@@ -564,11 +529,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 		}
 		// Create the head
-		int arity = distinguishVariables.size();
-		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//int arity = distinguishVariables.size();
+		//Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
-		return dfac.getCQIE(head, body);
+		return body;
 	}
 	
 	private Function createSubjectTerm(MapItem predicateSubjectMap) {
@@ -657,7 +622,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	// Column placeholder pattern
 	private static final String formatSpecifier = "\\{([\\w.]+)?\\}";
-	private static Pattern chPattern = Pattern.compile(formatSpecifier);
+	private static final Pattern chPattern = Pattern.compile(formatSpecifier);
 
 	private List<FormatString> parse(String text) {
 		List<FormatString> toReturn = new ArrayList<FormatString>();
@@ -679,20 +644,21 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return toReturn;
 	}
 
+
 	private interface FormatString {
 		int index();
 		String toString();
 	}
 
 	private class FixedString implements FormatString {
-		private String s;
+		private final String s;
 		FixedString(String s) { this.s = s; }
 		@Override public int index() { return -1; } // flag code for fixed string
 		@Override public String toString() { return s; }
 	}
 
 	private class ColumnString implements FormatString {
-		private String s;
+		private final String s;
 		ColumnString(String s) { this.s = s; }
 		@Override public int index() { return 0; } // flag code for column string
 		@Override public String toString() { return s;}
@@ -710,7 +676,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		predicateSubjectMap = null;
 	}
 
-	private String generateSQLString(DataDefinition table) {
+	private String generateSQLString(RelationDefinition table) {
 		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
@@ -718,20 +684,20 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(",");
 			}
 			sb.append(" ");
-			sb.append(attr.getName());
+			sb.append(attr.getID());
 			needComma = true;
 		}
 		sb.append(" ");
 		sb.append("from");
 		sb.append(" ");
-		sb.append(table.getName());
+		sb.append(table.getID());
 		return sb.toString();
 	}
 
 	private void executeQuery() {
 		try {
 			releaseResultset();
-			OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
+			OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
 			CountDownLatch latch = new CountDownLatch(1);
 			ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 			progMonitor.addProgressListener(action);
@@ -767,6 +733,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
+
 		selectedSource = newSource;
 		addDatabaseTableToDataSetComboBox();
 		releaseResultset();
@@ -774,14 +741,20 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void addDatabaseTableToDataSetComboBox() {
-		DefaultComboBoxModel relationList = new DefaultComboBoxModel();
+		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-			DBMetadata md = man.getMetaData(selectedSource);
-			for (DataDefinition relation : md.getRelations()) {
+			Connection conn = man.getConnection(selectedSource);
+			DBMetadata md = DBMetadataExtractor.createMetadata(conn);
+			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
+			DBMetadataExtractor.loadMetadata(md, conn, null);
+			// ROMAN (7 Oct 2015): I'm not sure we need to add "views" -- they are 
+			// created by SQLQueryParser for complex queries that cannot be parsed
+			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
 				relationList.addElement(relation);
 			}
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e) {
 			// NO-OP
 		}
 		cboDataSet.setModel(relationList);
@@ -895,16 +868,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					label.setText("<Select database table>");
 					return label;
 				} else {				
-					if (value instanceof TableDefinition) {
-						TableDefinition td = (TableDefinition) value;
+					if (value instanceof DatabaseRelationDefinition) {
+						DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
 						label.setIcon(icon);
-						label.setText(td.getName());
-					} else if (value instanceof ViewDefinition) {
-						ViewDefinition vd = (ViewDefinition) value;
+						label.setText(td.getID().getSQLRendering());
+					} else if (value instanceof ParserViewDefinition) {
+						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are 
+						// created by SQLQueryParser for complex queries that cannot be parsed
+						ParserViewDefinition vd = (ParserViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
 						label.setIcon(icon);
-						label.setText(vd.getName());
+						label.setText(vd.getID().getSQLRendering());
 					}
 					return label;
 				}
@@ -964,12 +939,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 		public void run() {
 			thread = new Thread() {
-				public void run() {
+				@Override
+                public void run() {
 					// Execute the sql query
 					try {
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType);
+                        //second parameter is database version, not relevant in this step
+                        SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
 						String sqlString = txtQueryEditor.getText();
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter

@@ -10,19 +10,15 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.*;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 
 /***
@@ -181,9 +177,11 @@ public class DatalogDependencyGraphGenerator {
 				if (!ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
 					ruleIndexByBodyPredicate.put(functionSymbol, rule);
 				}
-			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
+			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isOperation()) {
 				updateRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
-			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
+			// BC: should we reintroduce arithmetic functions?
+			//} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
+			} else if (bodyAtom.isDataTypeFunction()){
 				continue;
 			} else {
 				throw new IllegalStateException("Unknown Function");
@@ -206,9 +204,11 @@ public class DatalogDependencyGraphGenerator {
 				if (ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
 					ruleIndexByBodyPredicate.remove(functionSymbol, rule);
 				}
-			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
+			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isOperation()) {
 				removeRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
-			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
+				// BC: should we reintroduce arithmetic functions?//}
+				// else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
+			} else if (bodyAtom.isDataTypeFunction()){
 				continue;
 			} else {
 				throw new IllegalStateException("Unknown Function");
@@ -240,7 +240,7 @@ public class DatalogDependencyGraphGenerator {
 			if (queueHead instanceof Function) {
 				Function funcRoot = (Function) queueHead;
 				
-				if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
+				if (funcRoot.isOperation()
 						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
 					for (Term term : funcRoot.getTerms()) {
 						queueInAtom.add(term);
@@ -282,7 +282,7 @@ public class DatalogDependencyGraphGenerator {
 			if (queueHead instanceof Function) {
 				Function funcRoot = (Function) queueHead;
 				
-				if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
+				if (funcRoot.isOperation()
 						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
 					for (Term term : funcRoot.getTerms()) {
 						queueInAtom.add(term);
@@ -387,13 +387,14 @@ public class DatalogDependencyGraphGenerator {
 
 			if (bodyAtom.isDataFunction()) {
 				dependencyList.add(bodyAtom.getFunctionSymbol());
-			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isBooleanFunction()) {
+			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isOperation()) {
 				updatePredicateDependencyGraph_traverseBodyAtom(dependencyList, bodyAtom);
-			} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
-				continue;
-			} else {
-				throw new IllegalStateException("Unknown Function");
-			}
+				//} else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction() {
+			} else if (bodyAtom.isDataTypeFunction()) {
+					continue;
+				} else {
+					throw new IllegalStateException("Unknown Function");
+				}
 		}
 
 		Predicate headPred = rule.getHead().getFunctionSymbol();
@@ -450,7 +451,7 @@ public class DatalogDependencyGraphGenerator {
 			if (queueHead instanceof Function) {
 				Function funcRoot = (Function) queueHead;
 				
-				if (funcRoot.isBooleanFunction() || funcRoot.isArithmeticFunction() 
+				if (funcRoot.isOperation()
 						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
 					for (Term term : funcRoot.getTerms()) {
 						queueInAtom.add(term);

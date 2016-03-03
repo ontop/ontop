@@ -6,5 +6,8 @@ package it.unibz.inf.ontop.model;
 public interface BooleanExpression extends Function {
 
     @Override
+    OperationPredicate getFunctionSymbol();
+
+    @Override
     BooleanExpression clone();
 }

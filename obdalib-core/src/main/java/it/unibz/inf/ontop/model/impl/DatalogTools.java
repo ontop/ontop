@@ -30,8 +30,8 @@ public class DatalogTools {
     private final static  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT = new F<Function, Boolean>() {
         @Override
         public Boolean f(Function atom) {
-            return atom.isBooleanFunction()
-                    ||  atom.getFunctionSymbol().getName().equals(OBDAVocabulary.XSD_BOOLEAN_URI);
+            return atom.isOperation()
+                    ||  DATA_FACTORY.getDatatypeFactory().isBoolean(atom.getFunctionSymbol());
         }
     };
 
@@ -79,17 +79,13 @@ public class DatalogTools {
             return (BooleanExpression) atom;
 
         Predicate predicate = atom.getFunctionSymbol();
-        if (predicate instanceof BooleanOperationPredicate)
-            return DATA_FACTORY.getBooleanExpression((BooleanOperationPredicate)predicate,
+        if (predicate instanceof OperationPredicate)
+            return DATA_FACTORY.getBooleanExpression((OperationPredicate)predicate,
                     atom.getTerms());
-
-        String predicateName = predicate.getName();
-        if (predicateName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-
-            BooleanOperationPredicate newPredicate = new BooleanOperationPredicateImpl(predicateName,
-                    atom.getArity());
-
-            return DATA_FACTORY.getBooleanExpression(newPredicate, atom.getTerms());
+        // XSD:BOOLEAN case
+        else if (DATA_FACTORY.getDatatypeFactory().isBoolean(predicate)) {
+            throw new RuntimeException("TODO: support the conversion of this function as a boolean: "
+                    + atom);
         }
 
         throw new IllegalArgumentException(atom + " is not a boolean atom");

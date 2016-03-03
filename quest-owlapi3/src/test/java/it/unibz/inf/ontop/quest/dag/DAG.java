@@ -20,17 +20,18 @@ package it.unibz.inf.ontop.quest.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.Description;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
+import it.unibz.inf.ontop.ontology.Description;
+import it.unibz.inf.ontop.ontology.OClass;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
+import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.BinaryAxiom;
+import it.unibz.inf.ontop.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
 import java.io.Serializable;
@@ -92,13 +93,15 @@ public class DAG implements Serializable {
 		// classes.put(thingConcept, thing);
 
 		for (OClass concept : ontology.getVocabulary().getClasses()) {
-			DAGNode node = new DAGNode(concept);
+			if (!concept.isBottom() && !concept.isTop()) {
+				DAGNode node = new DAGNode(concept);
 
-			// if (!concept.equals(thingConcept)) {
-			// addParent(node, thing);
-			classes.put(concept, node);
+				// if (!concept.equals(thingConcept)) {
+				// addParent(node, thing);
+				classes.put(concept, node);
 
-			allnodes.put(concept, node);
+				allnodes.put(concept, node);
+			}
 		}
 
 		/*
@@ -106,53 +109,45 @@ public class DAG implements Serializable {
 		 */
 		
 		for (ObjectPropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
-			DAGNode rolenode = new DAGNode(role);
+			if (!role.isBottom() && !role.isTop()) {
+				DAGNode rolenode = new DAGNode(role);
 
-			roles.put(role, rolenode);
+				roles.put(role, rolenode);
 
-			ObjectPropertyExpression roleInv = role.getInverse();
-			DAGNode rolenodeinv = new DAGNode(roleInv);
-			roles.put(roleInv, rolenodeinv);
+				ObjectPropertyExpression roleInv = role.getInverse();
+				DAGNode rolenodeinv = new DAGNode(roleInv);
+				roles.put(roleInv, rolenodeinv);
 
-			ObjectSomeValuesFrom existsRole = role.getDomain();
-			ObjectSomeValuesFrom existsRoleInv = roleInv.getDomain();
-			DAGNode existsNode = new DAGNode(existsRole);
-			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
-			classes.put(existsRole, existsNode);
-			classes.put(existsRoleInv, existsNodeInv);
+				ObjectSomeValuesFrom existsRole = role.getDomain();
+				ObjectSomeValuesFrom existsRoleInv = roleInv.getDomain();
+				DAGNode existsNode = new DAGNode(existsRole);
+				DAGNode existsNodeInv = new DAGNode(existsRoleInv);
+				classes.put(existsRole, existsNode);
+				classes.put(existsRoleInv, existsNodeInv);
 
-			allnodes.put(role, rolenode);
-			allnodes.put(existsRole, existsNode);
-			allnodes.put(existsRoleInv, existsNodeInv);
-			allnodes.put(roleInv, rolenodeinv);
-
-			// addParent(existsNode, thing);
-			// addParent(existsNodeInv, thing);
+				allnodes.put(role, rolenode);
+				allnodes.put(existsRole, existsNode);
+				allnodes.put(existsRoleInv, existsNodeInv);
+				allnodes.put(roleInv, rolenodeinv);
+			}
 		}
 		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) {
-			DAGNode rolenode = new DAGNode(role);
+			if (!role.isBottom() && !role.isTop()) {
+				DAGNode rolenode = new DAGNode(role);
 
-			roles.put(role, rolenode);
+				roles.put(role, rolenode);
 
-			//DataPropertyExpression roleInv = role.getInverse();
-			//DAGNode rolenodeinv = new DAGNode(roleInv);
-			//roles.put(roleInv, rolenodeinv);
+				DataSomeValuesFrom existsRole = role.getDomainRestriction(DatatypeImpl.rdfsLiteral); 
+				DataPropertyRangeExpression existsRoleInv = role.getRange(); 
+				DAGNode existsNode = new DAGNode(existsRole);
+				DAGNode existsNodeInv = new DAGNode(existsRoleInv);
+				classes.put(existsRole, existsNode);
+				classes.put(existsRoleInv, existsNodeInv);
 
-			DataSomeValuesFrom existsRole = role.getDomain(); // descFactory.createPropertySomeRestriction(role);
-			DataPropertyRangeExpression existsRoleInv = role.getRange(); //descFactory.createDataPropertyRange(role);
-					//.createPropertySomeRestriction(roleInv);
-			DAGNode existsNode = new DAGNode(existsRole);
-			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
-			classes.put(existsRole, existsNode);
-			classes.put(existsRoleInv, existsNodeInv);
-
-			allnodes.put(role, rolenode);
-			allnodes.put(existsRole, existsNode);
-			allnodes.put(existsRoleInv, existsNodeInv);
-			//allnodes.put(roleInv, rolenodeinv);
-
-			// addParent(existsNode, thing);
-			// addParent(existsNodeInv, thing);
+				allnodes.put(role, rolenode);
+				allnodes.put(existsRole, existsNode);
+				allnodes.put(existsRoleInv, existsNodeInv);
+			}
 		}
 
 		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
@@ -305,8 +300,8 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		DataSomeValuesFrom existsParent = parent.getDomain(); // descFactory.createPropertySomeRestriction(parent);
-		DataSomeValuesFrom existChild = child.getDomain(); // escFactory.createPropertySomeRestriction(child);
+		DataSomeValuesFrom existsParent = parent.getDomainRestriction(DatatypeImpl.rdfsLiteral); // descFactory.createPropertySomeRestriction(parent);
+		DataSomeValuesFrom existChild = child.getDomainRestriction(DatatypeImpl.rdfsLiteral); // escFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);

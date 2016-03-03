@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.model.*;
 
 public class PredicateImpl implements Predicate {
 
-	private static final long serialVersionUID = -7096056207721170465L;
-
 	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);	
 	
 	private int arity = -1;
@@ -84,82 +82,44 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isClass() {
-		if (arity == 1 && types[0] == COL_TYPE.OBJECT) {
-			return true;
-		}
-		return false;
+		return (arity == 1 && getType(0) == COL_TYPE.OBJECT);
 	}
 
 	@Override
 	public boolean isObjectProperty() {
-		if (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.OBJECT) {
-			return true;
-		}
-		return false;
+		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT); 
+	}
+
+	@Override
+	public boolean isAnnotationProperty() {
+		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.NULL);
 	}
 
 	@Override
 	public boolean isDataProperty() {
-		if (arity == 2 && types[0] == COL_TYPE.OBJECT && types[1] == COL_TYPE.LITERAL) {
-			return true;
-		}
-		return false;
+		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.LITERAL); 
 	}
-
-	@Override
-	public boolean isDataPredicate() {
-		return (!(isBooleanPredicate() || isAlgebraPredicate() || isArithmeticPredicate() || isDataTypePredicate()));
-	}
-
-	@Override
-	public boolean isBooleanPredicate() {
-		return this instanceof BooleanOperationPredicate;
-	}
-	
-	@Override
-	public boolean isArithmeticPredicate() {
-		return this instanceof NumericalOperationPredicate;
-	}
-
-	@Override
-	public boolean isAlgebraPredicate() {
-		return this instanceof AlgebraOperatorPredicate;
-	}
-
-	@Override
-	public boolean isDataTypePredicate() {
-		return this instanceof DatatypePredicate;
-	}
-
-    @Override
-    public boolean isStringOperationPredicate() {
-        return this instanceof StringOperationPredicate;
-    }
-
 
     @Override
 	public boolean isTriplePredicate() {
-		if (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName())) {
-			return true;
-		}
-		return false;
+		return (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName()));
 	}
 
-    @Override
-    public boolean isAggregationPredicate() {
-        // The arity is supposed to be one
-        // but we prefer robustness to
-        // ill-defined arities
-
-        switch(getName()) {
-            case OBDAVocabulary.SPARQL_AVG_URI:
-            case OBDAVocabulary.SPARQL_SUM_URI:
-            case OBDAVocabulary.SPARQL_COUNT_URI:
-            case OBDAVocabulary.SPARQL_MAX_URI:
-            case OBDAVocabulary.SPARQL_MIN_URI:
-                return true;
-            default:
-                return false;
-        }
-    }
+//    @Override
+//    public boolean isAggregationPredicate() {
+//        // The arity is supposed to be one
+//        // but we prefer robustness to
+//        // ill-defined arities
+//
+//        switch(getName()) {
+//            case OBDAVocabulary.SPARQL_AVG_URI:
+//            case OBDAVocabulary.SPARQL_SUM_URI:
+//            case OBDAVocabulary.SPARQL_COUNT_URI:
+//            case OBDAVocabulary.SPARQL_MAX_URI:
+//            case OBDAVocabulary.SPARQL_MIN_URI:
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
 }

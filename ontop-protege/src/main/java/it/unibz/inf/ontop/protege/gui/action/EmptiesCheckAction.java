@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -31,10 +35,6 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
-import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;

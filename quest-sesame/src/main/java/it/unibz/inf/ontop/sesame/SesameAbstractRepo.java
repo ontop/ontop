@@ -20,71 +20,67 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.repository.RepositoryException;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.repository.RepositoryException;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public abstract class SesameAbstractRepo implements
 		org.openrdf.repository.Repository, AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
 
 	private RepositoryConnection repoConnection;
 	private Map<String, String> namespaces;
-	boolean isinitialized = false;
+	boolean initialized = false;
 	
 	public SesameAbstractRepo() {
 		namespaces = new HashMap<>();
 	}
 
-    /**
-     * Returns a new RepositoryConnection.
-     *
-     * (No repository connection sharing for the sake
-     *  of thread-safeness)
-     *
-     */
-	public RepositoryConnection getConnection() throws RepositoryException {
+	@Override
+    public RepositoryConnection getConnection() throws RepositoryException {
 		try {
-			return new RepositoryConnection(this,
-                    getQuestConnection());
+			this.repoConnection = new RepositoryConnection(this,
+					getQuestConnection());
 		} catch (OBDAException e) {
-			logger.error("Error creating repo connection: " + e.getMessage());
-			throw new RepositoryException(e.getMessage());
+			System.err.println("Error creating repo connection!");
+			e.printStackTrace();
+            throw new RepositoryException(e.getMessage());
 		}
+		return repoConnection;
+
 	}
 
-	public File getDataDir() {
-		// TODO Auto-generated method stub
-		// Get the directory where data and logging for this repository is
-		// stored.
+	@Override
+    public File getDataDir() {
 		return null;
 	}
 
-	public ValueFactory getValueFactory() {
+	@Override
+    public ValueFactory getValueFactory() {
 		// Gets a ValueFactory for this Repository.
 		return ValueFactoryImpl.getInstance();
 	}
 
-	public void initialize() throws RepositoryException {
+	@Override
+    public void initialize() throws RepositoryException {
 		// Initializes this repository.
-		isinitialized = true;
+		initialized = true;
 	}
 	
-	public boolean isInitialized() {
-		return isinitialized;
+	@Override
+    public boolean isInitialized() {
+		return initialized;
 	}
 
 	public abstract QuestDBConnection getQuestConnection() throws OBDAException;
 
-	public boolean isWritable() throws RepositoryException {
+	@Override
+    public boolean isWritable() throws RepositoryException {
 		// Checks whether this repository is writable, i.e.
 		// if the data contained in this repository can be changed.
 		// The writability of the repository is determined by the writability
@@ -92,17 +88,19 @@ public abstract class SesameAbstractRepo implements
 		return false;
 	}
 
-	public void setDataDir(File arg0) {
+	@Override
+    public void setDataDir(File arg0) {
 		// Set the directory where data and logging for this repository is
 		// stored.
 	}
 
-	public void shutDown() throws RepositoryException {
+	@Override
+    public void shutDown() throws RepositoryException {
 		// Shuts the repository down, releasing any resources that it keeps hold
 		// of.
 		// Once shut down, the repository can no longer be used until it is
 		// re-initialized.
-		isinitialized=false;
+		initialized =false;
 		if(repoConnection!=null && repoConnection.isOpen())
 			repoConnection.close();
 		

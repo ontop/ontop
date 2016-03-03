@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -20,9 +22,7 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-public interface OBDASQLQuery extends OBDAQuery {
+public interface OBDASQLQuery extends Serializable {
 
 	public OBDASQLQuery clone();
-
-	public OBDAQueryModifiers getQueryModifiers();
 }

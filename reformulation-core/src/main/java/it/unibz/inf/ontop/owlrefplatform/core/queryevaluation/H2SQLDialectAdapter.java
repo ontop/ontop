@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
 
-import java.sql.Types;
 
 /*
  * #%L
@@ -27,14 +26,32 @@ import java.util.regex.Pattern;
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
+	public String strUuid(){
+		return "RANDOM_UUID()";
+	}
+
+	@Override
+	public String uuid(){
+		return strConcat(new String[]{"'urn:uuid:'","RANDOM_UUID()"});
+	}
+
+	@Override
+	public String SHA256(String str){
+		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1)", str);
+	}
+
+
+	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
+		if (limit < 0 ) {
 			if (offset < 0) {
+
 				// If both limit and offset is not specified.
-				return "LIMIT 0";
+				return "";
+
 			} else {
 				// Max limit: http://www.h2database.com/html/advanced.html#limits_limitations
-				return String.format("LIMIT %d,214748364", offset);
+				return String.format("LIMIT %d,2147483647", offset);
 			}
 		} else {
 			if (offset < 0) {
@@ -45,17 +62,17 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-
+	
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
         Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
         if(quotes.matcher(pattern).matches() ) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-		// enclosing
-		// quotes
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
         }
-		// embedded options:
-
+		// embedded options: 
+		
 		String pflags = "(?";
 		if (multiLine)
 			pflags += "m"; // equivalent of Pattern.MULTILINE
@@ -65,8 +82,8 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
 	}
 
-	@Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    @Override
+    public String strReplace(String str, String oldstr, String newstr) {
         oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
 
         newstr = newstr.substring(1, newstr.length() - 1);
@@ -77,8 +94,8 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	public String getDummyTable() {
 		return "SELECT 1";
 	}
-
-	@Override
+	
+	@Override 
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";
 	}
@@ -90,7 +107,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 *
+	 * 
 	 * @param
 	 * @return
 	 */
@@ -128,96 +145,8 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		bf.insert(0, "'");
 		bf.append("'");
-
-		return bf.toString();
-	}
-	
-	
-	@Override
-	public String sqlCast(String value, int type) {
-		String strType = null;
 		
-		switch (type) {
-		case Types.VARCHAR:
-			strType = "CHAR";
-			break;
-		case Types.BIT:
-			strType = "BIT";			break;
-		case Types.TINYINT:
-			strType = "TINYINT";			break;
-		case Types.SMALLINT:
-			strType = "SMALLINT";			break;
-		case Types.INTEGER:
-			strType = "BIGINT";			break;
-		case Types.BIGINT:
-			strType = "BIGINT";			break;
-		case Types.FLOAT:
-			strType = "FLOAT";			break;
-		case Types.REAL:
-			strType = "REAL";			break;
-		case Types.DOUBLE:
-			strType = "DOUBLE";			break;
-		case Types.NUMERIC:
-			strType = "NUMERIC";			break;
-		case Types.DECIMAL:
-			strType = "DECIMAL";			break;
-		case Types.CHAR:
-			strType = "CHAR";			break;
-		case Types.LONGVARCHAR:
-			strType = "LONGVARCHAR";			break;
-		case Types.DATE:
-			strType = "DATE";			break;
-		case Types.TIME:
-			strType = "TIMESTAMP";			break;
-		case Types.TIMESTAMP:
-			strType = "TIMESTAMP";			break;
-		case Types.BINARY:
-			strType = "BINARY";			break;
-		case Types.VARBINARY:
-			strType = "VARBINARY";			break;
-		case Types.LONGVARBINARY:
-			strType = "LONGVARBINARY";			break;
-		case Types.NULL:
-			strType = "NULL";			break;
-		case Types.OTHER:
-			strType = "OTHER";			break;
-		case Types.JAVA_OBJECT:
-			strType = "JAVA_OBJECT";			break;
-		case Types.DISTINCT:
-			strType = "DISTINCT";			break;
-		case Types.STRUCT:
-			strType = "STRUCT";			break;
-		case Types.ARRAY:
-			strType = "ARRAY";			break;
-		case Types.BLOB:
-			strType = "BLOB";			break;
-		case Types.CLOB:
-			strType = "CLOB";			break;
-		case Types.REF:
-			strType = "REF";			break;
-		case Types.DATALINK:
-			strType = "DATALINK";			break;
-		case Types.BOOLEAN:
-			strType = "BOOLEAN";			break;
-		case Types.ROWID:
-			strType = "ROWID";			break;
-		case Types.NCHAR:
-			strType = "NCHAR";			break;
-		case Types.NVARCHAR:
-			strType = "NVARCHAR";			break;
-		case Types.LONGNVARCHAR:
-			strType = "LONGNVARCHAR";			break;
-		case Types.NCLOB:
-			strType = "NCLOB";			break;
-		case Types.SQLXML:
-			strType = "SQLXML";			break;
-
-
-		default:
-			throw new RuntimeException("Unsupported SQL type");
-
-		}
-		return "CAST(" + value + " AS " + strType + ")";
+		return bf.toString();
 	}
 	
 }

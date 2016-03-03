@@ -20,20 +20,18 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
-
-
-import java.util.ArrayList;
-import java.util.List;
-
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Return empty concepts and roles, based on the mappings. Given an ontology,
@@ -48,8 +46,8 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	Logger log = LoggerFactory.getLogger(QuestOWLEmptyEntitiesChecker.class);
 
-	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
-	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
+	private List<Predicate> emptyConcepts = new ArrayList<>();
+	private List<Predicate> emptyRoles = new ArrayList<>();
 
 	/**
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
@@ -58,9 +56,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @throws Exception
 	 */
 	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		this.onto = translator.translate(onto);
+		this.onto = OWLAPITranslatorUtility.translate(onto);
 		this.conn = conn;
 		runQueries();
 
@@ -120,28 +116,31 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	private void runQueries() throws Exception {
 
-		for (OClass cl : onto.getVocabulary().getClasses()) {
-			Predicate concept = cl.getPredicate();
-			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
-				emptyConcepts.add(concept);
+		for (OClass cl : onto.getVocabulary().getClasses()) 
+			if (!cl.isTop() && !cl.isBottom()) {
+				Predicate concept = cl.getPredicate();
+				if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
+					emptyConcepts.add(concept);
+				}
 			}
-		}
 		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role);
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) 
+			if (!prop.isBottom() && !prop.isTop()) {
+				Predicate role = prop.getPredicate();
+				if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+					emptyRoles.add(role);
+				}
 			}
-		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 
-		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
-			Predicate role = prop.getPredicate();
-			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-				emptyRoles.add(role);
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) 		
+			if (!prop.isBottom() && !prop.isTop()) {
+				Predicate role = prop.getPredicate();
+				if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+					emptyRoles.add(role);
+				}
 			}
-		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 		
 	}

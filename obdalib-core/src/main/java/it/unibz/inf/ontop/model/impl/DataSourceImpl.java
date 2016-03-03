@@ -20,12 +20,12 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDADataSource;
+
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
-
-import it.unibz.inf.ontop.model.OBDADataSource;
 
 public class DataSourceImpl implements OBDADataSource {
 

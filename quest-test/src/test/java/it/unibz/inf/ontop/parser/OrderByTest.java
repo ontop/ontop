@@ -20,23 +20,22 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,11 +80,8 @@ public class OrderByTest {
                 QuestConstants.FALSE);
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(p);
-
-        reasoner = (QuestOWL) factory.createReasoner(ontology,
-                new SimpleConfiguration());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
@@ -179,6 +175,27 @@ public class OrderByTest {
         expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-995");
         expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-996");
         expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-998");
+        checkReturnedUris(query, expectedUris);
+    }
+
+    @Test
+    public void testBolzanoOrderingAndLimit() throws Exception {
+        String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
+                + "SELECT ?x ?street ?country ?number "
+                + "WHERE {?x :hasNumber ?number ;"
+                + ":inCountry ?country ;"
+                + ":inStreet ?street . } "
+                + "ORDER BY DESC(?country) ?number DESC(?street)"
+                + "LIMIT 6"
+                ;
+
+        List<String> expectedUris = new ArrayList<>();
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-993");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-991");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-997");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-992");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-995");
+        expectedUris.add("http://www.owl-ontologies.com/Ontology1207768242.owl#Address-996");
         checkReturnedUris(query, expectedUris);
     }
 

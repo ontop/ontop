@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.r2rml.R2RMLManager;
 
 import java.io.File;
 import java.sql.Connection;
@@ -8,8 +11,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,15 +22,16 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
- * Tests the timeout on sesame queries
+ * Tests that user-applied constraints can be provided through 
+ * sesameWrapper.SesameVirtualRepo 
+ * with manually instantiated metadata.
+ * 
+ * This is quite similar to the setting in the optique platform
  * 
  * Some stuff copied from ExampleManualMetadata 
  * 

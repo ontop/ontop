@@ -21,15 +21,13 @@ package it.unibz.inf.ontop.quest.service;
  */
 
 import info.aduna.io.IOUtil;
-
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import it.unibz.inf.ontop.model.OBDAException;
 
 import junit.framework.TestCase;
 

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.utils.OBDAPreferences;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -39,8 +39,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-
-import it.unibz.inf.ontop.utils.OBDAPreferences;
 
 public class OBDAPreferencesPanel extends javax.swing.JPanel {
 	
@@ -64,53 +62,35 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     }
     
     private void addListener(){    	
-    	cmdClassColor.addActionListener(new ActionListener(){
-    		@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdClassColor, OBDAPreferences.CLASS_COLOR);
-				cc.setVisible(true);
-			}
-    	});
+    	cmdClassColor.addActionListener(arg0 -> {
+            ColorChooser cc = new ColorChooser(cmdClassColor, OBDAPreferences.CLASS_COLOR);
+            cc.setVisible(true);
+        });
     	
-    	cmdDataPropertyColor.addActionListener(new ActionListener(){
-    		@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, OBDAPreferences.DATAPROPERTY_COLOR);
-				cc.setVisible(true);
-			}
-    	});
+    	cmdDataPropertyColor.addActionListener(arg0 -> {
+            ColorChooser cc = new ColorChooser(cmdDataPropertyColor, OBDAPreferences.DATAPROPERTY_COLOR);
+            cc.setVisible(true);
+        });
     	
-    	cmdFunctorColor.addActionListener(new ActionListener(){
-    		@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdFunctorColor, OBDAPreferences.FUCNTOR_COLOR);
-				cc.setVisible(true);
-			}
-    	});
+    	cmdFunctorColor.addActionListener(arg0 -> {
+            ColorChooser cc = new ColorChooser(cmdFunctorColor, OBDAPreferences.FUCNTOR_COLOR);
+            cc.setVisible(true);
+        });
     	
-    	cmdObjectPropertyColor.addActionListener(new ActionListener(){
-    		@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, OBDAPreferences.OBJECTPROPTERTY_COLOR);
-				cc.setVisible(true);
-			}
-    	});
+    	cmdObjectPropertyColor.addActionListener(arg0 -> {
+            ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, OBDAPreferences.OBJECTPROPTERTY_COLOR);
+            cc.setVisible(true);
+        });
     	
-    	cmdParameterColor.addActionListener(new ActionListener(){
-    		@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdParameterColor, OBDAPreferences.PARAMETER_COLOR);
-				cc.setVisible(true);
-			}
-    	});
+    	cmdParameterColor.addActionListener(arg0 -> {
+            ColorChooser cc = new ColorChooser(cmdParameterColor, OBDAPreferences.PARAMETER_COLOR);
+            cc.setVisible(true);
+        });
     	
-    	cmdVariableColor.addActionListener(new ActionListener(){
-    		@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdVariableColor, OBDAPreferences.VARIABLE_COLOR);
-				cc.setVisible(true);
-			}
-    	});
+    	cmdVariableColor.addActionListener(arg0 -> {
+            ColorChooser cc = new ColorChooser(cmdVariableColor, OBDAPreferences.VARIABLE_COLOR);
+            cc.setVisible(true);
+        });
     	
     	String aux = pref.get(OBDAPreferences.ADD_MAPPING).toString();
     	KeyStroke ks = KeyStroke.getKeyStroke(aux);
@@ -391,7 +371,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdFontFamily.setText(fontBody + ", " + bodySize);
     	cmdFontFamily.setToolTipText(fontBody + ", " + bodySize);
     	
-    	jCheckBoxUseDefault.setSelected(new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString()));
+    	jCheckBoxUseDefault.setSelected(Boolean.parseBoolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString()));
 		if (jCheckBoxUseDefault.isSelected()) {
 			cmdFontFamily.setEnabled(false);
 		} else {

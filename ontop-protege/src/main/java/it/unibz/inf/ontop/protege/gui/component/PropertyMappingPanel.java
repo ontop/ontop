@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.component;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -19,6 +19,16 @@ package it.unibz.inf.ontop.protege.gui.component;
  * limitations under the License.
  * #L%
  */
+
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.MapItem;
+import it.unibz.inf.ontop.protege.gui.PredicateItem;
+import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,16 +60,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.protege.gui.MapItem;
-import it.unibz.inf.ontop.protege.gui.PredicateItem;
-import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 public class PropertyMappingPanel extends javax.swing.JPanel {
 
@@ -160,10 +160,10 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (DataPropertyExpression dp : obdaModel.getDeclaredDataProperties()) {
+        for (DataPropertyExpression dp : obdaModel.getOntologyVocabulary().getDataProperties()) {
             v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }
-        for (ObjectPropertyExpression op : obdaModel.getDeclaredObjectProperties()) {
+        for (ObjectPropertyExpression op : obdaModel.getOntologyVocabulary().getObjectProperties()) {
             v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);

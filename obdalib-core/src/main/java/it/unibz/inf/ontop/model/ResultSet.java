@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-public interface ResultSet {
+/**
+ * A common interface for TupleResultSet and GraphResultSet
+ */
+public interface ResultSet extends AutoCloseable{
 	// NO-OP
 }

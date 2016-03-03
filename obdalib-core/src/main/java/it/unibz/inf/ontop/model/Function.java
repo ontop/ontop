@@ -77,13 +77,13 @@ public interface Function extends Term {
 
 	boolean isDataFunction();
 
-	boolean isBooleanFunction();
+	boolean isOperation();
 
 	boolean isAlgebraFunction();
-	
-	boolean isArithmeticFunction();
 	
 	boolean isDataTypeFunction();
 
     public Set<Variable> getVariables();
+
 }
+

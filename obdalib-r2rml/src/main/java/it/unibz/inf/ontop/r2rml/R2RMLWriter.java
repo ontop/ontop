@@ -23,22 +23,14 @@ package it.unibz.inf.ontop.r2rml;
  * @author timea bagosi
  * Class responsible to write an r2rml turtle file given an obda model
  */
+
+import eu.optique.api.mapping.R2RMLMappingManager;
+import eu.optique.api.mapping.R2RMLMappingManagerFactory;
+import eu.optique.api.mapping.TriplesMap;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-
-import java.io.BufferedWriter;
-import java.io.*;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
@@ -47,9 +39,12 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.TriplesMap;
+import java.io.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class R2RMLWriter {
@@ -135,7 +130,6 @@ public class R2RMLWriter {
 			throw e;
 		}
 	}
-	
 
     /**
      * the method to write the R2RML mappings

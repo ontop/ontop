@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +41,7 @@ public class DatalogQueryServices {
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
 
-	// to be taken from DatalogUnfolder
+	// to be taken from it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder
 	
 	private static Function getFreshAtom(Function a, String suffix) {
 		List<Term> termscopy = new ArrayList<>(a.getArity());
@@ -107,7 +104,7 @@ public class DatalogQueryServices {
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
 					Substitution mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
-							query.getBody().get(chosenAtomIdx));
+                            query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
 						List<Function> newbody = newquery.getBody();

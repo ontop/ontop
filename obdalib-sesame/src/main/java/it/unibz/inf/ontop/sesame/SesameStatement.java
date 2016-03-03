@@ -20,19 +20,18 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
+import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.ontology.Assertion;
-
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 
 public class SesameStatement implements Statement {
     private static final long serialVersionUID = 3398547980791013746L;
@@ -70,7 +69,7 @@ public class SesameStatement implements Statement {
 			predicate = helper.createURI(pred.getName().toString()); // URI
 			
 			if (obj instanceof ValueConstant)
-				object = helper.getLiteral((ValueConstant) obj);
+				object = helper.getLiteral((ValueConstant)obj);		
 			else 
 				throw new RuntimeException("Invalid constant as object!" + obj);
 		} 

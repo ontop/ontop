@@ -20,32 +20,31 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertFalse;
 
 /**
  * The following tests take the Stock exchange scenario and execute the queries
@@ -60,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * tuples. If the scenario is run in classic, this data gets imported
  * automatically by the reasoner.
  */
-public class JoinElminationMappingTest extends TestCase {
+public class JoinElminationMappingTest {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -72,7 +71,7 @@ public class JoinElminationMappingTest extends TestCase {
 	final String owlfile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.owl";
 	final String obdafile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		// String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb";
@@ -102,12 +101,10 @@ public class JoinElminationMappingTest extends TestCase {
 		ioManager.load(new File(obdafile));
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
-
 			dropTables();
 			conn.close();
-		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -117,14 +114,11 @@ public class JoinElminationMappingTest extends TestCase {
 		conn.commit();
 	}
 	
-	private void runTests(Properties p) throws Exception {
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+	private void runTests(QuestPreferences p) throws Exception {
 
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 		reasoner.flush();
 
 		// Now we are ready for querying
@@ -133,7 +127,7 @@ public class JoinElminationMappingTest extends TestCase {
 		boolean fail = false;
 
 		String query = 
-				"PREFIX : <http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#> \n" +
+				"PREFIX : <http://it.unibz.inf/obda/ontologies/join-elimination-test.owl#> \n" +
 				"SELECT ?x WHERE {?x :R ?y. ?y a :A}";
 		try {
 			System.out.println("\n\nSQL:\n" + st.getUnfolding(query));
@@ -151,44 +145,44 @@ public class JoinElminationMappingTest extends TestCase {
 		assertFalse(fail);
 	}
 
+    @Test(expected = IllegalConfigurationException.class)
 	public void testSiEqSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		runTests(p);
 	}
 
+    @Test(expected = IllegalConfigurationException.class)
 	public void testSiEqNoSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		runTests(p);
 	}
 
+    @Test(expected = IllegalConfigurationException.class)
 	public void testSiNoEqSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		runTests(p);
 	}
 
+    @Test(expected = IllegalConfigurationException.class)
 	public void testSiNoEqNoSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
@@ -202,7 +196,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -213,7 +206,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -229,7 +221,6 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
@@ -245,48 +236,47 @@ public class JoinElminationMappingTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
+    @Test
 	public void testViEqSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		runTests(p);
 	}
 
+    @Test
 	public void testViEqNoSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		runTests(p);
 	}
 
 	/**
 	 * This is a very slow test, disable it if you are doing routine checks.
 	 */
+    @Test
 	public void testViNoEqSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		runTests(p);
 	}
 
 	/**
 	 * This is a very slow test, disable it if you are doing routine checks.
 	 */
+    @Test
 	public void testViNoEqNoSig() throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 		runTests(p);
 	}
 }

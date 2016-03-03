@@ -8,7 +8,7 @@
    <!ENTITY rdfs: SYSTEM 'http://www.w3.org/2000/01/rdf-schema#'>
 ]>
 <OBDA version="1.0" xml:base="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:quest="http://obda.org/quest#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
-  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="ncasp-it-project">
+  <mappings body="class it.unibz.inf.ontop.model.impl.SQLQueryImpl" headclass="class it.unibz.inf.ontop.model.impl.CQIEImpl" sourceuri="ncasp-it-project">
     <mapping id="M1">
       <CQ string="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#Student(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id)), http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#firstname(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id),$fname), http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#lastname(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id),$lname)"/>
       <SQLQuery string="select id, fname, lname, age from student"/>

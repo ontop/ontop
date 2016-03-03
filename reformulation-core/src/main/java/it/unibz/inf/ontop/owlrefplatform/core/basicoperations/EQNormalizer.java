@@ -1,10 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Substitution;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.*;
 
 import java.util.List;
 
@@ -36,7 +32,7 @@ public class EQNormalizer {
 			Function atom = body.get(i);
 			SubstitutionUtilities.applySubstitution(atom, mgu);
 
-            if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
+            if (atom.getFunctionSymbol() == ExpressionOperation.EQ) {
                 if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
                     continue;
 
@@ -44,7 +40,7 @@ public class EQNormalizer {
                 i--;
             }
             //search for nested equalities in AND function
-            else if (atom.getFunctionSymbol() == OBDAVocabulary.AND) {
+            else if (atom.getFunctionSymbol() == ExpressionOperation.AND) {
                 nestedEQSubstitutions(atom, mgu);
 
                 //we remove the function if empty because all its terms were equalities
@@ -67,7 +63,7 @@ public class EQNormalizer {
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions 
      * and removes EQ functions, substituting the values using the class
-     * {@link Substitution#composeTerms(Term, Term)}
+     * {@link it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Substitution#composeTerms(it.unibz.inf.ontop.model.Term, it.unibz.inf.ontop.model.Term)}
      * 
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term
@@ -83,7 +79,7 @@ public class EQNormalizer {
                 SubstitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
-                if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
+                if (t2.getFunctionSymbol() == ExpressionOperation.EQ) {
                     if (!mgu.composeTerms(t2.getTerm(0), t2.getTerm(1)))
                         continue;
                     
@@ -92,7 +88,7 @@ public class EQNormalizer {
                 }
                 //consider the case of  AND function. Calls recursive method to consider nested equalities
                 else {
-                    if (t2.getFunctionSymbol() == OBDAVocabulary.AND) {
+                    if (t2.getFunctionSymbol() == ExpressionOperation.AND) {
                         nestedEQSubstitutions(t2, mgu);
 
                         //we remove the function if empty because all its terms were equalities

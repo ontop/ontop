@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
+import java.sql.Connection;
+
+import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
-import it.unibz.inf.ontop.model.OBDAException;
-import org.semanticweb.owlapi.model.OWLException;
 
-import java.sql.Connection;
+import org.semanticweb.owlapi.model.OWLException;
 
 /***
  * Handler for a connection. Note that as with JDBC, executing queries in

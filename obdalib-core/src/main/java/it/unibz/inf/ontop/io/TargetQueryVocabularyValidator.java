@@ -24,12 +24,15 @@ import java.util.Vector;
 
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.Function;
+
+import java.util.List;
 
 public interface TargetQueryVocabularyValidator {
 
-	public boolean validate(CQIE targetQuery);
+	boolean validate(List<Function> targetQuery);
 
-	public Vector<String> getInvalidPredicates();
+	List<String> getInvalidPredicates();
 
 	/**
 	 * Checks whether the predicate is a class assertion.
@@ -39,7 +42,7 @@ public interface TargetQueryVocabularyValidator {
 	 * @return Returns true if the predicate is a class assertion from the input
 	 *         ontology, or false otherwise.
 	 */
-	public boolean isClass(Predicate predicate);
+    boolean isClass(Predicate predicate);
 
 	/**
 	 * Checks whether the predicate is a object property assertion.
@@ -49,7 +52,7 @@ public interface TargetQueryVocabularyValidator {
 	 * @return Returns true if the predicate is a object property assertion from
 	 *         the input ontology, or false otherwise.
 	 */
-	public boolean isObjectProperty(Predicate predicate);
+    boolean isObjectProperty(Predicate predicate);
 
 	/**
 	 * Checks whether the predicate is a data property assertion.
@@ -59,12 +62,25 @@ public interface TargetQueryVocabularyValidator {
 	 * @return Returns true if the predicate is a data property assertion from
 	 *         the input ontology, or false otherwise.
 	 */
-	public boolean isDataProperty(Predicate predicate);
+    boolean isDataProperty(Predicate predicate);
+
+
+	/**
+	 * Checks whether the predicate is an annotation property assertion.
+	 *
+	 * @param predicate
+	 *            The target predicate.
+	 * @return Returns true if the predicate is an annotation property assertion from
+	 *         the input ontology, or false otherwise.
+	 */
+    boolean isAnnotationProperty(Predicate predicate);
+
 
 	/**
 	 * Checks whether the predicate is a "triple", which is used for meta mapping
 	 * 
-	 * @param predicate
+	 * @param predicate a Predicate
+     *
 	 * @return
 	 * 	True if the predicate is "triple", or false otherwise
 	 */

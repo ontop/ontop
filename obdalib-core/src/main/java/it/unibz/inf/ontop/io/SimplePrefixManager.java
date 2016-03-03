@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.io;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
@@ -55,7 +57,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		addPrefix(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
 		addPrefix(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
 		addPrefix(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
-		addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
+		//addPrefix(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
 	}
 
 	@Override

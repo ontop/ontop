@@ -20,30 +20,60 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.TableDefinition;
-import it.unibz.inf.ontop.sql.api.Attribute;
-import it.unibz.inf.ontop.sql.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.sql.*;
+
+import java.util.*;
+import java.util.Map.Entry;
+
 
 public class DBMetadataUtil {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
+	
+	/***
+	 * Generates a map for each predicate in the body of the rules in 'program'
+	 * that contains the Primary Key data for the predicates obtained from the
+	 * info in the metadata.
+     *
+     * It also returns the columns with unique constraints
+     *
+     * For instance, Given the table definition
+     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
+     *
+     * The methods will return the following Multimap:
+     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
+     *
+	 * 
+	 * @param metadata
+	 * @param program
+	 */
+	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata) {
+		
+		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
+		for (DatabaseRelationDefinition relation : metadata.getDatabaseRelations()) {
+			Predicate predicate = Relation2DatalogPredicate.createPredicateFromRelation(relation);
+			
+			// primary key and unique constraints
+			for (UniqueConstraint uc : relation.getUniqueConstraints()) {
+				List<Integer> pkeyIdx = new ArrayList<>(uc.getAttributes().size());
+				for (Attribute att : uc.getAttributes())
+					pkeyIdx.add(att.getIndex());
+				
+				pkeys.put(predicate, pkeyIdx);
+			}
+		}
+		return pkeys;
+	}
+	
+	
 	
 	/*
 	 * generate CQIE rules from foreign key info of db metadata
@@ -52,71 +82,57 @@ public class DBMetadataUtil {
 	 */
 	public static LinearInclusionDependencies generateFKRules(DBMetadata metadata) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
+		final boolean printouts = false;
 		
-		Collection<TableDefinition> tableDefs = metadata.getTables();
-		for (TableDefinition def : tableDefs) {
-			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
-			for (Entry<String, List<Attribute>> fks : foreignKeys.entrySet()) {
-				String fkName = fks.getKey();
-				List<Attribute> fkAttributes = fks.getValue();
-				try {
-					String table1 = def.getName();
-					String table2 = "";
-					TableDefinition def2 = null;
-					Map<Integer, Integer> positionMatch = new HashMap<>();
-					for (Attribute attr : fkAttributes) {
-						// Get current table and column (1)
-						String column1 = attr.getName();
-						
-						// Get referenced table and column (2)
-						Reference reference = attr.getReference();
-						table2 = reference.getTableReference();
-						String column2 = reference.getColumnReference();				
-						
-						// Get table definition for referenced table
-						def2 = (TableDefinition) metadata.getDefinition(table2);
-						if (def2 == null) { // in case of broken FK
-							// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
-							//        (which can happen in the NEW abridged metadata)
-							throw new BrokenForeignKeyException(reference, "Missing table: " + table2);
-						}
-						// Get positions of referenced attribute
-						int pos1 = def.getAttributeKey(column1);
-						if (pos1 == -1) {
-							throw new BrokenForeignKeyException(reference, "Missing column: " + column1);
-						}
-						int pos2 = def2.getAttributeKey(column2);
-						if (pos2 == -1) {
-							throw new BrokenForeignKeyException(reference, "Missing column: " + column2);
-						}
-						positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
-					}
-					// Construct CQIE
-					Predicate p1 = fac.getPredicate(table1, def.getAttributes().size());
-					List<Term> terms1 = new ArrayList<>(p1.getArity());
-					for (int i = 1; i <= p1.getArity(); i++) 
-						 terms1.add(fac.getVariable("t" + i));
+		if (printouts)
+			System.out.println("===FOREIGN KEY RULES");
+		int count = 0;
+		Collection<DatabaseRelationDefinition> tableDefs = metadata.getDatabaseRelations();
+		for (DatabaseRelationDefinition def : tableDefs) {
+			for (ForeignKeyConstraint fks : def.getForeignKeys()) {
+
+				DatabaseRelationDefinition def2 = (DatabaseRelationDefinition) fks.getReferencedRelation();
+
+				Map<Integer, Integer> positionMatch = new HashMap<>();
+				for (ForeignKeyConstraint.Component comp : fks.getComponents()) {
+					// Get current table and column (1)
+					Attribute att1 = comp.getAttribute();
 					
-					Predicate p2 = fac.getPredicate(table2, def2.getAttributes().size());
-					List<Term> terms2 = new ArrayList<>(p2.getArity());
-					for (int i = 1; i <= p2.getArity(); i++) 
-						 terms2.add(fac.getVariable("p" + i));
+					// Get referenced table and column (2)
+					Attribute att2 = comp.getReference();
 					
-					// do the swapping
-					for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
-						terms1.set(swap.getKey(), terms2.get(swap.getValue()));
-					
-					Function head = fac.getFunction(p2, terms2);
-					Function body = fac.getFunction(p1, terms1);
-					
-					dependencies.addRule(head, body);				
-				} 
-				catch (BrokenForeignKeyException e) {
-					// Log the warning message
-					log.warn(e.getMessage());
+					// Get positions of referenced attribute
+					int pos1 = att1.getIndex();
+					int pos2 = att2.getIndex();
+					positionMatch.put(pos1 - 1, pos2 - 1); // indexes start at 1
 				}
+				// Construct CQIE
+				int len1 = def.getAttributes().size();
+				List<Term> terms1 = new ArrayList<>(len1);
+				for (int i = 1; i <= len1; i++) 
+					 terms1.add(fac.getVariable("t" + i));
+				
+				// Roman: important correction because table2 may not be in the same case 
+				// (e.g., it may be all upper-case)
+				int len2 = def2.getAttributes().size();
+				List<Term> terms2 = new ArrayList<>(len2);
+				for (int i = 1; i <= len2; i++) 
+					 terms2.add(fac.getVariable("p" + i));
+				
+				// do the swapping
+				for (Entry<Integer,Integer> swap : positionMatch.entrySet())
+					terms1.set(swap.getKey(), terms2.get(swap.getValue()));
+				
+				Function head = Relation2DatalogPredicate.getAtom(def2, terms2);
+				Function body = Relation2DatalogPredicate.getAtom(def, terms1);
+				
+				dependencies.addRule(head, body);				
+				if (printouts)
+					System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
 			}
 		}		
+		if (printouts)
+			System.out.println("===END OF FOREIGN KEY RULES");
 		return dependencies;
 	}
 }

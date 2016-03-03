@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,11 +20,12 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;

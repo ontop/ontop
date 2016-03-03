@@ -20,6 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDB.StoreStatus;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,10 +38,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDB.StoreStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

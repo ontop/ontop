@@ -49,7 +49,7 @@
       <position height="21" width="0" x="0" y="915"/>    
     </execution>  
   </object>  
-  <object id="27" language="java" name="it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore" 
+  <object id="27" language="java" name="it.unibz.inf.obda.owlrefplatform.questdb.QuestDBClassicStore"
     project="quest-db" file="/quest-db/src/main/java/it/unibz/krdb/obda/owlrefplatform/questdb/QuestDBClassicStore.java" 
     binary="false" label="questDBClassicStore" type="class" autoSize="true">    
     <position height="0" width="0" x="0" y="0"/>    
@@ -63,7 +63,7 @@
       <position height="105" width="179" x="482" y="685"/>    
     </execution>  
   </object>  
-  <object id="38" language="java" name="it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBAbstractStore" 
+  <object id="38" language="java" name="it.unibz.inf.obda.owlrefplatform.questdb.QuestDBAbstractStore"
     project="quest-db" 
     file="/quest-db/src/main/java/it/unibz/krdb/obda/owlrefplatform/questdb/QuestDBAbstractStore.java" binary="false" 
     label="questDBAbstractStore2" type="class" autoSize="true">    
@@ -75,7 +75,7 @@
       <position height="63" width="179" x="665" y="706"/>    
     </execution>  
   </object>  
-  <object id="41" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.Quest" project="reformulation-core" 
+  <object id="41" language="java" name="it.unibz.inf.obda.owlrefplatform.core.Quest" project="reformulation-core"
     file="/reformulation-core/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/Quest.java" binary="false" 
     label="quest" type="class" autoSize="true">    
     <position height="0" width="0" x="0" y="0"/>    
@@ -89,7 +89,7 @@
       <position height="21" width="164" x="665" y="515"/>    
     </execution>  
   </object>  
-  <object id="42" language="java" name="it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection" project="quest-db" 
+  <object id="42" language="java" name="it.unibz.inf.obda.owlrefplatform.core.QuestDBConnection" project="quest-db"
     file="/quest-db/src/main/java/it/unibz/krdb/obda/owlrefplatform/core/QuestDBConnection.java" binary="false" 
     label="questDBConnection" type="class" autoSize="true">    
     <position height="-1" width="-1" x="755" y="0"/>    
@@ -106,7 +106,7 @@
     <end type="TARGET" refId="6"/>  
   </message>  
   <message id="8" 
-    operation="createStore(java.lang.String,org.openrdf.query.Dataset,it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences):void">    
+    operation="createStore(java.lang.String,org.openrdf.query.Dataset,it.unibz.inf.obda.owlrefplatform.core.QuestPreferences):void">
     <end type="SOURCE" refId="7"/>    
     <end type="TARGET" refId="9"/>  
   </message>  
@@ -123,7 +123,7 @@
     <end type="TARGET" refId="18"/>  
   </message>  
   <message id="19" 
-    operation="QuestDBClassicStore(java.lang.String,org.openrdf.query.Dataset,it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences)">    
+    operation="QuestDBClassicStore(java.lang.String,org.openrdf.query.Dataset,it.unibz.inf.obda.owlrefplatform.core.QuestPreferences)">
     <end type="SOURCE" refId="9"/>    
     <end type="TARGET" refId="20"/>  
   </message>  
@@ -132,11 +132,11 @@
     <end type="TARGET" refId="22"/>  
   </message>  
   <message id="24" 
-    operation="RepositoryConnection(sesameWrapper.SesameAbstractRepo,it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection)">    
+    operation="RepositoryConnection(sesameWrapper.SesameAbstractRepo,it.unibz.inf.obda.owlrefplatform.core.QuestDBConnection)">
     <end type="SOURCE" refId="15"/>    
     <end type="TARGET" refId="25"/>  
   </message>  
-  <message id="28" operation="createInstance(it.unibz.krdb.obda.ontology.Ontology,java.util.Properties):void">    
+  <message id="28" operation="createInstance(it.unibz.inf.obda.ontology.Ontology,java.util.Properties):void">
     <end type="SOURCE" refId="20"/>    
     <end type="TARGET" refId="29"/>  
   </message>  
@@ -144,7 +144,7 @@
     <end type="SOURCE" refId="29"/>    
     <end type="TARGET" refId="31"/>  
   </message>  
-  <message id="32" operation="loadTBox(it.unibz.krdb.obda.ontology.Ontology):void">    
+  <message id="32" operation="loadTBox(it.unibz.inf.obda.ontology.Ontology):void">
     <end type="SOURCE" refId="29"/>    
     <end type="TARGET" refId="33"/>  
   </message>  
@@ -152,11 +152,11 @@
     <end type="SOURCE" refId="29"/>    
     <end type="TARGET" refId="35"/>  
   </message>  
-  <message id="36" operation="getConnection():it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection">    
+  <message id="36" operation="getConnection():it.unibz.inf.obda.owlrefplatform.core.QuestDBConnection">
     <end type="SOURCE" refId="22"/>    
     <end type="TARGET" refId="37"/>  
   </message>  
-  <message id="39" operation="QuestDBConnection(it.unibz.krdb.obda.owlrefplatform.core.QuestConnection)">    
+  <message id="39" operation="QuestDBConnection(it.unibz.inf.obda.owlrefplatform.core.QuestConnection)">
     <end type="SOURCE" refId="37"/>    
     <end type="TARGET" refId="40"/>  
   </message>

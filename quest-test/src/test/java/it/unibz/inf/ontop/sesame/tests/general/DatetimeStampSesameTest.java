@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.sesame.tests.general;
 
-
-import junit.framework.TestCase;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -17,12 +16,6 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

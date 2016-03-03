@@ -20,19 +20,19 @@ package it.unibz.inf.ontop.api.io;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
-import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.io.PrefixManager;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.TestCase;
 

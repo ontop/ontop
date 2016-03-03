@@ -1,27 +1,25 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
-
-import java.awt.Component;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import org.protege.editor.owl.OWLEditorKit;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import org.protege.editor.owl.OWLEditorKit;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.concurrent.CountDownLatch;
+
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -74,8 +72,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 *  This function must do the call to e.g. statement.query()
-	 * @param queryString
-	 * @return
 	 */
 	public abstract T executeQuery(QuestOWLStatement st, String queryString) throws OWLException;
 
@@ -87,7 +83,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 * This function displays or handles the result
-	 * @param result THe result object ot be handles
+	 * @param res THe result object ot be handles
 	 */
 	public abstract void handleResult(T res) throws OWLException;
 
@@ -97,9 +93,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		this.actionStarted = true;
 		this.isCanceled = false;
 		this.queryExecError = false;
-		OBDAProgessMonitor monitor = null;
+		OBDAProgressMonitor monitor = null;
 		try {
-			monitor = new OBDAProgessMonitor(this.msg);
+			monitor = new OBDAProgressMonitor(this.msg);
 			monitor.start();
 			latch = new CountDownLatch(1);
 			OWLEditorKit kit = this.getEditorKit();

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,11 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
+import it.unibz.inf.ontop.protege.gui.action.OBDASaveQueryResultToFileAction;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -32,11 +37,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.table.TableModel;
-
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
-import it.unibz.inf.ontop.protege.gui.action.OBDASaveQueryResultToFileAction;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 
 public class ResultViewTablePanel extends javax.swing.JPanel {
 

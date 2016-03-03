@@ -23,12 +23,14 @@ package it.unibz.inf.ontop.r2rml;
  * @author timea bagosi
  * Class responsible to construct an OBDA model from an R2RML mapping file or graph.
  */
+
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.OBDADataSource;
+import org.openrdf.model.Model;
 
 import java.io.File;
 import java.net.URI;
@@ -86,7 +88,7 @@ public class R2RMLReader {
 	
 	/**
 	 * the method that gives the obda model based on the given graph
-	 * @param datasource - the datasource of the model
+	 * @param dataSource - the datasource of the model
 	 * @return the read obda model
 	 */
 	public OBDAModel readModel(OBDADataSource dataSource){

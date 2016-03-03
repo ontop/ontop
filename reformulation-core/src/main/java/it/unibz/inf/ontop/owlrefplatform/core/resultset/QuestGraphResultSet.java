@@ -20,60 +20,42 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.AssertionFactory;
+import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
+import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.algebra.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.ProjectionElemList;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
-import it.unibz.inf.ontop.model.BNode;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-
+import java.util.Map;
 
 public class QuestGraphResultSet implements GraphResultSet {
 
-	private List<List<Assertion>> results = new ArrayList<List<Assertion>>();
+	private List<List<Assertion>> results = new ArrayList<>();
 
 	private TupleResultSet tupleResultSet;
 
 
 	private SesameConstructTemplate sesameTemplate;
 
-	List <ExtensionElem> extList = null;
+	List<ExtensionElem> extList = null;
 	
-	HashMap <String, ValueExpr> extMap = null;
+	Map<String, ValueExpr> extMap = null;
 	
 	//store results in case of describe queries
 	private boolean storeResults = false;
 
 	private OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
 			boolean storeResult) throws OBDAException {
@@ -83,12 +65,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 		processResultSet(tupleResultSet, sesameTemplate);
 	}
 
-	@Override
-	public TupleResultSet getTupleResultSet() {
-		return tupleResultSet;
-	}
-
-	private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
+    private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
 			throws OBDAException {
 		if (storeResults) {
 			//process current result set into local buffer, 
@@ -105,12 +82,6 @@ public class QuestGraphResultSet implements GraphResultSet {
 		results.add(result);
 	}
 
-//	@Override
-//	public Template getTemplate() {
-//		return template;
-//	}
-
-	
 	/**
 	 * The method to actually process the current result set Row.
 	 * Construct a list of assertions from the current result set row.
@@ -119,20 +90,19 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-	
 	private List<Assertion> processResults(TupleResultSet result,
 			SesameConstructTemplate template) throws OBDAException {
-		List<Assertion> tripleAssertions = new ArrayList<Assertion>();
+		List<Assertion> tripleAssertions = new ArrayList<>();
 		List<ProjectionElemList> peLists = template.getProjectionElemList();
 		
 		Extension ex = template.getExtension();
 		if (ex != null) 
 			{
 				extList = ex.getElements();
-				HashMap <String, ValueExpr> newExtMap = new HashMap<String, ValueExpr>();
-				for (int i = 0; i < extList.size(); i++) {
-					newExtMap.put(extList.get(i).getName(), extList.get(i).getExpr());
-				}
+				Map<String, ValueExpr> newExtMap = new HashMap<>();
+                for (ExtensionElem anExtList : extList) {
+                    newExtMap.put(anExtList.getName(), anExtList.getExpr());
+                }
 				extMap = newExtMap;
 			}
 		for (ProjectionElemList peList : peLists) {
@@ -146,33 +116,25 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
-			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				OClass concept = ofac.createClass(objectConstant.getValue());
-				ClassAssertion ca = ofac.createClassAssertion(concept, subjectConstant);
-				tripleAssertions.add(ca);
-			} 
-			else {
-				if (objectConstant instanceof URIConstant) {
-					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop, subjectConstant,
-									(ObjectConstant) objectConstant);
-					tripleAssertions.add(op);
-				} 
-				else if (objectConstant instanceof BNode) {
-					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop, subjectConstant,
-									(ObjectConstant) objectConstant);
-					tripleAssertions.add(op);
+			Assertion assertion;
+			try {
+				if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
+					assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
 				} 
 				else {
-					DataPropertyExpression prop = ofac.createDataProperty(predicateName);
-					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(prop, subjectConstant,
-									(ValueConstant) objectConstant);
-					tripleAssertions.add(dp);
-				}
+					if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) 
+						assertion = ofac.createObjectPropertyAssertion(predicateName, 
+								subjectConstant, (ObjectConstant) objectConstant);
+					else 
+						assertion = ofac.createDataPropertyAssertion(predicateName, 
+									subjectConstant, (ValueConstant) objectConstant);
+				} 
+				if (assertion != null)
+					tripleAssertions.add(assertion);
+			}
+			catch (InconsistentOntologyException e) {
+				throw new RuntimeException("InconsistentOntologyException: " + 
+							predicateName + " " + subjectConstant + " " + objectConstant);
 			}
 		}
 		}

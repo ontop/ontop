@@ -27,10 +27,14 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import junit.framework.Assert;
+import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,15 +46,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QuestOWLMaterializerTest extends TestCase {
 
@@ -126,10 +121,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion)
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
 				
-				else if (assertion instanceof ObjectPropertyAssertion)
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
 				
 				else // DataPropertyAssertion
@@ -150,10 +145,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			man.load(f);
 			
 			// read onto 
-			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  OWLAPI3TranslatorUtility.translate(owl_onto);
+			Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/materializer/MaterializeTest.owl");
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());

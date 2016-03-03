@@ -20,33 +20,24 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
-//import it.it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+
 
 
 public class QuestOWLExample_OntowisTests {
@@ -226,12 +217,12 @@ public class QuestOWLExample_OntowisTests {
 	/**
 	 * @throws OBDAException 
 	 * @throws OWLOntologyCreationException 
-	 * @throws InvalidMappingException
+	 * @throws InvalidMappingException 
 	 * @throws InvalidPredicateDeclarationException 
 	 * @throws IOException 
 	 * @throws OWLException
 	 */
-	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
 		 * Load the ontology from an external .owl file.
@@ -260,17 +251,20 @@ public class QuestOWLExample_OntowisTests {
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(preference);
+//		factory.setOBDAController(obdaModel);
+//		factory.setPreferenceHolder(preference);
 
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-
+		QuestOWLConfiguration config;
 		if (manualKeys){
 			System.out.println();
-			ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-			factory.setImplicitDBConstraints(constr);
+			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
+			//factory.setImplicitDBConstraints(constr);
+			config = QuestOWLConfiguration.builder().obdaModel(obdaModel).dbConstraintsReader(constr).build();
+		} else {
+			config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
 		}
 		/*
 		 * T-Mappings Handling!!
@@ -278,7 +272,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		this.reasoner = reasoner;
 		/*

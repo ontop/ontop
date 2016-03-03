@@ -20,6 +20,18 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import junit.framework.TestCase;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,21 +42,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import org.junit.Test;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 
 /***
  */
@@ -133,19 +130,16 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        
+		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
 		
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
+		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
@@ -167,7 +161,6 @@ public class TMappingConstantPositionsTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 	}
@@ -178,7 +171,6 @@ public class TMappingConstantPositionsTest extends TestCase {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);

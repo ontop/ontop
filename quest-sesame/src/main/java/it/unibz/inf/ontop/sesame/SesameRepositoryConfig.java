@@ -45,7 +45,7 @@ import static org.openrdf.repository.config.RepositoryConfigSchema.REPOSITORYTYP
 
 public class SesameRepositoryConfig extends RepositoryImplConfigBase {
 
-	public static final String NAMESPACE = "http://inf.unibz.it/krdb/obda/quest#";
+	public static final String NAMESPACE = "http://inf.unibz.it/inf/obda/quest#";
 
     /** <tt>http://inf.unibz.it/krdb/obda/quest#quest_type</tt> */
     public final static URI QUEST_TYPE;

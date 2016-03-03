@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,14 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,13 +37,6 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +166,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 			if (selectedSource == null) {
 				JOptionPane.showMessageDialog(this, "Please select data source first", "Error", JOptionPane.ERROR_MESSAGE);
 			} else {
-				OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
+				OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
 				CountDownLatch latch = new CountDownLatch(1);
 				ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 				progMonitor.addProgressListener(action);

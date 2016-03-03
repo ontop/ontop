@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.AbstractPrefixManager;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.io.AbstractPrefixManager;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 /**
  * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any
@@ -34,9 +35,9 @@ import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
  */
 public class PrefixManagerWrapper extends AbstractPrefixManager {
 
-	PrefixOWLOntologyFormat owlmapper;
+    PrefixDocumentFormat owlmapper;
 
-	public PrefixManagerWrapper(PrefixOWLOntologyFormat owlmapper) {
+	public PrefixManagerWrapper(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
 	
@@ -77,7 +78,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 
 	@Override
 	public void clear() {
-		owlmapper.clearPrefixes();
+		owlmapper.clear();
 	}
 
 	@Override

@@ -13,7 +13,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-quest-owlapi3</artifactId>
+			<artifactId>ontop-quest-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -23,7 +23,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -47,10 +47,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-		</dependency>
 	</dependencies>
 	
 	<build>

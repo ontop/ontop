@@ -21,26 +21,24 @@ package it.unibz.inf.ontop.quest.dag;
  */
 
 
-
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
-import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import junit.framework.TestCase;
-
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Map.Entry;
 
 public class S_Indexes_TestNewDAG extends TestCase {
 	
@@ -103,15 +101,13 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-
+		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine);
-		
 		
 		assertTrue(testIndexes(engine, dag));
 	}

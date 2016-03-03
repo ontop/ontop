@@ -20,15 +20,14 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.utils.EventGeneratingLinkedList;
+import it.unibz.inf.ontop.utils.EventGeneratingList;
+import it.unibz.inf.ontop.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.utils.EventGeneratingList;
-import it.unibz.inf.ontop.utils.EventGeneratingLinkedList;
 
 /**
  * TODO: rename ListenableFunctionImpl
@@ -189,4 +188,25 @@ public class FunctionalTermImpl extends AbstractFunctionalTermImpl implements Li
 		}
 		listChanged();
 	}
+
+	@Override
+	public boolean isDataFunction() {
+		return (!(isOperation() || isAlgebraFunction() || isDataTypeFunction()));
+	}
+
+	@Override
+	public boolean isOperation() {
+		return getFunctionSymbol() instanceof OperationPredicate;
+	}
+
+	@Override
+	public boolean isAlgebraFunction() {
+		return getFunctionSymbol() instanceof AlgebraOperatorPredicate;
+	}
+	
+	@Override
+	public boolean isDataTypeFunction() {
+		return getFunctionSymbol() instanceof DatatypePredicate;
+	}
+	
 }

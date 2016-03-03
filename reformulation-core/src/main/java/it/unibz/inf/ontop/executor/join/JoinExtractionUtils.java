@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.executor.join;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.ExpressionOperation;
 import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -31,16 +32,17 @@ public class JoinExtractionUtils {
      * TODO: explain
      */
     public static Optional<ImmutableBooleanExpression> extractFoldAndOptimizeBooleanExpressions(
-            ImmutableList<JoinOrFilterNode> filterAndJoinNodes) throws InsatisfiedExpressionException {
+            ImmutableList<JoinOrFilterNode> filterAndJoinNodes, MetadataForQueryOptimization metadata)
+            throws InsatisfiedExpressionException {
 
         ImmutableList<ImmutableBooleanExpression> booleanExpressions = extractBooleanExpressions(
                 filterAndJoinNodes);
 
         Optional<ImmutableBooleanExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator();
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(metadata.getUriTemplateMatcher());
 
-            Optional<ImmutableBooleanExpression> optionalEvaluatedExpression = evaluator.evaluateBooleanExpression(
+            Optional<ImmutableBooleanExpression> optionalEvaluatedExpression = evaluator.evaluateExpression(
                     foldedExpression.get());
             if (optionalEvaluatedExpression.isPresent()) {
                 return optionalEvaluatedExpression;
@@ -100,10 +102,10 @@ public class JoinExtractionUtils {
                 Iterator<ImmutableBooleanExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableBooleanExpression currentExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND,
+                ImmutableBooleanExpression currentExpression = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND,
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, currentExpression, it.next());
+                    currentExpression = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);

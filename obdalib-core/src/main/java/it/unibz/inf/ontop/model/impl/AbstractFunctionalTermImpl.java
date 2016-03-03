@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -74,8 +71,7 @@ public abstract class AbstractFunctionalTermImpl implements Function {
     /**
      * Check whether the function contains a particular term argument or not.
      *
-     * @param t
-     *            the term in question.
+     * @param t the term in question.
      * @return true if the function contains the term, or false otherwise.
      */
     @Override
@@ -98,26 +94,21 @@ public abstract class AbstractFunctionalTermImpl implements Function {
 
     @Override
     public boolean isDataFunction() {
-        return this.functor.isDataPredicate();
+        return (!(isOperation() || isAlgebraFunction() || isDataTypeFunction()));
     }
 
     @Override
-    public boolean isBooleanFunction() {
-        return this.functor.isBooleanPredicate();
+    public boolean isOperation() {
+        return functor instanceof OperationPredicate;
     }
 
     @Override
     public boolean isAlgebraFunction() {
-        return this.functor.isAlgebraPredicate();
-    }
-
-    @Override
-    public boolean isArithmeticFunction() {
-        return this.functor.isArithmeticPredicate();
+        return functor instanceof AlgebraOperatorPredicate;
     }
 
     @Override
     public boolean isDataTypeFunction() {
-        return this.functor.isDataTypePredicate();
+        return functor instanceof DatatypePredicate;
     }
 }

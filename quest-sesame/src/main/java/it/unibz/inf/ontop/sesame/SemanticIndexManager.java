@@ -20,16 +20,17 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi3.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.inf.ontop.sesame.SesameRDFIterator;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.turtle.TurtleParser;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public class SemanticIndexManager {
 	private final Connection conn;
 
 	private final TBoxReasoner reasoner;
+	private final ImmutableOntologyVocabulary voc;
 
 	private final RDBMSSIRepositoryManager dataRepository;
 
@@ -61,12 +63,11 @@ public class SemanticIndexManager {
 	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
+		voc = ontologyClosure.getVocabulary();
 
-		TBoxReasoner ontoReasoner = new TBoxReasonerImpl(ontologyClosure);
-		// generate a new TBox with a simpler vocabulary
-		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
+		reasoner = TBoxReasonerImpl.create(ontologyClosure, true);
 			
-		dataRepository = new RDBMSSIRepositoryManager(reasoner);
+		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
 		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");
@@ -89,7 +90,7 @@ public class SemanticIndexManager {
 				log.debug(e.getMessage(), e);
 			}
 		}
-
+		
 		dataRepository.createDBSchemaAndInsertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
@@ -106,9 +107,8 @@ public class SemanticIndexManager {
 
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology));
-		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
-		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);
+		OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology), voc);
+		int result = dataRepository.insertData(conn, aBoxIter, commitInterval, batchSize);
 
 		log.info("Loaded {} items into the DB.", result);
 
@@ -125,8 +125,6 @@ public class SemanticIndexManager {
 		
 		parser.setRDFHandler(aBoxIter);
 		
-		final EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
-
 
 		Thread t = new Thread() {
 			@Override
@@ -157,7 +155,7 @@ public class SemanticIndexManager {
 			@Override
 			public void run() {
 				try {
-					val[0] = dataRepository.insertData(conn, newData, commitInterval, batchSize);
+					val[0] = dataRepository.insertData(conn, aBoxIter, commitInterval, batchSize);
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

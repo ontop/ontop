@@ -20,26 +20,27 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
-import junit.framework.TestCase;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.TableDefinition;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.inf.ontop.sql.api.Attribute;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.UniqueConstraint;
+import junit.framework.TestCase;
 
 import java.sql.Types;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * TODO: disable this test
- */
 public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
@@ -50,21 +51,22 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata(("dummy class"));
-		TableDefinition table = new TableDefinition("TABLE");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, null, 1, null, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, null, 1, null, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, null, 1, null, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, false, null, 1, null, true));
-		metadata.add(table);
+		metadata = DBMetadataExtractor.createDummyMetadata();
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		
+		DatabaseRelationDefinition table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, true);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, true);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col4"))));
 		
-		table = new TableDefinition("TABLE2");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, true, false));
-		metadata.add(table);
+		table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, false);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col1"))));
 
         unfoldingProgram = fac.getDatalogProgram();
 
@@ -148,7 +150,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
+		Multimap<Predicate, List<Integer>> pkeys = DBMetadataUtil.extractPKs(metadata);
 		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
         // q(m, n, p) :-  id(m, p), id1(n, p)
@@ -164,8 +166,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
-		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
-				ArrayListMultimap.<Predicate, Integer>create());
+		DatalogProgram output = unfolder.unfold(input);
 		System.out.println("input " + input);
 
 		int atomcount = 0;

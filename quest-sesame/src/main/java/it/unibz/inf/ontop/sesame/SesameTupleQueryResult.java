@@ -21,17 +21,18 @@ package it.unibz.inf.ontop.sesame;
  */
 
 
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.TupleResultSet;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.TupleResultSet;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.impl.MapBindingSet;
-import it.unibz.inf.ontop.model.OBDAException;
 
 public class SesameTupleQueryResult implements TupleQueryResult {
 

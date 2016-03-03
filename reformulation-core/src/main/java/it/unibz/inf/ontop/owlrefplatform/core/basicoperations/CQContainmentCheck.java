@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.Substitution;
 import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.Substitution;
 
 public interface CQContainmentCheck {
 
@@ -15,7 +15,7 @@ public interface CQContainmentCheck {
 	*/
 	
 	boolean isContainedIn(CQIE cq1, CQIE cq2);
-	
+
 	Substitution computeHomomorphsim(CQIE q1, CQIE q2);
 	
 }

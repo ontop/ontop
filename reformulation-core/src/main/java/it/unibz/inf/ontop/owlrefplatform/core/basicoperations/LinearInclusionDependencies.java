@@ -6,20 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
+import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public class LinearInclusionDependencies {
 

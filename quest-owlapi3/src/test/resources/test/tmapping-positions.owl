@@ -9,13 +9,13 @@
 ]>
 
 
-<rdf:RDF xmlns="http://it.unibz.krdb/obda/test/simple#"
-     xml:base="http://it.unibz.krdb/obda/test/simple"
+<rdf:RDF xmlns="http://it.unibz.inf/obda/test/simple#"
+     xml:base="http://it.unibz.inf/obda/test/simple"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <owl:Ontology rdf:about="http://it.unibz.krdb/obda/test/simple"/>
+    <owl:Ontology rdf:about="http://it.unibz.inf/obda/test/simple"/>
     
 
 
@@ -27,6 +27,9 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/test/simple#P">
+  		<rdfs:domain rdf:resource="http://it.unibz.inf/obda/test/simple#C"/>
+  	</owl:ObjectProperty>
     
 
 
@@ -39,16 +42,13 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P">
-  		<rdfs:domain rdf:resource="http://it.unibz.krdb/obda/test/simple#C"/>
-  	</owl:ObjectProperty>	    
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#U -->
+    <!-- http://it.unibz.inf/obda/test/simple#U -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U">
-  		<rdfs:domain rdf:resource="http://it.unibz.krdb/obda/test/simple#A"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/test/simple#U">
+  		<rdfs:domain rdf:resource="http://it.unibz.inf/obda/test/simple#A"/>
   	</owl:DatatypeProperty>	    
 
 
@@ -63,12 +63,12 @@
     
 
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#A"/>
     
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#C"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#C"/>
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B">
-    	<rdfs:subClassOf rdf:resource="http://it.unibz.krdb/obda/test/simple#C"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#B">
+    	<rdfs:subClassOf rdf:resource="http://it.unibz.inf/obda/test/simple#C"/>
     </owl:Class>	
     
 </rdf:RDF>

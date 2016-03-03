@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unibz.inf.ontop.exception.Indicator;
 import it.unibz.inf.ontop.model.Predicate;
 
 /**

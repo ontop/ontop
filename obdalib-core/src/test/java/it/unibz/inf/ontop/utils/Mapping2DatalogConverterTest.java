@@ -21,50 +21,55 @@ package it.unibz.inf.ontop.utils;
  */
 
 import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.TableDefinition;
-import it.unibz.inf.ontop.sql.api.Attribute;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.UniqueConstraint;
+import junit.framework.TestCase;
 
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private DBMetadata md = new DBMetadata("dummy class");
+	private DBMetadata md;
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {
+		md = DBMetadataExtractor.createDummyMetadata();
+		QuotedIDFactory idfac = md.getQuotedIDFactory();
+		
 		// Database schema
-		TableDefinition table1 = new TableDefinition("Student");
-		table1.addAttribute(new Attribute("id", Types.INTEGER, true, null));
-		table1.addAttribute(new Attribute("first_name", Types.VARCHAR, false, null));
-		table1.addAttribute(new Attribute("last_name", Types.VARCHAR, false, null));
-		table1.addAttribute(new Attribute("year", Types.INTEGER, false, null));
-		table1.addAttribute(new Attribute("nationality", Types.VARCHAR, false, null));
+		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationID(null, "Student"));
+		table1.addAttribute(idfac.createAttributeID("id"), Types.INTEGER, null, false);
+		table1.addAttribute(idfac.createAttributeID("first_name"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createAttributeID("last_name"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createAttributeID("year"), Types.INTEGER, null, false);
+		table1.addAttribute(idfac.createAttributeID("nationality"), Types.VARCHAR, null, false);
+		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
 		
-		TableDefinition table2 = new TableDefinition("Course");
-		table2.addAttribute(new Attribute("cid", Types.VARCHAR, true, null));
-		table2.addAttribute(new Attribute("title", Types.VARCHAR, false, null));
-		table2.addAttribute(new Attribute("credits", Types.INTEGER, false, null));
-		table2.addAttribute(new Attribute("description", Types.VARCHAR, false, null));
+		DatabaseRelationDefinition table2 = md.createDatabaseRelation(idfac.createRelationID(null, "Course"));
+		table2.addAttribute(idfac.createAttributeID("cid"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createAttributeID("title"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createAttributeID("credits"), Types.INTEGER, null, false);
+		table2.addAttribute(idfac.createAttributeID("description"), Types.VARCHAR, null, false);
+		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
 		
-		TableDefinition table3 = new TableDefinition("Enrollment");
-		table3.addAttribute(new Attribute("student_id", Types.INTEGER, true, null));
-		table3.addAttribute(new Attribute("course_id", Types.VARCHAR, true, null));
-		
-		md.add(table1);
-		md.add(table2);
-		md.add(table3);
+		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationID(null, "Enrollment"));
+		table3.addAttribute(idfac.createAttributeID("student_id"), Types.INTEGER, null, false);
+		table3.addAttribute(idfac.createAttributeID("course_id"), Types.VARCHAR, null, false);
+		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")), 
+				table3.getAttribute(idfac.createAttributeID("course_id"))));
 		
 		// Prefix manager
 		pm.addPrefix(":", "http://www.example.org/university#");
@@ -72,9 +77,9 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm);
-		CQIE target = targetParser.parse(targetString);
+		List<Function> target = targetParser.parse(targetString);
 		
-		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(source, target);
+		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(ofac.getSQLQuery(source), target);
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
@@ -231,5 +236,13 @@ public class Mapping2DatalogConverterTest extends TestCase {
                 "select id from (select id from Student) JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
                 ":S_{id} a :Student .");
     }
+
+	public void testAnalysis_25() throws Exception {
+		runAnalysis(
+				"select \"QINVESTIGACIONPUARTTMP0\".id \"t1_1\" from Student \"QINVESTIGACIONPUARTTMP0\"  where \"QINVESTIGACIONPUARTTMP0\".first_name IS NOT NULL ",
+				":S_{t1_1} a :Student .");
+	}
+
+
 
 }

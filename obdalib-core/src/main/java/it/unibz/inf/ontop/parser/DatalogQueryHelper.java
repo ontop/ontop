@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDALibConstants;
+import it.unibz.inf.ontop.io.PrefixManager;
+
 import java.util.Map;
 import java.util.Set;
-
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.OBDALibConstants;
 
 /**
  * Provides additional strings for constructing a proper datalog query.

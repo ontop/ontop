@@ -23,13 +23,12 @@ package it.unibz.inf.ontop.quest.dag;
 
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
+import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -232,24 +231,11 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 			// TODO Auto-generated method stub
 			return null;
 		}
-	}
 
-	@Override
-	public OClass getClassRepresentative(OClass p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
+		@Override
+		public T getCanonicalForm(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }

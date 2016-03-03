@@ -21,22 +21,17 @@ package it.unibz.inf.ontop.quest.dag;
  */
 
 
-import java.util.Random;
-
-import junit.framework.TestCase;
-
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Random;
 
 public class DAGPerformanceTest extends TestCase {
 
@@ -68,10 +63,10 @@ public class DAGPerformanceTest extends TestCase {
 	public void testOnto15() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
-		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
+		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/inf/obda/quest/core/dag/test.owl"));
 
 		log.debug("Generating classes");
-		String base = "http://www.obda.org/krdb/obda/quest/core/dag/test.owl#";
+		String base = "http://www.obda.org/inf/obda/quest/core/dag/test.owl#";
 		OWLClass[] classes = new OWLClass[size];
 		for (int i = 0; i < size; i++) {
 			OWLClass c = fac.getOWLClass(IRI.create(base + "class" + i));
@@ -131,12 +126,12 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
+		Ontology o = OWLAPITranslatorUtility.translate(ont);
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasonerImpl reasoner= new TBoxReasonerImpl(o);
+		TBoxReasoner reasoner= TBoxReasonerImpl.create(o);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -159,10 +154,10 @@ public class DAGPerformanceTest extends TestCase {
 	public void testOnto17() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
-		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
+		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/inf/obda/quest/core/dag/test.owl"));
 
 		log.debug("Generating classes");
-		String base = "http://www.obda.org/krdb/obda/quest/core/dag/test.owl#";
+		String base = "http://www.obda.org/inf/obda/quest/core/dag/test.owl#";
 		OWLClass[] classes = new OWLClass[size];
 		for (int i = 0; i < size; i++) {
 			OWLClass c = fac.getOWLClass(IRI.create(base + "class" + i));
@@ -221,14 +216,14 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
+		Ontology o = OWLAPITranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasonerImpl  reasoner = new TBoxReasonerImpl(o);
+		TBoxReasoner  reasoner = TBoxReasonerImpl.create(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -252,10 +247,10 @@ public class DAGPerformanceTest extends TestCase {
 	public void testOnto19() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
-		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
+		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/inf/obda/quest/core/dag/test.owl"));
 
 		log.debug("Generating classes");
-		String base = "http://www.obda.org/krdb/obda/quest/core/dag/test.owl#";
+		String base = "http://www.obda.org/inf/obda/quest/core/dag/test.owl#";
 		OWLClass[] classes = new OWLClass[size];
 		for (int i = 0; i < size; i++) {
 			OWLClass c = fac.getOWLClass(IRI.create(base + "class" + i));
@@ -317,14 +312,14 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPI3TranslatorUtility.translate(ont);
+		Ontology o = OWLAPITranslatorUtility.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasonerImpl  reasoner= new TBoxReasonerImpl(o);
+		TBoxReasoner  reasoner= TBoxReasonerImpl.create(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 

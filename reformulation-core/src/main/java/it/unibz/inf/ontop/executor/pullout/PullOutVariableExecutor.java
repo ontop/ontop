@@ -264,7 +264,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
 
         ImmutableList.Builder<ImmutableBooleanExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            equalityBuilder.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ,
+            equalityBuilder.add(DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
         return ImmutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();

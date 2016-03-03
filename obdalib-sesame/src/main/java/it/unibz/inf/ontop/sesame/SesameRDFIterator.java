@@ -20,16 +20,23 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.DatatypeFactory;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.AssertionFactory;
+import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
+import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.ontology.OClass;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -38,20 +45,11 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.RDFHandlerBase;
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 
 public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
 	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private BlockingQueue<Statement> buffer;
@@ -166,53 +164,54 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		}
 		
 		// Create the assertion
-		Assertion assertion = null;
-		if (currentPredicate.getArity() == 1) {
-			OClass concept = ofac.createClass(currentPredicate.getName());
-			assertion = ofac.createClassAssertion(concept, c);
-		} 
-		else if (currentPredicate.getArity() == 2) {
-			if (currObject instanceof URI) {
-				ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
-				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
-				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+		Assertion assertion;
+		try {
+			if (currentPredicate.getArity() == 1) {
+				assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
 			} 
-			else if (currObject instanceof BNode) {
-				ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
-				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
-				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
-			} 
-			else if (currObject instanceof Literal) {
-				Literal l = (Literal) currObject;				
-				String lang = l.getLanguage();
-				ValueConstant c2;
-				if (lang == null) {
-					URI datatype = l.getDatatype();
-					Predicate.COL_TYPE type; 
-					
-					if (datatype == null) {
-						type = Predicate.COL_TYPE.LITERAL;
+			else if (currentPredicate.getArity() == 2) {
+				if (currObject instanceof URI) {
+					ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
+					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+				} 
+				else if (currObject instanceof BNode) {
+					ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
+					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+				} 
+				else if (currObject instanceof Literal) {
+					Literal l = (Literal) currObject;				
+					String lang = l.getLanguage();
+					ValueConstant c2;
+					if (lang == null) {
+						URI datatype = l.getDatatype();
+						Predicate.COL_TYPE type; 
+						
+						if (datatype == null) {
+							type = Predicate.COL_TYPE.LITERAL;
+						} 
+						else {
+							type = dtfac.getDatatype(datatype);
+							if (type == null)
+								type = Predicate.COL_TYPE.UNSUPPORTED;
+						}			
+						
+						c2 = obdafac.getConstantLiteral(l.getLabel(), type);
 					} 
 					else {
-						type = dtfac.getDatatype(datatype);
-						if (type == null)
-							type = Predicate.COL_TYPE.UNSUPPORTED;
-					}			
-					
-					c2 = obdafac.getConstantLiteral(l.getLabel(), type);
+						c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
+					}
+					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
 				} 
 				else {
-					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
+					throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 				}
-				DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
-				assertion = ofac.createDataPropertyAssertion(prop, c, c2);			
 			} 
 			else {
-				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
+				throw new RuntimeException("Unsupported statement: " + st.toString());
 			}
-		} 
-		else {
-			throw new RuntimeException("Unsupported statement: " + st.toString());
+		}
+		catch (InconsistentOntologyException e) {
+			throw new RuntimeException("InconsistentOntologyException: " + currentPredicate + " " + currSubject + " " + currObject);
 		}
 		return assertion;
 	}

@@ -21,19 +21,16 @@ package it.unibz.inf.ontop.reformulation.semindex.tests;
  */
 
 
-
-
-import java.util.LinkedList;
-import java.util.List;
-
-
 import it.unibz.inf.ontop.ontology.ClassExpression;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.Description;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataRangeExpression;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.TestCase;
 

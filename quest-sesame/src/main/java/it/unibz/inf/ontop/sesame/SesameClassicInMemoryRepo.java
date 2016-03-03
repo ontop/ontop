@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import org.openrdf.query.Dataset;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 
 public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 	
@@ -36,7 +37,6 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 		super();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
@@ -58,7 +58,6 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 		super();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 

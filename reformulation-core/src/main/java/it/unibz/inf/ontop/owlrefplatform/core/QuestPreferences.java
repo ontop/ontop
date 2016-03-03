@@ -46,6 +46,13 @@ public class QuestPreferences extends Properties {
 	public static final String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";
 	public static final String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
+
+	/**
+	 * Options to specify base IRI.
+	 *
+	 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-base-iri">Base IRI</a>
+	 */
+	public static final String  BASE_IRI             	= "org.obda.owlreformulationplatform.baseiri";
 	
 	public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
 
@@ -54,7 +61,7 @@ public class QuestPreferences extends Properties {
 
     public static final String  REWRITE 	= "rewrite";
 	
-	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
+//	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 	
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
@@ -165,7 +172,7 @@ public class QuestPreferences extends Properties {
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
 		keys.add(OPTIMIZE_EQUIVALENCES);
-		keys.add(OPTIMIZE_TBOX_SIGMA);
+//		keys.add(OPTIMIZE_TBOX_SIGMA);
 //		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;

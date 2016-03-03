@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.io;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
+
+import java.util.List;
 
 public abstract class AbstractPrefixManager implements PrefixManager {
 
@@ -47,7 +47,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		
 		// Check if the URI string has a matched prefix
 		for (String prefixUriDefinition : namespaceList) {
-			if (cleanUri.contains(prefixUriDefinition)) {
+			if (cleanUri.startsWith(prefixUriDefinition)) {
 				String prefix = getPrefix(prefixUriDefinition);
 				if (insideQuotes) {
 					prefix = String.format("&%s;", removeColon(prefix));

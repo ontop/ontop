@@ -20,16 +20,16 @@ package it.unibz.inf.ontop.owlrefplatform.core.unfolding;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.URIConstant;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.URIConstant;
 
 public class URIToFunctionMatcher implements Serializable {
 

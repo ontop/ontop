@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.quest;
  * #L%
  */
 
+import static it.unibz.inf.ontop.quest.ResultSetInfoSchema.RESULTSET_SIZE;
+import static it.unibz.inf.ontop.quest.ResultSetInfoSchema.THROWN_EXCEPTION;
+
 import java.util.Set;
 
 import org.openrdf.model.Statement;
@@ -33,9 +36,9 @@ public class ResultSetInfoTupleUtil {
 		ResultSetInfo rsInfo = new ResultSetInfo();
 		for (Statement stmt : resultGraph) {
 			URI predicate = getPredicate(stmt);
-			if (predicate.equals(ResultSetInfoSchema.RESULTSET_SIZE)) {
+			if (predicate.equals(RESULTSET_SIZE)) {
 				rsInfo.put("counter", getIntValue(stmt));
-			} else if (predicate.equals(ResultSetInfoSchema.THROWN_EXCEPTION)) {
+			} else if (predicate.equals(THROWN_EXCEPTION)) {
 				rsInfo.put("thrownException", getStringValue(stmt));
 			} else if (predicate.equals(RDF.TYPE)) {
 				// NO-OP

@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
+import java.sql.Connection;
+
 import it.unibz.inf.ontop.model.OBDAConnection;
 import it.unibz.inf.ontop.model.OBDAException;
 
-import java.sql.Connection;
 
 public class QuestDBConnection implements OBDAConnection {
 

@@ -20,17 +20,19 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi3.example;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.inf.ontop.io.ModelIOManager;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 /**
@@ -64,7 +66,7 @@ public class ABoxMaterializerExample {
 		 */
 
 		// TODO: try the streaming mode.
-		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false);
+		try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, false)) {
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);
@@ -82,19 +84,13 @@ public class ABoxMaterializerExample {
 			fout.delete(); // clean any existing output file.
 		}
 		
-		PrintWriter out = null;
-		try {
-		    out = new PrintWriter(new BufferedWriter(new FileWriter(fout, true)));
+		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fout, true)))) {
 			while (triplesIter.hasNext()) {
 				OWLIndividualAxiom individual = triplesIter.next();
 				out.println(individual.toString());
 			}
 			out.flush();
-		} finally {
-		    if (out != null) {
-		    	out.close();
-		    }
-		    materializer.disconnect();
+		} 
 		}
 	}
 

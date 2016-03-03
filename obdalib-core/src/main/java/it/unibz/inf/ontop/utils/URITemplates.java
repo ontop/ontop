@@ -20,17 +20,16 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.TermUtils;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.model.Variable;
-
 import java.util.LinkedList;
 import java.util.List;
 

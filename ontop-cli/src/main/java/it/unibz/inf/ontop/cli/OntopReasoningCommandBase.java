@@ -1,20 +1,21 @@
 package it.unibz.inf.ontop.cli;
 
 
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
 import com.google.common.base.Preconditions;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.r2rml.R2RMLReader;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
@@ -31,24 +32,25 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
             title = "output", description = "output file (default) or directory (for --separate-files)")
+    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
-    protected static OWLOntologyFormat getOntologyFormat(String format) throws Exception {
-		OWLOntologyFormat ontoFormat;
+    protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
+		OWLDocumentFormat ontoFormat;
 
 		if(format == null){
-			ontoFormat = new RDFXMLOntologyFormat();
+			ontoFormat = new RDFXMLDocumentFormat();
 		}
 		else {
 		switch (format) {
 			case "rdfxml":
-				ontoFormat = new RDFXMLOntologyFormat();
+				ontoFormat = new RDFXMLDocumentFormat();
 				break;
 			case "owlxml":
-				ontoFormat = new OWLXMLOntologyFormat();
+				ontoFormat = new OWLXMLDocumentFormat();
 				break;
 			case "turtle":
-				ontoFormat = new TurtleOntologyFormat();
+				ontoFormat = new TurtleDocumentFormat();
 				break;
 			default:
 				throw new Exception("Unknown format: " + format);
@@ -59,7 +61,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 
-        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI();
+        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI().get();
         System.err.println("Ontology " + ontologyIRI);
 
         Set<OWLDeclarationAxiom> declarationAxioms = ontology.getAxioms(AxiomType.DECLARATION);
@@ -78,7 +80,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         if(mappingFile.endsWith(".obda")){
             obdaModel = loadOBDA(mappingFile);
         } else {
-            obdaModel = loadR2RML(mappingFile, jdbcUrl, jdbcUserName, jdbcPassword, jdbcDriverClass);
+            obdaModel = loadR2RML(mappingFile, jdbcURL, jdbcUserName, jdbcPassword, jdbcDriverClass);
         }
         return obdaModel;
     }
@@ -93,7 +95,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     private OBDAModel loadR2RML(String r2rmlFile, String jdbcUrl, String username, String password, String driverClass) {
 
-        Preconditions.checkNotNull(jdbcUrl, "jdbcUrl is null");
+        Preconditions.checkNotNull(jdbcUrl, "jdbcURL is null");
         Preconditions.checkNotNull(password, "password is null");
         Preconditions.checkNotNull(username, "username is null");
         Preconditions.checkNotNull(driverClass, "driverClass is null");

@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-
 import it.unibz.inf.ontop.model.Substitution;
-import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.Term;
-
+import it.unibz.inf.ontop.model.Variable;
 import java.util.HashMap;
 import java.util.Map;
 

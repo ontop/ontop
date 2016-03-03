@@ -20,12 +20,14 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import java.util.List;
+
+import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
 
 public interface TargetQueryParser {
 	
 	public void setPrefixManager(PrefixManager manager);
 	
-	public CQIE parse(String input) throws TargetQueryParserException;
+	public List<Function> parse(String input) throws TargetQueryParserException;
 }

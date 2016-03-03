@@ -9,7 +9,7 @@
    <!ENTITY rdfs: 'http://www.w3.org/2000/01/rdf-schema#'>
 ]>
 <OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns::="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:Ontology1207768242:="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:owl2xml:="http://www.w3.org/2006/12/owl2-xml#" xmlns:owl:="http://www.w3.org/2002/07/owl#" xmlns:rdf:="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs:="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd:="http://www.w3.org/2001/XMLSchema#">
-  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
+  <mappings body="class it.unibz.inf.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.inf.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
     <mapping id="MAP1328576178907089000">
       <CQ string="Address(getAddressObj($id)),addressID(getAddressObj($id),$id),inStreet(getAddressObj($id),$street),hasNumber(getAddressObj($id),$number),inCity(getAddressObj($id),$city),inState(getAddressObj($id),$state),inCountry(getAddressObj($id),$country)"/>
       <SQLQuery string="select id, street, number, city, state, country from address"/>

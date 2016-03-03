@@ -20,18 +20,18 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAQuery;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-
 public class SourceQueryValidator {
 
-	private OBDAQuery sourceQuery = null;
+	private OBDASQLQuery sourceQuery = null;
 
 	private Exception reason = null;
 
@@ -43,7 +43,7 @@ public class SourceQueryValidator {
 
 	private Connection c;
 
-	public SourceQueryValidator(OBDADataSource source, OBDAQuery q) {
+	public SourceQueryValidator(OBDADataSource source, OBDASQLQuery q) {
 		this.source = source;
 		sourceQuery = q;
 	}

@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
  * #L%
  */
 
-import java.io.Serializable;
-import java.util.List;
-
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.OBDAException;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * A general interface which should be use to implement new source query

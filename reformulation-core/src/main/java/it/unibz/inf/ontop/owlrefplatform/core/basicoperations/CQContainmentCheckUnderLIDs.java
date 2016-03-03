@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,7 +12,6 @@ import java.util.Set;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
@@ -161,43 +162,92 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return indexedQ1.computeHomomorphism(q2);
 	}	
 
-/*	
+	static int redundantCounter = 0;
+	public static int twoAtomQs = 0;
+	public static int oneAtomQs = 0;
+	
 	public CQIE removeRedundantAtoms(CQIE query) {
-		List<Function> nonRedundantAtoms = new ArrayList<>(query.getBody().size());
+		List<Function> databaseAtoms = new ArrayList<>(query.getBody().size());
 		
-		Set<Variable> filterVariables = new HashSet<>();
+		Set<Term> groundTerms = new HashSet<>();
 		for (Function atom : query.getBody())
-			if (!atom.isDataFunction())
-				filterVariables.addAll(atom.getVariables());
-		
-		for (Function atom : query.getBody()) {
-			if (atom.isDataFunction()) {
-				boolean variableOccurrence = false;
-				for (Variable term : atom.getVariables()) 
-					if (filterVariables.contains(term)) {
-						variableOccurrence = true;
-						break;
-					}
-				if (variableOccurrence) {
-					nonRedundantAtoms.add(atom);
-					continue;
-				}
-					
-				CQIE clone = query.clone();
-				clone.getBody().remove(atom);
-				if (!isContainedIn(clone, query))
-					nonRedundantAtoms.add(atom);
-				else
-					System.err.println("CQC REMOVED ATOM: " + atom + " FROM " + query);
+			// non-database atom
+			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+				collectVariables(groundTerms, atom);
 			}
-			else
-				nonRedundantAtoms.add(atom);
+			else {
+				databaseAtoms.add(atom);
+			}
+
+		if (databaseAtoms.size() < 2) {
+			oneAtomQs++;
+			return query;
 		}
 		
-		return fac.getCQIE(query.getHead(), nonRedundantAtoms);
+		collectVariables(groundTerms, query.getHead());
+		
+		CQIE db = fac.getCQIE(query.getHead(), databaseAtoms);
+		
+		for (int i = 0; i < databaseAtoms.size(); i++) {
+			Function atomToBeRemoved = databaseAtoms.get(i);
+			if (checkRedundant(db, groundTerms, atomToBeRemoved)) {
+				System.out.println("  REDUNDANT " + ++redundantCounter + ": " + atomToBeRemoved + " IN " + query);
+				query.getBody().remove(atomToBeRemoved);
+				databaseAtoms.remove(atomToBeRemoved);
+				i--;
+			}
+		}
+		
+		twoAtomQs++;
+		return query;
 	}
-*/
 	
+	private boolean checkRedundant(CQIE db, Set<Term> groundTerms, Function atomToBeRemoved) {
+		List<Function> atomsToLeave = new ArrayList<>(db.getBody().size() - 1);
+		Set<Term> variablesInAtomsToLeave = new HashSet<>();
+		for (Function a: db.getBody()) 
+			if (a != atomToBeRemoved) {
+				atomsToLeave.add(a);
+				collectVariables(variablesInAtomsToLeave, a);
+			}
+		
+		if (!variablesInAtomsToLeave.containsAll(groundTerms)) {
+			return false;
+		}
+
+		CQIE q0 = fac.getCQIE(db.getHead(), atomsToLeave);
+		// if db is homomorphically embeddable into q0
+		if (computeHomomorphsim(q0, db) != null) {
+			oneAtomQs++;
+			return true;
+		}
+		return false;
+	}
+
+
+	private static void collectVariables(Set<Term> vars, Function atom) {
+		Deque<Term> terms = new LinkedList<>(atom.getTerms());
+		while (!terms.isEmpty()) {
+			Term t = terms.pollFirst();
+			if (t instanceof Variable) 
+				vars.add(t);
+			else if (!(t instanceof Constant))
+				terms.addAll(((Function)t).getTerms());
+		}		
+	}
+/*	
+	private static boolean containsConstants(Function atom) {
+		Deque<Term> terms = new LinkedList<>(atom.getTerms());
+		while (!terms.isEmpty()) {
+			Term t = terms.pollFirst();
+			if (t instanceof Constant)  
+				return true;
+			else if (!(t instanceof Variable))
+				terms.addAll(((Function)t).getTerms());
+		}		
+		return false;
+	}
+*/	
 	@Override
 	public String toString() {
 		if (dependencies != null)

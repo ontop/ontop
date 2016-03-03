@@ -25,9 +25,16 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tests that the generated SQL contains no blank lines
@@ -109,11 +116,10 @@ public class TestSQLBlankLines {
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 			// Creating a new instance of the reasoner
 			this.factory = new QuestOWLFactory();
-			factory.setOBDAController(obdaModel);
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+	        reasoner = factory.createReasoner(ontology, config);
 
-			factory.setPreferenceHolder(p);
-
-
+			
 		} catch (Exception exc) {
 			try {
 				tearDown();
@@ -126,7 +132,6 @@ public class TestSQLBlankLines {
 
 	@Test
 	public void testNoSQLBlankLines() throws Exception {
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

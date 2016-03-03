@@ -45,7 +45,7 @@ public class RedundantJoinTest {
          */
         uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
 
-        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build());
+        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), uriTemplateMatcher);
     }
 
     /**

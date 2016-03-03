@@ -20,66 +20,19 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.BooleanOperationPredicate;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.StringOperationPredicate;
-import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.ValueConstant;
 
 public class OBDAVocabulary {
 
-	/*
-	 * Singleton
-	 */
-	private OBDAVocabulary(){
-
-	}
-	
-
 	/* Constants */
-	
-	public static final ValueConstant NULL = new ValueConstantImpl("NULL", COL_TYPE.NULL);
+
+	public static final ValueConstant NULL = new ValueConstantImpl("null", COL_TYPE.STRING);
 	public static final ValueConstant TRUE = new ValueConstantImpl("true", COL_TYPE.BOOLEAN);
 	public static final ValueConstant FALSE = new ValueConstantImpl("false", COL_TYPE.BOOLEAN);
 
-	
-	/* Numeric operation predicates */
-	
-	public static final Predicate MINUS = new NumericalOperationPredicateImpl("minus", 1); // TODO (ROMAN): check -- never used
-	public static final Predicate ADD = new NumericalOperationPredicateImpl("add", 2);
-	public static final Predicate SUBTRACT = new NumericalOperationPredicateImpl("subtract", 2);
-	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl("multiply", 2);
-		
-	/* Boolean predicates */
-
-	public static final BooleanOperationPredicate AND = new BooleanOperationPredicateImpl("AND", 2);
-	public static final BooleanOperationPredicate OR = new BooleanOperationPredicateImpl("OR", 2);
-	public static final BooleanOperationPredicate NOT = new BooleanOperationPredicateImpl("NOT", 1);
-
-	public static final BooleanOperationPredicate EQ = new BooleanOperationPredicateImpl("EQ", 2);
-	public static final BooleanOperationPredicate NEQ = new BooleanOperationPredicateImpl("NEQ", 2);
-
-	public static final BooleanOperationPredicate GTE = new BooleanOperationPredicateImpl("GTE", 2);
-	public static final BooleanOperationPredicate GT = new BooleanOperationPredicateImpl("GT", 2);
-	public static final BooleanOperationPredicate LTE = new BooleanOperationPredicateImpl("LTE", 2);
-	public static final BooleanOperationPredicate LT = new BooleanOperationPredicateImpl("LT", 2);
-
-	public static final BooleanOperationPredicate IS_NULL = new BooleanOperationPredicateImpl("IS_NULL", 1);
-	public static final BooleanOperationPredicate IS_NOT_NULL = new BooleanOperationPredicateImpl("IS_NOT_NULL", 1);
-	public static final BooleanOperationPredicate IS_TRUE = new BooleanOperationPredicateImpl("IS_TRUE", 1);
-
-	
-	/* String predicates */
-	
-	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
-            "REPLACE", 3, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL});
-	
-	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
-            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
-	
-	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-
 
 	/* Common namespaces and prefixes */
 
@@ -94,78 +47,19 @@ public class OBDAVocabulary {
 	public static final String PREFIX_OWL = "owl:";
 	public static final String PREFIX_QUEST = "quest:";
 
-	
 	// TODO: to be removed
 	public static final String RDFS_LITERAL_URI = "http://www.w3.org/2000/01/rdf-schema#Literal";
-	
+
 	/* Built-in function URIs */
 
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_URI = "URI";
 
-	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
-
-	public static final Predicate QUEST_CAST = new PredicateImpl("cast", 2, new COL_TYPE[2]);
-	
 	public static final String QUEST_QUERY = "ans1";
 
-	// TODO: GX refactor
-	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
+	/* SPARQL algebra operations */
 
-	//TODO: Remove this if it is not used!!
-	public static final String XSD_INT_URI = "http://www.w3.org/2001/XMLSchema#int";
-
-
-	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
-
-	public static final String XSD_LONG_URI = "http://www.w3.org/2001/XMLSchema#long";
-
-	public static final String XSD_DECIMAL_URI = "http://www.w3.org/2001/XMLSchema#decimal";
-
-	public static final String XSD_DOUBLE_URI = "http://www.w3.org/2001/XMLSchema#double";
-
-	public static final String XSD_DATETIME_URI = "http://www.w3.org/2001/XMLSchema#dateTime";
-
-	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
-
-	public static final String SPARQL_COUNT_URI = "Count";
-
-	public static final String SPARQL_AVG_URI = "Avg";
-
-	public static final String SPARQL_SUM_URI = "Sum";
-
-	public static final String SPARQL_MIN_URI = "Min";
-
-	public static final String SPARQL_MAX_URI = "Max";
-
-	/* SPARQL Algebra predicate */
 	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl("Join");
 	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl("LeftJoin");
 
-
-	/* SPARQL built-in functions */
-	
-	public static final Predicate SPARQL_STR = new NonBooleanOperationPredicateImpl("str");
-	public static final Predicate SPARQL_DATATYPE = new NonBooleanOperationPredicateImpl("datatype");
-	public static final Predicate SPARQL_LANG = new NonBooleanOperationPredicateImpl("lang");
-
-	public static final Predicate SPARQL_COUNT = new NonBooleanOperationPredicateImpl("Count");
-	public static final Predicate SPARQL_AVG = new NonBooleanOperationPredicateImpl("Avg");
-	public static final Predicate SPARQL_SUM = new NonBooleanOperationPredicateImpl("Sum");
-	public static final Predicate SPARQL_MIN = new NonBooleanOperationPredicateImpl("Min");
-	public static final Predicate SPARQL_MAX = new NonBooleanOperationPredicateImpl("Max");
-
-	public static final Predicate SPARQL_GROUP = new AlgebraOperatorPredicateImpl("Group");
-	public static final Predicate SPARQL_HAVING = new BooleanOperationPredicateImpl("Having", 1);
-
-	
-	/* SPARQL built-in predicates */
-	
-	public static final BooleanOperationPredicate SPARQL_IS_LITERAL = new BooleanOperationPredicateImpl("isLiteral", 1);
-	public static final BooleanOperationPredicate SPARQL_IS_URI = new BooleanOperationPredicateImpl("isURI", 1);
-	public static final BooleanOperationPredicate SPARQL_IS_IRI = new BooleanOperationPredicateImpl("isIRI", 1);
-	public static final BooleanOperationPredicate SPARQL_IS_BLANK = new BooleanOperationPredicateImpl("isBlank", 1);
-	public static final BooleanOperationPredicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl("LangMatches", 2);
-	public static final BooleanOperationPredicate SPARQL_REGEX = new BooleanOperationPredicateImpl("regex", 3);
-	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl("like", 2);
 }

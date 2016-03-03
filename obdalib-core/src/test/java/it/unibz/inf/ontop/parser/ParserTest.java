@@ -20,9 +20,12 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,12 +62,11 @@ public class ParserTest extends TestCase {
 
 	}
 
-    // Does not parse SELECT DISTINCT (on purpose restriction)
+	// Does not parse SELECT DISTINCT (on purpose restriction)
 	public void test_1_3_1() {
 		final boolean result = parseJSQL("SELECT DISTINCT name FROM student");
 		printJSQL("test_1_3_1", result);
 		assertFalse(result);
-
 	}
 
 	public void test_1_3_2() {
@@ -96,7 +98,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_1_5_extra() {
 
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
@@ -105,7 +107,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-	
+
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
@@ -351,7 +353,7 @@ public class ParserTest extends TestCase {
 
 	}
 
-//	ADDED EXCEPTION IN JSQL for ANY
+	//	ADDED EXCEPTION IN JSQL for ANY
 	public void test_3_9_1() {
 		// ANY AND SOME are the same 
 		final boolean result = parseJSQL("SELECT DISTINCT maker FROM Product "
@@ -524,19 +526,18 @@ public class ParserTest extends TestCase {
 
 	}
 
-    public void test_7_1_b() {
-        final boolean result = parseJSQL("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
-        printJSQL("test_7_1", result);
-        assertTrue(result);
+	public void test_7_1_b() {
+		final boolean result = parseJSQL("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
+		printJSQL("test_7_1", result);
+		assertTrue(result);
 
-    }
+	}
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for operation
 	public void test_7_2() {
 		final boolean result = parseJSQL("SELECT (grade.score * 30 / 100) as percentage from grade");
 		printJSQL("test_7_2", result);
-		assertFalse(result);
-
+		assertTrue(result);
 	}
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for UNION
@@ -664,12 +665,12 @@ public class ParserTest extends TestCase {
 
 	}
 
-    public void test_13() {
-        final boolean result = parseJSQL("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
-        printJSQL("test_13", result);
-        assertTrue(result);
+	public void test_13() {
+		final boolean result = parseJSQL("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
+		printJSQL("test_13", result);
+		assertTrue(result);
 
-    }
+	}
 
 	private String queryText;
 
@@ -680,7 +681,9 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 
 			return false;
@@ -692,22 +695,22 @@ public class ParserTest extends TestCase {
 	private void printJSQL(String title, boolean isSupported) {
 		if (isSupported) {
 			System.out.println(title + ": " + queryP.toString());
-			
+
 			try {
 				System.out.println("  Tables: " + queryP.getTables());
 				System.out.println("  Projection: " + queryP.getProjection());
 
 				System.out.println("  Selection: "
 						+ ((queryP.getWhereClause() == null) ? "--" : queryP
-								.getWhereClause()));
+						.getWhereClause()));
 
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
-								.getAliasMap()));
-				System.out.println("  GroupBy: " + queryP.getGroupByClause());
+						.getAliasMap()));
+				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  Join conditions: "
 						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
-								.getJoinConditions()));
+						.getJoinConditions()));
 			} catch (Exception e) {
 
 				e.printStackTrace();

@@ -20,23 +20,18 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import java.io.File;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
+import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.model.OBDAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URI;
+import java.util.*;
 
 public class QuestDB {
 
@@ -89,7 +84,8 @@ public class QuestDB {
 		 * Called when System.exit() is called or Control+C happens.
 		 */
 		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
+			@Override
+            public void run() {
 				log.info("Shutting down.");
 
 				/*
@@ -101,7 +97,7 @@ public class QuestDB {
 		});
 	}
 
-	public static void main(String argsp[]) {
+	public static void main(String args[]) {
 		QuestDB db = new QuestDB();
 	}
 

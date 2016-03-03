@@ -20,207 +20,331 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.model.*;
+
+import java.util.*;
 
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
  * include predicates that have not been properly typed.
- * 
+ *
  * @author mariano
- * 
  */
 public class MappingVocabularyRepair {
 
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+    private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	private static final Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
+    private static final Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public static void fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
-		log.debug("Fixing OBDA Model");
-		for (OBDADataSource source : model.getSources()) {
-			Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(source.getSourceID()));
-			model.removeAllMappings(source.getSourceID());
-			try {
-				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+    public static void fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
+        log.debug("Fixing OBDA Model");
+        for (OBDADataSource source : model.getSources()) {
+            Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(source.getSourceID()));
+            model.removeAllMappings(source.getSourceID());
+            //try {
+            model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
+            //}
 
-	/***
-	 * Makes sure that the mappings given are correctly typed w.r.t. the given
-	 * vocabulary.
-	 * 
-	 * @param originalMappings
-	 * @param vocabulary
-	 * @return
-	 */
-	private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
-		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
+//			catch (DuplicateMappingException e) {
+//				e.printStackTrace();
+//			}
 
-		Map<String, Predicate> urimap = new HashMap<>();
-		for (OClass p : vocabulary.getClasses())
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+//			catch (Exception e) {
+//				throw new RuntimeException(e);
+//			}
+        }
+    }
 
-		for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
-		
-		for (DataPropertyExpression p : vocabulary.getDataProperties())
-			urimap.put(p.getPredicate().getName(), p.getPredicate());
+    /***
+     * Makes sure that the mappings given are correctly typed w.r.t. the given
+     * vocabulary.
+     *
+     * @param originalMappings
+     * @param vocabulary
+     * @return
+     */
+    private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, ImmutableOntologyVocabulary vocabulary) {
+        //		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
-		Collection<OBDAMappingAxiom> result = new LinkedList<>();
-		for (OBDAMappingAxiom mapping : originalMappings) {
-			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
-			List<Function> newbody = new LinkedList<>();
+        Map<String, Predicate> urimap = new HashMap<>();
+        for (OClass p : vocabulary.getClasses())
+            urimap.put(p.getName(), p.getPredicate());
 
-			for (Function atom : targetQuery.getBody()) {
-				Predicate p = atom.getFunctionSymbol();
+        for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
+            urimap.put(p.getName(), p.getPredicate());
+
+        for (DataPropertyExpression p : vocabulary.getDataProperties())
+            urimap.put(p.getName(), p.getPredicate());
+
+        for (AnnotationProperty p : vocabulary.getAnnotationProperties())
+            urimap.put(p.getName(), p.getPredicate());
+
+
+        Collection<OBDAMappingAxiom> result = new ArrayList<>();
+        for (OBDAMappingAxiom mapping : originalMappings) {
+            List<Function> targetQuery = mapping.getTargetQuery();
+            List<Function> newbody = new LinkedList<>();
+
+            for (Function atom : targetQuery) {
+                Predicate predTarget = atom.getFunctionSymbol();
 
 				/* Fixing terms */
-				List<Term> newTerms = new LinkedList<>();
-				for (Term term : atom.getTerms()) {
-					newTerms.add(fixTerm(term));
-				}
-				
-				Function newatom = null;
+                List<Term> arguments = new ArrayList<>();
+//                for (Term term : atom.getTerms()) {
+//                    //newTerms.add(fixTerm(term));
+//                    newTerms.add(fixTerm(term));
+//                }
 
-				Predicate predicate = urimap.get(p.getName());
-				if (predicate == null) {
-					if (!p.isTriplePredicate()) {
-						log.warn("WARNING: Mapping references an unknown class/property: " + p.getName());
-						
+                arguments = atom.getTerms();
+
+                Function newatom = null;
+
+                Predicate predicate = urimap.get(predTarget.getName());
+                if (predicate == null) {
+                    if (!predTarget.isTriplePredicate()) {
+                        log.warn("WARNING: Mapping references an unknown class/property: " + predTarget.getName());
+
 						/*
-						 * All this part is to handle the case where the predicate or the class is defined
+                         * All this part is to handle the case where the predicate or the class is defined
 						 * by the mapping but not present in the ontology.
 						 */
-						if (newTerms.size() == 1) {
-							Predicate pred = dfac.getClassPredicate(p.getName());
-							newatom = dfac.getFunction(pred, getNormalTerm(newTerms.get(0)));
-						} 
-						else if (newTerms.size() == 2) {
-							Term t1 = newTerms.get(0);
-							Term t2 = newTerms.get(1);
+                        newatom = fixUndeclaredPredicate(mapping, predTarget, arguments);
+                    } else {
 
-							if ((t1 instanceof Function) && (t2 instanceof Function)) {
+                        newatom = fixTripleAtom(mapping, arguments, predicate);
+                    }
+                } else {
 
-								Function ft1 = (Function) t1;
-								Function ft2 = (Function) t2;
+                    newatom = fixOntologyPredicate(mapping, predTarget, arguments, predicate);
+                }
 
-								boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);  
-								boolean t2uri = (ft2.getFunctionSymbol() instanceof URITemplatePredicate);
+                newbody.add(newatom);
+            } //end for
 
-								if (t1uri && t2uri) {
-									Predicate pred = dfac.getObjectPropertyPredicate(p.getName());
-									newatom = dfac.getFunction(pred, getNormalTerm(t1), getNormalTerm(t2));
-								}
-								else {
-									Predicate pred = dfac.getDataPropertyPredicate(p.getName());
-									newatom = dfac.getFunction(pred, getNormalTerm(t1), t2);
-								}
-							} 
-							else  {
-								System.err.println("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property: " + p.getName());
-								throw new IllegalArgumentException("INTERNAL ERROR: Cannot infer whether the property is a datatype property or an object Property:  " + p.getName());
-							}
-						}
-						else  {
-							System.err.println("ERROR: Predicate has an incorrect arity: " + p.getName());
-							throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + p.getName());
-						}
-					}
-					else {
-						// TODO (ROMAN): WHY ONLY THE SUBJECT IS NORMALIZED?
-						newatom = dfac.getTripleAtom(getNormalTerm(newTerms.get(0)), newTerms.get(1), newTerms.get(2));
-					}
-				}
-				else {
-					
-					if (newTerms.size() == 1) {
-						newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)));
-					}
-					else if (newTerms.size() == 2) {
-						if (predicate.isObjectProperty()) {
-							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));							
-						}
-						else {
-							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));							
-						}
-					}
-					else 
-						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());			
-				}
-
-				newbody.add(newatom);
-			} //end for
-			
-			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
-		}
+            result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),
+                    dfac.getSQLQuery(mapping.getSourceQuery().toString()), newbody));
+        }
 //		log.debug("Repair done. Returning {} mappings", result.size());
-		return result;
-	}
-	
-	/**
-	 * Fixing wrapping each variable with a URI function if the
-	 * position corresponds to an URI only position
-	 */
-	private static Term getNormalTerm(Term t) {
-		if (!(t instanceof Function)) {
-			return dfac.getUriTemplate(t);
-		}
-		else
-			return t;
-	}
+        return result;
+    }
 
-	/***
-	 * Fix functions that represent URI templates. Currently,the only fix
-	 * necessary is replacing the old-style template function with the new one,
-	 * that uses a string template and placeholders.
-	 * 
-	 * @param term
-	 * @return
-	 */
-	private static Term fixTerm(Term term) {
-		if (term instanceof Function) {
-			Function fterm = (Function)term;
-			Predicate predicate = fterm.getFunctionSymbol();
-			if (predicate instanceof DatatypePredicate) {
-				// no fix necessary
-				return term;
-			}
-			if (predicate instanceof URITemplatePredicate) {
-				// no fix necessary
-				return term;
-			}
-			// We have a function that is not a built-in, hence its an old-style uri
-			// template function(parm1,parm2,...)
-			StringBuilder newTemplate = new StringBuilder();
-			newTemplate.append(predicate.getName().toString());
-			for (int i = 0; i < fterm.getArity(); i++) {
-				newTemplate.append("-{}");
-			}
+    private static Function fixTripleAtom(OBDAMappingAxiom mapping, List<Term> arguments, Predicate predicate) {
+        Function newatom;
+        Term t0 = arguments.get(0);
+        if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-			LinkedList<Term> newTerms = new LinkedList<>();
-			newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
-			newTerms.addAll(fterm.getTerms());
+                newatom = dfac.getTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
 
-			return dfac.getUriTemplate(newTerms);
-		}
-		return term;
-	}
+        } else {
+            String message = String.format("" +
+                    "Error with triple atom\n" +
+                    "   %s \n" +
+                    "The reason is: \n" +
+                    "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", mapping, t0);
+
+            throw new IllegalArgumentException(message);
+        }
+        return newatom;
+    }
+
+    private static Function fixOntologyPredicate(OBDAMappingAxiom mapping, Predicate predTarget, List<Term> arguments, Predicate predicate) {
+        Function newatom;
+        if (arguments.size() == 1) {
+            Term t0 = arguments.get(0);
+            if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+                newatom = dfac.getFunction(predicate, arguments.get(0));
+            } else {
+                String message = String.format("" +
+                        "Error with class <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", predicate, mapping, t0);
+                throw new IllegalArgumentException(message);
+            }
+
+        } else if (arguments.size() == 2) {
+
+            Term t0 = arguments.get(0);
+            if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+                //object property
+                if (predicate.isObjectProperty()) {
+
+                    Term t1 = arguments.get(1);
+                    if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
+                        newatom = dfac.getFunction(predicate, arguments.get(0), arguments.get(1));
+
+                    } else {
+
+                        String message = String.format("" +
+                                "Error with property <%s> used in the mapping\n" +
+                                "   %s \n" +
+                                "The reason is: \n" +
+                                "the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", predicate, mapping, t1);
+
+                        throw new IllegalArgumentException(message);
+                    }
+
+                } else {
+                    //data property
+                    if (predicate.isDataProperty()) {
+
+
+                        newatom = dfac.getFunction(predicate, arguments.get(0), arguments.get(1));
+
+                    } else { //case of annotation property
+
+                        //we understood from the mappings that the annotation property can be treated as object property
+                        if (predTarget.isObjectProperty()) {
+
+                            Term t1 = arguments.get(1);
+                            if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
+                                newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+
+                            } else {
+
+                                String message = String.format("" +
+                                        "Error with property <%s> used in the mapping\n" +
+                                        "   %s \n" +
+                                        "The reason is: \n" +
+                                        "the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", predicate, mapping, t1);
+
+                                throw new IllegalArgumentException(message);
+                            }
+
+                            //we understood from the mappings that the annotation property can be treated as data property
+                        } else if (predTarget.isDataProperty()) {
+
+                            newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+
+                        } else { //annotation property not clear, is treated as a data property
+
+                            Predicate pred = dfac.getDataPropertyPredicate(predTarget.getName());
+                            newatom = dfac.getFunction(pred, arguments.get(0), arguments.get(1));
+
+                        }
+                    }
+
+                }
+            } else {
+                String message = String.format("" +
+                        "Error with property <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", predicate, mapping, t0);
+
+                throw new IllegalArgumentException(message);
+            }
+        } else {
+            throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + predTarget.getName());
+        }
+        return newatom;
+    }
+
+    private static Function fixUndeclaredPredicate(OBDAMappingAxiom mapping, Predicate undeclaredPredicate, List<Term> arguments) {
+        Function fixedTarget;
+        if (arguments.size() == 1) {
+            Term t0 = arguments.get(0);
+            if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+                Predicate pred = dfac.getClassPredicate(undeclaredPredicate.getName());
+                fixedTarget = dfac.getFunction(pred, arguments.get(0));
+            } else {
+                String message = String.format("" +
+                        "Error with class <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredicate.getName(), mapping, t0);
+                throw new IllegalArgumentException(message);
+            }
+        } else if (arguments.size() == 2) {
+            Term t0 = arguments.get(0);
+            Term t1 = arguments.get(1);
+            if (t0 instanceof Function) {
+
+                if ((t1 instanceof Function)) {
+
+                    Function ft0 = (Function) t0;
+                    Function ft1 = (Function) t1;
+
+                    boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
+                    boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
+
+                    if (t0uri && t1uri) {
+                        Predicate pred = dfac.getObjectPropertyPredicate(undeclaredPredicate.getName());
+                        fixedTarget = dfac.getFunction(pred, t0, t1);
+                    } else {
+                        Predicate pred = dfac.getDataPropertyPredicate(undeclaredPredicate.getName());
+                        fixedTarget = dfac.getFunction(pred, t0, t1);
+                    }
+                } else {
+                    //cases we cannot recognize
+
+                    String message = String.format("" +
+                            "Error with property <%s> used in the mapping\n" +
+                            "   %s \n" +
+                            "The reason is: \n" +
+                            "1. the property is not declared in the ontology; and \n" +
+                            "2. the object {%s} in the mapping is untyped. Solution: use `{val}^^xsd:string` for literal and `<{val}>` for IRI. ", undeclaredPredicate.getName(), mapping, t1);
+
+                    throw new IllegalArgumentException(message);
+                }
+            } else {
+                String message = String.format("" +
+                        "Error with property <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredicate.getName(), mapping, t0);
+
+                throw new IllegalArgumentException(message);
+            }
+        } else {
+            System.err.println("ERROR: Predicate has an incorrect arity: " + undeclaredPredicate.getName());
+            throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + undeclaredPredicate.getName());
+        }
+        return fixedTarget;
+    }
+
+
+
+    /***
+     * Fix functions that represent URI templates. Currently,the only fix
+     * necessary is replacing the old-style template function with the new one,
+     * that uses a string template and placeholders.
+     *
+     * @param term
+     * @return
+     */
+    private static Term fixTerm(Term term) {
+        if (term instanceof Function) {
+            Function fterm = (Function) term;
+            Predicate predicate = fterm.getFunctionSymbol();
+            if (predicate instanceof DatatypePredicate) {
+                // no fix necessary
+                return term;
+            }
+            if (predicate instanceof URITemplatePredicate) {
+                // no fix necessary
+                return term;
+            }
+            // We have a function that is not a built-in, hence its an old-style uri
+            // template function(parm1,parm2,...)
+            StringBuilder newTemplate = new StringBuilder();
+            newTemplate.append(predicate.getName().toString());
+            for (int i = 0; i < fterm.getArity(); i++) {
+                newTemplate.append("-{}");
+            }
+
+            LinkedList<Term> newTerms = new LinkedList<>();
+            newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
+            newTerms.addAll(fterm.getTerms());
+
+            return dfac.getUriTemplate(newTerms);
+        }
+        return term;
+    }
 
 }

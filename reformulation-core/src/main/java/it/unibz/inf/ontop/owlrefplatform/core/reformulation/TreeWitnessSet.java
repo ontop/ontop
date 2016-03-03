@@ -23,13 +23,15 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.inf.ontop.ontology.ClassExpression;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,9 +63,9 @@ public class TreeWitnessSet {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner);
+		this.cache = new QueryConnectedComponentCache(reasoner, voc);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -75,8 +77,8 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> generators) {		
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> generators) {		
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, voc, generators);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -87,12 +89,12 @@ public class TreeWitnessSet {
 	private void computeTreeWitnesses() {		
 		QueryFolding qf = new QueryFolding(cache); // in-place query folding, so copying is required when creating a tree witness
 		
-		for (QueryConnectedComponent.Loop loop : cc.getQuantifiedVariables()) {
+		for (Loop loop : cc.getQuantifiedVariables()) {
 			Term v = loop.getTerm();
 			log.debug("QUANTIFIED VARIABLE {}", v); 
 			qf.newOneStepFolding(v);
 			
-			for (QueryConnectedComponent.Edge edge : cc.getEdges()) { // loop.getAdjacentEdges()
+			for (Edge edge : cc.getEdges()) { // loop.getAdjacentEdges()
 				if (edge.getTerm0().equals(v)) {
 					if (!qf.extend(edge.getLoop1(), edge, loop))
 						break;
@@ -161,8 +163,8 @@ public class TreeWitnessSet {
 	private void saturateTreeWitnesses(QueryFolding qf) { 
 		boolean saturated = true; 
 		
-		for (QueryConnectedComponent.Edge edge : cc.getEdges()) {
-			QueryConnectedComponent.Loop rootLoop, internalLoop;
+		for (Edge edge : cc.getEdges()) { 
+			Loop rootLoop, internalLoop;
 			if (qf.canBeAttachedToAnInternalRoot(edge.getLoop0(), edge.getLoop1())) {
 				rootLoop = edge.getLoop0();
 				internalLoop = edge.getLoop1();
@@ -363,13 +365,15 @@ public class TreeWitnessSet {
 	
 	
 	static class QueryConnectedComponentCache {
-		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<TermOrderedPair, Intersection<ObjectPropertyExpression>>();
-		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<Term, Intersection<ClassExpression>>();
+		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
+		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final TBoxReasoner reasoner;
+		private final ImmutableOntologyVocabulary voc;
 		
-		private QueryConnectedComponentCache(TBoxReasoner reasoner) {
+		private QueryConnectedComponentCache(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
 			this.reasoner = reasoner;
+			this.voc = voc;
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
@@ -389,7 +393,10 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 subc.intersectWith(ontFactory.createClass(pred.getName()));
+				 if (voc.containsClass(pred.getName())) 
+					 subc.intersectWith(voc.getClass(pred.getName()));
+				 else
+					 subc.setToBottom();
 				 if (subc.isBottom())
 					 break;
 			}
@@ -397,7 +404,7 @@ public class TreeWitnessSet {
 		}
 		
 		
-		public Intersection<ClassExpression> getLoopConcepts(QueryConnectedComponent.Loop loop) {
+		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
 			Term t = loop.getTerm();
 			Intersection<ClassExpression> subconcepts = conceptsCache.get(t); 
 			if (subconcepts == null) {				
@@ -408,23 +415,28 @@ public class TreeWitnessSet {
 		}
 		
 		
-		public Intersection<ObjectPropertyExpression> getEdgeProperties(QueryConnectedComponent.Edge edge, Term root, Term nonroot) {
+		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, Term root, Term nonroot) {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
 				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 				for (Function a : edge.getBAtoms()) {
-					if (a.getFunctionSymbol() instanceof BooleanOperationPredicateImpl) {
+					if (a.isOperation()) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
 						properties.setToBottom();
 						break;
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						ObjectPropertyExpression prop = ontFactory.createObjectProperty(a.getFunctionSymbol().getName());
-						if (!root.equals(a.getTerm(0)))
-								prop = prop.getInverse();
-						properties.intersectWith(prop);
+						if (voc.containsObjectProperty(a.getFunctionSymbol().getName())) {
+							ObjectPropertyExpression prop = voc.getObjectProperty(a.getFunctionSymbol().getName());
+							if (!root.equals(a.getTerm(0)))
+									prop = prop.getInverse();
+							properties.intersectWith(prop);
+						}
+						else
+							properties.setToBottom();
+						
 						if (properties.isBottom())
 							break;						
 					}

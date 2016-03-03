@@ -1,6 +1,12 @@
 package it.unibz.inf.ontop.owlapi3.swrl;
 
-
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,13 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Term;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;

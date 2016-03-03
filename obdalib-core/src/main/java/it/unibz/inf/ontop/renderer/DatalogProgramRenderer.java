@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.renderer;
  * #L%
  */
 
-import java.util.Iterator;
-import java.util.List;
-
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A utility class to render a Datalog Program object into its representational

@@ -21,29 +21,21 @@ package it.unibz.inf.ontop.quest.dag;
  */
 
 
-
 import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import junit.framework.TestCase;
-
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Map.Entry;
 
 public class S_Indexes_Compare extends TestCase {
 	
@@ -64,7 +56,7 @@ public class S_Indexes_Compare extends TestCase {
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -73,14 +65,12 @@ public class S_Indexes_Compare extends TestCase {
 		
 		testIndexes(engine, dag);
 
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(fileInput));
-		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
 		DAG dag2 = DAGConstructor.getISADAG(onto);
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);
         DAGOperations.buildAncestors(dag2);
-		DAG pureIsa = DAGConstructor.filterPureISA(dag2);
+		DAG pureIsa = DAGConstructor.filterPureISA(dag2, onto.getVocabulary());
 		 pureIsa.clean();
 			pureIsa.index();
 			 DAGOperations.buildDescendants(pureIsa);
@@ -107,8 +97,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 		System.out.println(d1.getRoleNode(((ObjectPropertyExpression)dd.getDescription())));
 		;
 		}
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		System.out.println(d1.getRoleNode(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
+		//System.out.println(d1.getRoleNode(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
 		;
 	}
 		

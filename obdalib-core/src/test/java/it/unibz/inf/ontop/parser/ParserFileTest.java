@@ -20,6 +20,15 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,12 +38,6 @@ import java.util.Hashtable;
 import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,6 +117,10 @@ public class ParserFileTest extends TestCase {
 	// ------- Utility methods
 
 	private void execute(OBDAModel model, URI identifier) {
+		
+		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		
 		OBDAModel controller = model;
 		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingList = controller.getMappings();
 		ArrayList<OBDAMappingAxiom> mappings = mappingList.get(identifier);
@@ -121,7 +128,7 @@ public class ParserFileTest extends TestCase {
 		log.debug("=========== " + identifier + " ===========");
 		for (OBDAMappingAxiom axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
-			boolean result = parse(query);
+			boolean result = parse(query, idfac);
 
 			if (!result) {
 				log.error("Cannot parse query: " + query);
@@ -145,11 +152,11 @@ public class ParserFileTest extends TestCase {
 		return model;
 	}
 
-	private static boolean parse(String input) {
+	private static boolean parse(String input, QuotedIDFactory idfac) {
 		ParsedSQLQuery queryP;
 		
 		try {
-			queryP = new ParsedSQLQuery(input,true);
+			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (JSQLParserException e) {
 			log.debug(e.getMessage());
 			return false;

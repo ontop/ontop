@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.ObjectConstant;
-
 /**
  * Represents DataPropertyAssertion from OWL 2 QL Specification
  * 
@@ -30,11 +27,28 @@ import it.unibz.inf.ontop.model.ObjectConstant;
  * 
  */
 
+import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.ValueConstant;
+
+/**
+ * Represents DataPropertyAssertion from the OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations 
+ * 								DataPropertyExpression sourceIndividual targetValue ')'
+ * DataPropertyExpression := DataProperty
+ * 
+ *  Support for owl:topDataProperty and owl:bottomDataProperty
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
+
 public interface DataPropertyAssertion extends Assertion {
 
-	public DataPropertyExpression getProperty();
+	DataPropertyExpression getProperty();
 	
-	public ObjectConstant getSubject();
+	ObjectConstant getSubject();
 	
-	public ValueConstant getValue();
+	ValueConstant getValue();
 }

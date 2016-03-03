@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.ontology.Assertion;
+
 import java.util.Iterator;
 
-import it.unibz.inf.ontop.ontology.Assertion;
 import org.openrdf.model.Statement;
 
 /***
@@ -32,7 +33,7 @@ import org.openrdf.model.Statement;
  * 
  */
 public class SesameStatementIterator implements Iterator<Statement> {
-	private final Iterator<Assertion> iterator;
+	private final Iterator<Assertion> iterator;	
 	
 
 	public SesameStatementIterator(Iterator<Assertion> it) {

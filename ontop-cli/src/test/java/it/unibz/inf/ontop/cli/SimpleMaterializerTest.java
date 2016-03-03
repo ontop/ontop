@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.cli;
 
+import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.io.ModelIOManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

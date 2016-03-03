@@ -20,13 +20,18 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.sesame.SesameStatement;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import org.openrdf.model.Statement;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -35,12 +40,10 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.impl.GraphQueryResultImpl;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
-import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+
 
 public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery {
-	
+
 	private String baseURI;
 
 	public SesameGraphQuery(String queryString, String baseURI,

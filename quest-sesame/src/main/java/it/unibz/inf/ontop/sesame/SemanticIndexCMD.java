@@ -20,31 +20,27 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import java.io.File;
-import java.net.URI;
-import java.sql.Connection;
-
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URI;
+import java.sql.Connection;
 
 
 /***
@@ -153,11 +149,16 @@ public class SemanticIndexCMD {
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 		
 
-		fac.setPreferenceHolder(pref);
+//		fac.setPreferenceHolder(pref);
+//
+//		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
 
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
+		QuestOWLConnection qconn = (QuestOWLConnection) reasoner.getConnection();
 
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
 

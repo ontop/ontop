@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,13 +20,6 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.net.URI;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -38,6 +31,11 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.net.URI;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -86,14 +84,12 @@ public class R2RMLImportAction extends ProtegeAction {
 					e.printStackTrace();
 				}
 				if (file != null) {
-                    R2RMLReader reader = null;
-                    try {
-                        reader = new R2RMLReader(file);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+					R2RMLReader reader = null;
+					try {
+						reader = new R2RMLReader(file);
 
-                    URI sourceID = obdaModel.getSources().get(0).getSourceID();
+
+					URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
 					try {
 						for (OBDAMappingAxiom mapping : reader.readMappings()) {
@@ -101,11 +97,19 @@ public class R2RMLImportAction extends ProtegeAction {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
 								obdaModel.addMapping(sourceID, mapping);
+
 							}
 						}
+						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
+					}
+
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+						log.error("Error during r2rml import. \n");
+						e.printStackTrace();
 					}
 
 				}

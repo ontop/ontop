@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.quest.datatypes;
 
 import info.aduna.io.FileUtil;
 import info.aduna.io.ZipUtil;
+import it.unibz.inf.ontop.quest.scenarios.ScenarioManifestTestUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -129,7 +130,7 @@ public class QuestDatatypeTestUtils {
 		con.close();
 		manifestRep.shutDown();
 
-		logger.info("Created aggregated test extractTest with " + suite.countTestCases() + " test cases.");
+		logger.info("Created aggregated test suite with " + suite.countTestCases() + " test cases.");
 		return suite;
 	}
 

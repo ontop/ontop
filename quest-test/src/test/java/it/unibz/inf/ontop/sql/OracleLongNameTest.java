@@ -20,25 +20,24 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDAException;
+
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,19 +86,19 @@ public class OracleLongNameTest {
 	}
 	
 
-	private void runQuery(String varName) throws OBDAException, OWLException{
+	private void runQuery(String varName) throws OBDAException, OWLException {
 		
-		Properties p = new Properties();
-		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.put(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
-		factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        reasoner = factory.createReasoner(ontology, config);
 
-		QuestPreferences preferences = new QuestPreferences(p);
-		factory.setPreferenceHolder(preferences);
+		factory.setPreferenceHolder(p);
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

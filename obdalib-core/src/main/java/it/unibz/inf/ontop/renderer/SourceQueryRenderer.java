@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.renderer;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAQuery;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
 
 /**
  * A utility class to render a Source Query object into its representational
@@ -31,7 +31,7 @@ public class SourceQueryRenderer {
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string.
 	 */
-	public static String encode(OBDAQuery input) {
+	public static String encode(OBDASQLQuery input) {
 		if (input == null) {
 			return "";
 		}

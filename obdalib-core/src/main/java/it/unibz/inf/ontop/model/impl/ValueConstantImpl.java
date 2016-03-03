@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 public class ValueConstantImpl implements ValueConstant {
 
@@ -50,7 +51,7 @@ public class ValueConstantImpl implements ValueConstant {
 	protected ValueConstantImpl(String value, String language) {
 		this.value = value;
 		this.language = language;
-		this.type = Predicate.COL_TYPE.LITERAL_LANG;
+		this.type = COL_TYPE.LITERAL_LANG;
 		this.string = getStringRepresentation();
 	}
 	

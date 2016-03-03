@@ -1,4 +1,5 @@
 package it.unibz.inf.ontop.model.impl;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -19,10 +20,9 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.DatatypePredicate;
 
 //import com.hp.hpl.jena.iri.IRI;
-
-import it.unibz.inf.ontop.model.DatatypePredicate;
 
 public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
 

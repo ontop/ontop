@@ -20,33 +20,129 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OrderCondition;
+
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
-	private static Map<Integer, String> SqlDatatypes;
-	static {
-		SqlDatatypes = new HashMap<>();
-		SqlDatatypes.put(Types.INTEGER, "INT");
-		SqlDatatypes.put(Types.BIGINT, "BIGINT");
-		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
-		SqlDatatypes.put(Types.REAL, "FLOAT");
-		SqlDatatypes.put(Types.FLOAT, "DECIMAL");
-		SqlDatatypes.put(Types.DOUBLE, "DECIMAL");
-//		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
-		SqlDatatypes.put(Types.CHAR, "CHAR");
-		SqlDatatypes.put(Types.VARCHAR, "VARCHAR");  // for korean, chinese, etc characters we need to use utf8
-		SqlDatatypes.put(Types.DATE, "DATETIME");
-		SqlDatatypes.put(Types.TIME, "TIME");
-		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
-		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
-	}
-	
+	 @Override
+	  	public String SHA256(String str) {
+	    	return String.format("LOWER(CONVERT(VARCHAR(64),  HashBytes('SHA2_256',%s),2 ))", str);
+	  	}
+	    
+	    @Override
+	  	public String SHA1(String str) {
+	    	return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('SHA1',%s),2 ))", str);
+	  	}
+	    
+	    @Override
+	  	public String SHA512(String str) {
+	    	return String.format("LOWER(CONVERT(VARCHAR(128),HASHBYTES('SHA2_512',%s) ,2 ))", str);
+	  	}
+	      
+	      @Override
+	  	public String MD5(String str) {
+		    	return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('MD5',%s) ,2 ))", str);
+	  	}
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String dateNow() {
+		return "CURRENT_TIMESTAMP";
+	}
+
+	@Override
+	public String dateYear(String str) {
+		return String.format("YEAR ( %s)",str);
+	}
+
+	@Override
+	public String dateDay(String str) {
+		return String.format("DAY ( %s)",str);
+	}
+
+	@Override
+	public String dateHours(String str) {
+		return String.format("DATEPART(HOUR , %s)",str);
+	}
+
+	@Override
+	public String dateMonth(String str) {
+		return String.format("MONTH (%s)",str);
+	}
+
+	@Override
+	public String dateMinutes(String str) {
+		return String.format("DATEPART( MINUTE, %s)",str);
+	}
+
+	@Override
+	public String dateSeconds(String str) {
+		return String.format("DATEPART(SECOND, %s)",str);
+	}
+
+	@Override
+	public String dateTZ(String str) {
+
+		return String.format("CONVERT(varchar(5), DATEADD(minute, DATEPART(TZ, %s), 0), 114)",str);
+	}
+
+	@Override
+	public String ceil() {
+		return "CEILING(%s)";
+	}
+
+	@Override
+	public String round() {
+		return "ROUND(%s, 0)";
+	}
+
+	@Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LEN(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strEndsOperator(){
+		return "RIGHT(%1$s, LEN(%2$s)) LIKE %2$s";
+	}
+
+	@Override
+	public String strContainsOperator(){
+		return "CHARINDEX(%2$s,%1$s) > 0";
+	}
+
+	@Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,SIGN(CHARINDEX(%s,%s))* (CHARINDEX(%s,%s)-1))", str, before, str, before, str);
+
+	}
+
+	@Override
+	public String strAfter(String str, String after) {
+		return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
+				str, after, str , after , after, str, str); //FIXME when no match found should return empty string
+	}
+
+	@Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s,%s,%s)", str, start, end);
+	}
+
+	@Override
+	public String strSubstr(String str, String start) {
+		return String.format("SUBSTRING(%s,%s,LEN(%s) )", str, start, str);
+	}
+
+
+	@Override
+	public String strLength(String str) {
+		return String.format("LEN(%s)", str);
+	}
+
+	@Override
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		
@@ -55,20 +151,35 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(String.format("(%s", strings[0]));
+		sql.append(String.format("(CAST (%s as varchar(8000))", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
 			sql.append(String.format(" + CAST(%s as varchar(8000))", strings[i]));
 		}
 		sql.append(")");
 		return sql.toString();
 	}
-	
+
+	@Override
+	public String strUuid() {
+		return "NEWID()";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'+ CONVERT (VARCHAR(255),NEWID())";
+	}
+
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
-			if (offset < 0) {
-				return "OFFSET 0 ROWS";
+		if(limit == 0){
+			return "WHERE 1 = 0";
+		}
+
+		if (limit < 0)  {
+			if (offset < 0 ) {
+				return "";
 			} else {
+
 				return String.format("OFFSET %d ROWS", offset);
 			}
 		} else {
@@ -80,25 +191,29 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
+	@Override
+	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset) {
+
+		//BUGFIX LIMIT 0 is not supported in sql server
+		if(limit == 0){
+			return "WHERE 1 = 0";
+		}
+		String sql=sqlOrderBy(conditions,viewname);
+		if (!sql.equals(""))
+			sql+="\n";
+		return sql + sqlSlice(limit, offset);
+
+	}
 	@Override
 	public String sqlCast(String value, int type) {
-		
-		String strType = SqlDatatypes.get(type);
-
-		if (strType == null) {
-			throw new RuntimeException(String.format("Unsupported SQL type %d", type));
+		String strType = null;
+		if (type == Types.VARCHAR) {
+			strType = "VARCHAR(8000)";
+		} else {
+			throw new RuntimeException("Unsupported SQL type");
 		}
-
-		boolean noCast = strType.equals("BOOLEAN");
-
-		if (strType != null && !noCast ) {
-			return "CAST(" + value + " AS " + strType + ")";
-		} else	if (noCast){
-				return value;
-
-		}
-		throw new RuntimeException("Unsupported SQL type");
+		return "CAST(" + value + " AS " + strType + ")";
 	}
 	
 	public String sqlLimit(String originalString, long limit) {
@@ -126,9 +241,7 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
+	 *
 	 */
 	@Override
 	public String getSQLLexicalFormDatetime(String v) {
@@ -167,6 +280,6 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		return bf.toString();
 	}
-	
+
 
 }

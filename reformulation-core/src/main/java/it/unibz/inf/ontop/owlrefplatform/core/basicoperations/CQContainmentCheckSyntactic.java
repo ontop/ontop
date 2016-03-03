@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
+import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Substitution;
-import it.unibz.inf.ontop.model.CQIE;
 
 public class CQContainmentCheckSyntactic implements CQContainmentCheck {
 
@@ -17,7 +17,7 @@ public class CQContainmentCheckSyntactic implements CQContainmentCheck {
 		if (!cq2.getHead().equals(cq1.getHead())) 
 			return false;
 
-		for (Function atom : cq2.getBody())
+		for (Function atom : cq2.getBody()) 
 			if (!cq1.getBody().contains(atom))
 				return false;
 		

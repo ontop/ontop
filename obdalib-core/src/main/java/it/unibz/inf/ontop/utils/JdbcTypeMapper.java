@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.utils;
  */
 
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 import java.sql.Types;
 import java.util.HashMap;
@@ -32,61 +33,60 @@ import java.util.Map;
  */
 public class JdbcTypeMapper {
 
-	private final Map<Integer, Predicate.COL_TYPE> sqlToQuest = new HashMap<Integer, Predicate.COL_TYPE>();
-	private final Map<Predicate.COL_TYPE, Integer> datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
-	
+	private final Map<Integer, COL_TYPE> sqlToQuest = new HashMap<Integer, COL_TYPE>();
+	private final Map<COL_TYPE, Integer> datatypeMap = new HashMap<COL_TYPE, Integer>();
+
 	public JdbcTypeMapper() {
-		sqlToQuest.put(Types.VARCHAR, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.CHAR, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGNVARCHAR, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGVARCHAR, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NVARCHAR, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NCHAR, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.INTEGER, Predicate.COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.BIGINT, Predicate.COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.SMALLINT, Predicate.COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.TINYINT, Predicate.COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.NUMERIC, Predicate.COL_TYPE.DECIMAL);
-		sqlToQuest.put(Types.DECIMAL, Predicate.COL_TYPE.DECIMAL);
-		sqlToQuest.put(Types.FLOAT, Predicate.COL_TYPE.DOUBLE); // R: why not FLOAT?
-		sqlToQuest.put(Types.DOUBLE, Predicate.COL_TYPE.DOUBLE);
-		sqlToQuest.put(Types.REAL, Predicate.COL_TYPE.DOUBLE);
-		sqlToQuest.put(Types.DATE, Predicate.COL_TYPE.DATE);
-		sqlToQuest.put(Types.TIME, Predicate.COL_TYPE.TIME);
-		sqlToQuest.put(Types.TIMESTAMP, Predicate.COL_TYPE.DATETIME); //GX: needs check
-		sqlToQuest.put(Types.BOOLEAN, Predicate.COL_TYPE.BOOLEAN);
-		sqlToQuest.put(Types.BIT, Predicate.COL_TYPE.BOOLEAN);
+		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.NCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.INTEGER, COL_TYPE.INTEGER);
+		sqlToQuest.put(Types.BIGINT, COL_TYPE.INTEGER);
+		sqlToQuest.put(Types.SMALLINT, COL_TYPE.INTEGER);
+		sqlToQuest.put(Types.TINYINT, COL_TYPE.INTEGER);
+		sqlToQuest.put(Types.NUMERIC, COL_TYPE.DECIMAL);
+		sqlToQuest.put(Types.DECIMAL, COL_TYPE.DECIMAL);
+		sqlToQuest.put(Types.FLOAT, COL_TYPE.DOUBLE); // R: why not FLOAT?
+		sqlToQuest.put(Types.DOUBLE, COL_TYPE.DOUBLE);
+		sqlToQuest.put(Types.REAL, COL_TYPE.DOUBLE);
+		sqlToQuest.put(Types.DATE, COL_TYPE.DATE);
+		sqlToQuest.put(Types.TIME, COL_TYPE.TIME);
+		sqlToQuest.put(Types.TIMESTAMP, COL_TYPE.DATETIME); //GX: needs check
+		sqlToQuest.put(Types.BOOLEAN, COL_TYPE.BOOLEAN);
+		sqlToQuest.put(Types.BIT, COL_TYPE.BOOLEAN);
 //		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
-		sqlToQuest.put(Types.CLOB, Predicate.COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.OTHER, Predicate.COL_TYPE.LITERAL);
-		
-		datatypeMap.put(Predicate.COL_TYPE.BOOLEAN, Types.BOOLEAN);
-		datatypeMap.put(Predicate.COL_TYPE.INT, Types.INTEGER);
-		datatypeMap.put(Predicate.COL_TYPE.INTEGER, Types.BIGINT);
-		datatypeMap.put(Predicate.COL_TYPE.LONG, Types.BIGINT);
-		datatypeMap.put(Predicate.COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(Predicate.COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(Predicate.COL_TYPE.NON_POSITIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(Predicate.COL_TYPE.UNSIGNED_INT, Types.INTEGER);
-		datatypeMap.put(Predicate.COL_TYPE.FLOAT, Types.FLOAT);
-		datatypeMap.put(Predicate.COL_TYPE.DOUBLE, Types.DOUBLE);
-		datatypeMap.put(Predicate.COL_TYPE.STRING, Types.VARCHAR);
-		datatypeMap.put(Predicate.COL_TYPE.LITERAL, Types.VARCHAR);
-		datatypeMap.put(Predicate.COL_TYPE.DATETIME_STAMP, Types.TIMESTAMP);
-        datatypeMap.put(Predicate.COL_TYPE.DECIMAL, Types.DECIMAL);
+		sqlToQuest.put(Types.CLOB, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.OTHER, COL_TYPE.LITERAL);
+
+		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
+		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
+		datatypeMap.put(COL_TYPE.INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.LONG, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.UNSIGNED_INT, Types.INTEGER);
+		datatypeMap.put(COL_TYPE.FLOAT, Types.FLOAT);
+		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
+		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
+		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);
+		datatypeMap.put(COL_TYPE.DATETIME_STAMP, Types.TIMESTAMP);
 		// all other COL_TYPEs are mapped to Types.VARCHAR by default
 	}
-	
+
 	public Predicate.COL_TYPE getPredicate(int sqlType) {
 		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
-		if (type == null) 
-			type = Predicate.COL_TYPE.LITERAL;
-		
+		if (type == null)
+			type = COL_TYPE.LITERAL;
+
 		return type;
 	}
-	
+
 	public int getSQLType(Predicate.COL_TYPE type) {
 		if (type != null) {
 			Integer sqlType = datatypeMap.get(type);

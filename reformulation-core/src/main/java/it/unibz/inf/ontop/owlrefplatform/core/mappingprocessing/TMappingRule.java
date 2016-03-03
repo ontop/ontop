@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheck;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class TMappingRule {
 	private final CQIE stripped;
 	// an OR-connected list of AND-connected atomic filters
 	private final List<List<Function>> filterAtoms;	  
-	private final CQContainmentCheck cqc;
+	private final CQContainmentCheck cqc;   
 
 	
 	/***
@@ -101,21 +101,18 @@ public class TMappingRule {
 		return atom;
 	}
 	
-	public TMappingRule(TMappingRule baseRule, List<Function> conditionsOR) {
+	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms) {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)baseRule.head.clone();
 
-		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size() + 1);
-		for (List<Function> baseList: baseRule.filterAtoms)
-			filterAtoms.add(cloneList(baseList));		
-		filterAtoms.add(conditionsOR);
-
+		this.filterAtoms = filterAtoms;
+		
 		this.stripped = fac.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
 	
-	public TMappingRule(Function head, TMappingRule baseRule) {
+	TMappingRule(Function head, TMappingRule baseRule) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));

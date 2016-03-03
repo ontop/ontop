@@ -49,8 +49,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         /**
          * Distinguishes the BooleanExpression from the other functional terms.
          */
-        if (functionSymbol instanceof BooleanOperationPredicate) {
-            return DATA_FACTORY.getImmutableBooleanExpression((BooleanOperationPredicate) functionSymbol,
+        if (functionSymbol instanceof OperationPredicate) {
+            return DATA_FACTORY.getImmutableBooleanExpression((OperationPredicate) functionSymbol,
                     subTermsBuilder.build());
         }
         else {
@@ -288,7 +288,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         List<ImmutableBooleanExpression> equalities = new ArrayList<>();
 
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.EQ, entry.getKey(), entry.getValue()));
+            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
         }
 
         switch(equalities.size()) {
@@ -301,7 +301,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 // Non-final
                 ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
                 while (equalityIterator.hasNext()) {
-                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, aggregateExpression,
+                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, aggregateExpression,
                             equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);

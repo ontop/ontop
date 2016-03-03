@@ -20,20 +20,21 @@ package it.unibz.inf.ontop.owlapi3;
  * #L%
  */
 
-
-import java.util.Iterator;
-
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
+import java.util.Iterator;
+
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+
 public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAxiom> {
 
-	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+	private final OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 	
-	private Iterator<Assertion> assertions = null;
+	private final Iterator<Assertion> assertions;
 
 	public QuestOWLIndividualAxiomIterator(Iterator<Assertion> assertions) {
 		this.assertions = assertions;
@@ -52,15 +53,13 @@ public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAx
 	}
 
 	private OWLIndividualAxiom translate(Assertion a) {
-		if (a instanceof ClassAssertion)
+		if (a instanceof ClassAssertion) 
 			return translator.translate((ClassAssertion) a);
-		else if (a instanceof ObjectPropertyAssertion)
+		else if (a instanceof ObjectPropertyAssertion) 
 			return translator.translate((ObjectPropertyAssertion) a);
 		else
 			return translator.translate((DataPropertyAssertion) a);
 	}
-	
-	
 	
 	@Override
 	public void remove() {

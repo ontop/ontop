@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.inf.ontop.ontology.ClassExpression;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.ClassExpression;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class SemanticIndexCache {
 
-	private final Map<OClass, SemanticIndexRange> classRanges = new HashMap<>();
+	private final Map<OClass, SemanticIndexRange> classRanges = new HashMap<>();	
 	private final Map<ObjectPropertyExpression, SemanticIndexRange> opeRanges = new HashMap<>();
 	private final Map<DataPropertyExpression, SemanticIndexRange> dpeRanges = new HashMap<>();
 

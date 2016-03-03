@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.reformulation.owlapi3;
 
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.owlapi3.swrl.SWRLAPITranslator;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,8 +12,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.owlapi3.swrl.SWRLAPITranslator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;

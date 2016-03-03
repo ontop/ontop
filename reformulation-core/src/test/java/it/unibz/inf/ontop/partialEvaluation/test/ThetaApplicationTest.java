@@ -20,11 +20,16 @@ package it.unibz.inf.ontop.partialEvaluation.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,12 +37,11 @@ import java.util.Map;
 import java.util.Vector;
 
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.model.*;
 
 
 public class ThetaApplicationTest extends TestCase {
 
-	OBDADataFactory termFactory	= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
 	OBDADataFactory	predFactory	= OBDADataFactoryImpl.getInstance();
 
 	/*

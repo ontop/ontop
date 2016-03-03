@@ -20,14 +20,16 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
-import it.unibz.inf.ontop.model.OBDAException;
-
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
+import org.openrdf.model.Model;
+import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,13 +37,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 
-import org.openrdf.model.Model;
-import org.openrdf.repository.RepositoryException;
-import org.semanticweb.owlapi.model.OWLOntology;
-
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
 	private QuestDBVirtualStore virtualStore;
+	private QuestDBConnection questDBConn;
 
 	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
@@ -128,10 +127,10 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 * 
 	 * @param userConstraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+	public void setImplicitDBConstraints(ImplicitDBConstraintsReader userConstraints){
 		if(userConstraints == null)
 			throw new NullPointerException();
-		if(this.isinitialized)
+		if(this.initialized)
 			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		this.virtualStore.setImplicitDBConstraints(userConstraints);
 	}
@@ -153,7 +152,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		}
 	}
 	
-	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraints userConstraints) throws Exception
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraintsReader userConstraints) throws Exception
 	{
 		if (mappingFile == null) {
 			//if we have no mappings 
@@ -190,10 +189,11 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 */
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
-		if(!super.isinitialized)
+		if(!super.initialized)
 			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
-
-        return virtualStore.getConnection();
+		
+		questDBConn = this.virtualStore.getConnection();
+		return questDBConn;
 	}
 
 	@Override
@@ -208,7 +208,12 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	@Override
 	public void shutDown() throws RepositoryException {
 		super.shutDown();
-		virtualStore.close();
+		try {
+			questDBConn.close();
+			virtualStore.close();
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getType() {

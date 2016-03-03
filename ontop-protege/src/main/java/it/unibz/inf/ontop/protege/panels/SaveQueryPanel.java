@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -19,6 +19,10 @@ package it.unibz.inf.ontop.protege.panels;
  * limitations under the License.
  * #L%
  */
+
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -41,10 +45,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 
 public class SaveQueryPanel extends JPanel {
 

@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#
+:		http://it.unibz.inf/obda/ontologies/join-elimination-test.owl#
 
 [SourceDeclaration]
 sourceUri	h2

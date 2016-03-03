@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 /*
  * #%L
@@ -31,26 +31,26 @@ import it.unibz.inf.ontop.model.Predicate;
 
 public class SemanticIndexViewID {
 	
-	private final Predicate.COL_TYPE type1, type2;
+	private final COL_TYPE type1, type2;
 	private final int hashCode;
 
-	public SemanticIndexViewID(Predicate.COL_TYPE type1, Predicate.COL_TYPE type2) {
+	public SemanticIndexViewID(COL_TYPE type1, COL_TYPE type2) {
 		this.type1 = type1;
 		this.type2 = type2;
 		this.hashCode  = type2.hashCode() ^ (type1.hashCode() << 16);
 	}
 	
-	public SemanticIndexViewID(Predicate.COL_TYPE type1) {
+	public SemanticIndexViewID(COL_TYPE type1) {
 		this.type1 = type1;
 		this.type2 = null;
 		this.hashCode  = type1.hashCode();
 	}
 
-	public Predicate.COL_TYPE getType1() {
+	public COL_TYPE getType1() {
 		return type1;
 	}
 
-	public Predicate.COL_TYPE getType2() {
+	public COL_TYPE getType2() {
 		return type2;
 	}
 	

@@ -36,7 +36,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public DatatypeFactory getDatatypeFactory();
 
-	public CQIE getCQIE(Function head, Function... body );
+	public CQIE getCQIE(Function head, Function... body);
 	
 	public CQIE getCQIE(Function head, List<Function> body);
 	
@@ -118,17 +118,17 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @param functor
 	 *            the function symbol name.
-	 * @param arguments
+	 * @param terms
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
 	public Function getFunction(Predicate functor, Term... terms);
 
-	BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments);
+	BooleanExpression getBooleanExpression(OperationPredicate functor, List<Term> arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments);
+	ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor, ImmutableTerm... arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
+	ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor,
 															 ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanExpression booleanExpression);
@@ -163,7 +163,7 @@ public interface OBDADataFactory extends Serializable {
 																 ImmutableList<Variable> arguments);
 
 
-	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
+	public BooleanExpression getBooleanExpression(OperationPredicate functor, Term... arguments);
 
 	/*
 	 * Boolean function terms
@@ -195,27 +195,26 @@ public interface OBDADataFactory extends Serializable {
 
 	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2);
 	
-	public BooleanExpression getFunctionLike(Term term1, Term term2);
+	// ROMAN (23 Dec 2015): LIKE comes only from mappings
+	public BooleanExpression getSQLFunctionLike(Term term1, Term term2);
 	
 	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3);
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
-
-	/*
-	 * Numerical arithmethic functions
-	 */
-
-	public Function getFunctionMinus(Term term1);
-
-	public Function getFunctionAdd(Term term1, Term term2);
-
-	public Function getFunctionSubstract(Term term1, Term term2);
-
-	public Function getFunctionMultiply(Term term1, Term term2);
+	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
+    
+ // added by Nika: 
+    
+	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
+
+	public Function getFunctionSubstring(Term term1, Term term2);
+
 	
+
+
 	/*
 	 * Casting values cast(source-value AS destination-type)
 	 */
@@ -333,27 +332,22 @@ public interface OBDADataFactory extends Serializable {
 	public Variable getVariable(String name);
 	
 	
+	/* OBDA mapping axioms */
+	
+	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
-	/**
-	 * Construct a {@link Variable} object with empty name.
-	 * 
-	 * @return the variable object.
-	 */
-//	public Variable getVariableNondistinguished();
-
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
-
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery);
-
-	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery);
+	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
 
+	/* SPARQL meta-predicates */
 	
-	public Function getSPARQLJoin(Term t1, Term t2);
+	public Function getSPARQLJoin(Function t1, Function t2);
 
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
-	
+
+	Function getSPARQLJoin(Term t1, Term t2);
+
 	public Function getSPARQLJoin(List<Function> atoms, Function filter);
 
 	public Function getSPARQLJoin(List<Function> atoms);

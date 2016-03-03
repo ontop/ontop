@@ -1,14 +1,15 @@
 package it.unibz.inf.ontop.cli;
 
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
-import com.github.rvesse.airline.Command;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.r2rml.R2RMLReader;
 
 import java.io.File;
@@ -19,7 +20,8 @@ import java.net.URI;
 public class OntopR2RMLToOBDA implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-i", "--input"}, title = "mapping.ttl",
-            description = "Input mapping file in R2RML format (.ttl)", required = true)
+            description = "Input mapping file in R2RML format (.ttl)")
+    @Required
     protected String inputMappingFile;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"}, title = "mapping.obda",

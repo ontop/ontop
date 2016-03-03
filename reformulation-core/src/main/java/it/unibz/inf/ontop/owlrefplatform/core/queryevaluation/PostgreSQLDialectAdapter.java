@@ -27,12 +27,55 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
+    @Override
+    public String MD5(String str){
+    	return String.format("MD5(%s)", str);
+    }
+    
+    @Override
+	public String strSubstr(String str, String start, String end) {
+		return String.format("SUBSTRING(%s FROM %s FOR %s)", str, start, end);
+	} 
+    
+    @Override
+	public String strBefore(String str, String before) {
+		return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
+		}
+    
+    @Override
+	public String strStartsOperator(){
+		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";	
+	} 
+    
+    @Override
+	public String strContainsOperator(){
+		return "POSITION(%2$s IN %1$s) > 0";		
+	}
+    
+    @Override
+	public String strAfter(String str, String after) {
+//SIGN return a double precision, we need to cast to numeric to avoid conversion exception while using substring
+		return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
+				str, after, str , after , after, str, str);
+
+	}
+
+    @Override
+    public String dateTZ(String str){
+    	return strConcat(new String[]{String.format("EXTRACT(TIMEZONE_HOUR FROM %s)", str), "':'",String.format("EXTRACT(TIMEZONE_MINUTE FROM %s)", str) });
+    }
+
+	@Override
+	public String dateNow(){
+		return "NOW()";
+	}
+    
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 || limit == 0) {
+		if (limit < 0 ) {
 			if (offset < 0) {
 				// If both limit and offset is not specified.
-				return "LIMIT 0";
+				return "";
 			} else {
 				// if the limit is not specified
 				return String.format("LIMIT ALL\nOFFSET %d", offset);
@@ -46,90 +89,29 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
-	
+
+	@Override //trick to support uuid
+	public String strUuid() {
+		return "md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String uuid() {
+		return "'urn:uuid:'|| md5(random()::text || clock_timestamp()::text)::uuid";
+	}
+
+	@Override
+	public String rand() {
+		return "RANDOM()";
+	}
+
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = null;
-		
-		switch (type) {
-		case Types.VARCHAR:
-			strType = "VARCHAR";
-			break;
-		case Types.BIT:
-			strType = "BIT";			break;
-		case Types.TINYINT:
-			strType = "TINYINT";			break;
-		case Types.SMALLINT:
-			strType = "SMALLINT";			break;
-		case Types.INTEGER:
-			strType = "INTEGER";			break;
-		case Types.BIGINT:
-			strType = "BIGINT";			break;
-		case Types.FLOAT:
-			strType = "FLOAT";			break;
-		case Types.REAL:
-			strType = "REAL";			break;
-		case Types.DOUBLE:
-			strType = "double precision";			break;
-		case Types.NUMERIC:
-			strType = "NUMERIC";			break;
-		case Types.DECIMAL:
-			strType = "DECIMAL";			break;
-		case Types.CHAR:
-			strType = "CHAR";			break;
-		case Types.LONGVARCHAR:
-			strType = "LONGVARCHAR";			break;
-		case Types.DATE:
-			strType = "TIMESTAMP";			break;
-		case Types.TIME:
-			strType = "TIME";			break;
-		case Types.TIMESTAMP:
-			strType = "TIMESTAMP";			break;
-		case Types.BINARY:
-			strType = "BINARY";			break;
-		case Types.VARBINARY:
-			strType = "VARBINARY";			break;
-		case Types.LONGVARBINARY:
-			strType = "LONGVARBINARY";			break;
-		case Types.NULL:
-			strType = "NULL";			break;
-		case Types.OTHER:
-			strType = "OTHER";			break;
-		case Types.JAVA_OBJECT:
-			strType = "JAVA_OBJECT";			break;
-		case Types.DISTINCT:
-			strType = "DISTINCT";			break;
-		case Types.STRUCT:
-			strType = "STRUCT";			break;
-		case Types.ARRAY:
-			strType = "ARRAY";			break;
-		case Types.BLOB:
-			strType = "BLOB";			break;
-		case Types.CLOB:
-			strType = "CLOB";			break;
-		case Types.REF:
-			strType = "REF";			break;
-		case Types.DATALINK:
-			strType = "DATALINK";			break;
-		case Types.BOOLEAN:
-			strType = "BOOLEAN";			break;
-		case Types.ROWID:
-			strType = "ROWID";			break;
-		case Types.NCHAR:
-			strType = "NCHAR";			break;
-		case Types.NVARCHAR:
-			strType = "NVARCHAR";			break;
-		case Types.LONGNVARCHAR:
-			strType = "LONGNVARCHAR";			break;
-		case Types.NCLOB:
-			strType = "NCLOB";			break;
-		case Types.SQLXML:
-			strType = "SQLXML";			break;
-
-
-		default:
+		if (type == Types.VARCHAR) {
+			strType = "VARCHAR(10485760)";
+		} else {
 			throw new RuntimeException("Unsupported SQL type");
-
 		}
 		return "CAST(" + value + " AS " + strType + ")";
 	}
@@ -142,9 +124,9 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
 
         if(quotes.matcher(pattern).matches() ) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
         }
 		//An ARE can begin with embedded options: a sequence (?n)  specifies options affecting the rest of the RE. 
 		//n is newline-sensitive matching
@@ -158,8 +140,8 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		return columnname + " ~" + ((caseinSensitive)? "* " : " ") + "'"+ ((multiLine && dotAllMode)? "(?n)" : flags) + pattern + "'";
 	}
 
-	@Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    @Override
+    public String strReplace(String str, String oldstr, String newstr) {
 
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
@@ -189,7 +171,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param v
 	 * @return
 	 */
 	@Override

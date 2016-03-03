@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.protege.dialogs;
  */
 
 
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;

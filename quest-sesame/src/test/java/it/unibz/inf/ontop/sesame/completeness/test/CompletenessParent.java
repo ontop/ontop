@@ -23,6 +23,8 @@ package it.unibz.inf.ontop.sesame.completeness.test;
 import info.aduna.io.IOUtil;
 import info.aduna.iteration.Iterations;
 import info.aduna.text.StringUtil;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,9 +80,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.memory.MemoryStore;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

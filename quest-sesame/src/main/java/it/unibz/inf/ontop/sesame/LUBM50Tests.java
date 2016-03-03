@@ -20,28 +20,16 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.net.URI;
-import java.sql.Connection;
-
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -49,6 +37,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.net.URI;
+import java.sql.Connection;
 
 /***
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -176,8 +168,6 @@ public class LUBM50Tests {
 
 	public void test3InitializingQuest() throws Exception {
 
-		QuestOWLFactory fac = new QuestOWLFactory();
-
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -189,9 +179,11 @@ public class LUBM50Tests {
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
 
-		fac.setPreferenceHolder(pref);
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
+        QuestOWL quest = factory.createReasoner(ontology, config);
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		
 
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
 

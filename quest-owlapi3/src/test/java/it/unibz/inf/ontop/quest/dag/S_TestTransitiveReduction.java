@@ -21,28 +21,30 @@ package it.unibz.inf.ontop.quest.dag;
  */
 
 
-
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.ontology.ClassExpression;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-
-import java.util.ArrayList;
-import java.util.Set;
-
 import junit.framework.TestCase;
-
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 public class S_TestTransitiveReduction extends TestCase {
 
 	ArrayList<String> input= new ArrayList<String>();
 	ArrayList<String> output= new ArrayList<String>();
 
-	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
+	Logger log = LoggerFactory.getLogger(S_TestTransitiveReduction.class);
 
 	public S_TestTransitiveReduction (String name){
 		super(name);
@@ -97,13 +99,54 @@ public class S_TestTransitiveReduction extends TestCase {
 
 
 	}
+	
+	
+	public void testR() throws Exception{
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		
+		ClassExpression A = onto.getVocabulary().getClass("http://www.kro.com/ontologies/A");
+		ClassExpression B = onto.getVocabulary().getClass("http://www.kro.com/ontologies/B");
+		ClassExpression C = onto.getVocabulary().getClass("http://www.kro.com/ontologies/C");
+		
+		EquivalencesDAG<ClassExpression> classes = dag.getClassDAG();
+		
+		Equivalences<ClassExpression> vA = classes.getVertex(A);
+		Equivalences<ClassExpression> vB = classes.getVertex(B);
+		Equivalences<ClassExpression> vC = classes.getVertex(C);
+		
+		assertEquals(ImmutableSet.of(vB), classes.getDirectSuper(vC));
+		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
+	}
 
+	public void testR2() throws Exception{
+		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
+		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		
+		ClassExpression A = onto.getVocabulary().getClass("http://www.kro.com/ontologies/A");
+		ClassExpression B = onto.getVocabulary().getClass("http://www.kro.com/ontologies/B");
+		ClassExpression C = onto.getVocabulary().getClass("http://www.kro.com/ontologies/C");
+		ClassExpression D = onto.getVocabulary().getClass("http://www.kro.com/ontologies/D");
+		
+		EquivalencesDAG<ClassExpression> classes = dag.getClassDAG();
+		
+		Equivalences<ClassExpression> vA = classes.getVertex(A);
+		Equivalences<ClassExpression> vB = classes.getVertex(B);
+		Equivalences<ClassExpression> vC = classes.getVertex(C);
+		Equivalences<ClassExpression> vD = classes.getVertex(D);
+		
+		assertEquals(ImmutableSet.of(vB, vD), classes.getDirectSuper(vC));
+		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
+		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vD));
+	}
+	
+	
 	public void testSimplification() throws Exception{
 		//for each file in the input
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasonerImpl dag2 = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );

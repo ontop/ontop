@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.ontology;
 
-import it.unibz.inf.ontop.model.Predicate;
-
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -35,19 +32,37 @@ import it.unibz.inf.ontop.model.Predicate;
  *
  */
 
+import java.util.Collection;
+
+import it.unibz.inf.ontop.model.Predicate;
+
+/**
+ * Represents DataPropertyExpression from the OWL 2 QL Specification
+ * 
+ * DataPropertyExpression := DataProperty
+ * 
+ * Support for owl:topDataProperty and owl:bottomDataProperty
+ * 
+ * @author Roman Kontchakov
+ *
+ */
 
 
-public interface DataPropertyExpression extends Description {
+public interface DataPropertyExpression extends DescriptionBT {
 
 	public Predicate getPredicate();
 
+	public String getName();
+	
 	/**
 	 * returns the DataSomeValuesFrom for the domain of the data property
 	 * 
 	 * @return
 	 */
 	
-	public DataSomeValuesFrom getDomain();
+	public DataSomeValuesFrom getDomainRestriction(Datatype datatype);
+	
+	public Collection<DataSomeValuesFrom> getAllDomainRestrictions();
 
 	/**
 	 * returns the DataPropertyRangeExpression for the range of the data property
@@ -56,7 +71,4 @@ public interface DataPropertyExpression extends Description {
 	 */
 	public DataPropertyRangeExpression getRange();
 	
-	public boolean isBottom();
-	
-	public boolean isTop();
 }

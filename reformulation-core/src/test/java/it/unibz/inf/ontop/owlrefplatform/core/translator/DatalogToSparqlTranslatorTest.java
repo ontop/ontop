@@ -20,25 +20,27 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import java.util.Arrays;
-import java.util.List;
-
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import org.junit.Before;
-import org.junit.Test;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.model.ExpressionOperation;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAQueryModifiers;
+import it.unibz.inf.ontop.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.OrderCondition;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -147,9 +149,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
@@ -192,9 +194,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans6 = createRule(ANS6, x, e);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), ans2(x,a)
@@ -223,9 +225,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		Function cond6 = dataFactory.getFunctionAND(cond3, cond4);
 		Function cond7 = dataFactory.getFunctionOR(cond6, cond5);
 		
@@ -629,7 +631,7 @@ public class DatalogToSparqlTranslatorTest {
 		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
 		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
 		
-		OBDAQueryModifiers modifiers = new MutableQueryModifiersImpl();
+		OBDAQueryModifiers modifiers = new OBDAQueryModifiers();
 		modifiers.setDistinct();
 		modifiers.setLimit(100);
 		modifiers.setOffset(20);
@@ -663,7 +665,7 @@ public class DatalogToSparqlTranslatorTest {
 		List<CQIE> program = Arrays.asList(queryAndRules);
 		return dataFactory.getDatalogProgram(program);
 	}
-
+	
 	private void translateAndDisplayOutput(String title, DatalogProgram datalog) {
 		final String sparqlOutput = datalogTranslator.translate(datalog);
 		StringBuilder sb = new StringBuilder();
@@ -705,11 +707,11 @@ public class DatalogToSparqlTranslatorTest {
 		predMasterStudent = dataFactory.getClassPredicate("http://example.org/MasterStudent");
 		predDoctoralStudent = dataFactory.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = dataFactory.getDataPropertyPredicate("http://example.org/firstName", Predicate.COL_TYPE.STRING);
-		predLastName = dataFactory.getDataPropertyPredicate("http://example.org/lastName", Predicate.COL_TYPE.STRING);
-		predAge = dataFactory.getDataPropertyPredicate("http://example.org/age", Predicate.COL_TYPE.INTEGER);
-		predGrade = dataFactory.getDataPropertyPredicate("http://example.org/grade", Predicate.COL_TYPE.DECIMAL);
-		predEnrollmentDate = dataFactory.getDataPropertyPredicate("http://example.org/enrollmentDate", Predicate.COL_TYPE.DATETIME);
+		predFirstName = dataFactory.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
+		predLastName = dataFactory.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
+		predAge = dataFactory.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
+		predGrade = dataFactory.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
+		predEnrollmentDate = dataFactory.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
 		
 		predHasCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasCourse");
 		predHasElementaryCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
@@ -747,11 +749,11 @@ public class DatalogToSparqlTranslatorTest {
 	private static Constant c5;
 	
 	static {
-		c1 = dataFactory.getConstantLiteral("John", Predicate.COL_TYPE.STRING);
-		c2 = dataFactory.getConstantLiteral("Smith", Predicate.COL_TYPE.STRING);
-		c3 = dataFactory.getConstantLiteral("25", Predicate.COL_TYPE.INTEGER);
-		c4 = dataFactory.getConstantLiteral("48.50", Predicate.COL_TYPE.DECIMAL);
-		c5 = dataFactory.getConstantLiteral("2012-03-20 00:00:00", Predicate.COL_TYPE.DATETIME);
+		c1 = dataFactory.getConstantLiteral("John", COL_TYPE.STRING);
+		c2 = dataFactory.getConstantLiteral("Smith", COL_TYPE.STRING);
+		c3 = dataFactory.getConstantLiteral("25", COL_TYPE.INTEGER);
+		c4 = dataFactory.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
+		c5 = dataFactory.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
 	}
 	
 	private static Function student;

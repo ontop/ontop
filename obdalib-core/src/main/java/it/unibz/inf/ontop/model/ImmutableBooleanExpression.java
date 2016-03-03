@@ -22,8 +22,5 @@ public interface ImmutableBooleanExpression extends BooleanExpression, Immutable
      *
      * It is the responsibility of the caller to make sure such a flattening makes sense.
      */
-    ImmutableSet<ImmutableBooleanExpression> flatten(BooleanOperationPredicate operator);
-
-    @Override
-    public BooleanOperationPredicate getFunctionSymbol();
+    ImmutableSet<ImmutableBooleanExpression> flatten(OperationPredicate operator);
 }

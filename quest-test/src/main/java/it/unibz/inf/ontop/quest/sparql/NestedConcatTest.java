@@ -1,4 +1,5 @@
 package it.unibz.inf.ontop.quest.sparql;
+
 /*
  * #%L
  * ontop-quest-owlapi3
@@ -19,19 +20,17 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.junit.Test;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import org.junit.Test;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+
 
 import java.io.File;
 
@@ -77,9 +76,8 @@ public class NestedConcatTest {
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(preference);
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		/*
 		 * Prepare the data connection for querying.
@@ -98,11 +96,11 @@ public class NestedConcatTest {
 //                        "}\n" +
 //                        "LIMIT 1";
                 "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
-                        "SELECT ?per ?yS ?yE\n" +
-                        "WHERE{\n" +
-                        "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
-                        "}\n" +
-                        "LIMIT 1";
+                            "SELECT ?per ?yS ?yE\n" +
+                            "WHERE{\n" +
+                            "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
+                            "}\n" +
+                            "LIMIT 1";
 
         try {
             long t1 = System.currentTimeMillis();

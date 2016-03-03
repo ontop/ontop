@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.quest.scenarios;
  */
 
 import info.aduna.io.IOUtil;
+import it.unibz.inf.ontop.quest.ResultSetInfo;
+import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +34,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
@@ -53,7 +54,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.memory.MemoryStore;
-import it.unibz.inf.ontop.quest.ResultSetInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

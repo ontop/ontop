@@ -20,30 +20,20 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
+import it.unibz.inf.ontop.ontology.*;
 
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.Datatype;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
+/**
+ * 
+ * @author Roman Kontchakov
+ *
+ */
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
 	private static final OntologyFactoryImpl instance = new OntologyFactoryImpl();
-
-	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
-	
 	
 	private OntologyFactoryImpl() {
 		// NO-OP to make the default constructor private
@@ -54,81 +44,94 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object) {
-		return new ClassAssertionImpl(concept, object);
-	}
-
-	@Override
-	public Ontology createOntology() {
-		return new OntologyImpl();
+	public OntologyVocabulary createVocabulary() {
+		return new OntologyVocabularyImpl();
 	}
 	
-	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
-		if (role.isInverse())
-			return new ObjectPropertyAssertionImpl(role.getInverse(), o2, o1);
+	@Override
+	public Ontology createOntology(ImmutableOntologyVocabulary vb) {
+		return new OntologyImpl((OntologyVocabularyImpl)vb);
+	}
+	
+	/**
+	 * Creates a class assertion
+	 * <p>
+	 * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
+	 * <p>
+	 * Implements rule [C4]:
+	 *     - ignore (return null) if the class is top
+	 *     - inconsistency if the class is bot
+	 */
+	
+	@Override
+	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
+		if (ce.isTop())
+			return null;
+		if (ce.isBottom())
+			throw new InconsistentOntologyException();	
+		
+		return new ClassAssertionImpl(ce, object);
+	}
+
+	/**
+	 * Creates an object property assertion
+	 * <p>
+	 * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations 
+	 *				ObjectPropertyExpression sourceIndividual targetIndividual ')'
+	 * <p>
+	 * Implements rule [O4]:
+	 *     - ignore (return null) if the property is top
+	 *     - inconsistency if the property is bot
+	 *     - swap the arguments to eliminate inverses
+	 */
+	
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
+		if (ope.isTop())
+			return null;
+		if (ope.isBottom())
+			throw new InconsistentOntologyException();
+		
+		if (ope.isInverse())
+			return new ObjectPropertyAssertionImpl(ope.getInverse(), o2, o1);
 		else
-			return new ObjectPropertyAssertionImpl(role, o1, o2);			
+			return new ObjectPropertyAssertionImpl(ope, o1, o2);			
 	}
 
-
-	@Override
-	public OClass createClass(String c) {
-		Predicate classp = ofac.getClassPredicate(c);
-		return new ClassImpl(classp);
-	}
-
-	@Override
-	public ObjectPropertyExpression createObjectProperty(String uri) {
-		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new ObjectPropertyExpressionImpl(prop);
-	}
-
+	/**
+	 * Creates a data property assertion
+	 * <p>
+	 * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations 
+	 * 					DataPropertyExpression sourceIndividual targetValue ')'
+	 * <p>
+	 * Implements rule [D4]:
+	 *     - ignore (return null) if the property is top
+	 *     - inconsistency if the property is bot
+	 */
 	
 	@Override
-	public DataPropertyExpression createDataProperty(String p) {
-		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return new DataPropertyExpressionImpl(prop);
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
+		if (dpe.isTop())
+			return null;
+		if (dpe.isBottom())
+			throw new InconsistentOntologyException();
+		
+		return new DataPropertyAssertionImpl(dpe, o1, o2);
 	}
 
+//	@Override
+//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
+//		return new AnnotationAssertionImpl(ap,o,c);
+//	}
 
+	/**
+	 * Creates an annotation assertion
+	 * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
+	 * AnnotationSubject := IRI | AnonymousIndividual
+	 * Subjects and value are not currently stored
+	 */
 	@Override
-	public Datatype createDataType(Predicate.COL_TYPE type) {
-		return new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(type));
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap) {
+		return new AnnotationAssertionImpl(ap);
 	}
 
-	@Override
-	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2) {
-		return new DataPropertyAssertionImpl(attribute, o1, o2);
-	}
-
-	@Override
-	public OClass getThing() {
-		return ClassImpl.owlThing;
-	}
-
-	@Override
-	public OClass getNothing() {
-		return ClassImpl.owlNothing;
-	}
-
-	@Override
-	public ObjectPropertyExpression getTopObjectProperty() {
-		return ObjectPropertyExpressionImpl.owlTopObjectProperty;
-	}
-
-	@Override
-	public ObjectPropertyExpression getBottomObjectProperty() {
-		return ObjectPropertyExpressionImpl.owlBottomObjectProperty;
-	}
-
-	@Override
-	public DataPropertyExpression getTopDataProperty() {
-		return DataPropertyExpressionImpl.owlTopDataProperty;
-	}
-
-	@Override
-	public DataPropertyExpression getBottomDataProperty() {
-		return DataPropertyExpressionImpl.owlBottomDataProperty;
-	}
-	
 }

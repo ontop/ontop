@@ -32,4 +32,8 @@ plugin-runtime
 
 ontop-optique-test
 tmp
+<<<<<<< HEAD
 ontop-beyond-ql
+=======
+*.log
+>>>>>>> v1/package-names-changed

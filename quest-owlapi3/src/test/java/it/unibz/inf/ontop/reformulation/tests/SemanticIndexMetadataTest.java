@@ -1,6 +1,17 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.ontology.OntologyFactory;
+import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.Quest;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,17 +23,6 @@ import java.sql.Statement;
 
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -71,7 +71,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ModelIOManager ioManager = new ModelIOManager(obdaModel); 
 		ioManager.load(new File(obdafile));
 	}
 
@@ -106,19 +106,21 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-			Ontology ont = ofac.createOntology();
-			ont.getVocabulary().createClass("A");
-			ont.getVocabulary().createObjectProperty("P");
-			ont.getVocabulary().createDataProperty("P");
-			ont.getVocabulary().createObjectProperty("Q");
-			ont.getVocabulary().createDataProperty("D");
-				
+			OntologyVocabulary vb = ofac.createVocabulary();
+						
+			vb.createClass("A");
+			vb.createObjectProperty("P");
+			vb.createDataProperty("P");
+			vb.createObjectProperty("Q");
+			vb.createDataProperty("D");
+
+			Ontology ont = ofac.createOntology(vb);
+			
 			Quest quest = new Quest(ont, p);
 			quest.setupRepository();
 			

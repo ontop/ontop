@@ -22,6 +22,21 @@ package it.unibz.inf.ontop.ontology;
 
 import it.unibz.inf.ontop.model.ObjectConstant;
 
+/**
+ * Represents ObjectPropertyAssertion from the OWL 2 QL Specification
+ * 
+ * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations 
+ * 									ObjectPropertyExpression sourceIndividual targetIndividual ')'
+ * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
+ * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
+ * 
+ * Support for owl:topObjectProperty and owl:bottomObjectProperty
+ *     - the inverses of the two coincide with themselves 
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public interface ObjectPropertyAssertion extends Assertion {
 
 	public ObjectPropertyExpression getProperty();
@@ -29,5 +44,4 @@ public interface ObjectPropertyAssertion extends Assertion {
 	public ObjectConstant getSubject();
 	
 	public ObjectConstant getObject();	
-
 }

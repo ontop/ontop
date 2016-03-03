@@ -82,7 +82,7 @@ public class ImmutabilityTools {
      */
     public static BooleanExpression convertToMutableBooleanExpression(ImmutableBooleanExpression booleanExpression) {
 
-        BooleanOperationPredicate pred= (BooleanOperationPredicate) booleanExpression.getFunctionSymbol();
+        OperationPredicate pred= (OperationPredicate) booleanExpression.getFunctionSymbol();
         ImmutableList<Term> otherTerms =  booleanExpression.getTerms();
         List<Term> mutableList = new ArrayList<>();
 
@@ -114,17 +114,17 @@ public class ImmutabilityTools {
                 return Optional.of(conjunctionOfExpressions.get(0));
             case 2:
                 return Optional.of(DATA_FACTORY.getImmutableBooleanExpression(
-                        OBDAVocabulary.AND,
+                        ExpressionOperation.AND,
                         conjunctionOfExpressions));
             default:
                 // Non-final
                 ImmutableBooleanExpression cumulativeExpression = DATA_FACTORY.getImmutableBooleanExpression(
-                        OBDAVocabulary.AND,
+                        ExpressionOperation.AND,
                         conjunctionOfExpressions.get(0),
                         conjunctionOfExpressions.get(1));
                 for (int i = 2; i < size; i++) {
                     cumulativeExpression =  DATA_FACTORY.getImmutableBooleanExpression(
-                            OBDAVocabulary.AND,
+                            ExpressionOperation.AND,
                             cumulativeExpression,
                             conjunctionOfExpressions.get(i));
                 }

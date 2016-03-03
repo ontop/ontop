@@ -2,17 +2,14 @@ package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.BooleanExpression;
-import it.unibz.inf.ontop.model.BooleanOperationPredicate;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
-import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.*;
 
 public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableBooleanExpression {
-    protected ImmutableBooleanExpressionImpl(BooleanOperationPredicate functor, ImmutableTerm... terms) {
+    protected ImmutableBooleanExpressionImpl(OperationPredicate functor, ImmutableTerm... terms) {
         super(functor, terms);
     }
 
-    protected ImmutableBooleanExpressionImpl(BooleanOperationPredicate functor, ImmutableList<? extends ImmutableTerm> terms) {
+    protected ImmutableBooleanExpressionImpl(OperationPredicate functor, ImmutableList<? extends ImmutableTerm> terms) {
         super(functor, terms);
     }
 
@@ -26,8 +23,8 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
     }
 
     @Override
-    public BooleanOperationPredicate getFunctionSymbol() {
-        return (BooleanOperationPredicate) super.getFunctionSymbol();
+    public OperationPredicate getFunctionSymbol() {
+        return (OperationPredicate) super.getFunctionSymbol();
     }
 
     /**
@@ -35,16 +32,16 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
      */
     @Override
     public ImmutableSet<ImmutableBooleanExpression> flattenAND() {
-        return flatten(OBDAVocabulary.AND);
+        return flatten(ExpressionOperation.AND);
     }
 
     @Override
     public ImmutableSet<ImmutableBooleanExpression> flattenOR() {
-        return flatten(OBDAVocabulary.OR);
+        return flatten(ExpressionOperation.OR);
     }
 
     @Override
-    public ImmutableSet<ImmutableBooleanExpression> flatten(BooleanOperationPredicate operator) {
+    public ImmutableSet<ImmutableBooleanExpression> flatten(OperationPredicate operator) {
 
         /**
          * Only flattens OR expressions.

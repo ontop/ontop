@@ -20,10 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
@@ -33,6 +29,10 @@ import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -49,8 +49,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OBDAModelManager instance = null;
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
-	ProtegeOBDAPreferences obdaPref = null;
-	ProtegeReformulationPlatformPreferences refplatPref = null;
+	DisposableOBDAPreferences obdaPref = null;
+	DisposableQuestPreferences refplatPref = null;
 	
 	@Override
 	protected void setup(EditorKit editorKit) {
@@ -79,13 +79,13 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		/***
 		 * Preferences for the OBDA plugin (gui, etc)
 		 */
-		obdaPref = new ProtegeOBDAPreferences();
+		obdaPref = new DisposableOBDAPreferences();
 		getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
 
 		/***
 		 * Preferences for Quest
 		 */
-		refplatPref = new ProtegeReformulationPlatformPreferences();
+		refplatPref = new DisposableQuestPreferences();
 		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
 		loadPreferences();
 	}
@@ -119,7 +119,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String value = pref.getString(key, null);
 			if(value != null){
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) {
+				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;

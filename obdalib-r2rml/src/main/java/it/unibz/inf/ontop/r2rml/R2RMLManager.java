@@ -25,6 +25,14 @@ package it.unibz.inf.ontop.r2rml;
  * Class responsible of parsing R2RML mappings from file or from an RDF Model
  */
 
+import eu.optique.api.mapping.Join;
+import eu.optique.api.mapping.PredicateObjectMap;
+import eu.optique.api.mapping.RefObjectMap;
+import eu.optique.api.mapping.TriplesMap;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.TermUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +45,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -47,21 +53,11 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
-import eu.optique.api.mapping.Join;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.RefObjectMap;
-import eu.optique.api.mapping.TriplesMap;
-
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.TermUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
 public class R2RMLManager {
 	
@@ -158,9 +154,9 @@ public class R2RMLManager {
 	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm);
 		List<Function> body = getMappingTripleAtoms(tm);
-		Function head = getHeadAtom(body);
-		CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), sourceQuery, targetQuery);
+		//Function head = getHeadAtom(body);
+		//CQIE targetQuery = fac.getCQIE(head, body);
+		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), fac.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -210,16 +206,16 @@ public class R2RMLManager {
 				body.add(bodyAtom);
 			}
 
-			Function head = getHeadAtom(body);
-			CQIE targetQuery = fac.getCQIE(head, body);
+			//Function head = getHeadAtom(body);
+			//CQIE targetQuery = fac.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
 				throw new Exception("Could not create source query for join in "+tm.toString());
 			}
 			//finally, create mapping and add it to the list
-            //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-            OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), sourceQuery, targetQuery);
-            System.out.println("WARNING joinMapping introduced : "+mapping.toString());
+                //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
+			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), fac.getSQLQuery(sourceQuery), body);
+			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}
 			
@@ -301,7 +297,7 @@ public class R2RMLManager {
 							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
 							body.add(bodyAtom);
 						}
-						else if (term0 instanceof ValueConstant) {
+						else if (term0 instanceof ValueConstant) {							
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = fac.getPredicate(predName, 1);

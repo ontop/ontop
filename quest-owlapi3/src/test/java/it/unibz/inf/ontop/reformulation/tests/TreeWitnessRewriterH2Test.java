@@ -20,6 +20,28 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -30,24 +52,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -69,7 +76,8 @@ import org.slf4j.LoggerFactory;
  * tuples. If the scenario is run in classic, this data gets imported
  * automatically by the reasoner.
  */
-public class TreeWitnessRewriterH2Test extends TestCase {
+@Ignore // GUOHUI: 2016-01-16 SI+Mapping mode is disabled
+public class TreeWitnessRewriterH2Test{
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -137,7 +145,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		public long timeelapsed = -1;
 	}
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		/*
 		 * Initializing and H2 database with the stock exchange data
@@ -180,7 +188,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 											// obdaModel.getPrefixManager());
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 
 			dropTables();
@@ -232,15 +240,13 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		// }
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).obdaModel(obdaModel).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        
 		// Now we are ready for querying
 		QuestOWLStatement st = reasoner.getStatement();
 
@@ -311,6 +317,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		assertFalse(fail);
 	}
 
+    @Test
 	public void testViEqSig() throws Exception {
 
 		prepareTestQueries(tuples);
@@ -328,7 +335,6 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setProperty("rewrite", "true");
 
 		runTests(p);

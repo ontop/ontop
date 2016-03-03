@@ -15,34 +15,28 @@
  */
 package it.unibz.inf.ontop.sql;
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.r2rml.R2RMLManager;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.*;
+import org.openrdf.repository.RepositoryConnection;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
-import org.openrdf.model.Model;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import static org.junit.Assert.*;
 
 public class TestSesameBindings {
 

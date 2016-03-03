@@ -20,17 +20,19 @@ package it.unibz.inf.ontop.cli;
  * #L%
  */
 
-import com.github.rvesse.airline.Command;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
+
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
@@ -47,10 +49,10 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
-            allowedValues = {"rdfxml", "owlxml", "turtle"},
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, owlxml, turtle. " +
                     "Default: rdfxml")
+    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle"})
     public String format;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -118,9 +120,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             OBDAModel obdaModel = loadMappingFile(mappingFile);
 
-            Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
+            Ontology inputOntology = OWLAPITranslatorUtility.translate(ontology);
 
-            obdaModel.declareAll(inputOntology.getVocabulary());
+            obdaModel.getOntologyVocabulary().merge(inputOntology.getVocabulary());
 
 
             int numPredicates = predicates.size();
@@ -146,7 +148,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                                            Predicate predicate, String outputFile, String format) throws Exception {
         final long startTime = System.currentTimeMillis();
 
-        OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
+        OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
         QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
         System.err.println("Starts writing triples into files.");
@@ -198,7 +200,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
         //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-        manager.saveOntology(aBox, getOntologyFormat(format), new WriterDocumentTarget(writer));
+        manager.saveOntology(aBox, getDocumentFormat(format), new WriterDocumentTarget(writer));
 
         return tripleCount;
     }
@@ -222,7 +224,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             OWLOntology ontology = null;
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            OWLAPI3Materializer materializer = null;
+            OWLAPIMaterializer materializer = null;
 
             if (owlFile != null) {
             // Loading the OWL ontology from the file as with normal OWLReasoners
@@ -235,12 +237,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     ontology = extractDeclarations(manager, ontology);
                 }
 
-                Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
-                obdaModel.declareAll(onto.getVocabulary());
-                materializer = new OWLAPI3Materializer(obdaModel, onto, DO_STREAM_RESULTS);
+                Ontology onto =  OWLAPITranslatorUtility.translate(ontology);
+                obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
+                materializer = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS);
             } else {
                 ontology = manager.createOntology();
-                materializer = new OWLAPI3Materializer(obdaModel, DO_STREAM_RESULTS);
+                materializer = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
             }
 
 
@@ -253,9 +255,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 manager.addAxiom(ontology, iterator.next());
 
 
-            OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
+            OWLDocumentFormat DocumentFormat = getDocumentFormat(format);
 
-            manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));
+            manager.saveOntology(ontology, DocumentFormat, new WriterDocumentTarget(writer));
 
             System.err.println("NR of TRIPLES: " + materializer.getTriplesCount());
             System.err.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());

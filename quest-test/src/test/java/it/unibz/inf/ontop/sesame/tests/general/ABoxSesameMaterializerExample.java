@@ -20,17 +20,17 @@ package it.unibz.inf.ontop.sesame.tests.general;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.sesame.SesameStatementIterator;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sesame.SesameMaterializer;
-import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
@@ -43,7 +43,7 @@ public class ABoxSesameMaterializerExample {
 	 */
 	final String inputFile = "src/main/resources/example/exampleBooks.obda";
 	final String outputFile = "src/main/resources/example/exampleBooks.n3";
-	
+
 	/**
 	 * TODO: try with result streaming
 	 */

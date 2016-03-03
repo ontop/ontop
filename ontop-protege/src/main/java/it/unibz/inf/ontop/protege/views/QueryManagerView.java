@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import java.awt.BorderLayout;
-
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
+
+import java.awt.BorderLayout;
+
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class QueryManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {

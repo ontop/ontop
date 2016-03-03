@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,13 +20,6 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.net.URI;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -37,6 +30,11 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.net.URI;
 
 public class R2RMLExportAction extends ProtegeAction {
 
@@ -77,11 +75,11 @@ public class R2RMLExportAction extends ProtegeAction {
                 int approve = fc.showSaveDialog(workspace);
 
                 if(approve == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
+                    File file = fc.getSelectedFile();
 
 
-                R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
-                writer.write(file);
+                    R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
+                    writer.write(file);
                     JOptionPane.showMessageDialog(workspace, "R2rml Export completed.");
                 }
             }

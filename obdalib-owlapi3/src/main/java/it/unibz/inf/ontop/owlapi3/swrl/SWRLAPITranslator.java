@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.owlapi3.swrl;
 
 import it.unibz.inf.ontop.model.DatalogProgram;
+
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.SWRLRule;
 
