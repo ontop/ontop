@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.*;
@@ -50,7 +49,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
          * Distinguishes the BooleanExpression from the other functional terms.
          */
         if (functionSymbol instanceof OperationPredicate) {
-            return DATA_FACTORY.getImmutableBooleanExpression((OperationPredicate) functionSymbol,
+            return DATA_FACTORY.getImmutableExpression((OperationPredicate) functionSymbol,
                     subTermsBuilder.build());
         }
         else {
@@ -74,8 +73,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
-        return (ImmutableBooleanExpression) apply(booleanExpression);
+    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
+        return (ImmutableExpression) apply(booleanExpression);
     }
 
     @Override
@@ -278,17 +277,17 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public  Optional<ImmutableBooleanExpression> convertIntoBooleanExpression() {
+    public  Optional<ImmutableExpression> convertIntoBooleanExpression() {
         return convertIntoBooleanExpression(this);
     }
 
-    protected static Optional<ImmutableBooleanExpression> convertIntoBooleanExpression(
+    protected static Optional<ImmutableExpression> convertIntoBooleanExpression(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
-        List<ImmutableBooleanExpression> equalities = new ArrayList<>();
+        List<ImmutableExpression> equalities = new ArrayList<>();
 
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
+            equalities.add(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
         }
 
         switch(equalities.size()) {
@@ -297,11 +296,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             case 1:
                 return Optional.of(equalities.get(0));
             default:
-                Iterator<ImmutableBooleanExpression> equalityIterator = equalities.iterator();
+                Iterator<ImmutableExpression> equalityIterator = equalities.iterator();
                 // Non-final
-                ImmutableBooleanExpression aggregateExpression = equalityIterator.next();
+                ImmutableExpression aggregateExpression = equalityIterator.next();
                 while (equalityIterator.hasNext()) {
-                    aggregateExpression = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, aggregateExpression,
+                    aggregateExpression = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, aggregateExpression,
                             equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);

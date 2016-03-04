@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.executor.deletion;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.NodeTransformationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -76,7 +76,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
             case 0:
                 return new NodeTransformationProposalImpl(NodeTransformationProposedState.DELETE);
             case 1:
-                Optional<ImmutableBooleanExpression> optionalFilterCondition = innerJoinNode.getOptionalFilterCondition();
+                Optional<ImmutableExpression> optionalFilterCondition = innerJoinNode.getOptionalFilterCondition();
                 if (optionalFilterCondition.isPresent()) {
                     return new NodeTransformationProposalImpl(NodeTransformationProposedState.REPLACE_BY_NEW_NODE,
                             new FilterNodeImpl(optionalFilterCondition.get()));

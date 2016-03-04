@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
@@ -44,10 +43,10 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
     private static class FocusNodeUpdate {
         public final SubTreeDelimiterNode newFocusNode;
         public final Optional<InjectiveVar2VarSubstitution> optionalSubstitution;
-        public final ImmutableBooleanExpression newEqualities;
+        public final ImmutableExpression newEqualities;
 
         private FocusNodeUpdate(SubTreeDelimiterNode newFocusNode, Optional<InjectiveVar2VarSubstitution> optionalSubstitution,
-                                ImmutableBooleanExpression newEqualities) {
+                                ImmutableExpression newEqualities) {
             this.newFocusNode = newFocusNode;
             this.optionalSubstitution = optionalSubstitution;
             this.newEqualities = newEqualities;
@@ -98,7 +97,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      *
      */
     private void propagateUpNewEqualities(QueryTreeComponent treeComponent,
-                                          SubTreeDelimiterNode newFocusNode, ImmutableBooleanExpression newEqualities)
+                                          SubTreeDelimiterNode newFocusNode, ImmutableExpression newEqualities)
             throws IllegalTreeUpdateException, InvalidQueryOptimizationProposalException {
 
         QueryNode lastChildNode = newFocusNode;
@@ -114,7 +113,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
             else if (ancestorNode instanceof FilterNode) {
                 FilterNode originalFilterNode = (FilterNode) ancestorNode;
 
-                ImmutableBooleanExpression newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(
+                ImmutableExpression newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(
                         originalFilterNode.getFilterCondition(), newEqualities).get();
 
                 FilterNode newFilterNode = originalFilterNode.changeFilterCondition(newFilteringCondition);
@@ -160,10 +159,10 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      * TODO: explain
      */
     private static void updateNewJoinLikeNode(QueryTreeComponent treeComponent, JoinLikeNode originalNode,
-                                              ImmutableBooleanExpression newEqualities) {
+                                              ImmutableExpression newEqualities) {
 
-        Optional<ImmutableBooleanExpression> optionalOriginalFilterCondition = originalNode.getOptionalFilterCondition();
-        ImmutableBooleanExpression newFilteringCondition;
+        Optional<ImmutableExpression> optionalOriginalFilterCondition = originalNode.getOptionalFilterCondition();
+        ImmutableExpression newFilteringCondition;
         if (optionalOriginalFilterCondition.isPresent()) {
             newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(optionalOriginalFilterCondition.get(),
                     newEqualities).get();
@@ -180,7 +179,7 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
      * TODO: explain
      */
     private static void insertFilterNode(QueryTreeComponent treeComponent, QueryNode child,
-                                         ImmutableBooleanExpression newEqualities) throws IllegalTreeUpdateException {
+                                         ImmutableExpression newEqualities) throws IllegalTreeUpdateException {
         FilterNode newFilterNode = new FilterNodeImpl(newEqualities);
         treeComponent.insertParent(child, newFilterNode);
     }
@@ -257,14 +256,14 @@ public class PullOutVariableExecutor implements NodeCentricInternalExecutor<SubT
                 convertIntoEqualities(renamingMap));
     }
 
-    private ImmutableBooleanExpression convertIntoEqualities(ImmutableMap<Integer, VariableRenaming> renamingMap) {
+    private ImmutableExpression convertIntoEqualities(ImmutableMap<Integer, VariableRenaming> renamingMap) {
         if (renamingMap.isEmpty()) {
             throw new IllegalArgumentException("The renaming map must not be empty");
         }
 
-        ImmutableList.Builder<ImmutableBooleanExpression> equalityBuilder = ImmutableList.builder();
+        ImmutableList.Builder<ImmutableExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            equalityBuilder.add(DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.EQ,
+            equalityBuilder.add(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
         return ImmutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();

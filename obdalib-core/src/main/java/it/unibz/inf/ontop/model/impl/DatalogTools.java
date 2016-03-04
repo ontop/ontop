@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class DatalogTools {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private final static BooleanExpression TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+    private final static Expression TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
     private final static  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = new F<Function, Boolean>() {
         @Override
@@ -60,27 +60,27 @@ public class DatalogTools {
     /**
      * Folds a list of boolean atoms into one AND(AND(...)) boolean atom.
      */
-    public static BooleanExpression foldBooleanConditions(List<Function> booleanAtoms) {
+    public static Expression foldBooleanConditions(List<Function> booleanAtoms) {
         if (booleanAtoms.length() == 0)
             return TRUE_EQ;
 
-        BooleanExpression firstBooleanAtom = convertOrCastIntoBooleanAtom( booleanAtoms.head());
+        Expression firstBooleanAtom = convertOrCastIntoBooleanAtom( booleanAtoms.head());
 
-        return booleanAtoms.tail().foldLeft(new F2<BooleanExpression, Function, BooleanExpression>() {
+        return booleanAtoms.tail().foldLeft(new F2<Expression, Function, Expression>() {
             @Override
-            public BooleanExpression f(BooleanExpression previousAtom, Function currentAtom) {
+            public Expression f(Expression previousAtom, Function currentAtom) {
                 return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
             }
         }, firstBooleanAtom);
     }
 
-    private static BooleanExpression convertOrCastIntoBooleanAtom(Function atom) {
-        if (atom instanceof BooleanExpression)
-            return (BooleanExpression) atom;
+    private static Expression convertOrCastIntoBooleanAtom(Function atom) {
+        if (atom instanceof Expression)
+            return (Expression) atom;
 
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate instanceof OperationPredicate)
-            return DATA_FACTORY.getBooleanExpression((OperationPredicate)predicate,
+            return DATA_FACTORY.getExpression((OperationPredicate)predicate,
                     atom.getTerms());
         // XSD:BOOLEAN case
         else if (DATA_FACTORY.getDatatypeFactory().isBoolean(predicate)) {
@@ -91,7 +91,7 @@ public class DatalogTools {
         throw new IllegalArgumentException(atom + " is not a boolean atom");
     }
 
-    public static BooleanExpression foldBooleanConditions(java.util.List<Function> booleanAtoms) {
+    public static Expression foldBooleanConditions(java.util.List<Function> booleanAtoms) {
         return foldBooleanConditions(List.iterableList(booleanAtoms));
     }
 

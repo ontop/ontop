@@ -29,7 +29,6 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 
-import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -38,12 +37,6 @@ import java.util.UUID;
 
 
 import com.google.common.collect.ImmutableList;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
 import static it.unibz.inf.ontop.model.impl.DataAtomTools.areVariablesDistinct;
 import static it.unibz.inf.ontop.model.impl.DataAtomTools.isVariableOnly;
@@ -185,7 +178,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
 		if (functor instanceof OperationPredicate) {
-			return getBooleanExpression((OperationPredicate)functor, arguments);
+			return getExpression((OperationPredicate)functor, arguments);
 		}
 
 		// Default constructor
@@ -193,45 +186,45 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
-	public BooleanExpression getBooleanExpression(OperationPredicate functor, Term... arguments) {
-		return new BooleanExpressionImpl(functor, arguments);
+	public Expression getExpression(OperationPredicate functor, Term... arguments) {
+		return new ExpressionImpl(functor, arguments);
 	}
 
 	@Override
-	public BooleanExpression getBooleanExpression(OperationPredicate functor, List<Term> arguments) {
-		return new BooleanExpressionImpl(functor, arguments);
+	public Expression getExpression(OperationPredicate functor, List<Term> arguments) {
+		return new ExpressionImpl(functor, arguments);
 	}
 
 	@Override
-	public ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor, ImmutableTerm... arguments) {
-		return getImmutableBooleanExpression(functor, ImmutableList.copyOf(arguments));
+	public ImmutableExpression getImmutableExpression(OperationPredicate functor, ImmutableTerm... arguments) {
+		return getImmutableExpression(functor, ImmutableList.copyOf(arguments));
 	}
 
 	@Override
-	public ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor,
-																	ImmutableList<? extends ImmutableTerm> arguments) {
+	public ImmutableExpression getImmutableExpression(OperationPredicate functor,
+													  ImmutableList<? extends ImmutableTerm> arguments) {
 		if (GroundTermTools.areGroundTerms(arguments)) {
-			return new GroundBooleanExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments);
+			return new GroundExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments);
 		}
 		else {
-			return new NonGroundBooleanExpressionImpl(functor, arguments);
+			return new NonGroundExpressionImpl(functor, arguments);
 		}
 	}
 
 	@Override
-	public ImmutableBooleanExpression getImmutableBooleanExpression(BooleanExpression booleanExpression) {
-		if (GroundTermTools.isGroundTerm(booleanExpression)) {
-			return new GroundBooleanExpressionImpl(booleanExpression);
+	public ImmutableExpression getImmutableExpression(Expression expression) {
+		if (GroundTermTools.isGroundTerm(expression)) {
+			return new GroundExpressionImpl(expression);
 		}
 		else {
-			return new NonGroundBooleanExpressionImpl(booleanExpression);
+			return new NonGroundExpressionImpl(expression);
 		}
 	}
 
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
 		if (functor instanceof OperationPredicate) {
-			return getBooleanExpression((OperationPredicate) functor, arguments);
+			return getExpression((OperationPredicate) functor, arguments);
 		}
 
 		// Default constructor
@@ -241,7 +234,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
 		if (functor instanceof OperationPredicate) {
-			return getImmutableBooleanExpression((OperationPredicate)functor, terms);
+			return getImmutableExpression((OperationPredicate)functor, terms);
 		}
 
 		if (GroundTermTools.areGroundTerms(terms)) {
@@ -440,43 +433,43 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(ExpressionOperation.EQ, firstTerm, secondTerm);
+	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getExpression(ExpressionOperation.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(ExpressionOperation.GTE, firstTerm, secondTerm);
+	public Expression getFunctionGTE(Term firstTerm, Term secondTerm) {
+		return getExpression(ExpressionOperation.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(ExpressionOperation.GT, firstTerm, secondTerm);
+	public Expression getFunctionGT(Term firstTerm, Term secondTerm) {
+		return getExpression(ExpressionOperation.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(ExpressionOperation.LTE, firstTerm, secondTerm);
+	public Expression getFunctionLTE(Term firstTerm, Term secondTerm) {
+		return getExpression(ExpressionOperation.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(ExpressionOperation.LT, firstTerm, secondTerm);
+	public Expression getFunctionLT(Term firstTerm, Term secondTerm) {
+		return getExpression(ExpressionOperation.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getBooleanExpression(ExpressionOperation.NEQ, firstTerm, secondTerm);
+	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm) {
+		return getExpression(ExpressionOperation.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public BooleanExpression getFunctionNOT(Term term) {
-		return getBooleanExpression(ExpressionOperation.NOT, term);
+	public Expression getFunctionNOT(Term term) {
+		return getExpression(ExpressionOperation.NOT, term);
 	}
 
 	@Override
-	public BooleanExpression getFunctionAND(Term term1, Term term2) {
-		return getBooleanExpression(ExpressionOperation.AND, term1, term2);
+	public Expression getFunctionAND(Term term1, Term term2) {
+		return getExpression(ExpressionOperation.AND, term1, term2);
 	}
 
 //	@Override
@@ -500,8 +493,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public BooleanExpression getFunctionOR(Term term1, Term term2) {
-		return getBooleanExpression(ExpressionOperation.OR,term1, term2);
+	public Expression getFunctionOR(Term term1, Term term2) {
+		return getExpression(ExpressionOperation.OR,term1, term2);
 	}
 
 	
@@ -526,55 +519,55 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public BooleanExpression getFunctionIsNull(Term term) {
-		return getBooleanExpression(ExpressionOperation.IS_NULL, term);
+	public Expression getFunctionIsNull(Term term) {
+		return getExpression(ExpressionOperation.IS_NULL, term);
 	}
 
 	@Override
-	public BooleanExpression getFunctionIsNotNull(Term term) {
-		return getBooleanExpression(ExpressionOperation.IS_NOT_NULL, term);
+	public Expression getFunctionIsNotNull(Term term) {
+		return getExpression(ExpressionOperation.IS_NOT_NULL, term);
 	}
 
 
 	@Override
-	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2) {
-		return getBooleanExpression(ExpressionOperation.LANGMATCHES, term1, term2);
+	public Expression getLANGMATCHESFunction(Term term1, Term term2) {
+		return getExpression(ExpressionOperation.LANGMATCHES, term1, term2);
 	}
 
 	@Override
-	public BooleanExpression getSQLFunctionLike(Term term1, Term term2) {
-		return getBooleanExpression(ExpressionOperation.SQL_LIKE, term1, term2);
+	public Expression getSQLFunctionLike(Term term1, Term term2) {
+		return getExpression(ExpressionOperation.SQL_LIKE, term1, term2);
 	}
 	
 	@Override
-	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getBooleanExpression(ExpressionOperation.REGEX, term1, term2, term3);
+	public Expression getFunctionRegex(Term term1, Term term2, Term term3) {
+		return getExpression(ExpressionOperation.REGEX, term1, term2, term3);
 	}
 	
 	@Override
-	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
-		return getFunction(ExpressionOperation.REPLACE, term1, term2, term3 );
+	public Expression getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getExpression(ExpressionOperation.REPLACE, term1, term2, term3 );
 	}
 	
     @Override
-    public Function getFunctionConcat(Term term1, Term term2) {
-        return getFunction(ExpressionOperation.CONCAT, term1, term2);
+    public Expression getFunctionConcat(Term term1, Term term2) {
+        return getExpression(ExpressionOperation.CONCAT, term1, term2);
     }
 
     @Override
-    public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
-        return getFunction(ExpressionOperation.SUBSTR, term1, term2, term3);
+    public Expression getFunctionSubstring(Term term1, Term term2, Term term3) {
+        return getExpression(ExpressionOperation.SUBSTR, term1, term2, term3);
     } //added by Nika
 
 	@Override
-	public Function getFunctionSubstring(Term term1, Term term2) {
-		return getFunction(ExpressionOperation.SUBSTR, term1, term2);
+	public Expression getFunctionSubstring(Term term1, Term term2) {
+		return getExpression(ExpressionOperation.SUBSTR, term1, term2);
 	}
         
 	@Override
-	public Function getFunctionCast(Term term1, Term term2) {
+	public Expression getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
-		return getFunction(ExpressionOperation.QUEST_CAST, term1, term2);
+		return getExpression(ExpressionOperation.QUEST_CAST, term1, term2);
 	}
 	
 	@Override
@@ -608,8 +601,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public BooleanExpression getFunctionIsTrue(Term term) {
-		return getBooleanExpression(ExpressionOperation.IS_TRUE, term);
+	public Expression getFunctionIsTrue(Term term) {
+		return getExpression(ExpressionOperation.IS_TRUE, term);
 	}
 
 	@Override

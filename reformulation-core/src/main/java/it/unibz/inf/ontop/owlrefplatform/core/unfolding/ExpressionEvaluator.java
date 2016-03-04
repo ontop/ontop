@@ -48,8 +48,8 @@ public class ExpressionEvaluator {
 	/**
 	 * No boolean expression (absent) if the evaluation returns false
 	 */
-	public Optional<ImmutableBooleanExpression> evaluateExpression(ImmutableBooleanExpression expression) {
-		BooleanExpression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
+	public Optional<ImmutableExpression> evaluateExpression(ImmutableExpression expression) {
+		Expression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
 
 		Term evaluatedTerm = evalOperation(mutableExpression);
 
@@ -65,8 +65,8 @@ public class ExpressionEvaluator {
 						+ evaluatedFunctionalTerm);
 			}
 
-			return Optional.of(fac.getImmutableBooleanExpression(
-					fac.getBooleanExpression((OperationPredicate) predicate,
+			return Optional.of(fac.getImmutableExpression(
+					fac.getExpression((OperationPredicate) predicate,
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
@@ -74,7 +74,7 @@ public class ExpressionEvaluator {
 				return Optional.empty();
 			}
 			else {
-				return Optional.of(fac.getImmutableBooleanExpression(ExpressionOperation.AND, (Constant) evaluatedTerm,
+				return Optional.of(fac.getImmutableExpression(ExpressionOperation.AND, (Constant) evaluatedTerm,
 						OBDAVocabulary.TRUE));
 			}
 		}

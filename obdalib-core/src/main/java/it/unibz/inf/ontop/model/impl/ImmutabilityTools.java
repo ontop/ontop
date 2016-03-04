@@ -22,9 +22,9 @@ public class ImmutabilityTools {
         if (term instanceof Function) {
             if (term instanceof ImmutableFunctionalTerm) {
                 return (ImmutableTerm) term;
-            } else if (term instanceof BooleanExpression) {
-                BooleanExpression booleanExpression = (BooleanExpression) term;
-                return DATA_FACTORY.getImmutableBooleanExpression(booleanExpression);
+            } else if (term instanceof Expression) {
+                Expression expression = (Expression) term;
+                return DATA_FACTORY.getImmutableExpression(expression);
             }
             else {
                 Function functionalTerm = (Function) term;
@@ -80,7 +80,7 @@ public class ImmutabilityTools {
      * This method takes a immutable boolean term and convert it into an old mutable boolean function.
      *
      */
-    public static BooleanExpression convertToMutableBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+    public static Expression convertToMutableBooleanExpression(ImmutableExpression booleanExpression) {
 
         OperationPredicate pred= (OperationPredicate) booleanExpression.getFunctionSymbol();
         ImmutableList<Term> otherTerms =  booleanExpression.getTerms();
@@ -99,13 +99,13 @@ public class ImmutabilityTools {
             }
 
         }
-        BooleanExpression mutFunc = DATA_FACTORY.getBooleanExpression(pred,mutableList);
+        Expression mutFunc = DATA_FACTORY.getExpression(pred,mutableList);
         return mutFunc;
 
     }
 
-    public static Optional<ImmutableBooleanExpression> foldBooleanExpressions(
-            ImmutableList<ImmutableBooleanExpression> conjunctionOfExpressions) {
+    public static Optional<ImmutableExpression> foldBooleanExpressions(
+            ImmutableList<ImmutableExpression> conjunctionOfExpressions) {
         final int size = conjunctionOfExpressions.size();
         switch (size) {
             case 0:
@@ -113,17 +113,17 @@ public class ImmutabilityTools {
             case 1:
                 return Optional.of(conjunctionOfExpressions.get(0));
             case 2:
-                return Optional.of(DATA_FACTORY.getImmutableBooleanExpression(
+                return Optional.of(DATA_FACTORY.getImmutableExpression(
                         ExpressionOperation.AND,
                         conjunctionOfExpressions));
             default:
                 // Non-final
-                ImmutableBooleanExpression cumulativeExpression = DATA_FACTORY.getImmutableBooleanExpression(
+                ImmutableExpression cumulativeExpression = DATA_FACTORY.getImmutableExpression(
                         ExpressionOperation.AND,
                         conjunctionOfExpressions.get(0),
                         conjunctionOfExpressions.get(1));
                 for (int i = 2; i < size; i++) {
-                    cumulativeExpression =  DATA_FACTORY.getImmutableBooleanExpression(
+                    cumulativeExpression =  DATA_FACTORY.getImmutableExpression(
                             ExpressionOperation.AND,
                             cumulativeExpression,
                             conjunctionOfExpressions.get(i));
@@ -132,8 +132,8 @@ public class ImmutabilityTools {
         }
     }
 
-    public static Optional<ImmutableBooleanExpression> foldBooleanExpressions(
-           ImmutableBooleanExpression... conjunctionOfExpressions) {
+    public static Optional<ImmutableExpression> foldBooleanExpressions(
+           ImmutableExpression... conjunctionOfExpressions) {
         return foldBooleanExpressions(ImmutableList.copyOf(conjunctionOfExpressions));
     }
 

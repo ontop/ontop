@@ -124,14 +124,14 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public Function getFunction(Predicate functor, Term... terms);
 
-	BooleanExpression getBooleanExpression(OperationPredicate functor, List<Term> arguments);
+	Expression getExpression(OperationPredicate functor, List<Term> arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor, ImmutableTerm... arguments);
+	ImmutableExpression getImmutableExpression(OperationPredicate functor, ImmutableTerm... arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(OperationPredicate functor,
-															 ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableExpression getImmutableExpression(OperationPredicate functor,
+											   ImmutableList<? extends ImmutableTerm> arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanExpression booleanExpression);
+	ImmutableExpression getImmutableExpression(Expression expression);
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
@@ -163,54 +163,54 @@ public interface OBDADataFactory extends Serializable {
 																 ImmutableList<Variable> arguments);
 
 
-	public BooleanExpression getBooleanExpression(OperationPredicate functor, Term... arguments);
+	public Expression getExpression(OperationPredicate functor, Term... arguments);
 
 	/*
 	 * Boolean function terms
 	 */
 
-	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm);
+	public Expression getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm);
+	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm);
+	public Expression getFunctionGT(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm);
+	public Expression getFunctionLTE(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm);
+	public Expression getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm);
+	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionNOT(Term term);
+	public Expression getFunctionNOT(Term term);
 
-	public BooleanExpression getFunctionAND(Term term1, Term term2);
+	public Expression getFunctionAND(Term term1, Term term2);
 
-	public BooleanExpression getFunctionOR(Term term1, Term term2);
+	public Expression getFunctionOR(Term term1, Term term2);
 
-	public BooleanExpression getFunctionIsTrue(Term term);
+	public Expression getFunctionIsTrue(Term term);
 	
-	public BooleanExpression getFunctionIsNull(Term term);
+	public Expression getFunctionIsNull(Term term);
 
-	public BooleanExpression getFunctionIsNotNull(Term term);
+	public Expression getFunctionIsNotNull(Term term);
 
-	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2);
+	public Expression getLANGMATCHESFunction(Term term1, Term term2);
 	
 	// ROMAN (23 Dec 2015): LIKE comes only from mappings
-	public BooleanExpression getSQLFunctionLike(Term term1, Term term2);
+	public Expression getSQLFunctionLike(Term term1, Term term2);
 	
-	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3);
+	public Expression getFunctionRegex(Term term1, Term term2, Term term3);
 	
-	public Function getFunctionReplace(Term term1, Term term2, Term term3);
+	public Expression getFunctionReplace(Term term1, Term term2, Term term3);
 	
 	/* Functions on strings */
 
-    public Function getFunctionConcat(Term term1, Term term2);
+    public Expression getFunctionConcat(Term term1, Term term2);
     
  // added by Nika: 
     
-	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
+	public Expression getFunctionSubstring(Term term1, Term term2, Term term3);
 
-	public Function getFunctionSubstring(Term term1, Term term2);
+	public Expression getFunctionSubstring(Term term1, Term term2);
 
 	
 
@@ -218,7 +218,7 @@ public interface OBDADataFactory extends Serializable {
 	/*
 	 * Casting values cast(source-value AS destination-type)
 	 */
-	public Function getFunctionCast(Term term1, Term term2);
+	public Expression getFunctionCast(Term term1, Term term2);
 	
 	/*
 	 * JDBC objects

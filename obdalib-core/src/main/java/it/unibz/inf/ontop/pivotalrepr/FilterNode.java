@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
@@ -18,12 +18,12 @@ public interface FilterNode extends JoinOrFilterNode {
     /**
      * Not optional for a FilterNode.
      */
-    ImmutableBooleanExpression getFilterCondition();
+    ImmutableExpression getFilterCondition();
 
     /**
      * Returns a new FilterNode (immutable).
      */
-    FilterNode changeFilterCondition(ImmutableBooleanExpression newFilterCondition);
+    FilterNode changeFilterCondition(ImmutableExpression newFilterCondition);
 
     @Override
     SubstitutionResults<FilterNode> applyAscendentSubstitution(

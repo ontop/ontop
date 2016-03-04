@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
@@ -12,7 +12,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
 
-    public LeftJoinNodeImpl(Optional<ImmutableBooleanExpression> optionalJoinCondition) {
+    public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
     }
 
@@ -32,7 +32,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableBooleanExpression> newOptionalFilterCondition) {
+    public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition);
     }
 
@@ -64,10 +64,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return clone();
         }
 
-        ImmutableBooleanExpression newEqualities = substitution.convertIntoBooleanExpression().get();
+        ImmutableExpression newEqualities = substitution.convertIntoBooleanExpression().get();
 
-        Optional<ImmutableBooleanExpression> optionalFormerCondition = getOptionalFilterCondition();
-        ImmutableBooleanExpression newFilterCondition;
+        Optional<ImmutableExpression> optionalFormerCondition = getOptionalFilterCondition();
+        ImmutableExpression newFilterCondition;
         if (optionalFormerCondition.isPresent()) {
             newFilterCondition = ImmutabilityTools.foldBooleanExpressions(
                     optionalFormerCondition.get(), newEqualities).get();

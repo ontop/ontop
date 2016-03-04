@@ -81,7 +81,7 @@ public class RedundantJoinTest {
         DataAtom ans1Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 1), y);
         ConstructionNode rootNode = new ConstructionNodeImpl(ans1Atom);
         queryBuilder.init(rootNode);
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(rootNode, joinNode);
 
         return P.p(queryBuilder, joinNode);

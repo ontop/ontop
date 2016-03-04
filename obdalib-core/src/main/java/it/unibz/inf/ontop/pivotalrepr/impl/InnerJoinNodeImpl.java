@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -11,7 +11,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private static final String JOIN_NODE_STR = "JOIN" ;
 
-    public InnerJoinNodeImpl(Optional<ImmutableBooleanExpression> optionalFilterCondition) {
+    public InnerJoinNodeImpl(Optional<ImmutableExpression> optionalFilterCondition) {
         super(optionalFilterCondition);
     }
 
@@ -31,7 +31,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableBooleanExpression> newOptionalFilterCondition) {
+    public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new InnerJoinNodeImpl(newOptionalFilterCondition);
     }
 
@@ -46,7 +46,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public SubstitutionResults<InnerJoinNode> applyDescendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
 
-        Optional<ImmutableBooleanExpression> newOptionalCondition = transformOptionalBooleanExpression(substitution, getOptionalFilterCondition());
+        Optional<ImmutableExpression> newOptionalCondition = transformOptionalBooleanExpression(substitution, getOptionalFilterCondition());
         InnerJoinNode newNode = new InnerJoinNodeImpl(newOptionalCondition);
 
         return new SubstitutionResultsImpl<>(newNode, substitution);

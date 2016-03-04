@@ -4,21 +4,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 
-public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableBooleanExpression {
-    protected ImmutableBooleanExpressionImpl(OperationPredicate functor, ImmutableTerm... terms) {
+public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
+    protected ImmutableExpressionImpl(OperationPredicate functor, ImmutableTerm... terms) {
         super(functor, terms);
     }
 
-    protected ImmutableBooleanExpressionImpl(OperationPredicate functor, ImmutableList<? extends ImmutableTerm> terms) {
+    protected ImmutableExpressionImpl(OperationPredicate functor, ImmutableList<? extends ImmutableTerm> terms) {
         super(functor, terms);
     }
 
-    protected ImmutableBooleanExpressionImpl(BooleanExpression expression) {
+    protected ImmutableExpressionImpl(Expression expression) {
         super(expression);
     }
 
     @Override
-    public ImmutableBooleanExpression clone() {
+    public ImmutableExpression clone() {
         return this;
     }
 
@@ -31,29 +31,29 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
      * Recursive
      */
     @Override
-    public ImmutableSet<ImmutableBooleanExpression> flattenAND() {
+    public ImmutableSet<ImmutableExpression> flattenAND() {
         return flatten(ExpressionOperation.AND);
     }
 
     @Override
-    public ImmutableSet<ImmutableBooleanExpression> flattenOR() {
+    public ImmutableSet<ImmutableExpression> flattenOR() {
         return flatten(ExpressionOperation.OR);
     }
 
     @Override
-    public ImmutableSet<ImmutableBooleanExpression> flatten(OperationPredicate operator) {
+    public ImmutableSet<ImmutableExpression> flatten(OperationPredicate operator) {
 
         /**
          * Only flattens OR expressions.
          */
         if (getFunctionSymbol().equals(operator)) {
-            ImmutableSet.Builder<ImmutableBooleanExpression> setBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<ImmutableExpression> setBuilder = ImmutableSet.builder();
             for (ImmutableTerm subTerm : getArguments()) {
                 /**
                  * Recursive call
                  */
-                if (subTerm instanceof ImmutableBooleanExpression) {
-                    setBuilder.addAll(((ImmutableBooleanExpression) subTerm).flatten(operator));
+                if (subTerm instanceof ImmutableExpression) {
+                    setBuilder.addAll(((ImmutableExpression) subTerm).flatten(operator));
                 }
                 else {
                     throw new IllegalStateException("An AND-expression must be only composed of " +
@@ -63,7 +63,7 @@ public abstract class ImmutableBooleanExpressionImpl extends ImmutableFunctional
             return setBuilder.build();
         }
         else {
-            return ImmutableSet.of((ImmutableBooleanExpression)this);
+            return ImmutableSet.of((ImmutableExpression)this);
         }
     }
 }

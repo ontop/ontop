@@ -78,7 +78,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         }
     }
 
-    private ImmutableBooleanExpression renameBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+    private ImmutableExpression renameBooleanExpression(ImmutableExpression booleanExpression) {
         return renamingSubstitution.applyToBooleanExpression(booleanExpression);
     }
 
@@ -91,12 +91,12 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return DATA_FACTORY.getDataAtom(atom.getPredicate(), argListBuilder.build());
     }
 
-    private Optional<ImmutableBooleanExpression> renameOptionalBooleanExpression(
-            Optional<ImmutableBooleanExpression> optionalExpression) {
+    private Optional<ImmutableExpression> renameOptionalBooleanExpression(
+            Optional<ImmutableExpression> optionalExpression) {
         if (!optionalExpression.isPresent())
             return Optional.empty();
 
-        ImmutableBooleanExpression expression = optionalExpression.get();
+        ImmutableExpression expression = optionalExpression.get();
         return Optional.of(renameBooleanExpression(expression));
     }
 

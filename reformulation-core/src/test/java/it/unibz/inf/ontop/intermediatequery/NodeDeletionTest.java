@@ -5,7 +5,6 @@ import java.util.Optional;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
@@ -35,7 +34,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
         queryBuilder.addChild(rootNode, joinNode);
@@ -70,9 +69,9 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
 
         String table1Name = "table1";
@@ -117,7 +116,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         UnionNode topUnion = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, topUnion);
@@ -187,7 +186,7 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         UnionNode topUnion = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, topUnion);
@@ -215,7 +214,7 @@ public class NodeDeletionTest {
         ConstructionNode constructionNode3 = new ConstructionNodeImpl(subAtom);
         queryBuilder.addChild(topUnion, constructionNode3);
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(constructionNode3, joinNode2);
 
         ExtensionalDataNode table4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 2), x, y));
@@ -252,9 +251,9 @@ public class NodeDeletionTest {
         queryBuilder.init(rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(ExpressionOperation.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));

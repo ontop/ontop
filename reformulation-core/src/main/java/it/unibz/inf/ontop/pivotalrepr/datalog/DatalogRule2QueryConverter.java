@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import fj.F;
 import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
@@ -207,7 +206,7 @@ public class DatalogRule2QueryConverter {
      */
     private static Optional<JoinOrFilterNode> createFilterOrJoinNode(List<Function> dataAndCompositeAtoms,
                                                               List<Function> booleanAtoms) {
-        Optional<ImmutableBooleanExpression> optionalFilter = createFilterExpression(booleanAtoms);
+        Optional<ImmutableExpression> optionalFilter = createFilterExpression(booleanAtoms);
 
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
         Optional<JoinOrFilterNode> optionalRootNode;
@@ -231,10 +230,10 @@ public class DatalogRule2QueryConverter {
     }
 
 
-    private static Optional<ImmutableBooleanExpression> createFilterExpression(List<Function> booleanAtoms) {
+    private static Optional<ImmutableExpression> createFilterExpression(List<Function> booleanAtoms) {
         if (booleanAtoms.isEmpty())
             return Optional.empty();
-        return Optional.of(DATA_FACTORY.getImmutableBooleanExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
+        return Optional.of(DATA_FACTORY.getImmutableExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
     }
 
     /**
@@ -308,7 +307,7 @@ public class DatalogRule2QueryConverter {
          */
         AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms);
 
-        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(
+        Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 rightSubAtomClassification.booleanAtoms);
 
         LeftJoinNode ljNode = new LeftJoinNodeImpl(optionalFilterCondition);
@@ -342,7 +341,7 @@ public class DatalogRule2QueryConverter {
             throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("GROUP atom found inside a LJ meta-atom");
         }
 
-        Optional<ImmutableBooleanExpression> optionalFilterCondition = createFilterExpression(
+        Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 classification.booleanAtoms);
 
         if (classification.dataAndCompositeAtoms.isEmpty()) {

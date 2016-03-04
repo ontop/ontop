@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 public interface CommutativeJoinNode extends JoinLikeNode {
 
     @Override
-    CommutativeJoinNode changeOptionalFilterCondition(Optional<ImmutableBooleanExpression> newOptionalFilterCondition);
+    CommutativeJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
     SubstitutionResults<? extends CommutativeJoinNode> applyAscendentSubstitution(

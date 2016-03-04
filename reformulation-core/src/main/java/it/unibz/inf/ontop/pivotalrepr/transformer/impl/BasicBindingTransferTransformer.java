@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.transformer.impl;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.NonGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
@@ -30,7 +30,7 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
 
     @Override
     public FilterNode transform(FilterNode filterNode) {
-        ImmutableBooleanExpression newBooleanExpression =
+        ImmutableExpression newBooleanExpression =
                 transformOptionalFilterCondition(filterNode.getOptionalFilterCondition()).get();
         return new FilterNodeImpl(newBooleanExpression);
     }
@@ -88,8 +88,8 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
         return new GroupNodeImpl(newGroupingTerms);
     }
 
-    private Optional<ImmutableBooleanExpression> transformOptionalFilterCondition(
-            Optional<ImmutableBooleanExpression> optionalFilterCondition) {
+    private Optional<ImmutableExpression> transformOptionalFilterCondition(
+            Optional<ImmutableExpression> optionalFilterCondition) {
         if (optionalFilterCondition.isPresent()) {
             return Optional.of(transferredBindings.applyToBooleanExpression(optionalFilterCondition.get()));
         }

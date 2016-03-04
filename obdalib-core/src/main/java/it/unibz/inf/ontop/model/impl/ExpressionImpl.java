@@ -1,19 +1,19 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.BooleanExpression;
+import it.unibz.inf.ontop.model.Expression;
 import it.unibz.inf.ontop.model.OperationPredicate;
 import it.unibz.inf.ontop.model.Term;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BooleanExpressionImpl extends FunctionalTermImpl implements BooleanExpression {
+public class ExpressionImpl extends FunctionalTermImpl implements Expression {
 
-    protected BooleanExpressionImpl(OperationPredicate functor, Term... terms) {
+    protected ExpressionImpl(OperationPredicate functor, Term... terms) {
         super(functor, terms);
     }
 
-    protected BooleanExpressionImpl(OperationPredicate functor, List<Term> terms) {
+    protected ExpressionImpl(OperationPredicate functor, List<Term> terms) {
         super(functor, terms);
     }
 
@@ -23,12 +23,12 @@ public class BooleanExpressionImpl extends FunctionalTermImpl implements Boolean
     }
 
     @Override
-    public BooleanExpression clone() {
+    public Expression clone() {
         List<Term> newTerms = new ArrayList<>();
         for (Term term: getTerms()) {
             newTerms.add(term.clone());
         }
-        return new BooleanExpressionImpl(getFunctionSymbol(), newTerms);
+        return new ExpressionImpl(getFunctionSymbol(), newTerms);
     }
 
 }

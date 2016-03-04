@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 public class UnionLiftTest {
 
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-	private static final Optional<ImmutableBooleanExpression> NO_EXPRESSION = Optional.empty();
+	private static final Optional<ImmutableExpression> NO_EXPRESSION = Optional.empty();
 	private static final Optional<ImmutableQueryModifiers> NO_MODIFIER = Optional.empty();
 	private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 

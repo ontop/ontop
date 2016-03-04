@@ -3,24 +3,24 @@ package it.unibz.inf.ontop.model;
 
 import com.google.common.collect.ImmutableSet;
 
-public interface ImmutableBooleanExpression extends BooleanExpression, ImmutableFunctionalTerm {
+public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm {
     @Override
-    ImmutableBooleanExpression clone();
+    ImmutableExpression clone();
 
     /**
      * Flattens AND expressions.
      */
-    ImmutableSet<ImmutableBooleanExpression> flattenAND();
+    ImmutableSet<ImmutableExpression> flattenAND();
 
     /**
      * Flattens OR expressions.
      */
-    ImmutableSet<ImmutableBooleanExpression> flattenOR();
+    ImmutableSet<ImmutableExpression> flattenOR();
 
     /**
      * Generalization of flattening (AND, OR, etc.).
      *
      * It is the responsibility of the caller to make sure such a flattening makes sense.
      */
-    ImmutableSet<ImmutableBooleanExpression> flatten(OperationPredicate operator);
+    ImmutableSet<ImmutableExpression> flatten(OperationPredicate operator);
 }

@@ -153,8 +153,8 @@ public class IntermediateQueryToDatalogTranslator {
 			return body;
 			
 		} else if (node instanceof FilterNode) {
-			ImmutableBooleanExpression filter = ((FilterNode) node).getFilterCondition();
-			BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
+			ImmutableExpression filter = ((FilterNode) node).getFilterCondition();
+			Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
 			List<QueryNode> listnode =  te.getChildren(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
 			body.add(mutFilter);
@@ -173,7 +173,7 @@ public class IntermediateQueryToDatalogTranslator {
 		 * Nested Atoms	
 		 */
 		} else  if (node instanceof InnerJoinNode) {
-			Optional<ImmutableBooleanExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
+			Optional<ImmutableExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
 			List<Function> atoms = new LinkedList<Function>();
 			List<QueryNode> listnode =  te.getChildren(node);
 			for (QueryNode childnode: listnode) {
@@ -181,7 +181,7 @@ public class IntermediateQueryToDatalogTranslator {
 				atoms.addAll(atomsList);
 			}
 			if (filter.isPresent()){
-				ImmutableBooleanExpression filter2 = filter.get();
+				ImmutableExpression filter2 = filter.get();
 				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
 				Function newJ = ofac.getSPARQLJoin(atoms, mutFilter);
 				body.add(newJ);
@@ -193,7 +193,7 @@ public class IntermediateQueryToDatalogTranslator {
 			}
 			
 		} else if (node instanceof LeftJoinNode) {
-			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
+			Optional<ImmutableExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<QueryNode> listnode =  te.getChildren(node);
 		
 			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
@@ -201,8 +201,8 @@ public class IntermediateQueryToDatalogTranslator {
 
 				
 			if (filter.isPresent()){
-				ImmutableBooleanExpression filter2 = filter.get();
-				BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
+				ImmutableExpression filter2 = filter.get();
+				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
 				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, mutFilter);
 				body.add(newLJAtom);
 				return body;

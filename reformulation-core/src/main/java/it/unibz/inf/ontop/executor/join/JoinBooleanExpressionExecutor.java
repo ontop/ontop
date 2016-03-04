@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.executor.join;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -62,7 +62,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
 
         ImmutableList<JoinOrFilterNode> filterOrJoinNodes = extractFilterAndInnerJoinNodes(topJoinNode, query);
 
-        Optional<ImmutableBooleanExpression> optionalAggregatedFilterCondition;
+        Optional<ImmutableExpression> optionalAggregatedFilterCondition;
         try {
             optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes,
                     query.getMetadata());

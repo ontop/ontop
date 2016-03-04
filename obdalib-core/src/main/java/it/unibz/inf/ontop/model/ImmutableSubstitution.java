@@ -35,7 +35,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm);
 
-    ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression);
+    ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
     /**
      * Only guaranteed for T extends VariableOrGroundTerm.
@@ -72,5 +72,5 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
 
-    Optional<ImmutableBooleanExpression> convertIntoBooleanExpression();
+    Optional<ImmutableExpression> convertIntoBooleanExpression();
 }

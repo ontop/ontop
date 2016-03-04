@@ -57,7 +57,7 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
-    public ImmutableBooleanExpression applyToBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
         return booleanExpression;
     }
 
@@ -98,7 +98,7 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
-    public Optional<ImmutableBooleanExpression> convertIntoBooleanExpression() {
+    public Optional<ImmutableExpression> convertIntoBooleanExpression() {
         return AbstractImmutableSubstitutionImpl.convertIntoBooleanExpression(this);
     }
 

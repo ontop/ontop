@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
@@ -89,7 +88,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
              * TODO: explain
              */
             else {
-                ImmutableBooleanExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
+                ImmutableExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
                 FilterNode newFilterNode = new FilterNodeImpl(joiningCondition);
                 treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
             }
@@ -98,14 +97,14 @@ public class GroundTermRemovalFromDataNodeExecutor implements
         return multimapBuilder.build();
     }
 
-    private ImmutableBooleanExpression convertIntoBooleanExpression(Collection<VariableGroundTermPair> pairs) {
-        ImmutableList.Builder<ImmutableBooleanExpression> booleanExpressionBuilder = ImmutableList.builder();
+    private ImmutableExpression convertIntoBooleanExpression(Collection<VariableGroundTermPair> pairs) {
+        ImmutableList.Builder<ImmutableExpression> booleanExpressionBuilder = ImmutableList.builder();
 
         for (VariableGroundTermPair pair : pairs ) {
-            booleanExpressionBuilder.add(DATA_FACTORY.getImmutableBooleanExpression(
+            booleanExpressionBuilder.add(DATA_FACTORY.getImmutableExpression(
                     ExpressionOperation.EQ, pair.variable, pair.groundTerm));
         }
-        Optional<ImmutableBooleanExpression> optionalFoldExpression = ImmutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableExpression> optionalFoldExpression = ImmutabilityTools.foldBooleanExpressions(
                 booleanExpressionBuilder.build());
         return optionalFoldExpression.get();
     }
@@ -211,12 +210,12 @@ public class GroundTermRemovalFromDataNodeExecutor implements
 
         for (Map.Entry<JoinOrFilterNode, Collection<VariableGroundTermPair>> entry : receivingNodes.asMap().entrySet()) {
             JoinOrFilterNode formerNode = entry.getKey();
-            ImmutableBooleanExpression newAdditionalExpression = convertIntoBooleanExpression(entry.getValue());
+            ImmutableExpression newAdditionalExpression = convertIntoBooleanExpression(entry.getValue());
 
-            Optional<ImmutableBooleanExpression> optionalFormerExpression = formerNode.getOptionalFilterCondition();
-            ImmutableBooleanExpression newExpression;
+            Optional<ImmutableExpression> optionalFormerExpression = formerNode.getOptionalFilterCondition();
+            ImmutableExpression newExpression;
             if (optionalFormerExpression.isPresent()) {
-                ImmutableBooleanExpression formerExpression = optionalFormerExpression.get();
+                ImmutableExpression formerExpression = optionalFormerExpression.get();
                 newExpression = ImmutabilityTools.foldBooleanExpressions(
                         ImmutableList.of(formerExpression, newAdditionalExpression))
                         .get();
@@ -232,7 +231,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
     }
 
     protected JoinOrFilterNode generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
-                                                         ImmutableBooleanExpression newExpression) {
+                                                         ImmutableExpression newExpression) {
         if (formerNode instanceof FilterNode) {
             return ((FilterNode)formerNode).changeFilterCondition(newExpression);
         }

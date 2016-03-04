@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -162,7 +162,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         /**
          * If there is no boolean expression, no proposal
          */
-        Optional<ImmutableBooleanExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
+        Optional<ImmutableExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
 
         if (!optionalNestedExpression.isPresent()) {
             return Optional.empty();
@@ -171,7 +171,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         /**
          * Decomposes the boolean expressions as much as possible (conjunction)
          */
-        ImmutableSet<ImmutableBooleanExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
+        ImmutableSet<ImmutableExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
 
         /**
          * Finds a DelimiterTargetPair for each child sub-tree of the current node
@@ -185,10 +185,10 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
          * for some boolean expressions.
          *
          */
-        ImmutableMultimap.Builder<QueryNode, ImmutableBooleanExpression> transferMapBuilder = ImmutableMultimap.builder();
-        ImmutableList.Builder<ImmutableBooleanExpression> toKeepExpressionBuilder = ImmutableList.builder();
+        ImmutableMultimap.Builder<QueryNode, ImmutableExpression> transferMapBuilder = ImmutableMultimap.builder();
+        ImmutableList.Builder<ImmutableExpression> toKeepExpressionBuilder = ImmutableList.builder();
 
-        for (ImmutableBooleanExpression expression : booleanExpressions) {
+        for (ImmutableExpression expression : booleanExpressions) {
             ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(expression, potentialTargetNodes);
 
             /**
@@ -320,7 +320,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      *
      * Criterion: the delimiter node should contain all the variables used in the boolean expression.
      */
-    private ImmutableList<QueryNode> selectNodesForTransfer(ImmutableBooleanExpression expression,
+    private ImmutableList<QueryNode> selectNodesForTransfer(ImmutableExpression expression,
                                                             ImmutableList<DelimiterTargetPair> potentialTargetPairs) {
         ImmutableList.Builder<QueryNode> selectionBuilder = ImmutableList.builder();
         for (DelimiterTargetPair pair : potentialTargetPairs) {
@@ -339,8 +339,8 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * Builds the PushDownBooleanExpressionProposal.
      */
     private Optional<PushDownBooleanExpressionProposal> buildProposal(
-            JoinOrFilterNode focusNode, ImmutableMultimap<QueryNode, ImmutableBooleanExpression> transferMap,
-            ImmutableList<ImmutableBooleanExpression> toKeepExpressions) {
+            JoinOrFilterNode focusNode, ImmutableMultimap<QueryNode, ImmutableExpression> transferMap,
+            ImmutableList<ImmutableExpression> toKeepExpressions) {
         if (transferMap.isEmpty()) {
             return Optional.empty();
         }

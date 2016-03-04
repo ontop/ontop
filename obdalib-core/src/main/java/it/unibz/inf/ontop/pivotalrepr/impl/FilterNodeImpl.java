@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -12,7 +12,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
 
-    public FilterNodeImpl(ImmutableBooleanExpression filterCondition) {
+    public FilterNodeImpl(ImmutableExpression filterCondition) {
         super(Optional.of(filterCondition));
     }
 
@@ -37,12 +37,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public ImmutableBooleanExpression getFilterCondition() {
+    public ImmutableExpression getFilterCondition() {
         return getOptionalFilterCondition().get();
     }
 
     @Override
-    public FilterNode changeFilterCondition(ImmutableBooleanExpression newFilterCondition) {
+    public FilterNode changeFilterCondition(ImmutableExpression newFilterCondition) {
         return new FilterNodeImpl(newFilterCondition);
     }
 
@@ -56,7 +56,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public SubstitutionResults<FilterNode> applyDescendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
-        ImmutableBooleanExpression newFilterCondition = transformBooleanExpression(substitution, getFilterCondition());
+        ImmutableExpression newFilterCondition = transformBooleanExpression(substitution, getFilterCondition());
         FilterNode newNode = new FilterNodeImpl(newFilterCondition);
 
         return new SubstitutionResultsImpl<>(newNode, substitution);
