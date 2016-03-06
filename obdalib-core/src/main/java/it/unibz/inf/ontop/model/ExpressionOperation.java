@@ -85,8 +85,18 @@ public enum ExpressionOperation implements OperationPredicate {
 	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
 	SQL_LIKE("like", COL_TYPE.BOOLEAN, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	
-	QUEST_CAST("cast", null, null, null);
+	QUEST_CAST("cast", null, null, null),
 
+	/*
+	* Aggregation predicates (may be removed in the future)
+	* TODO: check these definitions
+	* */
+
+	AVG("AVG", null, null),
+	SUM("SUM", null, null),
+	MAX("MAX", null, null),
+	MIN("MIN", null, null),
+	COUNT("COUNT", COL_TYPE.INTEGER, null);
 
 
 	// 0-ary operations

@@ -651,7 +651,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * Only boolean atoms are pushable.
      */
     private static boolean isPushable(Function atom) {
-        if (atom.isBooleanFunction())
+        if (atom.isOperation())
             return true;
         return false;
     }

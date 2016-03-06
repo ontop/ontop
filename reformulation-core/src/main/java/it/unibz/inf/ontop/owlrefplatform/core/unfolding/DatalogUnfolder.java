@@ -202,7 +202,6 @@ public class DatalogUnfolder {
      * @return
      */
 
-    @Override
     /***
      * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
      * with respect to the program given when this unfolder was initialized.
@@ -529,8 +528,17 @@ public class DatalogUnfolder {
             Function compositeTerm = ((Function) arg);
             Predicate functionSymbol = compositeTerm.getFunctionSymbol();
 
-            if (functionSymbol.isAggregationPredicate()) {
-                return true;
+            if (functionSymbol instanceof ExpressionOperation) {
+                switch((ExpressionOperation) functionSymbol) {
+                    case AVG:
+                    case SUM:
+                    case MAX:
+                    case MIN:
+                    case COUNT:
+                        return true;
+                    default:
+                        return false;
+                }
             }
 
             /**
@@ -788,10 +796,10 @@ public class DatalogUnfolder {
         Set<Predicate> predicates = new HashSet<>();
         for (Function atom: atoms) {
             Predicate atomPredicate = atom.getFunctionSymbol();
-            if (atomPredicate.isDataPredicate()) {
+            if (atom.isDataFunction()) {
                 predicates.add(atomPredicate);
             }
-            else if (atomPredicate.isAlgebraPredicate()) {
+            else if (atom.isAlgebraFunction()) {
                 List<Function> subAtoms = (List<Function>)(List<?>)atom.getTerms();
                 predicates.addAll(extractDataPredicates(subAtoms));
             }
@@ -904,7 +912,7 @@ public class DatalogUnfolder {
         for (int atomIdx = 0; atomIdx < currentTerms.size(); atomIdx++) {
             Function focusedLiteral=currentTerms.get(atomIdx);
 
-            if (focusedLiteral.isBooleanFunction() || focusedLiteral.isArithmeticFunction() || focusedLiteral.isDataTypeFunction()) {
+            if (focusedLiteral.isOperation() || focusedLiteral.isDataTypeFunction()) {
                 continue;
 
             } else if (focusedLiteral.isAlgebraFunction()) {
@@ -1549,7 +1557,7 @@ public class DatalogUnfolder {
 
             Function focusedLiteral = (Function) currentTerms.get(atomIdx);
 
-            if (focusedLiteral.isBooleanFunction() || focusedLiteral.isArithmeticFunction() || focusedLiteral.isDataTypeFunction()) {
+            if (focusedLiteral.isOperation() || focusedLiteral.isDataTypeFunction()) {
                 termidx.pop();
                 continue;
             } else if (focusedLiteral.isAlgebraFunction()) {
@@ -1669,7 +1677,7 @@ public class DatalogUnfolder {
         for (Function atom : initialRule.getBody()) {
             if (atom.isDataFunction() || atom.isAlgebraFunction()) {
                 dataAtoms.add(atom);
-            } else if (atom.isBooleanFunction()) {
+            } else if (atom.isOperation()) {
                 filterConditionAtoms.add(atom);
             }
             else {
@@ -2037,7 +2045,7 @@ public class DatalogUnfolder {
                     continue;
                 }
                 //TODO: is that correct?? what if there is a complex expression?????
-            } else if (atom.isBooleanFunction()&& ArgumentAtoms >=2){
+            } else if (atom.isOperation()&& ArgumentAtoms >=2){
                 for (Variable var: variablesArg2){
                     Set<Variable> referencedVariables = new HashSet<>();
                     TermUtils.addReferencedVariablesTo(referencedVariables, atom);

@@ -132,7 +132,7 @@ public class DatalogNormalizer {
 		 */
 		for (Object o : atoms) {
 			Function atom = (Function) o;
-			if (atom.isBooleanFunction()) {
+			if (atom.isOperation()) {
 				booleanAtoms.add(atom);
 			} else {
 				dataAtoms.add(atom);
@@ -175,7 +175,7 @@ public class DatalogNormalizer {
 		int count = 0;
 		for (Term currentTerm : terms) {
 			Function currentAtom = (Function)currentTerm;
-			if (!currentAtom.isBooleanFunction())
+			if (!currentAtom.isOperation())
 				count += 1;
 		}
 		return count;
@@ -197,7 +197,7 @@ public class DatalogNormalizer {
 			if (f.isAlgebraFunction()) {
 				addMinimalEqualityToLeftJoin(f);
 			}
-			if (f.isBooleanFunction())
+			if (f.isOperation())
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
@@ -270,7 +270,7 @@ public class DatalogNormalizer {
 			else if (subTerm instanceof Function) {
                 Predicate head = ((Function) subTerm).getFunctionSymbol();
 
-                if (head.isDataTypePredicate()) {
+                if (head instanceof DatatypePredicate) {
 
                     // This case is for the ans atoms that might have
                     // functions in the head. Check if it is needed.
@@ -511,7 +511,7 @@ public class DatalogNormalizer {
 		Set<Variable> currentLevelVariables = new HashSet<>();
 		for (Term l : atoms) {
 			Function atom = (Function) l;
-			if (atom.isBooleanFunction()) {
+			if (atom.isOperation()) {
 				continue;
 			} else if (atom.isAlgebraFunction()) {
 				currentLevelVariables.addAll(getDefinedVariables(atom.getTerms()));

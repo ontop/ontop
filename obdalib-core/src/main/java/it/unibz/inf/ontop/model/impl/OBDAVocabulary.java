@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.ValueConstant;
@@ -59,7 +60,8 @@ public class OBDAVocabulary {
 
 	/* SPARQL algebra operations */
 
-	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl("Join");
-	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl("LeftJoin");
-
+	public static final AlgebraOperatorPredicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl("Join");
+	public static final AlgebraOperatorPredicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl("LeftJoin");
+	public static final AlgebraOperatorPredicate SPARQL_GROUP = new AlgebraOperatorPredicateImpl("Group");
+	public static final AlgebraOperatorPredicate SPARQL_HAVING = new AlgebraOperatorPredicateImpl("Having");
 }
