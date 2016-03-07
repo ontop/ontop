@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
@@ -2713,7 +2714,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				if (datatype.equals(XMLSchema.STRING)) {
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {
