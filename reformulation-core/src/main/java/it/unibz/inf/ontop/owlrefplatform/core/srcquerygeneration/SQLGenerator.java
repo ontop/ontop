@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.HSQLDBDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.QueryUtils;
 
@@ -44,6 +44,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -373,7 +374,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * Remembers view names so as to avoid conflicts due to the possible DB engine
 		 * restrictions.
 		 */
-		 Set<String> viewNames = new HashSet<>();
+		 Set<RelationID> viewNames = new HashSet<>();
 
 		/**
 		 * ANS i > 1
@@ -1011,15 +1012,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 		List<Variable> varsInGroupBy = Lists.newArrayList();
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)) {
-				varsInGroupBy.addAll(QueryUtils.getVariablesInAtom(atom));
+				varsInGroupBy.addAll(atom.getVariables());
 			}
 		}
 
 		List<String> groupReferences = Lists.newArrayList();
 
 		for(Variable var : varsInGroupBy) {
-			Collection<String> references = index.columnReferences.get(var);
-			groupReferences.addAll(references);
+			index.columnReferences.get(var).stream()
+					.map(QualifiedAttributeID::getSQLRendering)
+					.forEach(groupReferences::add);
 		}
 
 		if(!groupReferences.isEmpty()) {
@@ -1112,7 +1114,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 								Multimap<Predicate, CQIE> ruleIndex,
 								Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
 								DatalogProgram query, List<String> signature, boolean isAns1,
-								Set<String> viewNames)
+								Set<RelationID> viewIds)
 			throws OBDAException {
 
 		/* Creates BODY of the view query */
@@ -1135,8 +1137,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			// headArity = cqHead.getArity();
 			headArity = cqHead.getTerms().size();
 
-			List<String> varContainer = QueryUtils
-					.getVariableNamesInAtom(cqHead);
+			List<String> varContainer = cqHead.getVariables().stream()
+					.map(Variable::getName)
+					.collect(Collectors.toList());
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
@@ -1151,25 +1154,29 @@ public class SQLGenerator implements SQLQueryGenerator {
 			unionView = "(" + Joiner.on(")\n UNION ALL \n (").join(sqls) + ")";
 		}
 
+		QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
+
 		//String viewname = String.format(VIEW_ANS_NAME, pred);
 		// String viewname = "Q" + pred + "View";
 		String safePredicateName = escapeName(pred.getName());
-		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX, viewNames);
-		viewNames.add(viewname);
+		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX, viewIds);
+		RelationID viewId = idFactory.createRelationID(null, viewname);
 
-		List<String> columns = Lists
-				.newArrayListWithExpectedSize(3 * headArity);
+		viewIds.add(viewId);
+
+		List<QualifiedAttributeID> columnIds = Lists.newArrayListWithExpectedSize(3 * headArity);
 
 		// Hard coded variable names
 		for (int i = 0; i < headArity; i++) {
-			columns.add("v" + i + TYPE_SUFFIX);
-			columns.add("v" + i + LANG_SUFFIX);
-			columns.add("v" + i);
+			columnIds.add(new QualifiedAttributeID(viewId,
+					idFactory.createAttributeID("v" + i + TYPE_SUFFIX)));
+			columnIds.add(new QualifiedAttributeID(viewId,
+					idFactory.createAttributeID("v" + i + LANG_SUFFIX)));
+			columnIds.add(new QualifiedAttributeID(viewId,
+					idFactory.createAttributeID("v" + i)));
 		}
 
-		ViewDefinition viewU = metadata.createViewDefinition(viewname,
-				unionView, columns);
-		metadata.add(viewU);
+		metadata.createSubQueryView(viewId, unionView, columnIds);
 		sqlAnsViewMap.put(pred, unionView);
 	}
 
@@ -1639,17 +1646,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * the form "COL1 = COL2"
 		 */
 		for (Variable var : currentLevelVariables) {
-			Collection<String> references = index.getColumnReferences(var);
+			Set<QualifiedAttributeID> references = index.getColumnReferences(var);
 			if (references.size() < 2) {
 				// No need for equality
 				continue;
 			}
-			Iterator<String> referenceIterator = references.iterator();
-			String leftColumnReference = referenceIterator.next();
+			Iterator<QualifiedAttributeID> referenceIterator = references.iterator();
+			QualifiedAttributeID leftColumnReference = referenceIterator.next();
 			while (referenceIterator.hasNext()) {
-				String rightColumnReference = referenceIterator.next();
+				QualifiedAttributeID rightColumnReference = referenceIterator.next();
 				String equality = String.format("(%s = %s)",
-						leftColumnReference, rightColumnReference);
+						leftColumnReference.getSQLRendering(),
+						rightColumnReference.getSQLRendering());
 				equalities.add(equality);
 				leftColumnReference = rightColumnReference;
 			}
@@ -2228,7 +2236,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getTypeFromVariable(Variable var, QueryAliasIndex index) {
-		Collection<String> columnRefs = index.getColumnReferences(var);
+		Set<QualifiedAttributeID> columnRefs = index.getColumnReferences(var);
 
 		if (columnRefs == null || columnRefs.size() == 0) {
 			throw new RuntimeException(
@@ -2246,26 +2254,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 *
 		 * For instance, columnRef is `Qans4View`.`v1` .
 		 */
-		for (String columnRef : columnRefs) {
+		for (QualifiedAttributeID columnRef : columnRefs) {
 			String columnType, tableColumnType;
 
-			String[] splits = columnRef.split("\\.");
+			RelationID relationId = columnRef.getRelation();
 
-			String quotedTable = splits[0];
-			String table = unquote(splits[0]);
-			String column = unquote(splits[1]);
-
-			DataDefinition definition = metadata.getDefinition(table);
+			RelationDefinition definition = metadata.getRelation(relationId);
 			/**
 			 * If the var is defined in a ViewDefinition, then there is a
 			 * column for the type and we just need to refer to that column.
 			 *
 			 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 			 */
-			if (definition instanceof ViewDefinition) {
-				columnType = column + TYPE_SUFFIX;
+			if (definition instanceof ParserViewDefinition) {
+				columnType = columnRef.getAttribute().getName() + TYPE_SUFFIX;
 				tableColumnType = sqladapter.sqlQualifiedColumn(
-						quotedTable, columnType);
+						relationId.getSQLRendering(), columnType);
 				typeString = tableColumnType ;
 				break;
 			}
@@ -2481,27 +2485,32 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			}
 		} else if (term instanceof Variable) {
-			Collection<String> viewdef = index
+			Set<QualifiedAttributeID> viewdef = index
 					.getColumnReferences((Variable) term);
-			String def = viewdef.iterator().next();
-			String col = trim(def.split("\\.")[1]);
-			String table = def.split("\\.")[0];
-			if (def.startsWith("QVIEW")) {
-				Map<Function, String> views = index.viewNames;
+			QualifiedAttributeID def = viewdef.iterator().next();
+
+			RelationID relationId = def.getRelation();
+			QuotedID colId = def.getAttribute();
+
+			// Non-final TODO: understand
+			String table = relationId.getTableName();
+
+			if (relationId.getTableName().startsWith("QVIEW")) {
+				Map<Function, RelationID> views = index.viewNames;
 				for (Function func : views.keySet()) {
-					String value = views.get(func);
-					if (value.equals(def.split("\\.")[0])) {
+					RelationID knownViewId = views.get(func);
+					if (knownViewId.equals(relationId)) {
 						table = func.getFunctionSymbol().toString();
 						break;
 					}
 				}
 			}
-			Collection<TableDefinition> tables = metadata.getTables();
-			for (TableDefinition tabledef : tables) {
-				if (tabledef.getName().equals(table)) {
+			Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
+			for (DatabaseRelationDefinition tabledef : tables) {
+				if (tabledef.getID().getTableName().equals(table)) {
 					List<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
-						if (a.getName().equals(col)) {
+						if (a.getID().equals(colId)) {
 							switch (a.getType()) {
 								case Types.VARCHAR:
 								case Types.CHAR:
@@ -2585,12 +2594,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return sqladapter.getSQLLexicalFormString(uc.toString());
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			Collection<String> posList = index.getColumnReferences(var);
+			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
 			if (posList == null || posList.size() == 0) {
 				throw new RuntimeException(
 						"Unbound variable found in WHERE clause: " + term);
 			}
-			return posList.iterator().next();
+			return posList.iterator().next().getSQLRendering();
 		}
 
 		/* If its not constant, or variable its a function */
@@ -2694,14 +2703,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 			Variable var = (Variable) term1;
-			Collection<String> posList = index.getColumnReferences(var);
+			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
 
 			if (posList == null || posList.size() == 0) {
 				throw new RuntimeException(
 						"Unbound variable found in WHERE clause: " + term);
 			}
 
-			String langC = posList.iterator().next();
+			String langC = posList.iterator().next().getSQLRendering();
 			String langColumn = langC.replaceAll("`$", "Lang`");
 			return langColumn;
 
@@ -2927,10 +2936,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	public class QueryAliasIndex {
 
-		Map<Function, String> viewNames = new HashMap<>();
-		Map<Function, String> tableNames = new HashMap<>();
-		Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
-		Multimap<Variable, String> columnReferences = HashMultimap.create();
+		final Map<Function, RelationID> viewNames = new HashMap<>();
+		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
+		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -2975,9 +2983,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
-			String tableName = tablePredicate.getName();
-			String safeTableName = escapeName(tableName);
-			DataDefinition def = metadata.getDefinition(tableName);
+			String safeTableName = escapeName(tablePredicate.getName());
+			RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
+					tablePredicate);
+			RelationDefinition def = metadata.getRelation(tableId);
 
 			if (def == null) {
 				/*
@@ -2988,59 +2997,61 @@ public class SQLGenerator implements SQLQueryGenerator {
 				// tableName = "Q"+tableName+"View";
 				//tableName = String.format(VIEW_ANS_NAME, tableName);
 				final String viewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, VIEW_ANS_SUFFIX, viewNames.values());
+				RelationID viewId = metadata.getQuotedIDFactory().createRelationID(null, viewName);
 				/**
 				 * TODO: understand this.
 				 */
-				def = metadata.getDefinition(viewName);
+				def = metadata.getRelation(viewId);
 				if (def == null) {
 					isEmpty = true;
 					return;
 				} else {
-					viewNames.put(atom, viewName);
+					viewNames.put(atom, viewId);
 				}
 			} else {
 				//String simpleTableViewName = String.format(VIEW_NAME,
 				// tableName, String.valueOf(dataTableCount));
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
-				final String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, suffix, viewNames.values());
-				viewNames.put(atom, simpleTableViewName);
+				String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, suffix, viewNames.values());
+				viewNames.put(atom, metadata.getQuotedIDFactory().createRelationID(null, simpleTableViewName));
 			}
-			dataTableCount += 1;
-			// viewNames.put(atom, String.format(VIEW_NAME, dataTableCount));
-			tableNames.put(atom, def.getName());
-
+			dataTableCount++;
 			dataDefinitions.put(atom, def);
 
 			indexVariables(atom);
 		}
 
 		private void indexVariables(Function atom) {
-			DataDefinition def = dataDefinitions.get(atom);
-			Predicate atomName = atom.getFunctionSymbol();
-			final String quotedViewName = viewNames.get(atom); //sqladapter.sqlQuote(viewNames.get(atom));
+			RelationDefinition def = dataDefinitions.get(atom);
+			RelationID viewName = viewNames.get(atom);
+
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
 
 				if (term instanceof Variable) {
+
+					Set<QualifiedAttributeID> references = columnReferences.get(term);
+					if (references == null) {
+						references = new LinkedHashSet<>();
+						columnReferences.put((Variable) term, references);
+					}
+
 					/*
 					 * the index of attributes of the definition starts from 1
 					 */
-					String columnName;
+					Attribute column;
 
-					if (ruleIndex.containsKey(atomName)) {
+					if (ruleIndex.containsKey(atom.getFunctionSymbol().getName())) {
 						// If I am here it means that it is not a database table
 						// but a view from an Ans predicate
 						int attPos = 3 * (index + 1);
-						columnName = def.getAttributeName(attPos);
+						column = def.getAttribute(attPos);
 					} else {
-						columnName = def.getAttributeName(index + 1);
+						column = def.getAttribute(index + 1);
 					}
 
-					columnName = trim(columnName);
-
-					String reference = sqladapter.sqlQualifiedColumn(quotedViewName,
-							columnName);
-					columnReferences.put((Variable) term, reference);
+					QualifiedAttributeID qualifiedId = new QualifiedAttributeID(viewName, column.getID());
+					references.add(qualifiedId);
 				}
 
 			}
@@ -3054,7 +3065,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * @param var
 		 *            The variable we want the referenced columns.
 		 */
-		public Collection<String> getColumnReferences(Variable var) {
+		public Set<QualifiedAttributeID> getColumnReferences(Variable var) {
 			return columnReferences.get(var);
 		}
 
@@ -3065,18 +3076,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/**
 			 * Normal case
 			 */
-			DataDefinition def = dataDefinitions.get(atom);
+			RelationDefinition def = dataDefinitions.get(atom);
 			if (def != null) {
-				final String viewName = viewNames.get(atom); //sqladapter.sqlQuote(viewNames.get(atom));
-				if (def instanceof TableDefinition) {
-					return sqladapter.sqlTableName(tableNames.get(atom), viewName);
-				} else if (def instanceof ViewDefinition) {
-					String viewdef = ((ViewDefinition) def).getStatement();
-					String formatView = String.format("(%s) %s", viewdef, viewName);
-					return formatView;
-				} else {
-					throw new RuntimeException("Unsupported data definition");
+				if (def instanceof DatabaseRelationDefinition) {
+					return sqladapter.sqlTableName(dataDefinitions.get(atom).getID().getSQLRendering(),
+							viewNames.get(atom).getSQLRendering());
 				}
+				else if (def instanceof ParserViewDefinition) {
+					return String.format("(%s) %s", ((ParserViewDefinition) def).getStatement(),
+							viewNames.get(atom).getSQLRendering());
+				}
+				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);
 			}
 			/**
 			 * Special case.
@@ -3090,8 +3100,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String view = sqlAnsViewMap.get(pred);
 				if (view != null) {
 					// TODO: check if it is correct not to consider other view names.
-					final String viewName = sqladapter.sqlQuote(sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX,
-							ImmutableSet.<String>of()));
+					final String viewName = sqladapter.sqlQuote(sqladapter.nameView(VIEW_PREFIX, pred.getName(),
+							VIEW_ANS_SUFFIX, ImmutableSet.of()));
 					String formatView = String.format("(%s) %s", view, viewName);
 					return formatView;
 				}
@@ -3101,15 +3111,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 		}
 
-		public String getView(Function atom) {
+		public RelationID getView(Function atom) {
 			return viewNames.get(atom);
 		}
 
 		public String getColumnReference(Function atom, int column) {
-			String viewName = getView(atom);
-			DataDefinition def = dataDefinitions.get(atom);
-			String columnname = def.getAttributeName(column + 1);
-			return sqladapter.sqlQualifiedColumn(viewName, columnname);
+			RelationID viewName = viewNames.get(atom);
+			RelationDefinition def = dataDefinitions.get(atom);
+			QuotedID columnname = def.getAttribute(column + 1).getID(); // indexes from 1
+			return new QualifiedAttributeID(viewName, columnname).getSQLRendering();
 		}
 	}
 }

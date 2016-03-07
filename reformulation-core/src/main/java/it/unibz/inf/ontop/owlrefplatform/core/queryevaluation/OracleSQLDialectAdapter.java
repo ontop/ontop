@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  */
 
 import it.unibz.inf.ontop.model.OrderCondition;
+import it.unibz.inf.ontop.sql.RelationID;
 
 import java.sql.Types;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
@@ -318,7 +320,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
+	public String nameView(String prefix, String tableName, String suffix, Collection<RelationID> views) {
+
+		Set<String> viewNames = views.stream()
+				.map(RelationID::getSQLRendering)
+				.collect(Collectors.toSet());
+
 		return nameViewOrVariable(prefix, tableName, suffix, viewNames, false);
 	}
 

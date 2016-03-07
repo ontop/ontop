@@ -27,6 +27,7 @@ import java.util.Set;
 
 import it.unibz.inf.ontop.model.OrderCondition;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.sql.RelationID;
 
 public interface SQLDialectAdapter {
 	
@@ -142,5 +143,5 @@ public interface SQLDialectAdapter {
 	/**
 	 * Returns an UNQUOTED view name.
 	 */
-	String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames);
+	String nameView(String prefix, String tableName, String suffix, Collection<RelationID> views);
 }

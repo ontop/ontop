@@ -30,6 +30,8 @@ import com.google.common.base.Joiner;
 
 /**
  * Represents a complex sub-query created by the SQL parser (not a database view!)
+ *
+ * TODO: rename it because also used for sub-queries at runtime
  * 
  * @author Roman Kontchakov
 */

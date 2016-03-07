@@ -27,11 +27,11 @@ public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private final Map<RelationID, DatabaseRelationDefinition> tables = new HashMap<>();
+	private final Map<RelationID, DatabaseRelationDefinition> tables;
 	
 	// relations include tables and views (views are only created for complex queries in mappings)
-	private final Map<RelationID, RelationDefinition> relations = new HashMap<>();
-	private final List<DatabaseRelationDefinition> listOfTables = new LinkedList<>();
+	private final Map<RelationID, RelationDefinition> relations;
+	private final List<DatabaseRelationDefinition> listOfTables;
 
 	private final String driverName;
 	private final String driverVersion;
@@ -47,11 +47,21 @@ public class DBMetadata implements Serializable {
 	 */
 
 	DBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
+		this(driverName, driverVersion, databaseProductName, databaseVersion, idfac, new HashMap<>(), new HashMap<>(),
+				new LinkedList<>());
+	}
+
+	private DBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
+					   QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
+					   Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables) {
 		this.driverName = driverName;
 		this.driverVersion = driverVersion;
 		this.databaseProductName = databaseProductName;
 		this.databaseVersion = databaseVersion;
 		this.idfac = idfac;
+		this.tables = tables;
+		this.relations = relations;
+		this.listOfTables = listOfTables;
 	}
 
 	/**
@@ -78,8 +88,7 @@ public class DBMetadata implements Serializable {
 	/**
 	 * creates a view for SQLQueryParser
 	 * (NOTE: these views are simply names for complex non-parsable subqueries, not database views)
-	 * 
-	 * @param id
+	 *
 	 * @param sql
 	 * @return
 	 */
@@ -88,6 +97,15 @@ public class DBMetadata implements Serializable {
 		RelationID id = idfac.createRelationID(null, String.format("view_%s", parserViewCounter++));	
 		
 		ParserViewDefinition view = new ParserViewDefinition(id, sql);
+		add(view, relations);
+		return view;
+	}
+
+	public ParserViewDefinition createSubQueryView(RelationID viewID, String sql, List<QualifiedAttributeID> columnIds) {
+		ParserViewDefinition view = new ParserViewDefinition(viewID, sql);
+
+		columnIds.stream().forEach(view::addAttribute);
+
 		add(view, relations);
 		return view;
 	}
@@ -121,7 +139,7 @@ public class DBMetadata implements Serializable {
 	 * If <name>id</name> has schema and the fully qualified id 
 	 * cannot be resolved the the table-only id is used  
 	 * 
-	 * @param name
+	 * @param id
 	 */
 	public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
 		DatabaseRelationDefinition def = tables.get(id);
@@ -186,5 +204,11 @@ public class DBMetadata implements Serializable {
 			bf.append("\n");
 		}
 		return bf.toString();
+	}
+
+	@Override
+	public DBMetadata clone() {
+		return new DBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, idfac,
+				new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables));
 	}
 }

@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import it.unibz.inf.ontop.model.OrderCondition;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.sql.RelationID;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
@@ -432,7 +433,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
-	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
+	public String nameView(String prefix, String tableName, String suffix, Collection<RelationID> views) {
 		return buildDefaultName(prefix, tableName, suffix);
 	}
 

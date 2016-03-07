@@ -34,20 +34,20 @@ public class Relation2DatalogPredicate {
 	}
 	
 	/**
-	 * 
+	 *
 	 * @param s a predicate-name rendering of a possibly qualified table name
 	 * @return
 	 */
-	
-	
+
+
 	public static RelationID createRelationFromPredicateName(QuotedIDFactory idfac, Predicate predicate) {
 		String s = predicate.getName();
-		
+
 		// ROMAN (7 Oct 2015): a better way of splitting is probably needed here
 		String[] names = s.split("\\.");
 		if (names.length == 1)
 			return RelationID.createRelationIdFromDatabaseRecord(idfac, null, s);
 		else
-			return RelationID.createRelationIdFromDatabaseRecord(idfac, names[0], names[1]);			
-	}	
+			return RelationID.createRelationIdFromDatabaseRecord(idfac, names[0], names[1]);
+	}
 }
