@@ -29,8 +29,6 @@ import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import java.util.Iterator;
 
 public class SesameMaterializer {
-
-public class SesameMaterializer {
 	
 		private Iterator<Assertion> assertions = null;
 		private QuestMaterializer materializer;

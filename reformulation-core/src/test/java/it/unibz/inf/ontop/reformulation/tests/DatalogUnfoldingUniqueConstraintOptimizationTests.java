@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
@@ -27,6 +28,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.sql.DBMetadata;
@@ -166,7 +168,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
-		DatalogProgram output = unfolder.unfold(input);
+		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true);
 		System.out.println("input " + input);
 
 		int atomcount = 0;

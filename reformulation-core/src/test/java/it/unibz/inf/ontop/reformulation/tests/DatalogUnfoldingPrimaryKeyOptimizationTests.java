@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
@@ -28,7 +30,9 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
@@ -40,9 +44,6 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import junit.framework.TestCase;
 
 /**
  * TODO: disable this test
@@ -157,8 +158,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
-		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
-				ArrayListMultimap.<Predicate, Integer>create());
+		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true);
 		System.out.println("input " + input);
 
 		int atomcount = 0;
@@ -187,8 +187,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		query = fac.getCQIE(head, body);
 
 		input = fac.getDatalogProgram(Collections.singletonList(query));
-		output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
-				ArrayListMultimap.<Predicate, Integer>create());
+		output = unfolder.unfold(input, "q", QuestConstants.BUP, true);
 		System.out.println("input " + input);
 
 		atomcount = 0;

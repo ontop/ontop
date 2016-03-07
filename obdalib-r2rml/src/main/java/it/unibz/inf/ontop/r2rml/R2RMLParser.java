@@ -40,7 +40,6 @@ import org.openrdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.datatype.DatatypeFactory;
 import java.util.*;
 
 public class R2RMLParser {

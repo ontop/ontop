@@ -138,7 +138,7 @@ public class R2RMLWriter {
      */
     public void write(OutputStream os) throws Exception {
         try {
-            R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+            R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
             Collection<TriplesMap> coll = getTriplesMaps();
             Model out = mm.exportMappings(coll, Model.class);
             Rio.write(out, os, RDFFormat.TURTLE);

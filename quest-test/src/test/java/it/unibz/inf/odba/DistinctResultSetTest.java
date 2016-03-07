@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.query.BindingSet;
@@ -22,7 +23,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameVirtualRepo;
 
 import java.io.File;
 import java.util.List;

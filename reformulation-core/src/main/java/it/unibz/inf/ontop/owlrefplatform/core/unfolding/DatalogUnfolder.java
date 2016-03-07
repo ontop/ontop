@@ -78,8 +78,8 @@ public class DatalogUnfolder {
      */
     private final List<Predicate> extensionalPredicates;
 
-    public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-        this(unfoldingProgram, ArrayListMultimap.<Predicate, List<Integer>>create());
+    public DatalogUnfolder(List<CQIE> rules) {
+        this(rules, ArrayListMultimap.<Predicate, List<Integer>>create());
     }
 
     public DatalogUnfolder(DatalogProgram unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {

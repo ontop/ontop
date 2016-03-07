@@ -39,6 +39,7 @@ import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 

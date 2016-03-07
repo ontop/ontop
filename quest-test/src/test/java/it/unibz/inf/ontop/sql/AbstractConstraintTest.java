@@ -28,7 +28,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.sql.api.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

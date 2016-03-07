@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.inf.ontop.sesame.SesameMaterializer;
 import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import junit.framework.TestCase;
 import org.openrdf.rio.RDFHandler;
@@ -36,10 +37,12 @@ import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.io.WriterDocumentTarget;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import sesameWrapper.SesameMaterializer;
 
 import java.io.*;
 

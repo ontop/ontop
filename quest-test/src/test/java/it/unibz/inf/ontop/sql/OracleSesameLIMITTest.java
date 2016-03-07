@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.r2rml.R2RMLManager;
 
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -34,7 +35,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameVirtualRepo;
 
 import java.io.File;
 

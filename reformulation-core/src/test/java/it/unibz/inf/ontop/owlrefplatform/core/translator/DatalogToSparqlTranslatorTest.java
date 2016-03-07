@@ -22,17 +22,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.ExpressionOperation;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
-import it.unibz.inf.ontop.model.OBDAQueryModifiers.OrderCondition;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
@@ -631,7 +623,7 @@ public class DatalogToSparqlTranslatorTest {
 		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
 		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
 		
-		OBDAQueryModifiers modifiers = new OBDAQueryModifiers();
+		OBDAQueryModifiers modifiers = new MutableQueryModifiersImpl();
 		modifiers.setDistinct();
 		modifiers.setLimit(100);
 		modifiers.setOffset(20);

@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 

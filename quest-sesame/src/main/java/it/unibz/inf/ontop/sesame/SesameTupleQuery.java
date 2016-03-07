@@ -35,6 +35,8 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
 
+import java.util.List;
+
 
 public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery {
 

@@ -12,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import it.unibz.inf.ontop.sesame.RepositoryConnection;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -24,9 +26,6 @@ import org.openrdf.query.TupleQueryResult;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import sesameWrapper.RepositoryConnection;
-import sesameWrapper.SesameVirtualRepo;
 
 /**
  * Tests that user-applied constraints can be provided through

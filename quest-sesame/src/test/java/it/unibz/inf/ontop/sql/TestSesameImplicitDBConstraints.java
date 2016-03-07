@@ -20,6 +20,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.File;
 import java.util.Scanner;
+
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;

@@ -36,6 +36,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 /***
  * Tests that oracle identifiers for tables and columns are treated
  * correctly. Especially, that the unquoted identifiers are treated as uppercase, and

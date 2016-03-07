@@ -25,9 +25,7 @@ import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.*;
 import junit.framework.TestCase;
 
 import java.util.List;

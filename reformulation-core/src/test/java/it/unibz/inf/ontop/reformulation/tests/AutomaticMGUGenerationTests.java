@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Substitution;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;

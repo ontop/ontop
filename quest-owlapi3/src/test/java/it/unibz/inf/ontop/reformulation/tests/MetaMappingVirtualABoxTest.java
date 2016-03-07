@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import com.google.common.base.Joiner;
+import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;

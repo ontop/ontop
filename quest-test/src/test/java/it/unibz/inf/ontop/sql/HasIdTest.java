@@ -60,10 +60,12 @@ public class HasIdTest {
         QuestPreferences preferences = new QuestPreferences(p);
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(preferences);
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+                .obdaModel(obdaModel)
+                .preferences(new QuestPreferences(p))
+                .build();
 
-        reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        reasoner = factory.createReasoner(ontology, config);
     }
 
     @After

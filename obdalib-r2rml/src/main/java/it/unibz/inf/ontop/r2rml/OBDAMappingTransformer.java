@@ -63,6 +63,7 @@ import eu.optique.api.mapping.TriplesMap;
 import it.unibz.inf.ontop.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 /**
  * Transform OBDA mappings in R2rml mappings

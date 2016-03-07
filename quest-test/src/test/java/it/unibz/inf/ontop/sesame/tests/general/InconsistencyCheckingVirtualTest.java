@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 import java.io.File;
 
