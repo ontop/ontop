@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.convertSubstitution;
 
 /**
@@ -114,7 +115,7 @@ public class ImmutableUnificationTools {
      *
      */
     public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
-        Substitution mutableSubstitution = UnifierUtilities.getMGU(term1, term2);
+        Substitution mutableSubstitution = UnifierUtilities.getMGU(convertToMutableFunction(term1), convertToMutableFunction(term2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();
