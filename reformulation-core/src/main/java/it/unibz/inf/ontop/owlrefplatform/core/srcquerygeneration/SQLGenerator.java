@@ -2267,7 +2267,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 			 */
 			if (definition instanceof ParserViewDefinition) {
-				columnType = columnRef.getAttribute().getName() + TYPE_SUFFIX;
+				//columnType = columnRef.getAttribute().getName() + TYPE_SUFFIX;
+				columnType = columnRef.getAttribute().getName();
 				tableColumnType = sqladapter.sqlQualifiedColumn(
 						relationId.getSQLRendering(), columnType);
 				typeString = tableColumnType ;
