@@ -1169,11 +1169,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		// Hard coded variable names
 		for (int i = 0; i < headArity; i++) {
 			columnIds.add(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID("v" + i + TYPE_SUFFIX)));
+					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i + TYPE_SUFFIX))));
 			columnIds.add(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID("v" + i + LANG_SUFFIX)));
+					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i + LANG_SUFFIX))));
 			columnIds.add(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID("v" + i)));
+					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i))));
 		}
 
 		metadata.createSubQueryView(viewId, unionView, columnIds);
@@ -2254,10 +2254,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 *
 		 * For instance, columnRef is `Qans4View`.`v1` .
 		 */
-		for (QualifiedAttributeID columnRef : columnRefs) {
-			String columnType, tableColumnType;
-
-			RelationID relationId = columnRef.getRelation();
+		for (QualifiedAttributeID mainColumn : columnRefs) {
+			RelationID relationId = mainColumn.getRelation();
 
 			RelationDefinition definition = metadata.getRelation(relationId);
 			/**
@@ -2267,12 +2265,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 			 */
 			if (definition instanceof ParserViewDefinition) {
-				//columnType = columnRef.getAttribute().getName() + TYPE_SUFFIX;
-				columnType = columnRef.getAttribute().getName();
-				tableColumnType = sqladapter.sqlQualifiedColumn(
-						relationId.getSQLRendering(), columnType);
-				typeString = tableColumnType ;
-				break;
+				List<QualifiedAttributeID> columnIds = definition.getAttributes().stream()
+						.map(Attribute::getQualifiedID)
+						.collect(Collectors.toList());
+				int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
+
+				Attribute typeColumn = definition.getAttribute(mainColumnIndex - 2);
+				return typeColumn.getQualifiedID().getSQLRendering();
 			}
 		}
 
@@ -3042,7 +3041,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					 */
 					Attribute column;
 
-					if (ruleIndex.containsKey(atom.getFunctionSymbol().getName())) {
+					if (ruleIndex.containsKey(atom.getFunctionSymbol())) {
 						// If I am here it means that it is not a database table
 						// but a view from an Ans predicate
 						int attPos = 3 * (index + 1);
