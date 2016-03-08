@@ -569,7 +569,11 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerms().get(0);
 		if (innerTerm instanceof Function) {
 			Function f = (Function) innerTerm;
-			if (f.isDataTypeFunction()) return innerTerm;
+			if (f.isDataTypeFunction()) {
+				Function isNotNullInnerInnerTerm = fac.getFunction(ExpressionOperation.IS_NOT_NULL,
+						((Function) innerTerm).getTerms());
+				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull);
+			}
 		}
 		Term result = eval(innerTerm);
 		if (result == OBDAVocabulary.NULL) {
