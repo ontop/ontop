@@ -84,8 +84,7 @@ public class DatalogTools {
                     atom.getTerms());
         // XSD:BOOLEAN case
         else if (DATA_FACTORY.getDatatypeFactory().isBoolean(predicate)) {
-            throw new RuntimeException("TODO: support the conversion of this function as a boolean: "
-                    + atom);
+            return DATA_FACTORY.getExpression(ExpressionOperation.IS_TRUE, atom);
         }
 
         throw new IllegalArgumentException(atom + " is not a boolean atom");
