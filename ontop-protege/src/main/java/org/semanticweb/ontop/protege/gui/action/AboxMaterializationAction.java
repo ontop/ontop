@@ -295,14 +295,15 @@ public class AboxMaterializationAction extends ProtegeAction {
 		
 		int response = JOptionPane.showConfirmDialog(workspace, message, "Confirmation", JOptionPane.YES_NO_OPTION);
 		
-		if (response == JOptionPane.YES_OPTION) {			
+		if (response == JOptionPane.YES_OPTION) {
 			try {
-			
+
 				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
-				
-				Thread th = new Thread(() -> {
+
+				Thread th = new Thread("MaterializeDataInstances") {
+					public void run() {
                     try {
                         OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...");
                         CountDownLatch latch = new CountDownLatch(1);
@@ -317,13 +318,14 @@ public class AboxMaterializationAction extends ProtegeAction {
                         log.error(e.getMessage(), e);
                         JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances.");
                     }
-                });
+                }
+				};
 				th.start();
 			}
 			catch (Exception e) {
 				Container container = getWorkspace().getRootPane().getParent();
 				JOptionPane.showMessageDialog(container, "Cannot create individuals! See the log information for the details.", "Error", JOptionPane.ERROR_MESSAGE);
-			log.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 	}
