@@ -37,12 +37,17 @@ import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.UniqueConstraint;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.sql.Types;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * TODO: port it to RedundantJoinTest
+ */
+@Ignore
 public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
 
 	DBMetadata metadata;

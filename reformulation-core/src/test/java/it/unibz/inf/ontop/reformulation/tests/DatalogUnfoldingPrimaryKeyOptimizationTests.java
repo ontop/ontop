@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.CQIE;
@@ -39,6 +38,7 @@ import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.UniqueConstraint;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.sql.Types;
 import java.util.Collections;
@@ -46,8 +46,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * TODO: disable this test
+ * TODO: port it to RedundantJoinTest
  */
+@Ignore
 public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
