@@ -2715,10 +2715,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return langColumn;
 
 
-
+			/**
+			 * TODO: replace by a switch
+			 */
 		}else {
-			String functionName = functionSymbol.toString();
-			if (functionName.equals(ExpressionOperation.QUEST_CAST.getName())) {
+			if (functionSymbol.equals(ExpressionOperation.QUEST_CAST)) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
@@ -2731,7 +2732,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionName.equals(ExpressionOperation.SPARQL_STR.getName())) {
+			} else if (functionSymbol.equals(ExpressionOperation.SPARQL_STR)) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
 				if (isStringColType(function, index)) {
@@ -2739,31 +2740,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			}else if (functionName.equals(ExpressionOperation.REPLACE.getName())) {
+			}else if (functionSymbol.equals(ExpressionOperation.REPLACE)) {
                 String orig = getSQLString(function.getTerm(0), index, false);
                 String out_str = getSQLString(function.getTerm(1), index, false);
                 String in_str = getSQLString(function.getTerm(2), index, false);
                 String result = sqladapter.strReplace(orig, out_str, in_str);
                 return result;
             }
-            else if (functionName.equals(ExpressionOperation.CONCAT.getName())) {
+            else if (functionSymbol.equals(ExpressionOperation.CONCAT)) {
                 String left = getSQLString(function.getTerm(0), index, false);
                 String right = getSQLString(function.getTerm(1), index, false);
                 String result = sqladapter.strConcat(new String[]{left, right});
                 return result;
             }
-            else if (functionName.equals(ExpressionOperation.COUNT.getName())) {
+            else if (functionSymbol.equals(ExpressionOperation.COUNT)) {
 				if (term1.toString().equals("*")) {
 					return "COUNT(*)";
 				}
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "COUNT(" + columnName + ")";
-			} else if (functionName.equals(ExpressionOperation.AVG.getName())) {
+			} else if (functionSymbol.equals(ExpressionOperation.AVG)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "AVG(" + columnName + ")";
-			} else if (functionName.equals(ExpressionOperation.SUM.getName())) {
+			} else if (functionSymbol.equals(ExpressionOperation.SUM)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "SUM(" + columnName + ")";
