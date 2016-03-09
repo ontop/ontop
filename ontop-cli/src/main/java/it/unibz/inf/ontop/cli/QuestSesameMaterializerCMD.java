@@ -27,12 +27,12 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.r2rml.R2RMLReader;
+import it.unibz.inf.ontop.sesame.SesameMaterializer;
 import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
-import sesameWrapper.SesameMaterializer;
 
 import java.io.*;
 import java.net.URI;
