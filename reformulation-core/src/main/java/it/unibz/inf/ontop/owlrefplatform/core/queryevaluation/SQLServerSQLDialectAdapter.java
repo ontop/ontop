@@ -23,10 +23,31 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
 import it.unibz.inf.ontop.model.OrderCondition;
 
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
+	private static Map<Integer, String> SqlDatatypes;
+	static {
+		SqlDatatypes = new HashMap<>();
+		SqlDatatypes.put(Types.INTEGER, "INT");
+		SqlDatatypes.put(Types.BIGINT, "BIGINT");
+		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
+		SqlDatatypes.put(Types.REAL, "FLOAT");
+		SqlDatatypes.put(Types.FLOAT, "DECIMAL");
+		SqlDatatypes.put(Types.DOUBLE, "DECIMAL");
+//		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
+		SqlDatatypes.put(Types.CHAR, "CHAR");
+		SqlDatatypes.put(Types.VARCHAR, "VARCHAR");  // for korean, chinese, etc characters we need to use utf8
+		SqlDatatypes.put(Types.DATE, "DATETIME");
+		SqlDatatypes.put(Types.TIME, "TIME");
+		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
+		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
+	}
+
+
 	 @Override
 	  	public String SHA256(String str) {
 	    	return String.format("LOWER(CONVERT(VARCHAR(64),  HashBytes('SHA2_256',%s),2 ))", str);
@@ -207,14 +228,23 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 	@Override
 	public String sqlCast(String value, int type) {
-		String strType = null;
-		if (type == Types.VARCHAR) {
-			strType = "VARCHAR(8000)";
-		} else {
+
+		String strType = SqlDatatypes.get(type);
+
+		if (strType == null) {
+			throw new RuntimeException(String.format("Unsupported SQL type %d", type));
+		}
+
+		boolean noCast = strType.equals("BOOLEAN");
+
+		if (strType != null && !noCast ) {
+			return "CAST(" + value + " AS " + strType + ")";
+		} else	if (noCast){
+				return value;
+
+		}
 			throw new RuntimeException("Unsupported SQL type");
 		}
-		return "CAST(" + value + " AS " + strType + ")";
-	}
 	
 	public String sqlLimit(String originalString, long limit) {
 		final String limitStmt = String.format("TOP %d ", limit);
