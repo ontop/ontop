@@ -96,8 +96,8 @@ public class QuestOWLEmptyEntitiesChecker {
 	private class EmptyEntitiesIterator implements Iterator<Predicate> {
 
 
-		private String queryConcepts = "SELECT ?x WHERE {?x a <%s>.}";
-		private String queryRoles = "SELECT * WHERE {?x <%s> ?y.}";
+		private String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
+		private String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
 
 		private QuestOWLConnection questConn;
 		private boolean hasNext = false;
