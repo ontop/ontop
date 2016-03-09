@@ -50,9 +50,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * Left-branch
          */
         else {
-            LeftJoinNode newNode = new LeftJoinNodeImpl(transformOptionalBooleanExpression(substitution,
-                    getOptionalFilterCondition()));
-            return new SubstitutionResultsImpl<>(newNode, substitution);
+            return applyDescendentSubstitution(substitution);
         }
     }
 
@@ -80,7 +78,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public SubstitutionResults<LeftJoinNode> applyDescendentSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
-        return null;
+        LeftJoinNode newNode = new LeftJoinNodeImpl(transformOptionalBooleanExpression(substitution,
+                getOptionalFilterCondition()));
+        return new SubstitutionResultsImpl<>(newNode, substitution);
     }
 
     @Override
