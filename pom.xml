@@ -576,7 +576,7 @@
 		<repository>
 			<!-- for R2RML api -->
 			<id>bolzano-nexus-public</id>
-			<url>http://obdavm.inf.it.unibz.it:8080/nexus/content/groups/public/</url>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
