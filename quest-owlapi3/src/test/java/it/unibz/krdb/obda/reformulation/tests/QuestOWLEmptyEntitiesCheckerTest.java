@@ -25,6 +25,8 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
@@ -46,6 +48,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -64,7 +67,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+
+	private Ontology onto;
 
 	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
 	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
@@ -107,7 +111,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		onto =  OWLAPITranslatorUtility.translate(ontology);
 
 		// Loading the OBDA data
 		fac = OBDADataFactoryImpl.getInstance();
@@ -164,10 +169,15 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
-		emptyConcepts = empties.getEmptyConcepts();
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
+		Iterator<Predicate> iterator = empties.iEmptyConcepts();
+		while (iterator.hasNext()){
+			emptyConcepts.add(iterator.next());
+		}
+
 		log.info("Empty concept/s: " + emptyConcepts);
 		assertEquals(1, emptyConcepts.size());
+		assertEquals(1, empties.getEConceptsSize());
 
 	}
 
@@ -178,30 +188,18 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	 */
 	@Test
 	public void testEmptyRoles() throws Exception {
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
-		emptyRoles = empties.getEmptyRoles();
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
+		Iterator<Predicate> iterator = empties.iEmptyRoles();
+		while (iterator.hasNext()){
+			emptyRoles.add(iterator.next());
+		}
+
 		log.info("Empty role/s: " + emptyRoles);
 		assertEquals(2, emptyRoles.size());
+		assertEquals(2, empties.getERolesSize());
 
 	}
 
-	/**
-	 * Test numbers of empty concepts and roles
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testEmpties() throws Exception {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
-		emptyConcepts = empties.getEmptyConcepts();
-		log.info(empties.toString());
-		log.info("Empty concept/s: " + emptyConcepts);
-		assertEquals(1, emptyConcepts.size());
-		emptyRoles = empties.getEmptyRoles();
-		log.info("Empty role/s: " + emptyRoles);
-		assertEquals(2, emptyRoles.size());
-
-	}
 
 }
