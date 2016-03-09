@@ -29,21 +29,11 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.HSQLDBDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
-import it.unibz.inf.ontop.utils.QueryUtils;
 
 import java.sql.Types;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.openrdf.model.Literal;
@@ -370,11 +360,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		int numPreds = predicatesInBottomUp.size();
 		int i = 0;
 
-		/**
-		 * Remembers view names so as to avoid conflicts due to the possible DB engine
-		 * restrictions.
-		 */
-		 Set<RelationID> viewNames = new HashSet<>();
+		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
 
 		/**
 		 * ANS i > 1
@@ -389,8 +375,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 			} else {
 				boolean isAns1 = false;
-				createViewFrom(pred, metadata, ruleIndex,
-						ruleIndexByBodyPredicate, query, signature, isAns1, viewNames);
+				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex,
+						ruleIndexByBodyPredicate, query, signature, isAns1, subQueryDefinitions);
+
+				subQueryDefinitions.put(pred, view);
 			}
 			i++;
 		}
@@ -417,7 +405,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * form of a normal SQL algebra as possible,
 			 */
 			boolean isAns1 = true;
-			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, headDataTypes);
+			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, headDataTypes, subQueryDefinitions);
 
 			queryStrings.add(querystr);
 		}
@@ -935,12 +923,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param cq
 	 * @param signature
 	 * @param headDataTypes
+	 * @param subQueryDefinitions
 	 * @return
 	 * @throws OBDAException
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1, List<Predicate> headDataTypes) throws OBDAException {
-		QueryAliasIndex index = new QueryAliasIndex(cq);
+											  boolean isAns1, List<Predicate> headDataTypes,
+											  Map<Predicate, ParserViewDefinition> subQueryDefinitions) throws OBDAException {
+		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
 		boolean innerdistincts = false;
 
@@ -1105,16 +1095,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param ruleIndexByBodyPredicate
 	 * @param query
 	 * @param signature
+	 * @param subQueryDefinitions
 	 * @throws OBDAException
 	 *
 	 * @throws Exception
 	 */
 
-	private void createViewFrom(Predicate pred, DBMetadata metadata,
-								Multimap<Predicate, CQIE> ruleIndex,
-								Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
-								DatalogProgram query, List<String> signature, boolean isAns1,
-								Set<RelationID> viewIds)
+	private ParserViewDefinition createViewFrom(Predicate pred, DBMetadata metadata,
+												Multimap<Predicate, CQIE> ruleIndex,
+												Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
+												DatalogProgram query, List<String> signature, boolean isAns1,
+												Map<Predicate, ParserViewDefinition> subQueryDefinitions)
 			throws OBDAException {
 
 		/* Creates BODY of the view query */
@@ -1143,7 +1134,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					isAns1, headDataTypes);
+					isAns1, headDataTypes, subQueryDefinitions);
 
 			sqls.add(sqlQuery);
 		}
@@ -1156,13 +1147,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
 
+		Set<RelationID> alreadyAllocatedViewNames = subQueryDefinitions.values().stream()
+				.map(ParserViewDefinition::getID)
+				.collect(Collectors.toSet());
+
 		//String viewname = String.format(VIEW_ANS_NAME, pred);
 		// String viewname = "Q" + pred + "View";
 		String safePredicateName = escapeName(pred.getName());
-		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX, viewIds);
+		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX,
+				alreadyAllocatedViewNames);
 		RelationID viewId = idFactory.createRelationID(null, viewname);
-
-		viewIds.add(viewId);
 
 		List<QualifiedAttributeID> columnIds = Lists.newArrayListWithExpectedSize(3 * headArity);
 
@@ -1176,8 +1170,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i))));
 		}
 
-		metadata.createSubQueryView(viewId, unionView, columnIds);
+		// Creates a view outside the DBMetadata (specific to this sub-query)
+		ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
+		columnIds.stream().forEach(view::addAttribute);
+
 		sqlAnsViewMap.put(pred, unionView);
+
+		return view;
 	}
 
 	/**
@@ -2244,12 +2243,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		/**
-		 * By default, we assume that the variable is an IRI.
-		 *
-		 */
-		String typeString = String.format("%d", Predicate.COL_TYPE.OBJECT.getQuestCode());
-
-		/**
 		 * For each column reference corresponding to the variable.
 		 *
 		 * For instance, columnRef is `Qans4View`.`v1` .
@@ -2257,25 +2250,33 @@ public class SQLGenerator implements SQLQueryGenerator {
 		for (QualifiedAttributeID mainColumn : columnRefs) {
 			RelationID relationId = mainColumn.getRelation();
 
-			RelationDefinition definition = metadata.getRelation(relationId);
 			/**
 			 * If the var is defined in a ViewDefinition, then there is a
 			 * column for the type and we just need to refer to that column.
 			 *
 			 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 			 */
-			if (definition instanceof ParserViewDefinition) {
-				List<QualifiedAttributeID> columnIds = definition.getAttributes().stream()
+			Optional<RelationDefinition> optionalViewDefinition = index.getDefinition(relationId);
+
+			if (optionalViewDefinition.isPresent()
+					&& (optionalViewDefinition.get() instanceof ParserViewDefinition)) {
+				ParserViewDefinition viewDefinition = (ParserViewDefinition) optionalViewDefinition.get();
+
+				List<QualifiedAttributeID> columnIds = viewDefinition.getAttributes().stream()
 						.map(Attribute::getQualifiedID)
 						.collect(Collectors.toList());
 				int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
 
-				Attribute typeColumn = definition.getAttribute(mainColumnIndex - 2);
+				Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex - 2);
 				return typeColumn.getQualifiedID().getSQLRendering();
 			}
 		}
 
-		return typeString;
+		/**
+		 * By default, we assume that the variable is an IRI.
+		 *
+		 */
+		return String.format("%d", Predicate.COL_TYPE.OBJECT.getQuestCode());
 	}
 
 
@@ -2939,22 +2940,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		final Map<Function, RelationID> viewNames = new HashMap<>();
 		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
+		final Map<RelationID, RelationDefinition> dataDefinitionsById = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
 
-		public QueryAliasIndex(CQIE query) {
+		public QueryAliasIndex(CQIE query, Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			List<Function> body = query.getBody();
-			generateViews(body);
+			generateViews(body, subQueryDefinitions);
 		}
 
-		private void generateViews(List<Function> atoms) {
+		private void generateViews(List<Function> atoms, Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			for (Function atom : atoms) {
 				/*
 				 * This will be called recursively if necessary
 				 */
-				generateViewsIndexVariables(atom);
+				generateViewsIndexVariables(atom, subQueryDefinitions);
 			}
 		}
 
@@ -2970,24 +2972,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * boolean atoms are not associated to view definitions.
 		 *
 		 * @param atom
+		 * @param subQueryDefinitions
 		 */
-		private void generateViewsIndexVariables(Function atom) {
+		private void generateViewsIndexVariables(Function atom,
+												 Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			if (atom.isOperation()) {
 				return;
 			} else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {
 				List<Term> lit = atom.getTerms();
 				for (Term subatom : lit) {
 					if (subatom instanceof Function) {
-						generateViewsIndexVariables((Function) subatom);
+						generateViewsIndexVariables((Function) subatom, subQueryDefinitions);
 					}
 				}
 			}
 
-			Predicate tablePredicate = atom.getFunctionSymbol();
-			String safeTableName = escapeName(tablePredicate.getName());
+			Predicate predicate = atom.getFunctionSymbol();
 			RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
-					tablePredicate);
+					predicate);
 			RelationDefinition def = metadata.getRelation(tableId);
+
+
+			final RelationID relationId;
 
 			if (def == null) {
 				/*
@@ -2995,29 +3001,29 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * predicate. We check if it is an ans predicate and it has a
 				 * view:
 				 */
-				// tableName = "Q"+tableName+"View";
-				//tableName = String.format(VIEW_ANS_NAME, tableName);
-				final String viewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, VIEW_ANS_SUFFIX, viewNames.values());
-				RelationID viewId = metadata.getQuotedIDFactory().createRelationID(null, viewName);
-				/**
-				 * TODO: understand this.
-				 */
-				def = metadata.getRelation(viewId);
+				def = subQueryDefinitions.get(predicate);
 				if (def == null) {
 					isEmpty = true;
 					return;
 				} else {
+					RelationID viewId = def.getID();
 					viewNames.put(atom, viewId);
+					relationId = viewId;
 				}
 			} else {
+				relationId = tableId;
+
 				//String simpleTableViewName = String.format(VIEW_NAME,
 				// tableName, String.valueOf(dataTableCount));
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
-				String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, suffix, viewNames.values());
-				viewNames.put(atom, metadata.getQuotedIDFactory().createRelationID(null, simpleTableViewName));
+
+				String safePredicateName = escapeName(predicate.getName());
+				String simpleViewName = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, viewNames.values());
+				viewNames.put(atom, metadata.getQuotedIDFactory().createRelationID(null, simpleViewName));
 			}
 			dataTableCount++;
 			dataDefinitions.put(atom, def);
+			dataDefinitionsById.put(relationId, def);
 
 			indexVariables(atom);
 		}
@@ -3110,6 +3116,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 						"Impossible to get data definition for: " + atom
 								+ ", type: " + def);
 			}
+		}
+
+		public Optional<RelationDefinition> getDefinition(RelationID relationId) {
+			return Optional.ofNullable(dataDefinitionsById.get(relationId));
 		}
 
 		public RelationID getView(Function atom) {

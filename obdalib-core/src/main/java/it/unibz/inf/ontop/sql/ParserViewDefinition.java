@@ -44,13 +44,12 @@ public class ParserViewDefinition extends RelationDefinition {
 	private final String statement;
 	
 	/**
-	 * used only in DBMetadata
 	 * 
 	 * @param name
 	 * @param statement
 	 */
 	
-	ParserViewDefinition(RelationID name, String statement) {
+	public ParserViewDefinition(RelationID name, String statement) {
 		super(name);
 		this.statement = statement;
 	}

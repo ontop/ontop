@@ -100,15 +100,6 @@ public class DBMetadata implements Serializable {
 		add(view, relations);
 		return view;
 	}
-
-	public ParserViewDefinition createSubQueryView(RelationID viewID, String sql, List<QualifiedAttributeID> columnIds) {
-		ParserViewDefinition view = new ParserViewDefinition(viewID, sql);
-
-		columnIds.stream().forEach(view::addAttribute);
-
-		add(view, relations);
-		return view;
-	}
 	
 	/**
 	 * Inserts a new data definition to this metadata object. 
