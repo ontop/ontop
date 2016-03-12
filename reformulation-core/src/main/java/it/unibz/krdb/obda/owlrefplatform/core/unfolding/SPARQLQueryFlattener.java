@@ -32,70 +32,17 @@ import org.slf4j.LoggerFactory;
 
 public class SPARQLQueryFlattener {
 
-	
 	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
 	private static final Logger log = LoggerFactory.getLogger(SPARQLQueryFlattener.class);
 
+    /*
+     TODO: eliminate both instance variables
+     */
 	private final Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<>();
-
     private final List<Predicate> irreducible = new LinkedList<>();
 
-	/***
-	 * Leaf predicates are those that do not appear in the head of any rule. If
-	 * a predicate is a leaf predicate, it should not be unfolded, they indicate
-	 * stop points to get partial evaluations.
-	 * <p>
-	 * Any atom that is not a leaf, and that cannot be unified with a rule
-	 * (either cause of lack of MGU, or because of a rule for the predicate of
-	 * the atom) is logically empty w.r.t. to the program.
-	 */
-	private final Set<Predicate> extensionalPredicates = new HashSet<>();
-
-	private final List<CQIE> inputQueryRules = new LinkedList<>();
-	private final OBDAQueryModifiers modifiers;
-	
-	public SPARQLQueryFlattener(DatalogProgram program) {
-		
-		modifiers = program.getQueryModifiers();
-		
-		// Creating a local index for the rules according to their predicate
-		for (CQIE rule : program.getRules()) {
-			Predicate headPredicate = rule.getHead().getFunctionSymbol();
-
-			if (headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-				inputQueryRules.add(rule.clone());
-			}
-			else {
-				List<CQIE> rules = ruleIndex.get(headPredicate);
-				if (rules == null) {
-					rules = new LinkedList<>();
-					ruleIndex.put(headPredicate, rules);
-				}
-				rules.add(rule.clone());
-			}
-			
-			// Collecting the predicates that appear in the body of rules
-			// (first in extensionalPredicates, then we will remove all defined (intensional)
-			for (Function atom : rule.getBody()) 
-				collectPredicates(extensionalPredicates, atom);
-		}
-
-		// the predicates that do not appear in the head of rules are leaf
-		// predicates
-		extensionalPredicates.removeAll(ruleIndex.keySet());
-	}
-
-	private void collectPredicates(Set<Predicate> predicates, Function atom) {
-		if (atom.isAlgebraFunction()) {
-			for (Term innerTerm : atom.getTerms()) 
-				if (innerTerm instanceof Function)
-					collectPredicates(predicates, (Function) innerTerm);
-		} 
-		else if (!atom.isOperation()) {
-			Predicate pred = atom.getFunctionSymbol();
-			predicates.add(pred);
-		}
+	public SPARQLQueryFlattener() {
 	}
 
 	/***
@@ -178,26 +125,38 @@ public class SPARQLQueryFlattener {
 	 * resolved against rule
 	 */
 	
-	public DatalogProgram flatten() {
+	public DatalogProgram flatten(DatalogProgram program) {
 
-		List<CQIE> workingSet = new LinkedList<>();
-		for (CQIE query : inputQueryRules)  {
+        Predicate goalPredicate = null;
+        final OBDAQueryModifiers modifiers = program.getQueryModifiers();
+
+        // Creating a local index for the rules according to their predicate
+        for (CQIE rule : program.getRules()) {
+            Predicate headPredicate = rule.getHead().getFunctionSymbol();
+
+            if (headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+                goalPredicate = headPredicate;
+            }
+
+            List<CQIE> rules = ruleIndex.get(headPredicate);
+            if (rules == null) {
+                rules = new LinkedList<>();
+                ruleIndex.put(headPredicate, rules);
+            }
+            rules.add(rule);
+        }
+
+        List<CQIE> workingSet = new LinkedList<>();
+		for (CQIE query : ruleIndex.get(goalPredicate))  {
 			workingSet.add(query);
-			EQNormalizer.enforceEqualities(query);
 		}
 
 		ListIterator<CQIE> iterator = workingSet.listIterator();
-		
 		while (iterator.hasNext()) {
 			CQIE rule = iterator.next(); 
 
 			List<CQIE> result = computePartialEvaluation(rule.getBody(), rule, new Stack<Integer>());
-
-			if (result == null) {
-				// if the result is null the rule is logically empty
-				iterator.remove();
-			} 
-			else if (!result.isEmpty()) {
+            if (!result.isEmpty()) {
 				// one more step in the partial evaluation was computed, we need to
 				// remove the old query and add the result instead. Each of the new
 				// queries could still require more steps of evaluation, so we
@@ -256,7 +215,7 @@ public class SPARQLQueryFlattener {
 				List<CQIE> result = resolveDataAtom(atom, rule, termidx, false);
                 termidx.pop();
 
-				if (result == null || !result.isEmpty())
+				if (!result.isEmpty())
 					return result;
 			}			
 			else if (atom.isAlgebraFunction()) {
@@ -270,7 +229,7 @@ public class SPARQLQueryFlattener {
 					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
                 termidx.pop();
 
-				if (result == null || !result.isEmpty())
+				if (!result.isEmpty())
 					return result;
 			} 			
 		}
@@ -295,11 +254,7 @@ public class SPARQLQueryFlattener {
 				List<CQIE> result = resolveDataAtom(atom, rule, termidx, true);
                 // If there are none, the atom is logically empty, careful, LEFT JOIN alert!
                 if (isLeftJoinSecondArgument) {
-                    if (result == null) {
-                        log.debug("Empty evaluation - Data Function {}", atom);
-                        result = generateNullBindingsForLeftJoin(rule, termidx);
-                    }
-                    else if (result.size() > 1) {
+                    if (result.size() > 1) {
                         // We had disjunction on the second atom of the leftjoin, that is,
                         // more than two rules that unified. LeftJoin is not
                         // distributable on the right component, hence, we cannot simply
@@ -313,7 +268,7 @@ public class SPARQLQueryFlattener {
                 }
                 termidx.pop();
 
-                if (result == null || !result.isEmpty())
+                if (!result.isEmpty())
 					return result;
 			}			
 			else if (atom.isAlgebraFunction()) {
@@ -329,7 +284,7 @@ public class SPARQLQueryFlattener {
 					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
                 termidx.pop();
 
-				if (result == null || !result.isEmpty())
+				if (!result.isEmpty())
 					return result;
 			} 			
 		}
@@ -341,7 +296,7 @@ public class SPARQLQueryFlattener {
 	/***
 	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
 	 * atoms). The resolution step will will try to match the <strong>focus atom
-	 * a</strong> in the input <strong>rule r</strong> againts the rules in
+	 * a</strong> in the input <strong>rule r</strong> against the rules in
 	 * {@link #ruleIndex}.
 	 * <p>
 	 * For each <strong>rule s</strong>, if the <strong>head h</strong> of s is
@@ -368,10 +323,8 @@ public class SPARQLQueryFlattener {
 	 *            "list" positions (function term lists) and the last the focus
 	 *            atoms position.
 	 * @return <ul>
-	 *         <li>null if there is no s whose head unifies with a, we return null.</li>
 	 *         <li>empty list if the atom a is <strong>extensional
-	 *         predicate (those that have no defining rules)</strong> or the
-	 *         second data atom in a left join</li>
+	 *         predicate (those that have no defining rules)</strong></li>
 	 *         <li>a list with one ore more rules otherwise</li>
 	 *         <ul>
 	 * 
@@ -380,28 +333,12 @@ public class SPARQLQueryFlattener {
 	private List<CQIE> resolveDataAtom(Function atom, CQIE rule, Stack<Integer> termidx,
                                        boolean isLeftJoin) {
 
-		/*
-		 * Leaf predicates are ignored (as boolean or algebra predicates)
-		 */
-		Predicate pred = atom.getFunctionSymbol();
-		if (extensionalPredicates.contains(pred)) {
-			// The atom is a leaf, that means that is a data atom that
-			// has no resolvent rule, and marks the end points to compute
-			// partial evaluations
-
-			return Collections.emptyList();
-		}
-		/*
-		 * This is a real data atom, it either generates something, or null
-		 * (empty)
-		 */
-
-		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
-		if (rulesDefiningTheAtom != null)  {
+		List<CQIE> definitions = ruleIndex.get(atom.getFunctionSymbol());
+		if (definitions != null)  {
 			// Note, in this step result may get new CQIEs inside
 			List<CQIE> result = new LinkedList<>();
 
-			for (CQIE candidateRule : rulesDefiningTheAtom) {
+			for (CQIE candidateRule : definitions) {
 				CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
 				Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
 				if (mgu == null) {
@@ -441,8 +378,7 @@ public class SPARQLQueryFlattener {
 				return result;
 		}
 
-        // the atom is logically empty
-        return null;
+        return Collections.emptyList();
 	}
 
 	/***
@@ -492,73 +428,4 @@ public class SPARQLQueryFlattener {
     private static List<Function> getSubAtoms(Function f) {
         return (List<Function>)(List)f.getTerms();
     }
-
-	private List<CQIE> generateNullBindingsForLeftJoin(CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
-
-		CQIE freshRule = originalRuleWithLeftJoin.clone();
-
-        // termidx.size() is at least 2
-        List<Function> atomsList = freshRule.getBody();
-        Function leftJoinParent = null;
-        Function leftJoin = null;
-        for (int d = 0; d < termidx.size() - 1; d++) {
-            int i = termidx.get(d);
-            if (leftJoin != null)
-                leftJoinParent = leftJoin;
-
-            leftJoin = atomsList.get(i);
-            atomsList = getSubAtoms(leftJoin);
-        }
-
-		int argumentAtoms = 0;
-		List<Function> newbody = new LinkedList<>();
-		Set<Variable> variablesArg1 = new HashSet<>();
-		Set<Variable> variablesArg2 = new HashSet<>();
-
-		// Here we build the new LJ body where we remove the 2nd
-		// data atom
-		for (Function atom : atomsList) {
-			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
-				argumentAtoms++;
-				// the first argument of the LJ
-				if (argumentAtoms == 1) {
-					TermUtils.addReferencedVariablesTo(variablesArg1, atom);
-					newbody.add(atom);
-				} 
-				else if (argumentAtoms == 2) {
-					// the second LJ data argument
-					TermUtils.addReferencedVariablesTo(variablesArg2, atom);
-					// remove the variables that are in both arguments
-					variablesArg2.removeAll(variablesArg1);
-				} 
-				else 
-					newbody.add(atom);
-			} 
-			else 
-				newbody.add(atom);
-		}// end for rule body
-
-		// replaceInnerLJ(freshRule, newbody, termidx1);
-
-        if (leftJoinParent == null) {
-            //its just one Left Join, replace rule body directly
-            freshRule.updateBody(newbody);
-        }
-        else {
-            List<Term> tempTerms = leftJoinParent.getTerms();
-            tempTerms.remove(0);
-            List<Term> newTerms = new ArrayList<>(newbody.size() + tempTerms.size());
-            newTerms.addAll(newbody);
-            newTerms.addAll(tempTerms);
-            leftJoinParent.updateTerms(newTerms);
-        }
-
-        Substitution unifier = SubstitutionUtilities.getNullifier(variablesArg2);
-
-		// Now I need to add the null to the variables of the second
-		// LJ data argument
-		SubstitutionUtilities.applySubstitution(freshRule, unifier, false); // in-place unification
-		
-		return Collections.singletonList(freshRule);
-	}
 }

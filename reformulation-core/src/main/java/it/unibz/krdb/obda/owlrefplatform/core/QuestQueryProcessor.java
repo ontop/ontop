@@ -90,8 +90,8 @@ public class QuestQueryProcessor {
 
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener(program);
-		program = unfolder.flatten();
+		SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener();
+		program = unfolder.flatten(program);
 		log.debug("Flattened program: \n{}", program);
 			
 		log.debug("Replacing equivalences...");
@@ -123,8 +123,8 @@ public class QuestQueryProcessor {
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
 
-			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(translation);
-			DatalogProgram program = flattener.flatten();
+			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener();
+			DatalogProgram program = flattener.flatten(translation);
 			log.debug("Flattened program: \n{}", program);
 				
 			log.debug("Replacing equivalences...");

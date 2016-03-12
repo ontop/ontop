@@ -38,7 +38,7 @@ public class SPARQLQueryFlattenerTest {
         DatalogProgram program = translator.translate(pq);
         System.out.println(program);
 
-        SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(program);
-        System.out.println(flattener.flatten());
+        SPARQLQueryFlattener flattener = new SPARQLQueryFlattener();
+        System.out.println(flattener.flatten(program));
     }
 }
