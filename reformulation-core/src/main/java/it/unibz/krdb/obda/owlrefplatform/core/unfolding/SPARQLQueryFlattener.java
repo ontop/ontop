@@ -39,6 +39,8 @@ public class SPARQLQueryFlattener {
 
 	private final Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<>();
 
+    private final List<Predicate> irreducible = new LinkedList<>();
+
 	/***
 	 * Leaf predicates are those that do not appear in the head of any rule. If
 	 * a predicate is a leaf predicate, it should not be unfolded, they indicate
@@ -201,7 +203,7 @@ public class SPARQLQueryFlattener {
 				// queries could still require more steps of evaluation, so we
 				// move to the previous position
 				iterator.remove();
-				for (CQIE newquery : result) 
+				for (CQIE newquery : result)
 					if (!workingSet.contains(newquery)) {
 						iterator.add(newquery);
 						iterator.previous();
@@ -209,6 +211,13 @@ public class SPARQLQueryFlattener {
 			}
 			// otherwise, the result is empty and so,
 			// this rule is already a partial evaluation
+            for (Predicate p : irreducible) {
+                for (CQIE def: ruleIndex.get(p)) {
+                    iterator.add(def);
+                    iterator.previous();
+                }
+            }
+            irreducible.clear();
 		}
 		
 		// We need to enforce equality again, because at this point it is 
@@ -239,29 +248,31 @@ public class SPARQLQueryFlattener {
 	private List<CQIE> computePartialEvaluation(List<Function> atoms, CQIE rule, Stack<Integer> termidx) {
 
 		for (int atomIdx = 0; atomIdx < atoms.size(); atomIdx++) {
-			termidx.push(atomIdx);
-
 			Function atom = atoms.get(atomIdx);
 
 			if (atom.isDataFunction()) {
 				// This is a data atom, it should be unfolded with the usual resolution algorithm.
+                termidx.push(atomIdx);
 				List<CQIE> result = resolveDataAtom(atom, rule, termidx, false);
+                termidx.pop();
+
 				if (result == null || !result.isEmpty())
 					return result;
 			}			
 			else if (atom.isAlgebraFunction()) {
 				// These may contain data atoms that need to be unfolded, we need to recursively unfold each term.
-				
-				List<CQIE> result;
+
+                termidx.push(atomIdx);
+                List<CQIE> result;
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
-					result = computePartialEvaluationInLeftJoin((List<Function>)(List)atom.getTerms(), rule, termidx);
+					result = computePartialEvaluationInLeftJoin(getSubAtoms(atom), rule, termidx);
 				else
-					result = computePartialEvaluation((List<Function>)(List)atom.getTerms(), rule, termidx);
+					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
+                termidx.pop();
 
 				if (result == null || !result.isEmpty())
 					return result;
 			} 			
-			termidx.pop();
 		}
 
 		return Collections.emptyList();
@@ -272,8 +283,6 @@ public class SPARQLQueryFlattener {
 		int nonBooleanAtomCounter = 0;
 
 		for (int atomIdx = 0; atomIdx < atoms.size(); atomIdx++) {
-			termidx.push(atomIdx);
-
 			Function atom = atoms.get(atomIdx);
 
 			if (atom.isDataFunction()) {
@@ -282,6 +291,7 @@ public class SPARQLQueryFlattener {
 				// This is a data atom, it should be unfolded with the usual resolution algorithm.
 				
 				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2;
+                termidx.push(atomIdx);
 				List<CQIE> result = resolveDataAtom(atom, rule, termidx, true);
                 // If there are none, the atom is logically empty, careful, LEFT JOIN alert!
                 if (isLeftJoinSecondArgument) {
@@ -298,8 +308,10 @@ public class SPARQLQueryFlattener {
                         // The rules must be untouched, no partial evaluation is
                         // possible. We must return the original rule.
                         result = Collections.emptyList();
+                        irreducible.add(atom.getFunctionSymbol());
                     }
                 }
+                termidx.pop();
 
                 if (result == null || !result.isEmpty())
 					return result;
@@ -308,17 +320,18 @@ public class SPARQLQueryFlattener {
 				nonBooleanAtomCounter += 1;
 				
 				// These may contain data atoms that need to be unfolded, we need to recursively unfold each term.
-				
+
+                termidx.push(atomIdx);
 				List<CQIE> result;
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
-					result = computePartialEvaluationInLeftJoin((List<Function>)(List)atom.getTerms(), rule, termidx);
+					result = computePartialEvaluationInLeftJoin(getSubAtoms(atom), rule, termidx);
 				else
-					result = computePartialEvaluation((List<Function>)(List)atom.getTerms(), rule, termidx);
+					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
+                termidx.pop();
 
 				if (result == null || !result.isEmpty())
 					return result;
 			} 			
-			termidx.pop();
 		}
 
 		return Collections.emptyList();
@@ -414,7 +427,7 @@ public class SPARQLQueryFlattener {
                 for (int d = 0; d < termidx.size() - 1; d++) {
                     int i = termidx.get(d);
                     Function f = atomsList.get(i);
-                    atomsList = (List<Function>)(List)f.getTerms();
+                    atomsList = getSubAtoms(f);
                 }
                 int pos = termidx.peek(); // at termidx.size() - 1
                 atomsList.remove(pos);
@@ -476,6 +489,9 @@ public class SPARQLQueryFlattener {
 	}
 	
 
+    private static List<Function> getSubAtoms(Function f) {
+        return (List<Function>)(List)f.getTerms();
+    }
 
 	private List<CQIE> generateNullBindingsForLeftJoin(CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
@@ -491,7 +507,7 @@ public class SPARQLQueryFlattener {
                 leftJoinParent = leftJoin;
 
             leftJoin = atomsList.get(i);
-            atomsList = (List<Function>)(List)leftJoin.getTerms();
+            atomsList = getSubAtoms(leftJoin);
         }
 
 		int argumentAtoms = 0;
