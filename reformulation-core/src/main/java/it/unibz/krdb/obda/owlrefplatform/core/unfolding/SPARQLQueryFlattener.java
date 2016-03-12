@@ -245,7 +245,7 @@ public class SPARQLQueryFlattener {
 
 			if (atom.isDataFunction()) {
 				// This is a data atom, it should be unfolded with the usual resolution algorithm.
-				List<CQIE> result = resolveDataAtom(atom, rule, termidx, false, false);
+				List<CQIE> result = resolveDataAtom(atom, rule, termidx, false);
 				if (result == null || !result.isEmpty())
 					return result;
 			}			
@@ -282,8 +282,25 @@ public class SPARQLQueryFlattener {
 				// This is a data atom, it should be unfolded with the usual resolution algorithm.
 				
 				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2;
-				List<CQIE> result = resolveDataAtom(atom, rule, termidx, true, isLeftJoinSecondArgument);
-				if (result == null || !result.isEmpty())
+				List<CQIE> result = resolveDataAtom(atom, rule, termidx, true);
+                // If there are none, the atom is logically empty, careful, LEFT JOIN alert!
+                if (isLeftJoinSecondArgument) {
+                    if (result == null) {
+                        result = generateNullBindingsForLeftJoin(atom, rule, termidx);
+                    }
+                    else if (result.size() > 1) {
+                        // We had disjunction on the second atom of the leftjoin, that is,
+                        // more than two rules that unified. LeftJoin is not
+                        // distributable on the right component, hence, we cannot simply
+                        // generate 2 rules for the second atom.
+                        //
+                        // The rules must be untouched, no partial evaluation is
+                        // possible. We must return the original rule.
+                        result = Collections.emptyList();
+                    }
+                }
+
+                if (result == null || !result.isEmpty())
 					return result;
 			}			
 			else if (atom.isAlgebraFunction()) {
@@ -346,8 +363,8 @@ public class SPARQLQueryFlattener {
 	 * 
 	 * @see UnifierUtilities
 	 */
-	private List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx, boolean isLeftJoin,
-			boolean isSecondAtomInLeftJoin) {
+	private List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx,
+                                       boolean isLeftJoin) {
 
 		/*
 		 * Leaf predicates are ignored (as boolean or algebra predicates)
@@ -399,28 +416,14 @@ public class SPARQLQueryFlattener {
 
 				SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
 				result.add(partialEvaluation);
-
-				if (isSecondAtomInLeftJoin && result.size() > 1) {
-					// We had disjunction on the second atom of the leftjoin, that is,
-					// more than two rules that unified. LeftJoin is not
-					// distributable on the right component, hence, we cannot simply
-					// generate 2 rules for the second atom.
-					//
-					// The rules must be untouched, no partial evaluation is
-					// possible. We must return the original rule.
-					return Collections.emptyList();
-				}
 			}// end for candidate matches
 
 			if (!result.isEmpty())
 				return result;
 		}
 
-		// If there are none, the atom is logically empty, careful, LEFT JOIN alert!
-		if (!isSecondAtomInLeftJoin)
-			return null;
-		else
-			return Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
+        // the atom is logically empty
+        return null;
 	}
 
 	/***
@@ -468,7 +471,7 @@ public class SPARQLQueryFlattener {
 	
 
 
-	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
+	private List<CQIE> generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
 		log.debug("Empty evaluation - Data Function {}", focusLiteral);
 
@@ -521,7 +524,7 @@ public class SPARQLQueryFlattener {
 		// LJ data argument
 		SubstitutionUtilities.applySubstitution(freshRule, unifier, false); // in-place unification
 		
-		return freshRule;
+		return Collections.singletonList(freshRule);
 	}
 	
 	private static void replaceInnerLJ(CQIE rule, List<Function> replacementTerms, Stack<Integer> termidx) {
