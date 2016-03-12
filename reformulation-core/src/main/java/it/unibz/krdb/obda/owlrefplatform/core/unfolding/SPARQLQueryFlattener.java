@@ -46,41 +46,27 @@ public class SPARQLQueryFlattener {
 	}
 
 	/***
-	 * Given a query q and the {@link #unfoldingProgram}, this method will try
-	 * to flatten the query as much as possible by applying resolution steps
+	 * Given a datalog program, this method will try to flatten the query
+     * as much as possible by applying resolution steps
 	 * exhaustively to every atom in the query against the rules in
-	 * 'unfoldingProgram'. This will is exactly to computing a partial
-	 * evaluation of q w.r.t. unfolding program, that is, a specialized version
-	 * of q w.r.t. to unfolding program that requires less steps to execute.
+	 * the program (partial evaluation of the program).
 	 * <p>
-	 * This is used to translate ontological queries to database queries in the
-	 * when the unfolding program is a set of mapppings, and also to flatten the
-	 * Datalog queries that are produced by the
-	 * {@link SparqlAlgebraToDatalogTranslator} and in some other places.
+	 * This is used to flatten the Datalog queries that are produced by the
+	 * SparqlAlgebraToDatalogTranslator.
 	 * 
 	 * <p>
 	 * Example: matching rule the unfolding program.
 	 * <p>
-	 * Unfolding Program<br>
+	 * program<br>
 	 * <br>
+     * ans(x) :- A(x),B(x)<br>
 	 * A(x) :- table1(x,y)<br>
 	 * A(x) :- table2(x,z)<br>
 	 * B(x) :- table3(x,z)<br>
 	 * <br>
-	 * Query<br>
-	 * <br>
-	 * Q(x) :- A(x),B(x)<br>
-	 * <br>
-	 * Initially produces: <br>
-	 * Q(x1) :- table1(x1,y1),B(x1)<br>
-	 * Q(x1) :- table2(x1,z1),B(x1)<br>
-	 * Q(x1) :- table1(x1,y1),table3(x1,z2)<br>
-	 * Q(x1) :- table2(x1,z1),table3(x1,z2)<br>
-	 * 
-	 * But the final result is<br>
-	 * Q(x1) :- table1(x1,y1),table3(x1,z2)<br>
-	 * Q(x1) :- table2(x1,z1),table3(x1,z2)<br>
-	 * 
+	 * produces <br>
+	 * ans(x1) :- table1(x1,y1),table3(x1,z2)<br>
+	 * ans(x1) :- table2(x1,z1),table3(x1,z2)<br>
 	 * 
 	 * <p>
 	 * The strategy of this unfolding is simple, we cycle through all the
@@ -92,39 +78,13 @@ public class SPARQLQueryFlattener {
 	 * produced.
 	 * <p>
 	 * The right side of left joins will never be touched.
-	 * <p>
-	 * Currently the method also is aware of functional dependencies (Primary
-	 * keys) and will produce queries in which redundant joins w.r.t. to these
-	 * are avoided.
-	 * 
-	 * @param inputquery
+	 *
+	 * @param program
 	 * @return
 	 */
 
 
-	/***
-	 * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
-	 * with respect to the program given when this unfolder was initialized. The goal for
-	 * this partial evaluation is the predicate <b>ans1</b>
-	 * 
-	 * This method assumes that the inner term (termidx) of term is a data atom,
-	 * or a nested atom.
-	 * <p>
-	 * If the term is a data atom, it returns all the new rule resulting from
-	 * resolving that atom with unifiable rules in the unfoldign program. If
-	 * there are no such rules it returns null (the atom is logically empty).
-	 * <p>
-	 * If the atom is a Join or LeftJoin (algebra operators) it will recursively
-	 * call unfoldin into each term until one method returns something different
-	 * than the rule itself.
-	 * <p>
-	 * If the term is not a data atom, e.g., datatype atom, variable, constant,
-	 * boolean atom., the method returns the original rule, without change.
-	 * 
-	 * otherwise it does nothing (i.e., variables, constants, etc cannot be
-	 * resolved against rule
-	 */
-	
+
 	public DatalogProgram flatten(DatalogProgram program) {
 
         Predicate goalPredicate = null;
@@ -147,9 +107,7 @@ public class SPARQLQueryFlattener {
         }
 
         List<CQIE> workingSet = new LinkedList<>();
-		for (CQIE query : ruleIndex.get(goalPredicate))  {
-			workingSet.add(query);
-		}
+        workingSet.addAll(ruleIndex.get(goalPredicate));
 
 		ListIterator<CQIE> iterator = workingSet.listIterator();
 		while (iterator.hasNext()) {
@@ -170,6 +128,8 @@ public class SPARQLQueryFlattener {
 			}
 			// otherwise, the result is empty and so,
 			// this rule is already a partial evaluation
+
+            // add the irreducible rules
             for (Predicate p : irreducible) {
                 for (CQIE def: ruleIndex.get(p)) {
                     iterator.add(def);
@@ -192,8 +152,7 @@ public class SPARQLQueryFlattener {
 	/***
 	 * Goes through each term, and recursively each inner term trying to resolve
 	 * each atom. Returns an empty list if the partial evaluation is completed
-	 * (no atoms can be resolved and each atom is a leaf atom), null if there is
-	 * at least one atom that is not leaf and cannot be resolved, or a list with
+	 * (no atoms can be resolved and each atom is a leaf atom), or a list with
 	 * one or more queries if there was one atom that could be resolved against
 	 * one or more rules. The list contains the result of the resolution steps
 	 * against those rules.
