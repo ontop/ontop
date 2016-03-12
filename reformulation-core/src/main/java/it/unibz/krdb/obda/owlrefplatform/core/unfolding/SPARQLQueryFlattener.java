@@ -366,34 +366,61 @@ public class SPARQLQueryFlattener {
 		 */
 
 		List<CQIE> rulesDefiningTheAtom = ruleIndex.get(pred);
-		if (rulesDefiningTheAtom == null) {
-			// If there are none, the atom is logically empty, careful, LEFT JOIN alert!
-			if (!isSecondAtomInLeftJoin)
-				return null;
-			else 
-				return Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
-		} 
-		else {
+		if (rulesDefiningTheAtom != null)  {
 			// Note, in this step result may get new CQIEs inside
-			List<CQIE> result = generateResolutionResult(focusAtom, rule, termidx, rulesDefiningTheAtom, isLeftJoin,
-					isSecondAtomInLeftJoin);
-			
-			if (result == null) {
-				// this is the case for second atom in left join generating more
-				// than one rule, we
-				// must return an empty result indicating its already a partial
-				// evaluation.
-				return Collections.emptyList();
-			} 
-			else if (result.isEmpty()) {
-				if (!isSecondAtomInLeftJoin)
-					return null;
-				else 
-					return Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
-			}
-			else 
+			List<CQIE> result = new LinkedList<>();
+
+			for (CQIE candidateRule : rulesDefiningTheAtom) {
+				CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
+				Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
+				if (mgu == null) {
+					continue; // Failed attempt
+				}
+
+				// We have a matching rule, now we prepare for the resolution step
+				// if we are in a left join, we need to make sure the fresh rule
+				// has only one data atom
+				List<Function> freshRuleBody;
+				if (isLeftJoin)
+					freshRuleBody = foldJOIN(freshRule.getBody());
+				else
+					freshRuleBody = freshRule.getBody();
+
+				// generating the new body of the rule
+				CQIE partialEvaluation = rule.clone();
+
+				// locating the list that contains the current Function (either body
+				// or inner term) and replacing the current atom, with the body of
+				// the matching rule.
+				List<Function> innerAtoms = getNestedList(termidx, partialEvaluation.getBody());
+
+				innerAtoms.remove((int) termidx.peek());
+				innerAtoms.addAll((int) termidx.peek(), freshRuleBody);
+
+				SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
+				result.add(partialEvaluation);
+
+				if (isSecondAtomInLeftJoin && result.size() > 1) {
+					// We had disjunction on the second atom of the leftjoin, that is,
+					// more than two rules that unified. LeftJoin is not
+					// distributable on the right component, hence, we cannot simply
+					// generate 2 rules for the second atom.
+					//
+					// The rules must be untouched, no partial evaluation is
+					// possible. We must return the original rule.
+					return Collections.emptyList();
+				}
+			}// end for candidate matches
+
+			if (!result.isEmpty())
 				return result;
 		}
+
+		// If there are none, the atom is logically empty, careful, LEFT JOIN alert!
+		if (!isSecondAtomInLeftJoin)
+			return null;
+		else
+			return Collections.singletonList(generateNullBindingsForLeftJoin(focusAtom, rule, termidx));
 	}
 
 	/***
@@ -439,77 +466,7 @@ public class SPARQLQueryFlattener {
 		return otherAtomsList;
 	}
 	
-	/***
-	 * The list with all the successful resolutions against focusAtom. It
-	 * will return a list with 0 ore more elements that result from successful
-	 * resolution steps, or null if there are more than 1 successful resolution
-	 * steps but focusAtom is the second atom of a left join (that is,
-	 * isSecondAtomOfLeftJoin is true).
-	 * 
-	 * <p>
-	 * Note the meaning of NULL in this method is different than the meaning of
-	 * null and empty list in
-	 * {@link #resolveDataAtom(it.unibz.krdb.obda.model.Function, it.unibz.krdb.obda.model.CQIE, java.util.Stack, boolean, boolean)}  which is
-	 * the caller method. The job of interpreting correctly the output of this
-	 * method is done in the caller.
-	 */
 
-	private List<CQIE> generateResolutionResult(Function focusAtom, CQIE rule, Stack<Integer> termidx, 
-			List<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin) {
-
-		List<CQIE> result = new LinkedList<>();
-
-		for (CQIE candidateRule : rulesDefiningTheAtom) {
-
-			// getting a rule with unique variables 
-			CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
-			Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
-			if (mgu == null) {
-				// Failed attempt 
-				continue;
-			}
-
-			// We have a matching rule, now we prepare for the resolution step
-			// if we are in a left join, we need to make sure the fresh rule
-			// has only one data atom
-            List<Function> freshRuleBody;
-			if (isLeftJoin)
-				freshRuleBody = foldJOIN(freshRule.getBody());
-			else
-                freshRuleBody = freshRule.getBody();
-
-			// generating the new body of the rule
-			CQIE partialEvaluation = rule.clone();
-
-			// locating the list that contains the current Function (either body
-			// or inner term) and replacing the current atom, with the body of
-			// the matching rule.
-			List<Function> innerAtoms = getNestedList(termidx, partialEvaluation.getBody());
-
-			innerAtoms.remove((int) termidx.peek());
-			innerAtoms.addAll((int) termidx.peek(), freshRuleBody);
-
-			SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
-            result.add(partialEvaluation);
-
-			/***
-			 * DONE WITH BASIC RESOLUTION STEP
-			 */
-
-			if (isSecondAtomOfLeftJoin && result.size() > 1) {
-				// We had disjunction on the second atom of the leftjoin, that is,
-				// more than two rules that unified. LeftJoin is not
-				// distributable on the right component, hence, we cannot simply
-				// generate 2 rules for the second atom.
-				// 
-				// The rules must be untouched, no partial evaluation is
-				// possible. We must return the original rule.
-				return null;
-			}
-		}// end for candidate matches
-
-		return result;
-	}
 
 	private CQIE generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
