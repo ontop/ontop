@@ -286,7 +286,8 @@ public class SPARQLQueryFlattener {
                 // If there are none, the atom is logically empty, careful, LEFT JOIN alert!
                 if (isLeftJoinSecondArgument) {
                     if (result == null) {
-                        result = generateNullBindingsForLeftJoin(atom, rule, termidx);
+                        log.debug("Empty evaluation - Data Function {}", atom);
+                        result = generateNullBindingsForLeftJoin(rule, termidx);
                     }
                     else if (result.size() > 1) {
                         // We had disjunction on the second atom of the leftjoin, that is,
@@ -344,7 +345,7 @@ public class SPARQLQueryFlattener {
 	 * 
 	 * 
 	 * 
-	 * @param focusAtom
+	 * @param atom
 	 *            The atom to be resolved.
 	 * @param rule
 	 *            The rule in which this atom resides
@@ -363,13 +364,13 @@ public class SPARQLQueryFlattener {
 	 * 
 	 * @see UnifierUtilities
 	 */
-	private List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx,
+	private List<CQIE> resolveDataAtom(Function atom, CQIE rule, Stack<Integer> termidx,
                                        boolean isLeftJoin) {
 
 		/*
 		 * Leaf predicates are ignored (as boolean or algebra predicates)
 		 */
-		Predicate pred = focusAtom.getFunctionSymbol();
+		Predicate pred = atom.getFunctionSymbol();
 		if (extensionalPredicates.contains(pred)) {
 			// The atom is a leaf, that means that is a data atom that
 			// has no resolvent rule, and marks the end points to compute
@@ -389,7 +390,7 @@ public class SPARQLQueryFlattener {
 
 			for (CQIE candidateRule : rulesDefiningTheAtom) {
 				CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
-				Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
+				Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
 				if (mgu == null) {
 					continue; // Failed attempt
 				}
@@ -409,10 +410,15 @@ public class SPARQLQueryFlattener {
 				// locating the list that contains the current Function (either body
 				// or inner term) and replacing the current atom, with the body of
 				// the matching rule.
-				List<Function> innerAtoms = getNestedList(termidx, partialEvaluation.getBody());
-
-				innerAtoms.remove((int) termidx.peek());
-				innerAtoms.addAll((int) termidx.peek(), freshRuleBody);
+                List<Function> atomsList = partialEvaluation.getBody();
+                for (int d = 0; d < termidx.size() - 1; d++) {
+                    int i = termidx.get(d);
+                    Function f = atomsList.get(i);
+                    atomsList = (List<Function>)(List)f.getTerms();
+                }
+                int pos = termidx.peek(); // at termidx.size() - 1
+                atomsList.remove(pos);
+                atomsList.addAll(pos, freshRuleBody);
 
 				SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
 				result.add(partialEvaluation);
@@ -471,18 +477,22 @@ public class SPARQLQueryFlattener {
 	
 
 
-	private List<CQIE> generateNullBindingsForLeftJoin(Function focusLiteral, CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
-
-		log.debug("Empty evaluation - Data Function {}", focusLiteral);
+	private List<CQIE> generateNullBindingsForLeftJoin(CQIE originalRuleWithLeftJoin, Stack<Integer> termidx) {
 
 		CQIE freshRule = originalRuleWithLeftJoin.clone();
 
-		Stack<Integer> termidx1 = new Stack<>();
-		termidx1.addAll(termidx);
+        // termidx.size() is at least 2
+        List<Function> atomsList = freshRule.getBody();
+        Function leftJoinParent = null;
+        Function leftJoin = null;
+        for (int d = 0; d < termidx.size() - 1; d++) {
+            int i = termidx.get(d);
+            if (leftJoin != null)
+                leftJoinParent = leftJoin;
 
-		termidx1.pop();
-		termidx1.add(0);
-		List<Function> innerAtoms = getNestedList(termidx1, freshRule.getBody());
+            leftJoin = atomsList.get(i);
+            atomsList = (List<Function>)(List)leftJoin.getTerms();
+        }
 
 		int argumentAtoms = 0;
 		List<Function> newbody = new LinkedList<>();
@@ -491,21 +501,18 @@ public class SPARQLQueryFlattener {
 
 		// Here we build the new LJ body where we remove the 2nd
 		// data atom
-		for (Function atom : innerAtoms) {
+		for (Function atom : atomsList) {
 			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
 				argumentAtoms++;
-				// we found the first argument of the LJ, we need
-				// the variables
+				// the first argument of the LJ
 				if (argumentAtoms == 1) {
 					TermUtils.addReferencedVariablesTo(variablesArg1, atom);
 					newbody.add(atom);
 				} 
 				else if (argumentAtoms == 2) {
-					// Here we keep the variables of the second LJ
-					// data argument
+					// the second LJ data argument
 					TermUtils.addReferencedVariablesTo(variablesArg2, atom);
-
-					// and we remove the variables that are in both arguments
+					// remove the variables that are in both arguments
 					variablesArg2.removeAll(variablesArg1);
 				} 
 				else 
@@ -515,85 +522,27 @@ public class SPARQLQueryFlattener {
 				newbody.add(atom);
 		}// end for rule body
 
-		//freshRule.updateBody(newbody);
-		replaceInnerLJ(freshRule, newbody, termidx1);
-		
-		Substitution unifier = SubstitutionUtilities.getNullifier(variablesArg2);
+		// replaceInnerLJ(freshRule, newbody, termidx1);
+
+        if (leftJoinParent == null) {
+            //its just one Left Join, replace rule body directly
+            freshRule.updateBody(newbody);
+        }
+        else {
+            List<Term> tempTerms = leftJoinParent.getTerms();
+            tempTerms.remove(0);
+            List<Term> newTerms = new ArrayList<>(newbody.size() + tempTerms.size());
+            newTerms.addAll(newbody);
+            newTerms.addAll(tempTerms);
+            leftJoinParent.updateTerms(newTerms);
+        }
+
+        Substitution unifier = SubstitutionUtilities.getNullifier(variablesArg2);
 
 		// Now I need to add the null to the variables of the second
 		// LJ data argument
 		SubstitutionUtilities.applySubstitution(freshRule, unifier, false); // in-place unification
 		
 		return Collections.singletonList(freshRule);
-	}
-	
-	private static void replaceInnerLJ(CQIE rule, List<Function> replacementTerms, Stack<Integer> termidx) {
-		
-		if (termidx.size() > 1) {
-			/*
-			 * Its a nested term
-			 */
-			Function parentFunction = null;
-			Term nestedTerm = null;
-			for (int y = 0; y < termidx.size() - 1; y++) {
-				int i = termidx.get(y);
-				if (nestedTerm == null)
-					nestedTerm = rule.getBody().get(i);
-				else {
-					parentFunction = (Function) nestedTerm;
-					nestedTerm = ((Function) nestedTerm).getTerm(i);
-				}
-			}
-			//Function focusFunction = (Function) nestedTerm;
-			if (parentFunction == null) {
-				//its just one Left Join, replace rule body directly
-				rule.updateBody(replacementTerms);
-				return;
-			}
-			List <Term> tempTerms = parentFunction.getTerms();
-			tempTerms.remove(0);
-			List <Term> newTerms = new LinkedList<Term>();
-			newTerms.addAll(replacementTerms);
-			newTerms.addAll(tempTerms);
-			parentFunction.updateTerms(newTerms);
-		} 
-		else 
-			throw new RuntimeException("Unexpected OPTIONAL condition!");
-	}
-
-
-
-	/***
-	 * Returns the list of terms contained in the nested atom indicated by term
-	 * idx. If termidx is empty, then this is the list of atoms in the body of
-	 * the rule, otherwise the list correspond to the terms of the nested atom
-	 * indicated by termidx viewed as a path of atoms. For example, if termidx =
-	 * <2,4> then this atom returns the list of terms of the 4 atom, of the
-	 * second atom in the body of the rule.
-	 * 
-	 * <p>
-	 * Example two. IF the rule is q(x):-A(x), Join(R(x,y), Join(P(s),R(x,y) and
-	 * termidx = <1,2>, then this method returns the the terms of the second
-	 * join atom, ie.,
-	 * <P(s),R(x,y)>
-	 * ,
-	 * 
-	 * <p>
-	 * note that this list is the actual list of terms of the atom, so
-	 * manipulating the list will change the atom.
-	 * 
-	 * 
-	 * @param termidx
-	 * @param ruleBody
-	 * @return
-	 */
-	private static List<Function> getNestedList(Stack<Integer> termidx, List<Function> ruleBody) {
-        List<Function> c = ruleBody;
-        for (int d = 0; d < termidx.size() - 1; d++) {
-            int i = termidx.get(d);
-            Function f = c.get(i);
-            c = (List<Function>)(List)f.getTerms();
-        }
-        return c;
 	}
 }
