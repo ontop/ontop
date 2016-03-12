@@ -258,11 +258,11 @@ public class SPARQLQueryFlattener {
 					innerTerms.add((Function)t);
 				
 				List<CQIE> result;
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) 
+				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
 					result = computePartialEvaluationInLeftJoin(innerTerms, rule, termidx);
 				else
 					result = computePartialEvaluation(innerTerms, rule, termidx);
-					
+
 				if (result == null || !result.isEmpty())
 					return result;
 			} 			
@@ -301,7 +301,7 @@ public class SPARQLQueryFlattener {
 					innerTerms.add((Function)t);
 				
 				List<CQIE> result;
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) 
+				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
 					result = computePartialEvaluationInLeftJoin(innerTerms, rule, termidx);
 				else
 					result = computePartialEvaluation(innerTerms, rule, termidx);
@@ -320,7 +320,7 @@ public class SPARQLQueryFlattener {
 	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
 	 * atoms). The resolution step will will try to match the <strong>focus atom
 	 * a</strong> in the input <strong>rule r</strong> againts the rules in
-	 * {@link #unfoldingProgram}.
+	 * {@link #ruleIndex}.
 	 * <p>
 	 * For each <strong>rule s</strong>, if the <strong>head h</strong> of s is
 	 * unifiable with a, then this method will do the following:
@@ -345,8 +345,6 @@ public class SPARQLQueryFlattener {
 	 *            indicates the nesting, position by position, the first being
 	 *            "list" positions (function term lists) and the last the focus
 	 *            atoms position.
-	 * @param atomindx
-	 *            The location of the focustAtom in the currentlist
 	 * @return <ul>
 	 *         <li>null if there is no s whose head unifies with a, we return null.</li>
 	 *         <li>empty list if the atom a is <strong>extensional
@@ -423,15 +421,15 @@ public class SPARQLQueryFlattener {
 	 * m(x,y) :- Join(R(x,y), Join(R(y,z), R(z,m))
 	 * </pre>
 	 * 
-	 * @param rule 
-	 * @return a new query with the nested joins.
+	 * @param body
+	 * @return a new list with the nested joins.
 	 */
-	private CQIE foldJOIN(CQIE rule) {
+	private List<Function> foldJOIN(List<Function> body) {
 		
 		List<Function> dataAtomsList = new LinkedList<>();
 		List<Function> otherAtomsList = new LinkedList<>();
 
-		for (Function a : rule.getBody()) {
+		for (Function a : body) {
 			if (a.isDataFunction() || a.isAlgebraFunction()) 
 				dataAtomsList.add(a);
 			else 
@@ -439,7 +437,7 @@ public class SPARQLQueryFlattener {
 		}
 
 		if (dataAtomsList.size() <= 1) 
-			return rule;
+			return body;
 		
 		Function foldedJoinAtom = dataAtomsList.remove(0);
 		for (Function a : dataAtomsList)
@@ -447,8 +445,7 @@ public class SPARQLQueryFlattener {
 		
 		otherAtomsList.add(0, foldedJoinAtom);
 		
-		CQIE newrule = termFactory.getCQIE(rule.getHead(), otherAtomsList);
-		return newrule;
+		return otherAtomsList;
 	}
 	
 	/***
@@ -461,7 +458,7 @@ public class SPARQLQueryFlattener {
 	 * <p>
 	 * Note the meaning of NULL in this method is different than the meaning of
 	 * null and empty list in
-	 * {@link #resolveDataAtom(it.unibz.krdb.obda.model.Function, it.unibz.krdb.obda.model.CQIE, java.util.Stack, int[], boolean, boolean)}  which is
+	 * {@link #resolveDataAtom(it.unibz.krdb.obda.model.Function, it.unibz.krdb.obda.model.CQIE, java.util.Stack, boolean, boolean)}  which is
 	 * the caller method. The job of interpreting correctly the output of this
 	 * method is done in the caller.
 	 */
@@ -471,7 +468,6 @@ public class SPARQLQueryFlattener {
 
 		List<CQIE> result = new LinkedList<>();
 
-		int rulesGeneratedSoFar = 0;
 		for (CQIE candidateRule : rulesDefiningTheAtom) {
 
 			// getting a rule with unique variables 
@@ -485,30 +481,31 @@ public class SPARQLQueryFlattener {
 			// We have a matching rule, now we prepare for the resolution step
 			// if we are in a left join, we need to make sure the fresh rule
 			// has only one data atom
-			if (isLeftJoin) {
-				freshRule = foldJOIN(freshRule);
-			}
+            List<Function> freshRuleBody;
+			if (isLeftJoin)
+				freshRuleBody = foldJOIN(freshRule.getBody());
+			else
+                freshRuleBody = freshRule.getBody();
 
 			// generating the new body of the rule
-			CQIE partialEvalution = rule.clone();
+			CQIE partialEvaluation = rule.clone();
 
 			// locating the list that contains the current Function (either body
 			// or inner term) and replacing the current atom, with the body of
 			// the matching rule.
-			List<Function> innerAtoms = getNestedList(termidx, partialEvalution);
+			List<Function> innerAtoms = getNestedList(termidx, partialEvaluation.getBody());
 
 			innerAtoms.remove((int) termidx.peek());
-			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
+			innerAtoms.addAll((int) termidx.peek(), freshRuleBody);
 
-			SubstitutionUtilities.applySubstitution(partialEvalution, mgu, false);
+			SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
+            result.add(partialEvaluation);
 
 			/***
 			 * DONE WITH BASIC RESOLUTION STEP
 			 */
 
-			rulesGeneratedSoFar += 1;
-
-			if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1) {
+			if (isSecondAtomOfLeftJoin && result.size() > 1) {
 				// We had disjunction on the second atom of the leftjoin, that is,
 				// more than two rules that unified. LeftJoin is not
 				// distributable on the right component, hence, we cannot simply
@@ -518,8 +515,6 @@ public class SPARQLQueryFlattener {
 				// possible. We must return the original rule.
 				return null;
 			}
-
-			result.add(partialEvalution);
 		}// end for candidate matches
 
 		return result;
@@ -536,7 +531,7 @@ public class SPARQLQueryFlattener {
 
 		termidx1.pop();
 		termidx1.add(0);
-		List<Function> innerAtoms = getNestedList(termidx1, freshRule);
+		List<Function> innerAtoms = getNestedList(termidx1, freshRule.getBody());
 
 		int argumentAtoms = 0;
 		List<Function> newbody = new LinkedList<>();
@@ -638,45 +633,16 @@ public class SPARQLQueryFlattener {
 	 * 
 	 * 
 	 * @param termidx
-	 * @param rule
+	 * @param ruleBody
 	 * @return
 	 */
-	private static List<Function> getNestedList(Stack<Integer> termidx, CQIE rule) {
-
-		if (termidx.size() > 1) {
-			// it's a nested term
-			int i0 = termidx.get(0);
-			Function newfocusFunction = rule.getBody().get(i0);
-			
-			for (int y = 1; y < termidx.size() - 1; y++) {
-				int i = termidx.get(y);
-				newfocusFunction = (Function)newfocusFunction.getTerm(i);
-			}
-
-			return (List<Function>)(List)newfocusFunction.getTerms();
-		} 
-		else {
-			// it's the body of the query
-			return rule.getBody();
-		}
+	private static List<Function> getNestedList(Stack<Integer> termidx, List<Function> ruleBody) {
+        List<Function> c = ruleBody;
+        for (int d = 0; d < termidx.size() - 1; d++) {
+            int i = termidx.get(d);
+            Function f = c.get(i);
+            c = (List<Function>)(List)f.getTerms();
+        }
+        return c;
 	}
-
-	private static Function getTerm(Stack<Integer> termidx, CQIE rule) {
-		Function atom = null;
-		if (termidx.size() > 1) {
-			Stack<Integer> stack = new Stack<>();
-			stack.addAll(termidx.subList(0, termidx.size() - 1));
-			List<Function> innerTerms = getNestedList(stack, rule);
-			atom = innerTerms.get(stack.peek());
-		} 
-		else {
-			List<Function> body = rule.getBody();
-			Integer peek = termidx.peek();
-			if (peek >= body.size()) 
-				return null;
-			atom = body.get(peek);
-		}
-		return atom;
-	}
-
 }
