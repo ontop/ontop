@@ -44,13 +44,13 @@ public class Relation2DatalogPredicate {
 		String s = predicate.getName();
 		
 		// ROMAN (7 Oct 2015): a better way of splitting is probably needed here
-		String[] names = s.split("\\.");
-		if (names.length == 1)
+		// String[] names = s.split("\\.");
+		int position = s.indexOf('.');
+		if (position == -1)
 			return RelationID.createRelationIdFromDatabaseRecord(idfac, null, s);
 		else {
-
-			int position = s.indexOf('.');
-			return RelationID.createRelationIdFromDatabaseRecord(idfac, s.substring(0,position), s.substring(position+1, s.length()));
+			return RelationID.createRelationIdFromDatabaseRecord(idfac,
+					s.substring(0, position), s.substring(position + 1, s.length()));
 		}
 	}	
 }

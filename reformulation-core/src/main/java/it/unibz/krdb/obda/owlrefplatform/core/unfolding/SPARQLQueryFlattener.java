@@ -90,7 +90,7 @@ public class SPARQLQueryFlattener {
 				if (innerTerm instanceof Function)
 					collectPredicates(predicates, (Function) innerTerm);
 		} 
-		else if (!(atom.isOperation())) {
+		else if (!atom.isOperation()) {
 			Predicate pred = atom.getFunctionSymbol();
 			predicates.add(pred);
 		}
@@ -245,7 +245,6 @@ public class SPARQLQueryFlattener {
 
 			if (atom.isDataFunction()) {
 				// This is a data atom, it should be unfolded with the usual resolution algorithm.
-				
 				List<CQIE> result = resolveDataAtom(atom, rule, termidx, false, false);
 				if (result == null || !result.isEmpty())
 					return result;
@@ -253,15 +252,11 @@ public class SPARQLQueryFlattener {
 			else if (atom.isAlgebraFunction()) {
 				// These may contain data atoms that need to be unfolded, we need to recursively unfold each term.
 				
-				List<Function> innerTerms = new ArrayList<>(3);
-				for (Term t : atom.getTerms())
-					innerTerms.add((Function)t);
-				
 				List<CQIE> result;
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
-					result = computePartialEvaluationInLeftJoin(innerTerms, rule, termidx);
+					result = computePartialEvaluationInLeftJoin((List<Function>)(List)atom.getTerms(), rule, termidx);
 				else
-					result = computePartialEvaluation(innerTerms, rule, termidx);
+					result = computePartialEvaluation((List<Function>)(List)atom.getTerms(), rule, termidx);
 
 				if (result == null || !result.isEmpty())
 					return result;
@@ -296,15 +291,11 @@ public class SPARQLQueryFlattener {
 				
 				// These may contain data atoms that need to be unfolded, we need to recursively unfold each term.
 				
-				List<Function> innerTerms = new ArrayList<>(3);
-				for (Term t : atom.getTerms())
-					innerTerms.add((Function)t);
-				
 				List<CQIE> result;
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
-					result = computePartialEvaluationInLeftJoin(innerTerms, rule, termidx);
+					result = computePartialEvaluationInLeftJoin((List<Function>)(List)atom.getTerms(), rule, termidx);
 				else
-					result = computePartialEvaluation(innerTerms, rule, termidx);
+					result = computePartialEvaluation((List<Function>)(List)atom.getTerms(), rule, termidx);
 
 				if (result == null || !result.isEmpty())
 					return result;
@@ -394,7 +385,7 @@ public class SPARQLQueryFlattener {
 				// evaluation.
 				return Collections.emptyList();
 			} 
-			else if (result.size() == 0) {
+			else if (result.isEmpty()) {
 				if (!isSecondAtomInLeftJoin)
 					return null;
 				else 
