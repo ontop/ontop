@@ -453,10 +453,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					} else if (typePred instanceof BNodePredicate){
 						ansTypes.set(j, dtfac.getTypePredicate(Predicate.COL_TYPE.STRING));
 
-					}else if (  (typePred.getName().equals(ExpressionOperation.AVG))||
-							(typePred.getName().equals(ExpressionOperation.SUM)) ||
-							(typePred.getName().equals(ExpressionOperation.MAX)) ||
-							(typePred.getName().equals(ExpressionOperation.MIN))) {
+					}else if ((typePred == ExpressionOperation.AVG)||
+							(typePred == ExpressionOperation.SUM) ||
+							(typePred == ExpressionOperation.MAX) ||
+							(typePred == ExpressionOperation.MIN)) {
 
                         Term agTerm = f.getTerm(0);
                         if (agTerm instanceof Function) {
@@ -2720,12 +2720,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * TODO: replace by a switch
 			 */
 		}else {
-			if (functionSymbol.equals(ExpressionOperation.QUEST_CAST)) {
+			if (functionSymbol == ExpressionOperation.QUEST_CAST) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(XMLSchema.STRING)) {
+				if (datatype.equals(XMLSchema.STRING.stringValue())){
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {
@@ -2733,7 +2733,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionSymbol.equals(ExpressionOperation.SPARQL_STR)) {
+			} else if (functionSymbol == ExpressionOperation.SPARQL_STR) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
 				if (isStringColType(function, index)) {
@@ -2741,31 +2741,129 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			}else if (functionSymbol.equals(ExpressionOperation.REPLACE)) {
+			}else if (functionSymbol == ExpressionOperation.REPLACE) {
                 String orig = getSQLString(function.getTerm(0), index, false);
                 String out_str = getSQLString(function.getTerm(1), index, false);
                 String in_str = getSQLString(function.getTerm(2), index, false);
                 String result = sqladapter.strReplace(orig, out_str, in_str);
                 return result;
             }
-            else if (functionSymbol.equals(ExpressionOperation.CONCAT)) {
+            else if (functionSymbol == ExpressionOperation.CONCAT) {
                 String left = getSQLString(function.getTerm(0), index, false);
                 String right = getSQLString(function.getTerm(1), index, false);
                 String result = sqladapter.strConcat(new String[]{left, right});
                 return result;
             }
-            else if (functionSymbol.equals(ExpressionOperation.COUNT)) {
+			else if (functionSymbol == ExpressionOperation.STRLEN) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strLength(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.YEAR) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateYear(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.MINUTES) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateMinutes(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.DAY) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateDay(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.MONTH) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateMonth(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SECONDS) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateSeconds(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.HOURS) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateHours(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.TZ) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateTZ(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strEncodeForUri(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.UCASE) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strUcase(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.MD5) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.MD5(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SHA1) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.SHA1(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SHA256) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.SHA256(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SHA512) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.SHA512(literal); //TODO FIX
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.LCASE) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strLcase(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SUBSTR) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String start = getSQLString(function.getTerm(1), index, false);
+				if (function.getTerms().size() == 2){
+					return sqladapter.strSubstr(string, start);
+				}
+				String end = getSQLString(function.getTerm(2), index, false);
+				String result = sqladapter.strSubstr(string, start, end);
+
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.STRBEFORE) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String before = getSQLString(function.getTerm(1), index, false);
+				String result = sqladapter.strBefore(string, before);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.STRAFTER) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String after = getSQLString(function.getTerm(1), index, false);
+				String result = sqladapter.strAfter(string, after);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.COUNT) {
 				if (term1.toString().equals("*")) {
 					return "COUNT(*)";
 				}
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "COUNT(" + columnName + ")";
-			} else if (functionSymbol.equals(ExpressionOperation.AVG)) {
+			} else if (functionSymbol == ExpressionOperation.AVG) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "AVG(" + columnName + ")";
-			} else if (functionSymbol.equals(ExpressionOperation.SUM)) {
+			} else if (functionSymbol == ExpressionOperation.SUM) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "SUM(" + columnName + ")";
