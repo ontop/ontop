@@ -360,7 +360,12 @@ public class OntologyImpl implements Ontology {
 			ce1 = ClassImpl.owlThing; // rules [D5] and [O5]
 		classAxioms.addInclusion(ce1, ce2);
 	}	
-	
+
+	public void addTemporalSubClassOfAxiom(ClassExpression ce1, ClassExpression ce2) throws InconsistentOntologyException{
+
+	}
+
+
 	/**
 	 * Normalizes and adds a data property range axiom
 	 * <p>
@@ -706,8 +711,10 @@ public class OntologyImpl implements Ontology {
 	private void checkSignature(ClassExpression desc) {		
 		if (desc instanceof OClass) {
 			OClass cl = (OClass) desc;
-			if (!vocabulary.concepts.containsKey(cl.getName()))
+			if (!vocabulary.concepts.containsKey(cl.getName())) {
+				System.out.println(cl.getName());
 				throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
+			}
 		}	
 		else if (desc instanceof ObjectSomeValuesFrom) {
 			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
@@ -744,6 +751,10 @@ public class OntologyImpl implements Ontology {
 	private void checkSignature(AnnotationProperty prop) {
 		if (!vocabulary.containsAnnotationProperty(prop.getName()))
 			throw new IllegalArgumentException(ANNOTATION_PROPERTY_NOT_FOUND + prop);
+	}
+
+	public void removeFromSubClassAxioms(BinaryAxiom binaryAxiom){
+		classAxioms.inclusions.remove(binaryAxiom);
 	}
 
 }

@@ -1,0 +1,37 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	mesowest
+connectionUrl	jdbc:postgresql://localhost/mesowest
+username	postgres
+password	
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	snow
+target		:Snow/{station_id}/{currTime}/{nextTime} a :Snow . 
+source		SELECT station_id, currTime, currP1, nextTime, nextP1
+			            FROM (SELECT date_time AS currTime, precip_accum_one_hour_set_1 AS currP1,
+			            lead(date_time, 1) OVER () AS nextTime,
+			            lead(precip_accum_one_hour_set_1, 1) OVER () AS nextP1,
+			            station_id, air_temp_set_1
+			            FROM tb_newyorkdata2012) AS a
+			            WHERE nextP1 > currP1 AND station_id = 'KFZY' AND air_temp_set_1 < 0
+
+mappingId	rain
+target		:Rain/{station_id}/{currTime}/{nextTime} a :Rain . 
+source		SELECT station_id, currTime, currP1, nextTime, nextP1
+			         FROM (SELECT date_time AS currTime, precip_accum_one_hour_set_1 AS currP1,
+			         lead(date_time, 1) OVER () AS nextTime,
+			         lead(precip_accum_one_hour_set_1, 1) OVER () AS nextP1,
+			         station_id, air_temp_set_1
+			         FROM tb_newyorkdata2012) AS a
+			         WHERE nextP1 > currP1 AND station_id = 'KFZY' AND air_temp_set_1 > 5
+]]
+

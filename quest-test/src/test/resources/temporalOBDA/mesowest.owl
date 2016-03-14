@@ -1,0 +1,357 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#"
+     xml:base="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#class -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#class"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#duration -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#duration"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#forProperty -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#forProperty"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#tempOp -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#tempOp"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#timestamp -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#timestamp"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2015/11/mesowest#Rain">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#WetSurface"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Blizzard -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Blizzard"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Fog -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Fog"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature_Since_Snow -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature_Since_Snow">
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature"/>
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow"/>
+        <tempOp>Since</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature_Since_WetSurface -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature_Since_WetSurface">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SurfaceIce"/>
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature"/>
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow"/>
+        <tempOp>Since</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Frost -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Frost">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SurfaceIce"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Gale -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Gale"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HardFreeze -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HardFreeze"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HeavyRain -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HeavyRain">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Precipitation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Hurricane -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Hurricane"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind_1h_Box -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind_1h_Box">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Hurricane"/>
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind"/>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1</duration>
+        <tempOp>Box</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#MeltingTemperature -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#MeltingTemperature"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature_4h_Box -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature_4h_Box">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HardFreeze"/>
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature"/>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1</duration>
+        <tempOp>Box</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Precipitation -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Precipitation"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#RELHGreaterEqual100pct -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#RELHGreaterEqual100pct">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SaturatedHumidity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Rain -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Rain">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Precipitation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual72mph -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual72mph">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SaturatedHumidity -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SaturatedHumidity"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Precipitation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow_3h_Box -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow_3h_Box">
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow"/>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">3</duration>
+        <tempOp>Box</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SurfaceIce -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SurfaceIce"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#TMPGreater0C -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#TMPGreater0C">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#MeltingTemperature"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#TMPLessEqual0C -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#TMPLessEqual0C">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#TMPLessMinus4C -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#TMPLessMinus4C">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual1000m -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual1000m">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Fog"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m_3h_Box -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m_3h_Box">
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m"/>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1</duration>
+        <tempOp>Box</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#WetDay -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#WetDay"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#WetSurface -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#WetSurface"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h"/>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h_3h_Box -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h_3h_Box">
+        <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h"/>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">3</duration>
+        <tempOp>Box</tempOp>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SaturatedHumidity"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Frost"/>
+    </owl:Class>
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#FreezeTemperature_Since_Snow"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#MeltingTemperature"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#WetSurface"/>
+    </owl:Class>
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow_3h_Box"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m_3h_Box"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h_3h_Box"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Blizzard"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.1.3.20151118-2017) https://github.com/owlcs/owlapi -->
+

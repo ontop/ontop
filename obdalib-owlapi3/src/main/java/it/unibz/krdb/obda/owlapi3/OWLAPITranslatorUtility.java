@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlapi3;
  * #L%
  */
 
+import it.unibz.krdb.obda.ontology.AnnotationAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -77,6 +78,8 @@ public class OWLAPITranslatorUtility {
 				//	System.out.println(axiom);
 				axiom.accept(translator);
 			}
+			System.out.print("");
+			translator.createTemporalAxioms();
 		}
 		
 		log.debug("Ontology loaded: {}", translator.getOntology());

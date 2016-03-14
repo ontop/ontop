@@ -20,6 +20,8 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+import it.unibz.krdb.obda.ontology.impl.BinaryAxiomImpl;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -135,4 +137,6 @@ public interface Ontology extends Serializable {
 	
 	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
 
+
+	public void removeFromSubClassAxioms(BinaryAxiom binaryAxiom);
 }

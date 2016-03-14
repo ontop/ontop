@@ -2,14 +2,12 @@ package it.unibz.krdb.obda.owlapi3;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.ontology.impl.ClassImpl;
-import it.unibz.krdb.obda.ontology.impl.DataPropertyExpressionImpl;
-import it.unibz.krdb.obda.ontology.impl.DatatypeImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.*;
 
@@ -1130,6 +1128,47 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 
 		}
 		return ofac.createOntology(vb);		
+	}
+
+	public void createTemporalAxioms() {
+		String ce = null;
+		String duration = null;
+		String tempOp;
+		for (AnnotationAssertion annotationAssertion : getOntology().getAnnotationAssertions()) {
+			if (annotationAssertion.getProperty().getPredicate().getName().contains("tempOp")) {
+				String subj = annotationAssertion.getSubject().toString();
+				 tempOp = annotationAssertion.getValue().toString();
+				for (AnnotationAssertion annotationAssertion2 : getOntology().getAnnotationAssertions()) {
+					String subj2 = annotationAssertion2.getSubject().toString();
+					if (subj.equals(subj2)) {
+						if (annotationAssertion2.getProperty().getName().contains("class")) {
+								ce = annotationAssertion2.getValue().toString();
+						} else if (annotationAssertion2.getProperty().getName().contains("duration")) {
+							 duration = annotationAssertion2.getValue().toString();
+						}
+					}
+
+				}
+
+				TemporalExpression te = new TemporalExpressionImpl(ce, tempOp, duration);
+
+				for (BinaryAxiom binaryAxiom : getOntology().getSubClassAxioms()){
+					if (binaryAxiom.getSub().toString().equals(subj)){
+						System.out.print("");
+						try {
+							dl_onto.addSubClassOfAxiom(te, (ClassExpression) binaryAxiom.getSuper());
+							dl_onto.removeFromSubClassAxioms(binaryAxiom);
+							break;
+						} catch (InconsistentOntologyException e) {
+							e.printStackTrace();
+						}
+
+					}
+				}
+
+			}
+		}
+		System.out.print("");
 	}
 	
 	

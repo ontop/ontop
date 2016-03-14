@@ -20,9 +20,13 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.*;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
+import org.semanticweb.owlapi.model.OWLAnnotationValue;
 
 /**
  * 
@@ -132,6 +136,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap) {
 		return new AnnotationAssertionImpl(ap);
+	}
+
+	@Override
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, IRI subject, String value) {
+		return new AnnotationAssertionImpl(ap, subject, value);
 	}
 
 }

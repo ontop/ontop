@@ -1,10 +1,8 @@
 package it.unibz.krdb.obda.owlapi3;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorOWL2QL.TranslationException;
@@ -60,8 +58,10 @@ public class OWLAPITranslatorHelper {
 	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
 
 		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
+		IRI subject =  (IRI) ax.getSubject();
+		String value = ax.getValue().toString();
 
-		return ofac.createAnnotationAssertion(ap);
+		return ofac.createAnnotationAssertion(ap, subject, value);
 	}
 	
 	/**

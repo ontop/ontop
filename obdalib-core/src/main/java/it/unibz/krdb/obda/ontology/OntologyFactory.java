@@ -20,8 +20,12 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
+import org.semanticweb.owlapi.model.OWLAnnotationValue;
 
 /**
  * 
@@ -99,4 +103,7 @@ public interface OntologyFactory {
 
 
 	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
+
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, IRI subject, String value);
+
 }

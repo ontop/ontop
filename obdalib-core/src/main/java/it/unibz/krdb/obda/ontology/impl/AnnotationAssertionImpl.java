@@ -20,9 +20,13 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.ontology.AnnotationAssertion;
 import it.unibz.krdb.obda.ontology.AnnotationProperty;
-
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
+import org.semanticweb.owlapi.model.OWLAnnotationValue;
 
 /**
  * Represents AnnotationAssertion from the OWL 2 QL Specification
@@ -39,8 +43,17 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 
 	private final AnnotationProperty prop;
 
+	IRI subject;
+	String value;
 	AnnotationAssertionImpl(AnnotationProperty prop) {
 		this.prop = prop;
+
+	}
+
+	AnnotationAssertionImpl(AnnotationProperty prop, IRI subject, String value) {
+		this.prop = prop;
+		this.subject = subject;
+		this.value = value;
 
 	}
 
@@ -66,6 +79,22 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	@Override
 	public String toString() {
 		return prop.getName();
+	}
+
+	public IRI getSubject() {
+		return subject;
+	}
+
+	public void setSubject(IRI subject) {
+		this.subject = subject;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 }

@@ -32,12 +32,20 @@ package it.unibz.krdb.obda.ontology;
  *
  */
 
+import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.model.Constant;
+import org.semanticweb.owlapi.model.IRI;
+
 
 public interface AnnotationAssertion extends Assertion {
 
 	public AnnotationProperty getProperty();
 	
-//	public ObjectConstant getSubject();
+	public IRI getSubject();
+
+	public void setSubject(IRI subject);
 	
-//	public Constant getValue();
+	public String getValue();
+
+	public void setValue(String value);
 }
