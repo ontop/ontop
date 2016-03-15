@@ -109,21 +109,21 @@ public class AboxMaterializationAction extends ProtegeAction {
 		//should be enabled only when radio button export is selected
 		comboFormats.setEnabled(false);
 
-		//check box for including axioms of the current ontology in a new ontology
-		final JCheckBox cbCreateOntology = new JCheckBox("Include axioms of the current ontology", null, true);
+		//check box to save the materialized ontology in multiple files and avoid outofmemory error
+		final JCheckBox cbSeparateFiles = new JCheckBox("Use separate files", null, true);
 		//should be enabled only when radio button export is selected
-		cbCreateOntology.setEnabled(false);
+		cbSeparateFiles.setEnabled(false);
 
 		//add a listener for the radio button, allows to enable combo box and check box when the radio button is selected
 
 		radioExport.addItemListener(e -> {
 
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                cbCreateOntology.setEnabled(true);
+                cbSeparateFiles.setEnabled(true);
                 comboFormats.setEnabled(true);
 
             } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                cbCreateOntology.setEnabled(false);
+                cbSeparateFiles.setEnabled(false);
                 comboFormats.setEnabled(false);
             }
         });
@@ -135,7 +135,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		radioExportPanel.add(radioExport, BorderLayout.NORTH);
 		radioExportPanel.add(lFormat, BorderLayout.CENTER);
 		radioExportPanel.add(comboFormats, BorderLayout.EAST);
-		radioExportPanel.add(cbCreateOntology, BorderLayout.SOUTH);
+		radioExportPanel.add(cbSeparateFiles, BorderLayout.SOUTH);
 
 		panel.add(radioAddPanel, BorderLayout.CENTER);
 		panel.add(radioExportPanel, BorderLayout.SOUTH);
@@ -155,9 +155,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 				//write to file and create an ontology if requested
 				String outputFormat = (String)comboFormats.getSelectedItem();
 
-				if (cbCreateOntology.isSelected()) {
-					//create new ontology and add the materialized values
-					materializeNewOntoToFile();
+				if (cbSeparateFiles.isSelected()) {
+					//save materialized values in multiple files
+					materializeMultipleFiles();
 
 				} else {
 					//save materialized values in a new file
@@ -170,7 +170,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 	}
 
-	private void materializeNewOntoToFile() {
+	private void materializeMultipleFiles() {
 		try {
             String fileName = "";
             final JFileChooser fc = new JFileChooser();
@@ -182,10 +182,10 @@ public class AboxMaterializationAction extends ProtegeAction {
             {
                 //clone the ontology
                 OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
-                OWLOntology newOnto = cloneOnto(newMan);
-                materializeOnto(newOnto, newMan);
-                OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
-                newMan.saveOntology(newOnto, format, new FileOutputStream(file));
+//                OWLOntology newOnto = cloneOnto(newMan);
+//                materializeOnto(newOnto, newMan);
+//                OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
+//                newMan.saveOntology(newOnto, format, new FileOutputStream(file));
             }
         } catch (Exception e) {
 
