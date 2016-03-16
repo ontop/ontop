@@ -20,20 +20,7 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import org.junit.Before;
-
 public class TeradataMetadataInfoTest extends AbstractDbMetadataInfoTest {
-
-    @Before
-    @Override
-    public void setUp(){
-        try {
-            Class.forName("com.teradata.jdbc.TeraDriver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        super.setUp();
-    }
 
 	@Override
 	protected String getConnectionPassword() {
