@@ -117,6 +117,18 @@
             <artifactId>monetdb-jdbc</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.teradata</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>15.10.00.14</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.teradata</groupId>
+            <artifactId>tdgss</artifactId>
+            <version>14.10.00.01</version>
+        </dependency>
+
 	</dependencies>
 
     <repositories>
