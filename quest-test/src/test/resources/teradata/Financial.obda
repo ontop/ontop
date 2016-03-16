@@ -2,7 +2,7 @@
 :		http://www.semanticweb.org/xiao/ontologies/2016/2/untitled-ontology-123#
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
-xml:		http://www.w3.org/XML/1998/namespace
+xml:		http://www.w3.org/XML/1998/namespace#
 xsd:		http://www.w3.org/2001/XMLSchema#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
@@ -11,11 +11,11 @@ sourceUri	tera
 connectionUrl	jdbc:teradata://192.168.32.181/DATABASE=financial
 username	dbc
 password	dbc
-driverClass	com.teradata.jdbc.TeraDriver 
+driverClass	com.teradata.jdbc.TeraDriver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-5cbd3531de9a411395c9ad4b7fe8580b
-target		:{cust_id} a :Customer . 
-source		select "cust_id" from "financial"."customer"
+target		:{cust_id} a :Customer ; :age {age}^^xsd:int . 
+source		select "cust_id", "age" from "financial"."customer"
 ]]
 
