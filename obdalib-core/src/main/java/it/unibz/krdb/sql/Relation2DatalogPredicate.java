@@ -35,7 +35,7 @@ public class Relation2DatalogPredicate {
 	
 	/**
 	 * 
-	 * @param s a predicate-name rendering of a possibly qualified table name
+	 * @param predicate a predicate-name rendering of a possibly qualified table name
 	 * @return
 	 */
 	
@@ -47,7 +47,10 @@ public class Relation2DatalogPredicate {
 		String[] names = s.split("\\.");
 		if (names.length == 1)
 			return RelationID.createRelationIdFromDatabaseRecord(idfac, null, s);
-		else
-			return RelationID.createRelationIdFromDatabaseRecord(idfac, names[0], names[1]);			
+		else {
+
+			int position = s.indexOf('.');
+			return RelationID.createRelationIdFromDatabaseRecord(idfac, s.substring(0,position), s.substring(position+1, s.length()));
+		}
 	}	
 }
