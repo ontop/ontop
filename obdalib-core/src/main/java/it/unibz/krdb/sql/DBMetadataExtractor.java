@@ -21,22 +21,12 @@ package it.unibz.krdb.sql;
 */
 
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Retrieves the database metadata (table schema and database constraints) 
@@ -138,7 +128,7 @@ public class DBMetadataExtractor {
 		
 		QuotedIDFactory idfac;
 		// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
-		if (md.supportsMixedCaseIdentifiers()) {
+		if (md.storesMixedCaseIdentifiers()) {
 			 //  MySQL
 			if (productName.contains("MySQL"))  {
 				//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
