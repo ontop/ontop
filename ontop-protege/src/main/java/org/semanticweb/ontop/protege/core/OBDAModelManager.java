@@ -104,6 +104,7 @@ public class OBDAModelManager implements Disposable {
 		mmgr = owlEditorKit.getModelManager().getOWLOntologyManager();
 		OWLModelManager owlmmgr = (OWLModelManager) editorKit.getModelManager();
 		owlmmgr.addListener(modelManagerListener);
+
 		obdaManagerListeners = new ArrayList<>();
 		obdamodels = new HashMap<>();
 
@@ -240,6 +241,7 @@ public class OBDAModelManager implements Disposable {
 				}
 
 				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
+
 					// Found the pattern of a renaming refactoring
 					RemoveAxiom remove = (RemoveAxiom) change;
 					AddAxiom add = (AddAxiom) changes.get(idx + 1);
@@ -271,8 +273,9 @@ public class OBDAModelManager implements Disposable {
 				// hence we will modify the OBDA model accordingly
 				Predicate removedPredicate = getPredicate(removedEntity);
 				Predicate newPredicate = getPredicate(newEntity);
+				String oldName = removedPredicate.getName();
 
-				obdamodel.renamePredicate(removedPredicate, newPredicate);
+				obdamodel.renamePredicate(removedPredicate, newPredicate, oldName.substring(0, oldName.indexOf("#")+1));
 			}
 
 			// Applying the deletions to the obda model
@@ -814,6 +817,7 @@ public class OBDAModelManager implements Disposable {
 		@Override
         public void mappingUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
 			triggerOntologyChanged();
+
 		}
 	}
 
@@ -851,4 +855,6 @@ public class OBDAModelManager implements Disposable {
 			triggerOntologyChanged();
 		}
 	}
+
+
 }
