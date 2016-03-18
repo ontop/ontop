@@ -22,7 +22,6 @@ import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 
 public class MultipleSchemasTestH2 {
@@ -54,7 +53,7 @@ public class MultipleSchemasTestH2 {
     @BeforeClass
     public static void setUp() throws Exception {
 
-        String url = "jdbc:h2:tcp://localhost/./helloworld";
+        String url = "jdbc:h2:mem:helloworld";
         String username = "sa";
         String password = "";
 
