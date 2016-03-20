@@ -62,7 +62,7 @@ public class TMappingRule {
 		List<Function> filters = new ArrayList<>(body.size());
 		
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+			if (atom.getFunctionSymbol() instanceof BuiltinPredicate && !atom.getFunctionSymbol().getName().equals("interval")) {
 				Function clone = (Function)atom.clone();
 				filters.add(clone);
 			}
@@ -216,6 +216,10 @@ public class TMappingRule {
 	
 	public List<List<Function>> getConditions() {
 		return filterAtoms;
+	}
+
+	public List<Function> getDatabaseAtoms() {
+		return databaseAtoms;
 	}
 	
 	@Override

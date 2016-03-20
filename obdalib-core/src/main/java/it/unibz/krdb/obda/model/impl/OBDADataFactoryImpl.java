@@ -227,6 +227,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public OBDAMappingAxiom getTemporalMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery, String tFrom, String tTo) {
+		return new TemporalMappingAxiomImpl(id, sourceQuery, targetQuery, tFrom, tTo);
+	}
+
+	@Override
 	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery) {
 		String id = IDGenerator.getNextUniqueID("MAPID-");
 		return getRDBMSMappingAxiom(id, sourceQuery, targetQuery);
@@ -333,6 +338,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //		}
 //		return getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
 //	}
+
+	@Override
+	public Function getFunctionInterval(Term term1, Term term2) {
+		return getFunction(ExpressionOperation.INTERVAL, term1, term2);
+	}
+
+	@Override
+	public Function getFunctionCoalesce(Term term0, Term term1, Term term2) {
+		return getFunction(ExpressionOperation.COALESCE, term0, term1, term2);
+	}
+
 
 	@Override
 	public Function getFunctionIsNull(Term term) {

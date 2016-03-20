@@ -578,7 +578,7 @@ public class Quest implements Serializable {
 			if (aboxMode.equals(QuestConstants.VIRTUAL)) 
 				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings);
 			else
-				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
+				unfolder.setupInSemanticIndexMode(inputOntology, mappings, reformulationReasoner);
 
 			if (dataRepository != null)
 				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
@@ -587,7 +587,7 @@ public class Quest implements Serializable {
 						engine.clearSQLCache();
 						try {
 							// 
-							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
+							unfolder.setupInSemanticIndexMode(inputOntology, dataRepository.getMappings(), reformulationReasoner);
 							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 						} 
 						catch (Exception e) {

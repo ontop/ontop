@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
@@ -280,6 +281,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public OBDAMappingAxiom getRDBMSMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
+	public OBDAMappingAxiom getTemporalMappingAxiom(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery, String tFrom, String tTo);
+
 	public OBDAMappingAxiom getRDBMSMappingAxiom(OBDASQLQuery sourceQuery, List<Function> targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
@@ -289,5 +292,11 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Function t1, Function t2);
 
 	public Function getSPARQLLeftJoin(Function t1, Function t2);
+
+	/*Temporal predicates*/
+
+	public Function getFunctionInterval(Term term1, Term term2);
+
+	public Function getFunctionCoalesce(Term term0, Term term1, Term term2);
 
 }

@@ -20,19 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BuiltinPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
+import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -406,8 +397,8 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
-		
+	public static List<CQIE> getTMappings(Ontology ontology, List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+
 		final boolean printouts = false;
 		
 		if (printouts)
@@ -480,7 +471,28 @@ public class TMappingProcessor {
 		 * Starting with the leafs.
 		 */
 
+		String tempOp;
+		int duration;
+		Boolean tempMap;
+
 		for (Equivalences<ClassExpression> classSet : reasoner.getClassDAG()) {
+
+			tempOp = null;
+			duration = -1;
+			tempMap = false;
+
+			for(BinaryAxiom subClassAxiom : ontology.getSubClassAxioms()){
+				if(subClassAxiom.getSub() instanceof TemporalExpression)
+				{
+					if (!((TemporalExpression)subClassAxiom.getSub()).getTempOp().contains("Since")){
+						if (((OClass) subClassAxiom.getSuper()).getPredicate().toString().equals(((OClass) classSet.getRepresentative()).getPredicate().toString())) {
+							tempOp = ((TemporalExpression) subClassAxiom.getSub()).getTempOp();
+							duration = ((TemporalExpression) subClassAxiom.getSub()).getDuration();
+							tempMap = true;
+						}
+					}
+				}
+			}
 
 			if (!(classSet.getRepresentative() instanceof OClass)) 
 				continue;
@@ -545,19 +557,29 @@ public class TMappingProcessor {
 					for (TMappingRule childmapping : childmappings) {
 						
 						List<Term> terms = childmapping.getHeadTerms();
-
 						Function newMappingHead;
 						if (isClass) {
 							newMappingHead = fac.getFunction(currentPredicate, terms);
-						} 
+						}
 						else {
-							if (!isInverse) 
+							if (!isInverse)
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(0));
-							else 
+							else
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
-						currentNodeMappings.mergeMappingsWithCQC(newmapping);
+
+						if (tempMap){
+							Function coalFunc = fac.getFunctionCoalesce(fac.getConstantLiteral(tempOp),
+									new ValueConstantImpl(Integer.toString(duration), Predicate.COL_TYPE.INTEGER),new ValueConstantImpl(Integer.toString(0), Predicate.COL_TYPE.INTEGER));
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);
+							newmapping.getDatabaseAtoms().add(coalFunc);
+							currentNodeMappings.mergeMappingsWithCQC(newmapping);
+							System.out.print("");
+
+						}else {
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);
+							currentNodeMappings.mergeMappingsWithCQC(newmapping);
+						}
 					}
 				}
 			}

@@ -15,7 +15,9 @@ driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	SKNTGreaterEqual72mph
-target		:SKNTGreaterEqual72mph/{station_id}/{dFrom}/{dTo} a :SKNTGreaterEqual72mph .
+target		:SKNTGreaterEqual72mph/{station_id}/{dTo} a :SKNTGreaterEqual72mph .
+from        dFrom
+to          dTo
 source		SELECT station_id, dFrom, dTo
 			FROM (SELECT station_id,
 			lag(date_time, 1) OVER () AS dFrom,

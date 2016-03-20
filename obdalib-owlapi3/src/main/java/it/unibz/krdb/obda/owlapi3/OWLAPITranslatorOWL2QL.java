@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlapi3;
 
 import com.google.common.collect.ImmutableMap;
+import com.sun.tools.javac.util.Convert;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.*;
 import org.semanticweb.owlapi.model.*;
@@ -1131,20 +1132,24 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	}
 
 	public void createTemporalAxioms() {
-		String ce = null;
-		String duration = null;
+		String ce;
+		int duration;
 		String tempOp;
 		for (AnnotationAssertion annotationAssertion : getOntology().getAnnotationAssertions()) {
+			duration = -1;
+			ce = null;
 			if (annotationAssertion.getProperty().getPredicate().getName().contains("tempOp")) {
 				String subj = annotationAssertion.getSubject().toString();
-				 tempOp = annotationAssertion.getValue().toString();
+				 tempOp = annotationAssertion.getValue().substring(1,annotationAssertion.getValue().length()-1);
 				for (AnnotationAssertion annotationAssertion2 : getOntology().getAnnotationAssertions()) {
 					String subj2 = annotationAssertion2.getSubject().toString();
 					if (subj.equals(subj2)) {
 						if (annotationAssertion2.getProperty().getName().contains("class")) {
-								ce = annotationAssertion2.getValue().toString();
+							ce = annotationAssertion2.getValue().toString();
 						} else if (annotationAssertion2.getProperty().getName().contains("duration")) {
-							 duration = annotationAssertion2.getValue().toString();
+							String str = annotationAssertion2.getValue();
+							str = str.substring(str.indexOf("\"")+1, str.lastIndexOf("\""));
+							duration = Integer.parseInt(str);
 						}
 					}
 

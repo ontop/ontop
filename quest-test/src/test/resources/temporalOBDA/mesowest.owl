@@ -154,7 +154,7 @@
     <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind_1h_Box">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Hurricane"/>
         <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HurricaneForceWind"/>
-        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1</duration>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#int">60</duration>
         <tempOp>Box</tempOp>
     </owl:Class>
     
@@ -177,7 +177,7 @@
     <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature_4h_Box">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#HardFreeze"/>
         <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#PlantsDangerTemperature"/>
-        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1</duration>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#int">240</duration>
         <tempOp>Box</tempOp>
     </owl:Class>
     
@@ -231,7 +231,7 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow_3h_Box">
         <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#Snow"/>
-        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">3</duration>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#int">240</duration>
         <tempOp>Box</tempOp>
     </owl:Class>
     
@@ -285,7 +285,7 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m_3h_Box">
         <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#VSBYLessEqual400m"/>
-        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1</duration>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#int">60</duration>
         <tempOp>Box</tempOp>
     </owl:Class>
     
@@ -313,7 +313,7 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h_3h_Box">
         <class rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/2/untitled-ontology-27#SKNTGreaterEqual56km/h"/>
-        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">3</duration>
+        <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#int">180</duration>
         <tempOp>Box</tempOp>
     </owl:Class>
     

@@ -23,8 +23,10 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TemporalMappingAxiomImpl;
 import it.unibz.krdb.obda.parser.SQLQueryDeepParser;
 import it.unibz.krdb.sql.Attribute;
 import it.unibz.krdb.sql.DBMetadata;
@@ -103,6 +105,21 @@ public class Mapping2DatalogConverter {
                     Function filterFunction =  converter.convert(conditions);
                     bodyAtoms.add(filterFunction);
                 }
+
+                if(mappingAxiom instanceof TemporalMappingAxiomImpl){
+                    RelationID relationId = null;
+                    QualifiedAttributeID f = new QualifiedAttributeID(relationId,
+                            idfac.createAttributeID(((TemporalMappingAxiomImpl) mappingAxiom).getTfrom()));
+                    QualifiedAttributeID t = new QualifiedAttributeID(relationId,
+                            idfac.createAttributeID(((TemporalMappingAxiomImpl) mappingAxiom).getTto()));
+
+                    Term tf = lookupTable.get(f);
+                    Term tt = lookupTable.get(t);
+                    Function intervalFunc = fac.getFunctionInterval(tf,tt);
+                    bodyAtoms.add(intervalFunc);
+                }
+
+                //Function intervalFunction = new FunctionalTermImpl()
 
                 // For each body atom in the target query,
                 //  (1) renameVariables its variables and

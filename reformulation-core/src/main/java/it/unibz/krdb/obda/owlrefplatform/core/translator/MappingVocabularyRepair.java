@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.TemporalMappingAxiomImpl;
 import it.unibz.krdb.obda.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,8 +126,11 @@ public class MappingVocabularyRepair {
                 newbody.add(newatom);
             } //end for
 
-            result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),
-                    dfac.getSQLQuery(mapping.getSourceQuery().toString()), newbody));
+            if(mapping instanceof TemporalMappingAxiomImpl){
+                result.add(dfac.getTemporalMappingAxiom(mapping.getId(), dfac.getSQLQuery(mapping.getSourceQuery().toString()), newbody, ((TemporalMappingAxiomImpl) mapping).getTfrom(), ((TemporalMappingAxiomImpl) mapping).getTto()));
+            }else {
+                result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), dfac.getSQLQuery(mapping.getSourceQuery().toString()), newbody));
+            }
         }
 //		log.debug("Repair done. Returning {} mappings", result.size());
         return result;

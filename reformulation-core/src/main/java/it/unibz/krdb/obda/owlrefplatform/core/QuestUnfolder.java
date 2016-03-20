@@ -62,7 +62,7 @@ public class QuestUnfolder {
 		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 	}
 
-	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings) 
+	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings)
 					throws SQLException, JSQLParserException, OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
@@ -92,7 +92,7 @@ public class QuestUnfolder {
 		normalizeMappings(unfoldingProgram);
 
 		// Apply TMappings
-		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, true, excludeFromTMappings);
+		unfoldingProgram = applyTMappings(inputOntology, unfoldingProgram, reformulationReasoner, true, excludeFromTMappings);
 		
        // Adding ontology assertions (ABox) as rules (facts, head with no body).
        addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
@@ -127,13 +127,13 @@ public class QuestUnfolder {
 	 * @throws OBDAException 
 	 */
 
-	public void setupInSemanticIndexMode(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
+	public void setupInSemanticIndexMode(Ontology ontology, Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
 	
 		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
 		
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
-		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, false, TMappingExclusionConfig.empty());
+		unfoldingProgram = applyTMappings(ontology, unfoldingProgram, reformulationReasoner, false, TMappingExclusionConfig.empty());
 		
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
@@ -151,11 +151,11 @@ public class QuestUnfolder {
 	}
 
 	
-	private List<CQIE> applyTMappings(List<CQIE>  unfoldingProgram, TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
+	private List<CQIE> applyTMappings(Ontology ontology, List<CQIE>  unfoldingProgram, TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
-		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full,  foreignKeyCQC, excludeFromTMappings);
+		unfoldingProgram = TMappingProcessor.getTMappings(ontology, unfoldingProgram, reformulationReasoner, full,  foreignKeyCQC, excludeFromTMappings);
 		
 		// Eliminating redundancy from the unfolding program
 		// TODO: move the foreign-key optimisation inside t-mapping generation 

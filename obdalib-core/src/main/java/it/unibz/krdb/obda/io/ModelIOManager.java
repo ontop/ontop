@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,7 @@ public class ModelIOManager {
 
     private enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
-        /* Mapping decl.: */mappingId, target, source
+        /* Mapping decl.: */mappingId, target, source, from, to
     }
 
     private static final String PREFIX_DECLARATION_TAG = "[PrefixDeclaration]";
@@ -340,6 +342,8 @@ public class ModelIOManager {
     }
 
     private void readMappingDeclaration(LineNumberReader reader, URI dataSourceUri) throws IOException {
+        String tTo = null;
+        String tFrom = null;
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
@@ -416,7 +420,12 @@ public class ModelIOManager {
 	                	sourceQuery.append(sourceString);
 	                }
                 }
-            } else {
+            } else if(currentLabel.equals(Label.from.name())){
+                tFrom = value;
+            }else if(currentLabel.equals(Label.to.name())){
+                tTo = value;
+            }
+            else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);
                 throw new IOException(msg);
             }
@@ -428,7 +437,11 @@ public class ModelIOManager {
         
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
-            saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);
+            if(tFrom != null && tTo != null){
+                saveTemporalMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery, tFrom, tTo);
+            }else {
+                saveMapping(dataSourceUri, mappingId, sourceQuery.toString(), targetQuery);
+            }
         }
     }
 
@@ -467,6 +480,16 @@ public class ModelIOManager {
         try {
             OBDAMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(mappingId, 
             		dataFactory.getSQLQuery(sourceQuery), targetQuery);
+            model.addMapping(dataSourceUri, mapping);
+        } catch (DuplicateMappingException e) {
+            // NO-OP: Ignore it as duplicates won't be loaded to the model
+        }
+    }
+
+    private void saveTemporalMapping(URI dataSourceUri, String mappingId, String sourceQuery, List<Function> targetQuery, String tFrom, String tTo) {
+        try {
+            OBDAMappingAxiom mapping = dataFactory.getTemporalMappingAxiom(mappingId,
+                    dataFactory.getSQLQuery(sourceQuery), targetQuery, tFrom, tTo);
             model.addMapping(dataSourceUri, mapping);
         } catch (DuplicateMappingException e) {
             // NO-OP: Ignore it as duplicates won't be loaded to the model

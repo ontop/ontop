@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.TemporalMappingAxiomImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.ImmutableOntologyVocabulary;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -139,7 +140,11 @@ public class VocabularyValidator {
 		for (OBDAMappingAxiom mapping : originalMappings) {			
 			List<Function> targetQuery = mapping.getTargetQuery();	
 			List<Function> newTargetQuery = replaceEquivalences(targetQuery);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
+			if(mapping instanceof TemporalMappingAxiomImpl){
+				result.add(dfac.getTemporalMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery, ((TemporalMappingAxiomImpl) mapping).getTfrom(), ((TemporalMappingAxiomImpl) mapping).getTto()));
+			}else {
+				result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
+			}
 		}
 		return result;
 	}
