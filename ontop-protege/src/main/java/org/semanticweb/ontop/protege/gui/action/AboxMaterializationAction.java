@@ -9,9 +9,9 @@ package org.semanticweb.ontop.protege.gui.action;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ package org.semanticweb.ontop.protege.gui.action;
  * #L%
  */
 
-import com.google.common.base.Optional;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -32,13 +31,15 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +49,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /***
  * Action to create individuals into the currently open OWL Ontology using the
  * existing mappings from the current data source
- * 
+ *
  * @author Mariano Rodriguez Muro
  */
 public class AboxMaterializationAction extends ProtegeAction {
@@ -64,17 +64,19 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 	private OWLEditorKit editorKit = null;
 	private OBDAModel obdaModel = null;
-	private OWLWorkspace workspace;	
+	private OWLWorkspace workspace;
 	private OWLModelManager modelManager;
-	
+	private String lineSeparator;
+
 	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
-	
+
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();
-		workspace = editorKit.getWorkspace();	
+		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
 		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		lineSeparator = System.getProperty("line.separator");
 	}
 
 	@Override
@@ -109,21 +111,17 @@ public class AboxMaterializationAction extends ProtegeAction {
 		//should be enabled only when radio button export is selected
 		comboFormats.setEnabled(false);
 
-		//check box to save the materialized ontology in multiple files and avoid outofmemory error
-		final JCheckBox cbSeparateFiles = new JCheckBox("Use separate files", null, true);
-		//should be enabled only when radio button export is selected
-		cbSeparateFiles.setEnabled(false);
+		//info: materialization is expensive
+		JLabel info = new JLabel("<html><br>The operation may take some time<br>and may require a lot of memory.<br>Use the command line version<br> when data volume is too high.<br></html> ");
 
 		//add a listener for the radio button, allows to enable combo box and check box when the radio button is selected
 
 		radioExport.addItemListener(e -> {
 
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                cbSeparateFiles.setEnabled(true);
                 comboFormats.setEnabled(true);
 
             } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                cbSeparateFiles.setEnabled(false);
                 comboFormats.setEnabled(false);
             }
         });
@@ -135,7 +133,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		radioExportPanel.add(radioExport, BorderLayout.NORTH);
 		radioExportPanel.add(lFormat, BorderLayout.CENTER);
 		radioExportPanel.add(comboFormats, BorderLayout.EAST);
-		radioExportPanel.add(cbSeparateFiles, BorderLayout.SOUTH);
+		radioExportPanel.add(info, BorderLayout.SOUTH);
 
 		panel.add(radioAddPanel, BorderLayout.CENTER);
 		panel.add(radioExportPanel, BorderLayout.SOUTH);
@@ -149,66 +147,18 @@ public class AboxMaterializationAction extends ProtegeAction {
 			if (radioAdd.isSelected()) {
 				//add to current ontology
 				materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());
-			}
 
-			else if (radioExport.isSelected()) {
-				//write to file and create an ontology if requested
-				String outputFormat = (String)comboFormats.getSelectedItem();
+			} else if (radioExport.isSelected()) {
+				//choose file format
+				String outputFormat = (String) comboFormats.getSelectedItem();
 
-				if (cbSeparateFiles.isSelected()) {
-					//save materialized values in multiple files
-					materializeMultipleFiles();
+				//save materialized values in a new file
+				materializeToFile(outputFormat);
 
-				} else {
-					//save materialized values in a new file
-					materializeToFile(outputFormat);
-
-				}
 
 			}
 		}
 
-	}
-
-	private void materializeMultipleFiles() {
-		try {
-            String fileName = "";
-            final JFileChooser fc = new JFileChooser();
-            fc.setSelectedFile(new File(fileName));
-            fc.showSaveDialog(workspace);
-
-            File file = fc.getSelectedFile();
-            if (file != null)
-            {
-                //clone the ontology
-                OWLOntologyManager newMan = OWLManager.createOWLOntologyManager();
-//                OWLOntology newOnto = cloneOnto(newMan);
-//                materializeOnto(newOnto, newMan);
-//                OWLDocumentFormat format = modelManager.getOWLOntologyManager().getOntologyFormat(modelManager.getActiveOntology());
-//                newMan.saveOntology(newOnto, format, new FileOutputStream(file));
-            }
-        } catch (Exception e) {
-
-            log.error(e.getMessage(), e);
-            JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
-        }
-	}
-
-	private OWLOntology cloneOnto(OWLOntologyManager newMan) throws OWLOntologyCreationException {
-
-		//clone current ontology
-		OWLOntology currentOnto = modelManager.getActiveOntology();
-		OWLOntologyID ontologyID = currentOnto.getOntologyID();
-		Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		Optional<IRI> versionIRI = ontologyID.getVersionIRI();
-		OWLOntologyID newOntologyID = new OWLOntologyID(Optional.of(IRI.create(ontologyIRI.toString())),Optional.of(IRI.create(versionIRI.toString())));
-		OWLOntology newOnto = newMan.createOntology(newOntologyID);
-		Set<OWLAxiom> axioms = currentOnto.getAxioms();
-		for(OWLAxiom axiom: axioms)
-			newMan.addAxiom(newOnto, axiom);
-
-
-		return newOnto;
 	}
 
 	private void materializeToFile(String format) {
@@ -272,9 +222,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 				time = endTime - startTime;
 
 				JOptionPane.showMessageDialog(this.workspace,
-						"Task is completed\nNr. of triples: " + count
-								+ "\nVocabulary size: " + vocab
-								+ "\nElapsed time: " + time + " ms.", "Done",
+						"Task is completed"+lineSeparator+"Nr. of triples: " + count
+								+ lineSeparator+"Vocabulary size: " + vocab
+								+ lineSeparator+"Elapsed time: " + time + " ms.", "Done",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 
@@ -286,21 +236,24 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 	}
 
-	
-	private void materializeOnto(OWLOntology onto, OWLOntologyManager ontoManager)
+
+	private void materializeOnto(OWLOntology ontology, OWLOntologyManager ontoManager)
 	{
-		String message = "The plugin will generate several triples and save them in this current ontology.\n" +
-				"The operation may take some time and may require a lot of memory if the data volume is too high.\n\n" +
+
+		String message = "The plugin will generate several triples and save them in this current ontology."+lineSeparator +
+				"The operation may take some time and may require a lot of memory if the data volume is too high."+lineSeparator + lineSeparator +
 				"Do you want to continue?";
-		
+
 		int response = JOptionPane.showConfirmDialog(workspace, message, "Confirmation", JOptionPane.YES_NO_OPTION);
-		
+
 		if (response == JOptionPane.YES_OPTION) {
 			try {
+				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
 
-				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
+
+				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
-				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
+				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, individuals, container);
 
 				Thread th = new Thread("MaterializeDataInstances") {
 					public void run() {
@@ -330,5 +283,5 @@ public class AboxMaterializationAction extends ProtegeAction {
 		}
 	}
 
-	
+
 }
