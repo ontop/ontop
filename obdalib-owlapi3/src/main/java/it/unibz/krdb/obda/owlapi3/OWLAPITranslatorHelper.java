@@ -36,7 +36,7 @@ public class OWLAPITranslatorHelper {
 		return ofac.createClassAssertion(concept, c);
 	}
 	
-	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws InconsistentOntologyException {
+	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
 		URIConstant c1 = getIndividual(ax.getSubject());
 		URIConstant c2 = getIndividual(ax.getObject());
 
@@ -125,9 +125,9 @@ public class OWLAPITranslatorHelper {
 
 
 
-	public static URIConstant getIndividual(OWLIndividual ind) {
+	public static URIConstant getIndividual(OWLIndividual ind) throws TranslationException {
 		if (ind.isAnonymous()) 
-			throw new RuntimeException("Found anonymous individual, this feature is not supported:" + ind);
+			throw new TranslationException("Found anonymous individual, this feature is not supported:" + ind);
 
 		 return dfac.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
 	}
