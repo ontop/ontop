@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -61,7 +62,7 @@ public class R2rmlCheckerTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+	private OWLOntology owlOntology;
 	private Ontology onto;
 
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
@@ -81,10 +82,10 @@ public class R2rmlCheckerTest {
 		// Loading the OWL file
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
+		owlOntology = manager
 				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		onto = OWLAPITranslatorUtility.translate(ontology);
+		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -196,17 +197,23 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
-
+		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
 				ontology, conn);
-		emptyConceptsObda = empties.getEmptyConcepts();
+		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
+		while (iteratorC.hasNext()){
+			emptyConceptsObda.add(iteratorC.next());
+		}
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
-		emptyRolesObda = empties.getEmptyRoles();
+		Iterator<Predicate> iteratorR = empties.iEmptyRoles();
+		while (iteratorR.hasNext()){
+			emptyRolesObda.add(iteratorR.next());
+		}
 		log.info("Empty role/s: " + emptyRolesObda);
-		assertEquals(46, emptyRolesObda.size());
+		assertEquals(47, emptyRolesObda.size());
 
 	}
 
@@ -220,17 +227,23 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
-
+		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
 				ontology, conn);
-		emptyConceptsR2rml = empties.getEmptyConcepts();
+		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
+		while (iteratorC.hasNext()){
+			emptyConceptsR2rml.add(iteratorC.next());
+		}
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
-		emptyRolesR2rml = empties.getEmptyRoles();
+		Iterator<Predicate> iteratorR = empties.iEmptyRoles();
+		while (iteratorR.hasNext()){
+			emptyRolesR2rml.add(iteratorR.next());
+		}
 		log.info("Empty role/s: " + emptyRolesR2rml);
-		assertEquals(46, emptyRolesR2rml.size());
+		assertEquals(47, emptyRolesR2rml.size());
 	}
 
 	/**
@@ -354,7 +367,7 @@ public class R2rmlCheckerTest {
 		obdaModel = reader.readModel(dataSource);
 
 		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasonerR2rml = factory.createReasoner(ontology, config);
+        reasonerR2rml = factory.createReasoner(owlOntology, config);
 
 	}
 
@@ -377,7 +390,7 @@ public class R2rmlCheckerTest {
 		QuestOWLFactory factory = new QuestOWLFactory();
 		
 		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-		reasonerOBDA = factory.createReasoner(ontology, config);
+		reasonerOBDA = factory.createReasoner(owlOntology, config);
 		
 
 	}

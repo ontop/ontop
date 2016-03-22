@@ -22,23 +22,17 @@ package org.semanticweb.ontop.protege.gui.action;
 
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
-import org.semanticweb.ontop.protege.panels.EmptiesCheckPanel;
-import org.semanticweb.ontop.protege.utils.DialogUtils;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.ontop.protege.panels.EmptiesCheckPanel;
+import org.semanticweb.ontop.protege.utils.DialogUtils;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class EmptiesCheckAction extends ProtegeAction {
 
@@ -63,12 +57,12 @@ public class EmptiesCheckAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
+
 		OWLReasoner reasoner = owlManager.getOWLReasonerManager().getCurrentReasoner();
-		
+
 
 		if (reasoner instanceof QuestOWL) {
-			try {			
+			try {
 				check = ((QuestOWL) reasoner).getEmptyEntitiesChecker();
 
 				JDialog dialog = new JDialog();
@@ -77,7 +71,25 @@ public class EmptiesCheckAction extends ProtegeAction {
 				dialog.setLocationRelativeTo(null);
 				dialog.setTitle("Empties Check");
 
-				EmptiesCheckPanel emptiesPanel = new EmptiesCheckPanel(check);
+				EmptiesCheckPanel emptiesPanel = new EmptiesCheckPanel();
+				Thread th = new Thread("EmptyEntitiesCheck") {
+					public void run() {
+
+						OBDAProgressMonitor monitor = new OBDAProgressMonitor("Finding empty entities...");
+						monitor.addProgressListener(emptiesPanel);
+						monitor.start();
+						emptiesPanel.initContent(check);
+						monitor.stop();
+
+
+						if(!emptiesPanel.isCancelled() && !emptiesPanel.isErrorShown()) {
+							dialog.setVisible(true);
+						}
+
+					}
+				};
+				th.start();
+
 				JPanel pnlCommandButton = createButtonPanel(dialog);
 				dialog.setLayout(new BorderLayout());
 				dialog.add(emptiesPanel, BorderLayout.CENTER);
@@ -85,13 +97,13 @@ public class EmptiesCheckAction extends ProtegeAction {
 				DialogUtils.installEscapeCloseOperation(dialog);
 
 				dialog.pack();
-				dialog.setVisible(true);
+
 
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "An error occured. For more info, see the logs.");
+				JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
 			}
-		}
-		else {
+
+		} else {
 			JOptionPane.showMessageDialog(null, "You have to start ontop reasoner for this feature.");
 		}
 
@@ -103,13 +115,11 @@ public class EmptiesCheckAction extends ProtegeAction {
 
 		JButton cmdCloseInformation = new JButton();
 		cmdCloseInformation.setText("Close Information");
-		cmdCloseInformation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				parent.setVisible(false);
-				parent.removeAll();
-				parent.dispose();
-			}
-		});
+		cmdCloseInformation.addActionListener(evt -> {
+            parent.setVisible(false);
+            parent.removeAll();
+            parent.dispose();
+        });
 		panel.add(cmdCloseInformation);
 
 		return panel;

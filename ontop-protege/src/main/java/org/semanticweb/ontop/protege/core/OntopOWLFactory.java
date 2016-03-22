@@ -2,6 +2,7 @@ package org.semanticweb.ontop.protege.core;
 
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.protege.utils.NarrowOptionPane;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
@@ -21,7 +22,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	
 	private void handleError(Exception e){
 		String message = "Error during reasoner initialization: " + e;
-		JOptionPane.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
+		NarrowOptionPane.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
 	}
 			
 	@Nonnull

@@ -1,12 +1,12 @@
 package it.unibz.krdb.sql;
 
-import java.util.List;
-
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+
+import java.util.List;
 
 public class Relation2DatalogPredicate {
 
@@ -27,7 +27,7 @@ public class Relation2DatalogPredicate {
 	
 	public static Function getAtom(RelationDefinition r, List<Term> terms) {
 		if (r.getAttributes().size() != terms.size())
-			throw new IllegalArgumentException("The number of terms does not match the ariry of relation");
+			throw new IllegalArgumentException("The number of terms does not match the arity of relation");
 		
 		Predicate pred = createPredicateFromRelation(r);
 		return fac.getFunction(pred, terms);

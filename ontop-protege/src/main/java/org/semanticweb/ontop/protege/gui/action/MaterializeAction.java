@@ -66,27 +66,33 @@ public class MaterializeAction implements OBDAProgressListener {
 			}
 			catch (Exception e) {
 				log.error(e.getMessage(), e);
-				JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+				JOptionPane.showMessageDialog(null, "ERROR: could not materialize Abox.");
 				this.errorShown = true;
 				return;
 			}
 		}
-		
-		thread = new Thread() {
+
+		thread = new Thread("AddAxiomToOntology") {
 			public void run() {
 				try {
-					while(iterator.hasNext()) {
+					while (iterator.hasNext()) {
 						ontologyManager.addAxiom(currentOntology, iterator.next());
 					}
-					
+
 					latch.countDown();
-					if(!bCancel){
+					if (!bCancel) {
 						JOptionPane.showMessageDialog(cont, "Task is completed", "Done", JOptionPane.INFORMATION_MESSAGE);
 					}
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					latch.countDown();
 					log.error("Materialization of Abox failed", e);
+
+				} catch (Error e) {
+
+					latch.countDown();
+					log.error("Materialization of Abox failed", e);
+					JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+
 				}
 			}
 		};
