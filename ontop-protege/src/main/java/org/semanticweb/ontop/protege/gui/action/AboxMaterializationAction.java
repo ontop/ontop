@@ -30,6 +30,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
+import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
@@ -60,6 +61,12 @@ import java.util.concurrent.CountDownLatch;
 public class AboxMaterializationAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
+
+	private static final String RDF_XML = "RDF/XML";
+	private static final String OWL_XML = "OWL/XML";
+	private static final String TURTLE = "Turtle";
+	private static final String N3 = "N3";
+
 	private static final boolean DO_STREAM_RESULTS = true;
 
 	private OWLEditorKit editorKit = null;
@@ -98,7 +105,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		//panel for exporting triples to file
 		JPanel radioExportPanel = new JPanel(new BorderLayout());
-		JRadioButton radioExport = new JRadioButton("Export triples to an external file");
+		JRadioButton radioExport = new JRadioButton("Dump triples to an external file (including current ontology)");
 
 		ButtonGroup group = new ButtonGroup();
 		group.add(radioAdd);
@@ -106,13 +113,15 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		//combo box for output format,
 		JLabel lFormat = new JLabel("Output format:\t");
-		String[] fileOptions = {"rdfxml", "owlxml", "turtle", "n3"};
+		String[] fileOptions = {RDF_XML, OWL_XML, TURTLE, N3};
 		final JComboBox comboFormats = new JComboBox(fileOptions);
 		//should be enabled only when radio button export is selected
 		comboFormats.setEnabled(false);
 
 		//info: materialization is expensive
-		JLabel info = new JLabel("<html><br>The operation may take some time<br>and may require a lot of memory.<br>Use the command line version<br> when data volume is too high.<br></html> ");
+
+		JLabel info = new JLabel("<html><br><b>The operation may take some time and may require a lot of memory.<br>Use the command line version when data volume is too high.</b><br></html> ");
+		info.setIcon(IconLoader.getImageIcon("images/alert.png"));
 
 		//add a listener for the radio button, allows to enable combo box and check box when the radio button is selected
 
@@ -182,22 +191,21 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 
 				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
-				obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
 
 				final long startTime = System.currentTimeMillis();
 				OWLDocumentFormat ontoFormat;
 
 				switch (format) {
-					case "rdfxml":
+					case RDF_XML:
 						ontoFormat = new RDFXMLDocumentFormat();
 						break;
-					case "owlxml":
+					case OWL_XML:
 						ontoFormat = new OWLXMLDocumentFormat();
 						break;
-					case "turtle":
+					case TURTLE:
 						ontoFormat = new TurtleDocumentFormat();
 						break;
-					case "n3":
+					case N3:
 						ontoFormat = new N3DocumentFormat();
 						break;
 					default:
@@ -249,7 +257,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 		if (response == JOptionPane.YES_OPTION) {
 			try {
 				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
-
 
 				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
