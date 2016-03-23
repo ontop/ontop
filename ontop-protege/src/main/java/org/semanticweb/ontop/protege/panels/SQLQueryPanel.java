@@ -25,9 +25,9 @@ import it.unibz.krdb.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
-import org.semanticweb.ontop.protege.utils.NarrowOptionPane;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
+import org.semanticweb.ontop.protege.utils.OptionPaneUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,7 +181,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 				}
 			}
 		} catch (Exception e) {
-			NarrowOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			log.error("Error while executing query.", e);
 		}
 	}
@@ -268,7 +268,9 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 					} catch (Exception e) {
 						latch.countDown();
 						errorShown = true;
-						NarrowOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+						OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
 						log.error("Error while executing query.", e);
 					}
 				}

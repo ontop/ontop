@@ -23,7 +23,7 @@ package org.semanticweb.ontop.protege.panels;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import org.semanticweb.ontop.protege.gui.IconLoader;
-import org.semanticweb.ontop.protege.utils.NarrowOptionPane;
+import org.semanticweb.ontop.protege.utils.OptionPaneUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -233,7 +233,9 @@ public class SaveQueryPanel extends JPanel {
 				queryController.createGroup(group);
 				queryController.addQuery(query, id, group);
 			} catch (Exception e) {
-                NarrowOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+                OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
 				return;
 			}
 		} else { // a group selected
