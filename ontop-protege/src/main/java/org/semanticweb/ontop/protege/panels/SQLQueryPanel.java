@@ -181,7 +181,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 				}
 			}
 		} catch (Exception e) {
-			OptionPaneUtils.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			log.error("Error while executing query.", e);
 		}
 	}
@@ -269,7 +269,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 						latch.countDown();
 						errorShown = true;
 
-						OptionPaneUtils.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+						OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 
 						log.error("Error while executing query.", e);
 					}

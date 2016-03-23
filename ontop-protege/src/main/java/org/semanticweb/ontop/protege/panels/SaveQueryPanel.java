@@ -234,7 +234,7 @@ public class SaveQueryPanel extends JPanel {
 				queryController.addQuery(query, id, group);
 			} catch (Exception e) {
 
-                OptionPaneUtils.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 
 				return;
 			}

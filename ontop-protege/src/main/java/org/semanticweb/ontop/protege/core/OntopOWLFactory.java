@@ -22,7 +22,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	
 	private void handleError(Exception e){
 		String message = "Error during reasoner initialization: " + e;
-		OptionPaneUtils.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
+		OptionPaneUtils.showPrettyMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
 
 	}
 			

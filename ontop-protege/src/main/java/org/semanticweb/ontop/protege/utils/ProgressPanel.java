@@ -97,7 +97,7 @@ public class ProgressPanel extends javax.swing.JPanel {
 			monitor.cancel();
 		} 
 		catch (Exception e) {
-            OptionPaneUtils.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}//GEN-LAST:event_cmdCancelOperationActionPerformed
 

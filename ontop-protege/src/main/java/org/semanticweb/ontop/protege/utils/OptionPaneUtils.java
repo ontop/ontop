@@ -39,7 +39,7 @@ public final class OptionPaneUtils {
         return new PrettyOptionPane();
     }
 
-    public static void showMessageDialog(Component parent, Object message, String title, int type) {
+    public static void showPrettyMessageDialog(Component parent, Object message, String title, int type) {
 
         class PrettyOptionPane extends JOptionPane {
 
