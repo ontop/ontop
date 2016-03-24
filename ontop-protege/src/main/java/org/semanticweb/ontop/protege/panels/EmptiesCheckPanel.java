@@ -22,70 +22,90 @@ package org.semanticweb.ontop.protege.panels;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.Iterator;
 
-public class EmptiesCheckPanel extends javax.swing.JPanel {
+public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgressListener {
 
 	private static final long serialVersionUID = 2317777246039649415L;
 
-	public EmptiesCheckPanel(QuestOWLEmptyEntitiesChecker check) {
+	Logger log = LoggerFactory.getLogger(EmptiesCheckPanel.class);
+
+	private boolean bCancel = false;
+	private boolean errorShown = false;
+
+	public EmptiesCheckPanel() {
 		initComponents();
-		initContent(check);
+
 	}
 
-	private void initContent(QuestOWLEmptyEntitiesChecker check) {
+	public void initContent(QuestOWLEmptyEntitiesChecker check) {
 
-		/* Fill the label summary value */
-		String message;
 		try {
-			message = check.toString();
-		} catch (Exception e) {
-			message = String.format("%s. Please try again!", e.getMessage());
-		}
-		lblSummaryValue.setText(message);
-
 		/* Create table list for empty concepts */
-		List<Predicate> emptyC = check.getEmptyConcepts();
 
-		final int rowConcepts = emptyC.size();
-		final int col = 1;
-		final String[] columnConcept = { "Concepts" };
+			Iterator<Predicate> emptyC = check.iEmptyConcepts();
 
-		Object[][] rowDataConcept = new Object[rowConcepts][col];
 
-		int index = 0;
+			final int rowConcepts = check.getEConceptsSize();
+			final int col = 1;
+			final String[] columnConcept = {"Concepts"};
 
-		for (Predicate concept : emptyC) {
+			Object[][] rowDataConcept = new Object[rowConcepts][col];
 
-			rowDataConcept[index][0] = concept.getName();
-			index++;
-		}
-		JTable tblConceptCount = createTable(rowDataConcept, columnConcept);
-		jScrollConcepts.setViewportView(tblConceptCount);
+			JTable tblConceptCount = createTable(rowDataConcept, columnConcept);
+
+			jScrollConcepts.setViewportView(tblConceptCount);
+
+			DefaultTableModel modelConcept = (DefaultTableModel) tblConceptCount.getModel();
+
+			while (emptyC.hasNext() && !bCancel) {
+				modelConcept.addRow(new Object[]{emptyC.next().getName()});
+			}
 
 		/* Create table list for empty roles */
-		List<Predicate> emptyR = check.getEmptyRoles();
+			Iterator<Predicate> emptyR = check.iEmptyRoles();
 
-		final int rowRoles = emptyR.size();
+			final int rowRoles = check.getERolesSize();
 
-		final String[] columnsRole = { "Roles" };
+			final String[] columnRole = {"Roles"};
 
-		Object[][] rowDataRole = new Object[rowRoles][col];
+			Object[][] rowDataRole = new Object[rowRoles][col];
 
-		index = 0;
+			JTable tblRoleCount = createTable(rowDataRole, columnRole);
 
-		for (Predicate role : emptyR) {
+			jScrollRoles.setViewportView(tblRoleCount);
 
-			rowDataRole[index][0] = role.getName();
-			index++;
+			DefaultTableModel modelRole = (DefaultTableModel) tblRoleCount.getModel();
+
+			while (emptyR.hasNext() && !bCancel) {
+				modelRole.addRow(new Object[]{emptyR.next().getName()});
+			}
+
+
+		/* Fill the label summary value */
+			String message;
+			try {
+				message = check.toString();
+			} catch (Exception e) {
+				message = String.format("%s. Please try again!", e.getMessage());
+			}
+			lblSummaryValue.setText(message);
+
 		}
-		JTable tblRoleCount = createTable(rowDataRole, columnsRole);
 
-		jScrollRoles.setViewportView(tblRoleCount);
+		catch (Exception e) {
+			errorShown = true;
+			log.error("If OutOfMemoryError try increasing java heap size. ");
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+		}
+
 	}
 
 	private JTable createTable(Object[][] rowData, String[] columnNames) {
@@ -156,5 +176,21 @@ public class EmptiesCheckPanel extends javax.swing.JPanel {
 	private javax.swing.JLabel lblSummaryValue;
 	private javax.swing.JPanel pnlEmptiesSummary;
 	private javax.swing.JPanel pnlSummary;
+
+	@Override
+	public void actionCanceled() {
+			bCancel = true;
+
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return this.bCancel;
+	}
+
+	@Override
+	public boolean isErrorShown() {
+		return this.errorShown;
+	}
 	// End of variables declaration//GEN-END:variables
 }

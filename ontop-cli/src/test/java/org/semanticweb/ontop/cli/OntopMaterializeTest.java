@@ -75,4 +75,14 @@ public class OntopMaterializeTest {
         Ontop.main(argv);
     }
 
+    @Test
+    public void testOntopMaterializeNoStreamResults (){
+        String[] argv = {"materialize", "-m", "/Users/Sarah/develop/ontop/quest-test/src/test/resources/example/exampleBooks.obda",
+                "-t", "/Users/Sarah/develop/ontop/quest-test/src/test/resources/example/exampleBooks.owl",
+                "-f", "turtle", "-o", "/tmp/books.ttl",
+                "--no-streaming"
+        };
+        Ontop.main(argv);
+    }
+
 }

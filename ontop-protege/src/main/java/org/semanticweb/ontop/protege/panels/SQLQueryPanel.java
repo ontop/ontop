@@ -21,24 +21,23 @@ package org.semanticweb.ontop.protege.panels;
  */
 
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.protege.gui.IconLoader;
 import org.semanticweb.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege.utils.DatasourceSelectorListener;
-import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 import org.semanticweb.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
+import org.semanticweb.ontop.protege.utils.OptionPaneUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import javax.swing.table.TableModel;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-import javax.swing.table.TableModel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -182,7 +181,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 				}
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			log.error("Error while executing query.", e);
 		}
 	}
@@ -269,7 +268,9 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 					} catch (Exception e) {
 						latch.countDown();
 						errorShown = true;
-						JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+						OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
 						log.error("Error while executing query.", e);
 					}
 				}

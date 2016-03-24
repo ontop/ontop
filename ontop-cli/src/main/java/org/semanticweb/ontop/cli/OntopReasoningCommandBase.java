@@ -3,8 +3,6 @@ package org.semanticweb.ontop.cli;
 
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.github.rvesse.airline.annotations.help.BashCompletion;
-import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Preconditions;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
@@ -14,7 +12,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
-
+import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
@@ -54,6 +52,9 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 			case "turtle":
 				ontoFormat = new TurtleDocumentFormat();
 				break;
+            case "n3":
+                ontoFormat = new N3DocumentFormat();
+                break;
 			default:
 				throw new Exception("Unknown format: " + format);
 			}

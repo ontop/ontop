@@ -50,9 +50,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             description = "The format of the materialized ontology. " +
-                    //" Options: rdfxml, owlxml, turtle. " +
+                    //" Options: rdfxml, owlxml, turtle, n3. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle"})
+    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle", "n3"})
     public String format;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -61,13 +61,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     public boolean separate = false;
 
 
-    /**
-     * Necessary for materialize large RDF graphs without
-     * storing all the SQL results of one big query in memory.
-     *
-     * TODO: add an option to disable it.
-     */
-    private static boolean DO_STREAM_RESULTS = true;
+
+    @Option(type = OptionType.COMMAND, name = {"--no-streaming"}, title = "do not execute streaming of results",
+            description = "All the SQL results of one big query will be stored in memory. Not recommended. Default: false.")
+    private boolean noStream = false;
+
+    private boolean doStreamResults = true;
 
 	public static void main(String... args) {
 
@@ -77,6 +76,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     @Override
     public void run(){
+
+        //   Streaming it's necessary to materialize large RDF graphs without
+        //   storing all the SQL results of one big query in memory.
+        if (noStream){
+            doStreamResults = false;
+        }
         if(separate) {
             runWithSeparateFiles();
         } else {
@@ -144,11 +149,11 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
-    private static void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel,
+    private void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel,
                                            Predicate predicate, String outputFile, String format) throws Exception {
         final long startTime = System.currentTimeMillis();
 
-        OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
+        OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, inputOntology, predicate, doStreamResults);
         QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
         System.err.println("Starts writing triples into files.");
@@ -177,7 +182,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      *
      */
-    private static int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator,
+    private int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator,
                                             String filePrefix, String predicateName, int fileCount, String format) throws Exception {
         String fileName = filePrefix + fileCount + ".owl";
 
@@ -239,10 +244,10 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
                 Ontology onto =  OWLAPITranslatorUtility.translate(ontology);
                 obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
-                materializer = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS);
+                materializer = new OWLAPIMaterializer(obdaModel, onto, doStreamResults);
             } else {
                 ontology = manager.createOntology();
-                materializer = new OWLAPIMaterializer(obdaModel, DO_STREAM_RESULTS);
+                materializer = new OWLAPIMaterializer(obdaModel, doStreamResults);
             }
 
 

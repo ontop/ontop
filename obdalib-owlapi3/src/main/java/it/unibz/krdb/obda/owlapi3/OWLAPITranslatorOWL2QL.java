@@ -422,7 +422,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			ObjectPropertyAssertion a = helper.translate(ax);
 			if (a != null)
 				dl_onto.addObjectPropertyAssertion(a);
-		} 
+		}
+		catch (TranslationException e) {
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
+		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
 			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
