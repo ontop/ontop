@@ -21,14 +21,12 @@ package org.semanticweb.ontop.protege.core;
  */
 
 import it.unibz.krdb.obda.io.AbstractPrefixManager;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
  * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any
@@ -74,7 +72,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 
 	@Override
 	public void addPrefix(String name, String uri) {
-		owlmapper.setPrefix(name, getProperPrefixURI(uri));
+		owlmapper.setPrefix(name, uri);
 	}
 
 	@Override
