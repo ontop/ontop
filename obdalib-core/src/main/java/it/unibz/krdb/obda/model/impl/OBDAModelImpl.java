@@ -421,7 +421,38 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public int renamePredicate(Predicate oldname, Predicate newName, String oldPrefix) {
+	public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
+
+		/*
+		Find the old and the new prefix
+		 */
+		String oldName = removedPredicate.getName();
+		String newName = newPredicate.getName();
+
+		String oldPrefix = "";
+		String newPrefix ="";
+
+
+		Map<String, String> currentMap = prefixManager.getPrefixMap();
+		int predicateNameLength = 0;
+
+		//Find the newPrefix in the prefixManager
+		for (String prefix : currentMap.values()) {
+
+			if(newName.startsWith(prefix)){
+				//get the length of the predicate name
+				int prefixlength = prefix.length();
+				predicateNameLength = newName.length()- prefixlength;
+				newPrefix = newName.substring(0, prefixlength);
+			}
+		}
+
+		//find old prefix removing the predicateName
+		if(predicateNameLength!=0) {
+			int prefixLength = oldName.length() - predicateNameLength;
+			oldPrefix = oldName.substring(0, prefixLength);
+		}
+
 		int modifiedCount = 0;
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
@@ -434,24 +465,24 @@ public class OBDAModelImpl implements OBDAModel {
 						/**
                          * Rename the uri of individuals in the mapping, substitute the oldPrefix with the default current one
 						 */
-						if(!oldPrefix.isEmpty()) {
+						if(!oldPrefix.isEmpty() && !newPrefix.isEmpty()) {
 							if (term instanceof Function) {
 								Function uri = ((Function) term);
 								if (uri.getFunctionSymbol() instanceof URITemplatePredicate) {
 									String uriName = ((ValueConstant) uri.getTerm(0)).getValue();
 									if (uriName.startsWith(oldPrefix)) {
-										uriName = uriName.replaceFirst(oldPrefix, prefixManager.getDefaultPrefix());
+										uriName = uriName.replaceFirst(oldPrefix, newPrefix);
 										uri.setTerm(0, dfac.getConstantLiteral(uriName));
 									}
 								}
 							}
 						}
 					}
-					if (!oldatom.getFunctionSymbol().equals(oldname)) {
+					if (!oldatom.getFunctionSymbol().equals(removedPredicate)) {
 						continue;
 					}
 					modifiedCount += 1;
-					Function newatom = dfac.getFunction(newName, oldatom.getTerms());
+					Function newatom = dfac.getFunction(newPredicate, oldatom.getTerms());
 					body.set(idx, newatom);
 				}
 				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);

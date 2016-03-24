@@ -172,7 +172,7 @@ public class OBDAModelManager implements Disposable {
 					URI newiri = null;
 					if(optionalNewIRI.isPresent()) {
 						newiri = optionalNewIRI.get().toURI();
-						prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, newiri.toString());
+						prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, getProperPrefixURI(newiri.toString()));
 					}
 					else {
 						newiri = URI.create(newOntologyID.toString());
@@ -273,9 +273,8 @@ public class OBDAModelManager implements Disposable {
 				// hence we will modify the OBDA model accordingly
 				Predicate removedPredicate = getPredicate(removedEntity);
 				Predicate newPredicate = getPredicate(newEntity);
-				String oldName = removedPredicate.getName();
 
-				obdamodel.renamePredicate(removedPredicate, newPredicate, oldName.substring(0, oldName.indexOf("#")+1));
+				obdamodel.renamePredicate(removedPredicate, newPredicate);
 			}
 
 			// Applying the deletions to the obda model
@@ -414,7 +413,7 @@ public class OBDAModelManager implements Disposable {
 
 		}
 
-		activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
+		activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, getProperPrefixURI(defaultPrefix));
 
 		obdamodels.put(modelUri, activeOBDAModel);
 	}
@@ -550,7 +549,7 @@ public class OBDAModelManager implements Disposable {
 
 			}
 
-			activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
+			activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, OBDAModelManager.getProperPrefixURI(defaultPrefix));
 
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
@@ -595,7 +594,7 @@ public class OBDAModelManager implements Disposable {
 					defaultPrefix = "";
 				}
 
-				activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
+				activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, OBDAModelManager.getProperPrefixURI(defaultPrefix));
 
                 if (obdaFile.exists()) {
                     try {
@@ -856,5 +855,15 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-
+	/**
+	 * A utility method to ensure a proper naming for prefix URI
+	 */
+	private static String getProperPrefixURI(String prefixUri) {
+		if (!prefixUri.endsWith("/")) {
+			if (!prefixUri.endsWith("#")) {
+				prefixUri += "#";
+			}
+		}
+		return prefixUri;
+	}
 }
