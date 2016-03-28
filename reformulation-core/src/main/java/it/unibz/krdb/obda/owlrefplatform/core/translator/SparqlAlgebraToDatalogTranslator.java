@@ -50,11 +50,9 @@ import java.util.*;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
- * same semantics. We use the built-in predicates Join and Left join. The rules
+ * same semantics. We use the built-in predicate LeftJoin. The rules
  * in the program have always 1 or 2 operator atoms, plus (in)equality atoms
  * (due to filters).
- * 
- * This programs needs to be flattened by another procedure later.
  * 
  * @author mariano
  */
@@ -100,7 +98,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			// order elements of the set in some way by converting it into the list
 			signature = new ArrayList<>(te.getBindingNames());
 		else
-			signature = Collections.emptyList(); // ASK queries have no asnwer variables
+			signature = Collections.emptyList(); // ASK queries have no answer variables
 
 		List<Term> answerVariables = new ArrayList<>(signature.size());
 		for (String variable : signature)
@@ -128,20 +126,20 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 	private Function translateTupleExpr(TupleExpr te, DatalogProgram pr, String newHeadName) {
 		if (te instanceof Slice) {
-			// Add LIMIT and OFFSET modifiers, if any
+			// add LIMIT and OFFSET modifiers
 			Slice slice = (Slice)te;
 			pr.getQueryModifiers().setOffset(slice.getOffset());
 			pr.getQueryModifiers().setLimit(slice.getLimit());
 			return translateTupleExpr(slice.getArg(), pr, newHeadName); // narrow down the query
 		} 
 		else if (te instanceof Distinct) {
-			// Add DISTINCT modifier, if any
+			// add DISTINCT modifier
 			Distinct distinct = (Distinct) te;
 			pr.getQueryModifiers().setDistinct();
 			return translateTupleExpr(distinct.getArg(), pr, newHeadName); // narrow down the query
 		} 
 		else if (te instanceof Order) {
-			// Add ORDER BY modifier, if any
+			// add ORDER BY modifier
 			Order order = (Order) te;
 			for (OrderElem c : order.getElements()) {	
 				ValueExpr expression = c.getExpr();
@@ -443,52 +441,46 @@ public class SparqlAlgebraToDatalogTranslator {
 	 */
 	private Function translate(StatementPattern triple) {
 		
-		Var pred = triple.getPredicateVar();		
-		Value p = pred.getValue();
-		
-		if (!(p instanceof URI || (p == null))) {
+		Term sTerm = getOntopTerm(triple.getSubjectVar());
+
+		Value p = triple.getPredicateVar().getValue();
+		if (p == null) {
+			Term oTerm = getOntopTerm(triple.getObjectVar());
+			return ofac.getTripleAtom(sTerm, ofac.getVariable(triple.getPredicateVar().getName()), oTerm);
+		}
+		else if (p instanceof URI) {
+			String predicateName = p.stringValue();
+			if (predicateName.equals(RDF.TYPE.stringValue())) {
+				Value o = triple.getObjectVar().getValue();
+				if (o == null) {
+					// object is a variable
+					Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+					return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(triple.getObjectVar().getName()));
+				}
+				else if (o instanceof URI) {
+					// object is a URI of either a type of a class
+					Predicate.COL_TYPE type = dtfac.getDatatype((URI)o);
+					Predicate predicate;
+					if (type != null)
+						predicate = dtfac.getTypePredicate(type);
+					else
+						predicate = ofac.getClassPredicate(o.stringValue());
+
+					return ofac.getFunction(predicate, sTerm);
+				}
+				else
+					throw new RuntimeException("Unsupported query syntax");
+			}
+			else {
+				// The predicate is NOT rdf:type: either an object or a datatype property
+				Term oTerm = getOntopTerm(triple.getObjectVar());
+				Predicate predicate = ofac.getPredicate(predicateName, new COL_TYPE[] { null, null });
+				return ofac.getFunction(predicate, sTerm, oTerm);
+			}
+		}
+		else {
 			// if predicate is a variable or literal
 			throw new RuntimeException("Unsupported query syntax");
-		}
-
-		Var obj = triple.getObjectVar();
-		
-		Var subj = triple.getSubjectVar();
-		Term sTerm = getOntopTerm(subj);
-		
-		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
-			Value o = obj.getValue();
-			if (o == null) {
-				// object is a variable
-				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-				return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
-			} 
-			else if (o instanceof URI) {
-				// object is a URI of either a type of a class
-				URI objectUri = (URI)o; 
-				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
-				Predicate predicate;
-				if (type != null) 
-					predicate = dtfac.getTypePredicate(type);
-	            else 
-					predicate = ofac.getClassPredicate(objectUri.stringValue());
-				
-				return ofac.getFunction(predicate, sTerm);
-			}
-			else  
-				throw new RuntimeException("Unsupported query syntax");
-		} 
-		else {			
-			// The predicate is NOT rdf:type
-			Term oTerm = getOntopTerm(obj); 
-			
-			if (p != null) {
-				// either an object or a datatype property
-				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { null, null });
-				return ofac.getFunction(predicate, sTerm, oTerm);
-			} 
-			else 
-				return ofac.getTripleAtom(sTerm, ofac.getVariable(pred.getName()), oTerm);
 		}
 	}
 	
@@ -499,49 +491,46 @@ public class SparqlAlgebraToDatalogTranslator {
 			result = ofac.getVariable(subj.getName());
 		} 
 		else if (s instanceof Literal) {
-			Literal object = (Literal) s;
-			URI type = object.getDatatype();
-			String value = object.getLabel();
+			Literal literal = (Literal) s;
+			URI typeURI = literal.getDatatype();
+			String value = literal.getLabel();
 	
-			// Validating that the value is correct (lexically) with respect to the
-			// specified datatype
-			if (type != null) {
-				boolean valid = XMLDatatypeUtil.isValidValue(value, type);
-				if (!valid)
-					throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
-			}
-			
-			COL_TYPE objectType; 			
-			if (type == null) 
-				objectType = COL_TYPE.LITERAL;
+			COL_TYPE type;
+			if (typeURI == null)
+				type = COL_TYPE.LITERAL;
 			else {
-				objectType = dtfac.getDatatype(type);
-		        if (objectType == null) 
-					throw new RuntimeException("Unsupported datatype: " + type.stringValue());
+				type = dtfac.getDatatype(typeURI);
+		        if (type == null)
+					throw new RuntimeException("Unsupported datatype: " + typeURI.stringValue());
+
+				// Validating that the value is correct (lexically) with respect to the
+				// specified datatype
+				if (!XMLDatatypeUtil.isValidValue(value, typeURI))
+					throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
+
+				// special case for decimal
+				if ((type == COL_TYPE.DECIMAL) && !value.contains("."))
+					// put the type as integer (decimal without fractions)
+					type = COL_TYPE.INTEGER;
 			}
 			
-			// special case for decimal
-	        if ((objectType == COL_TYPE.DECIMAL) && !value.contains("."))  { 
-				// put the type as integer (decimal without fractions)
-				objectType = COL_TYPE.INTEGER;
-			} 
-	        
-			ValueConstant constant = ofac.getConstantLiteral(value, objectType);
+
+			ValueConstant constant = ofac.getConstantLiteral(value, type);
 
 			// v1.7: We extend the syntax such that the data type of a
 			// constant is defined using a functional symbol.
-			if (objectType == COL_TYPE.LITERAL) {
+			if (type == COL_TYPE.LITERAL) {
 				// if the object has type LITERAL, check any language tag!
-				String lang = object.getLanguage();
+				String lang = literal.getLanguage();
 				if (lang != null && !lang.equals("")) {
-					result = ofac.getTypedTerm(constant, lang.toLowerCase());
+					result = ofac.getTypedTerm(constant, lang);
 				} 
 				else {
-					result =  ofac.getTypedTerm(constant, objectType);
+					result =  ofac.getTypedTerm(constant, type);
 				}
 			} 
 			else {
-				result = ofac.getTypedTerm(constant, objectType);
+				result = ofac.getTypedTerm(constant, type);
 			}
 		} 
 		else if (s instanceof URI) {
@@ -909,27 +898,24 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getFunction(p, term1, term2);
 		} 
 		else if (expr instanceof LangMatches) {
-			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
+			if (term2 instanceof Function) {
+				Function f = (Function) term2;
+				if (f.isDataTypeFunction()) {
+					Term functionTerm = f.getTerm(0);
+					if (functionTerm instanceof Constant) {
+						Constant c = (Constant) functionTerm;
+						term2 = ofac.getFunction(f.getFunctionSymbol(),
+								ofac.getConstantLiteral(c.getValue().toLowerCase(),
+										c.getType()));
+					}
+				}
+			}
+
+			return ofac.getLANGMATCHESFunction(term1, term2);
 		} 
 		
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 
-	private Term toLowerCase(Term term) {
-		Term output = term;
-		if (term instanceof Function) {
-			Function f = (Function) term;
-			if (f.isDataTypeFunction()) {
-				Term functionTerm = f.getTerm(0);
-				if (functionTerm instanceof Constant) {
-					Constant c = (Constant) functionTerm;
-					output = ofac.getFunction(f.getFunctionSymbol(), 
-							 ofac.getConstantLiteral(c.getValue().toLowerCase(), 
-							 c.getType()));
-				}
-			}
-		}
-		return output;
-	}
-	
+
 }
