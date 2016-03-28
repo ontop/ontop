@@ -90,26 +90,31 @@ public class SparqlAlgebraToDatalogTranslator {
 	 *         query.
 	 */
 
-	public DatalogProgram translate(ParsedQuery pq) {
+	public SparqlQuery translate(ParsedQuery pq) {
 		
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
 
-		List<Term> answerVariables;
-		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
-			Set<String> signature = te.getBindingNames();
-			answerVariables = new ArrayList<>(signature.size());
-			for (String vs : signature) 
-				answerVariables.add(ofac.getVariable(vs));
-		}
+		List<String> signature;
+		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery)
+			// order elements of the set in some way by converting it into the list
+			signature = new ArrayList<>(te.getBindingNames());
 		else
-			answerVariables = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
-		
-		DatalogProgram result = ofac.getDatalogProgram();
-		Function bodyAtom = translateTupleExpr(te, result, OBDAVocabulary.QUEST_QUERY + "0");
-		createRule(result, OBDAVocabulary.QUEST_QUERY, answerVariables, bodyAtom); // appends rule to the result
-		
-		return result;
+			signature = Collections.emptyList(); // ASK queries have no asnwer variables
+
+		List<Term> answerVariables = new ArrayList<>(signature.size());
+		for (String variable : signature)
+			answerVariables.add(ofac.getVariable(variable));
+
+		DatalogProgram program = ofac.getDatalogProgram();
+		Function bodyAtom = translateTupleExpr(te, program, OBDAVocabulary.QUEST_QUERY + "0");
+		CQIE top = createRule(program, OBDAVocabulary.QUEST_QUERY, answerVariables, bodyAtom); // appends rule to the result
+
+		SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(program);
+		List<CQIE> flattened = flattener.flatten(top);
+
+		DatalogProgram result = ofac.getDatalogProgram(program.getQueryModifiers(), flattened);
+		return new SparqlQuery(result, signature);
 	}
 
 
@@ -478,10 +483,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			Term oTerm = getOntopTerm(obj); 
 			
 			if (p != null) {
-        		COL_TYPE subjectType = null; // are never changed
-				COL_TYPE objectType = null;
 				// either an object or a datatype property
-				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { subjectType, objectType });
+				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { null, null });
 				return ofac.getFunction(predicate, sTerm, oTerm);
 			} 
 			else 
@@ -571,7 +574,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
 		}
 
-		if(bindingCompositeTerms.isEmpty()) {
+		if (bindingCompositeTerms.isEmpty()) {
 			// TODO: find a better exception
 			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
 		}

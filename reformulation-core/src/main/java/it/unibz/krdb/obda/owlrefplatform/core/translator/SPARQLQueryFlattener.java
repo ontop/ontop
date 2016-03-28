@@ -1,16 +1,14 @@
-package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
+package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities;
@@ -18,13 +16,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import org.slf4j.Logger;
@@ -39,10 +33,11 @@ public class SPARQLQueryFlattener {
     /*
      TODO: eliminate both instance variables
      */
-	private final Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<>();
     private final List<Predicate> irreducible = new LinkedList<>();
+	private final DatalogProgram program;
 
-	public SPARQLQueryFlattener() {
+    SPARQLQueryFlattener(DatalogProgram program) {
+		this.program = program;
 	}
 
 	/***
@@ -79,35 +74,15 @@ public class SPARQLQueryFlattener {
 	 * <p>
 	 * The right side of left joins will never be touched.
 	 *
-	 * @param program
 	 * @return
 	 */
 
 
 
-	public DatalogProgram flatten(DatalogProgram program) {
-
-        Predicate goalPredicate = null;
-        final OBDAQueryModifiers modifiers = program.getQueryModifiers();
-
-        // Creating a local index for the rules according to their predicate
-        for (CQIE rule : program.getRules()) {
-            Predicate headPredicate = rule.getHead().getFunctionSymbol();
-
-            if (headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-                goalPredicate = headPredicate;
-            }
-
-            List<CQIE> rules = ruleIndex.get(headPredicate);
-            if (rules == null) {
-                rules = new LinkedList<>();
-                ruleIndex.put(headPredicate, rules);
-            }
-            rules.add(rule);
-        }
+	List<CQIE> flatten(CQIE topLevelRule) {
 
         List<CQIE> workingSet = new LinkedList<>();
-        workingSet.addAll(ruleIndex.get(goalPredicate));
+		workingSet.add(topLevelRule);
 
 		ListIterator<CQIE> iterator = workingSet.listIterator();
 		while (iterator.hasNext()) {
@@ -131,7 +106,7 @@ public class SPARQLQueryFlattener {
 
             // add the irreducible rules
             for (Predicate p : irreducible) {
-                for (CQIE def: ruleIndex.get(p)) {
+                for (CQIE def: program.getRules(p)) {
                     iterator.add(def);
                     iterator.previous();
                 }
@@ -144,9 +119,8 @@ public class SPARQLQueryFlattener {
 		for (CQIE query : workingSet) {
 			EQNormalizer.enforceEqualities(query);
 		}
-			
-		DatalogProgram result = termFactory.getDatalogProgram(modifiers, workingSet);
-		return result;
+
+		return workingSet;
 	}
 
 	/***
@@ -207,12 +181,10 @@ public class SPARQLQueryFlattener {
 				nonBooleanAtomCounter += 1;
 				
 				// This is a data atom, it should be unfolded with the usual resolution algorithm.
-				
-				boolean isLeftJoinSecondArgument = nonBooleanAtomCounter == 2;
                 termidx.push(atomIdx);
 				List<CQIE> result = resolveDataAtom(atom, rule, termidx, true);
                 // If there are none, the atom is logically empty, careful, LEFT JOIN alert!
-                if (isLeftJoinSecondArgument) {
+                if (nonBooleanAtomCounter == 2) /* isLeftJoinSecondArgument */ {
                     if (result.size() > 1) {
                         // We had disjunction on the second atom of the leftjoin, that is,
                         // more than two rules that unified. LeftJoin is not
@@ -256,7 +228,6 @@ public class SPARQLQueryFlattener {
 	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
 	 * atoms). The resolution step will will try to match the <strong>focus atom
 	 * a</strong> in the input <strong>rule r</strong> against the rules in
-	 * {@link #ruleIndex}.
 	 * <p>
 	 * For each <strong>rule s</strong>, if the <strong>head h</strong> of s is
 	 * unifiable with a, then this method will do the following:
@@ -292,52 +263,49 @@ public class SPARQLQueryFlattener {
 	private List<CQIE> resolveDataAtom(Function atom, CQIE rule, Stack<Integer> termidx,
                                        boolean isLeftJoin) {
 
-		List<CQIE> definitions = ruleIndex.get(atom.getFunctionSymbol());
-		if (definitions != null)  {
-			// Note, in this step result may get new CQIEs inside
-			List<CQIE> result = new LinkedList<>();
+		List<CQIE> definitions = program.getRules(atom.getFunctionSymbol());
+		if (definitions == null)
+            return Collections.emptyList();
 
-			for (CQIE candidateRule : definitions) {
-				CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
-				Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
-				if (mgu == null) {
-					continue; // Failed attempt
-				}
+        List<CQIE> result = new LinkedList<>();
+        for (CQIE candidateRule : definitions) {
+            CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
+            // IMPORTANT: getMGU changes arguments
+            Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
+            if (mgu == null) {
+                continue; // Failed attempt
+            }
 
-				// We have a matching rule, now we prepare for the resolution step
-				// if we are in a left join, we need to make sure the fresh rule
-				// has only one data atom
-				List<Function> freshRuleBody;
-				if (isLeftJoin)
-					freshRuleBody = foldJOIN(freshRule.getBody());
-				else
-					freshRuleBody = freshRule.getBody();
+            // We have a matching rule, now we prepare for the resolution step
+            // if we are in a left join, we need to make sure the fresh rule
+            // has only one data atom
+            List<Function> freshRuleBody;
+            if (isLeftJoin)
+                freshRuleBody = foldJOIN(freshRule.getBody());
+            else
+                freshRuleBody = freshRule.getBody();
 
-				// generating the new body of the rule
-				CQIE partialEvaluation = rule.clone();
+            // generating the new body of the rule
+            CQIE partialEvaluation = rule.clone();
 
-				// locating the list that contains the current Function (either body
-				// or inner term) and replacing the current atom, with the body of
-				// the matching rule.
-                List<Function> atomsList = partialEvaluation.getBody();
-                for (int d = 0; d < termidx.size() - 1; d++) {
-                    int i = termidx.get(d);
-                    Function f = atomsList.get(i);
-                    atomsList = getSubAtoms(f);
-                }
-                int pos = termidx.peek(); // at termidx.size() - 1
-                atomsList.remove(pos);
-                atomsList.addAll(pos, freshRuleBody);
+            // locating the list that contains the current Function (either body
+            // or inner term) and replacing the current atom, with the body of
+            // the matching rule.
+            List<Function> atomsList = partialEvaluation.getBody();
+            for (int d = 0; d < termidx.size() - 1; d++) {
+                int i = termidx.get(d);
+                Function f = atomsList.get(i);
+                atomsList = getSubAtoms(f);
+            }
+            int pos = termidx.peek(); // at termidx.size() - 1
+            atomsList.remove(pos);
+            atomsList.addAll(pos, freshRuleBody);
 
-				SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
-				result.add(partialEvaluation);
-			}// end for candidate matches
+            SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
+            result.add(partialEvaluation);
+        }// end for candidate matches
 
-			if (!result.isEmpty())
-				return result;
-		}
-
-        return Collections.emptyList();
+        return result;
 	}
 
 	/***

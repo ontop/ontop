@@ -18,8 +18,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlQuery;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SPARQLQueryFlattener;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 
 import java.util.ArrayList;
@@ -86,14 +87,10 @@ public class QuestQueryProcessor {
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
 		
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
-		DatalogProgram program = translator.translate(pq);
+		DatalogProgram program = translator.translate(pq).getProgram();
 
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener();
-		program = unfolder.flatten(program);
-		log.debug("Flattened program: \n{}", program);
-			
 		log.debug("Replacing equivalences...");
 		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
 		for (CQIE query : program.getRules()) {
@@ -119,14 +116,10 @@ public class QuestQueryProcessor {
 			// log.debug("Input query:\n{}", strquery);
 			
 			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
-			DatalogProgram translation = translator.translate(pq);
+			SparqlQuery translation = translator.translate(pq);
+			DatalogProgram program = translation.getProgram();
+			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
-
-			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener();
-			DatalogProgram program = flattener.flatten(translation);
-			log.debug("Flattened program: \n{}", program);
-				
 			log.debug("Replacing equivalences...");
 			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
 			for (CQIE query : program.getRules()) {
@@ -188,23 +181,12 @@ public class QuestQueryProcessor {
 			log.debug("Partial evaluation ended.");
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 
-			List<String> signature = null;
-			 // IMPORTANT: this is the original query 
-			// (with original variable names, not the BINDings after flattening)
-			for (CQIE q : translation.getRules()) 
-				if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-					List<Term> terms = q.getHead().getTerms();
-					signature = new ArrayList<>(terms.size());
-					for (Term t : terms)
-						signature.add(((Variable)t).getName()); // ALL VARIABLES by construction
-					break;
-				}
-			querySignatureCache.put(pq, signature);
+			querySignatureCache.put(pq, translation.getSignature());
 	
 			String sql;
 			if (programAfterUnfolding.getRules().size() > 0) {
 				log.debug("Producing the SQL string...");
-				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, signature);
+				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, translation.getSignature());
 				log.debug("Resulting SQL: \n{}", sql);
 			}
 			else

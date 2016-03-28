@@ -4,7 +4,8 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SPARQLQueryFlattener;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlQuery;
 import org.junit.Test;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -35,10 +36,7 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 new UriTemplateMatcher(), new SemanticIndexURIMap());
-        DatalogProgram program = translator.translate(pq);
+        SparqlQuery program = translator.translate(pq);
         System.out.println(program);
-
-        SPARQLQueryFlattener flattener = new SPARQLQueryFlattener();
-        System.out.println(flattener.flatten(program));
     }
 }

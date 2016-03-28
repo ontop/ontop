@@ -220,7 +220,7 @@ public class DatalogToSparqlTranslator {
 		} else if (functionSymbol == ExpressionOperation.MULTIPLY) {
 			return MULTIPLY;
 		}
-		throw new UnknownBooleanSymbolException(functionSymbol.getName());
+		throw new RuntimeException("Found unknown function symbol: " + functionSymbol.getName());
 	}
 
 	/*
