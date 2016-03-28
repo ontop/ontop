@@ -182,7 +182,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			return translate((Extension) te, pr, newHeadName);
 		}
 		else if (te instanceof BindingSetAssignment) {
-			return createFilterValuesAtom((BindingSetAssignment)te);
+			return getValuesFilter((BindingSetAssignment)te);
 		}
 		
 		try {
@@ -562,89 +562,38 @@ public class SparqlAlgebraToDatalogTranslator {
 	/**
 	 * Creates a "FILTER" atom out of VALUES bindings.
 	 */
-	private Function createFilterValuesAtom(BindingSetAssignment expression) {
-		Map<String, Variable> variableIndex = createVariableIndex(expression.getBindingNames());
+	private Function getValuesFilter(BindingSetAssignment expression) {
 
-		/**
-		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
-		 */
-		List<Function> bindingCompositeTerms = new ArrayList<>();
-
+		Function valuesFilter = null;
 		for (BindingSet bindingSet : expression.getBindingSets()) {
-			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
-		}
 
-		if (bindingCompositeTerms.isEmpty()) {
-			// TODO: find a better exception
-			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
-		}
-
-		Function orAtom = buildBooleanTree(bindingCompositeTerms, ExpressionOperation.OR);
-		return orAtom;
-	}
-
-	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
-		Map<String, Variable> variableIndex = new HashMap<>();
-		for (String varName: variableNames) {
-			variableIndex.put(varName, ofac.getVariable(varName));
-		}
-		return variableIndex;
-	}
-
-	/**
-	 * Used for VALUES bindings
-	 */
-	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
-		List<Function> bindingEqualityTerms = new ArrayList<>();
-
-		for (Binding binding : bindingSet) {
-			Variable variable = variableIndex.get(binding.getName());
-			if (variable == null) {
-				//TODO: find a better exception
-				throw new RuntimeException("Unknown variable " + binding.getName() + " used in the VALUES clause.");
+			Function bindingFilter = null;
+			for (Binding binding : bindingSet) {
+				Variable variable = ofac.getVariable(binding.getName());
+				Term value = getConstantExpression(binding.getValue());
+				Function eqFilter = ofac.getFunctionEQ(variable, value);
+				bindingFilter = (bindingFilter == null) ?
+						eqFilter :
+						ofac.getFunctionAND(bindingFilter, eqFilter);
 			}
 
-			Term valueTerm = getConstantExpression(binding.getValue());
+			// the empty conjunction is TRUE
+			if (bindingFilter == null)
+				bindingFilter = ofac.getFunctionIsTrue(ofac.getBooleanConstant(true));
 
-			Function equalityTerm = ofac.getFunction(ExpressionOperation.EQ, variable, valueTerm);
-			bindingEqualityTerms.add(equalityTerm);
+			valuesFilter = (valuesFilter == null) ?
+					bindingFilter :
+					ofac.getFunctionOR(valuesFilter, bindingFilter);
 		}
 
-		if(bindingEqualityTerms.isEmpty()) {
-			//TODO: find a better exception
-			throw new RuntimeException("Empty binding sets are not accepted.");
+		// the empty disjunction is FALSE
+		if (valuesFilter == null)
+			valuesFilter = ofac.getFunctionIsTrue(ofac.getBooleanConstant(false));
 
-		}
-		return buildBooleanTree(bindingEqualityTerms, ExpressionOperation.AND);
+		return valuesFilter;
 	}
 
-	/**
-	 * Builds a boolean tree (e.g. AND or OR-tree) out of boolean expressions.
-	 *
-	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
-	 *
-	 */
-	private Function buildBooleanTree(List<Function> booleanFctTerms, ExpressionOperation booleanFunctionSymbol) {
-		Function topFunction = null;
-		int termNb = booleanFctTerms.size();
-		for(int i=0; i < termNb; i+=2) {
-			Function newFunction;
-			if ((termNb - i) >= 2 ) {
-				newFunction = ofac.getFunction(booleanFunctionSymbol, booleanFctTerms.get(i), booleanFctTerms.get(i + 1));
-			}
-			else {
-				newFunction = booleanFctTerms.get(i);
-			}
 
-			if (topFunction == null)
-				topFunction = newFunction;
-			else
-				topFunction = ofac.getFunction(booleanFunctionSymbol, topFunction, newFunction);
-		}
-		return topFunction;
-	}
-	
-	
 
 
 	private Term getExpression(ValueExpr expr) {
