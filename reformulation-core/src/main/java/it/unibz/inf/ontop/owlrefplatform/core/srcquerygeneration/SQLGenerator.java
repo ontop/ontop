@@ -1666,6 +1666,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 
+			/**
+			 * Datatype for the main column (to which it is cast).
+			 * Beware, it may defer the RDF datatype (the one of the type column).
+			 *
+			 * Why? Because most DBs (if not all) require the result table to have
+			 * one datatype per column. If the sub-queries are producing results of different types,
+			 * them there will be a difference between the type in the main column and the RDF one.
+			 */
 			Predicate headDataTtype = headDataTypeIter.next();
 
 			String varName;
@@ -1680,7 +1688,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				varName = "v" + hpos;
 			}
 
-			String typeColumn = getTypeColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
+			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
 			String langColumn = getLangColumnForSELECT(ht, varName, hpos,	index, sqlVariableNames);
 
@@ -1928,14 +1936,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Infers the type of a projected term.
 	 *
+	 * Note this type may differ from the one used for casting the main column (in some special cases).
+	 * This type will appear as the RDF datatype.
+	 *
 	 * @param projectedTerm
 	 * @param signatureVarName Name of the variable
 	 * @param index Used when the term correspond to a column name
-	 * @param headType
 	 *@param sqlVariableNames Used for creating non conflicting variable names (when they have to be shorten)  @return A string like "5 AS ageQuestType"
 	 */
 	private String getTypeColumnForSELECT(Term projectedTerm, String signatureVarName,
-										  QueryAliasIndex index, Predicate headType,
+										  QueryAliasIndex index,
 										  Set<String> sqlVariableNames) {
 
 		final String varName = sqladapter.nameTopVariable(signatureVarName, TYPE_SUFFIX, sqlVariableNames);
@@ -1945,8 +1955,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Predicate.COL_TYPE type = null;
 
 		if (projectedTerm instanceof Function) {
-			//type = getCompositeTermType((Function) projectedTerm);
-			if (headType == null) {
+			// FIXME: properly handle the default types by checking the metadata
+			Predicate.COL_TYPE defaultTypeForVariable = Predicate.COL_TYPE.LITERAL;
+
+			Predicate typePredicate = getHeadDataType(projectedTerm, defaultTypeForVariable);
+			if (typePredicate == null) {
 				throw new IllegalStateException("The head datatype must not null for " + projectedTerm);
 			}
 			/**
@@ -1954,11 +1967,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 *
 			 * TODO: integrate it better
 			 */
-			else if (headType.getName().equals(OBDAVocabulary.QUEST_URI)) {
+			else if (typePredicate.getName().equals(OBDAVocabulary.QUEST_URI)) {
 				type = Predicate.COL_TYPE.OBJECT;
 			}
 			else {
-				type = dtfac.getDatatype(headType.getName());
+				type = dtfac.getDatatype(typePredicate.getName());
 			}
 		}
 		else if (projectedTerm instanceof URIConstant) {
@@ -1987,7 +2000,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return String.format(TYPE_STR, typeString, varName);
 
 	}
-    /**
+
+	/**
 	 * Gets the type of a variable.
 	 *
 	 * Such variable does not hold this information, so we have to look
