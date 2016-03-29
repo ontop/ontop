@@ -22,9 +22,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.*;
+
+import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -77,14 +79,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 	// TODO: remove it
-	private static final Predicate.COL_TYPE DEFAULT_TYPE_FOR_EXPRESSION_OPERATION_SUB_TERM = Predicate.COL_TYPE.INTEGER;
+	private static final COL_TYPE DEFAULT_TYPE_FOR_EXPRESSION_OPERATION_SUB_TERM = INTEGER;
 
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
 
 	private static final int UNDEFINED_TYPE_CODE = -1;
 
-	private ImmutableTable<DatatypePredicate, DatatypePredicate, DatatypePredicate> dataTypePredicateUnifyTable;
+	private ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> dataTypeUnifyTable;
 
 
 	private boolean generatingREPLACE = true;
@@ -123,7 +125,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
 		this.sqladapter = sqladapter;
-		dataTypePredicateUnifyTable = buildPredicateUnifyTable();
+		dataTypeUnifyTable = buildPredicateUnifyTable();
 
 		ImmutableMap.Builder<ExpressionOperation, String> builder = new ImmutableMap.Builder<ExpressionOperation, String>()
 				.put(ExpressionOperation.ADD, "%s + %s")
@@ -191,22 +193,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, uriRefIds);
 	}
 
-	private ImmutableTable<DatatypePredicate, DatatypePredicate, DatatypePredicate> buildPredicateUnifyTable() {
-		return new ImmutableTable.Builder<DatatypePredicate, DatatypePredicate, DatatypePredicate>()
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER))
-				//.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+	private ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> buildPredicateUnifyTable() {
+		return new ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE>()
+				.put(INTEGER, DOUBLE, DOUBLE)
+				.put(INTEGER, DECIMAL, DECIMAL)
+				.put(INTEGER, INTEGER, INTEGER)
+				//.put(COL_TYPE.INTEGER), COL_TYPE.REAL), COL_TYPE.REAL)
+				.put(DECIMAL, DECIMAL, DECIMAL)
+				.put(DECIMAL, DOUBLE, DOUBLE)
+				//.put(COL_TYPE.DECIMAL), COL_TYPE.REAL), COL_TYPE.REAL))
+				.put(DECIMAL, INTEGER, DECIMAL)
 				
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				//.put(dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL))
-				
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				//.put(dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
+				.put(DOUBLE, DECIMAL, DOUBLE)
+				.put(DOUBLE, DOUBLE, DOUBLE)
+				//.put(COL_TYPE.DOUBLE), COL_TYPE.REAL), COL_TYPE.REAL))
+				.put(DOUBLE, INTEGER, DOUBLE)
 				
 				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL))
 				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL))
@@ -419,7 +420,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules
 				.size());
 
-		List<Predicate> headDataTypes = getHeadDataTypes(ansrules);
+		List<COL_TYPE> castDataTypes = getCastDataTypes(ansrules);
 		
 		/* Main loop, constructing the SPJ query for each CQ */
 
@@ -430,7 +431,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * form of a normal SQL algebra as possible,
 			 */
 			boolean isAns1 = true;
-			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, headDataTypes, subQueryDefinitions);
+			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, castDataTypes, subQueryDefinitions);
 
 			queryStrings.add(querystr);
 		}
@@ -442,16 +443,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 	/**
-	 * @param rules
-	 * @return
+	 * Gets the column datatypes that will be used for casting.
+	 *
+	 * If there are multiple rules with different datatypes, it takes
+	 * their common denominators.
 	 */
-	private List<Predicate> getHeadDataTypes(Collection<CQIE> rules) {
+	private List<COL_TYPE> getCastDataTypes(Collection<CQIE> rules) {
 		int ansArity = rules.iterator().next().getHead().getTerms().size();
 
-		List<Predicate> ansTypes = Lists.newArrayListWithCapacity(ansArity);
+		List<COL_TYPE> ansCastTypes = Lists.newArrayListWithCapacity(ansArity);
 
 		for(int k = 0; k < ansArity; k++){
-			ansTypes.add(null);
+			ansCastTypes.add(null);
 		}
 
 		for(CQIE rule : rules){
@@ -460,70 +463,81 @@ public class SQLGenerator implements SQLQueryGenerator {
 			for (int j = 0; j < terms.size(); j++) {
 				Term term = terms.get(j);
 
-				// FIXME: properly handle the default types by checking the metadata
-				Predicate.COL_TYPE defaultTypeForVariable = Predicate.COL_TYPE.STRING;
-
-				// TODO: see if this way simple to deal with multiple types is fine
-				ansTypes.set(j, unifyTypes(ansTypes.get(j), getHeadDataType(term, defaultTypeForVariable)));
+				ansCastTypes.set(j, unifyTypes(ansCastTypes.get(j), getCastDataType(term)));
 			}
 		}
-		return ansTypes;
+		return ansCastTypes;
 	}
 
 	/**
-	 * possiblyAlreadyAssignedType may be null.
+	 * TODO: explain
      */
-	private Predicate getHeadDataType(Term term,Predicate.COL_TYPE defaultTypeForVariable) {
-		if(term instanceof BNode){
-			// TODO: remove it
-			throw new IllegalArgumentException();
+	private COL_TYPE getCastDataType(Term term) {
+		COL_TYPE type = getHeadDataType(term);
+		switch (type) {
+			case OBJECT:
+			case BNODE:
+			case NULL:
+				// TODO: should we return LITERAL?
+				return STRING;
+			default:
+				return type;
+		}
+	}
 
-		} else if(term instanceof Function){
+	/**
+	 * Extracts the type from a term found in a head
+     */
+	private COL_TYPE getHeadDataType(Term term) {
+		if(term instanceof Function){
 			Function f = (Function)term;
 			Predicate typePred = f.getFunctionSymbol();
 
 			if(typePred instanceof ExpressionOperation){
-				return getHeadTypesOfExpressionOperator((ExpressionOperation) typePred,
-						f.getTerms());
-			} else if (f.isDataTypeFunction() || typePred.getName().equals(OBDAVocabulary.QUEST_URI)){
-				return typePred;
-
+				return getHeadTypesOfExpressionOperator((ExpressionOperation) typePred, f.getTerms());
+			} else if (f.isDataTypeFunction()){
+				return f.getFunctionSymbol().getType(0);
+			} else if (typePred instanceof URITemplatePredicate) {
+				return OBJECT;
 			} else if (typePred instanceof BNodePredicate){
-				return dtfac.getTypePredicate(Predicate.COL_TYPE.STRING);
+				return BNODE;
 			}
 			else {
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Unexcepted functional term: " + term);
 			}
-
-		} else if(term instanceof Variable){
-			return dtfac.getTypePredicate(defaultTypeForVariable);
+		}
+		/**
+		 * If a variable is found as a top term in a head, returns the most general COL_TYPE
+		 * (for casting).
+		 */
+		else if(term instanceof Variable){
+			return LITERAL;
 		} else if(term instanceof ValueConstant){
-			Predicate.COL_TYPE type = ((ValueConstant)term).getType();
-			return dtfac.getTypePredicate(type);
+			/**
+			 * Deals with the ugly definition of the NULL constant.
+			 * COL_TYPE of NULL should be NULL!
+			 */
+			if (term == OBDAVocabulary.NULL) {
+				return NULL;
+			}
+			else {
+				return ((ValueConstant) term).getType();
+			}
 		} else if(term instanceof URIConstant){
-			return dtfac.getTypePredicate(Predicate.COL_TYPE.STRING);
+			return OBJECT;
 		}
 		else {
-			return null;
+			throw new IllegalStateException("Unexpected term: " + term);
 		}
+
 	}
 
-	private Predicate getHeadTypesOfExpressionOperator(ExpressionOperation operator, List<Term> terms) {
+
+	private COL_TYPE getHeadTypesOfExpressionOperator(ExpressionOperation operator, List<Term> terms) {
 
 		if (operator.getExpressionType() != null) {
-			Predicate.COL_TYPE type = operator.getExpressionType();
-			/**
-			 * Special case that is not integrated to the datatype factory
-			 * TODO: integrate it
-			 */
-			if (type == Predicate.COL_TYPE.OBJECT) {
-				return new URITemplatePredicateImpl(0);
-			}
-			else {
-				return dtfac.getTypePredicate(type);
-			}
+			return operator.getExpressionType();
 		}
-
 		switch (operator.getArity()) {
 			case 0:
 				// No type
@@ -531,20 +545,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			case 1:
 				return getSubTermDatatype(operator, terms, 0);
 			case 2:
-				Predicate type1 = getSubTermDatatype(operator, terms, 0);
-				Predicate type2 = getSubTermDatatype(operator, terms, 1);
+				COL_TYPE type1 = getSubTermDatatype(operator, terms, 0);
+				COL_TYPE type2 = getSubTermDatatype(operator, terms, 1);
 				return unifyTypes(type1, type2);
 			default:
 				throw new RuntimeException("Arity >2 are not yet supported. Operator: " + operator);
 		}
 	}
 
-	private Predicate getSubTermDatatype(ExpressionOperation operator, List<Term> terms, int termIndex) {
-		Predicate.COL_TYPE predefinedType = operator.getType(0);
+	private COL_TYPE getSubTermDatatype(ExpressionOperation operator, List<Term> terms, int termIndex) {
+		COL_TYPE predefinedType = operator.getType(0);
 		return predefinedType != null
-				? dtfac.getTypePredicate(predefinedType)
+				? predefinedType
 				// TODO: make the operator provide its default type for its arguments!
-				: getHeadDataType(terms.get(termIndex), DEFAULT_TYPE_FOR_EXPRESSION_OPERATION_SUB_TERM);
+				: getHeadDataType(terms.get(termIndex));
 	}
 
 	/**
@@ -805,20 +819,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *
 	 * @return
 	 */
-	private Predicate unifyTypes(Predicate type1, Predicate type2) {
+	private COL_TYPE unifyTypes(COL_TYPE type1, COL_TYPE type2) {
 
 		if(type1 == null){
 			return type2;
 		}
 		else if(type1.equals(type2)){
 			return type1;
-		} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
-			return dataTypePredicateUnifyTable.get(type1, type2);
+		} else if(dataTypeUnifyTable.contains(type1, type2)){
+			return dataTypeUnifyTable.get(type1, type2);
 		}else if(type2 == null){
 			return type1;
 			//throw new NullPointerException("type2 cannot be null");
 		} else {
-			return dtfac.getTypePredicate(Predicate.COL_TYPE.STRING);
+			return STRING;
 		}
 
 	}
@@ -860,13 +874,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *
 	 * @param cq
 	 * @param signature
-	 * @param headDataTypes
+	 * @param castDatatypes
 	 * @param subQueryDefinitions
 	 * @return
 	 * @throws OBDAException
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1, List<Predicate> headDataTypes,
+											  boolean isAns1, List<COL_TYPE> castDatatypes,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions) throws OBDAException {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
@@ -880,7 +894,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String FROM = getFROM(cq.getBody(), index);
 		String WHERE = getWHERE(cq.getBody(), index);
 
-		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, headDataTypes);
+		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, castDatatypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);
 
@@ -1056,7 +1070,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		int headArity = 0;
 
-		List<Predicate> headDataTypes = getHeadDataTypes(ruleList);
+		List<COL_TYPE> headDataTypes = getCastDataTypes(ruleList);
 
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
@@ -1595,7 +1609,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				Predicate.COL_TYPE type = dtfac.getDatatype(p.toString());
+				COL_TYPE type = dtfac.getDatatype(p.toString());
 				return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1628,12 +1642,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *
 	 * @param query
 	 *            the query
-	 * @param headDataTypes
+	 * @param castDataTypes
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
 								   QueryAliasIndex index, boolean distinct, boolean isAns1,
-								   List<Predicate> headDataTypes)
+								   List<COL_TYPE> castDataTypes)
 			throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
@@ -1654,7 +1668,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 
-		Iterator<Predicate> headDataTypeIter = headDataTypes.iterator();
+		Iterator<COL_TYPE> castDataTypeIter = castDataTypes.iterator();
 
 		/**
 		 * Set that contains all the variable names created on the top query.
@@ -1674,7 +1688,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * one datatype per column. If the sub-queries are producing results of different types,
 			 * them there will be a difference between the type in the main column and the RDF one.
 			 */
-			Predicate headDataTtype = headDataTypeIter.next();
+			COL_TYPE castDataType = castDataTypeIter.next();
 
 			String varName;
 
@@ -1689,7 +1703,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
-			String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
+			String mainColumn = getMainColumnForSELECT(ht, varName, index, castDataType, sqlVariableNames);
 			String langColumn = getLangColumnForSELECT(ht, varName, hpos,	index, sqlVariableNames);
 
 			sb.append("\n   ");
@@ -1707,7 +1721,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getMainColumnForSELECT(Term ht, String signatureVarName,
-										  QueryAliasIndex index, Predicate typePredicate,
+										  QueryAliasIndex index, COL_TYPE castDataType,
 										  Set<String> sqlVariableNames) {
 
 		final String varName = sqladapter.nameTopVariable(signatureVarName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
@@ -1783,11 +1797,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
 
-			if (typePredicate != null){
+			if (castDataType != null){
 
-				int sqlType = dataTypePredicateToSQLType(typePredicate);
-
-				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);
+				mainColumn = sqladapter.sqlCast(mainColumn, obdaDataFactory.getJdbcTypeMapper().getSQLType(castDataType));
 			}
 
 			//int sqlType = getSQLTypeForTerm(ht,index );
@@ -1952,35 +1964,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 		sqlVariableNames.add(varName);
 
 		String typeString = null;
-		Predicate.COL_TYPE type = null;
+		final COL_TYPE type;
 
 		if (projectedTerm instanceof Function) {
-			// FIXME: properly handle the default types by checking the metadata
-			Predicate.COL_TYPE defaultTypeForVariable = Predicate.COL_TYPE.LITERAL;
 
-			Predicate typePredicate = getHeadDataType(projectedTerm, defaultTypeForVariable);
-			if (typePredicate == null) {
+			type = getHeadDataType(projectedTerm);
+			if (type == null) {
 				throw new IllegalStateException("The head datatype must not null for " + projectedTerm);
 			}
-			/**
-			 * Special case: a URI is not a datatype
-			 *
-			 * TODO: integrate it better
-			 */
-			else if (typePredicate.getName().equals(OBDAVocabulary.QUEST_URI)) {
-				type = Predicate.COL_TYPE.OBJECT;
-			}
-			else {
-				type = dtfac.getDatatype(typePredicate.getName());
-			}
 		}
-		else if (projectedTerm instanceof URIConstant) {
-			type = Predicate.COL_TYPE.OBJECT;
-		}
-		else if (projectedTerm == OBDAVocabulary.NULL) {
-			type = Predicate.COL_TYPE.NULL;
+		else if (projectedTerm instanceof Constant) {
+			type = ((Constant) projectedTerm).getType();
 		}
 		else if (projectedTerm instanceof Variable) {
+			type = null;
 			typeString = getTypeFromVariable((Variable) projectedTerm, index);
 		}
 		else {
@@ -2054,7 +2051,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * By default, we assume that the variable is an IRI.
 		 *
 		 */
-		return String.format("%d", Predicate.COL_TYPE.OBJECT.getQuestCode());
+		return String.format("%d", OBJECT.getQuestCode());
 	}
 
 
@@ -2235,7 +2232,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return java.sql.Types.DECIMAL;
 		}
 
-		Predicate.COL_TYPE colType = dtfac.getDatatype(functionName);
+		COL_TYPE colType = dtfac.getDatatype(functionName);
 		int sqlType = obdaDataFactory.getJdbcTypeMapper().getSQLType(colType);
 
 		return sqlType;
@@ -2355,8 +2352,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (isSI) {
-				if (ct.getType() == Predicate.COL_TYPE.OBJECT
-						|| ct.getType() == Predicate.COL_TYPE.LITERAL) {
+				if (ct.getType() == OBJECT
+						|| ct.getType() == LITERAL) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
@@ -2389,7 +2386,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		int size = function.getTerms().size();
 
 		if (function.isDataTypeFunction()) {
-			if (functionSymbol.getType(0) == Predicate.COL_TYPE.UNSUPPORTED) {
+			if (functionSymbol.getType(0) == UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: "
 						+ function);
 			}
@@ -2655,11 +2652,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 		String sql = null;
-		if (constant.getType() == Predicate.COL_TYPE.BNODE || constant.getType() == Predicate.COL_TYPE.LITERAL || constant.getType() == Predicate.COL_TYPE.OBJECT
-				|| constant.getType() == Predicate.COL_TYPE.STRING) {
+		if (constant.getType() == BNODE || constant.getType() == LITERAL || constant.getType() == OBJECT
+				|| constant.getType() == STRING) {
 			sql = "'" + constant.getValue() + "'";
 		}
-		else if (constant.getType() == Predicate.COL_TYPE.BOOLEAN) {
+		else if (constant.getType() == BOOLEAN) {
 			String value = constant.getValue().toLowerCase();
 			if (value.equals("1") || value.equals("true") || value.equals("t")) {
 				sql = sqladapter.getSQLLexicalFormBoolean(true);
@@ -2671,16 +2668,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
 			}
 		}
-		else if (constant.getType() == Predicate.COL_TYPE.DATETIME) {
+		else if (constant.getType() == DATETIME) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
 		}
-		else if (constant.getType() == Predicate.COL_TYPE.NULL
-				|| constant.getType() == Predicate.COL_TYPE.DECIMAL || constant.getType() == Predicate.COL_TYPE.DOUBLE
-				|| constant.getType() == Predicate.COL_TYPE.INTEGER || constant.getType() == Predicate.COL_TYPE.LONG
-				|| constant.getType() == Predicate.COL_TYPE.FLOAT || constant.getType() == Predicate.COL_TYPE.NON_POSITIVE_INTEGER
-				|| constant.getType() == Predicate.COL_TYPE.INT || constant.getType() == Predicate.COL_TYPE.UNSIGNED_INT
-				|| constant.getType() == Predicate.COL_TYPE.NEGATIVE_INTEGER
-				|| constant.getType() == Predicate.COL_TYPE.POSITIVE_INTEGER || constant.getType() == Predicate.COL_TYPE.NON_NEGATIVE_INTEGER) {
+		else if (constant.getType() == NULL
+				|| constant.getType() == DECIMAL || constant.getType() == DOUBLE
+				|| constant.getType() == INTEGER || constant.getType() == LONG
+				|| constant.getType() == FLOAT || constant.getType() == NON_POSITIVE_INTEGER
+				|| constant.getType() == INT || constant.getType() == UNSIGNED_INT
+				|| constant.getType() == NEGATIVE_INTEGER
+				|| constant.getType() == POSITIVE_INTEGER || constant.getType() == NON_NEGATIVE_INTEGER) {
 			sql = constant.getValue();
 		}
 		else {
