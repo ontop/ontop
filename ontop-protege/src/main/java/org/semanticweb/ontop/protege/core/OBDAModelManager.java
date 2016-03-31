@@ -36,6 +36,7 @@ import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
@@ -859,9 +860,9 @@ public class OBDAModelManager implements Disposable {
 	 * A utility method to ensure a proper naming for prefix URI
 	 */
 	private static String getProperPrefixURI(String prefixUri) {
-		if (!prefixUri.endsWith("/")) {
-			if (!prefixUri.endsWith("#")) {
-				prefixUri += "#";
+		if (!prefixUri.endsWith("#")) {
+			if (!prefixUri.endsWith("/")) {
+				prefixUri += EntityCreationPreferences.getDefaultSeparator();;
 			}
 		}
 		return prefixUri;

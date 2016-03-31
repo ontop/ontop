@@ -424,7 +424,7 @@ public class OBDAModelImpl implements OBDAModel {
 	public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
 
 		/*
-		Find the old and the new prefix
+		Find the new prefix to substitute with the old prefix
 		 */
 		String oldName = removedPredicate.getName();
 		String newName = newPredicate.getName();
@@ -440,10 +440,10 @@ public class OBDAModelImpl implements OBDAModel {
 		for (String prefix : currentMap.values()) {
 
 			if(newName.startsWith(prefix)){
-				//get the length of the predicate name
-				int prefixlength = prefix.length();
-				predicateNameLength = newName.length()- prefixlength;
-				newPrefix = newName.substring(0, prefixlength);
+				//find the new prefix and the length of the predicateName that we do not want to consider
+				int prefixLength = prefix.length();
+				predicateNameLength = newName.length()- prefixLength;
+				newPrefix = prefix;
 			}
 		}
 
@@ -456,14 +456,15 @@ public class OBDAModelImpl implements OBDAModel {
 		int modifiedCount = 0;
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
+
 			for (OBDAMappingAxiom mapping : mp) {
 				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
-					Function oldatom = body.get(idx);
-					for (Term term : oldatom.getTerms()) {
+					Function oldAtom = body.get(idx);
+					for (Term term : oldAtom.getTerms()) {
 
 						/**
-                         * Rename the uri of individuals in the mapping, substitute the oldPrefix with the default current one
+                         * Rename the uri of individuals in the mapping, substitute the oldPrefix with the newPrefix
 						 */
 						if(!oldPrefix.isEmpty() && !newPrefix.isEmpty()) {
 							if (term instanceof Function) {
@@ -478,12 +479,13 @@ public class OBDAModelImpl implements OBDAModel {
 							}
 						}
 					}
-					if (!oldatom.getFunctionSymbol().equals(removedPredicate)) {
+					if (!oldAtom.getFunctionSymbol().equals(removedPredicate)) {
 						continue;
 					}
+					//renamePredicate
 					modifiedCount += 1;
-					Function newatom = dfac.getFunction(newPredicate, oldatom.getTerms());
-					body.set(idx, newatom);
+					Function newAtom = dfac.getFunction(newPredicate, oldAtom.getTerms());
+					body.set(idx, newAtom);
 				}
 				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
 			}
