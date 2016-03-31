@@ -30,10 +30,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 import com.google.common.collect.ImmutableList;
@@ -606,96 +603,41 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getSPARQLJoin(Term t1, Term t2) {
-        return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
-	}
-
-	@Override
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
 		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2, joinCondition);
 	}
 
+
 	@Override
-	public Function getSPARQLJoin(List<Function> atoms, Function filter) {
-		
+	public Function getSPARQLLeftJoin(List<Function> leftAtoms, List<Function> rightAtoms,
+									  Optional<Function> optionalCondition){
 
-		int size = atoms.size();
-		
-		if (size>1){
-			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin((List<Function>) atoms.subList(1, size)), filter);
-			return join;
-
-		}else{
-			return atoms.get(0);
+		if (leftAtoms.isEmpty() || rightAtoms.isEmpty()) {
+			throw new IllegalArgumentException("Atoms on the left and right sides are required");
 		}
-	
+
+		List<Term> joinTerms = new ArrayList<>(leftAtoms);
+		/**
+		 * We need an (boolean) expression to separate the left and the right parts
+		 */
+		if (!leftAtoms.get(leftAtoms.size() - 1).isOperation()) {
+			joinTerms.add(getExpression(ExpressionOperation.OR, OBDAVocabulary.TRUE, OBDAVocabulary.TRUE));
+		}
+
+		joinTerms.addAll(rightAtoms);
+
+		/**
+		 * The joining condition goes with the right part
+		 */
+		optionalCondition.ifPresent(joinTerms::add);
+
+		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, joinTerms);
 	}
 
-	
-	
-	
-	
-	
-	@Override
-	public Function getSPARQLJoin(List<Function> atoms) {
-		
-		int size = atoms.size();
-		
-		if (size>1){
-			List<Function> remainingAtoms = (List<Function>) atoms.subList(1, size);
-			Function join = getSPARQLJoin(atoms.get(0), getSPARQLJoin(remainingAtoms)  );
-			return join;
-
-		}else{
-			return atoms.get(0);
-		}
-	
-		
-	}	
-	
-	
-	
-
-	
-	
-	@Override
-	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter){
-		
-		atoms2.add(filter);
-		
-		return  getSPARQLLeftJoin(atoms,atoms2);
-		
-	}
-
-	@Override
-	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2){
-
-		List<Term> termList= new LinkedList<Term>();
-		atoms.addAll(atoms2);
-		
-		for (Function f: atoms){
-			termList.add(f);
-		}
-		
-		Function function = getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, termList );
-		return  function;
-		
-	}
-
-
-
-	
-	
 	@Override
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {
 		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}
-
-	@Override
-	public Function getSPARQLLeftJoin(Function t1, Function t2, Function filter) {
-		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2, filter);
-	}
-
 	
 	@Override
 	public ValueConstant getBooleanConstant(boolean value) {

@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -346,20 +347,10 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
 
-	Function getSPARQLJoin(Term t1, Term t2);
-
-	public Function getSPARQLJoin(List<Function> atoms, Function filter);
-
-	public Function getSPARQLJoin(List<Function> atoms);
-
-	
-
-	
-	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter);
-
-	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2);
+	/**
+	 * Follows the ugly encoding of complex left-join expressions (with a filter on the left side)
+     */
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Optional<Function> optionalCondition);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
-
-	public Function getSPARQLLeftJoin(Function function, Function function2, Function LjoinCondition);
 }
