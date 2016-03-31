@@ -421,38 +421,71 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public int renamePredicate(Predicate oldname, Predicate newName, String oldPrefix) {
+	public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
+
+		/*
+		Find the new prefix to substitute with the old prefix
+		 */
+		String oldName = removedPredicate.getName();
+		String newName = newPredicate.getName();
+
+		String oldPrefix = "";
+		String newPrefix ="";
+
+
+		Map<String, String> currentMap = prefixManager.getPrefixMap();
+		int predicateNameLength = 0;
+
+		//Find the newPrefix in the prefixManager
+		for (String prefix : currentMap.values()) {
+
+			if(newName.startsWith(prefix)){
+				//find the new prefix and the length of the predicateName that we do not want to consider
+				int prefixLength = prefix.length();
+				predicateNameLength = newName.length()- prefixLength;
+				newPrefix = prefix;
+			}
+		}
+
+		//find old prefix removing the predicateName
+		if(predicateNameLength!=0) {
+			int prefixLength = oldName.length() - predicateNameLength;
+			oldPrefix = oldName.substring(0, prefixLength);
+		}
+
 		int modifiedCount = 0;
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
+
 			for (OBDAMappingAxiom mapping : mp) {
 				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
-					Function oldatom = body.get(idx);
-					for (Term term : oldatom.getTerms()) {
+					Function oldAtom = body.get(idx);
+					for (Term term : oldAtom.getTerms()) {
 
 						/**
-                         * Rename the uri of individuals in the mapping, substitute the oldPrefix with the default current one
+                         * Rename the uri of individuals in the mapping, substitute the oldPrefix with the newPrefix
 						 */
-						if(!oldPrefix.isEmpty()) {
+						if(!oldPrefix.isEmpty() && !newPrefix.isEmpty()) {
 							if (term instanceof Function) {
 								Function uri = ((Function) term);
 								if (uri.getFunctionSymbol() instanceof URITemplatePredicate) {
 									String uriName = ((ValueConstant) uri.getTerm(0)).getValue();
 									if (uriName.startsWith(oldPrefix)) {
-										uriName = uriName.replaceFirst(oldPrefix, prefixManager.getDefaultPrefix());
+										uriName = uriName.replaceFirst(oldPrefix, newPrefix);
 										uri.setTerm(0, dfac.getConstantLiteral(uriName));
 									}
 								}
 							}
 						}
 					}
-					if (!oldatom.getFunctionSymbol().equals(oldname)) {
+					if (!oldAtom.getFunctionSymbol().equals(removedPredicate)) {
 						continue;
 					}
+					//renamePredicate
 					modifiedCount += 1;
-					Function newatom = dfac.getFunction(newName, oldatom.getTerms());
-					body.set(idx, newatom);
+					Function newAtom = dfac.getFunction(newPredicate, oldAtom.getTerms());
+					body.set(idx, newAtom);
 				}
 				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
 			}

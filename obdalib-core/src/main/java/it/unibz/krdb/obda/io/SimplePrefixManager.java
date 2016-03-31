@@ -22,12 +22,7 @@ package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
@@ -68,8 +63,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 			throw new IllegalArgumentException("Prefix names must end with a colon (:)");
 		}
 		
-		prefixToURIMap.put(prefix, getProperPrefixURI(uri));
-		uriToPrefixMap.put(getProperPrefixURI(uri), prefix);
+		prefixToURIMap.put(prefix, uri);
+		uriToPrefixMap.put(uri, prefix);
 	}
 
 	/**

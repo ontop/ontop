@@ -177,7 +177,7 @@ public interface OBDAModel extends Cloneable, Serializable {
 	 * the model by replacing each atom that use the predicate old name, with a
 	 * new atom that uses newName and has the same terms as the old atom.
 	 */
-	public int renamePredicate(Predicate oldname, Predicate newName, String oldPrefix);
+	public int renamePredicate(Predicate oldname, Predicate newName);
 
 	/**
 	 * Removes all atoms that contain the given predicate in all mappings.
