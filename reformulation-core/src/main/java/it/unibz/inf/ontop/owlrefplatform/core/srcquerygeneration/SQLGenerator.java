@@ -1826,18 +1826,19 @@ public class SQLGenerator implements SQLQueryGenerator {
         String langVariableName = sqladapter.nameTopVariable(signatureVarName, LANG_SUFFIX, sqlVariableNames);
         sqlVariableNames.add(langVariableName);
 
+		final String lang;
+
         if (ht instanceof Function) {
             Function ov = (Function) ht;
-            Predicate function = ov.getFunctionSymbol();
-
-            String lang = getLangType(ov, index);
-//
-
-            return (String.format(LANG_STR, lang, langVariableName));
+            lang = getLangType(ov, index);
         }
-
-        return  (String.format(LANG_STR, "NULL", langVariableName));
-
+		else if (ht instanceof Variable) {
+			lang = getLangFromVariable((Variable) ht, index);
+		}
+		else {
+			lang = "NULL";
+		}
+		return String.format(LANG_STR, lang, langVariableName);
     }
 
 
@@ -2006,6 +2007,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getTypeFromVariable(Variable var, QueryAliasIndex index) {
+
+		return getNonMainColumnId(var, index, -2)
+				.map(QualifiedAttributeID::getSQLRendering)
+				/**
+				 * By default, we assume that the variable is an IRI.
+				 *
+				 */
+				.orElseGet(() -> String.format("%d", OBJECT.getQuestCode()));
+	}
+
+	private static String getLangFromVariable(Variable var, QueryAliasIndex index) {
+		return getNonMainColumnId(var, index, -1)
+				.map(QualifiedAttributeID::getSQLRendering)
+				.orElse("NULL");
+	}
+
+	private static Optional<QualifiedAttributeID> getNonMainColumnId(Variable var, QueryAliasIndex index,
+																	 int relativeIndexWrtMainColumn) {
 		Set<QualifiedAttributeID> columnRefs = index.getColumnReferences(var);
 
 		if (columnRefs == null || columnRefs.size() == 0) {
@@ -2038,17 +2057,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 						.collect(Collectors.toList());
 				int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
 
-				Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex - 2);
-				return typeColumn.getQualifiedID().getSQLRendering();
+				Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
+				return Optional.of(typeColumn.getQualifiedID());
 			}
 		}
 
-		/**
-		 * By default, we assume that the variable is an IRI.
-		 *
-		 */
-		return String.format("%d", OBJECT.getQuestCode());
+		return Optional.empty();
 	}
+
 
 
 	private static String unquote(String string) {
