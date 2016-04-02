@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -126,9 +127,6 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
-        // By default, keep the former (non-final)
-        InnerJoinNode newTopJoinNode = topJoinNode;
-
         /**
          * Tries to optimize if there are data nodes
          */
@@ -144,11 +142,12 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                newTopJoinNode = applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(),
+                return applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(),
                         concreteProposal);
             }
         }
-        return new NodeCentricOptimizationResultsImpl<>(query, newTopJoinNode);
+        // No optimization
+        return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
     }
 
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
@@ -431,28 +430,77 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
     }
 
     /**
-     * Assumes that the data atoms are leafs
+     * Assumes that the data atoms are leafs.
+     *
+     *
+     *
      */
-    private static InnerJoinNode applyOptimization(IntermediateQuery query, QueryTreeComponent treeComponent,
-                                                   InnerJoinNode topJoinNode, ConcreteProposal proposal) {
-        for (DataNode nodeToRemove : proposal.getDataNodesToRemove()) {
-            treeComponent.removeSubTree(nodeToRemove);
-        }
-        for (DataNode newNode : proposal.getNewDataNodes()) {
-            treeComponent.addChild(topJoinNode, newNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false);
-        }
+    private static NodeCentricOptimizationResults<InnerJoinNode> applyOptimization(IntermediateQuery query,
+                                                                                   QueryTreeComponent treeComponent,
+                                                                                   InnerJoinNode topJoinNode,
+                                                                                   ConcreteProposal proposal) {
+        /**
+         * First, add and remove non-top nodes
+         */
+        proposal.getDataNodesToRemove()
+                .forEach(treeComponent::removeSubTree);
 
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution = proposal.getOptionalSubstitution();
+        proposal.getNewDataNodes()
+                .forEach(newNode -> treeComponent.addChild(topJoinNode, newNode,
+                        Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false));
+
+        switch(treeComponent.getCurrentSubNodesOf(topJoinNode).size()) {
+            case 0:
+                throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
+
+                /**
+                 * Special case: only one child remains so the join node is not needed anymore.
+                 *
+                 * Creates a FILTER node if there is a joining condition
+                 */
+            case 1:
+                QueryNode uniqueChild = treeComponent.getFirstChild(topJoinNode).get();
+                Optional<ImmutableExpression> optionalFilter = topJoinNode.getOptionalFilterCondition();
+
+                QueryNode newTopNode;
+                if (optionalFilter.isPresent()) {
+                    newTopNode = new FilterNodeImpl(optionalFilter.get());
+                    treeComponent.replaceNode(topJoinNode, newTopNode);
+                }
+                else {
+                    treeComponent.removeOrReplaceNodeByUniqueChildren(topJoinNode);
+                    newTopNode = uniqueChild;
+                }
+
+                QueryNode updatedTopNode = propagateSubstitution(query, proposal.getOptionalSubstitution(), newTopNode);
+                return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(updatedTopNode));
+
+            /**
+             * Multiple children, keep the top join node
+             */
+            default:
+                InnerJoinNode updatedTopJoinNode = propagateSubstitution(query, proposal.getOptionalSubstitution(),
+                        topJoinNode);
+                return new NodeCentricOptimizationResultsImpl<>(query, updatedTopJoinNode);
+        }
+    }
+
+    /**
+     *  Applies the substitution from the topNode
+     */
+    private static <N extends QueryNode> N propagateSubstitution(IntermediateQuery query,
+                                                                 Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
+                                                                 N topNode) {
         if (optionalSubstitution.isPresent()) {
 
             // TODO: filter the non-bound variables from the substitution before propagating!!!
 
-            SubstitutionPropagationProposal<InnerJoinNode> propagationProposal = new SubstitutionPropagationProposalImpl<>(
-                    topJoinNode, optionalSubstitution.get());
+            SubstitutionPropagationProposal<N> propagationProposal = new SubstitutionPropagationProposalImpl<>(
+                    topNode, optionalSubstitution.get());
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {
-                NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(propagationProposal, true);
+                NodeCentricOptimizationResults<N> results = query.applyProposal(propagationProposal, true);
 
                 return results.getOptionalNewNode()
                         .orElseThrow(() -> new IllegalStateException(
@@ -467,7 +515,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
          * No substitution to propagate
          */
         else {
-            return topJoinNode;
+            return topNode;
         }
     }
 }
