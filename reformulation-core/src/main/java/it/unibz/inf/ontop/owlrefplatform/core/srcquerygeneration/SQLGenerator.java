@@ -1840,66 +1840,62 @@ public class SQLGenerator implements SQLQueryGenerator {
 
     }
 
-    private String getLangType(Function func1, QueryAliasIndex index) {
 
-        Predicate pred1 = func1.getFunctionSymbol();
+	/**
+	 * http://www.w3.org/TR/sparql11-query/#idp1915512
+	 *
+	 * Functions that return a string literal do so with the string literal of the same kind as the first argument
+	 * (simple literal, plain literal with same language tag, xsd:string). This includes SUBSTR, STRBEFORE and STRAFTER.
+	 *
+	 * The function CONCAT returns a string literal based on the details of all its arguments.
+	 *
+	 * @param func1
+	 * @param index
+	 * @return
+	 */
+	private String getLangType(Function func1, QueryAliasIndex index) {
 
-        if (dtfac.isLiteral(pred1) && isBinary(func1)) {
+		Predicate pred1 = func1.getFunctionSymbol();
 
+		if (dtfac.isLiteral(pred1) && func1.getArity() == 2) {
+			Term langTerm = func1.getTerm(1);
+			if (langTerm == OBDAVocabulary.NULL) {
+				return  "NULL";
+			}
+			else if (langTerm instanceof ValueConstant) {
+				return getSQLLexicalForm((ValueConstant) langTerm);
+			}
+			else {
+				return getSQLString(langTerm, index, false);
+			}
+		}
+		else if (func1.isOperation()) {
+			if (pred1 == ExpressionOperation.CONCAT) {
+				Term term1 = func1.getTerm(0);
+				Term term2 = func1.getTerm(1);
 
-            Term langTerm = func1.getTerm(1);
-            if (langTerm == OBDAVocabulary.NULL) {
-                return  "NULL";
-            } else if (langTerm instanceof ValueConstant) {
-                return getSQLLexicalForm((ValueConstant) langTerm);
-            } else {
-                return getSQLString(langTerm, index, false);
-            }
-
-        }
-        else if (isStringOperationPredicate(pred1)) {
-
-            if(pred1 == ExpressionOperation.CONCAT) {
-                Term concat1 = func1.getTerm(0);
-                Term concat2 = func1.getTerm(1);
-
-                if (concat1 instanceof Function && concat2 instanceof Function) {
-                    Function concatFunc1 = (Function) concat1;
-                    Function concatFunc2 = (Function) concat2;
-
-                    String lang1 = getLangType(concatFunc1, index);
-
-                    String lang2 = getLangType(concatFunc2, index);
-
-                    if (lang1.equals(lang2)) {
-
-                        return lang1;
-
-                    } else return "NULL";
-
-                }
-            }
-            else if(pred1 == ExpressionOperation.REPLACE){
-                Term rep1 = func1.getTerm(0);
-
-
-                if (rep1 instanceof Function) {
-                    Function replFunc1 = (Function) rep1;
-
-
-                    String lang1 = getLangType(replFunc1, index);
-
-                    return lang1;
-
-
-
-                }
-
-            }
-            return "NULL";
-        }
-        else return "NULL";
-    }
+				if (term1 instanceof Function && term2 instanceof Function) {
+					String lang1 = getLangType((Function) term1, index);
+					String lang2 = getLangType((Function) term2, index);
+					if (lang1.equals(lang2))
+						return lang1;
+					else
+						return "NULL";
+				}
+			}
+			else if (pred1 == ExpressionOperation.REPLACE || pred1 == ExpressionOperation.SUBSTR ||
+					pred1 == ExpressionOperation.UCASE || pred1 == ExpressionOperation.LCASE ||
+					pred1 == ExpressionOperation.STRBEFORE || pred1 == ExpressionOperation.STRAFTER) {
+				Term rep1 = func1.getTerm(0);
+				if (rep1 instanceof Function) {
+					String lang1 = getLangType((Function) rep1, index);
+					return lang1;
+				}
+			}
+			return "NULL";
+		}
+		return "NULL";
+	}
 
 //	/**
 //	 * Infers the type of a projected term.
