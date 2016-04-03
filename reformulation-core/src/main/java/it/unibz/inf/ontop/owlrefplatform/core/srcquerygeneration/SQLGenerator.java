@@ -198,61 +198,35 @@ public class SQLGenerator implements SQLQueryGenerator {
 				.put(INTEGER, DOUBLE, DOUBLE)
 				.put(INTEGER, DECIMAL, DECIMAL)
 				.put(INTEGER, INTEGER, INTEGER)
-				//.put(COL_TYPE.INTEGER), COL_TYPE.REAL), COL_TYPE.REAL)
+				//.put(COL_TYPE.INTEGER, COL_TYPE.REAL, COL_TYPE.REAL)
 				.put(DECIMAL, DECIMAL, DECIMAL)
 				.put(DECIMAL, DOUBLE, DOUBLE)
-				//.put(COL_TYPE.DECIMAL), COL_TYPE.REAL), COL_TYPE.REAL))
+				//.put(COL_TYPE.DECIMAL, COL_TYPE.REAL, COL_TYPE.REAL)
 				.put(DECIMAL, INTEGER, DECIMAL)
 				
 				.put(DOUBLE, DECIMAL, DOUBLE)
 				.put(DOUBLE, DOUBLE, DOUBLE)
-				//.put(COL_TYPE.DOUBLE), COL_TYPE.REAL), COL_TYPE.REAL))
+				//.put(COL_TYPE.DOUBLE, COL_TYPE.REAL, COL_TYPE.REAL)
 				.put(DOUBLE, INTEGER, DOUBLE)
 				
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL))
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.REAL))
+				//.put(COL_TYPE.REAL, COL_TYPE.DECIMAL, COL_TYPE.REAL)
+				//.put(COL_TYPE.REAL, COL_TYPE.DOUBLE, COL_TYPE.REAL)
+				//.put(COL_TYPE.REAL, COL_TYPE.REAL, COL_TYPE.REAL)
+				//.put(COL_TYPE.REAL, COL_TYPE.INTEGER, COL_TYPE.REAL)
 				
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-				
-		
+
 				.build();
-		
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-		
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL)
-		
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE)
-		
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL)
-		
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
 	}
 
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
 	 * method descriptions. Observe that the SQL itself will be done by
-	 * {@link #generateQuery(DatalogProgram, List, String, Map, List, Set)}
+	 * {@link #generateQuery}
 	 *
 	 * @param queryProgram
 	 *            This is an arbitrary Datalog Program. In this program ans
@@ -353,7 +327,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Main method. Generates the full SQL query, taking into account
 	 * limit/offset/order by. An important part of this program is
-	 * {@link #createViewFrom(Predicate, DBMetadata, Map, DatalogProgram, List)}
+	 * {@link #createViewFrom}
 	 * that will create a view for every ans prodicate in the Datalog input
 	 * program.
 	 *
@@ -370,7 +344,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param ruleIndexByBodyPredicate
 	 * @param predicatesInBottomUp
 	 *            The topologically ordered predicates in
-	 *            <code> query </query>. {@link #DatalogDependencyGraphGenerator}
+	 *            <code> query </query>.
 	 * @param extensionalPredicates
 	 *            The predicates that are not defined by any rule in <code>
 	 *            query </query>
@@ -392,7 +366,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * ANS i > 1
 		 */
 
-		// create a view for every ans prodicate in the Datalog input program.
+		// create a view for every ans predicate in the Datalog input program.
 		while (i < numPreds - 1) {
 			Predicate pred = predicatesInBottomUp.get(i);
 			if (extensionalPredicates.contains(pred)) {
@@ -562,253 +536,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
-     */
-	@Deprecated
-	private boolean isStringOperationPredicate(Predicate typePred) {
-		if (typePred instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) typePred) {
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-				case RAND:
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-					return false;
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return true;
-				default:
-					throw new IllegalStateException("Unknown operator");
-			}
-		}
-		else {
-			return false;
-		}
-	}
-	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
-	 */
-	@Deprecated
-	private boolean isAggregationPredicate(Predicate functionSymbol) {
-		if (functionSymbol instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) functionSymbol) {
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-				case RAND:
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return false;
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-					return true;
-				default:
-					throw new IllegalStateException("Unknown operator");
-			}
-		}
-		else {
-			return false;
-		}
-	}
-
-
-	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
-	 */
-	@Deprecated
-	private boolean isArithmeticPredicate(Predicate functionSymbol) {
-		if (functionSymbol instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) functionSymbol) {
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-					// TODO: include RAND? 
-				case RAND:
-					return true;
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return false;
-				default:
-					throw new IllegalStateException("Unknown operator");
-			}
-		}
-		else {
-			return false;
-		}
-	}
-
-	/**
 	 * Unifies the input types
 	 *
 	 * For instance,
@@ -870,7 +597,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Takes 1 single Datalog rule <code> cq </code> and return the SQL
 	 * translation of that rule. It is a helper method for
-	 * {@link #generateQuery(DatalogProgram, List, String, Map, List, Set)}
+	 * {@link #generateQuery}
 	 *
 	 * @param cq
 	 * @param signature
@@ -916,11 +643,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (conditions.isEmpty()) {
 			return "";
 		}
-		//The "addAll" methods does not compile on travis-CI:
-		// inconvertible types
-		// required: java.util.Collection<? extends Function>
-		// found:    java.util.List<Term>
-		//condFunctions.addAll((Collection<? extends Function>) conditions);
 
 		for(Term cond : conditions){
 			condFunctions.add((Function) cond);
@@ -1037,8 +759,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * <ul>
 	 * <li>QConceptView = definition1 UNION definition2
 	 * </ul>
-	 * This view is stored in the <code>metadata </code>. See
-	 * {@link #DBMetadata}
+	 * This view is stored in the <code>metadata </code>. See DBMetadata
 	 *
 	 * The idea is to use the view definition in the case of Union in the
 	 * Optionals/LeftJoins
@@ -1070,14 +791,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		int headArity = 0;
 
-		List<COL_TYPE> headDataTypes = getCastDataTypes(ruleList);
+		List<COL_TYPE> castDataTypes = getCastDataTypes(ruleList);
 
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
-			// FIXME: the arity of the predicate might be wrong, should be fixed
-			// in the unfolder
-			// headArity = cqHead.getArity();
 			headArity = cqHead.getTerms().size();
 
 			List<String> varContainer = cqHead.getVariables().stream()
@@ -1086,7 +804,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					isAns1, headDataTypes, subQueryDefinitions);
+					isAns1, castDataTypes, subQueryDefinitions);
 
 			sqls.add(sqlQuery);
 		}
@@ -1103,8 +821,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				.map(ParserViewDefinition::getID)
 				.collect(Collectors.toSet());
 
-		//String viewname = String.format(VIEW_ANS_NAME, pred);
-		// String viewname = "Q" + pred + "View";
 		String safePredicateName = escapeName(pred.getName());
 		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX,
 				alreadyAllocatedViewNames);
@@ -1336,9 +1052,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				JOIN_KEYWORD = "JOIN";
 			}
 
-//			String JOIN = "\n" + indent + "(\n" + indent + "%s\n" + indent
-//					+ JOIN_KEYWORD + "\n" + indent + "%s\n" + indent + ")";
-
 			String JOIN = "" + indent + "" + indent + "%s\n" + indent
 					+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
 
@@ -1507,8 +1220,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return new HashSet<Variable>();
 		}
 		/*
-		 * we have an alebra opertaor (join or left join) if its a join, we need
-		 * to collect all the varaibles of each nested atom., if its a left
+		 * we have an algebra operator (join or left join) if its a join, we need
+		 * to collect all the variables of each nested atom., if its a left
 		 * join, only of the first data/algebra atom (the left atom).
 		 */
 		boolean isLeftJoin = false;
@@ -1727,7 +1440,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		final String varName = sqladapter.nameTopVariable(signatureVarName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
 		sqlVariableNames.add(varName);
 
-		String mainColumn = null;
+		String mainColumn;
 
 		String mainTemplate = "%s AS %s";
 
@@ -1897,50 +1610,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		return "NULL";
 	}
-
-//	/**
-//	 * Infers the type of a projected term.
-//	 *
-//	 * @param projectedTerm
-//	 * @param varName Name of the variable
-//	 * @param index Used when the term correspond to a column name
-//	 * @return A string like "5 AS ageQuestType"
-//	 */
-//	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
-//										  QueryAliasIndex index) {
-//		COL_TYPE typeCode;
-//		String type;
-//
-//		if (projectedTerm instanceof Function) {
-//			type = getCompositeTermType((Function) projectedTerm);
-//			//type = String.valueOf(typeCode);
-//		}
-//		else if (projectedTerm instanceof URIConstant) {
-//			typeCode = COL_TYPE.OBJECT;
-//			type = String.valueOf(typeCode.getQuestCode());
-//
-//		}
-//		else if (projectedTerm == OBDAVocabulary.NULL) {
-//			typeCode = COL_TYPE.NULL;
-//			type = String.valueOf(typeCode.getQuestCode());
-//
-//		}
-//		else if (projectedTerm instanceof Variable) {
-//			type = getTypeFromVariable((Variable) projectedTerm, index, varName);
-//		}
-//		else {
-//			// Unusual term
-//			throw new RuntimeException("Cannot generate SELECT for term: "
-//					+ projectedTerm.toString());
-//		}
-//		//int code = type.getQuestCode();
-//
-//		if(type == null || type.equals("null")){
-//			throw new NullPointerException();
-//		}
-//
-//		return String.format(typeStrForSELECT, type, varName);
-//	}
 
 	/**
 	 * Infers the type of a projected term.
@@ -2226,28 +1895,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 		}
 		return toReturn;
-	}
-
-
-	/**
-	 * @param functionSymbol
-	 * @return
-	 */
-	@Deprecated
-	private int dataTypePredicateToSQLType(Predicate functionSymbol) {
-		String functionName = functionSymbol.getName();
-
-		/**
-		 * Aggregation case
-		 */
-		if (isAggregationPredicate(functionSymbol)) {
-			return java.sql.Types.DECIMAL;
-		}
-
-		COL_TYPE colType = dtfac.getDatatype(functionName);
-		int sqlType = obdaDataFactory.getJdbcTypeMapper().getSQLType(colType);
-
-		return sqlType;
 	}
 
 	private boolean isStringColType(Term term, QueryAliasIndex index) {
@@ -2800,8 +2447,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				relationId = tableId;
 
-				//String simpleTableViewName = String.format(VIEW_NAME,
-				// tableName, String.valueOf(dataTableCount));
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
 
 				String safePredicateName = escapeName(predicate.getName());
@@ -2907,10 +2552,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		public Optional<RelationDefinition> getDefinition(RelationID relationId) {
 			return Optional.ofNullable(dataDefinitionsById.get(relationId));
-		}
-
-		public RelationID getView(Function atom) {
-			return viewNames.get(atom);
 		}
 
 		public String getColumnReference(Function atom, int column) {
