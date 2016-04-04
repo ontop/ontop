@@ -71,6 +71,8 @@ public class RedundantJoinTest {
                 .getResultingQuery();
         System.out.println("\n After optimization: \n" +  optimizedQuery);
 
+
+
         // TODO: continue
     }
 
