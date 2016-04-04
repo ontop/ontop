@@ -66,6 +66,7 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
 		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
 		datatypeMap.put(COL_TYPE.INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.DECIMAL, Types.DECIMAL); //BC: needs to be checked
 		datatypeMap.put(COL_TYPE.LONG, Types.BIGINT);
 		datatypeMap.put(COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
 		datatypeMap.put(COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);

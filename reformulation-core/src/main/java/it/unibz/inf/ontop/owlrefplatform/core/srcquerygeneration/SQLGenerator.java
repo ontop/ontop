@@ -22,12 +22,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.HSQLDBDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.*;
+
+import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -59,31 +61,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final long serialVersionUID = 7477161929752147045L;
 
 	/**
-	 * Operator symbols
-	 */
-	private static final String EQ_OPERATOR = "%s = %s";
-	private static final String NEQ_OPERATOR = "%s <> %s";
-	private static final String GT_OPERATOR = "%s > %s";
-	private static final String GTE_OPERATOR = "%s >= %s";
-	private static final String LT_OPERATOR = "%s < %s";
-	private static final String LTE_OPERATOR = "%s <= %s";
-	private static final String AND_OPERATOR = "%s AND %s";
-	private static final String OR_OPERATOR = "%s OR %s";
-	private static final String NOT_OPERATOR = "NOT %s";
-	private static final String IS_NULL_OPERATOR = "%s IS NULL";
-	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
-
-	private static final String ADD_OPERATOR = "%s + %s";
-	private static final String SUBTRACT_OPERATOR = "%s - %s";
-	private static final String MULTIPLY_OPERATOR = "%s * %s";
-
-	private static final String LIKE_OPERATOR = "%s LIKE %s";
-
-	private static final String INDENT = "    ";
-
-	private static final String IS_TRUE_OPERATOR = "%s IS TRUE";
-
-	/**
 	 * Formatting template
 	 */
     //private static final String VIEW_NAME = "Q%sVIEW%s";
@@ -98,12 +75,18 @@ public class SQLGenerator implements SQLQueryGenerator {
     private static final String LANG_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
+	private static final String INDENT = "    ";
+
+
+	// TODO: remove it
+	private static final COL_TYPE DEFAULT_TYPE_FOR_EXPRESSION_OPERATION_SUB_TERM = INTEGER;
+
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
 
 	private static final int UNDEFINED_TYPE_CODE = -1;
 
-	private ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
+	private ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> dataTypeUnifyTable;
 
 
 	private boolean generatingREPLACE = true;
@@ -125,6 +108,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
+	private final ImmutableMap<ExpressionOperation, String> operations;
+
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
 
@@ -140,7 +125,49 @@ public class SQLGenerator implements SQLQueryGenerator {
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
 		this.sqladapter = sqladapter;
-		dataTypePredicateUnifyTable = buildPredicateUnifyTable();
+		dataTypeUnifyTable = buildPredicateUnifyTable();
+
+		ImmutableMap.Builder<ExpressionOperation, String> builder = new ImmutableMap.Builder<ExpressionOperation, String>()
+				.put(ExpressionOperation.ADD, "%s + %s")
+				.put(ExpressionOperation.SUBTRACT, "%s - %s")
+				.put(ExpressionOperation.MULTIPLY, "%s * %s")
+				.put(ExpressionOperation.ABS, "ABS(%s)")
+				.put(ExpressionOperation.CEIL, sqladapter.ceil())
+				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
+				.put(ExpressionOperation.ROUND, sqladapter.round())
+				.put(ExpressionOperation.RAND, sqladapter.rand())
+
+				.put(ExpressionOperation.EQ, "%s = %s")
+				.put(ExpressionOperation.NEQ, "%s <> %s")
+				.put(ExpressionOperation.GT, "%s > %s")
+				.put(ExpressionOperation.GTE, "%s >= %s")
+				.put(ExpressionOperation.LT, "%s < %s")
+				.put(ExpressionOperation.LTE, "%s <= %s")
+				.put(ExpressionOperation.AND, "%s AND %s")
+				.put(ExpressionOperation.OR, "%s OR %s")
+				.put(ExpressionOperation.NOT, "NOT %s")
+				.put(ExpressionOperation.IS_NULL, "%s IS NULL")
+				.put(ExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")
+				.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
+				.put(ExpressionOperation.SQL_LIKE, "%s LIKE %s")
+				.put(ExpressionOperation.STR_STARTS, sqladapter.strStartsOperator())
+				.put(ExpressionOperation.STR_ENDS, sqladapter.strEndsOperator())
+				.put(ExpressionOperation.CONTAINS, sqladapter.strContainsOperator())
+
+				.put(ExpressionOperation.NOW, sqladapter.dateNow());
+
+		try {
+			builder.put(ExpressionOperation.STRUUID, sqladapter.strUuid());
+		} catch (UnsupportedOperationException e) {
+			// ignore
+		}
+		try {
+			builder.put(ExpressionOperation.UUID, sqladapter.uuid());
+		} catch (UnsupportedOperationException e) {
+			// ignore
+		}
+
+		operations = builder.build();
 	}
 
 
@@ -166,67 +193,40 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, uriRefIds);
 	}
 
-	private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
-		return new ImmutableTable.Builder<Predicate, Predicate, Predicate>()
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER))
-				//.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+	private ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> buildPredicateUnifyTable() {
+		return new ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE>()
+				.put(INTEGER, DOUBLE, DOUBLE)
+				.put(INTEGER, DECIMAL, DECIMAL)
+				.put(INTEGER, INTEGER, INTEGER)
+				//.put(COL_TYPE.INTEGER, COL_TYPE.REAL, COL_TYPE.REAL)
+				.put(DECIMAL, DECIMAL, DECIMAL)
+				.put(DECIMAL, DOUBLE, DOUBLE)
+				//.put(COL_TYPE.DECIMAL, COL_TYPE.REAL, COL_TYPE.REAL)
+				.put(DECIMAL, INTEGER, DECIMAL)
 				
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				//.put(dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL))
+				.put(DOUBLE, DECIMAL, DOUBLE)
+				.put(DOUBLE, DOUBLE, DOUBLE)
+				//.put(COL_TYPE.DOUBLE, COL_TYPE.REAL, COL_TYPE.REAL)
+				.put(DOUBLE, INTEGER, DOUBLE)
 				
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				//.put(dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				.put(dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE), dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER), dtfac.getTypePredicate(Predicate.COL_TYPE.DOUBLE))
-				
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL))
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
-				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.REAL))
+				//.put(COL_TYPE.REAL, COL_TYPE.DECIMAL, COL_TYPE.REAL)
+				//.put(COL_TYPE.REAL, COL_TYPE.DOUBLE, COL_TYPE.REAL)
+				//.put(COL_TYPE.REAL, COL_TYPE.REAL, COL_TYPE.REAL)
+				//.put(COL_TYPE.REAL, COL_TYPE.INTEGER, COL_TYPE.REAL)
 				
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
 				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-				
-		
+
 				.build();
-		
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-//		.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-		
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL)
-		
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE)
-		
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL)
-		
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-//		.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
 	}
 
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
 	 * method descriptions. Observe that the SQL itself will be done by
-	 * {@link #generateQuery(DatalogProgram, List, String, Map, List, Set)}
+	 * {@link #generateQuery}
 	 *
 	 * @param queryProgram
 	 *            This is an arbitrary Datalog Program. In this program ans
@@ -327,7 +327,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Main method. Generates the full SQL query, taking into account
 	 * limit/offset/order by. An important part of this program is
-	 * {@link #createViewFrom(Predicate, DBMetadata, Map, DatalogProgram, List)}
+	 * {@link #createViewFrom}
 	 * that will create a view for every ans prodicate in the Datalog input
 	 * program.
 	 *
@@ -344,7 +344,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param ruleIndexByBodyPredicate
 	 * @param predicatesInBottomUp
 	 *            The topologically ordered predicates in
-	 *            <code> query </query>. {@link #DatalogDependencyGraphGenerator}
+	 *            <code> query </query>.
 	 * @param extensionalPredicates
 	 *            The predicates that are not defined by any rule in <code>
 	 *            query </query>
@@ -366,7 +366,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * ANS i > 1
 		 */
 
-		// create a view for every ans prodicate in the Datalog input program.
+		// create a view for every ans predicate in the Datalog input program.
 		while (i < numPreds - 1) {
 			Predicate pred = predicatesInBottomUp.get(i);
 			if (extensionalPredicates.contains(pred)) {
@@ -394,7 +394,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules
 				.size());
 
-		List<Predicate> headDataTypes = getHeadDataTypes(ansrules);
+		List<COL_TYPE> castDataTypes = getCastDataTypes(ansrules);
 		
 		/* Main loop, constructing the SPJ query for each CQ */
 
@@ -405,7 +405,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * form of a normal SQL algebra as possible,
 			 */
 			boolean isAns1 = true;
-			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, headDataTypes, subQueryDefinitions);
+			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, castDataTypes, subQueryDefinitions);
 
 			queryStrings.add(querystr);
 		}
@@ -417,16 +417,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 	/**
-	 * @param rules
-	 * @return
+	 * Gets the column datatypes that will be used for casting.
+	 *
+	 * If there are multiple rules with different datatypes, it takes
+	 * their common denominators.
 	 */
-	private List<Predicate> getHeadDataTypes(Collection<CQIE> rules) {
+	private List<COL_TYPE> getCastDataTypes(Collection<CQIE> rules) {
 		int ansArity = rules.iterator().next().getHead().getTerms().size();
 
-		List<Predicate> ansTypes = Lists.newArrayListWithCapacity(ansArity);
+		List<COL_TYPE> ansCastTypes = Lists.newArrayListWithCapacity(ansArity);
 
 		for(int k = 0; k < ansArity; k++){
-			ansTypes.add(null);
+			ansCastTypes.add(null);
 		}
 
 		for(CQIE rule : rules){
@@ -434,425 +436,104 @@ public class SQLGenerator implements SQLQueryGenerator {
 			List<Term> terms = head.getTerms();
 			for (int j = 0; j < terms.size(); j++) {
 				Term term = terms.get(j);
-				if(term instanceof BNode){
-					ansTypes.set(j, dtfac.getTypePredicate(Predicate.COL_TYPE.STRING));
-					// TODO: remove it
-					throw new IllegalArgumentException();
 
-				} else if(term instanceof Function){
-					Function f = (Function)term;
-					Predicate typePred = f.getFunctionSymbol();
-
-					if(isStringOperationPredicate(typePred)){
-                        Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(Predicate.COL_TYPE.LITERAL));
-                        ansTypes.set(j, unifiedType);
-                    } else if (f.isDataTypeFunction() || typePred.getName().equals(OBDAVocabulary.QUEST_URI)){
-						Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
-						ansTypes.set(j, unifiedType);
-
-					} else if (typePred instanceof BNodePredicate){
-						ansTypes.set(j, dtfac.getTypePredicate(Predicate.COL_TYPE.STRING));
-
-					}else if (  (typePred.getName().equals(ExpressionOperation.AVG))||
-							(typePred.getName().equals(ExpressionOperation.SUM)) ||
-							(typePred.getName().equals(ExpressionOperation.MAX)) ||
-							(typePred.getName().equals(ExpressionOperation.MIN))) {
-
-                        Term agTerm = f.getTerm(0);
-                        if (agTerm instanceof Function) {
-                            Function agFunc = (Function) agTerm;
-                            typePred = agFunc.getFunctionSymbol();
-                            Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
-                            ansTypes.set(j, unifiedType);
-
-                        } else {
-                            Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(Predicate.COL_TYPE.DECIMAL));
-                            ansTypes.set(j, unifiedType);
-                        }
-                    }else if(isArithmeticPredicate(typePred)){
-                        Predicate unifiedPredicate = getHeadDataTypesOfArithmeticOperations(f);
-                        ansTypes.set(j, unifiedPredicate);
-                    } else {
-						throw new IllegalArgumentException();
-					}
-
-				} else if(term instanceof Variable){
-					// FIXME: properly hanldle the types by checking the metadata
-					ansTypes.set(j, dtfac.getTypePredicate(Predicate.COL_TYPE.STRING));
-				} else if(term instanceof ValueConstant){
-					Predicate.COL_TYPE type = ((ValueConstant)term).getType();
-					Predicate typePredicate =  dtfac.getTypePredicate(type);
-					Predicate unifiedType = unifyTypes(ansTypes.get(j), typePredicate);
-					ansTypes.set(j, unifiedType);
-				} else if(term instanceof URIConstant){
-					ansTypes.set(j, dtfac.getTypePredicate(Predicate.COL_TYPE.STRING));
-				}
+				ansCastTypes.set(j, unifyTypes(ansCastTypes.get(j), getCastDataType(term)));
 			}
-
-
-
 		}
-		return ansTypes;
+		return ansCastTypes;
 	}
 
 	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
+	 * TODO: explain
      */
-	@Deprecated
-	private boolean isStringOperationPredicate(Predicate typePred) {
-		if (typePred instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) typePred) {
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-				case RAND:
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-					return false;
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return true;
-				default:
-					throw new IllegalStateException("Unknown operator");
-			}
-		}
-		else {
-			return false;
-		}
-	}
-	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
-	 */
-	@Deprecated
-	private boolean isAggregationPredicate(Predicate functionSymbol) {
-		if (functionSymbol instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) functionSymbol) {
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-				case RAND:
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return false;
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-					return true;
-				default:
-					throw new IllegalStateException("Unknown operator");
-			}
-		}
-		else {
-			return false;
-		}
-	}
-
-
-	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
-	 */
-	@Deprecated
-	private boolean isBooleanPredicate(Predicate functionSymbol) {
-		if (functionSymbol instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) functionSymbol) {
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-					return true;
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-				case RAND:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return false;
-				default:
-					throw new IllegalStateException("Unknown operator");
-			}
-		}
-		else {
-			return false;
+	private COL_TYPE getCastDataType(Term term) {
+		COL_TYPE type = getHeadDataType(term);
+		switch (type) {
+			case OBJECT:
+			case BNODE:
+			case NULL:
+				// TODO: should we return LITERAL?
+				return STRING;
+			default:
+				return type;
 		}
 	}
 
 	/**
-	 * Temporary method  introduced for merging purposes.
-	 * To be replaced by a switch
-	 */
-	@Deprecated
-	private boolean isArithmeticPredicate(Predicate functionSymbol) {
-		if (functionSymbol instanceof ExpressionOperation) {
-			switch ((ExpressionOperation) functionSymbol) {
-				case MINUS:
-				case ADD:
-				case SUBTRACT:
-				case MULTIPLY:
-				case DIVIDE:
-				case ABS:
-				case ROUND:
-				case CEIL:
-				case FLOOR:
-					// TODO: include RAND? 
-				case RAND:
-					return true;
-				case AND:
-				case OR:
-				case NOT:
-				case EQ:
-				case NEQ:
-				case GTE:
-				case GT:
-				case LTE:
-				case LT:
-				case IS_NULL:
-				case IS_NOT_NULL:
-				case IS_TRUE:
-				case STR_STARTS:
-				case STR_ENDS:
-				case CONTAINS:
-				case MD5:
-				case SHA1:
-				case SHA512:
-				case SHA256:
-				case NOW:
-				case YEAR:
-				case DAY:
-				case MONTH:
-				case HOURS:
-				case MINUTES:
-				case SECONDS:
-				case TZ:
-				case SPARQL_STR:
-				case SPARQL_DATATYPE:
-				case SPARQL_LANG:
-				case UUID:
-				case STRUUID:
-				case IS_LITERAL:
-				case IS_IRI:
-				case IS_BLANK:
-				case LANGMATCHES:
-				case REGEX:
-				case SQL_LIKE:
-				case QUEST_CAST:
-				case AVG:
-				case SUM:
-				case MAX:
-				case MIN:
-				case COUNT:
-				case STRLEN:
-				case UCASE:
-				case LCASE:
-				case SUBSTR:
-				case STRBEFORE:
-				case STRAFTER:
-				case REPLACE:
-				case CONCAT:
-				case ENCODE_FOR_URI:
-					return false;
-				default:
-					throw new IllegalStateException("Unknown operator");
+	 * Extracts the type from a term found in a head
+     */
+	private COL_TYPE getHeadDataType(Term term) {
+		if(term instanceof Function){
+			Function f = (Function)term;
+			Predicate typePred = f.getFunctionSymbol();
+
+			if(typePred instanceof ExpressionOperation){
+				return getHeadTypesOfExpressionOperator((ExpressionOperation) typePred, f.getTerms());
+			} else if (f.isDataTypeFunction()){
+				return f.getFunctionSymbol().getType(0);
+			} else if (typePred instanceof URITemplatePredicate) {
+				return OBJECT;
+			} else if (typePred instanceof BNodePredicate){
+				return BNODE;
+			}
+			else {
+				throw new IllegalArgumentException("Unexcepted functional term: " + term);
 			}
 		}
+		/**
+		 * If a variable is found as a top term in a head, returns the most general COL_TYPE
+		 * (for casting).
+		 */
+		else if(term instanceof Variable){
+			return LITERAL;
+		} else if(term instanceof ValueConstant){
+			/**
+			 * Deals with the ugly definition of the NULL constant.
+			 * COL_TYPE of NULL should be NULL!
+			 */
+			if (term == OBDAVocabulary.NULL) {
+				return NULL;
+			}
+			else {
+				return ((ValueConstant) term).getType();
+			}
+		} else if(term instanceof URIConstant){
+			return OBJECT;
+		}
 		else {
-			return false;
+			throw new IllegalStateException("Unexpected term: " + term);
+		}
+
+	}
+
+
+	private COL_TYPE getHeadTypesOfExpressionOperator(ExpressionOperation operator, List<Term> terms) {
+
+		if (operator.getExpressionType() != null) {
+			return operator.getExpressionType();
+		}
+		switch (operator.getArity()) {
+			case 0:
+				// No type
+				return null;
+			case 1:
+				return getSubTermDatatype(operator, terms, 0);
+			case 2:
+				COL_TYPE type1 = getSubTermDatatype(operator, terms, 0);
+				COL_TYPE type2 = getSubTermDatatype(operator, terms, 1);
+				return unifyTypes(type1, type2);
+			default:
+				throw new RuntimeException("Arity >2 are not yet supported. Operator: " + operator);
 		}
 	}
 
-	private Predicate getHeadDataTypesOfArithmeticOperations(Term t){
-
-        Predicate type1 = null;
-        Predicate type2 = null;
-        Predicate type = null;
-
-        Function f = null;
-
-
-        if (t instanceof  Variable){
-            return type = dtfac.getTypePredicate(Predicate.COL_TYPE.INTEGER);
-        }else if(t instanceof ValueConstant) {
-            Predicate.COL_TYPE ty = ((ValueConstant) t).getType();
-            return type = dtfac.getTypePredicate(ty);
-        }else if(t instanceof Function){
-            f = (Function) t;
-
-            if(f.isDataTypeFunction()){
-                return type = f.getFunctionSymbol();
-            }else {
-                type1 = getHeadDataTypesOfArithmeticOperations((Term) (f.getTerm(0)));
-                type2 = getHeadDataTypesOfArithmeticOperations((Term) (f.getTerm(1)));
-                type = unifyTypes(type1, type2);
-            }
-        }
-
-        return type;
-
-    }
+	private COL_TYPE getSubTermDatatype(ExpressionOperation operator, List<Term> terms, int termIndex) {
+		COL_TYPE predefinedType = operator.getType(0);
+		return predefinedType != null
+				? predefinedType
+				// TODO: make the operator provide its default type for its arguments!
+				: getHeadDataType(terms.get(termIndex));
+	}
 
 	/**
 	 * Unifies the input types
@@ -863,24 +544,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * [int, varchar] -> varchar
 	 * [int, int] -> int
 	 *
-	 * @param predicate
-	 * @param typePred
 	 * @return
 	 */
-	private Predicate unifyTypes(Predicate type1, Predicate type2) {
+	private COL_TYPE unifyTypes(COL_TYPE type1, COL_TYPE type2) {
 
 		if(type1 == null){
 			return type2;
 		}
 		else if(type1.equals(type2)){
 			return type1;
-		} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
-			return dataTypePredicateUnifyTable.get(type1, type2);
+		} else if(dataTypeUnifyTable.contains(type1, type2)){
+			return dataTypeUnifyTable.get(type1, type2);
 		}else if(type2 == null){
 			return type1;
 			//throw new NullPointerException("type2 cannot be null");
 		} else {
-			return dtfac.getTypePredicate(Predicate.COL_TYPE.STRING);
+			return STRING;
 		}
 
 	}
@@ -918,17 +597,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Takes 1 single Datalog rule <code> cq </code> and return the SQL
 	 * translation of that rule. It is a helper method for
-	 * {@link #generateQuery(DatalogProgram, List, String, Map, List, Set)}
+	 * {@link #generateQuery}
 	 *
 	 * @param cq
 	 * @param signature
-	 * @param headDataTypes
+	 * @param castDatatypes
 	 * @param subQueryDefinitions
 	 * @return
 	 * @throws OBDAException
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1, List<Predicate> headDataTypes,
+											  boolean isAns1, List<COL_TYPE> castDatatypes,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions) throws OBDAException {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
@@ -942,7 +621,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String FROM = getFROM(cq.getBody(), index);
 		String WHERE = getWHERE(cq.getBody(), index);
 
-		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, headDataTypes);
+		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, castDatatypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);
 
@@ -964,11 +643,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (conditions.isEmpty()) {
 			return "";
 		}
-		//The "addAll" methods does not compile on travis-CI:
-		// inconvertible types
-		// required: java.util.Collection<? extends Function>
-		// found:    java.util.List<Term>
-		//condFunctions.addAll((Collection<? extends Function>) conditions);
 
 		for(Term cond : conditions){
 			condFunctions.add((Function) cond);
@@ -1085,8 +759,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * <ul>
 	 * <li>QConceptView = definition1 UNION definition2
 	 * </ul>
-	 * This view is stored in the <code>metadata </code>. See
-	 * {@link #DBMetadata}
+	 * This view is stored in the <code>metadata </code>. See DBMetadata
 	 *
 	 * The idea is to use the view definition in the case of Union in the
 	 * Optionals/LeftJoins
@@ -1118,14 +791,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		int headArity = 0;
 
-		List<Predicate> headDataTypes = getHeadDataTypes(ruleList);
+		List<COL_TYPE> castDataTypes = getCastDataTypes(ruleList);
 
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
-			// FIXME: the arity of the predicate might be wrong, should be fixed
-			// in the unfolder
-			// headArity = cqHead.getArity();
 			headArity = cqHead.getTerms().size();
 
 			List<String> varContainer = cqHead.getVariables().stream()
@@ -1134,7 +804,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					isAns1, headDataTypes, subQueryDefinitions);
+					isAns1, castDataTypes, subQueryDefinitions);
 
 			sqls.add(sqlQuery);
 		}
@@ -1151,8 +821,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				.map(ParserViewDefinition::getID)
 				.collect(Collectors.toSet());
 
-		//String viewname = String.format(VIEW_ANS_NAME, pred);
-		// String viewname = "Q" + pred + "View";
 		String safePredicateName = escapeName(pred.getName());
 		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX,
 				alreadyAllocatedViewNames);
@@ -1218,7 +886,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (isUnary(atom)) {
 			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
 			// added also for IS TRUE
-			String expressionFormat = getBooleanOperatorString(functionSymbol);
+			String expressionFormat = operations.get(functionSymbol);
 			Term term = atom.getTerm(0);
 			String column = getSQLString(term, index, false);
 			if (expressionFormat.contains("NOT %s")) {
@@ -1263,47 +931,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			return String.format(expressionFormat, column);
 		} else if (isBinary(atom)) {
-			if (isBooleanPredicate(atom.getFunctionSymbol())) {
-				// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
-				// _
-				String expressionFormat = getBooleanOperatorString(functionSymbol);
-				Term left = atom.getTerm(0);
-				Term right = atom.getTerm(1);
-				String leftOp = getSQLString(left, index, true);
-				String rightOp = getSQLString(right, index, true);
+			// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
+			// _
+			String expressionFormat = operations.get(functionSymbol);
+			Term left = atom.getTerm(0);
+			Term right = atom.getTerm(1);
+			String leftOp = getSQLString(left, index, true);
+			String rightOp = getSQLString(right, index, true);
 
-				return String.format("(" + expressionFormat + ")", leftOp,
-						rightOp);
-
-				// TODO: do this more efficient !!!!
-
-				/*
-				 * if (!leftOp.equals("'null'") && !rightOp.equals("'null'")){
-				 * return String.format("(" + expressionFormat + ")", leftOp,
-				 * rightOp); }else if (leftOp.equals("'null'") &&
-				 * !rightOp.equals("'null'")){ expressionFormat=
-				 * getBooleanOperatorString(ExpressionOperation.IS_NULL); return
-				 * String.format( expressionFormat , rightOp); }else if
-				 * (!leftOp.equals("'null'") && rightOp.equals("'null'")){
-				 * expressionFormat=
-				 * getBooleanOperatorString(ExpressionOperation.IS_NULL); return
-				 * String.format( expressionFormat , leftOp); }else{ return
-				 * "(1=1)"; }
-				 */
-
-			} else if (isArithmeticPredicate(atom.getFunctionSymbol())) {
-				// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
-				String expressionFormat = getNumericalOperatorString(functionSymbol);
-				Term left = atom.getTerm(0);
-				Term right = atom.getTerm(1);
-				String leftOp = getSQLString(left, index, true);
-				String rightOp = getSQLString(right, index, true);
-				return String.format("(" + expressionFormat + ")", leftOp,
-						rightOp);
-			} else {
-				throw new RuntimeException("The binary function "
-						+ functionSymbol.toString() + " is not supported yet!");
-			}
+			return String.format("(" + expressionFormat + ")", leftOp,
+					rightOp);
 		} else {
 			if (functionSymbol == ExpressionOperation.REGEX) {
 				boolean caseinSensitive = false;
@@ -1414,9 +1051,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				JOIN_KEYWORD = "JOIN";
 			}
-
-//			String JOIN = "\n" + indent + "(\n" + indent + "%s\n" + indent
-//					+ JOIN_KEYWORD + "\n" + indent + "%s\n" + indent + ")";
 
 			String JOIN = "" + indent + "" + indent + "%s\n" + indent
 					+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
@@ -1586,8 +1220,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return new HashSet<Variable>();
 		}
 		/*
-		 * we have an alebra opertaor (join or left join) if its a join, we need
-		 * to collect all the varaibles of each nested atom., if its a left
+		 * we have an algebra operator (join or left join) if its a join, we need
+		 * to collect all the variables of each nested atom., if its a left
 		 * join, only of the first data/algebra atom (the left atom).
 		 */
 		boolean isLeftJoin = false;
@@ -1688,7 +1322,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				Predicate.COL_TYPE type = dtfac.getDatatype(p.toString());
+				COL_TYPE type = dtfac.getDatatype(p.toString());
 				return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1721,11 +1355,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *
 	 * @param query
 	 *            the query
-	 * @param headDataTypes
+	 * @param castDataTypes
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-								   QueryAliasIndex index, boolean distinct, boolean isAns1, List<Predicate> headDataTypes)
+								   QueryAliasIndex index, boolean distinct, boolean isAns1,
+								   List<COL_TYPE> castDataTypes)
 			throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
@@ -1746,7 +1381,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 
-		Iterator<Predicate> headDataTypeIter = headDataTypes.iterator();
+		Iterator<COL_TYPE> castDataTypeIter = castDataTypes.iterator();
 
 		/**
 		 * Set that contains all the variable names created on the top query.
@@ -1758,7 +1393,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (hit.hasNext()) {
 			Term ht = hit.next();
 
-			Predicate headDataTtype = headDataTypeIter.next();
+			/**
+			 * Datatype for the main column (to which it is cast).
+			 * Beware, it may defer the RDF datatype (the one of the type column).
+			 *
+			 * Why? Because most DBs (if not all) require the result table to have
+			 * one datatype per column. If the sub-queries are producing results of different types,
+			 * them there will be a difference between the type in the main column and the RDF one.
+			 */
+			COL_TYPE castDataType = castDataTypeIter.next();
 
 			String varName;
 
@@ -1773,7 +1416,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
-			String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
+			String mainColumn = getMainColumnForSELECT(ht, varName, index, castDataType, sqlVariableNames);
 			String langColumn = getLangColumnForSELECT(ht, varName, hpos,	index, sqlVariableNames);
 
 			sb.append("\n   ");
@@ -1791,13 +1434,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getMainColumnForSELECT(Term ht, String signatureVarName,
-										  QueryAliasIndex index, Predicate typePredicate,
+										  QueryAliasIndex index, COL_TYPE castDataType,
 										  Set<String> sqlVariableNames) {
 
 		final String varName = sqladapter.nameTopVariable(signatureVarName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
 		sqlVariableNames.add(varName);
 
-		String mainColumn = null;
+		String mainColumn;
 
 		String mainTemplate = "%s AS %s";
 
@@ -1816,21 +1459,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * datatype function or we need to do the CONCAT if its URI(....).
 			 */
 			Function ov = (Function) ht;
-			Predicate function = ov.getFunctionSymbol();
-			//TODO: remove this variable (removed in v1)
-			String functionString = function.toString();
+			Predicate functionSymbol = ov.getFunctionSymbol();
 
 			/*
 			 * Adding the column(s) with the actual value(s)
 			 */
-			if (function instanceof DatatypePredicate) {
+			if (ov.isDataTypeFunction()) {
 				/*
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
 				 */
 				String termStr = null;
 				int size = ov.getTerms().size();
-				if ((function instanceof Literal) || size > 2) {
+				if ((functionSymbol instanceof Literal) || size > 2) {
 					termStr = getSQLStringForTemplateFunction(ov, index);
 				} else {
 					Term term = ov.getTerms().get(0);
@@ -1843,47 +1484,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = termStr;
 
 			}
-			else if (function instanceof URITemplatePredicate) {
+			else if (functionSymbol instanceof URITemplatePredicate) {
 				// New template based URI building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 			}
-            else if (isStringOperationPredicate(function)) {
-                // Functions returning string values
-                mainColumn = getSQLString(ov, index, false);
-            }
-            else if (isArithmeticPredicate(function)){
-                // For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
-                String expressionFormat = getNumericalOperatorString(function);
-                Term left = ov.getTerm(0);
-                Term right = ov.getTerm(1);
-                String leftOp = getSQLString(left, index, true);
-                String rightOp = getSQLString(right, index, true);
-                mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
-            }
-            else if (function instanceof BNodePredicate) {
+            else if (functionSymbol instanceof BNodePredicate) {
 				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
-				/**
-				 * TODO: update this tests (not based on this function string).
-				 */
-				// Aggregates
-			} else if (functionString.equals("Count")) {
-				mainColumn = "COUNT(" + getSQLString(ov.getTerm(0), index, false) + ")";
-
-			} else if (functionString.equals("Sum")) {
-				mainColumn = "SUM(" + getSQLString(ov.getTerm(0), index, false) + ")";
-
-			} else if (functionString.equals("Avg")) {
-				mainColumn = "AVG(" + getSQLString(ov.getTerm(0), index, false) + ")";
-
-			} else if (functionString.equals("Min")) {
-				mainColumn = "MIN(" + getSQLString(ov.getTerm(0), index, false) + ")";
-
-			} else if (functionString.equals("Max")) {
-				mainColumn = "MAX(" + getSQLString(ov.getTerm(0), index, false) + ")";
-
-			} else {
+			}
+			else if (ov.isOperation()) {
+				mainColumn = getSQLString(ov, index, false);
+			}
+			else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -1898,11 +1510,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
 
-			if (typePredicate != null){
+			if (castDataType != null){
 
-				int sqlType = dataTypePredicateToSQLType(typePredicate);
-
-				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);
+				mainColumn = sqladapter.sqlCast(mainColumn, obdaDataFactory.getJdbcTypeMapper().getSQLType(castDataType));
 			}
 
 			//int sqlType = getSQLTypeForTerm(ht,index );
@@ -1929,153 +1539,111 @@ public class SQLGenerator implements SQLQueryGenerator {
         String langVariableName = sqladapter.nameTopVariable(signatureVarName, LANG_SUFFIX, sqlVariableNames);
         sqlVariableNames.add(langVariableName);
 
+		final String lang;
+
         if (ht instanceof Function) {
             Function ov = (Function) ht;
-            Predicate function = ov.getFunctionSymbol();
-
-            String lang = getLangType(ov, index);
-//
-
-            return (String.format(LANG_STR, lang, langVariableName));
+            lang = getLangType(ov, index);
         }
-
-        return  (String.format(LANG_STR, "NULL", langVariableName));
-
+		else if (ht instanceof Variable) {
+			lang = getLangFromVariable((Variable) ht, index);
+		}
+		else {
+			lang = "NULL";
+		}
+		return String.format(LANG_STR, lang, langVariableName);
     }
 
-    private String getLangType(Function func1, QueryAliasIndex index) {
 
-        Predicate pred1 = func1.getFunctionSymbol();
+	/**
+	 * http://www.w3.org/TR/sparql11-query/#idp1915512
+	 *
+	 * Functions that return a string literal do so with the string literal of the same kind as the first argument
+	 * (simple literal, plain literal with same language tag, xsd:string). This includes SUBSTR, STRBEFORE and STRAFTER.
+	 *
+	 * The function CONCAT returns a string literal based on the details of all its arguments.
+	 *
+	 * @param func1
+	 * @param index
+	 * @return
+	 */
+	private String getLangType(Function func1, QueryAliasIndex index) {
 
-        if (dtfac.isLiteral(pred1) && isBinary(func1)) {
+		Predicate pred1 = func1.getFunctionSymbol();
 
+		if (dtfac.isLiteral(pred1) && func1.getArity() == 2) {
+			Term langTerm = func1.getTerm(1);
+			if (langTerm == OBDAVocabulary.NULL) {
+				return  "NULL";
+			}
+			else if (langTerm instanceof ValueConstant) {
+				return getSQLLexicalForm((ValueConstant) langTerm);
+			}
+			else {
+				return getSQLString(langTerm, index, false);
+			}
+		}
+		else if (func1.isOperation()) {
+			if (pred1 == ExpressionOperation.CONCAT) {
+				Term term1 = func1.getTerm(0);
+				Term term2 = func1.getTerm(1);
 
-            Term langTerm = func1.getTerm(1);
-            if (langTerm == OBDAVocabulary.NULL) {
-                return  "NULL";
-            } else if (langTerm instanceof ValueConstant) {
-                return getSQLLexicalForm((ValueConstant) langTerm);
-            } else {
-                return getSQLString(langTerm, index, false);
-            }
-
-        }
-        else if (isStringOperationPredicate(pred1)) {
-
-            if(pred1.equals(ExpressionOperation.CONCAT)) {
-                Term concat1 = func1.getTerm(0);
-                Term concat2 = func1.getTerm(1);
-
-                if (concat1 instanceof Function && concat2 instanceof Function) {
-                    Function concatFunc1 = (Function) concat1;
-                    Function concatFunc2 = (Function) concat2;
-
-                    String lang1 = getLangType(concatFunc1, index);
-
-                    String lang2 = getLangType(concatFunc2, index);
-
-                    if (lang1.equals(lang2)) {
-
-                        return lang1;
-
-                    } else return "NULL";
-
-                }
-            }
-            else if(pred1.equals(ExpressionOperation.REPLACE)){
-                Term rep1 = func1.getTerm(0);
-
-
-                if (rep1 instanceof Function) {
-                    Function replFunc1 = (Function) rep1;
-
-
-                    String lang1 = getLangType(replFunc1, index);
-
-                    return lang1;
-
-
-
-                }
-
-            }
-            return "NULL";
-        }
-        else return "NULL";
-    }
-
-//	/**
-//	 * Infers the type of a projected term.
-//	 *
-//	 * @param projectedTerm
-//	 * @param varName Name of the variable
-//	 * @param index Used when the term correspond to a column name
-//	 * @return A string like "5 AS ageQuestType"
-//	 */
-//	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
-//										  QueryAliasIndex index) {
-//		COL_TYPE typeCode;
-//		String type;
-//
-//		if (projectedTerm instanceof Function) {
-//			type = getCompositeTermType((Function) projectedTerm);
-//			//type = String.valueOf(typeCode);
-//		}
-//		else if (projectedTerm instanceof URIConstant) {
-//			typeCode = COL_TYPE.OBJECT;
-//			type = String.valueOf(typeCode.getQuestCode());
-//
-//		}
-//		else if (projectedTerm == OBDAVocabulary.NULL) {
-//			typeCode = COL_TYPE.NULL;
-//			type = String.valueOf(typeCode.getQuestCode());
-//
-//		}
-//		else if (projectedTerm instanceof Variable) {
-//			type = getTypeFromVariable((Variable) projectedTerm, index, varName);
-//		}
-//		else {
-//			// Unusual term
-//			throw new RuntimeException("Cannot generate SELECT for term: "
-//					+ projectedTerm.toString());
-//		}
-//		//int code = type.getQuestCode();
-//
-//		if(type == null || type.equals("null")){
-//			throw new NullPointerException();
-//		}
-//
-//		return String.format(typeStrForSELECT, type, varName);
-//	}
+				if (term1 instanceof Function && term2 instanceof Function) {
+					String lang1 = getLangType((Function) term1, index);
+					String lang2 = getLangType((Function) term2, index);
+					if (lang1.equals(lang2))
+						return lang1;
+					else
+						return "NULL";
+				}
+			}
+			else if (pred1 == ExpressionOperation.REPLACE || pred1 == ExpressionOperation.SUBSTR ||
+					pred1 == ExpressionOperation.UCASE || pred1 == ExpressionOperation.LCASE ||
+					pred1 == ExpressionOperation.STRBEFORE || pred1 == ExpressionOperation.STRAFTER) {
+				Term rep1 = func1.getTerm(0);
+				if (rep1 instanceof Function) {
+					String lang1 = getLangType((Function) rep1, index);
+					return lang1;
+				}
+			}
+			return "NULL";
+		}
+		return "NULL";
+	}
 
 	/**
 	 * Infers the type of a projected term.
 	 *
+	 * Note this type may differ from the one used for casting the main column (in some special cases).
+	 * This type will appear as the RDF datatype.
+	 *
 	 * @param projectedTerm
 	 * @param signatureVarName Name of the variable
 	 * @param index Used when the term correspond to a column name
-	 * @param sqlVariableNames Used for creating non conflicting variable names (when they have to be shorten)
-	 * @return A string like "5 AS ageQuestType"
+	 *@param sqlVariableNames Used for creating non conflicting variable names (when they have to be shorten)  @return A string like "5 AS ageQuestType"
 	 */
 	private String getTypeColumnForSELECT(Term projectedTerm, String signatureVarName,
-										  QueryAliasIndex index, Set<String> sqlVariableNames) {
+										  QueryAliasIndex index,
+										  Set<String> sqlVariableNames) {
 
 		final String varName = sqladapter.nameTopVariable(signatureVarName, TYPE_SUFFIX, sqlVariableNames);
 		sqlVariableNames.add(varName);
 
 		String typeString = null;
-		Predicate.COL_TYPE type = null;
+		final COL_TYPE type;
 
 		if (projectedTerm instanceof Function) {
-			type = getCompositeTermType((Function) projectedTerm);
+
+			type = getHeadDataType(projectedTerm);
+			if (type == null) {
+				throw new IllegalStateException("The head datatype must not null for " + projectedTerm);
+			}
 		}
-		else if (projectedTerm instanceof URIConstant) {
-			type = Predicate.COL_TYPE.OBJECT;
-		}
-		else if (projectedTerm == OBDAVocabulary.NULL) {
-			type = Predicate.COL_TYPE.NULL;
+		else if (projectedTerm instanceof Constant) {
+			type = ((Constant) projectedTerm).getType();
 		}
 		else if (projectedTerm instanceof Variable) {
+			type = null;
 			typeString = getTypeFromVariable((Variable) projectedTerm, index);
 		}
 		else {
@@ -2097,133 +1665,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	/**
-	 * Gets the type expression for a composite term.
-	 *
-	 * There is two common form of composite terms considered here:
-	 *   1. Typed variable. For instance, "http://...#decimal(cost)"
-	 *         should return something like "5 AS costQuestType"
-	 *   2. Aggregation. For instance, "SUM(http://...#decimal(cost))"
-	 *         should return something like "5 AS totalCostQuestType"
-	 *
-	 *   Basically, it tries to infer the type by looking at function symbols.
-	 *
-	 */
-	private Predicate.COL_TYPE getCompositeTermType(Function compositeTerm) {
-		Predicate mainFunctionSymbol = compositeTerm.getFunctionSymbol();
-
-		Predicate.COL_TYPE type = null;
-
-		switch(mainFunctionSymbol.getName()) {
-			/**
-			 * Aggregation cases
-			 */
-			case "Count":
-				// Integer
-				return Predicate.COL_TYPE.INTEGER;
-			case "Sum":
-			case "Avg":
-			case "Min":
-			case "Max":
-
-				// We look at the sub-term
-				Term subTerm = compositeTerm.getTerm(0);
-
-				if (subTerm instanceof Function) {
-					Function compositeSubTerm = (Function) subTerm;
-
-					type = dtfac.getDatatype(compositeSubTerm.getFunctionSymbol().toString());
-				}
-
-				/**
-				 * Sometimes we cannot infer the type by looking at the term.
-				 *
-				 * In such a case, we cast the aggregate to a xsd:double
-				 * (any number can be promoted to a double http://www.w3.org/TR/xpath20/#promotion) .
-				 */
-				if (type == null) {
-					return Predicate.COL_TYPE.DOUBLE;
-				}
-				break;
-
-			/**
-			 * Not a (known) aggregation function symbol
-			 */
-			default:
-				if (mainFunctionSymbol instanceof URITemplatePredicate) {
-					type = Predicate.COL_TYPE.OBJECT;
-				}else if(isStringOperationPredicate(mainFunctionSymbol)){
-                    if (mainFunctionSymbol.equals(ExpressionOperation.CONCAT)) {
-
-                        Predicate.COL_TYPE type1, type2;
-
-                        type1 = getTypeFromStringOperationSubTerm(compositeTerm.getTerm(0));
-                        type2 = getTypeFromStringOperationSubTerm(compositeTerm.getTerm(1));
-
-                        if (type1.equals(type2) && (type1.equals(Predicate.COL_TYPE.STRING)) ) {
-
-                            type =  type1; //only if both values are string return string
-
-                        } else{
-
-                            type = Predicate.COL_TYPE.LITERAL;
-                        }
-
-                    } else if (mainFunctionSymbol.equals(ExpressionOperation.REPLACE)){
-                        Predicate.COL_TYPE type1;
-                        type1 = getTypeFromStringOperationSubTerm(compositeTerm.getTerm(0));
-
-                        if(type1.equals(Predicate.COL_TYPE.STRING)) {
-                            type = type1;
-                        }
-                        else{
-                            type = Predicate.COL_TYPE.LITERAL;
-                        }
-
-                    }
-                    else {
-
-                        type = Predicate.COL_TYPE.LITERAL;
-                    }
-                } else if (mainFunctionSymbol instanceof BNodePredicate) {
-					type = Predicate.COL_TYPE.BNODE;
-				}else if (isArithmeticPredicate(mainFunctionSymbol)){
-                    type = Predicate.COL_TYPE.DECIMAL;
-                }
-				else {
-					type = dtfac.getDatatype(mainFunctionSymbol.toString());
-				}
-		}
-
-		if (type == null) {
-			throw new RuntimeException("Cannot generate the SQL query " +
-					"because of an untyped term: " + compositeTerm.toString());
-		}
-		return type;
-	}
-
-    private Predicate.COL_TYPE getTypeFromStringOperationSubTerm(Term term) {
-        if (term instanceof Function) {
-            return getCompositeTermType((Function) term);
-        }
-        else if (term instanceof URIConstant) {
-            return Predicate.COL_TYPE.OBJECT;
-        }
-        else if (term == OBDAVocabulary.NULL) {
-            return Predicate.COL_TYPE.NULL;
-        }
-        /**
-         * TODO: try to infer the type
-         */
-        else if (term instanceof Variable) {
-            // By default
-            return Predicate.COL_TYPE.LITERAL;
-        }
-        else {
-            throw new IllegalArgumentException("Unexpected term: " + term);
-        }
-    }
-
-    /**
 	 * Gets the type of a variable.
 	 *
 	 * Such variable does not hold this information, so we have to look
@@ -2235,6 +1676,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getTypeFromVariable(Variable var, QueryAliasIndex index) {
+
+		return getNonMainColumnId(var, index, -2)
+				.map(QualifiedAttributeID::getSQLRendering)
+				/**
+				 * By default, we assume that the variable is an IRI.
+				 *
+				 */
+				.orElseGet(() -> String.format("%d", OBJECT.getQuestCode()));
+	}
+
+	private static String getLangFromVariable(Variable var, QueryAliasIndex index) {
+		return getNonMainColumnId(var, index, -1)
+				.map(QualifiedAttributeID::getSQLRendering)
+				.orElse("NULL");
+	}
+
+	private static Optional<QualifiedAttributeID> getNonMainColumnId(Variable var, QueryAliasIndex index,
+																	 int relativeIndexWrtMainColumn) {
 		Set<QualifiedAttributeID> columnRefs = index.getColumnReferences(var);
 
 		if (columnRefs == null || columnRefs.size() == 0) {
@@ -2267,17 +1726,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 						.collect(Collectors.toList());
 				int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
 
-				Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex - 2);
-				return typeColumn.getQualifiedID().getSQLRendering();
+				Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
+				return Optional.of(typeColumn.getQualifiedID());
 			}
 		}
 
-		/**
-		 * By default, we assume that the variable is an IRI.
-		 *
-		 */
-		return String.format("%d", Predicate.COL_TYPE.OBJECT.getQuestCode());
+		return Optional.empty();
 	}
+
 
 
 	private static String unquote(String string) {
@@ -2441,27 +1897,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return toReturn;
 	}
 
-
-	/**
-	 * @param functionSymbol
-	 * @return
-	 */
-	private int dataTypePredicateToSQLType(Predicate functionSymbol) {
-		String functionName = functionSymbol.getName();
-
-		/**
-		 * Aggregation case
-		 */
-		if (isAggregationPredicate(functionSymbol)) {
-			return java.sql.Types.DECIMAL;
-		}
-
-		Predicate.COL_TYPE colType = dtfac.getDatatype(functionName);
-		int sqlType = obdaDataFactory.getJdbcTypeMapper().getSQLType(colType);
-
-		return sqlType;
-	}
-
 	private boolean isStringColType(Term term, QueryAliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
@@ -2576,8 +2011,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (isSI) {
-				if (ct.getType() == Predicate.COL_TYPE.OBJECT
-						|| ct.getType() == Predicate.COL_TYPE.LITERAL) {
+				if (ct.getType() == OBJECT
+						|| ct.getType() == LITERAL) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
@@ -2607,62 +2042,60 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Function function = (Function) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
-		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof DatatypePredicate) {
-			if (functionSymbol.getType(0) == Predicate.COL_TYPE.UNSUPPORTED) {
+		if (function.isDataTypeFunction()) {
+			if (functionSymbol.getType(0) == UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: "
 						+ function);
 			}
 			if (size == 1) {
 				// atoms of the form integer(x)
+				Term term1 = function.getTerm(0);
 				return getSQLString(term1, index, false);
 			} else {
 				return getSQLStringForTemplateFunction(function, index);
 			}
-		} else if (isBooleanPredicate(functionSymbol)) {
+		}
+		else if (operations.containsKey(functionSymbol)) {
 			// atoms of the form EQ(x,y)
-			String expressionFormat = getBooleanOperatorString(functionSymbol);
-			if (isUnary(function)) {
+			String expressionFormat = operations.get(functionSymbol);
+			if (function.getArity() == 1) {
+				Term term1 = function.getTerm(0);
 				// for unary functions, e.g., NOT, IS NULL, IS NOT NULL
 				// also added for IS TRUE
-				if (expressionFormat.contains("IS TRUE")) {
+				if (functionSymbol == ExpressionOperation.IS_TRUE) {
 					// find data type of term and evaluate accordingly
 					String column = getSQLString(term1, index, false);
 					int type = getVariableDataType(term1, index);
-					if (type == Types.INTEGER)
+					if (type == Types.INTEGER || type == Types.BIGINT || type == Types.DOUBLE || type == Types.FLOAT)
 						return String.format("%s > 0", column);
-					if (type == Types.BIGINT)
-						return String.format("%s > 0", column);
-					if (type == Types.DOUBLE)
-						return String.format("%s > 0", column);
-					if (type == Types.FLOAT)
-						return String.format("%s > 0", column);
-					if (type == Types.BOOLEAN)
+					else if (type == Types.BOOLEAN)
 						return String.format("%s", column);
-					if (type == Types.VARCHAR)
+					else if (type == Types.VARCHAR)
 						return String.format("LENGTH(%s) > 0", column);
-					throw new UnsupportedOperationException("Unsupported type: " + type);
+					return "1";
 				}
 				String op = getSQLString(term1, index, true);
 				return String.format(expressionFormat, op);
-
-			} else if (isBinary(function)) {
-				// for binary functions, e.g., AND, OR, EQ, NEQ, GT, etc.
-				String leftOp = getSQLString(term1, index, true);
-				Term term2 = function.getTerms().get(1);
-				String rightOp = getSQLString(term2, index, true);
-				String result = String
-						.format(expressionFormat, leftOp, rightOp);
-				if (useBrackets) {
+			}
+			else if (function.getArity() == 2) {
+				// for binary functions, e.g., AND, OR, EQ, NEQ, GT etc.
+				String leftOp = getSQLString(function.getTerm(0), index, true);
+				String rightOp = getSQLString(function.getTerm(1), index, true);
+				String result = String.format(expressionFormat, leftOp, rightOp);
+				if (useBrackets)
 					return String.format("(%s)", result);
-				} else {
+				else
 					return result;
-				}
-			} else {
-
-				if (functionSymbol == ExpressionOperation.REGEX) {
+			}
+			else if (function.getArity() == 0) {
+				return expressionFormat;
+			}
+			else
+				throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
+		}
+		else if (functionSymbol == ExpressionOperation.REGEX) {
 					boolean caseinSensitive = false;
 					boolean multiLine = false;
 					boolean dotAllMode = false;
@@ -2684,26 +2117,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String pattern = getSQLString(p2, index, false);
 					return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 				}
-				else
-					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
-			}
-
-		} else if (isArithmeticPredicate(functionSymbol)) {
-			String expressionFormat = getNumericalOperatorString(functionSymbol);
-			String leftOp = getSQLString(term1, index, true);
-			Term term2 = function.getTerms().get(1);
-			String rightOp = getSQLString(term2, index, true);
-			String result = String.format(expressionFormat, leftOp, rightOp);
-			if (useBrackets) {
-				return String.format("(%s)", result);
-			} else {
-				return result;
-			}
-
-		} else if (functionSymbol.equals(ExpressionOperation.SPARQL_LANG)) {
-
-
-			Variable var = (Variable) term1;
+		else if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
+			Variable var = (Variable) function.getTerm(0);
 			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
 
 			if (posList == null || posList.size() == 0) {
@@ -2720,12 +2135,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * TODO: replace by a switch
 			 */
 		}else {
-			if (functionSymbol.equals(ExpressionOperation.QUEST_CAST)) {
+			if (functionSymbol == ExpressionOperation.QUEST_CAST) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(XMLSchema.STRING)) {
+				if (datatype.equals(XMLSchema.STRING.stringValue())){
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {
@@ -2733,7 +2148,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionSymbol.equals(ExpressionOperation.SPARQL_STR)) {
+			} else if (functionSymbol == ExpressionOperation.SPARQL_STR) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
 				if (isStringColType(function, index)) {
@@ -2741,31 +2156,129 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			}else if (functionSymbol.equals(ExpressionOperation.REPLACE)) {
+			}else if (functionSymbol == ExpressionOperation.REPLACE) {
                 String orig = getSQLString(function.getTerm(0), index, false);
                 String out_str = getSQLString(function.getTerm(1), index, false);
                 String in_str = getSQLString(function.getTerm(2), index, false);
                 String result = sqladapter.strReplace(orig, out_str, in_str);
                 return result;
             }
-            else if (functionSymbol.equals(ExpressionOperation.CONCAT)) {
+            else if (functionSymbol == ExpressionOperation.CONCAT) {
                 String left = getSQLString(function.getTerm(0), index, false);
                 String right = getSQLString(function.getTerm(1), index, false);
                 String result = sqladapter.strConcat(new String[]{left, right});
                 return result;
             }
-            else if (functionSymbol.equals(ExpressionOperation.COUNT)) {
-				if (term1.toString().equals("*")) {
+			else if (functionSymbol == ExpressionOperation.STRLEN) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strLength(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.YEAR) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateYear(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.MINUTES) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateMinutes(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.DAY) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateDay(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.MONTH) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateMonth(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SECONDS) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateSeconds(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.HOURS) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateHours(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.TZ) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateTZ(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strEncodeForUri(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.UCASE) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strUcase(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.MD5) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.MD5(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SHA1) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.SHA1(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SHA256) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.SHA256(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SHA512) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.SHA512(literal); //TODO FIX
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.LCASE) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.strLcase(literal);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.SUBSTR) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String start = getSQLString(function.getTerm(1), index, false);
+				if (function.getTerms().size() == 2){
+					return sqladapter.strSubstr(string, start);
+				}
+				String end = getSQLString(function.getTerm(2), index, false);
+				String result = sqladapter.strSubstr(string, start, end);
+
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.STRBEFORE) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String before = getSQLString(function.getTerm(1), index, false);
+				String result = sqladapter.strBefore(string, before);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.STRAFTER) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String after = getSQLString(function.getTerm(1), index, false);
+				String result = sqladapter.strAfter(string, after);
+				return result;
+			}
+			else if (functionSymbol == ExpressionOperation.COUNT) {
+				if (function.getTerm(0).toString().equals("*")) {
 					return "COUNT(*)";
 				}
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "COUNT(" + columnName + ")";
-			} else if (functionSymbol.equals(ExpressionOperation.AVG)) {
+			} else if (functionSymbol == ExpressionOperation.AVG) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "AVG(" + columnName + ")";
-			} else if (functionSymbol.equals(ExpressionOperation.SUM)) {
+			} else if (functionSymbol == ExpressionOperation.SUM) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "SUM(" + columnName + ")";
@@ -2798,11 +2311,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 		String sql = null;
-		if (constant.getType() == Predicate.COL_TYPE.BNODE || constant.getType() == Predicate.COL_TYPE.LITERAL || constant.getType() == Predicate.COL_TYPE.OBJECT
-				|| constant.getType() == Predicate.COL_TYPE.STRING) {
+		if (constant.getType() == BNODE || constant.getType() == LITERAL || constant.getType() == OBJECT
+				|| constant.getType() == STRING) {
 			sql = "'" + constant.getValue() + "'";
 		}
-		else if (constant.getType() == Predicate.COL_TYPE.BOOLEAN) {
+		else if (constant.getType() == BOOLEAN) {
 			String value = constant.getValue().toLowerCase();
 			if (value.equals("1") || value.equals("true") || value.equals("t")) {
 				sql = sqladapter.getSQLLexicalFormBoolean(true);
@@ -2814,16 +2327,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
 			}
 		}
-		else if (constant.getType() == Predicate.COL_TYPE.DATETIME) {
+		else if (constant.getType() == DATETIME) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
 		}
-		else if (constant.getType() == Predicate.COL_TYPE.NULL
-				|| constant.getType() == Predicate.COL_TYPE.DECIMAL || constant.getType() == Predicate.COL_TYPE.DOUBLE
-				|| constant.getType() == Predicate.COL_TYPE.INTEGER || constant.getType() == Predicate.COL_TYPE.LONG
-				|| constant.getType() == Predicate.COL_TYPE.FLOAT || constant.getType() == Predicate.COL_TYPE.NON_POSITIVE_INTEGER
-				|| constant.getType() == Predicate.COL_TYPE.INT || constant.getType() == Predicate.COL_TYPE.UNSIGNED_INT
-				|| constant.getType() == Predicate.COL_TYPE.NEGATIVE_INTEGER
-				|| constant.getType() == Predicate.COL_TYPE.POSITIVE_INTEGER || constant.getType() == Predicate.COL_TYPE.NON_NEGATIVE_INTEGER) {
+		else if (constant.getType() == NULL
+				|| constant.getType() == DECIMAL || constant.getType() == DOUBLE
+				|| constant.getType() == INTEGER || constant.getType() == LONG
+				|| constant.getType() == FLOAT || constant.getType() == NON_POSITIVE_INTEGER
+				|| constant.getType() == INT || constant.getType() == UNSIGNED_INT
+				|| constant.getType() == NEGATIVE_INTEGER
+				|| constant.getType() == POSITIVE_INTEGER || constant.getType() == NON_NEGATIVE_INTEGER) {
 			sql = constant.getValue();
 		}
 		else {
@@ -2850,85 +2363,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return id;
 		return -2;
 
-	}
-
-	/**
-	 * Returns the SQL string for the boolean operator, including placeholders
-	 * for the terms to be used, e.g., %s = %s, %s IS NULL, etc.
-	 *
-	 * @param functionSymbol
-	 * @return
-	 */
-	private String getBooleanOperatorString(Predicate functionSymbol) {
-		String operator = null;
-		if (functionSymbol.equals(ExpressionOperation.EQ)) {
-			operator = EQ_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.NEQ)) {
-			operator = NEQ_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.GT)) {
-			if (sqladapter instanceof HSQLDBDialectAdapter){
-				operator = "(cast (ltrim(%s) as INTEGER)) > %s";
-			}else{
-				operator = GT_OPERATOR;
-			}
-		} else if (functionSymbol.equals(ExpressionOperation.GTE)) {
-			if (sqladapter instanceof HSQLDBDialectAdapter){
-				operator = "(cast (ltrim(%s) as INTEGER)) >= %s";
-			}else{
-				operator = GTE_OPERATOR;
-			}
-		} else if (functionSymbol.equals(ExpressionOperation.LT)) {
-			if (sqladapter instanceof HSQLDBDialectAdapter){
-				operator = "(cast (ltrim(%s) as INTEGER)) < %s";
-			}else{
-				operator = LT_OPERATOR;
-			}
-		} else if (functionSymbol.equals(ExpressionOperation.LTE)) {
-			if (sqladapter instanceof HSQLDBDialectAdapter){
-				operator = "(cast (ltrim(%s) as INTEGER)) <= %s";
-			}else{
-				operator = LTE_OPERATOR;
-			}
-		} else if (functionSymbol.equals(ExpressionOperation.AND)) {
-			operator = AND_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.OR)) {
-			operator = OR_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.NOT)) {
-			operator = NOT_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.IS_NULL)) {
-			operator = IS_NULL_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.IS_NOT_NULL)) {
-			operator = IS_NOT_NULL_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.IS_TRUE)) {
-			operator = IS_TRUE_OPERATOR;
-		// BC: was SPARQL_LIKE. TODO: is it valid?
-		} else if (functionSymbol.equals(ExpressionOperation.SQL_LIKE)) {
-			operator = LIKE_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.REGEX)) {
-			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
-		}
-		else if (functionSymbol instanceof DatatypePredicate && dtfac.isBoolean(functionSymbol)) {
-			operator = IS_TRUE_OPERATOR;
-		}
-		else {
-			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
-		}
-		return operator;
-	}
-
-	private String getNumericalOperatorString(Predicate functionSymbol) {
-		String operator;
-		if (functionSymbol.equals(ExpressionOperation.ADD)) {
-			operator = ADD_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.SUBTRACT)) {
-			operator = SUBTRACT_OPERATOR;
-		} else if (functionSymbol.equals(ExpressionOperation.MULTIPLY)) {
-			operator = MULTIPLY_OPERATOR;
-		} else {
-			throw new RuntimeException("Unknown numerical operator: "
-					+ functionSymbol);
-		}
-		return operator;
 	}
 
 	/**
@@ -3013,8 +2447,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				relationId = tableId;
 
-				//String simpleTableViewName = String.format(VIEW_NAME,
-				// tableName, String.valueOf(dataTableCount));
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
 
 				String safePredicateName = escapeName(predicate.getName());
@@ -3120,10 +2552,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		public Optional<RelationDefinition> getDefinition(RelationID relationId) {
 			return Optional.ofNullable(dataDefinitionsById.get(relationId));
-		}
-
-		public RelationID getView(Function atom) {
-			return viewNames.get(atom);
 		}
 
 		public String getColumnReference(Function atom, int column) {

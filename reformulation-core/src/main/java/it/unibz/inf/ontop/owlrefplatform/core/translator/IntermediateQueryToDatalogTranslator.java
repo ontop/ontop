@@ -174,20 +174,25 @@ public class IntermediateQueryToDatalogTranslator {
 		 */
 		} else  if (node instanceof InnerJoinNode) {
 			Optional<ImmutableExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
-			List<Function> atoms = new LinkedList<Function>();
+			List<Function> atoms = new ArrayList<>();
 			List<QueryNode> listnode =  te.getChildren(node);
 			for (QueryNode childnode: listnode) {
 				List<Function> atomsList = getAtomFrom(te, childnode, rulesToDo);
 				atoms.addAll(atomsList);
 			}
+
+			if (atoms.size() <= 1) {
+				throw new IllegalArgumentException("Inconsistent IQ: an InnerJoinNode must have at least two children");
+			}
+
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
 				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newJ = ofac.getSPARQLJoin(atoms, mutFilter);
+				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
 				body.add(newJ);
 				return body;
 			}else{
-				Function newJ = ofac.getSPARQLJoin(atoms);
+				Function newJ = getSPARQLJoin(atoms, Optional.empty());
 				body.add(newJ);
 				return body;
 			}
@@ -195,19 +200,18 @@ public class IntermediateQueryToDatalogTranslator {
 		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<QueryNode> listnode =  te.getChildren(node);
-		
+
 			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
 			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
-
 				
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
 				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, mutFilter);
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
 				body.add(newLJAtom);
 				return body;
 			}else{
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight);
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
 				body.add(newLJAtom);
 				return body;
 			}
@@ -237,5 +241,26 @@ public class IntermediateQueryToDatalogTranslator {
 		}
 	
 	}
-	
+
+	private static Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
+		int atomCount = atoms.size();
+		Function rightTerm;
+
+		switch (atomCount) {
+			case 0:
+			case 1:
+				throw new IllegalArgumentException("A join requires at least two atoms");
+			case 2:
+				rightTerm = atoms.get(1);
+				break;
+			default:
+				rightTerm = getSPARQLJoin(atoms.subList(1, atomCount), Optional.empty());
+				break;
+		}
+
+		return optionalCondition.isPresent()
+				? ofac.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
+				: ofac.getSPARQLJoin(atoms.get(0), rightTerm);
+	}
+
 }

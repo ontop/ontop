@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
-import java.util.Map;
-
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
@@ -123,36 +121,37 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     /**
-     * TODO: explain
+     * Creates a new ConstructionNode with a new substitution.
+     * This substitution is obtained by composition and then cleaned (only defines the projected variables)
+     *
+     * Stops the propagation.
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToApply,
             QueryNode descendantNode, IntermediateQuery query) {
-        ImmutableMap<Variable, ImmutableTerm> formerNodeSubstitutionMap = getSubstitution()
-                .getImmutableMap();
-        ImmutableSet<Variable> boundVariables = formerNodeSubstitutionMap.keySet();
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
-        newSubstitutionMapBuilder.putAll(formerNodeSubstitutionMap);
+        ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
+        ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
 
-        ImmutableSet<Variable> projectedVariables = getProjectionAtom().getVariables();
-
-        for (Map.Entry<Variable, ? extends VariableOrGroundTerm> entry : substitution.getImmutableMap().entrySet()) {
-            Variable replacedVariable = entry.getKey();
-            if (projectedVariables.contains(replacedVariable)) {
-                if (boundVariables.contains(replacedVariable)) {
-                    throw new RuntimeException(
-                            "Inconsistent query: an already bound has been also found in the sub-tree: "
-                                    + replacedVariable);
-                }
-                else {
-                    newSubstitutionMapBuilder.put(replacedVariable, entry.getValue());
-                }
-            }
+        if (substitutionToApply.getImmutableMap().keySet().stream().anyMatch(boundVariables::contains)) {
+            throw new IllegalArgumentException("An ascendent substitution MUST NOT include variables bound by" +
+                    "the substitution of the current construction node");
         }
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
+        ImmutableSubstitution<ImmutableTerm> compositeSubstitution = substitutionToApply.composeWith(localSubstitution);
+
+        /**
+         * Cleans the composite substitution by removing non-projected variables
+         */
+        ImmutableSet<Variable> projectedVariables = getProjectionAtom().getVariables();
+
+        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
+        compositeSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .forEach(newSubstitutionMapBuilder::put);
+
+        ImmutableSubstitutionImpl<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
                 newSubstitutionMapBuilder.build());
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(getProjectionAtom(),

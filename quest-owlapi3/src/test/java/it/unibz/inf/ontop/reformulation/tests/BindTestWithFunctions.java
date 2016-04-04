@@ -268,10 +268,10 @@ public class BindTestWithFunctions {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.6\"");
-        expectedValues.add("\"5.75\"");
-        expectedValues.add("\"6.8\"");
-        expectedValues.add("\"1.50\"");
+        expectedValues.add("\"8.6\"^^xsd:decimal");
+        expectedValues.add("\"5.75\"^^xsd:decimal");
+        expectedValues.add("\"6.8\"^^xsd:decimal");
+        expectedValues.add("\"1.50\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
 	}	
 	
