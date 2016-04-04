@@ -52,6 +52,12 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
     }
 
     @Override
+    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
+        return (node instanceof ExtensionalDataNode)
+                && ((ExtensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+    }
+
+    @Override
     public String toString() {
         return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
     }

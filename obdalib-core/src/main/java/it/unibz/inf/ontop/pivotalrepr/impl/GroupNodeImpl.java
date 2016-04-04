@@ -82,6 +82,12 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
+    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
+        return (node instanceof GroupNode)
+                && ((GroupNode) node).getGroupingTerms().equals(groupingTerms);
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }

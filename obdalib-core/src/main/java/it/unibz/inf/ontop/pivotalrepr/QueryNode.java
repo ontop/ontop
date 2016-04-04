@@ -9,6 +9,9 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
  * Immutable.
  *
  * However, needs to be cloned to have multiple copies (distinct nodes) in an query tree.
+ *
+ * Only "QueryNode.equals(this)" returns true since multiple clones of a node
+ * may appear in the same IntermediateQuery and they must absolutely be distinguished.
  */
 public interface QueryNode extends Cloneable {
 
@@ -68,4 +71,9 @@ public interface QueryNode extends Cloneable {
     SubstitutionResults<? extends QueryNode> applyDescendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
             throws QueryNodeSubstitutionException;
+
+    /**
+     * TODO: explain
+     */
+    boolean isSyntacticallyEquivalentTo(QueryNode node);
 }

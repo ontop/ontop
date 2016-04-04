@@ -53,6 +53,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
+    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
+        return (node instanceof InnerJoinNode);
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }

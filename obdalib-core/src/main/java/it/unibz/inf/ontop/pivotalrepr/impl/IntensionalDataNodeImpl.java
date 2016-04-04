@@ -43,6 +43,12 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     }
 
     @Override
+    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
+        return (node instanceof IntensionalDataNode)
+                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
