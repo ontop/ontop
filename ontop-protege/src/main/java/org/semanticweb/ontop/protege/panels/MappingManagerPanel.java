@@ -172,7 +172,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
    
 
-    public void setOBDAModel(OBDAModel omodel) {
+    private void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
