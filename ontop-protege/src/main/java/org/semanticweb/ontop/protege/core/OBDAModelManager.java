@@ -43,6 +43,8 @@ import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
+import org.semanticweb.owlapi.change.AddImportData;
+import org.semanticweb.owlapi.change.RemoveImportData;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -139,55 +141,57 @@ public class OBDAModelManager implements Disposable {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 
+					updateOntologyID((SetOntologyID) change);
 
-					// original ontology id
-					OWLOntologyID originalOntologyID = ((SetOntologyID) change).getOriginalOntologyID();
-					Optional<IRI> oldOntologyIRI = originalOntologyID.getOntologyIRI();
-
-					URI oldiri = null;
-					if(oldOntologyIRI.isPresent()) {
-						oldiri = oldOntologyIRI.get().toURI();
-					}
-					else {
-						oldiri = URI.create(originalOntologyID.toString());
-					}
-
-					log.debug("Ontology ID changed");
-					log.debug("Old ID: {}", oldiri);
-
-
-					//get model
-					OBDAModel model = obdamodels.get(oldiri);
-
-					if (model == null) {
-						setupNewOBDAModel();
-						model = getActiveOBDAModel();
-					}
-
-					PrefixManager prefixManager = model.getPrefixManager();
-
-					// new ontology id
-					OWLOntologyID newOntologyID = ((SetOntologyID) change).getNewOntologyID();
-					Optional<IRI> optionalNewIRI = newOntologyID.getOntologyIRI();
-
-					URI newiri = null;
-					if(optionalNewIRI.isPresent()) {
-						newiri = optionalNewIRI.get().toURI();
-						prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, getProperPrefixURI(newiri.toString()));
-					}
-					else {
-						newiri = URI.create(newOntologyID.toString());
-						prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, "");
-					}
-
-					log.debug("New ID: {}", newiri);
-
-
-					obdamodels.remove(oldiri);
-					obdamodels.put(newiri, model);
 					continue;
 
-				} else if (change instanceof AddAxiom) {
+				} else if (change instanceof AddImport) {
+
+					AddImportData addedImport = ((AddImport) change).getChangeData();
+					IRI addedOntoIRI = addedImport.getDeclaration().getIRI();
+
+					OWLOntology addedOnto = mmgr.getOntology(addedOntoIRI);
+					OBDAModel activeOBDAModel = getActiveOBDAModel();
+
+					// Setup the entity declarations
+					for (OWLClass c : addedOnto.getClassesInSignature())
+						activeOBDAModel.getOntologyVocabulary().createClass(c.getIRI().toString());
+
+					for (OWLObjectProperty r : addedOnto.getObjectPropertiesInSignature())
+						activeOBDAModel.getOntologyVocabulary().createObjectProperty(r.getIRI().toString());
+
+					for (OWLDataProperty p : addedOnto.getDataPropertiesInSignature())
+						activeOBDAModel.getOntologyVocabulary().createDataProperty(p.getIRI().toString());
+
+					for (OWLAnnotationProperty p : addedOnto.getAnnotationPropertiesInSignature())
+						activeOBDAModel.getOntologyVocabulary().createAnnotationProperty(p.getIRI().toString());
+
+
+					continue;
+
+				} else if (change instanceof RemoveImport) {
+
+					RemoveImportData removedImport = ((RemoveImport) change).getChangeData();
+					IRI removedOntoIRI = removedImport.getDeclaration().getIRI();
+
+					OWLOntology removedOnto = mmgr.getOntology(removedOntoIRI);
+					OBDAModel activeOBDAModel = getActiveOBDAModel();
+
+					for (OWLClass c : removedOnto.getClassesInSignature())
+						activeOBDAModel.getOntologyVocabulary().removeClass(c.getIRI().toString());
+
+					for (OWLObjectProperty r : removedOnto.getObjectPropertiesInSignature())
+						activeOBDAModel.getOntologyVocabulary().removeObjectProperty(r.getIRI().toString());
+
+					for (OWLDataProperty p : removedOnto.getDataPropertiesInSignature())
+						activeOBDAModel.getOntologyVocabulary().removeDataProperty(p.getIRI().toString());
+
+					for (OWLAnnotationProperty p : removedOnto.getAnnotationPropertiesInSignature())
+						activeOBDAModel.getOntologyVocabulary().removeAnnotationProperty(p.getIRI().toString());
+
+					continue;
+
+			} else if (change instanceof AddAxiom) {
 					OWLAxiom axiom = change.getAxiom();
 					if (axiom instanceof OWLDeclarationAxiom) {
 
@@ -283,6 +287,54 @@ public class OBDAModelManager implements Disposable {
 				Predicate removedPredicate = getPredicate(removede);
 				obdamodel.deletePredicate(removedPredicate);
 			}
+		}
+
+		private void updateOntologyID(SetOntologyID change) {
+			// original ontology id
+			OWLOntologyID originalOntologyID = change.getOriginalOntologyID();
+			Optional<IRI> oldOntologyIRI = originalOntologyID.getOntologyIRI();
+
+			URI oldiri = null;
+			if(oldOntologyIRI.isPresent()) {
+                oldiri = oldOntologyIRI.get().toURI();
+            }
+            else {
+                oldiri = URI.create(originalOntologyID.toString());
+            }
+
+			log.debug("Ontology ID changed");
+			log.debug("Old ID: {}", oldiri);
+
+
+			//get model
+			OBDAModel model = obdamodels.get(oldiri);
+
+			if (model == null) {
+                setupNewOBDAModel();
+                model = getActiveOBDAModel();
+            }
+
+			PrefixManager prefixManager = model.getPrefixManager();
+
+			// new ontology id
+			OWLOntologyID newOntologyID = change.getNewOntologyID();
+			Optional<IRI> optionalNewIRI = newOntologyID.getOntologyIRI();
+
+			URI newiri = null;
+			if(optionalNewIRI.isPresent()) {
+                newiri = optionalNewIRI.get().toURI();
+                prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, getProperPrefixURI(newiri.toString()));
+            }
+            else {
+                newiri = URI.create(newOntologyID.toString());
+                prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, "");
+            }
+
+			log.debug("New ID: {}", newiri);
+
+
+			obdamodels.remove(oldiri);
+			obdamodels.put(newiri, model);
 		}
 	}
 	
@@ -575,18 +627,8 @@ public class OBDAModelManager implements Disposable {
 
 				IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 				String owlDocumentIriString = documentIRI.toString();
-				int i = owlDocumentIriString.lastIndexOf(".");
-				String owlName = owlDocumentIriString.substring(0,i);
 
-				String obdaDocumentIri = owlName + OBDA_EXT;
-                String queryDocumentIri = owlName + QUERY_EXT;
-                String dbprefsDocumentIri = owlName + DBPREFS_EXT;
-
-                File obdaFile = new File(URI.create(obdaDocumentIri));
-                File queryFile = new File(URI.create(queryDocumentIri));
-                File dbprefsFile = new File(URI.create(dbprefsDocumentIri));
 				Optional<IRI> ontologyIRI = activeOntology.getOntologyID().getOntologyIRI();
-
 				String defaultPrefix;
 				if(ontologyIRI.isPresent()){
 						defaultPrefix = ontologyIRI.get().toString();
@@ -596,6 +638,23 @@ public class OBDAModelManager implements Disposable {
 				}
 
 				activeOBDAModel.getPrefixManager().addPrefix(PrefixManager.DEFAULT_PREFIX, OBDAModelManager.getProperPrefixURI(defaultPrefix));
+
+				if(!UIUtil.isLocalFile(documentIRI.toURI())){
+					return;
+				}
+
+				int i = owlDocumentIriString.lastIndexOf(".");
+				String owlName = owlDocumentIriString.substring(0,i);
+
+
+				String obdaDocumentIri = owlName + OBDA_EXT;
+				String queryDocumentIri = owlName + QUERY_EXT;
+				String dbprefsDocumentIri = owlName + DBPREFS_EXT;
+
+				File obdaFile = new File(URI.create(obdaDocumentIri));
+				File queryFile = new File(URI.create(queryDocumentIri));
+				File dbprefsFile = new File(URI.create(dbprefsDocumentIri));
+
 
                 if (obdaFile.exists()) {
                     try {
