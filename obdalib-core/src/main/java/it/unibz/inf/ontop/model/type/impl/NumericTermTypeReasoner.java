@@ -22,7 +22,7 @@ public class NumericTermTypeReasoner extends UnifierTermTypeReasoner {
                 .forEach(i ->  {
                     if(!argumentTypes.get(i)
                             .map(TermType::isNumeric)
-                            .orElse(false)) {
+                            .orElse(true)) {
                         // TODO: refactor the exception
                         throw new TermTypeError(terms.get(i), null, argumentTypes.get(i).get());
                     }

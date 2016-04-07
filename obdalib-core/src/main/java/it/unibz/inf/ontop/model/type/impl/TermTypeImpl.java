@@ -48,9 +48,9 @@ public class TermTypeImpl implements TermType {
     }
 
     @Override
-    public boolean isInstanceOf(Predicate.COL_TYPE expectedBaseType) {
-        return TermTypeReasonerTools.getCommonDenominatorType(colType, expectedBaseType)
-                .map(t -> t == expectedBaseType)
+    public boolean isCompatibleWith(Predicate.COL_TYPE moreGeneralType) {
+        return TermTypeReasonerTools.getCommonDenominatorType(colType, moreGeneralType)
+                .map(t -> t == moreGeneralType)
                 .orElse(false);
     }
 

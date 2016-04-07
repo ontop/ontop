@@ -35,8 +35,9 @@ public abstract class AbstractTermTypeReasoner implements TermTypeReasoner {
         IntStream.range(0, terms.size())
                 .forEach(i -> argumentTypes.get(i)
                         .ifPresent(t -> {
-                            if (!t.isInstanceOf(expectedBaseTypes[i])) {
-                                throw new TermTypeError(terms.get(i), new TermTypeImpl(expectedBaseTypes[i]), t);
+                            Predicate.COL_TYPE expectedBaseType = expectedBaseTypes[i];
+                            if ((expectedBaseType != null) && (!t.isCompatibleWith(expectedBaseType))) {
+                                throw new TermTypeError(terms.get(i), new TermTypeImpl(expectedBaseType), t);
                             }
                         }));
         doAdditionalChecks(terms, argumentTypes);

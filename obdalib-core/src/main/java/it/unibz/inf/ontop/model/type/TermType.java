@@ -15,10 +15,7 @@ public interface TermType {
 
     Optional<LanguageTag> getOptionalLanguageTag();
 
-    /**
-     * TODO: find a better name
-     */
-    boolean isInstanceOf(Predicate.COL_TYPE expectedBaseType);
+    boolean isCompatibleWith(Predicate.COL_TYPE colType);
 
     Optional<TermType> getCommonDenominator(TermType otherTermType);
 

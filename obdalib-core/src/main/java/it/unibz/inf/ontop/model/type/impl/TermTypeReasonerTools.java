@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -7,36 +8,61 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeError;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
 public class TermTypeReasonerTools {
 
-    private static final ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> DATATYPE_UNIFY_TABLE =
-            new ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE>()
-                .put(INTEGER, DOUBLE, DOUBLE)
-                .put(INTEGER, DECIMAL, DECIMAL)
-                .put(INTEGER, INTEGER, INTEGER)
-                //.put(COL_TYPE.INTEGER, COL_TYPE.REAL, COL_TYPE.REAL)
-                .put(DECIMAL, DECIMAL, DECIMAL)
-                .put(DECIMAL, DOUBLE, DOUBLE)
-                //.put(COL_TYPE.DECIMAL, COL_TYPE.REAL, COL_TYPE.REAL)
-                .put(DECIMAL, INTEGER, DECIMAL)
+    /**
+     * This table is not "ground truth" and deserve to be discussed (is it good enough or not?)
+     */
+    private static final ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> DATATYPE_DENOMINATORS = generateDatatypeDenominators();
 
-                .put(DOUBLE, DECIMAL, DOUBLE)
-                .put(DOUBLE, DOUBLE, DOUBLE)
-                //.put(COL_TYPE.DOUBLE, COL_TYPE.REAL, COL_TYPE.REAL)
-                .put(DOUBLE, INTEGER, DOUBLE)
+    private static ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> generateDatatypeDenominators() {
 
-                //.put(COL_TYPE.REAL, COL_TYPE.DECIMAL, COL_TYPE.REAL)
-                //.put(COL_TYPE.REAL, COL_TYPE.DOUBLE, COL_TYPE.REAL)
-                //.put(COL_TYPE.REAL, COL_TYPE.REAL, COL_TYPE.REAL)
-                //.put(COL_TYPE.REAL, COL_TYPE.INTEGER, COL_TYPE.REAL)
+        ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE> tableBuilder = ImmutableTable.<COL_TYPE, COL_TYPE, COL_TYPE>builder()
+                // Base COL_TYPES
+                .put(LITERAL, LITERAL, LITERAL)
+                .put(OBJECT, OBJECT, OBJECT)
+                .put(BNODE, BNODE, BNODE)
+                .put(NULL, NULL, NULL)
+                .put(UNSUPPORTED, UNSUPPORTED, UNSUPPORTED);
 
-                // TODO: complete
-
+        // Child: Parent
+        Map<COL_TYPE, COL_TYPE> datatypeHierarchy = ImmutableMap.<COL_TYPE, COL_TYPE>builder()
+                .put(LITERAL_LANG, LITERAL)
+                .put(STRING, LITERAL)
+                .put(DATE, LITERAL)
+                .put(DATETIME, LITERAL)
+                .put(DATETIME_STAMP, DATETIME)
+                .put(TIME, LITERAL)
+                .put(YEAR, LITERAL)
+                .put(DOUBLE, LITERAL)
+                .put(FLOAT, DOUBLE) // Type promotion (https://www.w3.org/TR/xpath20/#dt-type-promotion)
+                .put(DECIMAL, FLOAT) // Type promotion
+                .put(INTEGER, DECIMAL) // Subtype substitution (https://www.w3.org/TR/xpath20/#dt-subtype-substitution)
+                .put(LONG, INTEGER) // Subtype substitution
+                .put(INT, LONG) // Subtype substitution
+                .put(NEGATIVE_INTEGER, INTEGER) // Subtype substitution
+                .put(NON_NEGATIVE_INTEGER, INTEGER) // Subtype substitution
+                .put(POSITIVE_INTEGER, INTEGER) // Subtype substitution
+                .put(NON_POSITIVE_INTEGER, INTEGER) // Subtype substitution
+                .put(UNSIGNED_INT, NON_NEGATIVE_INTEGER) // Subtype substitution
                 .build();
+
+        // TODO: implement transitive closure
+        datatypeHierarchy.forEach((child, parent) -> {
+            tableBuilder.put(child, child, child);
+            tableBuilder.put(child, parent, parent);
+            tableBuilder.put(parent, child, parent);
+        });
+
+
+        return tableBuilder.build();
+    }
+
 
     /**
      * TODO: find a better name
@@ -48,7 +74,7 @@ public class TermTypeReasonerTools {
             return Optional.of(type1);
         }
         else {
-            return Optional.ofNullable(DATATYPE_UNIFY_TABLE.get(type1, type2));
+            return Optional.ofNullable(DATATYPE_DENOMINATORS.get(type1, type2));
         }
     }
 

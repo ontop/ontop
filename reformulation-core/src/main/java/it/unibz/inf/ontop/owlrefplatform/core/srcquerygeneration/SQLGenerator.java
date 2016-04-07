@@ -484,6 +484,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private COL_TYPE unifyTypes(COL_TYPE type1, COL_TYPE type2) {
 		return TermTypeReasonerTools.getCommonDenominatorType(type1, type2)
+				// TODO: justify
 				.orElse(STRING);
 	}
 
