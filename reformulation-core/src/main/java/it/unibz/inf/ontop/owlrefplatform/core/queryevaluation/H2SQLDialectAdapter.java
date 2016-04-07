@@ -40,25 +40,25 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1)", str);
 	}
 
-
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		if (limit < 0 ) {
-			if (offset < 0) {
+		if(limit == 0){
+			return "LIMIT 0";
+		}
 
-				// If both limit and offset is not specified.
+		if (limit < 0)  {
+			if (offset < 0 ) {
 				return "";
-
 			} else {
-				// Max limit: http://www.h2database.com/html/advanced.html#limits_limitations
-				return String.format("LIMIT %d,2147483647", offset);
+
+				return String.format("OFFSET %d ROWS", offset);
 			}
 		} else {
 			if (offset < 0) {
 				// If the offset is not specified
-				return String.format("LIMIT %d", limit);
+				return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
 			} else {
-				return String.format("LIMIT %d,%d", offset, limit);
+				return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
 			}
 		}
 	}
