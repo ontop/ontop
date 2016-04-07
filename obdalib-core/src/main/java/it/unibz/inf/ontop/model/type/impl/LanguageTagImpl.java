@@ -48,4 +48,9 @@ public class LanguageTagImpl implements LanguageTag {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return fullString;
+    }
 }

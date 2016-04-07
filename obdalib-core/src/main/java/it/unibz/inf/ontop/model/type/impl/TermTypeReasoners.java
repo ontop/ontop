@@ -20,10 +20,6 @@ public class TermTypeReasoners {
      * TODO: explain
      */
     public static final TermTypeReasoner STRING_LANG_REASONER = new UnifierTermTypeReasoner();
-    /**
-     * TODO: explain
-     */
-    public static final TermTypeReasoner FIRST_ARG_STRING_LANG_REASONER = new FirstArgumentTermTypeReasoner();
 
     /**
      * TODO: explain
@@ -34,6 +30,11 @@ public class TermTypeReasoners {
      * Cannot infer COL_TYPE.INTEGER (will put COL_TYPE.DECIMAL instead)
      */
     public static final TermTypeReasoner NON_INTEGER_NUMERIC_REASONER = new NonIntegerNumericReasoner();
+
+    /**
+     * TODO: explain
+     */
+    public static final TermTypeReasoner FIRST_ARG_REASONER = new FirstArgumentTermTypeReasoner();
 
     /**
      * TODO: explain

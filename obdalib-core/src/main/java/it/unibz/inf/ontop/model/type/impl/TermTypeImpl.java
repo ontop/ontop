@@ -116,4 +116,10 @@ public class TermTypeImpl implements TermType {
                         .orElseGet(() -> !o.getOptionalLanguageTag().isPresent()))
                 .isPresent();
     }
+
+    @Override
+    public String toString() {
+        // TODO: Should we print the IRI of the datatypes instead (when possible)?
+        return colType + optionalLangTag.map(tag -> "@" + tag).orElse("");
+    }
 }
