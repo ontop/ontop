@@ -6,14 +6,15 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeError;
+import it.unibz.inf.ontop.model.type.TermTypeException;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
-public class TermTypeReasonerTools {
+public class TermTypeInferenceTools {
 
     /**
      * This table is not "ground truth" and deserve to be discussed (is it good enough or not?)
@@ -45,20 +46,25 @@ public class TermTypeReasonerTools {
                 .put(INTEGER, DECIMAL) // Subtype substitution (https://www.w3.org/TR/xpath20/#dt-subtype-substitution)
                 .put(LONG, INTEGER) // Subtype substitution
                 .put(INT, LONG) // Subtype substitution
-                .put(NEGATIVE_INTEGER, INTEGER) // Subtype substitution
                 .put(NON_NEGATIVE_INTEGER, INTEGER) // Subtype substitution
-                .put(POSITIVE_INTEGER, INTEGER) // Subtype substitution
+                .put(POSITIVE_INTEGER, NON_NEGATIVE_INTEGER) // Subtype substitution
                 .put(NON_POSITIVE_INTEGER, INTEGER) // Subtype substitution
+                .put(NEGATIVE_INTEGER, NON_POSITIVE_INTEGER) // Subtype substitution
                 .put(UNSIGNED_INT, NON_NEGATIVE_INTEGER) // Subtype substitution
                 .build();
 
-        // TODO: implement transitive closure
         datatypeHierarchy.forEach((child, parent) -> {
             tableBuilder.put(child, child, child);
-            tableBuilder.put(child, parent, parent);
-            tableBuilder.put(parent, child, parent);
-        });
 
+            // Non-final
+            COL_TYPE ancestor = parent;
+            // Transitive closure
+            while (ancestor != null) {
+                tableBuilder.put(child, ancestor, ancestor);
+                tableBuilder.put(ancestor, child, ancestor);
+                ancestor = datatypeHierarchy.get(ancestor);
+            }
+        });
 
         return tableBuilder.build();
     }
@@ -81,7 +87,7 @@ public class TermTypeReasonerTools {
     /**
      * TODO: simplify this method
      */
-    public static Optional<TermType> inferType(Term term) throws TermTypeError {
+    public static Optional<TermType> inferType(Term term) throws TermTypeException {
         if(term instanceof Function){
             Function f = (Function)term;
             Predicate typePred = f.getFunctionSymbol();

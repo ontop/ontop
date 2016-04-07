@@ -13,7 +13,7 @@ public interface TermType {
 
     Predicate.COL_TYPE getColType();
 
-    Optional<LanguageTag> getOptionalLanguageTag();
+    Optional<LanguageTag> getLanguageTag();
 
     boolean isCompatibleWith(Predicate.COL_TYPE colType);
 

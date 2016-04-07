@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.impl.TermTypeReasonerTools;
+import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -433,7 +433,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Extracts the type from a term found in a head
      */
 	private COL_TYPE getHeadDataType(Term term) {
-		return TermTypeReasonerTools.inferType(term)
+		return TermTypeInferenceTools.inferType(term)
 				.map(TermType::getColType)
 				/**
 				 * If a variable is found as a top term in a head, returns the most general COL_TYPE
@@ -483,7 +483,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private COL_TYPE unifyTypes(COL_TYPE type1, COL_TYPE type2) {
-		return TermTypeReasonerTools.getCommonDenominatorType(type1, type2)
+		return TermTypeInferenceTools.getCommonDenominatorType(type1, type2)
 				// TODO: justify
 				.orElse(STRING);
 	}

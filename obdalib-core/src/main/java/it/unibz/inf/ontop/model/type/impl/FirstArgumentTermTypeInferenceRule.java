@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public class FirstArgumentTermTypeReasoner extends AbstractTermTypeReasoner {
+public class FirstArgumentTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
     protected Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes) {

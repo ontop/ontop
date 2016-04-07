@@ -8,21 +8,21 @@ import java.util.Optional;
 /**
  * Does not look at the terms, always returns the same type.
  */
-public class PredefinedTermTypeReasoner extends AbstractTermTypeReasoner {
+public class PredefinedTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     private final TermType predefinedType;
 
     /**
      * Standard constructor
      */
-    public PredefinedTermTypeReasoner(TermType predefinedType) {
+    public PredefinedTermTypeInferenceRule(TermType predefinedType) {
         this.predefinedType = predefinedType;
     }
 
     /**
      * Do not use this construction if you know the language tag!
      */
-    public PredefinedTermTypeReasoner(Predicate.COL_TYPE predefinedColType) {
+    public PredefinedTermTypeInferenceRule(Predicate.COL_TYPE predefinedColType) {
         this(new TermTypeImpl(predefinedColType));
     }
 

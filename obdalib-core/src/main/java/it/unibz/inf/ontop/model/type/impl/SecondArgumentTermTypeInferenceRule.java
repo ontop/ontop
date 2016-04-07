@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 
-public class SecondArgumentTermTypeReasoner extends AbstractTermTypeReasoner {
+public class SecondArgumentTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
     protected Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes) {

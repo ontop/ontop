@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * Unifies the types of the arguments by taking their common denominator.
  */
-public class UnifierTermTypeReasoner extends AbstractTermTypeReasoner {
+public class UnifierTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
     protected Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes) {

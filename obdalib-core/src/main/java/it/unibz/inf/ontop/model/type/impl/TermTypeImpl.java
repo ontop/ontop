@@ -43,13 +43,13 @@ public class TermTypeImpl implements TermType {
     }
 
     @Override
-    public Optional<LanguageTag> getOptionalLanguageTag() {
+    public Optional<LanguageTag> getLanguageTag() {
         return optionalLangTag;
     }
 
     @Override
     public boolean isCompatibleWith(Predicate.COL_TYPE moreGeneralType) {
-        return TermTypeReasonerTools.getCommonDenominatorType(colType, moreGeneralType)
+        return TermTypeInferenceTools.getCommonDenominatorType(colType, moreGeneralType)
                 .map(t -> t == moreGeneralType)
                 .orElse(false);
     }
@@ -62,7 +62,7 @@ public class TermTypeImpl implements TermType {
          */
         if (colType == LITERAL_LANG && otherTermType.getColType() == LITERAL_LANG) {
             Optional<LanguageTag> newOptionalLangTag = optionalLangTag
-                    .flatMap(tag1 -> otherTermType.getOptionalLanguageTag()
+                    .flatMap(tag1 -> otherTermType.getLanguageTag()
                             .flatMap(tag1::getCommonDenominator));
 
             return Optional.of(newOptionalLangTag
@@ -70,7 +70,7 @@ public class TermTypeImpl implements TermType {
                     .orElseGet(()-> new TermTypeImpl(LITERAL_LANG)));
         }
         else {
-            return TermTypeReasonerTools.getCommonDenominatorType(colType, otherTermType.getColType())
+            return TermTypeInferenceTools.getCommonDenominatorType(colType, otherTermType.getColType())
                     .map(TermTypeImpl::new);
         }
     }
@@ -110,10 +110,10 @@ public class TermTypeImpl implements TermType {
                 .map(o -> (TermType) o)
                 .filter(o -> colType == o.getColType())
                 .filter(o -> optionalLangTag
-                        .map(tag1 -> o.getOptionalLanguageTag()
+                        .map(tag1 -> o.getLanguageTag()
                                 .map(tag1::equals)
                                 .orElse(false))
-                        .orElseGet(() -> !o.getOptionalLanguageTag().isPresent()))
+                        .orElseGet(() -> !o.getLanguageTag().isPresent()))
                 .isPresent();
     }
 

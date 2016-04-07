@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.type.TermTypeReasoner;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
 public interface OperationPredicate extends BuiltinPredicate {
     /**
      * TODO: generalize
      */
-    TermTypeReasoner getTermTypeReasoner();
+    TermTypeInferenceRule getTermTypeInferenceRule();
 
-    COL_TYPE[] getArgumentTypes();
+    ImmutableList<COL_TYPE> getArgumentTypes();
 }

@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeError;
-import it.unibz.inf.ontop.model.type.TermTypeReasoner;
+import it.unibz.inf.ontop.model.type.TermTypeException;
+import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +15,10 @@ import java.util.stream.IntStream;
 /**
  * TODO: explain
  */
-public abstract class AbstractTermTypeReasoner implements TermTypeReasoner {
+public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferType(List<Term> terms, Predicate.COL_TYPE[] expectedBaseTypes) throws TermTypeError {
+    public Optional<TermType> inferType(List<Term> terms, Predicate.COL_TYPE[] expectedBaseTypes) throws TermTypeException {
 
         if (expectedBaseTypes.length != terms.size()) {
             throw new IllegalArgumentException("Arity mismatch between " + terms + " and " + expectedBaseTypes);
@@ -26,7 +26,7 @@ public abstract class AbstractTermTypeReasoner implements TermTypeReasoner {
 
         ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
                 terms.stream()
-                        .map(TermTypeReasonerTools::inferType)
+                        .map(TermTypeInferenceTools::inferType)
                         .collect(Collectors.toList()));
 
         /**
@@ -37,7 +37,7 @@ public abstract class AbstractTermTypeReasoner implements TermTypeReasoner {
                         .ifPresent(t -> {
                             Predicate.COL_TYPE expectedBaseType = expectedBaseTypes[i];
                             if ((expectedBaseType != null) && (!t.isCompatibleWith(expectedBaseType))) {
-                                throw new TermTypeError(terms.get(i), new TermTypeImpl(expectedBaseType), t);
+                                throw new TermTypeException(terms.get(i), new TermTypeImpl(expectedBaseType), t);
                             }
                         }));
         doAdditionalChecks(terms, argumentTypes);
@@ -56,7 +56,7 @@ public abstract class AbstractTermTypeReasoner implements TermTypeReasoner {
      * Hook, does nothing by default
      */
     protected void doAdditionalChecks(List<Term> terms, ImmutableList<Optional<TermType>> argumentTypes)
-            throws TermTypeError {
+            throws TermTypeException {
     }
 
     /**

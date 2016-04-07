@@ -25,7 +25,7 @@ public interface Expression extends Function {
      */
     default Optional<TermType> getOptionalTermType() {
         OperationPredicate predicate = getFunctionSymbol();
-        return predicate.getTermTypeReasoner().inferType(
+        return predicate.getTermTypeInferenceRule().inferType(
                getTerms(), predicate.getArgumentTypes());
     }
 }

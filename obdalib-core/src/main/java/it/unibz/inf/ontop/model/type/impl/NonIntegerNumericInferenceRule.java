@@ -9,7 +9,7 @@ import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.DECIMAL;
 /**
  * Cannot infer COL_TYPE.INTEGER (will put COL_TYPE.DECIMAL instead)
  */
-public class NonIntegerNumericReasoner extends NumericTermTypeReasoner {
+public class NonIntegerNumericInferenceRule extends NumericTermTypeInferenceRule {
 
     @Override
     protected Optional<TermType> postprocessDeducedType(Optional<TermType> optionalTermType) {

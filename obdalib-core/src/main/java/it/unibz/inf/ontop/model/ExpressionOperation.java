@@ -1,136 +1,137 @@
 package it.unibz.inf.ontop.model;
 
-import it.unibz.inf.ontop.model.type.TermTypeReasoner;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
-import static it.unibz.inf.ontop.model.type.impl.TermTypeReasoners.*;
+import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
 public enum ExpressionOperation implements OperationPredicate {
 
 	/* Numeric operations */
 
-	MINUS("minus", STANDARD_NUMERIC_REASONER, null), // TODO (ROMAN): check -- never used
-	ADD("add", STANDARD_NUMERIC_REASONER, null, null),
-	SUBTRACT("subtract", STANDARD_NUMERIC_REASONER, null, null),
-	MULTIPLY("multiply", STANDARD_NUMERIC_REASONER, null, null),
-	DIVIDE("divide", NON_INTEGER_NUMERIC_REASONER, null, null),
-	ABS("abs", STANDARD_NUMERIC_REASONER, null),
-	ROUND("round", STANDARD_NUMERIC_REASONER, null),
-	CEIL("ceil", STANDARD_NUMERIC_REASONER, null),
-	FLOOR("floor", STANDARD_NUMERIC_REASONER, null),
-	RAND("RAND", PREDEFINED_DOUBLE_REASONER),
+	MINUS("minus", STANDARD_NUMERIC_RULE, null), // TODO (ROMAN): check -- never used
+	ADD("add", STANDARD_NUMERIC_RULE, null, null),
+	SUBTRACT("subtract", STANDARD_NUMERIC_RULE, null, null),
+	MULTIPLY("multiply", STANDARD_NUMERIC_RULE, null, null),
+	DIVIDE("divide", NON_INTEGER_NUMERIC_RULE, null, null),
+	ABS("abs", STANDARD_NUMERIC_RULE, null),
+	ROUND("round", STANDARD_NUMERIC_RULE, null),
+	CEIL("ceil", STANDARD_NUMERIC_RULE, null),
+	FLOOR("floor", STANDARD_NUMERIC_RULE, null),
+	RAND("RAND", PREDEFINED_DOUBLE_RULE),
 	
 	/* Boolean operations */
 
-	AND("AND", PREDEFINED_BOOLEAN_REASONER, null, null),
-	OR("OR", PREDEFINED_BOOLEAN_REASONER, null, null),
-	NOT("NOT", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.BOOLEAN),
+	AND("AND", PREDEFINED_BOOLEAN_RULE, null, null),
+	OR("OR", PREDEFINED_BOOLEAN_RULE, null, null),
+	NOT("NOT", PREDEFINED_BOOLEAN_RULE, COL_TYPE.BOOLEAN),
 	
-	EQ("EQ", PREDEFINED_BOOLEAN_REASONER, null, null),
-	NEQ("NEQ", PREDEFINED_BOOLEAN_REASONER, null, null),
-	GTE("GTE", PREDEFINED_BOOLEAN_REASONER, null, null),
-	GT("GT", PREDEFINED_BOOLEAN_REASONER, null, null),
-	LTE("LTE", PREDEFINED_BOOLEAN_REASONER, null, null),
-	LT("LT", PREDEFINED_BOOLEAN_REASONER, null, null),
+	EQ("EQ", PREDEFINED_BOOLEAN_RULE, null, null),
+	NEQ("NEQ", PREDEFINED_BOOLEAN_RULE, null, null),
+	GTE("GTE", PREDEFINED_BOOLEAN_RULE, null, null),
+	GT("GT", PREDEFINED_BOOLEAN_RULE, null, null),
+	LTE("LTE", PREDEFINED_BOOLEAN_RULE, null, null),
+	LT("LT", PREDEFINED_BOOLEAN_RULE, null, null),
 
-	IS_NULL("IS_NULL", PREDEFINED_BOOLEAN_REASONER, null),
-	IS_NOT_NULL("IS_NOT_NULL", PREDEFINED_BOOLEAN_REASONER, null),
-	IS_TRUE("IS_TRUE", PREDEFINED_BOOLEAN_REASONER, null),
+	IS_NULL("IS_NULL", PREDEFINED_BOOLEAN_RULE, null),
+	IS_NOT_NULL("IS_NOT_NULL", PREDEFINED_BOOLEAN_RULE, null),
+	IS_TRUE("IS_TRUE", PREDEFINED_BOOLEAN_RULE, null),
 
-	STR_STARTS("STRSTARTS", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	STR_ENDS("STRENDS", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	CONTAINS("CONTAINS", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	STR_STARTS("STRSTARTS", PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	STR_ENDS("STRENDS", PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	CONTAINS("CONTAINS", PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	
 	/* SPARQL String functions */
 
-	STRLEN("STRLEN", PREDEFINED_INTEGER_REASONER, COL_TYPE.LITERAL),
-	UCASE("UCASE", STRING_LANG_REASONER, COL_TYPE.LITERAL),
-	LCASE("LCASE", STRING_LANG_REASONER, COL_TYPE.LITERAL),
-	SUBSTR("SUBSTR", FIRST_ARG_REASONER, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
-	STRBEFORE("STRBEFORE", FIRST_ARG_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	STRAFTER("STRAFTER", FIRST_ARG_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REPLACE("REPLACE", PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	CONCAT("CONCAT", STRING_LANG_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	ENCODE_FOR_URI("ENCODE_FOR_URI", PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL),
+	STRLEN("STRLEN", PREDEFINED_INTEGER_RULE, COL_TYPE.LITERAL),
+	UCASE("UCASE", STRING_LANG_RULE, COL_TYPE.LITERAL),
+	LCASE("LCASE", STRING_LANG_RULE, COL_TYPE.LITERAL),
+	SUBSTR("SUBSTR", FIRST_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
+	STRBEFORE("STRBEFORE", FIRST_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	STRAFTER("STRAFTER", FIRST_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	REPLACE("REPLACE", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	CONCAT("CONCAT", STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	ENCODE_FOR_URI("ENCODE_FOR_URI", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
 
 	/* Hash functions */
 	
-	MD5("MD5", PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL),
-	SHA1("SHA1", PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL),
-	SHA512("SHA521", PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL),
-	SHA256("SHA256", PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL),
+	MD5("MD5", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	SHA1("SHA1", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	SHA512("SHA521", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	SHA256("SHA256", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
 
 	/* SPARQL Functions on Dates and Times */
 
-	NOW("NOW", PREDEFINED_DATETIME_STAMP_REASONER),
-	YEAR("YEAR", PREDEFINED_INTEGER_REASONER, COL_TYPE.DATETIME),
-	DAY("DAY", PREDEFINED_INTEGER_REASONER, COL_TYPE.DATETIME),
-	MONTH("MONTH", PREDEFINED_INTEGER_REASONER, COL_TYPE.DATETIME),
-	HOURS("HOURS", PREDEFINED_INTEGER_REASONER,  COL_TYPE.DATETIME),
-	MINUTES("MINUTES", PREDEFINED_INTEGER_REASONER, COL_TYPE.DATETIME),
-	SECONDS("SECONDS", PREDEFINED_DECIMAL_REASONER, COL_TYPE.DATETIME),
-	TZ("TZ", PREDEFINED_LITERAL_REASONER, COL_TYPE.DATETIME),
+	NOW("NOW", PREDEFINED_DATETIME_RULE),
+	YEAR("YEAR", PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
+	DAY("DAY", PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
+	MONTH("MONTH", PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
+	HOURS("HOURS", PREDEFINED_INTEGER_RULE,  COL_TYPE.DATETIME),
+	MINUTES("MINUTES", PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
+	SECONDS("SECONDS", PREDEFINED_DECIMAL_RULE, COL_TYPE.DATETIME),
+	TZ("TZ", PREDEFINED_LITERAL_RULE, COL_TYPE.DATETIME),
 	
 	/* SPARQL built-in functions */
 
-	SPARQL_STR("str", PREDEFINED_LITERAL_REASONER, null),
-	SPARQL_DATATYPE("datatype", PREDEFINED_OBJECT_REASONER, COL_TYPE.LITERAL),
-	SPARQL_LANG("lang" , PREDEFINED_LITERAL_REASONER, COL_TYPE.LITERAL),
-	UUID("UUID", PREDEFINED_OBJECT_REASONER),
-	STRUUID("STRUUID", PREDEFINED_LITERAL_REASONER),
+	SPARQL_STR("str", PREDEFINED_LITERAL_RULE, null),
+	SPARQL_DATATYPE("datatype", PREDEFINED_OBJECT_RULE, COL_TYPE.LITERAL),
+	SPARQL_LANG("lang" , PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	UUID("UUID", PREDEFINED_OBJECT_RULE),
+	STRUUID("STRUUID", PREDEFINED_LITERAL_RULE),
 
 	/* SPARQL built-in predicates */
 
-	IS_LITERAL("isLiteral", PREDEFINED_BOOLEAN_REASONER, null),
-	IS_IRI("isIRI", PREDEFINED_BOOLEAN_REASONER, null),
-	IS_BLANK("isBlank", PREDEFINED_BOOLEAN_REASONER, null),
-	LANGMATCHES("LangMatches", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REGEX("regex", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	IS_LITERAL("isLiteral", PREDEFINED_BOOLEAN_RULE, null),
+	IS_IRI("isIRI", PREDEFINED_BOOLEAN_RULE, null),
+	IS_BLANK("isBlank", PREDEFINED_BOOLEAN_RULE, null),
+	LANGMATCHES("LangMatches", PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	REGEX("regex", PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	
 	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
-	SQL_LIKE("like", PREDEFINED_BOOLEAN_REASONER, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	SQL_LIKE("like", PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 
-	QUEST_CAST("cast", SECOND_ARG_REASONER, null, null), // TODO: check
+	QUEST_CAST("cast", SECOND_ARG_RULE, null, null), // TODO: check
 
 	/*
 	* Set functions (for aggregation)
 	*/
 
-	AVG("AVG", NON_INTEGER_NUMERIC_REASONER, null),
-	SUM("SUM", STANDARD_NUMERIC_REASONER, null),
-	MAX("MAX", STANDARD_NUMERIC_REASONER, null),
-	MIN("MIN", STANDARD_NUMERIC_REASONER, null),
-	COUNT("COUNT", PREDEFINED_INTEGER_REASONER, null);
+	AVG("AVG", NON_INTEGER_NUMERIC_RULE, null),
+	SUM("SUM", STANDARD_NUMERIC_RULE, null),
+	MAX("MAX", STANDARD_NUMERIC_RULE, null),
+	MIN("MIN", STANDARD_NUMERIC_RULE, null),
+	COUNT("COUNT", PREDEFINED_INTEGER_RULE, null);
 
 
 	// 0-ary operations
-    ExpressionOperation(String name, TermTypeReasoner termTypeReasoner) {
+    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule) {
 		this.name = name;
-		this.termTypeReasoner = termTypeReasoner;
-		this.argTypes = new COL_TYPE[] { };
+		this.termTypeInferenceRule = termTypeInferenceRule;
+		this.argTypes = ImmutableList.of();
 	}
 	// unary operations
-    ExpressionOperation(String name, TermTypeReasoner termTypeReasoner, COL_TYPE arg1) {
+    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1) {
 		this.name = name;
-		this.termTypeReasoner = termTypeReasoner;
-		this.argTypes = new COL_TYPE[] { arg1 };
+		this.termTypeInferenceRule = termTypeInferenceRule;
+		this.argTypes = ImmutableList.of(arg1);
 	}
 	// binary operations
-    ExpressionOperation(String name, TermTypeReasoner termTypeReasoner, COL_TYPE arg1, COL_TYPE arg2) {
+    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2) {
 		this.name = name;
-		this.termTypeReasoner = termTypeReasoner;
-		this.argTypes = new COL_TYPE[] { arg1, arg2 };
+		this.termTypeInferenceRule = termTypeInferenceRule;
+		this.argTypes = ImmutableList.of(arg1, arg2);
 	}
 	// ternary operations
-    ExpressionOperation(String name, TermTypeReasoner termTypeReasoner, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
+    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
 		this.name = name;
-		this.termTypeReasoner = termTypeReasoner;
-		this.argTypes = new COL_TYPE[] { arg1, arg2, arg3 };
+		this.termTypeInferenceRule = termTypeInferenceRule;
+		this.argTypes = ImmutableList.of(arg1, arg2, arg3);
 	}
 
 
 	private final String name;
-	private final TermTypeReasoner termTypeReasoner;
-	private final COL_TYPE argTypes[];
+	private final TermTypeInferenceRule termTypeInferenceRule;
+	private final ImmutableList<COL_TYPE> argTypes;
 	
 	@Override
 	public String getName() {
@@ -139,12 +140,12 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	@Override
 	public int getArity() {
-		return argTypes.length;
+		return argTypes.size();
 	}
 
 	@Override
 	public COL_TYPE getType(int column) {
-		return argTypes[column];
+		return argTypes.get(column);
 	}
 	
 	@Override
@@ -172,13 +173,12 @@ public enum ExpressionOperation implements OperationPredicate {
 		return false;
 	}
 
-	@Override
-	public TermTypeReasoner getTermTypeReasoner() {
-		return termTypeReasoner;
+	public TermTypeInferenceRule getTermTypeInferenceRule() {
+		return termTypeInferenceRule;
 	}
 
 	@Override
-	public COL_TYPE[] getArgumentTypes() {
+	public ImmutableList<COL_TYPE> getArgumentTypes() {
 		return argTypes;
 	}
 }
