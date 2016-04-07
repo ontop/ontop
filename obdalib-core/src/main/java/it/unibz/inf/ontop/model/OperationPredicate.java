@@ -20,6 +20,13 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.TermTypeReasoner;
+
 public interface OperationPredicate extends BuiltinPredicate {
-	// NO-OP
+    /**
+     * TODO: generalize
+     */
+    TermTypeReasoner getTermTypeReasoner();
+
+    COL_TYPE[] getArgumentTypes();
 }

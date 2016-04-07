@@ -25,6 +25,8 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.impl.TermTypeReasonerTools;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -86,8 +88,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private static final int UNDEFINED_TYPE_CODE = -1;
 
-	private ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> dataTypeUnifyTable;
-
 
 	private boolean generatingREPLACE = true;
 
@@ -125,7 +125,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
 		this.sqladapter = sqladapter;
-		dataTypeUnifyTable = buildPredicateUnifyTable();
 
 		ImmutableMap.Builder<ExpressionOperation, String> builder = new ImmutableMap.Builder<ExpressionOperation, String>()
 				.put(ExpressionOperation.ADD, "%s + %s")
@@ -191,35 +190,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	public SQLQueryGenerator cloneGenerator() {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, uriRefIds);
-	}
-
-	private ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> buildPredicateUnifyTable() {
-		return new ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE>()
-				.put(INTEGER, DOUBLE, DOUBLE)
-				.put(INTEGER, DECIMAL, DECIMAL)
-				.put(INTEGER, INTEGER, INTEGER)
-				//.put(COL_TYPE.INTEGER, COL_TYPE.REAL, COL_TYPE.REAL)
-				.put(DECIMAL, DECIMAL, DECIMAL)
-				.put(DECIMAL, DOUBLE, DOUBLE)
-				//.put(COL_TYPE.DECIMAL, COL_TYPE.REAL, COL_TYPE.REAL)
-				.put(DECIMAL, INTEGER, DECIMAL)
-				
-				.put(DOUBLE, DECIMAL, DOUBLE)
-				.put(DOUBLE, DOUBLE, DOUBLE)
-				//.put(COL_TYPE.DOUBLE, COL_TYPE.REAL, COL_TYPE.REAL)
-				.put(DOUBLE, INTEGER, DOUBLE)
-				
-				//.put(COL_TYPE.REAL, COL_TYPE.DECIMAL, COL_TYPE.REAL)
-				//.put(COL_TYPE.REAL, COL_TYPE.DOUBLE, COL_TYPE.REAL)
-				//.put(COL_TYPE.REAL, COL_TYPE.REAL, COL_TYPE.REAL)
-				//.put(COL_TYPE.REAL, COL_TYPE.INTEGER, COL_TYPE.REAL)
-				
-				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-
-				.build();
 	}
 
 	/**
@@ -463,77 +433,43 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Extracts the type from a term found in a head
      */
 	private COL_TYPE getHeadDataType(Term term) {
-		if(term instanceof Function){
-			Function f = (Function)term;
-			Predicate typePred = f.getFunctionSymbol();
-
-			if(typePred instanceof ExpressionOperation){
-				return getHeadTypesOfExpressionOperator((ExpressionOperation) typePred, f.getTerms());
-			} else if (f.isDataTypeFunction()){
-				return f.getFunctionSymbol().getType(0);
-			} else if (typePred instanceof URITemplatePredicate) {
-				return OBJECT;
-			} else if (typePred instanceof BNodePredicate){
-				return BNODE;
-			}
-			else {
-				throw new IllegalArgumentException("Unexcepted functional term: " + term);
-			}
-		}
-		/**
-		 * If a variable is found as a top term in a head, returns the most general COL_TYPE
-		 * (for casting).
-		 */
-		else if(term instanceof Variable){
-			return LITERAL;
-		} else if(term instanceof ValueConstant){
-			/**
-			 * Deals with the ugly definition of the NULL constant.
-			 * COL_TYPE of NULL should be NULL!
-			 */
-			if (term == OBDAVocabulary.NULL) {
-				return NULL;
-			}
-			else {
-				return ((ValueConstant) term).getType();
-			}
-		} else if(term instanceof URIConstant){
-			return OBJECT;
-		}
-		else {
-			throw new IllegalStateException("Unexpected term: " + term);
-		}
-
+		return TermTypeReasonerTools.inferType(term)
+				.map(TermType::getColType)
+				/**
+				 * If a variable is found as a top term in a head, returns the most general COL_TYPE
+				 * (for casting).
+				 */
+				.orElse(LITERAL);
 	}
 
 
-	private COL_TYPE getHeadTypesOfExpressionOperator(ExpressionOperation operator, List<Term> terms) {
-
-		if (operator.getExpressionType() != null) {
-			return operator.getExpressionType();
-		}
-		switch (operator.getArity()) {
-			case 0:
-				// No type
-				return null;
-			case 1:
-				return getSubTermDatatype(operator, terms, 0);
-			case 2:
-				COL_TYPE type1 = getSubTermDatatype(operator, terms, 0);
-				COL_TYPE type2 = getSubTermDatatype(operator, terms, 1);
-				return unifyTypes(type1, type2);
-			default:
-				throw new RuntimeException("Arity >2 are not yet supported. Operator: " + operator);
-		}
-	}
-
-	private COL_TYPE getSubTermDatatype(ExpressionOperation operator, List<Term> terms, int termIndex) {
-		COL_TYPE predefinedType = operator.getType(0);
-		return predefinedType != null
-				? predefinedType
-				// TODO: make the operator provide its default type for its arguments!
-				: getHeadDataType(terms.get(termIndex));
-	}
+//	private COL_TYPE getHeadTypesOfExpressionOperator(ExpressionOperation operator, List<Term> terms) {
+//
+//		if (operator.getExpressionType() != null) {
+//			return operator.getExpressionType();
+//		}
+//		switch (operator.getArity()) {
+//			case 0:
+//				// No type
+//				return null;
+//			case 1:
+//				return getSubTermDatatype(operator, terms, 0);
+//			case 2:
+//				COL_TYPE type1 = getSubTermDatatype(operator, terms, 0);
+//				COL_TYPE type2 = getSubTermDatatype(operator, terms, 1);
+//				return unifyTypes(type1, type2);
+//			default:
+//				throw new RuntimeException("Arity >2 are not yet supported. Operator: " + operator);
+//		}
+//	}
+//
+//	private COL_TYPE getSubTermDatatype(ExpressionOperation operator, List<Term> terms, int termIndex) {
+//		COL_TYPE predefinedType = operator.getType(0);
+//		return predefinedType != null
+//				? predefinedType
+//				// TODO: make the operator provide its default type for its arguments!
+//				: getHeadDataType(terms.get(termIndex));
+//	}
 
 	/**
 	 * Unifies the input types
@@ -547,21 +483,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private COL_TYPE unifyTypes(COL_TYPE type1, COL_TYPE type2) {
-
-		if(type1 == null){
-			return type2;
-		}
-		else if(type1.equals(type2)){
-			return type1;
-		} else if(dataTypeUnifyTable.contains(type1, type2)){
-			return dataTypeUnifyTable.get(type1, type2);
-		}else if(type2 == null){
-			return type1;
-			//throw new NullPointerException("type2 cannot be null");
-		} else {
-			return STRING;
-		}
-
+		return TermTypeReasonerTools.getCommonDenominatorType(type1, type2)
+				.orElse(STRING);
 	}
 
 	/**
