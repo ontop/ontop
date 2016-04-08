@@ -11,7 +11,7 @@ import java.util.Optional;
 public class FirstArgumentTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
-    protected Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes) {
+    protected Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes) {
         if (argumentTypes.isEmpty()) {
             throw new IllegalStateException("At least one argument is required by the FirstArgumentTermTypeReasoner");
         }

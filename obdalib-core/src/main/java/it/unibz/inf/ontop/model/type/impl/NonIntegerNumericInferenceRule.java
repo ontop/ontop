@@ -17,8 +17,8 @@ public class NonIntegerNumericInferenceRule extends NumericTermTypeInferenceRule
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Override
-    protected Optional<TermType> postprocessDeducedType(Optional<TermType> optionalTermType) {
-        // No need to call super.postprocessDeducedType()
+    protected Optional<TermType> postprocessInferredType(Optional<TermType> optionalTermType) {
+        // No need to call super.postprocessInferredType()
         return optionalTermType
                 .map(t -> INTEGER_TYPES.contains(t.getColType()) ? DATA_FACTORY.getTermType(INTEGER) : t);
     }

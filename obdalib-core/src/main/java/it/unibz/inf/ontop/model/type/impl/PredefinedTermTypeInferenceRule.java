@@ -33,7 +33,7 @@ public class PredefinedTermTypeInferenceRule extends AbstractTermTypeInferenceRu
     }
 
     @Override
-    protected Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes) {
+    protected Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes) {
         return Optional.of(predefinedType);
     }
 }

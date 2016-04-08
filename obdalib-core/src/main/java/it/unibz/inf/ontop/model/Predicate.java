@@ -37,7 +37,7 @@ public interface Predicate {
 		OBJECT (1, "OBJECT"),
 		BNODE (2, "BNODE"),
 		LITERAL (3, "LITERAL"),
-		LITERAL_LANG (-3, "LITERAL_LANG"), // not to be mapped from code
+		LITERAL_LANG (-3, "LITERAL_LANG"), // not to be mapped from code // BC: Why not?
 		INTEGER (4, "INTEGER"),
 		DECIMAL (5, "DECIMAL"),
 		DOUBLE (6, "DOUBLE"),
@@ -62,8 +62,8 @@ public interface Predicate {
 		static {
 			ImmutableMap.Builder<Integer, COL_TYPE> mapBuilder = ImmutableMap.builder();
 			for (COL_TYPE type : COL_TYPE.values()) {
-				// ignore UNSUPPORTED and LITERAL_LANG
-				if (type.code >= 0)
+				// ignore UNSUPPORTED (but not LITERAL_LANG anymore)
+				if (type.code != -1)
 					mapBuilder.put(type.code, type);
 			}
 			CODE_TO_TYPE_MAP = mapBuilder.build();

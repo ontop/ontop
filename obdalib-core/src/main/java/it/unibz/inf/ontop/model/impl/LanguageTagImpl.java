@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.impl;
 
 
 import it.unibz.inf.ontop.model.LanguageTag;
+import org.openrdf.model.util.language.LanguageTagSyntaxException;
 
 import java.util.Optional;
 
@@ -12,7 +13,17 @@ public class LanguageTagImpl implements LanguageTag {
 
     protected LanguageTagImpl(String fullString){
         this.fullString = fullString;
-        throw new RuntimeException("TODO: complete");
+
+        try {
+            org.openrdf.model.util.language.LanguageTag tag = new org.openrdf.model.util.language.LanguageTag(fullString);
+            prefix = tag.getLanguage().twoCharCode;
+            optionalSuffix = Optional.ofNullable(tag.getVariant());
+        }
+        catch (LanguageTagSyntaxException e) {
+            // TODO: find a better exception
+            throw new IllegalStateException("Invalid language tag found: " + fullString
+                    + " (should have been detected before)");
+        }
     }
 
     @Override
@@ -32,7 +43,15 @@ public class LanguageTagImpl implements LanguageTag {
 
     @Override
     public Optional<LanguageTag> getCommonDenominator(LanguageTag otherTag) {
-        throw new RuntimeException("TODO: implement it");
+        if (equals(otherTag)) {
+            return Optional.of(this);
+        }
+        else if (prefix.equals(otherTag.getPrefix())) {
+            return Optional.of(new LanguageTagImpl(prefix));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     @Override

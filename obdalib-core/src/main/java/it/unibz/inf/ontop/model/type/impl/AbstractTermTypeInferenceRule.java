@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.TermTypeImpl;
 import it.unibz.inf.ontop.model.type.TermTypeException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
@@ -50,13 +49,13 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
                         })));
         doAdditionalChecks(terms, argumentTypes);
 
-        return postprocessDeducedType(deduceType(argumentTypes));
+        return postprocessInferredType(reduceInferredTypes(argumentTypes));
     }
 
     /**
      * Hook, does nothing by default
      */
-    protected Optional<TermType> postprocessDeducedType(Optional<TermType> termType) {
+    protected Optional<TermType> postprocessInferredType(Optional<TermType> termType) {
         return termType;
     }
 
@@ -70,6 +69,6 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     /**
      * TODO: find a better name
      */
-    protected abstract Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes);
+    protected abstract Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes);
 
 }

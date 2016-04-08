@@ -41,7 +41,7 @@ public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
      * Only base numeric types (double, float, decimal and integer) can be returned by numeric functions and operators
      */
     @Override
-    protected Optional<TermType> postprocessDeducedType(Optional<TermType> optionalTermType) {
+    protected Optional<TermType> postprocessInferredType(Optional<TermType> optionalTermType) {
         return optionalTermType
                 .map(t -> INTEGER_TYPES.contains(t.getColType()) ? DATA_FACTORY.getTermType(INTEGER) : t);
     }

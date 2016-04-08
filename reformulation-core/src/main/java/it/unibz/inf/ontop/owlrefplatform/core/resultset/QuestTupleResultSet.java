@@ -216,8 +216,11 @@ public class QuestTupleResultSet implements TupleResultSet {
 					}
 					result = fac.getConstantBNode(scopedLabel);
 					break;
-					
+					/**
+                     * TODO: the language tag should be reserved to LITERAL_LANG
+ 					 */
 				case LITERAL:
+				case LITERAL_LANG:
 					// The constant is a literal, we need to find if its
 					// rdfs:Literal or a normal literal and construct it
 					// properly.

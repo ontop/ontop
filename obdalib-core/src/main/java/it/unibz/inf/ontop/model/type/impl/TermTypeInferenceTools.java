@@ -76,7 +76,11 @@ public class TermTypeInferenceTools {
     private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(OBJECT));
     private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(BNODE));
     private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(NULL));
+    private static final Optional<TermType> OPTIONAL_DEFAULT_LITERAL_LANG_TERM_TYPE = Optional.of(
+            DATA_FACTORY.getTermType(LITERAL_LANG));
 
+    private static final DatatypePredicate LITERAL_LANG_PREDICATE = DATA_FACTORY.getDatatypeFactory()
+            .getTypePredicate(LITERAL_LANG);
 
     /**
      * TODO: find a better name
@@ -111,14 +115,15 @@ public class TermTypeInferenceTools {
                 /**
                  * Special case: langString WHERE the language tag is KNOWN
                  */
-                if (colType == LITERAL_LANG) {
+                if (typePred.equals(LITERAL_LANG_PREDICATE)) {
                     if (f.getTerms().size() != 2) {
                         throw new IllegalStateException("A lang literal function should have two arguments");
                     }
                     Term secondArgument = f.getTerms().get(1);
-                    if (secondArgument instanceof Constant) {
-                        return Optional.of(DATA_FACTORY.getTermType(((Constant)secondArgument).getValue()));
-                    }
+
+                    return (secondArgument instanceof Constant)
+                            ? Optional.of(DATA_FACTORY.getTermType(((Constant)secondArgument).getValue()))
+                            : OPTIONAL_DEFAULT_LITERAL_LANG_TERM_TYPE;
                 }
                 return Optional.of(DATA_FACTORY.getTermType(colType));
 

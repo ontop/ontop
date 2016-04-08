@@ -79,14 +79,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private static final String INDENT = "    ";
 
-
-	// TODO: remove it
-	private static final COL_TYPE DEFAULT_TYPE_FOR_EXPRESSION_OPERATION_SUB_TERM = INTEGER;
-
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
-
-	private static final int UNDEFINED_TYPE_CODE = -1;
 
 
 	private boolean generatingREPLACE = true;
@@ -107,6 +101,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
 
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+
+	private final DatatypePredicate literalLangFunctionSymbol = dtfac.getTypePredicate(LITERAL_LANG);
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
@@ -1310,9 +1306,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				varName = "v" + hpos;
 			}
 
-			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
+			// TODO: this recomputation could be avoided
+			Optional<TermType> optionalTermType = TermTypeInferenceTools.inferType(ht);
+
+			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index, castDataType, sqlVariableNames);
-			String langColumn = getLangColumnForSELECT(ht, varName, hpos,	index, sqlVariableNames);
+			String langColumn = getLangColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -1425,8 +1424,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return format;
 	}
 
-	private String getLangColumnForSELECT(Term ht, String signatureVarName, int hpos, QueryAliasIndex index,
-                                          Set<String> sqlVariableNames) {
+	private String getLangColumnForSELECT(Term ht, String signatureVarName, QueryAliasIndex index,
+										  Set<String> sqlVariableNames, Optional<TermType> optionalTermType) {
 
         /**
          * Creates a variable name that fits to the restrictions of the SQL dialect.
@@ -1436,127 +1435,69 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		final String lang;
 
-        if (ht instanceof Function) {
-            Function ov = (Function) ht;
-            lang = getLangType(ov, index);
-        }
-		else if (ht instanceof Variable) {
+		if (ht instanceof Variable) {
 			lang = getLangFromVariable((Variable) ht, index);
 		}
 		else {
-			lang = "NULL";
+			lang = optionalTermType
+					.filter(t -> t.getColType() == LITERAL_LANG)
+					.flatMap(t -> t.getLanguageTag()
+								.map(tag -> Optional.of("'" + tag.getFullString() + "'"))
+							/**
+							 * The language tag may correspond to a variable
+							 */
+								.orElseGet(() -> Optional.of(ht)
+											.filter(term -> term instanceof Function)
+											.map(term -> (Function) term)
+											.filter(f -> f.getFunctionSymbol().equals(literalLangFunctionSymbol))
+											.map(f -> {
+												List<Term> terms = f.getTerms();
+												if (terms.size() != 2) {
+													throw new IllegalStateException("Illegal literal lang: " + f);
+												}
+												else {
+													return getSQLString(terms.get(1), index, false);
+												}
+											})))
+					.orElse("NULL");
 		}
 		return String.format(LANG_STR, lang, langVariableName);
     }
-
-
-	/**
-	 * http://www.w3.org/TR/sparql11-query/#idp1915512
-	 *
-	 * Functions that return a string literal do so with the string literal of the same kind as the first argument
-	 * (simple literal, plain literal with same language tag, xsd:string). This includes SUBSTR, STRBEFORE and STRAFTER.
-	 *
-	 * The function CONCAT returns a string literal based on the details of all its arguments.
-	 *
-	 * @param func1
-	 * @param index
-	 * @return
-	 */
-	private String getLangType(Function func1, QueryAliasIndex index) {
-
-		Predicate pred1 = func1.getFunctionSymbol();
-
-		if (dtfac.isLiteral(pred1) && func1.getArity() == 2) {
-			Term langTerm = func1.getTerm(1);
-			if (langTerm == OBDAVocabulary.NULL) {
-				return  "NULL";
-			}
-			else if (langTerm instanceof ValueConstant) {
-				return getSQLLexicalForm((ValueConstant) langTerm);
-			}
-			else {
-				return getSQLString(langTerm, index, false);
-			}
-		}
-		else if (func1.isOperation()) {
-			if (pred1 == ExpressionOperation.CONCAT) {
-				Term term1 = func1.getTerm(0);
-				Term term2 = func1.getTerm(1);
-
-				if (term1 instanceof Function && term2 instanceof Function) {
-					String lang1 = getLangType((Function) term1, index);
-					String lang2 = getLangType((Function) term2, index);
-					if (lang1.equals(lang2))
-						return lang1;
-					else
-						return "NULL";
-				}
-			}
-			else if (pred1 == ExpressionOperation.REPLACE || pred1 == ExpressionOperation.SUBSTR ||
-					pred1 == ExpressionOperation.UCASE || pred1 == ExpressionOperation.LCASE ||
-					pred1 == ExpressionOperation.STRBEFORE || pred1 == ExpressionOperation.STRAFTER) {
-				Term rep1 = func1.getTerm(0);
-				if (rep1 instanceof Function) {
-					String lang1 = getLangType((Function) rep1, index);
-					return lang1;
-				}
-			}
-			return "NULL";
-		}
-		return "NULL";
-	}
 
 	/**
 	 * Infers the type of a projected term.
 	 *
 	 * Note this type may differ from the one used for casting the main column (in some special cases).
 	 * This type will appear as the RDF datatype.
-	 *
-	 * @param projectedTerm
+	 *  @param projectedTerm
 	 * @param signatureVarName Name of the variable
 	 * @param index Used when the term correspond to a column name
-	 *@param sqlVariableNames Used for creating non conflicting variable names (when they have to be shorten)  @return A string like "5 AS ageQuestType"
+	 * @param sqlVariableNames Used for creating non conflicting variable names (when they have to be shorten)  @return A string like "5 AS ageQuestType"
+	 * @param optionalTermType
 	 */
 	private String getTypeColumnForSELECT(Term projectedTerm, String signatureVarName,
 										  QueryAliasIndex index,
-										  Set<String> sqlVariableNames) {
+										  Set<String> sqlVariableNames, Optional<TermType> optionalTermType) {
 
 		final String varName = sqladapter.nameTopVariable(signatureVarName, TYPE_SUFFIX, sqlVariableNames);
 		sqlVariableNames.add(varName);
 
-		String typeString = null;
-		final COL_TYPE type;
-
-		if (projectedTerm instanceof Function) {
-
-			type = getHeadDataType(projectedTerm);
-			if (type == null) {
-				throw new IllegalStateException("The head datatype must not null for " + projectedTerm);
-			}
-		}
-		else if (projectedTerm instanceof Constant) {
-			type = ((Constant) projectedTerm).getType();
-		}
-		else if (projectedTerm instanceof Variable) {
-			type = null;
+		final String typeString;
+		if (projectedTerm instanceof Variable) {
 			typeString = getTypeFromVariable((Variable) projectedTerm, index);
 		}
 		else {
-			// Unusual term
-			throw new RuntimeException("Cannot generate SELECT for term: "
-					+ projectedTerm.toString());
-		}
+			COL_TYPE colType = optionalTermType
+					.map(TermType::getColType)
+					/**
+					 * By default, we apply the "most" general COL_TYPE
+					 */
+					.orElse(LITERAL);
 
-		if (type != null) {
-			typeString = String.format("%d", type.getQuestCode());
-		}
-		else if (typeString == null) {
-			throw new RuntimeException("Cannot generate SELECT for term: "
-						+ projectedTerm.toString());
+			typeString = String.format("%d", colType.getQuestCode());
 		}
 
 		return String.format(TYPE_STR, typeString, varName);
-
 	}
 
 	/**

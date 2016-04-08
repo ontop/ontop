@@ -11,7 +11,7 @@ import java.util.Optional;
 public class UnifierTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
-    protected Optional<TermType> deduceType(ImmutableList<Optional<TermType>> argumentTypes) {
+    protected Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes) {
         return argumentTypes.stream()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
