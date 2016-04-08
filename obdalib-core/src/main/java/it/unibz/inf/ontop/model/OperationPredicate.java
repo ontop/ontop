@@ -23,11 +23,13 @@ package it.unibz.inf.ontop.model;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
+import java.util.Optional;
+
 public interface OperationPredicate extends BuiltinPredicate {
     /**
      * TODO: generalize
      */
     TermTypeInferenceRule getTermTypeInferenceRule();
 
-    ImmutableList<COL_TYPE> getArgumentTypes();
+    ImmutableList<Optional<COL_TYPE>> getArgumentTypes();
 }

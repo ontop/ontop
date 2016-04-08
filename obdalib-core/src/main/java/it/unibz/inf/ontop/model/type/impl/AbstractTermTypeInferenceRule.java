@@ -18,9 +18,10 @@ import java.util.stream.IntStream;
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferType(List<Term> terms, Predicate.COL_TYPE[] expectedBaseTypes) throws TermTypeException {
+    public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
+            throws TermTypeException {
 
-        if (expectedBaseTypes.length != terms.size()) {
+        if (expectedBaseTypes.size() != terms.size()) {
             throw new IllegalArgumentException("Arity mismatch between " + terms + " and " + expectedBaseTypes);
         }
 
@@ -34,12 +35,11 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
          */
         IntStream.range(0, terms.size())
                 .forEach(i -> argumentTypes.get(i)
-                        .ifPresent(t -> {
-                            Predicate.COL_TYPE expectedBaseType = expectedBaseTypes[i];
-                            if ((expectedBaseType != null) && (!t.isCompatibleWith(expectedBaseType))) {
+                        .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
+                            if (!t.isCompatibleWith(expectedBaseType)) {
                                 throw new TermTypeException(terms.get(i), new TermTypeImpl(expectedBaseType), t);
                             }
-                        }));
+                        })));
         doAdditionalChecks(terms, argumentTypes);
 
         return postprocessDeducedType(deduceType(argumentTypes));

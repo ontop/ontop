@@ -16,5 +16,6 @@ public interface TermTypeInferenceRule {
      * TODO: explain
      *
      */
-    Optional<TermType> inferType(List<Term> terms, ImmutableList<COL_TYPE> expectedBaseTypes) throws TermTypeException;
+    Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<COL_TYPE>> expectedBaseTypes)
+            throws TermTypeException;
 }

@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.model;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
 public enum ExpressionOperation implements OperationPredicate {
@@ -113,25 +115,26 @@ public enum ExpressionOperation implements OperationPredicate {
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(arg1);
+		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1));
 	}
 	// binary operations
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(arg1, arg2);
+		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2));
 	}
 	// ternary operations
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(arg1, arg2, arg3);
+		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2), Optional.ofNullable(arg3));
 	}
 
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
-	private final ImmutableList<COL_TYPE> argTypes;
+	// Immutable
+	private final ImmutableList<Optional<COL_TYPE>> argTypes;
 	
 	@Override
 	public String getName() {
@@ -145,7 +148,7 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	@Override
 	public COL_TYPE getType(int column) {
-		return argTypes.get(column);
+		return argTypes.get(column).orElse(null);
 	}
 	
 	@Override
@@ -178,7 +181,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public ImmutableList<COL_TYPE> getArgumentTypes() {
+	public ImmutableList<Optional<COL_TYPE>> getArgumentTypes() {
 		return argTypes;
 	}
 }
