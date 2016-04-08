@@ -25,7 +25,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -441,35 +441,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 				.orElse(LITERAL);
 	}
-
-
-//	private COL_TYPE getHeadTypesOfExpressionOperator(ExpressionOperation operator, List<Term> terms) {
-//
-//		if (operator.getExpressionType() != null) {
-//			return operator.getExpressionType();
-//		}
-//		switch (operator.getArity()) {
-//			case 0:
-//				// No type
-//				return null;
-//			case 1:
-//				return getSubTermDatatype(operator, terms, 0);
-//			case 2:
-//				COL_TYPE type1 = getSubTermDatatype(operator, terms, 0);
-//				COL_TYPE type2 = getSubTermDatatype(operator, terms, 1);
-//				return unifyTypes(type1, type2);
-//			default:
-//				throw new RuntimeException("Arity >2 are not yet supported. Operator: " + operator);
-//		}
-//	}
-//
-//	private COL_TYPE getSubTermDatatype(ExpressionOperation operator, List<Term> terms, int termIndex) {
-//		COL_TYPE predefinedType = operator.getType(0);
-//		return predefinedType != null
-//				? predefinedType
-//				// TODO: make the operator provide its default type for its arguments!
-//				: getHeadDataType(terms.get(termIndex));
-//	}
 
 	/**
 	 * Unifies the input types

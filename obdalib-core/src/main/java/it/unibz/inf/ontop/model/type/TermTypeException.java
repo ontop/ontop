@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.type;
 
 import it.unibz.inf.ontop.exception.OntopRuntimeException;
 import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.TermType;
 
 import java.util.Optional;
 

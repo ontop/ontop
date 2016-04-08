@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.TermType;
 
 import java.util.List;
 import java.util.Optional;

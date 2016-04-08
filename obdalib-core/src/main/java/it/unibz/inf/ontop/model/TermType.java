@@ -1,6 +1,4 @@
-package it.unibz.inf.ontop.model.type;
-
-import it.unibz.inf.ontop.model.Predicate;
+package it.unibz.inf.ontop.model;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.type;
+package it.unibz.inf.ontop.model;
 
 import java.util.Optional;
 

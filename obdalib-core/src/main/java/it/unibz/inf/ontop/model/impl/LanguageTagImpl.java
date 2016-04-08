@@ -1,9 +1,8 @@
-package it.unibz.inf.ontop.model.type.impl;
+package it.unibz.inf.ontop.model.impl;
 
 
-import it.unibz.inf.ontop.model.type.LanguageTag;
+import it.unibz.inf.ontop.model.LanguageTag;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class LanguageTagImpl implements LanguageTag {

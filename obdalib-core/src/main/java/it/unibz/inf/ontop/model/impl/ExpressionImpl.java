@@ -3,11 +3,9 @@ package it.unibz.inf.ontop.model.impl;
 import it.unibz.inf.ontop.model.Expression;
 import it.unibz.inf.ontop.model.OperationPredicate;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ExpressionImpl extends FunctionalTermImpl implements Expression {
 

@@ -1,8 +1,10 @@
-package it.unibz.inf.ontop.model.type.impl;
+package it.unibz.inf.ontop.model.impl;
 
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.LanguageTag;
+import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ public class TermTypeImpl implements TermType {
 
     private final Predicate.COL_TYPE colType;
     private final Optional<LanguageTag> optionalLangTag;
+    private static final TermType LITERAL_LANG_TERM_TYPE = OBDADataFactoryImpl.getInstance().getTermType(LITERAL_LANG);
 
     /**
      * Only for langString WHEN the languageTag is known.
@@ -24,7 +27,7 @@ public class TermTypeImpl implements TermType {
      * is stored in a DB column.
      *
      */
-    public TermTypeImpl(LanguageTag languageTag) {
+    protected TermTypeImpl(LanguageTag languageTag) {
         this.colType = LITERAL_LANG;
         this.optionalLangTag = Optional.of(languageTag);
     }
@@ -32,7 +35,7 @@ public class TermTypeImpl implements TermType {
     /**
      * If you know the language tag, use the other constructor.
      */
-    public TermTypeImpl(Predicate.COL_TYPE colType) {
+    protected TermTypeImpl(Predicate.COL_TYPE colType) {
         this.colType = colType;
         this.optionalLangTag = Optional.empty();
     }
@@ -67,7 +70,7 @@ public class TermTypeImpl implements TermType {
 
             return Optional.of(newOptionalLangTag
                     .map(tag -> (TermType) new TermTypeImpl(tag))
-                    .orElse(TermTypes.LITERAL_LANG_TERM_TYPE));
+                    .orElse(LITERAL_LANG_TERM_TYPE));
         }
         else {
             return TermTypeInferenceTools.getCommonDenominatorType(colType, otherTermType.getColType())

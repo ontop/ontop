@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.model;
 
-import it.unibz.inf.ontop.model.type.TermType;
-
 import java.util.Optional;
 
 /**

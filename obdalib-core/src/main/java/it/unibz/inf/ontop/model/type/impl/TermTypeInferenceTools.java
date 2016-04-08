@@ -4,13 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.LanguageTagImpl;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.model.impl.TermTypeImpl;
 import it.unibz.inf.ontop.model.type.TermTypeException;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
@@ -70,9 +72,10 @@ public class TermTypeInferenceTools {
         return tableBuilder.build();
     }
 
-    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(TermTypes.OBJECT_TERM_TYPE);
-    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TermTypes.BNODE_TERM_TYPE);
-    private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(TermTypes.NULL_TERM_TYPE);
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(OBJECT));
+    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(BNODE));
+    private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(NULL));
 
 
     /**
@@ -114,11 +117,10 @@ public class TermTypeInferenceTools {
                     }
                     Term secondArgument = f.getTerms().get(1);
                     if (secondArgument instanceof Constant) {
-                        return Optional.of(new TermTypeImpl(new LanguageTagImpl((
-                                ((Constant)secondArgument).getValue()))));
+                        return Optional.of(DATA_FACTORY.getTermType(((Constant)secondArgument).getValue()));
                     }
                 }
-                return Optional.of(new TermTypeImpl(colType));
+                return Optional.of(DATA_FACTORY.getTermType(colType));
 
             } else if (typePred instanceof URITemplatePredicate) {
                 return  OPTIONAL_OBJECT_TERM_TYPE;
@@ -140,7 +142,7 @@ public class TermTypeInferenceTools {
                 return OPTIONAL_NULL_TERM_TYPE;
             }
             else {
-                return Optional.of(new TermTypeImpl(((ValueConstant) term).getType()));
+                return Optional.of(DATA_FACTORY.getTermType(((ValueConstant) term).getType()));
             }
         } else if(term instanceof URIConstant){
             return OPTIONAL_OBJECT_TERM_TYPE;
