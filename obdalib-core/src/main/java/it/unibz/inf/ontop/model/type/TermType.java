@@ -18,6 +18,4 @@ public interface TermType {
     boolean isCompatibleWith(Predicate.COL_TYPE colType);
 
     Optional<TermType> getCommonDenominator(TermType otherTermType);
-
-    boolean isNumeric();
 }

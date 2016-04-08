@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
 * The Predicate class currently represents (1) first-order predicts, (2) function symbols, and
@@ -56,16 +56,26 @@ public interface Predicate {
 		INT (19, "INT"),
 		UNSIGNED_INT (20, "UNSIGNED_INT"),
 		DATETIME_STAMP (21, "DATETIME_STAMP");
-		
-		private static final Map<Integer, Predicate.COL_TYPE> codeToTypeMap = new HashMap<>();
+
+		private static final ImmutableMap<Integer, COL_TYPE> CODE_TO_TYPE_MAP;
 		
 		static {
+			ImmutableMap.Builder<Integer, COL_TYPE> mapBuilder = ImmutableMap.builder();
 			for (COL_TYPE type : COL_TYPE.values()) {
 				// ignore UNSUPPORTED and LITERAL_LANG
 				if (type.code >= 0)
-					codeToTypeMap.put(type.code, type);
+					mapBuilder.put(type.code, type);
 			}
+			CODE_TO_TYPE_MAP = mapBuilder.build();
 		}
+
+		public static final ImmutableSet<COL_TYPE> INTEGER_TYPES = ImmutableSet.of(
+				INTEGER, LONG, INT, NEGATIVE_INTEGER, NON_NEGATIVE_INTEGER, POSITIVE_INTEGER, NON_POSITIVE_INTEGER,
+				UNSIGNED_INT);
+
+		public static final ImmutableSet<COL_TYPE> NUMERIC_TYPES = ImmutableSet.of(
+				DOUBLE, FLOAT, DECIMAL, INTEGER, LONG, INT, NEGATIVE_INTEGER, NON_NEGATIVE_INTEGER,
+				POSITIVE_INTEGER, NON_POSITIVE_INTEGER, UNSIGNED_INT);
 		
 		private final int code;
 		private final String label;
@@ -86,7 +96,7 @@ public interface Predicate {
 		}
 		
 		public static COL_TYPE getQuestType(int code) {
-			return codeToTypeMap.get(code);
+			return CODE_TO_TYPE_MAP.get(code);
 		}
   };
 

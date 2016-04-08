@@ -66,35 +66,12 @@ public class TermTypeImpl implements TermType {
                             .flatMap(tag1::getCommonDenominator));
 
             return Optional.of(newOptionalLangTag
-                    .map(TermTypeImpl::new)
-                    .orElseGet(()-> new TermTypeImpl(LITERAL_LANG)));
+                    .map(tag -> (TermType) new TermTypeImpl(tag))
+                    .orElse(TermTypes.LITERAL_LANG_TERM_TYPE));
         }
         else {
             return TermTypeInferenceTools.getCommonDenominatorType(colType, otherTermType.getColType())
                     .map(TermTypeImpl::new);
-        }
-    }
-
-    /**
-     * As defined in https://www.w3.org/TR/sparql11-query/#operandDataTypes
-     */
-    @Override
-    public boolean isNumeric() {
-        switch (colType) {
-            case INTEGER:
-            case DECIMAL:
-            case DOUBLE:
-            case LONG:
-            case FLOAT:
-            case NEGATIVE_INTEGER:
-            case NON_NEGATIVE_INTEGER:
-            case POSITIVE_INTEGER:
-            case NON_POSITIVE_INTEGER:
-            case INT:
-            case UNSIGNED_INT:
-                return true;
-            default:
-                return false;
         }
     }
 

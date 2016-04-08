@@ -35,6 +35,7 @@ public class TermTypeInferenceTools {
         Map<COL_TYPE, COL_TYPE> datatypeHierarchy = ImmutableMap.<COL_TYPE, COL_TYPE>builder()
                 .put(LITERAL_LANG, LITERAL)
                 .put(STRING, LITERAL)
+                .put(BOOLEAN, LITERAL)
                 .put(DATE, LITERAL)
                 .put(DATETIME, LITERAL)
                 .put(DATETIME_STAMP, DATETIME)
@@ -68,6 +69,10 @@ public class TermTypeInferenceTools {
 
         return tableBuilder.build();
     }
+
+    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(TermTypes.OBJECT_TERM_TYPE);
+    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TermTypes.BNODE_TERM_TYPE);
+    private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(TermTypes.NULL_TERM_TYPE);
 
 
     /**
@@ -116,9 +121,9 @@ public class TermTypeInferenceTools {
                 return Optional.of(new TermTypeImpl(colType));
 
             } else if (typePred instanceof URITemplatePredicate) {
-                return  Optional.of(new TermTypeImpl(OBJECT));
+                return  OPTIONAL_OBJECT_TERM_TYPE;
             } else if (typePred instanceof BNodePredicate){
-                return Optional.of(new TermTypeImpl(BNODE));
+                return OPTIONAL_BNODE_TERM_TYPE;
             }
             else {
                 throw new IllegalArgumentException("Unexpected functional term: " + term);
@@ -132,13 +137,13 @@ public class TermTypeInferenceTools {
              * COL_TYPE of NULL should be NULL!
              */
             if (term == OBDAVocabulary.NULL) {
-                return Optional.of(new TermTypeImpl(NULL));
+                return OPTIONAL_NULL_TERM_TYPE;
             }
             else {
                 return Optional.of(new TermTypeImpl(((ValueConstant) term).getType()));
             }
         } else if(term instanceof URIConstant){
-            return Optional.of(new TermTypeImpl(OBJECT));
+            return OPTIONAL_OBJECT_TERM_TYPE;
         }
         else {
             throw new IllegalStateException("Unexpected term: " + term);
