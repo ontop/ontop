@@ -21,7 +21,10 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
             throws TermTypeException {
 
-        if (expectedBaseTypes.size() != terms.size()) {
+        /**
+         * TODO: restore inequality test between the arities
+         */
+        if (expectedBaseTypes.size() < terms.size()) {
             throw new IllegalArgumentException("Arity mismatch between " + terms + " and " + expectedBaseTypes);
         }
 
