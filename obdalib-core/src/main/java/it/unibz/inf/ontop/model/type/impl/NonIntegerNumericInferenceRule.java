@@ -13,6 +13,7 @@ public class NonIntegerNumericInferenceRule extends NumericTermTypeInferenceRule
 
     @Override
     protected Optional<TermType> postprocessDeducedType(Optional<TermType> optionalTermType) {
+        // No need to call super.postprocessDeducedType()
         if (optionalTermType.isPresent()) {
             switch(optionalTermType.get().getColType()) {
                 case INTEGER:
