@@ -102,8 +102,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
-	private final DatatypePredicate literalLangFunctionSymbol = dtfac.getTypePredicate(LITERAL_LANG);
-
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
 	private static final org.slf4j.Logger log = LoggerFactory
@@ -213,9 +211,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		ruleIndex = depGraph.getRuleIndex();
 
-		Multimap<Predicate, CQIE> ruleIndexByBodyPredicate = depGraph
-				.getRuleIndexByBodyPredicate();
-
 		List<Predicate> predicatesInBottomUp = depGraph
 				.getPredicatesInBottomUp();
 
@@ -225,11 +220,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		isDistinct = hasSelectDistinctStatement(queryProgram);
 		isOrderBy = hasOrderByClause(queryProgram);
 		if (queryProgram.getQueryModifiers().hasModifiers()) {
-			final String indent = "   ";
 			final String outerViewName = "SUB_QVIEW";
-			String subquery = generateQuery(queryProgram, signature, indent,
-					ruleIndex, ruleIndexByBodyPredicate, predicatesInBottomUp,
-					extensionalPredicates);
+			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 
 			String modifier = "";
 
@@ -261,9 +253,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += modifier;
 			return sql;
 		} else {
-			return generateQuery(queryProgram, signature, "", ruleIndex,
-					ruleIndexByBodyPredicate, predicatesInBottomUp,
-					extensionalPredicates);
+			return generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 		}
 	}
 
@@ -297,17 +287,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * that will create a view for every ans prodicate in the Datalog input
 	 * program.
 	 *
-	 * @param query
-	 *            This is a arbitrary Datalog Program. In this program ans
-	 *            predicates will be translated to Views.
-	 *
-	 *
 	 * @param signature
 	 *            The Select variables in the SPARQL query
-	 * @param indent
 	 * @param ruleIndex
 	 *            The index that maps intentional predicates to its rules
-	 * @param ruleIndexByBodyPredicate
 	 * @param predicatesInBottomUp
 	 *            The topologically ordered predicates in
 	 *            <code> query </query>.
@@ -317,9 +300,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 * @throws OBDAException
 	 */
-	private String generateQuery(DatalogProgram query, List<String> signature,
-								 String indent, Multimap<Predicate, CQIE> ruleIndex,
-								 Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
+	private String generateQuery(List<String> signature,
+								 Multimap<Predicate, CQIE> ruleIndex,
 								 List<Predicate> predicatesInBottomUp,
 								 List<Predicate> extensionalPredicates) throws OBDAException {
 
@@ -340,9 +322,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * extensional predicates are defined by DBs
 				 */
 			} else {
-				boolean isAns1 = false;
-				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex,
-						ruleIndexByBodyPredicate, query, signature, isAns1, subQueryDefinitions);
+				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex, subQueryDefinitions);
 
 				subQueryDefinitions.put(pred, view);
 			}
@@ -656,9 +636,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Optionals/LeftJoins
 	 *
 	 * @param ruleIndex
-	 * @param ruleIndexByBodyPredicate
-	 * @param query
-	 * @param signature
 	 * @param subQueryDefinitions
 	 * @throws OBDAException
 	 *
@@ -667,8 +644,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private ParserViewDefinition createViewFrom(Predicate pred, DBMetadata metadata,
 												Multimap<Predicate, CQIE> ruleIndex,
-												Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
-												DatalogProgram query, List<String> signature, boolean isAns1,
 												Map<Predicate, ParserViewDefinition> subQueryDefinitions)
 			throws OBDAException {
 
@@ -695,7 +670,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					isAns1, castDataTypes, subQueryDefinitions);
+					false, castDataTypes, subQueryDefinitions);
 
 			sqls.add(sqlQuery);
 		}
