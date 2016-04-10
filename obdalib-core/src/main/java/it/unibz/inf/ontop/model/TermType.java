@@ -13,7 +13,10 @@ public interface TermType {
 
     Optional<LanguageTag> getLanguageTagConstant();
 
-    Optional<Variable> getLanguageTagVariable();
+    /**
+     * Non-constant term
+     */
+    Optional<Term> getLanguageTagTerm();
 
     boolean isCompatibleWith(Predicate.COL_TYPE moreGeneralType);
 

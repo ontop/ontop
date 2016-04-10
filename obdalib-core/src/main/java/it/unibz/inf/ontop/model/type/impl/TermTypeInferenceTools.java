@@ -113,28 +113,14 @@ public class TermTypeInferenceTools {
             }
             else if (f.isDataTypeFunction()){
                 /**
-                 * Special case: langString WHERE the language tag is KNOWN
+                 * Special case: langString
                  */
                 if (typePred.equals(LITERAL_LANG_PREDICATE)) {
                     if (f.getTerms().size() != 2) {
                         throw new IllegalStateException("A lang literal function should have two arguments");
                     }
                     Term secondArgument = f.getTerms().get(1);
-
-                    if (secondArgument instanceof Constant) {
-                        return Optional.of(DATA_FACTORY.getTermType(((Constant)secondArgument).getValue()));
-                    }
-                    else if (secondArgument instanceof Variable) {
-                        return Optional.of(DATA_FACTORY.getTermType((Variable)secondArgument));
-                    }
-                    /**
-                     * TODO: should we support any term?
-                     */
-                    else {
-                        // TODO: find a better exception for this limitation
-                        throw new RuntimeException("Only variable and constants are accepted as language tags (was "
-                                + secondArgument + ")");
-                    }
+                    return Optional.of(DATA_FACTORY.getTermType(secondArgument));
                 }
                 return Optional.of(DATA_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
 

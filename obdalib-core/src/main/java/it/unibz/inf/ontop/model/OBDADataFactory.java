@@ -356,6 +356,6 @@ public interface OBDADataFactory extends Serializable {
 
 	TermType getTermType(COL_TYPE type);
 	TermType getTermType(String languageTagString);
-	TermType getTermType(Variable languageTagVariable);
+	TermType getTermType(Term languageTagTerm);
 
 }
