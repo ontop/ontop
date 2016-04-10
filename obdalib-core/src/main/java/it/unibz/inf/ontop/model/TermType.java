@@ -11,9 +11,11 @@ public interface TermType {
 
     Predicate.COL_TYPE getColType();
 
-    Optional<LanguageTag> getLanguageTag();
+    Optional<LanguageTag> getLanguageTagConstant();
 
-    boolean isCompatibleWith(Predicate.COL_TYPE colType);
+    Optional<Variable> getLanguageTagVariable();
+
+    boolean isCompatibleWith(Predicate.COL_TYPE moreGeneralType);
 
     Optional<TermType> getCommonDenominator(TermType otherTermType);
 }

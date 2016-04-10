@@ -662,6 +662,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new TermTypeImpl(getLanguageTag(languageTagString));
 	}
 
+	@Override
+	public TermType getTermType(Variable languageTagVariable) {
+		return new TermTypeImpl(languageTagVariable);
+	}
+
 	private LanguageTag getLanguageTag(String languageTagString) {
 		return new LanguageTagImpl(languageTagString);
 	}

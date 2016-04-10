@@ -1441,24 +1441,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 		else {
 			lang = optionalTermType
 					.filter(t -> t.getColType() == LITERAL_LANG)
-					.flatMap(t -> t.getLanguageTag()
-								.map(tag -> Optional.of("'" + tag.getFullString() + "'"))
-							/**
-							 * The language tag may correspond to a variable
-							 */
-								.orElseGet(() -> Optional.of(ht)
-											.filter(term -> term instanceof Function)
-											.map(term -> (Function) term)
-											.filter(f -> f.getFunctionSymbol().equals(literalLangFunctionSymbol))
-											.map(f -> {
-												List<Term> terms = f.getTerms();
-												if (terms.size() != 2) {
-													throw new IllegalStateException("Illegal literal lang: " + f);
-												}
-												else {
-													return getSQLString(terms.get(1), index, false);
-												}
-											})))
+					.map(t -> t.getLanguageTagConstant()
+								.map(tag -> "'" + tag.getFullString() + "'")
+								.orElseGet(() -> t.getLanguageTagVariable()
+										.map(v -> getSQLString(v, index, false))
+										.orElseThrow(() -> new IllegalStateException(
+												"Inconsistent term type: the language tag must be defined " +
+														"for any LITERAL_LANG"))))
 					.orElse("NULL");
 		}
 		return String.format(LANG_STR, lang, langVariableName);

@@ -1,13 +1,14 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.LanguageTag;
 import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL_LANG;
 
 /**
@@ -16,8 +17,10 @@ import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL_LANG;
 public class TermTypeImpl implements TermType {
 
     private final Predicate.COL_TYPE colType;
-    private final Optional<LanguageTag> optionalLangTag;
-    private static final TermType LITERAL_LANG_TERM_TYPE = OBDADataFactoryImpl.getInstance().getTermType(LITERAL_LANG);
+    private final Optional<LanguageTag> optionalLangTagConstant;
+    private final Optional<Variable> optionalLangTagVariable;
+    private static final Optional<TermType> OPTIONAL_LITERAL_TERM_TYPE = Optional.of(
+            OBDADataFactoryImpl.getInstance().getTermType(LITERAL));
 
     /**
      * Only for langString WHEN the languageTag is known.
@@ -29,15 +32,34 @@ public class TermTypeImpl implements TermType {
      */
     protected TermTypeImpl(LanguageTag languageTag) {
         this.colType = LITERAL_LANG;
-        this.optionalLangTag = Optional.of(languageTag);
+        this.optionalLangTagConstant = Optional.of(languageTag);
+        this.optionalLangTagVariable = Optional.empty();
     }
 
     /**
-     * If you know the language tag, use the other constructor.
+     * Only for langString WHEN the languageTag is known.
+     *
+     * It may indeed appear that the languageTag is not known
+     * at query reformulation time because this information
+     * is stored in a DB column.
+     *
+     */
+    protected TermTypeImpl(Variable languageTagVariable) {
+        this.colType = LITERAL_LANG;
+        this.optionalLangTagConstant = Optional.empty();
+        this.optionalLangTagVariable = Optional.of(languageTagVariable);
+    }
+
+    /**
+     * Do not use this construction for LITERAL_LANG!.
      */
     protected TermTypeImpl(Predicate.COL_TYPE colType) {
+        if (colType == LITERAL_LANG) {
+            throw new IllegalArgumentException("A Literal lang must have a language tag (constant or variable)!");
+        }
         this.colType = colType;
-        this.optionalLangTag = Optional.empty();
+        this.optionalLangTagConstant = Optional.empty();
+        this.optionalLangTagVariable = Optional.empty();
     }
 
     @Override
@@ -46,8 +68,13 @@ public class TermTypeImpl implements TermType {
     }
 
     @Override
-    public Optional<LanguageTag> getLanguageTag() {
-        return optionalLangTag;
+    public Optional<LanguageTag> getLanguageTagConstant() {
+        return optionalLangTagConstant;
+    }
+
+    @Override
+    public Optional<Variable> getLanguageTagVariable() {
+        return optionalLangTagVariable;
     }
 
     @Override
@@ -64,13 +91,30 @@ public class TermTypeImpl implements TermType {
          * TODO: explain
          */
         if (colType == LITERAL_LANG && otherTermType.getColType() == LITERAL_LANG) {
-            Optional<LanguageTag> newOptionalLangTag = optionalLangTag
-                    .flatMap(tag1 -> otherTermType.getLanguageTag()
-                            .flatMap(tag1::getCommonDenominator));
 
-            return Optional.of(newOptionalLangTag
-                    .map(tag -> (TermType) new TermTypeImpl(tag))
-                    .orElse(LITERAL_LANG_TERM_TYPE));
+            if (optionalLangTagConstant.isPresent()) {
+                LanguageTag langTag = optionalLangTagConstant.get();
+
+                Optional<LanguageTag> newOptionalLangTag = otherTermType.getLanguageTagConstant()
+                        .flatMap(langTag::getCommonDenominator);
+
+                if (newOptionalLangTag.isPresent()) {
+                    LanguageTag newLangTag = newOptionalLangTag.get();
+                    return Optional.of(newLangTag.equals(langTag)
+                            ? this
+                            : new TermTypeImpl(newOptionalLangTag.get()));
+                }
+            }
+            else if (optionalLangTagVariable.isPresent()) {
+                Variable langTagVar = optionalLangTagVariable.get();
+                if (otherTermType.getLanguageTagVariable()
+                        .filter(langTagVar::equals)
+                        .isPresent()) {
+                    return Optional.of(this);
+                }
+            }
+            // Default: (non-tagged) LITERAL
+            return OPTIONAL_LITERAL_TERM_TYPE;
         }
         else {
             return TermTypeInferenceTools.getCommonDenominatorType(colType, otherTermType.getColType())
@@ -80,7 +124,7 @@ public class TermTypeImpl implements TermType {
 
     @Override
     public int hashCode() {
-        return colType.hashCode() + optionalLangTag.hashCode();
+        return colType.hashCode() + optionalLangTagConstant.hashCode();
     }
 
     @Override
@@ -89,17 +133,28 @@ public class TermTypeImpl implements TermType {
                 .filter(o -> (o instanceof TermType))
                 .map(o -> (TermType) o)
                 .filter(o -> colType == o.getColType())
-                .filter(o -> optionalLangTag
-                        .map(tag1 -> o.getLanguageTag()
+                .filter(o -> optionalLangTagConstant
+                        .map(tag1 -> o.getLanguageTagConstant()
                                 .map(tag1::equals)
                                 .orElse(false))
-                        .orElseGet(() -> !o.getLanguageTag().isPresent()))
+                        .orElseGet(() -> !o.getLanguageTagConstant().isPresent()))
+                .filter(o -> optionalLangTagVariable
+                        .map(tag1 -> o.getLanguageTagVariable()
+                                .map(tag1::equals)
+                                .orElse(false))
+                        .orElseGet(() -> !o.getLanguageTagVariable().isPresent()))
                 .isPresent();
     }
 
     @Override
     public String toString() {
+        String tagSuffix = optionalLangTagConstant.isPresent()
+                ? "@" + optionalLangTagConstant.get().toString()
+                : optionalLangTagVariable.isPresent()
+                    ? "@" +  optionalLangTagVariable.get().toString()
+                    : "";
+
         // TODO: Should we print the IRI of the datatypes instead (when possible)?
-        return colType + optionalLangTag.map(tag -> "@" + tag).orElse("");
+        return colType + tagSuffix;
     }
 }

@@ -31,7 +31,10 @@ public class TermTypeInferenceTools {
                 .put(OBJECT, OBJECT, OBJECT)
                 .put(BNODE, BNODE, BNODE)
                 .put(NULL, NULL, NULL)
-                .put(UNSUPPORTED, UNSUPPORTED, UNSUPPORTED);
+                .put(UNSUPPORTED, UNSUPPORTED, UNSUPPORTED)
+                // Special case: comparison of langString and String
+                .put(LITERAL_LANG, STRING, LITERAL)
+                .put(STRING, LITERAL_LANG, LITERAL);
 
         // Child: Parent
         Map<COL_TYPE, COL_TYPE> datatypeHierarchy = ImmutableMap.<COL_TYPE, COL_TYPE>builder()
@@ -76,8 +79,6 @@ public class TermTypeInferenceTools {
     private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(OBJECT));
     private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(BNODE));
     private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(NULL));
-    private static final Optional<TermType> OPTIONAL_DEFAULT_LITERAL_LANG_TERM_TYPE = Optional.of(
-            DATA_FACTORY.getTermType(LITERAL_LANG));
 
     private static final DatatypePredicate LITERAL_LANG_PREDICATE = DATA_FACTORY.getDatatypeFactory()
             .getTypePredicate(LITERAL_LANG);
@@ -111,7 +112,6 @@ public class TermTypeInferenceTools {
                 return ((Expression) f).getOptionalTermType();
             }
             else if (f.isDataTypeFunction()){
-                COL_TYPE colType = f.getFunctionSymbol().getType(0);
                 /**
                  * Special case: langString WHERE the language tag is KNOWN
                  */
@@ -121,11 +121,22 @@ public class TermTypeInferenceTools {
                     }
                     Term secondArgument = f.getTerms().get(1);
 
-                    return (secondArgument instanceof Constant)
-                            ? Optional.of(DATA_FACTORY.getTermType(((Constant)secondArgument).getValue()))
-                            : OPTIONAL_DEFAULT_LITERAL_LANG_TERM_TYPE;
+                    if (secondArgument instanceof Constant) {
+                        return Optional.of(DATA_FACTORY.getTermType(((Constant)secondArgument).getValue()));
+                    }
+                    else if (secondArgument instanceof Variable) {
+                        return Optional.of(DATA_FACTORY.getTermType((Variable)secondArgument));
+                    }
+                    /**
+                     * TODO: should we support any term?
+                     */
+                    else {
+                        // TODO: find a better exception for this limitation
+                        throw new RuntimeException("Only variable and constants are accepted as language tags (was "
+                                + secondArgument + ")");
+                    }
                 }
-                return Optional.of(DATA_FACTORY.getTermType(colType));
+                return Optional.of(DATA_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
 
             } else if (typePred instanceof URITemplatePredicate) {
                 return  OPTIONAL_OBJECT_TERM_TYPE;
