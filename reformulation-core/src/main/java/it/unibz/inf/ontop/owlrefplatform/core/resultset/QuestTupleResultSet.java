@@ -241,6 +241,24 @@ public class QuestTupleResultSet implements TupleResultSet {
 					String s = formatter.format(d); // format name into correct double representation
 					result = fac.getConstantLiteral(s, COL_TYPE.DOUBLE);
 					break;
+
+				case INTEGER:
+				case INT:
+				case UNSIGNED_INT:
+				case LONG:
+				case NEGATIVE_INTEGER:
+				case NON_NEGATIVE_INTEGER:
+				case POSITIVE_INTEGER:
+				case NON_POSITIVE_INTEGER:
+					/**
+					 * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
+					 */
+					int dotIndex = value.indexOf(".");
+					String integerString = dotIndex >= 0
+							? value.substring(0, dotIndex)
+							: value;
+					result = fac.getConstantLiteral(integerString, type);
+					break;
 					
 				case DATETIME:
                     /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
