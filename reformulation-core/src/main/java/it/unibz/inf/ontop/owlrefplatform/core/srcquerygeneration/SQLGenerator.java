@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -37,9 +36,7 @@ import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import java.sql.Types;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.openrdf.model.Literal;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
@@ -312,9 +309,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
 
-		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = extractTermTypeMap(ruleIndex.values());
-		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = extractCastTypeMap(ruleIndex,
-				predicatesInBottomUp, termTypeMap);
+		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp);
+
+		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
+		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
 
 		/**
 		 * ANS i > 1
@@ -368,141 +366,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return result.toString();
 	}
 
-	private static ImmutableMap<Predicate,ImmutableList<COL_TYPE>> extractCastTypeMap(
-			Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp,
-			ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap) {
 
-		Map<Predicate,ImmutableList<COL_TYPE>> mutableCastMap = Maps.newHashMap();
-		for (Predicate predicate : predicatesInBottomUp) {
-			ImmutableList<COL_TYPE> castTypes = inferCastTypes(ruleIndex.get(predicate),
-					termTypeMap, mutableCastMap);
-			mutableCastMap.put(predicate, castTypes);
-		}
-
-		return ImmutableMap.copyOf(mutableCastMap);
-	}
-
-	/**
-	 * No side-effect on alreadyKnownCastTypes
-     */
-	private static ImmutableList<COL_TYPE> inferCastTypes(
-			Collection<CQIE> samePredicateRules, ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-			Map<Predicate, ImmutableList<COL_TYPE>> alreadyKnownCastTypes) {
-
-		if (samePredicateRules.isEmpty()) {
-			return ImmutableList.of();
-		}
-
-		ImmutableMultimap.Builder<Integer, COL_TYPE> indexedCastTypeBuilder = ImmutableMultimap.builder();
-
-		int arity = samePredicateRules.iterator().next().getHead().getTerms().size();
-		samePredicateRules.stream()
-				.forEach(rule -> {
-					List<Term> headArguments = rule.getHead().getTerms();
-					ImmutableList<Optional<TermType>> termTypes = termTypeMap.get(rule);
-
-					IntStream.range(0, arity)
-							.forEach(i -> {
-
-								COL_TYPE type = termTypes.get(i)
-										.map(SQLGenerator::getCastType)
-										.orElseGet(() -> getCastTypeFromSubRule(headArguments.get(i), rule.getBody(),
-												alreadyKnownCastTypes));
-
-								indexedCastTypeBuilder.put(i, type);
-							});
-						});
-
-		ImmutableMultimap<Integer, COL_TYPE> indexedCastTypes = indexedCastTypeBuilder.build();
-		ImmutableList.Builder<COL_TYPE> castTypeBuilder = ImmutableList.builder();
-		IntStream.range(0, arity)
-				.forEach(i -> castTypeBuilder.add(
-						Optional.ofNullable(indexedCastTypes.get(i).stream()
-								.reduce(
-										// "Neutral" COL_TYPE
-										null,
-										(type1, type2) -> type1 == null ? type2 : unifyCastTypes(type1, type2)))
-						.orElseThrow(() -> new IllegalStateException("Every argument is expected to have a COL_TYPE")))
-				);
-
-		return castTypeBuilder.build();
-	}
-
-	private static COL_TYPE getCastType(TermType termType) {
-		COL_TYPE type = termType.getColType();
-		switch (type) {
-			case OBJECT:
-			case BNODE:
-			case NULL:
-				// TODO: should we return LITERAL?
-				return STRING;
-			default:
-				return type;
-		}
-	}
-
-	/**
-	 * TODO: explain
-     */
-	private static COL_TYPE getCastTypeFromSubRule(Term term, List<Function> bodyAtoms,
-												   Map<Predicate, ImmutableList<COL_TYPE>> alreadyKnownCastTypes) {
-		if (term instanceof Variable) {
-			Variable variable = (Variable) term;
-
-			for (Function bodyAtom : bodyAtoms) {
-				if (!bodyAtom.isDataFunction()) {
-					continue;
-				}
-				List<Term> arguments = bodyAtom.getTerms();
-				for (int i = 0; i < arguments.size(); i++) {
-					if (arguments.get(i).equals(variable)) {
-
-						// i is not final...
-						final int index = i;
-
-						return Optional.ofNullable(alreadyKnownCastTypes.get(bodyAtom.getFunctionSymbol()))
-								.map(types -> types.get(index))
-								// TODO: may look for the COL_TYPE of the extensional atom in the DBMetadata
-								.orElse(LITERAL);
-					}
-				}
-			}
-
-			throw new IllegalStateException("Unbounded variable: " + variable);
-		}
-		else {
-			throw new IllegalStateException("The type should already be for a non-variable (was " + term + ")");
-		}
-	}
-
-	private static ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules) {
-		return rules.stream()
-				.collect(ImmutableCollectors.toMap(
-						rule -> rule,
-						rule -> rule.getHead().getTerms().stream()
-								.map(TermTypeInferenceTools::inferType)
-								.collect(ImmutableCollectors.toList())
-				));
-	}
-
-	/**
-	 * Unifies the input cast types
-	 *
-	 * For instance,
-	 *
-	 * [INTEGER, DOUBLE] -> DOUBLE
-	 * [INTEGER, LITERAL] -> LITERAL
-	 * [INTEGER, INTEGER] -> INTEGER
-	 *
-	 */
-	private static COL_TYPE unifyCastTypes(COL_TYPE type1, COL_TYPE type2) {
-		return TermTypeInferenceTools.getCommonDenominatorType(type1, type2)
-				/**
-				 * Every head argument must have a COL_TYPE. By default,
-				 * we cast it as a LITERAL (VARCHAR)
-				 */
-				.orElse(LITERAL);
-	}
 
 	/**
 	 * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION.... This
