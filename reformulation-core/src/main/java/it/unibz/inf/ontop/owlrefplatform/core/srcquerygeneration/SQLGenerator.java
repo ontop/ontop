@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -101,8 +100,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
 
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-
-	private final DatatypePredicate literalLangFunctionSymbol = dtfac.getTypePredicate(LITERAL_LANG);
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
@@ -213,9 +210,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		ruleIndex = depGraph.getRuleIndex();
 
-		Multimap<Predicate, CQIE> ruleIndexByBodyPredicate = depGraph
-				.getRuleIndexByBodyPredicate();
-
 		List<Predicate> predicatesInBottomUp = depGraph
 				.getPredicatesInBottomUp();
 
@@ -225,11 +219,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		isDistinct = hasSelectDistinctStatement(queryProgram);
 		isOrderBy = hasOrderByClause(queryProgram);
 		if (queryProgram.getQueryModifiers().hasModifiers()) {
-			final String indent = "   ";
 			final String outerViewName = "SUB_QVIEW";
-			String subquery = generateQuery(queryProgram, signature, indent,
-					ruleIndex, ruleIndexByBodyPredicate, predicatesInBottomUp,
-					extensionalPredicates);
+			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 
 			String modifier = "";
 
@@ -261,9 +252,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += modifier;
 			return sql;
 		} else {
-			return generateQuery(queryProgram, signature, "", ruleIndex,
-					ruleIndexByBodyPredicate, predicatesInBottomUp,
-					extensionalPredicates);
+			return generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 		}
 	}
 
@@ -297,17 +286,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * that will create a view for every ans prodicate in the Datalog input
 	 * program.
 	 *
-	 * @param query
-	 *            This is a arbitrary Datalog Program. In this program ans
-	 *            predicates will be translated to Views.
-	 *
-	 *
 	 * @param signature
 	 *            The Select variables in the SPARQL query
-	 * @param indent
 	 * @param ruleIndex
 	 *            The index that maps intentional predicates to its rules
-	 * @param ruleIndexByBodyPredicate
 	 * @param predicatesInBottomUp
 	 *            The topologically ordered predicates in
 	 *            <code> query </query>.
@@ -317,9 +299,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 * @throws OBDAException
 	 */
-	private String generateQuery(DatalogProgram query, List<String> signature,
-								 String indent, Multimap<Predicate, CQIE> ruleIndex,
-								 Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
+	private String generateQuery(List<String> signature,
+								 Multimap<Predicate, CQIE> ruleIndex,
 								 List<Predicate> predicatesInBottomUp,
 								 List<Predicate> extensionalPredicates) throws OBDAException {
 
@@ -327,6 +308,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		int i = 0;
 
 		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
+
+		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp);
+
+		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
+		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
 
 		/**
 		 * ANS i > 1
@@ -340,9 +326,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * extensional predicates are defined by DBs
 				 */
 			} else {
-				boolean isAns1 = false;
-				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex,
-						ruleIndexByBodyPredicate, query, signature, isAns1, subQueryDefinitions);
+				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex, subQueryDefinitions,
+						termTypeMap, castTypeMap.get(pred));
 
 				subQueryDefinitions.put(pred, view);
 			}
@@ -360,7 +345,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules
 				.size());
 
-		List<COL_TYPE> castDataTypes = getCastDataTypes(ansrules);
 		
 		/* Main loop, constructing the SPJ query for each CQ */
 
@@ -371,7 +355,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * form of a normal SQL algebra as possible,
 			 */
 			boolean isAns1 = true;
-			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, castDataTypes, subQueryDefinitions);
+			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, castTypeMap.get(predAns1),
+					subQueryDefinitions, termTypeMap.get(cq));
 
 			queryStrings.add(querystr);
 		}
@@ -382,78 +367,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 
-	/**
-	 * Gets the column datatypes that will be used for casting.
-	 *
-	 * If there are multiple rules with different datatypes, it takes
-	 * their common denominators.
-	 */
-	private List<COL_TYPE> getCastDataTypes(Collection<CQIE> rules) {
-		int ansArity = rules.iterator().next().getHead().getTerms().size();
-
-		List<COL_TYPE> ansCastTypes = Lists.newArrayListWithCapacity(ansArity);
-
-		for(int k = 0; k < ansArity; k++){
-			ansCastTypes.add(null);
-		}
-
-		for(CQIE rule : rules){
-			Function head = rule.getHead();
-			List<Term> terms = head.getTerms();
-			for (int j = 0; j < terms.size(); j++) {
-				Term term = terms.get(j);
-
-				ansCastTypes.set(j, unifyTypes(ansCastTypes.get(j), getCastDataType(term)));
-			}
-		}
-		return ansCastTypes;
-	}
-
-	/**
-	 * TODO: explain
-     */
-	private COL_TYPE getCastDataType(Term term) {
-		COL_TYPE type = getHeadDataType(term);
-		switch (type) {
-			case OBJECT:
-			case BNODE:
-			case NULL:
-				// TODO: should we return LITERAL?
-				return STRING;
-			default:
-				return type;
-		}
-	}
-
-	/**
-	 * Extracts the type from a term found in a head
-     */
-	private COL_TYPE getHeadDataType(Term term) {
-		return TermTypeInferenceTools.inferType(term)
-				.map(TermType::getColType)
-				/**
-				 * If a variable is found as a top term in a head, returns the most general COL_TYPE
-				 * (for casting).
-				 */
-				.orElse(LITERAL);
-	}
-
-	/**
-	 * Unifies the input types
-	 *
-	 * For instance,
-	 *
-	 * [int, double] -> double
-	 * [int, varchar] -> varchar
-	 * [int, int] -> int
-	 *
-	 * @return
-	 */
-	private COL_TYPE unifyTypes(COL_TYPE type1, COL_TYPE type2) {
-		return TermTypeInferenceTools.getCommonDenominatorType(type1, type2)
-				// TODO: justify
-				.orElse(STRING);
-	}
 
 	/**
 	 * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION.... This
@@ -470,7 +383,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			result.append(queryStringIterator.next());
 		}
 
-		String UNION = null;
+		String UNION;
 		if (isDistinct) {
 			UNION = "UNION";
 		} else {
@@ -494,12 +407,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param signature
 	 * @param castDatatypes
 	 * @param subQueryDefinitions
+	 * @param termTypes
 	 * @return
 	 * @throws OBDAException
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
 											  boolean isAns1, List<COL_TYPE> castDatatypes,
-											  Map<Predicate, ParserViewDefinition> subQueryDefinitions) throws OBDAException {
+											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
+											  ImmutableList<Optional<TermType>> termTypes)
+			throws OBDAException {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
 		boolean innerdistincts = false;
@@ -512,7 +428,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String FROM = getFROM(cq.getBody(), index);
 		String WHERE = getWHERE(cq.getBody(), index);
 
-		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, castDatatypes);
+		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, castDatatypes, termTypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);
 
@@ -656,20 +572,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Optionals/LeftJoins
 	 *
 	 * @param ruleIndex
-	 * @param ruleIndexByBodyPredicate
-	 * @param query
-	 * @param signature
 	 * @param subQueryDefinitions
-	 * @throws OBDAException
+	 * @param termTypeMap
+	 *@param castTypes @throws OBDAException
 	 *
 	 * @throws Exception
 	 */
 
 	private ParserViewDefinition createViewFrom(Predicate pred, DBMetadata metadata,
 												Multimap<Predicate, CQIE> ruleIndex,
-												Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
-												DatalogProgram query, List<String> signature, boolean isAns1,
-												Map<Predicate, ParserViewDefinition> subQueryDefinitions)
+												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
+												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
+												ImmutableList<COL_TYPE> castTypes)
 			throws OBDAException {
 
 		/* Creates BODY of the view query */
@@ -682,8 +596,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		int headArity = 0;
 
-		List<COL_TYPE> castDataTypes = getCastDataTypes(ruleList);
-
 		for (CQIE rule : ruleList) {
 			Function cqHead = rule.getHead();
 
@@ -695,7 +607,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					isAns1, castDataTypes, subQueryDefinitions);
+					false, castTypes, subQueryDefinitions, termTypeMap.get(rule));
 
 			sqls.add(sqlQuery);
 		}
@@ -1246,12 +1158,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *
 	 * @param query
 	 *            the query
-	 * @param castDataTypes
+	 * @param castTypes
+	 * @param termTypes
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
 								   QueryAliasIndex index, boolean distinct, boolean isAns1,
-								   List<COL_TYPE> castDataTypes)
+								   List<COL_TYPE> castTypes, ImmutableList<Optional<TermType>> termTypes)
 			throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
@@ -1272,7 +1185,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 
-		Iterator<COL_TYPE> castDataTypeIter = castDataTypes.iterator();
+		Iterator<COL_TYPE> castTypeIter = castTypes.iterator();
+		Iterator<Optional<TermType>> termTypeIter = termTypes.iterator();
 
 		/**
 		 * Set that contains all the variable names created on the top query.
@@ -1292,7 +1206,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * one datatype per column. If the sub-queries are producing results of different types,
 			 * them there will be a difference between the type in the main column and the RDF one.
 			 */
-			COL_TYPE castDataType = castDataTypeIter.next();
+			COL_TYPE castType = castTypeIter.next();
+
+			Optional<TermType> optionalTermType = termTypeIter.next();
 
 			String varName;
 
@@ -1306,11 +1222,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				varName = "v" + hpos;
 			}
 
-			// TODO: this recomputation could be avoided
-			Optional<TermType> optionalTermType = TermTypeInferenceTools.inferType(ht);
-
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
-			String mainColumn = getMainColumnForSELECT(ht, varName, index, castDataType, sqlVariableNames);
+			String mainColumn = getMainColumnForSELECT(ht, varName, index, castType, sqlVariableNames);
 			String langColumn = getLangColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
 
 			sb.append("\n   ");
