@@ -590,7 +590,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 		catch (TranslationException e) {
-			throw new RuntimeException(e.getMessage());
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 	}
 
@@ -1063,13 +1063,16 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	}
 
 	@Override
-	public void visit(OWLAnnotationPropertyDomainAxiom arg0) {
+	public void visit(OWLAnnotationPropertyDomainAxiom ax) {
 		// NO-OP: AnnotationAxioms have no effect
+		log.debug("annotation domain",ax);
+
 	}
 
 	@Override
-	public void visit(OWLAnnotationPropertyRangeAxiom arg0) {
+	public void visit(OWLAnnotationPropertyRangeAxiom ax) {
 		// NO-OP: AnnotationAxioms have no effect
+		log.debug("annotation range",ax);
 	}
 
 	@Override
@@ -1125,10 +1128,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				}
 			}
 
-			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature())  {
+			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-					annotationproperties.add(uri);
-					vb.createAnnotationProperty(uri);
+				annotationproperties.add(uri);
+				vb.createAnnotationProperty(uri);
 			}
 
 		}

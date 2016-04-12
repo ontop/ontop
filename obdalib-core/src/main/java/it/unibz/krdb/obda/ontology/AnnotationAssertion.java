@@ -21,6 +21,9 @@ package it.unibz.krdb.obda.ontology;
  */
 
 
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ObjectConstant;
+
 /**
  * Represents AnnotationAssertion from the OWL 2 QL Specification
  *
@@ -37,7 +40,7 @@ public interface AnnotationAssertion extends Assertion {
 
 	public AnnotationProperty getProperty();
 	
-//	public ObjectConstant getSubject();
+	public ObjectConstant getSubject();
 	
-//	public Constant getValue();
+	public Constant getValue();
 }
