@@ -90,17 +90,16 @@ public class QuestUnfolder {
 
 		// Apply TMappings
 		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, true, excludeFromTMappings);
-		
-       // Adding ontology assertions (ABox) as rules (facts, head with no body).
-       addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
-       		inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), inputOntology.getAnnotationAssertions());
 
 		// Adding data typing on the mapping axioms.
 		 // Adding NOT NULL conditions to the variables used in the head
 		 // of all mappings to preserve SQL-RDF semantics
 		extendTypesWithMetadataAndAddNOTNULL(unfoldingProgram, reformulationReasoner, vocabularyValidator);
-		
-		
+
+		// Adding ontology assertions (ABox) as rules (facts, head with no body).
+		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
+				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), inputOntology.getAnnotationAssertions());
+
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
@@ -109,7 +108,10 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 
-        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+		if(log.isDebugEnabled()) {
+			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+			log.debug("Final set of mappings: \n {}", finalMappings);
+		}
 		
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 		
@@ -140,7 +142,10 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 
-        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+		if(log.isDebugEnabled()) {
+			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+			log.debug("Final set of mappings: \n {}", finalMappings);
+		}
 		
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 		

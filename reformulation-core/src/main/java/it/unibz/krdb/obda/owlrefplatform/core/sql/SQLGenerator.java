@@ -1489,7 +1489,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		case LITERAL:
 		case OBJECT:
 		case STRING:
-			return "'" + constant.getValue() + "'";
+			return sqladapter.getSQLLexicalFormString(constant.getValue());
 		case BOOLEAN:
 			boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
 			return sqladapter.getSQLLexicalFormBoolean(v);		

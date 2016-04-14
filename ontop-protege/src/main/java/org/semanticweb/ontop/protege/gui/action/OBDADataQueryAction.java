@@ -153,10 +153,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 					latch.countDown();
 				} catch (Exception e) {
 					if(!isCancelled()){
+						latch.countDown();
 						queryExecError = true;
 						log.error(e.getMessage(), e);
 						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
-						latch.countDown();
 					}
 				}	
 			}

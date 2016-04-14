@@ -921,7 +921,11 @@ public class OBDAModelManager implements Disposable {
 	private static String getProperPrefixURI(String prefixUri) {
 		if (!prefixUri.endsWith("#")) {
 			if (!prefixUri.endsWith("/")) {
-				prefixUri += EntityCreationPreferences.getDefaultSeparator();;
+				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
+				if (!prefixUri.endsWith(defaultSeparator))
+				{
+					prefixUri += defaultSeparator;
+				}
 			}
 		}
 		return prefixUri;
