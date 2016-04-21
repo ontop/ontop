@@ -54,7 +54,24 @@ public class AnnotationTest {
 
     }
 
+    @Test
+    public void testAnnotationInOntology() throws Exception {
 
+        QuestPreferences p = new QuestPreferences();
+
+        String queryBind = "PREFIX dbpedia: <http://dbpedia.org/ontology/>" +
+                "PREFIX mo:		<http://www.movieontology.org/2009/10/01/movieontology.owl#>" +
+                "\n" +
+                "SELECT  ?r " +
+                "WHERE {<http://dbpedia.org/ontology/birthDate> rdfs:label ?r . \n" +
+
+                "}";
+
+
+
+        String results = runTestQuery(p, queryBind);
+        assertEquals("\"ημερομηνία_γέννησης\"@el", results);
+    }
 
 
     @Test
@@ -220,7 +237,7 @@ public class AnnotationTest {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).queryingAnnotationsInOntology(true).build();
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
@@ -253,6 +270,9 @@ public class AnnotationTest {
         assertFalse(count == 0);
 
         log.debug("Elapsed time: {} ms", time);
+
+        conn.close();
+        reasoner.dispose();
 
         return result;
 

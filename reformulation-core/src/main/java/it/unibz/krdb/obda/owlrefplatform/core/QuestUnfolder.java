@@ -59,7 +59,7 @@ public class QuestUnfolder {
 		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 	}
 
-	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings) 
+	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings, boolean queryingAnnotationsInOntology)
 					throws SQLException, JSQLParserException, OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
@@ -97,8 +97,15 @@ public class QuestUnfolder {
 		extendTypesWithMetadataAndAddNOTNULL(unfoldingProgram, reformulationReasoner, vocabularyValidator);
 
 		// Adding ontology assertions (ABox) as rules (facts, head with no body).
+		List<AnnotationAssertion> annotationAssertions;
+		if (queryingAnnotationsInOntology) {
+			annotationAssertions = inputOntology.getAnnotationAssertions();
+		}
+		else{
+			annotationAssertions = Collections.emptyList();
+		}
 		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
-				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), inputOntology.getAnnotationAssertions());
+				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), annotationAssertions);
 
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);

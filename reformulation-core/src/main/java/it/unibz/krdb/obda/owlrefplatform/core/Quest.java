@@ -146,6 +146,8 @@ public class Quest implements Serializable {
 
 	private boolean distinctResultSet = false;
 
+	private boolean queryingAnnotationsInOntology = false;
+
 	private String aboxMode = QuestConstants.CLASSIC;
 
 	private String aboxSchemaType = QuestConstants.SEMANTIC_INDEX;
@@ -255,6 +257,18 @@ public class Quest implements Serializable {
 		this.applyUserConstraints = true;
 	}
 
+	/**
+	 * Enable/Disable querying annotation properties defined in the ontology
+	 * It overrides the value defined in QuestPreferences
+	 *
+	 * @param queryingAnnotationsInOntology
+	 */
+
+	public void setQueryingAnnotationsInOntology(boolean queryingAnnotationsInOntology) {
+		this.queryingAnnotationsInOntology = queryingAnnotationsInOntology;
+
+	}
+
 	
 	// TEST ONLY
 	public List<CQIE> getUnfolderRules() {
@@ -310,6 +324,8 @@ public class Quest implements Serializable {
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+		queryingAnnotationsInOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.ANNOTATIONS_IN_ONTO));
+
                 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -576,7 +592,7 @@ public class Quest implements Serializable {
 			 * T-Mappings and Fact mappings
 			 */
 			if (aboxMode.equals(QuestConstants.VIRTUAL)) 
-				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings);
+				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings, queryingAnnotationsInOntology);
 			else
 				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 

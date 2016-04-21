@@ -49,8 +49,8 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 
 	AnnotationPropertyImpl(String name) {
-		//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
-		this.predicate = ofac.getPredicate(name, new Predicate.COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
+
+		this.predicate = ofac.getAnnotationPropertyPredicate(name);
 		this.name = name;
 //		this.domain =  new AnnotationPropertyDomainImpl(this);
 //		this.range = new AnnotationPropertyRangeImpl(this);
