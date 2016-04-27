@@ -25,17 +25,6 @@ public class TermTypeInferenceTools {
 
     private static ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> generateDatatypeDenominators() {
 
-        ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE> tableBuilder = ImmutableTable.<COL_TYPE, COL_TYPE, COL_TYPE>builder()
-                // Base COL_TYPES
-                .put(LITERAL, LITERAL, LITERAL)
-                .put(OBJECT, OBJECT, OBJECT)
-                .put(BNODE, BNODE, BNODE)
-                .put(NULL, NULL, NULL)
-                .put(UNSUPPORTED, UNSUPPORTED, UNSUPPORTED)
-                // Special case: comparison of langString and String
-                .put(LITERAL_LANG, STRING, LITERAL)
-                .put(STRING, LITERAL_LANG, LITERAL);
-
         // Child: Parent
         Map<COL_TYPE, COL_TYPE> datatypeHierarchy = ImmutableMap.<COL_TYPE, COL_TYPE>builder()
                 .put(LITERAL_LANG, LITERAL)
@@ -59,18 +48,45 @@ public class TermTypeInferenceTools {
                 .put(UNSIGNED_INT, NON_NEGATIVE_INTEGER) // Subtype substitution
                 .build();
 
+
+        ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE> saturatedHierarchyBuilder = ImmutableTable.builder();
+
         datatypeHierarchy.forEach((child, parent) -> {
-            tableBuilder.put(child, child, child);
+            saturatedHierarchyBuilder.put(child, child, child);
 
             // Non-final
             COL_TYPE ancestor = parent;
             // Transitive closure
             while (ancestor != null) {
-                tableBuilder.put(child, ancestor, ancestor);
-                tableBuilder.put(ancestor, child, ancestor);
+                saturatedHierarchyBuilder.put(child, ancestor, ancestor);
+                saturatedHierarchyBuilder.put(ancestor, child, ancestor);
                 ancestor = datatypeHierarchy.get(ancestor);
             }
         });
+
+        ImmutableTable<COL_TYPE, COL_TYPE, COL_TYPE> saturatedHierarchy = saturatedHierarchyBuilder.build();
+
+        ImmutableTable.Builder<COL_TYPE, COL_TYPE, COL_TYPE> tableBuilder = ImmutableTable.<COL_TYPE, COL_TYPE, COL_TYPE>builder()
+                // Base COL_TYPES
+                .put(LITERAL, LITERAL, LITERAL)
+                .put(OBJECT, OBJECT, OBJECT)
+                .put(BNODE, BNODE, BNODE)
+                .put(NULL, NULL, NULL)
+                .put(UNSUPPORTED, UNSUPPORTED, UNSUPPORTED)
+                .putAll(saturatedHierarchy);
+
+        /**
+         * Other literal type combinations
+         */
+        COL_TYPE.LITERAL_TYPES.stream().forEach(
+                type1 -> COL_TYPE.LITERAL_TYPES.stream().forEach(
+                            type2 -> {
+                                if ((!type1.equals(type2) && (!saturatedHierarchy.contains(type1, type2)))) {
+                                    tableBuilder.put(type1, type2, LITERAL);
+                                }
+                            }
+                    )
+        );
 
         return tableBuilder.build();
     }
