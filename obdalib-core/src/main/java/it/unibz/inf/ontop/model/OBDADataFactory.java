@@ -353,4 +353,9 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Optional<Function> optionalCondition);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+	TermType getTermType(COL_TYPE type);
+	TermType getTermType(String languageTagString);
+	TermType getTermType(Term languageTagTerm);
+
 }

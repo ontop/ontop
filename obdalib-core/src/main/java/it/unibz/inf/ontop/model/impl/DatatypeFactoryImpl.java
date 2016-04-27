@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.DatatypePredicate;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
@@ -20,8 +21,8 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
-	// special case of literals with the specified language 
-	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDFS.LITERAL.toString(),
+	// special case of literals with the specified language
+	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
 									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 	
 	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;

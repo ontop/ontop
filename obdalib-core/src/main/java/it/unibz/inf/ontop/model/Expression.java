@@ -1,5 +1,9 @@
 package it.unibz.inf.ontop.model;
 
+import it.unibz.inf.ontop.model.type.TermTypeException;
+
+import java.util.Optional;
+
 /**
  * An expression has an Operation predicate.
  *
@@ -15,4 +19,17 @@ public interface Expression extends Function {
 
     @Override
     Expression clone();
+
+    /**
+     * TODO: generalize
+     */
+    default Optional<TermType> getOptionalTermType() throws TermTypeException {
+        try {
+            OperationPredicate predicate = getFunctionSymbol();
+            return predicate.getTermTypeInferenceRule().inferType(
+                    getTerms(), predicate.getArgumentTypes());
+        } catch (TermTypeException e) {
+            throw new TermTypeException(this, e);
+        }
+    }
 }

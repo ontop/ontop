@@ -23,6 +23,8 @@ package it.unibz.inf.ontop.model.impl;
 import com.google.common.base.Preconditions;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.LanguageTag;
+import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.openrdf.model.ValueFactory;
@@ -31,6 +33,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 import com.google.common.collect.ImmutableList;
@@ -45,8 +48,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
 	private DatatypeFactoryImpl datatypes = null;
-	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
-	
+	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper();
+
+	// Only builds these TermTypes once.
+	private final Map<COL_TYPE, TermType> termTypeCache = new ConcurrentHashMap<>();
 
 	private static int counter = 0;
 	
@@ -638,7 +643,36 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {
 		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}
-	
+
+	@Override
+	public TermType getTermType(COL_TYPE type) {
+		TermType cachedType = termTypeCache.get(type);
+		if (cachedType != null) {
+			return cachedType;
+		}
+		else {
+			TermType termType = new TermTypeImpl(type);
+			termTypeCache.put(type, termType);
+			return termType;
+		}
+	}
+
+	@Override
+	public TermType getTermType(String languageTagString) {
+		return new TermTypeImpl(getLanguageTag(languageTagString));
+	}
+
+	@Override
+	public TermType getTermType(Term languageTagTerm) {
+		return languageTagTerm instanceof Constant
+				? getTermType(((Constant) languageTagTerm).getValue())
+				: new TermTypeImpl(languageTagTerm);
+	}
+
+	private LanguageTag getLanguageTag(String languageTagString) {
+		return new LanguageTagImpl(languageTagString);
+	}
+
 	@Override
 	public ValueConstant getBooleanConstant(boolean value) {
 		return value ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE;
