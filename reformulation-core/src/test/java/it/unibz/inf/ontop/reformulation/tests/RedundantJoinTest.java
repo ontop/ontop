@@ -326,6 +326,48 @@ public class RedundantJoinTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
     }
 
+    @Test
+    public void testSelfJoinElimination5() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(ANS1_PREDICATE, M,N,O));
+        queryBuilder.init(constructionNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.<ImmutableExpression>empty());
+        queryBuilder.addChild(constructionNode, joinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O1));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.addChild(joinNode, dataNode3);
+        queryBuilder.addChild(joinNode, dataNode4);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(ANS1_PREDICATE, M,N,O));
+        queryBuilder1.init(constructionNode1);
+
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.<ImmutableExpression>empty());
+        queryBuilder1.addChild(constructionNode1, joinNode1);
+
+        queryBuilder1.addChild(joinNode1, dataNode2);
+        queryBuilder1.addChild(joinNode1, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O)));
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
     /**
      * Ignored for the moment because the looping mechanism is not implemented
      */
