@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model;
 
+import it.unibz.inf.ontop.model.type.TermTypeException;
+
 import java.util.Optional;
 
 /**
@@ -21,9 +23,13 @@ public interface Expression extends Function {
     /**
      * TODO: generalize
      */
-    default Optional<TermType> getOptionalTermType() {
-        OperationPredicate predicate = getFunctionSymbol();
-        return predicate.getTermTypeInferenceRule().inferType(
-               getTerms(), predicate.getArgumentTypes());
+    default Optional<TermType> getOptionalTermType() throws TermTypeException {
+        try {
+            OperationPredicate predicate = getFunctionSymbol();
+            return predicate.getTermTypeInferenceRule().inferType(
+                    getTerms(), predicate.getArgumentTypes());
+        } catch (TermTypeException e) {
+            throw new TermTypeException(this, e);
+        }
     }
 }
