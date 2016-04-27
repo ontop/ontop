@@ -207,6 +207,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                     break;
                 case 1:
                     keptDataNodeBuilder.add(redundantNodes.iterator().next());
+                    break;
                 default:
                     ImmutableSubstitution<VariableOrGroundTerm> unifier = unifyRedundantNodes(redundantNodes);
                     if (!unifier.isEmpty()) {
