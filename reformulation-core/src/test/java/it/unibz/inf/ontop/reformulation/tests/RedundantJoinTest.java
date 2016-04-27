@@ -39,8 +39,10 @@ public class RedundantJoinTest {
     private final static Variable M1 = DATA_FACTORY.getVariable("m1");
     private final static Variable N = DATA_FACTORY.getVariable("n");
     private final static Variable N1 = DATA_FACTORY.getVariable("n1");
+    private final static Variable N2 = DATA_FACTORY.getVariable("n2");
     private final static Variable O = DATA_FACTORY.getVariable("o");
     private final static Variable O1 = DATA_FACTORY.getVariable("o1");
+    private final static Variable O2 = DATA_FACTORY.getVariable("o2");
 
     private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, M, N);
@@ -291,7 +293,7 @@ public class RedundantJoinTest {
         ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
         ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O));
         ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O1));
-        ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M1, N1, O));
+        ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M1, N2, O));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -315,9 +317,9 @@ public class RedundantJoinTest {
         queryBuilder1.addChild(constructionNode1, joinNode1);
         ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
 
-        queryBuilder1.addChild(joinNode1, dataNode5);
-        queryBuilder1.addChild(joinNode1, dataNode3);
         queryBuilder1.addChild(joinNode1, dataNode4);
+        queryBuilder1.addChild(joinNode1, dataNode5);
+        queryBuilder1.addChild(joinNode1, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O)));
 
         IntermediateQuery query1 = queryBuilder1.build();
 
