@@ -35,6 +35,10 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
+    @Option(type = OptionType.COMMAND, name = {"--enable-annotations"},
+            description = "enable annotation properties defined in the ontology. Default: false")
+    public boolean enableAnnotations = false;
+
     protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
 		OWLDocumentFormat ontoFormat;
 

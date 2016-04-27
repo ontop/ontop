@@ -20,34 +20,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ResultSet;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
  * Allows you to work with the virtual triples defined by an OBDA model. In
@@ -93,22 +75,26 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-		this(model, null, null, getDefaultPreferences(), doStreamResults);
+		this(model, null, null, getDefaultPreferences(), doStreamResults, false);
 	}
 	
 	public QuestMaterializer(OBDAModel model, QuestPreferences pref, boolean doStreamResults) throws Exception {
-		this(model, null, null, pref, doStreamResults);
+		this(model, null, null, pref, doStreamResults, false);
 		
 	}
 	
-	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
-		this(model, onto, null, getDefaultPreferences(), doStreamResults);
+	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults, boolean enabledAnnotations) throws Exception {
+		this(model, onto, null, getDefaultPreferences(), doStreamResults, enabledAnnotations);
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
-        this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
+    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults, boolean enabledAnnotations) throws Exception {
+        this(model, onto, predicates, getDefaultPreferences(), doStreamResults, enabledAnnotations);
     }
-	
+
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults,  boolean enabledAnnotations) throws Exception {
+		this(model, onto, null, prefs, doStreamResults, enabledAnnotations);
+	}
+
 	/***
 	 * 
 	 * 
@@ -116,7 +102,7 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences,
-							 boolean doStreamResults) throws Exception {
+							 boolean doStreamResults, boolean enabledAnnotations) throws Exception {
 		this.doStreamResults = doStreamResults;
 		this.model = model;
 		this.ontology = onto;
@@ -124,7 +110,7 @@ public class QuestMaterializer {
         if(predicates != null && !predicates.isEmpty()){
             this.vocabulary = new HashSet<>(predicates);
         } else {
-           this.vocabulary = extractVocabulary(model, onto);
+           this.vocabulary = extractVocabulary(model, onto, enabledAnnotations);
         }
 
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
@@ -145,7 +131,12 @@ public class QuestMaterializer {
 
 			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
 				vb.createDataProperty(prop.getName());
-			
+
+			if (enabledAnnotations) {
+				for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties())
+					vb.createAnnotationProperty(prop.getName());
+
+			}
 			ontology = ofac.createOntology(vb);			
 		}
 		
@@ -157,11 +148,8 @@ public class QuestMaterializer {
 		questInstance.setupRepository();
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
-        this(model, onto, null, prefs, doStreamResults);
-    }
 
-    private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
+    private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto, boolean enabledAnnotations) {
         Set<Predicate> vocabulary = new HashSet<Predicate>();
 
         //add all class/data/object predicates to vocabulary
@@ -181,6 +169,13 @@ public class QuestMaterializer {
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
+		if(enabledAnnotations) {
+			for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties()) {
+				Predicate p = prop.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+					vocabulary.add(p);
+			}
+		}
         if (onto != null) {
             //from ontology
             for (OClass cl : onto.getVocabulary().getClasses()) {
@@ -201,6 +196,14 @@ public class QuestMaterializer {
                         && !vocabulary.contains(p))
                     vocabulary.add(p);
             }
+			if (enabledAnnotations) {
+				for (AnnotationProperty role : onto.getVocabulary().getAnnotationProperties()) {
+					Predicate p = role.getPredicate();
+					if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+							&& !vocabulary.contains(p))
+						vocabulary.add(p);
+				}
+			}
         }
         else {
             //from mapping undeclared predicates (can happen)

@@ -163,7 +163,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		System.out.println(outfile);
 		
 		setUpOnto();
-		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS,false);
 		SesameStatementIterator iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8")); 
 		RDFHandler handler = new N3Writer(writer);
@@ -190,7 +190,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 
 		setUpOnto();
 		// output
-		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS, false);
 		SesameStatementIterator iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
@@ -218,7 +218,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 
 		setUpOnto();
 		// output
-		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS, false);
 		SesameStatementIterator iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
@@ -283,7 +283,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		setUpOnto();
 		
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
-		OWLAPIMaterializer materializer = new OWLAPIMaterializer(model, onto, DO_STREAM_RESULTS);
+		OWLAPIMaterializer materializer = new OWLAPIMaterializer(model, onto, DO_STREAM_RESULTS, false);
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();

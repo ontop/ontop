@@ -1058,21 +1058,22 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	}
 
 	@Override
-	public void visit(OWLSubAnnotationPropertyOfAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
+	public void visit(OWLSubAnnotationPropertyOfAxiom ax) {
+
+		AnnotationProperty ap1 = helper.getPropertyExpression(ax.getSubProperty());
+		AnnotationProperty ap2 = helper.getPropertyExpression(ax.getSuperProperty());
+		dl_onto.addSubPropertyOfAxiom(ap1, ap2);
 	}
 
 	@Override
 	public void visit(OWLAnnotationPropertyDomainAxiom ax) {
 		// NO-OP: AnnotationAxioms have no effect
-		log.debug("annotation domain",ax);
 
 	}
 
 	@Override
 	public void visit(OWLAnnotationPropertyRangeAxiom ax) {
 		// NO-OP: AnnotationAxioms have no effect
-		log.debug("annotation range",ax);
 	}
 
 	@Override

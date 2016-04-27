@@ -265,7 +265,7 @@ public class Quest implements Serializable {
 	 */
 
 	public void setQueryingAnnotationsInOntology(boolean queryingAnnotationsInOntology) {
-		this.queryingAnnotationsInOntology = queryingAnnotationsInOntology;
+ 		this.queryingAnnotationsInOntology = queryingAnnotationsInOntology;
 
 	}
 

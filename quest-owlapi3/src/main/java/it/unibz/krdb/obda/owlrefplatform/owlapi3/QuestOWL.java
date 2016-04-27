@@ -160,7 +160,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
         this.preferences = configuration.getPreferences();
 
-		this.queryingAnnotationsInOntology = configuration.isQueryingAnnotationsInOntology();
+		if(configuration.isQueryingAnnotationsInOntology()) {
+			this.queryingAnnotationsInOntology = true;
+		}
 
         this.init(rootOntology, obdaModel, configuration, preferences);
     }
@@ -243,7 +245,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		//if( this.applyExcludeFromTMappings )
 		questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
 
-		questInstance.setQueryingAnnotationsInOntology(this.queryingAnnotationsInOntology);
+		if(this.queryingAnnotationsInOntology){
+			questInstance.setQueryingAnnotationsInOntology(this.queryingAnnotationsInOntology);
+		}
+
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
