@@ -153,4 +153,15 @@ public class TermTypeInferenceTools {
             throw new IllegalStateException("Unexpected term: " + term);
         }
     }
+
+    protected static TermType castStringLangType(TermType termType) {
+        switch (termType.getColType()) {
+            case LITERAL:
+            case LITERAL_LANG:
+            case STRING:
+                return termType;
+            default:
+                return DATA_FACTORY.getTermType(LITERAL);
+        }
+    }
 }

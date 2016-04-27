@@ -19,7 +19,7 @@ public class TermTypeInferenceRules {
     /**
      * TODO: explain
      */
-    public static final TermTypeInferenceRule STRING_LANG_RULE = new UnifierTermTypeInferenceRule();
+    public static final TermTypeInferenceRule STRING_LANG_RULE = new StringLangTypeInferenceRule();
 
     /**
      * TODO: explain
@@ -34,7 +34,7 @@ public class TermTypeInferenceRules {
     /**
      * TODO: explain
      */
-    public static final TermTypeInferenceRule FIRST_ARG_RULE = new FirstArgumentTermTypeInferenceRule();
+    public static final TermTypeInferenceRule FIRST_STRING_LANG_ARG_RULE = new FirstStringLangArgTermTypeInferenceRule();
 
     /**
      * TODO: explain
