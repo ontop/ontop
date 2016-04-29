@@ -75,24 +75,24 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-		this(model, null, null, getDefaultPreferences(), doStreamResults, false);
+		this(model, null, null, getDefaultPreferences(), doStreamResults);
 	}
 	
 	public QuestMaterializer(OBDAModel model, QuestPreferences pref, boolean doStreamResults) throws Exception {
-		this(model, null, null, pref, doStreamResults, false);
+		this(model, null, null, pref, doStreamResults);
 		
 	}
 	
-	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults, boolean enabledAnnotations) throws Exception {
-		this(model, onto, null, getDefaultPreferences(), doStreamResults, enabledAnnotations);
+	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+		this(model, onto, null, getDefaultPreferences(), doStreamResults);
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults, boolean enabledAnnotations) throws Exception {
-        this(model, onto, predicates, getDefaultPreferences(), doStreamResults, enabledAnnotations);
+    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
+        this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
     }
 
-	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults,  boolean enabledAnnotations) throws Exception {
-		this(model, onto, null, prefs, doStreamResults, enabledAnnotations);
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
+		this(model, onto, null, prefs, doStreamResults);
 	}
 
 	/***
@@ -102,7 +102,7 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences,
-							 boolean doStreamResults, boolean enabledAnnotations) throws Exception {
+							 boolean doStreamResults) throws Exception {
 		this.doStreamResults = doStreamResults;
 		this.model = model;
 		this.ontology = onto;
@@ -110,7 +110,7 @@ public class QuestMaterializer {
         if(predicates != null && !predicates.isEmpty()){
             this.vocabulary = new HashSet<>(predicates);
         } else {
-           this.vocabulary = extractVocabulary(model, onto, enabledAnnotations);
+           this.vocabulary = extractVocabulary(model, onto);
         }
 
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
@@ -132,11 +132,9 @@ public class QuestMaterializer {
 			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
 				vb.createDataProperty(prop.getName());
 
-			if (enabledAnnotations) {
-				for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties())
-					vb.createAnnotationProperty(prop.getName());
+			for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties())
+				vb.createAnnotationProperty(prop.getName());
 
-			}
 			ontology = ofac.createOntology(vb);			
 		}
 		
@@ -149,7 +147,7 @@ public class QuestMaterializer {
 	}
 
 
-    private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto, boolean enabledAnnotations) {
+    private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
         Set<Predicate> vocabulary = new HashSet<Predicate>();
 
         //add all class/data/object predicates to vocabulary
@@ -169,13 +167,11 @@ public class QuestMaterializer {
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
-		if(enabledAnnotations) {
-			for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties()) {
-				Predicate p = prop.getPredicate();
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
-					vocabulary.add(p);
+		for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties()) {
+			Predicate p = prop.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
 			}
-		}
         if (onto != null) {
             //from ontology
             for (OClass cl : onto.getVocabulary().getClasses()) {
@@ -196,14 +192,12 @@ public class QuestMaterializer {
                         && !vocabulary.contains(p))
                     vocabulary.add(p);
             }
-			if (enabledAnnotations) {
-				for (AnnotationProperty role : onto.getVocabulary().getAnnotationProperties()) {
-					Predicate p = role.getPredicate();
-					if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+			for (AnnotationProperty role : onto.getVocabulary().getAnnotationProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 							&& !vocabulary.contains(p))
-						vocabulary.add(p);
+					vocabulary.add(p);
 				}
-			}
         }
         else {
             //from mapping undeclared predicates (can happen)
