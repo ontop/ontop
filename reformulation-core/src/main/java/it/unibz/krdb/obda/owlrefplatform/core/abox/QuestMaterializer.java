@@ -142,6 +142,7 @@ public class QuestMaterializer {
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		questInstance = new Quest(ontology, this.model, preferences);
+		questInstance.setQueryingAnnotationsInOntology(true);
 					
 		questInstance.setupRepository();
 	}
@@ -171,7 +172,7 @@ public class QuestMaterializer {
 			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
-			}
+		}
         if (onto != null) {
             //from ontology
             for (OClass cl : onto.getVocabulary().getClasses()) {
@@ -362,8 +363,8 @@ public class QuestMaterializer {
 						if (doStreamResults) {
 							stm.setFetchSize(FETCH_SIZE);
 						}
-						Predicate next = vocabularyIterator.next();
-						String query = getQuery(next);
+						Predicate predicate = vocabularyIterator.next();
+						String query = getQuery(predicate);
 						ResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;

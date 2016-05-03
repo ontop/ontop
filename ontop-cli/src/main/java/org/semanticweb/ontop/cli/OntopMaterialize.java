@@ -121,6 +121,10 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 Predicate predicate = obdaDataFactory.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
                 predicates.add(predicate);
             }
+            for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
+                Predicate predicate = obdaDataFactory.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
+                predicates.add(predicate);
+            }
 
 
             OBDAModel obdaModel = loadMappingFile(mappingFile);

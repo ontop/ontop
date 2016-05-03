@@ -34,11 +34,11 @@ public class SesameMaterializer {
     private QuestMaterializer materializer;
 
     public SesameMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-        this(model, null, doStreamResults, false);
+        this(model, null, doStreamResults);
     }
 
-    public SesameMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults, boolean enabledAnnotations) throws Exception {
-        materializer = new QuestMaterializer(model, onto, doStreamResults, enabledAnnotations);
+    public SesameMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+        materializer = new QuestMaterializer(model, onto, doStreamResults);
         assertions = materializer.getAssertionIterator();
     }
 

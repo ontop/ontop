@@ -17,5 +17,9 @@ password	postgres
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
+mappingId      MAPID-b305ed1c06714504a2978e85f1423981
+target         obo:DOID_0060309 rdfs:comment {bk_title}^^xsd:string .
+source         SELECT bk_title from tb_books
+
 ]]
 
