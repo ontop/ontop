@@ -1113,6 +1113,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 			URIConstant uc = (URIConstant) t;
 			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
+		else if (t instanceof Function) {
+			/*
+			 * The function is of the form uri(CONCAT("string",x)),we simply return the value from the database.
+			 */
+			return sqladapter.sqlCast(getSQLString(t, index, false), Types.VARCHAR);
+
+
+		}
 
 		/*
 		 * Unsupported case
