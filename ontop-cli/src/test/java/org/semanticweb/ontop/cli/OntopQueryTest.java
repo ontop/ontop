@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.cli;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class OntopQueryTest {
@@ -70,6 +71,7 @@ public class OntopQueryTest {
         Ontop.main(argv);
     }
 
+    @Ignore("too expensive")
     @Test
     public void testOntopQueryAnnotations_Ontology (){
         String[] argv = {"query",

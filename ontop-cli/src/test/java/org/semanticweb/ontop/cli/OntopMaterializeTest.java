@@ -85,6 +85,7 @@ public class OntopMaterializeTest {
         Ontop.main(argv);
     }
 
+    @Ignore("too expensive")
     @Test
     public void testOntopMaterializeAnnotation (){
         String[] argv = {"materialize", "-m", "../quest-test/src/test/resources/annotation/doid.obda",
