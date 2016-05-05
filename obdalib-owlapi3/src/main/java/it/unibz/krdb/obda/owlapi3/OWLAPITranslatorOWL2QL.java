@@ -422,7 +422,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			ObjectPropertyAssertion a = helper.translate(ax);
 			if (a != null)
 				dl_onto.addObjectPropertyAssertion(a);
-		} 
+		}
+		catch (TranslationException e) {
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
+		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
 			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
@@ -587,7 +590,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			throw new RuntimeException(INCONSISTENT_ONTOLOGY_EXCEPTION_MESSAGE + ax);
 		}
 		catch (TranslationException e) {
-			throw new RuntimeException(e.getMessage());
+			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
 		}
 	}
 
@@ -1055,17 +1058,21 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	}
 
 	@Override
-	public void visit(OWLSubAnnotationPropertyOfAxiom arg0) {
-		// NO-OP: AnnotationAxioms have no effect
+	public void visit(OWLSubAnnotationPropertyOfAxiom ax) {
+
+		AnnotationProperty ap1 = helper.getPropertyExpression(ax.getSubProperty());
+		AnnotationProperty ap2 = helper.getPropertyExpression(ax.getSuperProperty());
+		dl_onto.addSubPropertyOfAxiom(ap1, ap2);
 	}
 
 	@Override
-	public void visit(OWLAnnotationPropertyDomainAxiom arg0) {
+	public void visit(OWLAnnotationPropertyDomainAxiom ax) {
 		// NO-OP: AnnotationAxioms have no effect
+
 	}
 
 	@Override
-	public void visit(OWLAnnotationPropertyRangeAxiom arg0) {
+	public void visit(OWLAnnotationPropertyRangeAxiom ax) {
 		// NO-OP: AnnotationAxioms have no effect
 	}
 
@@ -1122,10 +1129,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				}
 			}
 
-			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature())  {
+			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-					annotationproperties.add(uri);
-					vb.createAnnotationProperty(uri);
+				annotationproperties.add(uri);
+				vb.createAnnotationProperty(uri);
 			}
 
 		}

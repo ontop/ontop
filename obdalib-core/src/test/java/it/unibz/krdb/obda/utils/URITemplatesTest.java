@@ -22,11 +22,18 @@ package it.unibz.krdb.obda.utils;
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
-public class URITemplatesTest extends TestCase {
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class URITemplatesTest {
 	
 	@SuppressWarnings("unchecked")
+    @Test
 	public void testFormat(){
 		assertEquals("http://example.org/A/1", URITemplates.format("http://example.org/{}/{}", "A", 1));
 		
@@ -35,6 +42,52 @@ public class URITemplatesTest extends TestCase {
 		assertEquals("http://example.org/A/1", URITemplates.format("http://example.org/{}/{}", Arrays.asList("A", 1)));
 		
 		assertEquals("http://example.org/A", URITemplates.format("http://example.org/{}", Arrays.asList("A")));
+
+        assertEquals("http://example.org/A", URITemplates.format("{}", Arrays.asList("http://example.org/A")));
 	}
 
+    @Test
+    public void testGetUriTemplateString1(){
+        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+
+        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}"), //
+                FACTORY.getVariable("X"), FACTORY.getVariable("Y"));
+        assertEquals("http://example.org/{X}/{Y}", URITemplates.getUriTemplateString(f1));
+    }
+
+    @Test
+    public void testGetUriTemplateString2(){
+        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+
+        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("{}"), //
+                FACTORY.getVariable("X"));
+        assertEquals("{X}", URITemplates.getUriTemplateString(f1));
+    }
+
+    @Test
+    public void testGetUriTemplateString3(){
+        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+
+        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("{}/"), //
+                FACTORY.getVariable("X"));
+        assertEquals("{X}/", URITemplates.getUriTemplateString(f1));
+    }
+
+    @Test
+    public void testGetUriTemplateString4(){
+        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+
+        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}/"), //
+                FACTORY.getVariable("X"), FACTORY.getVariable("Y"));
+        assertEquals("http://example.org/{X}/{Y}/", URITemplates.getUriTemplateString(f1));
+    }
+
+    @Test
+    public void testGetUriTemplateString5(){
+        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+
+        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
+                FACTORY.getVariable("X"), FACTORY.getVariable("Y"),FACTORY.getVariable("X"));
+        assertEquals("http://example.org/{X}/{Y}/{X}", URITemplates.getUriTemplateString(f1));
+    }
 }

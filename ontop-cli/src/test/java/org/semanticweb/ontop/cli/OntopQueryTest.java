@@ -71,6 +71,18 @@ public class OntopQueryTest {
         Ontop.main(argv);
     }
 
+    @Ignore("too expensive")
+    @Test
+    public void testOntopQueryAnnotations_Ontology (){
+        String[] argv = {"query",
+                "-m", "../quest-test/src/test/resources/annotation/doid.obda",
+                "-t", "../quest-test/src/test/resources/annotation/doid.owl",
+                "-q", "../quest-test/src/test/resources/annotation/q1.q",
+                "--enable-annotations"
+        };
+        Ontop.main(argv);
+    }
+
 
 
 }

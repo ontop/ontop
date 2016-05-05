@@ -32,12 +32,12 @@ public class SameAsOntowisTest {
 
     interface ParamConst{
         // Postgres
-        public static final String POSTGRES2DSten = "resources/sameAs/ontowis/ontowisOBDA2-ten.obda";
-        public static final String POSTGRES2DSthirty = "resources/sameAs/ontowis/ontowisOBDA2-thirty.obda";
-        public static final String POSTGRES2DSsixty = "resources/sameAs/ontowis/ontowisOBDA2-sixty.obda";
-        public static final String POSTGRES3DSten = "resources/sameAs/ontowis/ontowisOBDA3-ten.obda";
-        public static final String POSTGRES3DSthirty = "resources/sameAs/ontowis/ontowisOBDA3-thirty.obda";
-        public static final String POSTGRES3DSsixty = "resources/sameAs/ontowis/ontowisOBDA3-sixty.obda";
+        public static final String POSTGRES2DSten = "src/test/resources/sameAs/ontowis/ontowisOBDA2-ten.obda";
+        public static final String POSTGRES2DSthirty = "src/test/resources/sameAs/ontowis/ontowisOBDA2-thirty.obda";
+        public static final String POSTGRES2DSsixty = "src/test/resources/sameAs/ontowis/ontowisOBDA2-sixty.obda";
+        public static final String POSTGRES3DSten = "src/test/resources/sameAs/ontowis/ontowisOBDA3-ten.obda";
+        public static final String POSTGRES3DSthirty = "src/test/resources/sameAs/ontowis/ontowisOBDA3-thirty.obda";
+        public static final String POSTGRES3DSsixty = "src/test/resources/sameAs/ontowis/ontowisOBDA3-sixty.obda";
 
 
     }
@@ -56,7 +56,7 @@ public class SameAsOntowisTest {
     final String obdaFile;
 
 
-    final String owlfile = "resources/sameAs/ontowis/ontowis.owl";
+    final String owlfile = "src/test/resources/sameAs/ontowis/ontowis.owl";
 
 
     // Internal Modifiable State
@@ -179,9 +179,9 @@ public class SameAsOntowisTest {
 		/*
 		 * Generate File !
 		 */
-        PrintWriter writer = new PrintWriter("resources/results/"+Settings.resultFileName+"table.txt", "UTF-8");
-        PrintWriter writerQ = new PrintWriter("resources/results/"+Settings.resultFileName+"queries.txt", "UTF-8");
-        PrintWriter writerG = new PrintWriter("resources/results/"+Settings.resultFileName+"graph.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("src/test/resources/results/"+Settings.resultFileName+"table.txt", "UTF-8");
+        PrintWriter writerQ = new PrintWriter("src/test/resources/results/"+Settings.resultFileName+"queries.txt", "UTF-8");
+        PrintWriter writerG = new PrintWriter("src/test/resources/results/"+Settings.resultFileName+"graph.txt", "UTF-8");
 
         writer.println("offline time: " + time);
 

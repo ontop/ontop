@@ -25,8 +25,8 @@ import it.unibz.krdb.obda.parser.EncodeForURI;
 
 import java.sql.Types;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
@@ -337,7 +337,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String getSQLLexicalFormString(String constant) {
-		return "'" + constant + "'";
+
+		return "'" + constant.replaceAll("(?<!')'(?!')","''") + "'";
 	}
 	
 	@Override 

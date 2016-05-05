@@ -6,10 +6,7 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
@@ -54,11 +51,11 @@ public class QuestUnfolder {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	private Set<Predicate> dataPropertiesAndClassesMapped = new HashSet<>();
-	private Set<Predicate> objectPropertiesMapped = new HashSet<>();;
-	
+	private Set<Predicate> objectPropertiesMapped = new HashSet<>();
+
 	/**
-	 * @throws SQLException 
-	 * @throws JSQLParserException 
+	 * @throws SQLException
+	 * @throws JSQLParserException
 	 */
 	public QuestUnfolder(DBMetadata metadata)  {
 
@@ -70,7 +67,7 @@ public class QuestUnfolder {
 		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 	}
 
-	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings)
+	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings, boolean queryingAnnotationsInOntology, boolean sameAs)
 					throws SQLException, JSQLParserException, OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
@@ -101,17 +98,26 @@ public class QuestUnfolder {
 
 		// Apply TMappings
 		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, true, excludeFromTMappings);
-		
-       // Adding ontology assertions (ABox) as rules (facts, head with no body).
-       addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
-       		inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions());
 
 		// Adding data typing on the mapping axioms.
 		 // Adding NOT NULL conditions to the variables used in the head
 		 // of all mappings to preserve SQL-RDF semantics
 		extendTypesWithMetadataAndAddNOTNULL(unfoldingProgram, reformulationReasoner, vocabularyValidator);
 
-		addSameAsMapping(unfoldingProgram);
+		// Adding ontology assertions (ABox) as rules (facts, head with no body).
+		List<AnnotationAssertion> annotationAssertions;
+		if (queryingAnnotationsInOntology) {
+			annotationAssertions = inputOntology.getAnnotationAssertions();
+		}
+		else{
+			annotationAssertions = Collections.emptyList();
+		}
+		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
+				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), annotationAssertions);
+
+		if (sameAs) {
+			addSameAsMapping(unfoldingProgram);
+		}
 
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
@@ -121,7 +127,10 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 
-        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+		if(log.isDebugEnabled()) {
+			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+			log.debug("Final set of mappings: \n {}", finalMappings);
+		}
 		
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 		
@@ -132,7 +141,7 @@ public class QuestUnfolder {
 	/**
 	 * Setting up the unfolder and SQL generation
 	 * @param reformulationReasoner 
-	 * @param collection 
+	 * @param mappings
 	 * @throws OBDAException 
 	 */
 
@@ -152,7 +161,10 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 
-        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+		if(log.isDebugEnabled()) {
+			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+			log.debug("Final set of mappings: \n {}", finalMappings);
+		}
 		
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 		
@@ -245,8 +257,8 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	private void addAssertionsAsFacts(List<CQIE> unfoldingProgram, Iterable<ClassAssertion> cas, 
-							Iterable<ObjectPropertyAssertion> pas, Iterable<DataPropertyAssertion> das) {
+	private void addAssertionsAsFacts(List<CQIE> unfoldingProgram, Iterable<ClassAssertion> cas,
+									  Iterable<ObjectPropertyAssertion> pas, Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas) {
 		
 		int count = 0;
 		for (ClassAssertion ca : cas) {
@@ -279,21 +291,64 @@ public class QuestUnfolder {
 		log.debug("Appended {} object property assertions as fact rules", count);
 			
 		
-//		int count = 0;
-//		for (DataPropertyAssertion a : assertions) {
-			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
-//			DataPropertyAssertion ca = (DataPropertyAssertion) assertion;
-//			ObjectConstant s = ca.getObject();
-//			ValueConstant o = ca.getValue();
-//			String typeURI = getURIType(o.getType());
-//			Predicate p = ca.getPredicate();
-//			Predicate urifuction = factory.getUriTemplatePredicate(1);
-//			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
-//			rule = factory.getCQIE(head, new LinkedList<Function>());
-//		} 	
-				
-//		}
-//		log.debug("Appended {} ABox assertions as fact rules", count);		
+		count = 0;
+		for (DataPropertyAssertion da : das) {
+			// no blank nodes are supported here
+			URIConstant s = (URIConstant)da.getSubject();
+			ValueConstant o = da.getValue();
+			Predicate p = da.getProperty().getPredicate();
+
+			Function head;
+			if(o.getLanguage()!=null){
+				head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(fac.getConstantLiteral(o.getValue()),o.getLanguage()));
+			}
+			else {
+
+				head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(o, o.getType()));
+			}
+			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
+
+			unfoldingProgram.add(rule);
+			count ++;
+		}
+
+		log.debug("Appended {} data property assertions as fact rules", count);
+
+		count = 0;
+		for (AnnotationAssertion aa : aas) {
+			// no blank nodes are supported here
+
+			URIConstant s = (URIConstant) aa.getSubject();
+			Constant v = aa.getValue();
+			Predicate p = aa.getProperty().getPredicate();
+
+			Function head;
+			if (v instanceof ValueConstant) {
+
+				ValueConstant o = (ValueConstant) v;
+
+				if (o.getLanguage() != null) {
+					head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(fac.getConstantLiteral(o.getValue()), o.getLanguage()));
+				} else {
+
+					head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(o, o.getType()));
+				}
+			} else {
+
+				URIConstant o = (URIConstant) v;
+				head = fac.getFunction(p,
+						fac.getUriTemplate(fac.getConstantLiteral(s.getURI())),
+						fac.getUriTemplate(fac.getConstantLiteral(o.getURI())));
+
+
+			}
+			CQIE rule = fac.getCQIE(head, Collections.<Function>emptyList());
+
+			unfoldingProgram.add(rule);
+			count++;
+		}
+
+		log.debug("Appended {} annotation assertions as fact rules", count);
 	}		
 		
 

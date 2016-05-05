@@ -105,7 +105,7 @@
 	
   <extension id="menu.ontop.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Materialize triples..."/>
-		<toolTip value="Import OWL Assertions (ABox/Triples) from the mappings..."/>
+		<toolTip value="Dump OWL Assertions (ABox/Triples) derived by the mappings and ontology"/>
 		<class value="org.semanticweb.ontop.protege.gui.action.AboxMaterializationAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotA-A"/>
 		<editorKitId value="OWLEditorKit"/>

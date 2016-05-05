@@ -991,7 +991,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private Function addSameAs(Function leftAtom, DatalogProgram pr, String newHeadName){
 
-        //case of class and data properties
+        //case of class and data properties need as join only on the left
         if (dataPropertiesAndClassesSameAs.contains(leftAtom.getFunctionSymbol()) ){
 
             Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName + "1");
@@ -1004,6 +1004,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
             return atom;
         }
+		//case of object properties need as join only on the left and on the right
         else if (objectPropertiesSameAs.contains(leftAtom.getFunctionSymbol())){
 
 

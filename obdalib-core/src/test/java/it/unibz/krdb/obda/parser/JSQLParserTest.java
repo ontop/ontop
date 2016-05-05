@@ -762,6 +762,26 @@ public class JSQLParserTest extends TestCase {
         assertTrue(result);
     }
 
+	public void test_() {
+		final boolean result = parseJSQL("SELECT [ID] as \"KEYID\"\n" +
+				"      ,CONVERT(varchar(50), [DATETIME], 0) as \"DATETIMEH\"\n" +
+				"      ,[SCALE] as \"SCALE\"\n" +
+				"      ,[INTERVAL] as \"TEMPINTERVAL\"\n" +
+				"  FROM [CIM].[dbo].[TEMPERATURE_DEVIATION] where [INTERVAL] = '0-10'");
+		printJSQL("test_RegexpReplace()", result);
+		assertTrue(result);
+	}
+
+	public void test_2() {
+		final boolean result = parseJSQL("SELECT [ID]\n" +
+				"      ,[DATETIME]\n" +
+				"      ,[SCALE]\n" +
+				"      ,[INTERVAL]\n" +
+				"  FROM [CIM].[dbo].[TEMPERATURE_DEVIATION] where [INTERVAL] = '0-10'");
+		printJSQL("test_RegexpReplace()", result);
+		assertTrue(result);
+	}
+
 	private String queryText;
 
 	ParsedSQLQuery queryP;

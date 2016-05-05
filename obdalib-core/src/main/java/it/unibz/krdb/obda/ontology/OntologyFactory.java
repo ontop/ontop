@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 
@@ -92,11 +93,11 @@ public interface OntologyFactory {
 
 	/**
 	 * Creates an annotation property assertion
-	 *Temporary solution without information about the values
+	 *
 	 */
 
-//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
 
 
-	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
+//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
 }

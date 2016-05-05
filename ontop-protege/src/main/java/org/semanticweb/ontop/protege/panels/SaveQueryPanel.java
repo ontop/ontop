@@ -20,31 +20,18 @@ package org.semanticweb.ontop.protege.panels;
  * #L%
  */
 
-import org.semanticweb.ontop.protege.gui.IconLoader;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import org.semanticweb.ontop.protege.gui.IconLoader;
+import org.semanticweb.ontop.protege.utils.OptionPaneUtils;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 public class SaveQueryPanel extends JPanel {
 
@@ -246,7 +233,9 @@ public class SaveQueryPanel extends JPanel {
 				queryController.createGroup(group);
 				queryController.addQuery(query, id, group);
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+                OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
 				return;
 			}
 		} else { // a group selected

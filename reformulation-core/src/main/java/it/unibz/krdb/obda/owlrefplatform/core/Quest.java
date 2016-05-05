@@ -186,6 +186,10 @@ public class Quest implements Serializable {
 
 	private boolean distinctResultSet = false;
 
+	private boolean queryingAnnotationsInOntology = false;
+
+	private boolean sameAs =  false;
+
 	private String aboxMode = QuestConstants.CLASSIC;
 
 	private String aboxSchemaType = QuestConstants.SEMANTIC_INDEX;
@@ -297,7 +301,19 @@ public class Quest implements Serializable {
 		this.applyUserConstraints = true;
 	}
 
-	
+	/**
+	 * Enable/Disable querying annotation properties defined in the ontology
+	 * It overrides the value defined in QuestPreferences
+	 *
+	 * @param queryingAnnotationsInOntology
+	 */
+
+	public void setQueryingAnnotationsInOntology(boolean queryingAnnotationsInOntology) {
+ 		this.queryingAnnotationsInOntology = queryingAnnotationsInOntology;
+
+	}
+
+
 	// TEST ONLY
 	public List<CQIE> getUnfolderRules() {
 		return engine.unfolder.ufp;
@@ -352,7 +368,10 @@ public class Quest implements Serializable {
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
-                
+		queryingAnnotationsInOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.ANNOTATIONS_IN_ONTO));
+		sameAs = Boolean.valueOf((String) preferences.get(QuestPreferences.SAME_AS));
+
+
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
 			aboxJdbcUser = preferences.getProperty(QuestPreferences.DBUSER);
@@ -492,27 +511,27 @@ public class Quest implements Serializable {
 
 				// TODO one of these is redundant??? check
 				connect();
-
+				
 				setupConnectionPool();
 
 				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
 
 				if (inmemory) {
-					// we work in memory (with H2), the database is clean and
+					// we work in memory (with H2), the database is clean and 
 					// Quest will insert new Abox assertions into the database.
 					dataRepository.generateMetadata();
 					
-					// Creating the ABox repository
+					// Creating the ABox repository 
 					dataRepository.createDBSchemaAndInsertMetadata(localConnection);
 				} 
 				else {
-					// the repository has already been created in the database,
-					// restore the repository and do NOT insert any data in the repo,
+					// the repository has already been created in the database, 
+					// restore the repository and do NOT insert any data in the repo, 
 					// it should have been inserted already.
 					dataRepository.loadMetadata(localConnection);
 
 					// TODO add code to verify that the existing semantic index
-					// repository can be used with the current ontology, e.g.,
+					// repository can be used with the current ontology, e.g., 
 					// checking the vocabulary of URIs, ranges wrt the ontology entailments
 				}
 
@@ -531,7 +550,7 @@ public class Quest implements Serializable {
 							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
 									+ sources.size() + " data sources. Please remove the aditional sources.");
 
-				// Setting up the OBDA model
+				// Setting up the OBDA model 
 
 				obdaSource = sources.iterator().next();
 
@@ -611,14 +630,14 @@ public class Quest implements Serializable {
             SQLQueryGenerator datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
     		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
-
+            
             final QuestUnfolder unfolder = new QuestUnfolder(metadata);
 
 			/*
 			 * T-Mappings and Fact mappings
 			 */
-			if (aboxMode.equals(QuestConstants.VIRTUAL))
-				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings);
+			if (aboxMode.equals(QuestConstants.VIRTUAL)) 
+				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings, queryingAnnotationsInOntology, sameAs);
 			else
 				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 
@@ -628,17 +647,17 @@ public class Quest implements Serializable {
 					public void repositoryChanged() {
 						engine.clearSQLCache();
 						try {
-							//
+							// 
 							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
 							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
-						}
+						} 
 						catch (Exception e) {
 							log.error("Error updating Semantic Index mappings", e);
 						}
 					}
 				});
 			
-
+			
 			/* The active ABox dependencies */
 			LinearInclusionDependencies sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
 			
@@ -652,11 +671,11 @@ public class Quest implements Serializable {
 
 			QueryRewriter rewriter;
 			// Setting up the reformulation engine
-			if (reformulate == false)
+			if (reformulate == false) 
 				rewriter = new DummyReformulator();
-			else if (QuestConstants.TW.equals(reformulationTechnique))
+			else if (QuestConstants.TW.equals(reformulationTechnique)) 
 				rewriter = new TreeWitnessRewriter();
-			else
+			else 
 				throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
 
 			rewriter.setTBox(reformulationReasoner, inputOntology.getVocabulary(), sigma);
@@ -665,7 +684,7 @@ public class Quest implements Serializable {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(), datasourceQueryGenerator);
-
+			
 
 			log.debug("... Quest has been initialized.");
 		} 
@@ -891,11 +910,11 @@ public class Quest implements Serializable {
 	}
 	
 	public boolean hasDistinctResultSet() {
-		return distinctResultSet;
+		return distinctResultSet;		
 	}
 
 	public QuestQueryProcessor getEngine() {
 		return engine;
 	}
-
+	
 }

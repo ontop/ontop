@@ -56,8 +56,8 @@ public class H2ComplexSameAsTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "resources/sameAs/wellbores-complex.owl";
-	final String obdafile = "resources/sameAs/wellbores-complex.obda";
+	final String owlfile = "src/test/resources/sameAs/wellbores-complex.owl";
+	final String obdafile = "src/test/resources/sameAs/wellbores-complex.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
@@ -68,7 +68,7 @@ public class H2ComplexSameAsTest {
 			    java.sql.Statement s = sqlConnection.createStatement();
 			  
 //			    try {
-			    	String text = new Scanner( new File("resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
+			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
 			    	s.execute(text);
 //			    	Server.startWebServer(sqlConnection);
 			    	 

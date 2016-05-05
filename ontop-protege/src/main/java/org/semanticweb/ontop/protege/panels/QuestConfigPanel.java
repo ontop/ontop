@@ -53,6 +53,9 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
         boolean bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.REWRITE);
         chkRewrite.setSelected(bChecked);
+        
+        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.ANNOTATIONS_IN_ONTO);
+        chkAnnotations.setSelected(bChecked);
 
         String value = (String) preference.getCurrentValue(QuestPreferences.ABOX_MODE);
         if (value.equals(QuestConstants.VIRTUAL)) {
@@ -148,6 +151,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         labelNote = new javax.swing.JLabel();
         pnlReformulationMethods = new javax.swing.JPanel();
         chkRewrite = new javax.swing.JCheckBox();
+        chkAnnotations = new javax.swing.JCheckBox();
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
         pnlABoxConfiguration = new javax.swing.JPanel();
         radVirtualObda = new javax.swing.JRadioButton();
@@ -198,6 +202,25 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
         pnlReformulationMethods.add(chkRewrite, gridBagConstraints);
+
+        chkAnnotations.setText("Enable querying annotations in the ontology");
+        chkAnnotations.setToolTipText("Enable only if your application requires querying annotation properties defined in the ontology.");
+        chkAnnotations.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        chkAnnotations.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkAnnotationsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
+        pnlReformulationMethods.add(chkAnnotations, gridBagConstraints);
+        chkAnnotations.getAccessibleContext().setAccessibleDescription("Enable only if your application requires querying annotation properties defined in the ontology.");
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -474,8 +497,17 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_chkRewriteActionPerformed
 
+    private void chkAnnotationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAnnotationsActionPerformed
+         if (chkAnnotations.isSelected()) {
+            preference.setCurrentValueOf(QuestPreferences.ANNOTATIONS_IN_ONTO, Boolean.TRUE.toString());
+        } else {
+            preference.setCurrentValueOf(QuestPreferences.ANNOTATIONS_IN_ONTO, Boolean.FALSE.toString());
+        }
+    }//GEN-LAST:event_chkAnnotationsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup AboxMode;
+    private javax.swing.JCheckBox chkAnnotations;
     private javax.swing.JCheckBox chkObtainFromMappings;
     private javax.swing.JCheckBox chkObtainFromOntology;
     private javax.swing.JCheckBox chkRewrite;

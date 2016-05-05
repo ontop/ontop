@@ -22,22 +22,18 @@ package org.semanticweb.ontop.protege.gui.action;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.utils.VirtualABoxStatistics;
+import org.protege.editor.core.ui.action.ProtegeAction;
+import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.ontop.protege.core.OBDAModelManager;
 import org.semanticweb.ontop.protege.panels.OBDAModelStatisticsPanel;
 import org.semanticweb.ontop.protege.utils.DialogUtils;
-import it.unibz.krdb.obda.utils.VirtualABoxStatistics;
+import org.semanticweb.ontop.protege.utils.OBDAProgressMonitor;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-
-import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
 
 public class ABoxStatisticsAction extends ProtegeAction {
 
@@ -61,15 +57,36 @@ public class ABoxStatisticsAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		statistics.refresh();  // refresh the statistics every time users click the menu.
-		
+
 		JDialog dialog = new JDialog();
 		dialog.setModal(true);
 		dialog.setSize(520, 400);
 		dialog.setLocationRelativeTo(null);
 		dialog.setTitle("OBDA Model Statistics");
-		
-		OBDAModelStatisticsPanel pnlStatistics = new OBDAModelStatisticsPanel(statistics);
+
+		OBDAModelStatisticsPanel pnlStatistics = new OBDAModelStatisticsPanel();
+
+		Thread th = new Thread("OBDAModelStatistics") {
+			public void run() {
+
+
+				OBDAProgressMonitor monitor = new OBDAProgressMonitor("Create statistics...");
+				monitor.addProgressListener(pnlStatistics);
+				monitor.start();
+				// refresh the statistics every time users click the menu.
+				statistics.refresh();
+				pnlStatistics.initContent(statistics);
+				monitor.stop();
+
+				if(!pnlStatistics.isCancelled() && !pnlStatistics.isErrorShown()) {
+					dialog.setVisible(true);
+				}
+
+			}
+		};
+		th.start();
+
+
 		JPanel pnlCommandButton = createButtonPanel(dialog); 
 		dialog.setLayout(new BorderLayout());
 		dialog.add(pnlStatistics, BorderLayout.CENTER);
@@ -78,7 +95,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 		DialogUtils.installEscapeCloseOperation(dialog);
 		
 		dialog.pack();
-		dialog.setVisible(true);
+
 		
 	}
 	

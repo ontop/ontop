@@ -296,7 +296,6 @@ public class MetaMappingExpander {
 	 * 
 	 * @param varsInTemplate
 	 * @param columnList
-	 * @param mapping
      * @return
 	 */
 	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
@@ -326,6 +325,16 @@ public class MetaMappingExpander {
 						columnsForTemplate.add(selectExpression);
 						found = true;
 						break;
+					}
+				}
+				else {
+					if( selectExpression.getExpression() instanceof StringValue) {
+
+						if (selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName())) {
+							columnsForTemplate.add(selectExpression);
+							found = true;
+							break;
+						}
 					}
 				}
 					
@@ -371,13 +380,28 @@ public class MetaMappingExpander {
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
 		int len = uriTermForPredicate.getTerms().size();
-		List<Variable> vars = new ArrayList<Variable>(len - 1);
+		List<Variable> vars;
 
-		// TODO: check when getTerms().size() != getArity() 
-		
-		// index 0 is for the URI template
-		for (int i = 1; i < len; i++) {
-			vars.add((Variable) uriTermForPredicate.getTerm(i));
+		//consider the case of <{varUri}>
+		if(len == 1){
+			vars = new ArrayList<Variable>(1);
+			Term uri = uriTermForPredicate.getTerm(0);
+			if(uri instanceof Variable){
+				vars.add((Variable) uri);
+			}
+			else{
+				vars = Collections.emptyList();
+			}
+		}
+		else {
+			vars = new ArrayList<Variable>(len - 1);
+
+			// TODO: check when getTerms().size() != getArity()
+
+			// index 0 is for the URI template
+			for (int i = 1; i < len; i++) {
+				vars.add((Variable) uriTermForPredicate.getTerm(i));
+			}
 		}
 		return vars;
 	}
@@ -402,10 +426,20 @@ public class MetaMappingExpander {
 	private Function expandHigherOrderAtom(Function atom, List<String> values, int arity) {
 
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
-		
-		String uriTemplate = ((ValueConstant) uriTermForPredicate.getTerm(0)).getValue();
 
-		String predName = URITemplates.format(uriTemplate, values);
+		Term uriTermForPredicateTerm = uriTermForPredicate.getTerm(0);
+
+		String predName;
+		if(uriTermForPredicateTerm instanceof Variable){
+
+			predName = values.get(0);
+		}
+
+		else {
+			String uriTemplate = ((ValueConstant) uriTermForPredicateTerm).getValue();
+
+			predName = URITemplates.format(uriTemplate, values);
+		}
 		
 		Function result = null;
 		if (arity == 1) {

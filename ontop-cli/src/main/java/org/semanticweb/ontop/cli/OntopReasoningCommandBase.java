@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
+import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
@@ -34,6 +35,10 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
+    @Option(type = OptionType.COMMAND, name = {"--enable-annotations"},
+            description = "enable annotation properties defined in the ontology. Default: false")
+    public boolean enableAnnotations = false;
+
     protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
 		OWLDocumentFormat ontoFormat;
 
@@ -51,6 +56,9 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 			case "turtle":
 				ontoFormat = new TurtleDocumentFormat();
 				break;
+            case "n3":
+                ontoFormat = new N3DocumentFormat();
+                break;
 			default:
 				throw new Exception("Unknown format: " + format);
 			}

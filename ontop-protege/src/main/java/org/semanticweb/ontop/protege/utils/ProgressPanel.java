@@ -20,7 +20,7 @@ package org.semanticweb.ontop.protege.utils;
  * #L%
  */
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 public class ProgressPanel extends javax.swing.JPanel {
 
@@ -97,7 +97,7 @@ public class ProgressPanel extends javax.swing.JPanel {
 			monitor.cancel();
 		} 
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}//GEN-LAST:event_cmdCancelOperationActionPerformed
 

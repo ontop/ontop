@@ -19,6 +19,15 @@
      xmlns:quest="http://obda.org/quest#">
     <owl:Ontology rdf:about="http://it.unibz.krdb/obda/test/simple"/>
     
+ <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="http://it.unibz.krdb/obda/test/simple#S"/>
 
 
     <!-- 
@@ -34,7 +43,10 @@
 
     <!-- http://it.unibz.krdb/obda/test/simple#P -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P">
+    <rdfs:label rdf:datatype="&xsd;string">object property</rdfs:label>
+    <rdfs:comment rdf:datatype="&xsd;string">example of object property</rdfs:comment>
+    </owl:ObjectProperty>
     
 
 

@@ -90,7 +90,11 @@ public class QuestMaterializer {
     public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
         this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
     }
-	
+
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
+		this(model, onto, null, prefs, doStreamResults);
+	}
+
 	/***
 	 * 
 	 * 
@@ -127,7 +131,10 @@ public class QuestMaterializer {
 
 			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
 				vb.createDataProperty(prop.getName());
-			
+
+			for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties())
+				vb.createAnnotationProperty(prop.getName());
+
 			ontology = ofac.createOntology(vb);			
 		}
 		
@@ -135,13 +142,11 @@ public class QuestMaterializer {
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		questInstance = new Quest(ontology, this.model, preferences);
+		questInstance.setQueryingAnnotationsInOntology(true);
 					
 		questInstance.setupRepository();
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
-        this(model, onto, null, prefs, doStreamResults);
-    }
 
     private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
         Set<Predicate> vocabulary = new HashSet<Predicate>();
@@ -163,6 +168,11 @@ public class QuestMaterializer {
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
+		for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties()) {
+			Predicate p = prop.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
         if (onto != null) {
             //from ontology
             for (OClass cl : onto.getVocabulary().getClasses()) {
@@ -183,6 +193,12 @@ public class QuestMaterializer {
                         && !vocabulary.contains(p))
                     vocabulary.add(p);
             }
+			for (AnnotationProperty role : onto.getVocabulary().getAnnotationProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+							&& !vocabulary.contains(p))
+					vocabulary.add(p);
+				}
         }
         else {
             //from mapping undeclared predicates (can happen)
@@ -347,8 +363,8 @@ public class QuestMaterializer {
 						if (doStreamResults) {
 							stm.setFetchSize(FETCH_SIZE);
 						}
-						Predicate next = vocabularyIterator.next();
-						String query = getQuery(next);
+						Predicate predicate = vocabularyIterator.next();
+						String query = getQuery(predicate);
 						ResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;

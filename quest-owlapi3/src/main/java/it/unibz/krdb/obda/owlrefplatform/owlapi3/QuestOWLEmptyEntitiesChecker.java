@@ -25,13 +25,11 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPITranslatorUtility;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
 /**
  * Return empty concepts and roles, based on the mappings. Given an ontology,
@@ -44,23 +42,9 @@ public class QuestOWLEmptyEntitiesChecker {
 	private Ontology onto;
 	private QuestOWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(QuestOWLEmptyEntitiesChecker.class);
+	private int nEmptyConcepts = 0;
+	private int nEmptyRoles = 0;
 
-	private List<Predicate> emptyConcepts = new ArrayList<>();
-	private List<Predicate> emptyRoles = new ArrayList<>();
-
-	/**
-	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
-	 * 
-	 * @param onto the OWLOntology needs to be translated in OWLAPI3, conn QuestOWL connection
-	 * @throws Exception
-	 */
-	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
-		this.onto = OWLAPITranslatorUtility.translate(onto);
-		this.conn = conn;
-		runQueries();
-
-	}
 
 	/**
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
@@ -71,112 +55,220 @@ public class QuestOWLEmptyEntitiesChecker {
 	public QuestOWLEmptyEntitiesChecker(Ontology translatedOntologyMerge, QuestOWLConnection conn) throws Exception {
 		this.onto = translatedOntologyMerge;
 		this.conn = conn;
-		runQueries();
+
 	}
 
-	/**
-	 * Returns the empty concepts.
-	 * 
-	 * @return The empty concepts.
-	 */
-	public List<Predicate> getEmptyConcepts() {
-		return emptyConcepts;
+	public Iterator<Predicate> iEmptyConcepts() {
+		return new EmptyEntitiesIterator( onto.getVocabulary().getClasses().iterator(), conn);
 	}
 
-	/**
-	 * Returns the empty roles.
-	 * 
-	 * @return The empty roles.
-	 */
-	public List<Predicate> getEmptyRoles() {
-		return emptyRoles;
+
+	public Iterator<Predicate> iEmptyRoles() {
+		return new EmptyEntitiesIterator(onto.getVocabulary().getObjectProperties().iterator(), onto.getVocabulary().getDataProperties().iterator(), conn);
 	}
 
-	/**
-	 * Gets the total number of empty entities
-	 * 
-	 * @return The total number of empty entities.
-	 * @throws Exception
-	 */
-	public int getNumberEmptyEntities() throws Exception {
-
-		return emptyConcepts.size() + emptyRoles.size();
+	public int getEConceptsSize() {
+		return nEmptyConcepts;
 	}
+
+	public int getERolesSize() {
+		return  nEmptyRoles ;
+	}
+
 
 	@Override
 	public String toString() {
 		String str = new String();
 
-		int countC = emptyConcepts.size();
-		str += String.format("- %s Empty %s ", countC, (countC == 1) ? "concept" : "concepts");
-		int countR = emptyRoles.size();
-		str += String.format("- %s Empty %s\n", countR, (countR == 1) ? "role" : "roles");
+		str += String.format("- %s Empty %s ", nEmptyConcepts, (nEmptyConcepts == 1) ? "concept" : "concepts");
+
+		str += String.format("- %s Empty %s\n", nEmptyRoles, (nEmptyRoles == 1) ? "role" : "roles");
 		return str;
 	}
 
-	private void runQueries() throws Exception {
 
-		for (OClass cl : onto.getVocabulary().getClasses()) 
-			if (!cl.isTop() && !cl.isBottom()) {
-				Predicate concept = cl.getPredicate();
-				if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
-					emptyConcepts.add(concept);
+	/***
+	 * An iterator that will dynamically construct ABox assertions for the given
+	 * predicate based on the results of executing the mappings for the
+	 * predicate in each data source.
+	 *
+	 */
+	private class EmptyEntitiesIterator implements Iterator<Predicate> {
+
+
+		private String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
+		private String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
+
+		private QuestOWLConnection questConn;
+		private boolean hasNext = false;
+		private Predicate nextConcept;
+
+		Iterator<OClass> classIterator;
+		Iterator<ObjectPropertyExpression> objectRoleIterator;
+		Iterator<DataPropertyExpression> dataRoleIterator;
+
+		private Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
+
+		/** iterator for classes  of the ontologies */
+		public EmptyEntitiesIterator(Iterator<OClass> classIterator, QuestOWLConnection questConn) {
+
+				this.questConn = questConn;
+
+				this.classIterator = classIterator;
+
+				this.objectRoleIterator = new Iterator<ObjectPropertyExpression>() {
+					@Override
+					public boolean hasNext() {
+						return false;
+					}
+
+					@Override
+					public ObjectPropertyExpression next() {
+						return null;
+					}
+				};
+
+				this.dataRoleIterator = new Iterator<DataPropertyExpression>() {
+				@Override
+				public boolean hasNext() {
+					return false;
 				}
-			}
-		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) 
-			if (!prop.isBottom() && !prop.isTop()) {
-				Predicate role = prop.getPredicate();
-				if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-					emptyRoles.add(role);
+				@Override
+				public DataPropertyExpression next() {
+					return null;
 				}
-			}
-		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
+			};
+		}
 
-		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) 		
-			if (!prop.isBottom() && !prop.isTop()) {
-				Predicate role = prop.getPredicate();
-				if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
-					emptyRoles.add(role);
+		/** iterator for roles of the ontologies */
+		public EmptyEntitiesIterator(Iterator<ObjectPropertyExpression> objectRoleIterator, Iterator<DataPropertyExpression> dataRoleIterator, QuestOWLConnection questConn) {
+
+			this.questConn = questConn;
+
+			this.classIterator = new Iterator<OClass>() {
+				@Override
+				public boolean hasNext() {
+					return false;
 				}
-			}
-		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
-		
-	}
 
-	private boolean runSPARQLConceptsQuery(String description) throws Exception {
-		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		QuestOWLStatement st = conn.createStatement();
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			return (rs.nextRow());
+				@Override
+				public OClass next() {
+					return null;
+				}
+			};
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			
-			st.close();
+			this.objectRoleIterator = objectRoleIterator;
+
+			this.dataRoleIterator = dataRoleIterator;
 
 		}
 
-	}
+		private String getPredicateQuery(Predicate p) {
+			return String.format(queryRoles, p.toString()); }
 
-	private boolean runSPARQLRolesQuery(String description) throws Exception {
-		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		QuestOWLStatement st = conn.createStatement();
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			return (rs.nextRow());
+		private String getClassQuery(Predicate p) {
+			return String.format(queryConcepts, p.toString()); }
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			
-			st.close();
+		private String getQuery(Predicate p)
+		{
+			if (p.getArity() == 1)
+				return getClassQuery(p);
+			else if (p.getArity() == 2)
+				return getPredicateQuery(p);
+			return "";
+		}
+
+		@Override
+		public boolean hasNext() {
+			while (classIterator.hasNext()){
+				OClass next = classIterator.next();
+				if (!next.isTop() && !next.isBottom()) {
+					Predicate entity = next.getPredicate();
+					if (nextEmptyEntity(entity)) {
+						nEmptyConcepts++;
+						return hasNext;
+					}
+				}
+
+			}
+			log.debug( "No more empty concepts" );
+
+			while (objectRoleIterator.hasNext()){
+				ObjectPropertyExpression next = objectRoleIterator.next();
+				if (!next.isTop() && !next.isBottom()) {
+					Predicate entity = next.getPredicate();
+					if (nextEmptyEntity(entity)) {
+						nEmptyRoles++;
+						return hasNext;
+					}
+				}
+			}
+			log.debug( "No more empty object roles" );
+
+			while (dataRoleIterator.hasNext()){
+				DataPropertyExpression next = dataRoleIterator.next();
+				if (!next.isTop() && !next.isBottom()) {
+					Predicate entity = next.getPredicate();
+					if (nextEmptyEntity(entity)) {
+						nEmptyRoles++;
+						return hasNext;
+					}
+				}
+
+			}
+			log.debug( "No more empty data roles" );
+			hasNext = false;
+
+			return hasNext;
+		}
+
+		private boolean nextEmptyEntity(Predicate entity) {
+
+			String query =getQuery(entity);
+
+			//execute next query
+			try (QuestOWLStatement stm = questConn.createStatement()){
+
+                try (QuestOWLResultSet rs = stm.executeTuple(query)) {
+
+                    if (!rs.nextRow()) {
+
+						nextConcept = entity;
+						log.debug( "Empty " + entity );
+
+						hasNext = true;
+						return true;
+
+                    }
+
+					return false;
+
+                }
+            } catch (OWLException e) {
+                e.printStackTrace();
+            }
+
+			return false;
+		}
+
+		@Override
+		public Predicate next() {
+
+			if(hasNext) {
+				return nextConcept;
+			}
+
+			return null;
+
 
 		}
 
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }
