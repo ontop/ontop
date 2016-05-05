@@ -20,34 +20,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ResultSet;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
  * Allows you to work with the virtual triples defined by an OBDA model. In
@@ -108,7 +90,11 @@ public class QuestMaterializer {
     public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
         this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
     }
-	
+
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
+		this(model, onto, null, prefs, doStreamResults);
+	}
+
 	/***
 	 * 
 	 * 
@@ -145,7 +131,10 @@ public class QuestMaterializer {
 
 			for (DataPropertyExpression prop : model.getOntologyVocabulary().getDataProperties()) 
 				vb.createDataProperty(prop.getName());
-			
+
+			for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties())
+				vb.createAnnotationProperty(prop.getName());
+
 			ontology = ofac.createOntology(vb);			
 		}
 		
@@ -153,13 +142,11 @@ public class QuestMaterializer {
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		questInstance = new Quest(ontology, this.model, preferences);
+		questInstance.setQueryingAnnotationsInOntology(true);
 					
 		questInstance.setupRepository();
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
-        this(model, onto, null, prefs, doStreamResults);
-    }
 
     private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
         Set<Predicate> vocabulary = new HashSet<Predicate>();
@@ -181,6 +168,11 @@ public class QuestMaterializer {
             if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
                 vocabulary.add(p);
         }
+		for (AnnotationProperty prop : model.getOntologyVocabulary().getAnnotationProperties()) {
+			Predicate p = prop.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
         if (onto != null) {
             //from ontology
             for (OClass cl : onto.getVocabulary().getClasses()) {
@@ -201,6 +193,12 @@ public class QuestMaterializer {
                         && !vocabulary.contains(p))
                     vocabulary.add(p);
             }
+			for (AnnotationProperty role : onto.getVocabulary().getAnnotationProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+							&& !vocabulary.contains(p))
+					vocabulary.add(p);
+				}
         }
         else {
             //from mapping undeclared predicates (can happen)
@@ -365,8 +363,8 @@ public class QuestMaterializer {
 						if (doStreamResults) {
 							stm.setFetchSize(FETCH_SIZE);
 						}
-						Predicate next = vocabularyIterator.next();
-						String query = getQuery(next);
+						Predicate predicate = vocabularyIterator.next();
+						String query = getQuery(predicate);
 						ResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;

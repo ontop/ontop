@@ -44,6 +44,7 @@ public interface Ontology extends Serializable {
 
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) throws InconsistentOntologyException;
 
+	public void addSubPropertyOfAxiom(AnnotationProperty included, AnnotationProperty including);
 
 	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms();
 
@@ -53,7 +54,9 @@ public interface Ontology extends Serializable {
 
 	public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
 
-	//TODO:subproperty annotation
+	public Collection<BinaryAxiom<AnnotationProperty>> getSubAnnotationAxioms();
+
+
 
 	// DISJOINTNESS
 	

@@ -360,7 +360,7 @@ public class OBDAModelManager implements Disposable {
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = dfac.getDataPropertyPredicate(uri);
+			p = dfac.getAnnotationPropertyPredicate(uri);
         }
 		return p;
 	}
@@ -457,7 +457,7 @@ public class OBDAModelManager implements Disposable {
 			modelUri = ontologyIRI.get().toURI();
 
 			if (defaultPrefix == null) {
-				defaultPrefix = ontologyIRI.get().toString();
+				defaultPrefix = modelUri.toString();
 
 			}
 		} else {
@@ -921,7 +921,11 @@ public class OBDAModelManager implements Disposable {
 	private static String getProperPrefixURI(String prefixUri) {
 		if (!prefixUri.endsWith("#")) {
 			if (!prefixUri.endsWith("/")) {
-				prefixUri += EntityCreationPreferences.getDefaultSeparator();;
+				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
+				if (!prefixUri.endsWith(defaultSeparator))
+				{
+					prefixUri += defaultSeparator;
+				}
 			}
 		}
 		return prefixUri;

@@ -26,11 +26,11 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.AnnotationProperty;
 
 /**
- * Represents DataPropertyExpression from the OWL 2 QL Specification
+ * Represents AnnotationPropertyExpression from the OWL 2 QL Specification
  * 
- * DataPropertyExpression := DataProperty
+ * AnnotationProperty := IRI
  * 
- * Support for owl:topDataProperty and owl:bottomDataProperty
+ *
  * 
  * @author Roman Kontchakov
  *
@@ -42,14 +42,18 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 	private final Predicate predicate;
 	private final String name;
+//	private final AnnotationPropertyDomainImpl domain;
+//	private final AnnotationPropertyRangeImpl range;
 
 	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 
 	AnnotationPropertyImpl(String name) {
-		//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
-		this.predicate = ofac.getPredicate(name, new Predicate.COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
-		this.name = name;		
+
+		this.predicate = ofac.getAnnotationPropertyPredicate(name);
+		this.name = name;
+//		this.domain =  new AnnotationPropertyDomainImpl(this);
+//		this.range = new AnnotationPropertyRangeImpl(this);
 
 	}
 
@@ -62,6 +66,16 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 	public String getName() {
 		return name;
 	}
+
+//	@Override
+//	public AnnotationPropertyDomain getDomain() {
+//		return domain;
+//	}
+//
+//	@Override
+//	public AnnotationPropertyRange getRange() {
+//		return range;
+//	}
 
 
 	@Override

@@ -19,16 +19,8 @@ package it.unibz.krdb.obda.utils;
  * limitations under the License.
  * #L%
  */
- 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryShallowParser;
@@ -38,17 +30,6 @@ import it.unibz.krdb.sql.QuotedIDFactory;
 import it.unibz.krdb.sql.RelationID;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -57,9 +38,14 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 
 /**
@@ -310,7 +296,6 @@ public class MetaMappingExpander {
 	 * 
 	 * @param varsInTemplate
 	 * @param columnList
-	 * @param mapping
      * @return
 	 */
 	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
@@ -340,6 +325,16 @@ public class MetaMappingExpander {
 						columnsForTemplate.add(selectExpression);
 						found = true;
 						break;
+					}
+				}
+				else {
+					if( selectExpression.getExpression() instanceof StringValue) {
+
+						if (selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName())) {
+							columnsForTemplate.add(selectExpression);
+							found = true;
+							break;
+						}
 					}
 				}
 					
@@ -385,13 +380,28 @@ public class MetaMappingExpander {
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
 		int len = uriTermForPredicate.getTerms().size();
-		List<Variable> vars = new ArrayList<Variable>(len - 1);
+		List<Variable> vars;
 
-		// TODO: check when getTerms().size() != getArity() 
-		
-		// index 0 is for the URI template
-		for (int i = 1; i < len; i++) {
-			vars.add((Variable) uriTermForPredicate.getTerm(i));
+		//consider the case of <{varUri}>
+		if(len == 1){
+			vars = new ArrayList<Variable>(1);
+			Term uri = uriTermForPredicate.getTerm(0);
+			if(uri instanceof Variable){
+				vars.add((Variable) uri);
+			}
+			else{
+				vars = Collections.emptyList();
+			}
+		}
+		else {
+			vars = new ArrayList<Variable>(len - 1);
+
+			// TODO: check when getTerms().size() != getArity()
+
+			// index 0 is for the URI template
+			for (int i = 1; i < len; i++) {
+				vars.add((Variable) uriTermForPredicate.getTerm(i));
+			}
 		}
 		return vars;
 	}
@@ -416,10 +426,20 @@ public class MetaMappingExpander {
 	private Function expandHigherOrderAtom(Function atom, List<String> values, int arity) {
 
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
-		
-		String uriTemplate = ((ValueConstant) uriTermForPredicate.getTerm(0)).getValue();
 
-		String predName = URITemplates.format(uriTemplate, values);
+		Term uriTermForPredicateTerm = uriTermForPredicate.getTerm(0);
+
+		String predName;
+		if(uriTermForPredicateTerm instanceof Variable){
+
+			predName = values.get(0);
+		}
+
+		else {
+			String uriTemplate = ((ValueConstant) uriTermForPredicateTerm).getValue();
+
+			predName = URITemplates.format(uriTemplate, values);
+		}
 		
 		Function result = null;
 		if (arity == 1) {

@@ -191,7 +191,7 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void testOBDAEmpties() throws Exception {
 
 
@@ -213,7 +213,7 @@ public class R2rmlCheckerTest {
 			emptyRolesObda.add(iteratorR.next());
 		}
 		log.info("Empty role/s: " + emptyRolesObda);
-		assertEquals(47, emptyRolesObda.size());
+		assertEquals(46, emptyRolesObda.size());
 
 	}
 
@@ -222,7 +222,7 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void testR2rmlEmpties() throws Exception {
 
 		// Now we are ready for querying
@@ -243,7 +243,7 @@ public class R2rmlCheckerTest {
 			emptyRolesR2rml.add(iteratorR.next());
 		}
 		log.info("Empty role/s: " + emptyRolesR2rml);
-		assertEquals(47, emptyRolesR2rml.size());
+		assertEquals(46, emptyRolesR2rml.size());
 	}
 
 	/**
