@@ -368,11 +368,22 @@ public class OBDAMappingTransformer {
  					Function o = (Function) object;
  					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
-						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
-						//add template object
-						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-						//obm.setTemplate(mfact.createTemplate(objectURI));
-						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
+
+						Term objectTerm = ((Function) object).getTerm(0);
+
+						if(objectTerm instanceof Variable)
+						{
+							obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) objectTerm).getName()).stringValue());
+							obm.setTermType(R2RMLVocabulary.iri);
+						}
+						else {
+
+							String objectURI = URITemplates.getUriTemplateString((Function) object, prefixmng);
+							//add template object
+							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
+							//obm.setTemplate(mfact.createTemplate(objectURI));
+							obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
+						}
 					}
 					else if (o.isDataTypeFunction()) {
 						Term objectTerm = ((Function) object).getTerm(0);

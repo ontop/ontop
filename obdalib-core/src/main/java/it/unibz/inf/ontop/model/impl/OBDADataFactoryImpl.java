@@ -77,9 +77,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public JdbcTypeMapper getJdbcTypeMapper() {
 		return jdbcTypeMapper;
 	}
-	
-	
-		
+
+
+	@Override
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
@@ -98,18 +98,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new PredicateImpl(uri, types.length, types);
 	}
 
-
+	@Override
 	public Predicate getObjectPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	}
 
+	@Override
 	public Predicate getDataPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 	}
+
+	@Override
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
 	}
 
+	//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
+	@Override
+	public Predicate getAnnotationPropertyPredicate(String name) {
+		return new PredicateImpl(name, 2, new COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
+	}
+
+	@Override
 	public Predicate getClassPredicate(String name) {
 		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
 	}

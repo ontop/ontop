@@ -19,7 +19,8 @@ package it.unibz.inf.ontop.ontology.impl;
  * limitations under the License.
  * #L%
  */
-
+import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.ontology.AnnotationProperty;
 
@@ -38,9 +39,14 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	private static final long serialVersionUID = -8834975903851540150L;
 
 	private final AnnotationProperty prop;
+	private final ObjectConstant o1;
+	private final Constant o2;
 
-	AnnotationAssertionImpl(AnnotationProperty prop) {
+
+	AnnotationAssertionImpl(AnnotationProperty prop, ObjectConstant o1, Constant o2) {
 		this.prop = prop;
+		this.o1 = o1;
+		this.o2 = o2;
 
 	}
 
@@ -48,7 +54,17 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	public AnnotationProperty getProperty() {
 		return prop;
 	}
-	
+
+	@Override
+	public ObjectConstant getSubject() {
+		return o1;
+	}
+
+	@Override
+	public Constant getValue() {
+		return o2;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof AnnotationAssertionImpl) {
@@ -60,12 +76,12 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	
 	@Override
 	public int hashCode() {
-		return prop.hashCode() ;
+		return prop.hashCode() + o1.hashCode() + o2.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return prop.getName();
+		return prop + "(" + o1 + ", " + o2 + ")";
 	}
 
 }

@@ -173,11 +173,9 @@ private String removeBrackets(String text) {
 	          toReturn = dfac.getUriTemplate(uriTemplate);
 	      }
 	      else if (token instanceof ColumnString) {
-	         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
+	         // a single URI template
 	         Variable column = dfac.getVariable(token.toString());
-	         terms.add(0, uriTemplate);
-	         terms.add(column);
-	         toReturn = dfac.getUriTemplate(terms);
+	         toReturn = dfac.getUriTemplate(column);
 	      }
 	   }
 	   else {

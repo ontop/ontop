@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.ontology;
  */
 
 
+import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.ObjectConstant;
+
 /**
  * Represents AnnotationAssertion from the OWL 2 QL Specification
  *
@@ -37,7 +40,7 @@ public interface AnnotationAssertion extends Assertion {
 
 	public AnnotationProperty getProperty();
 	
-//	public ObjectConstant getSubject();
+	public ObjectConstant getSubject();
 	
-//	public Constant getValue();
+	public Constant getValue();
 }

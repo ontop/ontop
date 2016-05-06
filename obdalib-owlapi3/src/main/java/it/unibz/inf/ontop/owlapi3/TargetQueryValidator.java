@@ -87,7 +87,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 					debugMsg += " is a Data property.";
 				}
                 else if (isAnnotProp){
-                    predicate =  dataFactory.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
+                    predicate =  dataFactory.getAnnotationPropertyPredicate(p.getName());
                     debugMsg += " is an Annotation property.";
                 }
 				else

@@ -32,7 +32,7 @@ import it.unibz.inf.ontop.ontology.*;
  * IMPORTANT: this factory does NOT check whether the class / property has been declared
  * 
  * USES: OntologyFactoryImpl (and so, checks for top / bottom concept / property
-* 			@see rules [C4], [O4], [D4]) 
+* 			see rules [C4], [O4], [D4])
   * 
  * @author Roman Kontchakov
  *
@@ -100,7 +100,7 @@ public class AssertionFactoryImpl implements AssertionFactory {
 	@Override
 	public AnnotationAssertion createAnnotationAssertion(String propertyName, ObjectConstant o, Constant v)  {
 		AnnotationProperty ap = new AnnotationPropertyImpl(propertyName);
-		return ofac.createAnnotationAssertion(ap);
+		return ofac.createAnnotationAssertion(ap, o, v);
 	}
 
 }

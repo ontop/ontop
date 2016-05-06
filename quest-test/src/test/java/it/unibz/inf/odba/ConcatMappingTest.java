@@ -65,7 +65,7 @@ public class ConcatMappingTest {
         String queryBind = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>  \n" +
                 "\n" +
                 "SELECT  ?f ?y " +
-                "WHERE {?f rdfs:label ?y .} \n";
+                "WHERE {?f a <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ; rdfs:label ?y .} \n";
 
 
 
@@ -99,7 +99,7 @@ public class ConcatMappingTest {
                 while (res.nextRow()) {
                     count += 1;
                     for (int i = 1; i <= res.getColumnCount(); i++) {
-                         log.debug(res.getSignature().get(i-1) + "=" + res.getOWLObject(i));
+                         log.debug(res.getSignature().get(i-1) + "=" + res.getOWLObject(i).toString());
 
                       }
                 }

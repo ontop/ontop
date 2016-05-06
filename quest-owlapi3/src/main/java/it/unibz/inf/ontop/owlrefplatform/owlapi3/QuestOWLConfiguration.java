@@ -17,6 +17,8 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
     private final ImplicitDBConstraintsReader userConstraints;
 
+    private final boolean queryingAnnotationsInOntology;
+
     private final OBDAModel obdaModel;
 
     private final QuestPreferences preferences;
@@ -28,6 +30,10 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
     public ImplicitDBConstraintsReader getUserConstraints() {
         return userConstraints;
+    }
+
+    public boolean isQueryingAnnotationsInOntology() {
+        return queryingAnnotationsInOntology;
     }
 
     public OBDAModel getObdaModel() {
@@ -54,19 +60,19 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
         userConstraints = builder.userConstraints;
         obdaModel = builder.obdaModel;
-
-
+        queryingAnnotationsInOntology = builder.queryingAnnotationsInOntology;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-
     public static final class Builder {
         private TMappingExclusionConfig excludeFromTMappings;
         private ImplicitDBConstraintsReader userConstraints;
         private OBDAModel obdaModel;
+        private boolean queryingAnnotationsInOntology = false;
+
         private QuestPreferences preferences;
         private ReasonerProgressMonitor progressMonitor = new NullReasonerProgressMonitor();
 
@@ -85,6 +91,11 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
         public Builder obdaModel(OBDAModel obdaModel) {
             this.obdaModel = obdaModel;
+            return this;
+        }
+
+        public Builder queryingAnnotationsInOntology(boolean queryingAnnotationsInOntology) {
+            this.queryingAnnotationsInOntology = queryingAnnotationsInOntology;
             return this;
         }
 

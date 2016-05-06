@@ -189,31 +189,40 @@ public class TargetQueryRenderer {
 					sb.append(fname);
 				}
 			} else if (functionSymbol instanceof URITemplatePredicate) {
-				String template = ((ValueConstant) function.getTerms().get(0)).getValue();
-				
-				// Utilize the String.format() method so we replaced placeholders '{}' with '%s'
-				String templateFormat = template.replace("{}", "%s");
-				List<String> varNames = new ArrayList<String>();
-				for (Term innerTerm : function.getTerms()) {
-					if (innerTerm instanceof Variable) {
-						varNames.add(getDisplayName(innerTerm, prefixManager));
-					}
-				}
-				String originalUri = String.format(templateFormat, varNames.toArray());
-				if(originalUri.equals(OBDAVocabulary.RDF_TYPE))
+				Term firstTerm = function.getTerms().get(0);
+
+				if(firstTerm instanceof Variable)
 				{
-					sb.append("a");
+					sb.append("<{");
+					sb.append(((Variable) firstTerm).getName());
+					sb.append("}>");
 				}
-				else{
-				String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
-				if (!shortenUri.equals(originalUri)) {
-					sb.append(shortenUri);
-				} else {
-					// If the URI can't be shorten then use the full URI within brackets
-					sb.append("<");
-					sb.append(originalUri);
-					sb.append(">");
-				}		
+
+				else {
+					String template = ((ValueConstant) firstTerm).getValue();
+
+					// Utilize the String.format() method so we replaced placeholders '{}' with '%s'
+					String templateFormat = template.replace("{}", "%s");
+					List<String> varNames = new ArrayList<String>();
+					for (Term innerTerm : function.getTerms()) {
+						if (innerTerm instanceof Variable) {
+							varNames.add(getDisplayName(innerTerm, prefixManager));
+						}
+					}
+					String originalUri = String.format(templateFormat, varNames.toArray());
+					if (originalUri.equals(OBDAVocabulary.RDF_TYPE)) {
+						sb.append("a");
+					} else {
+						String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
+						if (!shortenUri.equals(originalUri)) {
+							sb.append(shortenUri);
+						} else {
+							// If the URI can't be shorten then use the full URI within brackets
+							sb.append("<");
+							sb.append(originalUri);
+							sb.append(">");
+						}
+					}
 				}
 			} 
 			else if (functionSymbol == ExpressionOperation.CONCAT) { //Concat

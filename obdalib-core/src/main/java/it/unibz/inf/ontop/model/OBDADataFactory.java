@@ -72,6 +72,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
 
+	public Predicate getAnnotationPropertyPredicate(String name);
+
 	/**
 	 * with default type COL_TYPE.LITERAL
 	 * @param name

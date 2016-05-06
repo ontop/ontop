@@ -116,6 +116,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	// //////////////////////////////////////////////////////////////////////////////////////
 
 	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
+
+	/* Used to enable querying annotation Properties coming from the ontology. */
+
+	private  boolean queryingAnnotationsInOntology = false;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -155,6 +159,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
         this.excludeFromTMappings = configuration.getExcludeFromTMappings();
 
         this.preferences = configuration.getPreferences();
+
+		if(configuration.isQueryingAnnotationsInOntology()) {
+			this.queryingAnnotationsInOntology = true;
+		}
 
         this.init(rootOntology, obdaModel, configuration, preferences);
     }
@@ -235,7 +243,12 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			questInstance.setImplicitDBConstraints(userConstraints);
 		
 		//if( this.applyExcludeFromTMappings )
-			questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
+		questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
+
+		if(this.queryingAnnotationsInOntology){
+			questInstance.setQueryingAnnotationsInOntology(this.queryingAnnotationsInOntology);
+		}
+
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
