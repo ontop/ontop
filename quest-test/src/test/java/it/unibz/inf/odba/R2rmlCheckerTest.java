@@ -191,7 +191,7 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+//	@Test
 	public void testOBDAEmpties() throws Exception {
 
 
@@ -222,7 +222,7 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+//	@Test
 	public void testR2rmlEmpties() throws Exception {
 
 		// Now we are ready for querying
