@@ -20,8 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.UnsignedInteger;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -30,8 +32,11 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.parser.EncodeForURI;
+import javafx.util.Pair;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -93,378 +98,314 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
+		//System.out.println("SPARQL algebra:\n" + te);
 
-		List<String> signature;
-		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery)
-			// order elements of the set in some way by converting it into the list
-			signature = new ArrayList<>(te.getBindingNames());
-		else
-			signature = Collections.emptyList(); // ASK queries have no answer variables
+        TranslationProgram program = new TranslationProgram();
+        TranslationResult body = tran(te, program);
 
-		List<Term> answerVariables = new ArrayList<>(signature.size());
-		for (String variable : signature)
-			answerVariables.add(ofac.getVariable(variable));
+        List<Term> answerVariables;
+		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
+            // order elements of the set in some way by converting it into the list
+            answerVariables = new ArrayList<Term>(body.variables);
+        }
+		else {
+            // ASK queries have no answer variables
+            answerVariables = Collections.emptyList();
+        }
 
-		DatalogProgram program = ofac.getDatalogProgram();
-		SubExpression body = translateTupleExpr(te, program, OBDAVocabulary.QUEST_QUERY + "0");
+        Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY, answerVariables.size());
+        Function head = ofac.getFunction(pred, answerVariables);
+        program.appendRule(head, body.atoms);
 
-		CQIE top = createRule(program, OBDAVocabulary.QUEST_QUERY, answerVariables, body.atoms); // appends rule to the result
+        List<String> signature = new ArrayList<>(answerVariables.size());
+        for (Term v : answerVariables)
+            signature.add(((Variable)v).getName());
 
-		SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(program);
-		List<CQIE> flattened = flattener.flatten(top);
+        //System.out.println("result:\n" + program.program);
 
-		DatalogProgram result = ofac.getDatalogProgram(program.getQueryModifiers(), flattened);
-		return new SparqlQuery(result, signature);
+        // TODO: to be removed
+        SPARQLQueryFlattener fl = new SPARQLQueryFlattener(program.program);
+        List<CQIE> p = fl.flatten(program.program.getRules(pred).get(0));
+        DatalogProgram pp = ofac.getDatalogProgram(program.getQueryModifiers(), p);
+
+		return new SparqlQuery(pp, signature);
 	}
 
-	private static final class SubExpression {
-		final Set<Variable> variables;
-		final Set<Variable> nullableVariables;
-		final List<Function> atoms;
+    private static class TranslationResult {
+        final ImmutableList<Function> atoms;
+        final ImmutableSet<Variable> variables;
+        final ImmutableSet<Variable> allVariables;
+        final boolean isBGP;
 
-		SubExpression(List<Function> atoms, Set<Variable> variables, Set<Variable> nullableVariables) {
-			this.atoms = atoms;
-			this.variables = variables;
-			this.nullableVariables = nullableVariables;
-		}
-	}
+        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables,
+                          ImmutableSet<Variable> allVariables, boolean isBGP) {
+            this.atoms = atoms;
+            this.variables = variables;
+            this.allVariables = allVariables;
+            this.isBGP = isBGP;
+        }
+    }
 
+    private static class TranslationProgram {
+        final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	/**
-	 * main translation method -- a recursive switch over all possible types of subexpressions
-	 * 
-	 * @param te
-	 * @param pr
-	 * @param newHeadName
-	 */
-	
-	private SubExpression translateTupleExpr(TupleExpr te, DatalogProgram pr, String newHeadName) {
-		if (te instanceof Slice) {
-			// add LIMIT and OFFSET modifiers
-			Slice slice = (Slice)te;
-			pr.getQueryModifiers().setOffset(slice.getOffset());
-			pr.getQueryModifiers().setLimit(slice.getLimit());
-			return translateTupleExpr(slice.getArg(), pr, newHeadName); // narrow down the query
-		} 
-		else if (te instanceof Distinct) {
-			// add DISTINCT modifier
-			Distinct distinct = (Distinct) te;
-			pr.getQueryModifiers().setDistinct();
-			return translateTupleExpr(distinct.getArg(), pr, newHeadName); // narrow down the query
-		}
-		else if (te instanceof Reduced) {
-			// ignore REDUCED modifier 
-			Reduced reduced = (Reduced)te;
-			return translateTupleExpr(reduced.getArg(), pr, newHeadName);
-		}
-		else if (te instanceof Order) {
-			// add ORDER BY modifier
-			Order order = (Order) te;
-			for (OrderElem c : order.getElements()) {	
-				ValueExpr expression = c.getExpr();
-				if (!(expression instanceof Var)) {
-					throw new IllegalArgumentException("Error translating ORDER BY. "
-							+ "The current implementation can only sort by variables, this query has a more complex expression '" + expression + "'");
-				}
-				Var v = (Var) expression;
-				Variable var = ofac.getVariable(v.getName());
-				int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING; 
-				pr.getQueryModifiers().addOrderCondition(var, direction);
-			}
-			return translateTupleExpr(order.getArg(), pr, newHeadName); // narrow down the query
-		} 
-		else if (te instanceof Projection) {
-			return translate((Projection) te, pr, newHeadName);
-		} 
-		else if (te instanceof Filter) {
-			return translate((Filter) te, pr, newHeadName);
-		} 
-		else if (te instanceof StatementPattern) {
-			Function atom = translate((StatementPattern) te);
-			Set<Variable> vars = new HashSet<>();
-			TermUtils.addReferencedVariablesTo(vars, atom);
-			return new SubExpression(Collections.singletonList(atom), vars, Collections.emptySet());
-		} 
-		else if (te instanceof Join) {
-			return translate((Join) te, pr, newHeadName);
-		} 
-		else if (te instanceof Union) {
-			return translate((Union) te, pr, newHeadName);
-		} 
-		else if (te instanceof LeftJoin) {
-			return translate((LeftJoin) te, pr, newHeadName);
-		} 
-		else if (te instanceof Extension) {
-			return translate((Extension) te, pr, newHeadName);
-		}
-		else if (te instanceof BindingSetAssignment) {
-			return getValuesFilter((BindingSetAssignment)te);
-		}
-		
-		try {
-			throw new QueryEvaluationException("Operation not supported: " + te);
-		} catch (QueryEvaluationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
+        final DatalogProgram program;
+        int predicateIdx = 0;
 
+        TranslationProgram() {
+            this.program = ofac.getDatalogProgram();
+        }
 
-	private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, Function... body) {
-		Predicate pred = ofac.getPredicate(headName, headParameters.size());
-		Function head = ofac.getFunction(pred, headParameters);
-		CQIE rule = ofac.getCQIE(head, body);
-		pr.appendRule(rule);
-		return rule;
-	}
+        OBDAQueryModifiers getQueryModifiers() {
+            return program.getQueryModifiers();
+        }
 
-	private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, List<Function> body) {
-		Predicate pred = ofac.getPredicate(headName, headParameters.size());
-		Function head = ofac.getFunction(pred, headParameters);
-		CQIE rule = ofac.getCQIE(head, body);
-		pr.appendRule(rule);
-		return rule;
-	}
+        Function getFreshHead(List<Term> terms) {
+            Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY + predicateIdx, terms.size());
+            predicateIdx++;
+            Function head = ofac.getFunction(pred, terms);
+            return head;
+        }
 
-	private static Set<Variable> union(Set<Variable> s1, Set<Variable> s2) {
-		Set<Variable> r = new HashSet<>();
-		r.addAll(s1);
-		r.addAll(s2);
-		return r;
-	}
+        void appendRule(Function head, List<Function> body) {
+            CQIE rule = ofac.getCQIE(head, body).clone(); // TODO: get rid of cloning (which is needed for Unfolder)
+            EQNormalizer.enforceEqualities(rule);
+            program.appendRule(rule);
+        }
 
-	/**
-	 * EXTEND { (T_j AS V_j) } EXPR
-	 * 
-	 * where the T_j are built from the variables X of EXPR,
-	 *   
-	 * adds the following rule:
-	 * 
-	 *   ans_i(X * T) :- ans_{i.0}(X)
-	 * 
-	 * @param extend
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-	
-	private SubExpression translate(Extension extend, DatalogProgram pr, String newHeadName) {
+        Function wrapNonTriplePattern(TranslationResult sub) {
+            if (sub.atoms.size() > 1 || sub.atoms.get(0).isAlgebraFunction()) {
+                Function head = getFreshHead(new ArrayList<>(sub.variables));
+                appendRule(head, sub.atoms);
+                return head;
+            }
+            return sub.atoms.get(0);
+        }
+    }
 
-		SubExpression subAtom = translateTupleExpr(extend.getArg(), pr, newHeadName + "0");
+    private ImmutableList<Function> extendWithNulls(ImmutableList<Function> list,
+                                           ImmutableSet<Variable> vars, ImmutableSet<Variable> extVars) {
+        Set<Variable> nullVars = new HashSet<>(extVars);
+        nullVars.removeAll(vars);
+        if (nullVars.isEmpty())
+            return list;
 
-		int sz = subAtom.variables.size() + extend.getElements().size();
-		List<Term> varList = new ArrayList<>(sz);
-		varList.addAll(subAtom.variables);
-		Set<Variable> varSet = new HashSet<>();
-		varSet.addAll(subAtom.variables);
-		List<Term> termList = new ArrayList<>(sz);
-		termList.addAll(varList);
-		
-		for (ExtensionElem el: extend.getElements()) {
-			Variable var = ofac.getVariable(el.getName());
-			varList.add(var);
-			varSet.add(var);
-			
-			Term term = getExpression(el.getExpr());			
-			termList.add(term);
-		}
-		CQIE rule = createRule(pr, newHeadName, termList, subAtom.atoms);
-		
-		Function newHeadAtom = ofac.getFunction(rule.getHead().getFunctionSymbol(), varList);
-		// TODO: double check nullable variables
-		return new SubExpression(Collections.singletonList(newHeadAtom), varSet, subAtom.nullableVariables);
-	}
+        ImmutableList.Builder extListBuilder = ImmutableList.<Function>builder().addAll(list);
+        for (Variable v : nullVars)
+            extListBuilder.add(ofac.getFunctionEQ(v, OBDAVocabulary.NULL));
+        return extListBuilder.build();
+    }
 
+    private TranslationResult tran(TupleExpr currentNode, TranslationProgram program) {
 
-	/**
-	 * EXPR_1 UNION EXPR_2
-	 * 
-	 * adds the following two rules
-	 * 
-	 * ans_i(X * X_1 * NULL_2) :- ans_{i.0}(X * X_1)
-	 * ans_i(X * NULL_1 * X_2) :- ans_{i.1}(X * X_2)
-	 * 
-	 * where NULL_i is the padding of X_i with NULLs 
-	 * 
-	 * @param union
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-	
-	private SubExpression translate(Union union, DatalogProgram pr, String  newHeadName) {
+        //System.out.println(currentNode + "\n\n");
 
-		SubExpression left = translateTupleExpr(union.getLeftArg(), pr, newHeadName + "0");
-		SubExpression right = translateTupleExpr(union.getRightArg(), pr, newHeadName + "1");
+        if (currentNode instanceof Slice) {   // SLICE algebra operation
+            Slice slice = (Slice) currentNode;
+            OBDAQueryModifiers modifiers = program.getQueryModifiers();
+            modifiers.setOffset(slice.getOffset());
+            modifiers.setLimit(slice.getLimit());
+            return tran(slice.getArg(), program);
+        }
+        else if (currentNode instanceof Distinct) { // DISTINCT algebra operation
+            Distinct distinct = (Distinct) currentNode;
+            program.getQueryModifiers().setDistinct();
+            return tran(distinct.getArg(), program);
+        }
+        else if (currentNode instanceof Reduced) {  // REDUCED algebra operation
+            Reduced reduced = (Reduced) currentNode;
+            return tran(reduced.getArg(), program);
+        }
+        else if (currentNode instanceof Order) {   // ORDER algebra operation
+            Order order = (Order) currentNode;
+            OBDAQueryModifiers modifiers = program.getQueryModifiers();
+            for (OrderElem c : order.getElements()) {
+                ValueExpr expression = c.getExpr();
+                if (!(expression instanceof Var))
+                    throw new IllegalArgumentException("Error translating ORDER BY. "
+                            + "The current implementation can only sort by variables, "
+                            + "this query has a more complex expression '" + expression + "'");
 
-		Set<Variable> vars = union(left.variables, right.variables);
-		List<Term> varList = new ArrayList<>(vars);
+                Var v = (Var) expression;
+                Variable var = ofac.getVariable(v.getName());
+                int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING
+                        : OrderCondition.ORDER_DESCENDING;
+                modifiers.addOrderCondition(var, direction);
+            }
+            return tran(order.getArg(), program);
+        }
+        else if (currentNode instanceof StatementPattern) { // triple pattern
+            Function atom = translate((StatementPattern) currentNode);
+            Set<Variable> vars0 = new HashSet<>();
+            TermUtils.addReferencedVariablesTo(vars0, atom);
+            ImmutableSet<Variable> vars = new ImmutableSet.Builder<Variable>().addAll(vars0).build();
+            return new TranslationResult(ImmutableList.of(atom), vars, vars, true);
+        }
+        else if (currentNode instanceof Join) {     // JOIN algebra operation
+            Join join = (Join) currentNode;
+            TranslationResult a1 = tran(join.getLeftArg(), program);
+            TranslationResult a2 = tran(join.getRightArg(), program);
+            ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
 
-		List<Term> leftTermList = new ArrayList<>(varList.size());
-		List<Term> rightTermList = new ArrayList<>(varList.size());
-		for (Term v : varList) {
-			Term ltl =  left.variables.contains(v) ? v : OBDAVocabulary.NULL;
-			leftTermList.add(ltl);
+            if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
+                ImmutableList<Function> atoms =
+                        ImmutableList.<Function>builder().addAll(a1.atoms).addAll(a2.atoms).build();
+                return new TranslationResult(atoms, vars, vars, true);
+            }
+            Function body = ofac.getSPARQLJoin(program.wrapNonTriplePattern(a1),
+                    program.wrapNonTriplePattern(a2));
 
-			Term ltr =  right.variables.contains(v) ? v : OBDAVocabulary.NULL;
-			rightTermList.add(ltr);
-		}
-		CQIE leftRule = createRule(pr, newHeadName, leftTermList, left.atoms);
-		CQIE rightRule = createRule(pr, newHeadName, rightTermList, right.atoms);
-		
-		Function atom = ofac.getFunction(rightRule.getHead().getFunctionSymbol(), varList);
-		// TODO: double-check nullable variables
-		return new SubExpression(Collections.singletonList(atom), vars, Collections.emptySet());
-	}
+            return new TranslationResult(ImmutableList.of(body), vars, vars, false);
+        }
+        else if (currentNode instanceof LeftJoin) {  // OPTIONAL algebra operation
+            LeftJoin lj = (LeftJoin) currentNode;
+            TranslationResult a1 = tran(lj.getLeftArg(), program);
+            TranslationResult a2 = tran(lj.getRightArg(), program);
+            ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
 
-	
-	/**
-	 * EXPR_1 JOIN EXPR_2
-	 * 
-	 * adds the following rule 
-	 * 
-	 * ans_i(X_1 U X_2) :- ans_{i.0}(X_1), ans_{i.1}(X_2)
-	 * 
-	 * @param join
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-	
-	private SubExpression translate(Join join, DatalogProgram pr, String  newHeadName)  {
+            Function body = ofac.getSPARQLLeftJoin(program.wrapNonTriplePattern(a1),
+                    program.wrapNonTriplePattern(a2));
 
-		SubExpression left = translateTupleExpr(join.getLeftArg(), pr, newHeadName + "0");
-		SubExpression right = translateTupleExpr(join.getRightArg(), pr, newHeadName + "1");
+            ValueExpr expr = lj.getCondition();
+            if (expr != null) {
+                Function f = getFilterExpression(expr, vars);
+                body.getTerms().add(f);
+            }
 
-		Set<Variable> vars = union(left.variables, right.variables);
+            return new TranslationResult(ImmutableList.of(body), vars, vars, false);
+        }
+        else if (currentNode instanceof Union) {   // UNION algebra operation
+            Union union = (Union) currentNode;
+            TranslationResult a1 = tran(union.getLeftArg(), program);
+            TranslationResult a2 = tran(union.getRightArg(), program);
+            ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
 
-		//CQIE rule = createRule(pr, newHeadName, new ArrayList<>(vars), left.atoms, right.atoms);
-		LinkedList<Function> list = new LinkedList<>();
-		list.addAll(left.atoms);
-		list.addAll(right.atoms);
+            Function head = program.getFreshHead(new ArrayList<>(vars));
+            program.appendRule(head, extendWithNulls(a1.atoms, a1.variables, vars));
+            program.appendRule(head, extendWithNulls(a2.atoms, a2.variables, vars));
+            return new TranslationResult(ImmutableList.of(head), vars, vars, false);
+        }
+        else if (currentNode instanceof Filter) {   // FILTER algebra operation
+            Filter filter = (Filter) currentNode;
+            TranslationResult a = tran(filter.getArg(), program);
 
-		// TODO: double-check nullable variables
-		return new SubExpression(list, vars, Collections.emptySet());
-	}
-	
-	/**
-	 * EXPR_1 OPT EXPR_2 FILTER F
-	 * 
-	 * ans_i(X_1 U X_2) :- LEFTJOIN(ans_{i.0}(X_1), ans_{i.1}(X_2), F(X_1 U X_2))
-	 * 
-	 * @param leftjoin
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
+            ValueExpr expr = filter.getCondition();
+            Function f = getFilterExpression(expr, a.variables);
+            ImmutableList<Function> atoms = ImmutableList.<Function>builder().addAll(a.atoms).add(f).build();
+            // TODO: split ANDs in f
 
-	private SubExpression translate(LeftJoin leftjoin, DatalogProgram pr, String  newHeadName) {
+            return new TranslationResult(atoms, a.variables, a.allVariables, false);
+        }
+        else if (currentNode instanceof Projection) {  // PROJECT algebra operation
+            Projection projection = (Projection) currentNode;
+            TranslationResult sub = tran(projection.getArg(), program);
 
-		SubExpression left = translateTupleExpr(leftjoin.getLeftArg(), pr, newHeadName + "0");
-		SubExpression right = translateTupleExpr(leftjoin.getRightArg(), pr, newHeadName + "1");
+            List<ProjectionElem> pes = projection.getProjectionElemList().getElements();
+            // the two lists are required to synchronise the order of variables
+            List<Term> sVars = new ArrayList<>(pes.size());
+            List<Term> tVars = new ArrayList<>(pes.size());
+            boolean noRenaming = true;
+            for (ProjectionElem pe : pes)  {
+                Variable sVar = ofac.getVariable(pe.getSourceName());
+                if (!sub.variables.contains(sVar))
+                    throw new IllegalArgumentException("Projection source of " + pe
+                            + " not found in " + projection.getArg());
+                sVars.add(sVar);
 
-		Function leftAtom;
-		if (left.atoms.size() > 1 || left.atoms.get(0).isAlgebraFunction())
-			leftAtom = createRule(pr, newHeadName + "0", new ArrayList<Term>(left.variables), left.atoms).getHead();
-		else
-			leftAtom = left.atoms.get(0);
+                Variable tVar = ofac.getVariable(pe.getTargetName());
+                tVars.add(tVar);
 
-		Function rightAtom;
-		if (right.atoms.size() > 1 || right.atoms.get(0).isAlgebraFunction())
-			rightAtom = createRule(pr, newHeadName + "1", new ArrayList<Term>(right.variables), right.atoms).getHead();
-		else
-			rightAtom = right.atoms.get(0);
+                if (!sVar.equals(tVar))
+                    noRenaming = false;
+            }
+            if (noRenaming && sVars.containsAll(sub.variables)) // neither projection nor renaming
+                return sub;
 
-		// the left join atom
-		Function joinAtom = ofac.getSPARQLLeftJoin(leftAtom, rightAtom);
+            ImmutableSet.Builder varsBuilder = ImmutableSet.<Variable>builder();
+            for (Term t : tVars)
+                varsBuilder.add((Variable)t);
+            ImmutableSet<Variable> vars = varsBuilder.build();
 
-		Set<Variable> vars = union(left.variables, right.variables);
+            if (noRenaming)
+                return new TranslationResult(sub.atoms, vars, sub.allVariables, false);
 
-		// adding the conditions of the filter for the LeftJoin 
-		ValueExpr filter = leftjoin.getCondition();
-		if (filter != null) {
-			SubExpression filterSub = getFilterExpression(filter, vars);
-			joinAtom.getTerms().addAll(filterSub.atoms);
-			vars = filterSub.variables;
-		}
+            Function head = program.getFreshHead(sVars);
+            program.appendRule(head, sub.atoms);
 
-		// TODO: double-check nullable variables
-		return new SubExpression(Collections.singletonList(joinAtom), vars, Collections.emptySet());
-	}
-	
-	/**
-	 * PROJECT { V_j } EXPR
-	 * 
-	 * adds the following rule
-	 * 
-	 * ans_i(V) :- ans_{i.0}(X)
-	 * 
-	 * @param project
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
+            Function atom = ofac.getFunction(head.getFunctionSymbol(), tVars);
+            return new TranslationResult(ImmutableList.of(atom), vars, vars, false);
+        }
+        else if (currentNode instanceof Extension) {     // EXTEND algebra operation
+            Extension extension = (Extension) currentNode;
+            TranslationResult sub = tran(extension.getArg(), program);
 
-	private SubExpression translate(Projection project, DatalogProgram pr, String  newHeadName) {
+            Set<Variable> vars0 = new HashSet<>(sub.variables);
+            List<Term> terms = new LinkedList<>(sub.variables);
+            ImmutableList.Builder bodyBuilder = ImmutableList.<Function>builder().addAll(sub.atoms);
+            for (ExtensionElem ee : extension.getElements()) {
+                // ignore the second step of the two-step procedure (mapping via ID, not variable)
+                if (ee.getExpr() instanceof Var && ee.getName().equals(((Var)ee.getExpr()).getName()))
+                    continue;
 
-		SubExpression sub = translateTupleExpr(project.getArg(), pr, newHeadName + "0");
-		Set<Variable> vars = new HashSet<>();
+                //System.out.println(ee.getName() + " -> " + ee.getExpr() + " " + ee.getExpr().getClass());
+                Variable v = ofac.getVariable(ee.getName());
+                if (!vars0.add(v))
+                    throw new IllegalArgumentException("Duplicate binding for variable " + v
+                            + " in " + extension);
 
-		List<ProjectionElem> projectionElements = project.getProjectionElemList().getElements();
-		for (ProjectionElem pe : projectionElements)  {
-			// we assume here that the target name is "introduced" as one of the arguments of atom
-			// (this is normally done by an EXTEND inside the PROJECTION)
-			// first, we check whether this assumption can be made
-			if (!pe.getSourceName().equals(pe.getTargetName())) {
-				Variable t = ofac.getVariable(pe.getSourceName());
-				if (!sub.variables.contains(t))
-					throw new RuntimeException("Projection source of " + pe + " not found in " + project.getArg());
-			}
-			vars.add(ofac.getVariable(pe.getTargetName()));
-		}
+                terms.add(v);
+                Term expr = getExpression(ee.getExpr()); // TODO: add a fix for the range of variables
 
-		CQIE rule = createRule(pr, newHeadName, new  ArrayList<>(vars), sub.atoms);
-		// TODO: double-check nullable variables
-		return new SubExpression(Collections.singletonList(rule.getHead()), vars, Collections.emptySet());
-	}
+                bodyBuilder.add(ofac.getFunctionEQ(v, expr));
+            }
+            ImmutableSet<Variable> vars = ImmutableSet.<Variable>builder().addAll(vars0).build();
+            return new TranslationResult(bodyBuilder.build(), vars, vars, false);
+        }
+        else if (currentNode instanceof BindingSetAssignment) {
+            BindingSetAssignment values = (BindingSetAssignment) currentNode;
+            ImmutableSet.Builder extVarsBuilder = ImmutableSet.<Variable>builder();
+            List<Pair<ImmutableList.Builder<Function>, ImmutableSet<Variable>>> lists = new LinkedList<>();
+            for (BindingSet bs : values.getBindingSets()) {
+                ImmutableList.Builder listBuilder = ImmutableList.<Function>builder();
+                ImmutableSet.Builder varsBuilder = ImmutableSet.<Variable>builder();
+                for (Binding b : bs) {
+                    Variable v = ofac.getVariable(b.getName());
+                    extVarsBuilder.add(v);
+                    varsBuilder.add(v);
+                    // TODO: resurrect the check?
+                    //throw new IllegalArgumentException("Duplicate binding for variable " + f.getTerm(0)
+                    //        + " in " + values);
+                    Term expr = getConstantExpression(b.getValue());
+                    listBuilder.add(ofac.getFunctionEQ(v, expr));
+                }
+                lists.add(new Pair(listBuilder, varsBuilder.build()));
+            }
+            ImmutableSet<Variable> extVars = extVarsBuilder.build();
+            Function head = program.getFreshHead(new LinkedList<>(extVars));
+            for (Pair<ImmutableList.Builder<Function>, ImmutableSet<Variable>> p : lists) {
+                // TODO: efficiency
+                ImmutableList<Function> list = extendWithNulls(p.getKey().build(), p.getValue(), extVars);
+                program.appendRule(head, list);
+            }
+            return new TranslationResult(ImmutableList.of(head), extVars, extVars, false);
+        }
+        throw new IllegalArgumentException("Not supported");
+    }
 
-	/**
-	 * FILTER EXPR F
-	 * 
-	 * adds the following rule
-	 * 
-	 * ans_i(X U X') :- ans_{i.0}(X), F(X')
-	 * 
-	 * @param filter
-	 * @param pr
-	 * @param newHeadName
-	 * @return
-	 */
-	private SubExpression translate(Filter filter, DatalogProgram pr, String  newHeadName) {
+    private static ImmutableSet<Variable> union(ImmutableSet<Variable> s1, ImmutableSet<Variable> s2) {
+        return ImmutableSet.<Variable>builder().addAll(s1).addAll(s2).build();
+    }
 
-		SubExpression sub = translateTupleExpr(filter.getArg(), pr, newHeadName + "0");
-
-		SubExpression filterSub  = getFilterExpression(filter.getCondition(), new HashSet<>(sub.variables));
-
-		//CQIE rule = createRule(pr, newHeadName, new ArrayList<>(filterSub.variables), sub.atom, filterSub.atom);
-		List<Function> atoms = new LinkedList<>();
-		atoms.addAll(sub.atoms);
-		atoms.addAll(filterSub.atoms);
-		// TODO: double-check nullable variables
-		return new SubExpression(atoms, filterSub.variables, Collections.emptySet());
-	}
-
-	private SubExpression getFilterExpression(ValueExpr condition, Set<Variable> vars) {
+	private Function getFilterExpression(ValueExpr condition, ImmutableSet<Variable> vars) {
+        // TODO: add check for the variable ranges
 		Function filterAtom;
 		if (condition instanceof Var)
 			filterAtom = ofac.getFunctionIsTrue(getOntopTerm((Var) condition));
 		else
 			filterAtom = (Function) getExpression(condition);
 
-		TermUtils.addReferencedVariablesTo(vars, filterAtom);
-		return new SubExpression(Collections.singletonList(filterAtom), vars, Collections.emptySet());
+//		TermUtils.addReferencedVariablesTo(vars, filterAtom);
+		return filterAtom;
 	}
 
 	/***
@@ -574,42 +515,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		throw new RuntimeException("Unsupported term " + term);
 	}
 
-	/**
-	 * Creates a "FILTER" atom out of VALUES bindings.
-	 */
-	private SubExpression getValuesFilter(BindingSetAssignment expression) {
-		Set<Variable> vars = new HashSet<>();
-
-		Function valuesFilter = null;
-		for (BindingSet bindingSet : expression.getBindingSets()) {
-
-			Function bindingFilter = null;
-			for (Binding binding : bindingSet) {
-				Variable variable = ofac.getVariable(binding.getName());
-				vars.add(variable);
-				Term value = getConstantExpression(binding.getValue());
-				Function eqFilter = ofac.getFunctionEQ(variable, value);
-				bindingFilter = (bindingFilter == null) ?
-						eqFilter :
-						ofac.getFunctionAND(bindingFilter, eqFilter);
-			}
-
-			// the empty conjunction is TRUE
-			if (bindingFilter == null)
-				bindingFilter = ofac.getFunctionIsTrue(ofac.getBooleanConstant(true));
-
-			valuesFilter = (valuesFilter == null) ?
-					bindingFilter :
-					ofac.getFunctionOR(valuesFilter, bindingFilter);
-		}
-
-		// the empty disjunction is FALSE
-		if (valuesFilter == null)
-			valuesFilter = ofac.getFunctionIsTrue(ofac.getBooleanConstant(false));
-
-		// TODO: double-check nullable variables
-		return new SubExpression(Collections.singletonList(valuesFilter), vars, Collections.emptySet());
-	}
 
 
 
