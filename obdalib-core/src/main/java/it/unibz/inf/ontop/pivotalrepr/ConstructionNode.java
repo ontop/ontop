@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
@@ -12,10 +14,10 @@ import it.unibz.inf.ontop.model.VariableOrGroundTerm;
  * TODO: further explain
  *
  */
-public interface ConstructionNode extends SubTreeDelimiterNode {
+public interface ConstructionNode extends ConstructionOrDataNode {
 
     /**
-     * Projected variables --> transformed variable
+     * (Some) projected variable --> transformed variable
      */
     ImmutableSubstitution<ImmutableTerm> getSubstitution();
 

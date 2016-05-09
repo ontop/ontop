@@ -7,7 +7,12 @@ import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 /**
  * TODO: describe
  */
-public interface DataNode extends SubTreeDelimiterNode {
+public interface DataNode extends ConstructionOrDataNode {
+
+    /**
+     * Data atom containing the projected variables
+     */
+    DataAtom getProjectionAtom();
 
     /**
      * Returns a new DataNode of the same type that will use the new atom

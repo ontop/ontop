@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullOutVariableExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
-        internalExecutorMapBuilder.put(PullOutVariableProposal.class, PullOutVariableExecutor.class);
+        internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 

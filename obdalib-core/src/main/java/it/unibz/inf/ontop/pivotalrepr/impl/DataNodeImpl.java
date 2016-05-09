@@ -24,6 +24,12 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         return atom;
     }
 
+
+    @Override
+    public ImmutableSet<Variable> getProjectedVariables() {
+        return getVariables();
+    }
+
     @Override
     public ImmutableSet<Variable> getVariables() {
         ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();

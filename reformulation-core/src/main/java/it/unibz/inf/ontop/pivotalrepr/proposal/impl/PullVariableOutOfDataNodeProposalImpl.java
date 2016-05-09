@@ -1,15 +1,14 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.pivotalrepr.SubTreeDelimiterNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PullOutVariableProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfDataNodeProposal;
 
-public class PullOutVariableProposalImpl  implements PullOutVariableProposal {
+public class PullVariableOutOfDataNodeProposalImpl implements PullVariableOutOfDataNodeProposal {
 
     private final ImmutableList<Integer> indexes;
     private final SubTreeDelimiterNode focusNode;
 
-    public PullOutVariableProposalImpl(SubTreeDelimiterNode focusNode, ImmutableList<Integer> indexes) {
+    public PullVariableOutOfDataNodeProposalImpl(SubTreeDelimiterNode focusNode, ImmutableList<Integer> indexes) {
         this.focusNode = focusNode;
         this.indexes = indexes;
     }

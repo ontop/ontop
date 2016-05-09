@@ -16,14 +16,14 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
-    private final DataAtom dataAtom;
+    private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
-    public ConstructionNodeImpl(DataAtom dataAtom, ImmutableSubstitution<ImmutableTerm> substitution,
+    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables, ImmutableSubstitution<ImmutableTerm> substitution,
                                 Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
-        this.dataAtom = dataAtom;
+        this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
     }
@@ -31,15 +31,15 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     /**
      * Without modifiers nor substitution.
      */
-    public ConstructionNodeImpl(DataAtom dataAtom) {
-        this.dataAtom = dataAtom;
+    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables) {
+        this.projectedVariables = projectedVariables;
         this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
         this.optionalModifiers = Optional.empty();
     }
 
     @Override
-    public DataAtom getProjectionAtom() {
-        return dataAtom;
+    public ImmutableSet<Variable> getProjectedVariables() {
+        return projectedVariables;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public ConstructionNode clone() {
-        return new ConstructionNodeImpl(dataAtom, substitution, optionalModifiers);
+        return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers);
     }
 
     @Override
@@ -75,10 +75,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public ImmutableSet<Variable> getVariables() {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
-        for (VariableOrGroundTerm term : dataAtom.getArguments()) {
-            if (term instanceof Variable)
-                collectedVariableBuilder.add((Variable)term);
-        }
+        collectedVariableBuilder.addAll(projectedVariables);
 
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = substitution.getImmutableMap();
 
@@ -144,7 +141,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         /**
          * Cleans the composite substitution by removing non-projected variables
          */
-        ImmutableSet<Variable> projectedVariables = getProjectionAtom().getVariables();
 
         ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
         compositeSubstitution.getImmutableMap().entrySet().stream()
@@ -154,7 +150,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSubstitutionImpl<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
                 newSubstitutionMapBuilder.build());
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(getProjectionAtom(),
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
                 newSubstitution, getOptionalModifiers());
 
         /**
@@ -170,42 +166,64 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
             throws QueryNodeSubstitutionException {
-        DataAtom newProjectionAtom = substitution.applyToDataAtom(getProjectionAtom());
 
-        try {
-            /**
-             * TODO: explain why it makes sense (interface)
-             */
-            SubQueryUnificationTools.ConstructionNodeUnification constructionNodeUnification =
-                    SubQueryUnificationTools.unifyConstructionNode(this, newProjectionAtom);
+        ImmutableSet.Builder<Variable> projectionBuilder = ImmutableSet.builder();
 
-            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
-            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
-                    constructionNodeUnification.getSubstitutionToPropagate();
+        substitution.getMap().entrySet().stream()
+                .filter(entry -> projectedVariables.contains(entry.getKey()))
+                .forEach(substitutionEntry -> {
+                    Variable replacedVariable = substitutionEntry.getKey();
+                    Variable replacingVariable = substitutionEntry.getValue();
 
-            /**
-             * If the substitution has changed, throws the new substitution
-             * and the new construction node so that the "client" can continue
-             * with the new substitution (for the children nodes).
-             */
-            if (!getSubstitution().equals(newSubstitutionToPropagate)) {
-                return new SubstitutionResultsImpl<>(newConstructionNode, newSubstitutionToPropagate);
-            }
+                    if (substitution.isDefining(replacedVariable)) {
 
-            /**
-             * Otherwise, continues with the current substitution
-             */
-            return new SubstitutionResultsImpl<>(newConstructionNode, substitution);
+                    }
+                    else {
 
-        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
-            throw new QueryNodeSubstitutionException(e.getMessage());
-        }
+                    }
+
+                });
+
+
+
+
+
+//        DataAtom newProjectionAtom = substitution.applyToDataAtom(getProjectionAtom());
+//
+//        try {
+//            /**
+//             * TODO: explain why it makes sense (interface)
+//             */
+//            SubQueryUnificationTools.ConstructionNodeUnification constructionNodeUnification =
+//                    SubQueryUnificationTools.unifyConstructionNode(this, newProjectionAtom);
+//
+//            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
+//            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
+//                    constructionNodeUnification.getSubstitutionToPropagate();
+//
+//            /**
+//             * If the substitution has changed, throws the new substitution
+//             * and the new construction node so that the "client" can continue
+//             * with the new substitution (for the children nodes).
+//             */
+//            if (!getSubstitution().equals(newSubstitutionToPropagate)) {
+//                return new SubstitutionResultsImpl<>(newConstructionNode, newSubstitutionToPropagate);
+//            }
+//
+//            /**
+//             * Otherwise, continues with the current substitution
+//             */
+//            return new SubstitutionResultsImpl<>(newConstructionNode, substitution);
+//
+//        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
+//            throw new QueryNodeSubstitutionException(e.getMessage());
+//        }
     }
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof ConstructionNode)
-                && ((ConstructionNode) node).getProjectionAtom().equals(dataAtom);
+                && ((ConstructionNode) node).getProjectedVariables().equals(projectedVariables);
     }
 
     @Override
@@ -216,7 +234,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public String toString() {
         // TODO: display the query modifiers
-        return CONSTRUCTION_NODE_STR + " " + dataAtom + " " + "[" + substitution + "]" ;
+        return CONSTRUCTION_NODE_STR + " " + projectedVariables + " " + "[" + substitution + "]" ;
     }
 
 }

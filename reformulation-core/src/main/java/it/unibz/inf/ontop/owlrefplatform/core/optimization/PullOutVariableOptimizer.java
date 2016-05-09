@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTo
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.UpdatedNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PullOutVariableProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullOutVariableProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfDataNodeProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfDataNodeProposalImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -102,7 +102,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                 /**
                  * May update alreadySeenVariables (append-only)!!
                  */
-                Optional<PullOutVariableProposal> optionalProposal = buildProposal((SubTreeDelimiterNode) childNode,
+                Optional<PullVariableOutOfDataNodeProposal> optionalProposal = buildProposal((SubTreeDelimiterNode) childNode,
                         alreadySeenVariables, startIndex);
 
                 /**
@@ -110,7 +110,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                  * from the results
                  */
                 if (optionalProposal.isPresent()) {
-                    PullOutVariableProposal proposal = optionalProposal.get();
+                    PullVariableOutOfDataNodeProposal proposal = optionalProposal.get();
 
                     NodeCentricOptimizationResults<SubTreeDelimiterNode> results = currentQuery.applyProposal(proposal);
 
@@ -164,9 +164,9 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      *
      * TODO: explain it further
      */
-    private Optional<PullOutVariableProposal> buildProposal(SubTreeDelimiterNode delimiterNode,
-                                                            Set<Variable> alreadySeenVariables,
-                                                            int startIndex) {
+    private Optional<PullVariableOutOfDataNodeProposal> buildProposal(SubTreeDelimiterNode delimiterNode,
+                                                                      Set<Variable> alreadySeenVariables,
+                                                                      int startIndex) {
         ImmutableList.Builder<Integer> variableIndexListBuilder = ImmutableList.builder();
 
         DataAtom dataAtom = delimiterNode.getProjectionAtom();
@@ -188,7 +188,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
         ImmutableList<Integer> toReplaceVariableIndexes = variableIndexListBuilder.build();
         if (!toReplaceVariableIndexes.isEmpty()) {
-            PullOutVariableProposal proposal = new PullOutVariableProposalImpl(delimiterNode, toReplaceVariableIndexes);
+            PullVariableOutOfDataNodeProposal proposal = new PullVariableOutOfDataNodeProposalImpl(delimiterNode, toReplaceVariableIndexes);
             return Optional.of(proposal);
         }
         else {
@@ -205,10 +205,10 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
         int startIndex = getStartIndex(currentQuery, currentQuery.getParent(currentNode));
 
-        Optional<PullOutVariableProposal> optionalProposal = buildProposal(currentNode, new HashSet<Variable>(), startIndex);
+        Optional<PullVariableOutOfDataNodeProposal> optionalProposal = buildProposal(currentNode, new HashSet<Variable>(), startIndex);
 
         if (optionalProposal.isPresent()) {
-            PullOutVariableProposal proposal = optionalProposal.get();
+            PullVariableOutOfDataNodeProposal proposal = optionalProposal.get();
             NodeCentricOptimizationResults<SubTreeDelimiterNode> results = currentQuery.applyProposal(proposal);
 
             return getNextNodeAndQuery(results);

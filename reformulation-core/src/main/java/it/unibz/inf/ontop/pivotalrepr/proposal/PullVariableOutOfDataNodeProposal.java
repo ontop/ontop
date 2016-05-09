@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.pivotalrepr.SubTreeDelimiterNode;
+import it.unibz.inf.ontop.pivotalrepr.DataNode;
 
 /**
  * TODO: explain
@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.SubTreeDelimiterNode;
  * TODO: make explicit the treatment that is expected to be done
  *
  */
-public interface PullOutVariableProposal extends NodeCentricOptimizationProposal<SubTreeDelimiterNode> {
+public interface PullVariableOutOfDataNodeProposal extends NodeCentricOptimizationProposal<DataNode> {
 
     /**
      * Indexes of the variables to renamed.
