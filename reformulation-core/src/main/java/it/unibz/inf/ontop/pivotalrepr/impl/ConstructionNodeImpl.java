@@ -2,13 +2,18 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 
 import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
+
+import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.computeNewProjectedVariables;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -164,25 +169,10 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
+            ImmutableSubstitution<? extends VariableOrGroundTerm> tau)
             throws QueryNodeSubstitutionException {
 
-        ImmutableSet.Builder<Variable> projectionBuilder = ImmutableSet.builder();
-
-        substitution.getMap().entrySet().stream()
-                .filter(entry -> projectedVariables.contains(entry.getKey()))
-                .forEach(substitutionEntry -> {
-                    Variable replacedVariable = substitutionEntry.getKey();
-                    Variable replacingVariable = substitutionEntry.getValue();
-
-                    if (substitution.isDefining(replacedVariable)) {
-
-                    }
-                    else {
-
-                    }
-
-                });
+        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(tau, getProjectedVariables());
 
 
 

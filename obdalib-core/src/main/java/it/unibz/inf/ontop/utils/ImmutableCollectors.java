@@ -78,7 +78,7 @@ public class ImmutableCollectors {
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableMap.Builder<K,U>::build,
+                ImmutableMap.Builder::<K,U>build,
                 Collector.Characteristics.UNORDERED);
     }
 
@@ -87,11 +87,38 @@ public class ImmutableCollectors {
                 // Supplier
                 ImmutableMap::<K,U>builder,
                 // Accumulator
-                ImmutableMap.Builder::put,
+                ImmutableMap.Builder::<K,U>put,
                 // Merger
                 (builder1, builder2) -> builder1.putAll(builder2.build()),
                 // Finisher
-                ImmutableMap.Builder<K,U>::build,
+                ImmutableMap.Builder::<K,U>build,
+                Collector.Characteristics.UNORDERED);
+    }
+
+    public static <T, K, U> Collector<T, ? ,ImmutableMultimap<K,U>> toMultimap(Function<? super T, ? extends K> keyMapper,
+                                                                     Function<? super T, ? extends U> valueMapper) {
+        return Collector.of(
+                // Supplier
+                ImmutableMultimap::<K,U>builder,
+                // Accumulator
+                (builder, e) -> builder.put(keyMapper.apply(e), valueMapper.apply(e)),
+                // Merger
+                (builder1, builder2) -> builder1.putAll(builder2.build()),
+                // Finisher
+                ImmutableMultimap.Builder::<K,U>build,
+                Collector.Characteristics.UNORDERED);
+    }
+
+    public static <T extends Map.Entry<K,U>, K, U> Collector<T, ? ,ImmutableMultimap<K,U>> toMultimap() {
+        return Collector.of(
+                // Supplier
+                ImmutableMultimap::<K,U>builder,
+                // Accumulator
+                ImmutableMultimap.Builder::<K,U>put,
+                // Merger
+                (builder1, builder2) -> builder1.putAll(builder2.build()),
+                // Finisher
+                ImmutableMultimap.Builder::<K,U>build,
                 Collector.Characteristics.UNORDERED);
     }
 

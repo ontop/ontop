@@ -31,7 +31,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 1), x));
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
@@ -66,7 +66,7 @@ public class NodeDeletionTest {
                 new AtomPredicateImpl("ans1", 2), x, y));
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
@@ -113,7 +113,7 @@ public class NodeDeletionTest {
                 new AtomPredicateImpl("ans1", 2), x, y));
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
@@ -183,7 +183,7 @@ public class NodeDeletionTest {
                 new AtomPredicateImpl("ans1", 2), x, y));
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
@@ -248,7 +248,7 @@ public class NodeDeletionTest {
                 new AtomPredicateImpl("ans1", 2), x, y));
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);

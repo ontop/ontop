@@ -1,24 +1,21 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import java.util.Optional;
+import java.util.*;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -31,6 +28,20 @@ public class SubQueryUnificationTools {
     public static class SubQueryUnificationException extends Exception {
         protected SubQueryUnificationException(String message) {
             super(message);
+        }
+    }
+
+    /**
+     * TODO: find a better name
+     */
+    public static class NewSubstitutionPair {
+        public final ImmutableSubstitution<? extends ImmutableTerm> bindings;
+        public final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
+
+        private NewSubstitutionPair(ImmutableSubstitution<? extends ImmutableTerm> bindings,
+                                   ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution) {
+            this.bindings = bindings;
+            this.propagatedSubstitution = propagatedSubstitution;
         }
     }
 
@@ -137,7 +148,7 @@ public class SubQueryUnificationTools {
                 targetDataAtom);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalSubQuery.getMetadata());
-        queryBuilder.init(rootUnification.unifiedNode);
+        queryBuilder.init(projectionAtom, rootUnification.unifiedNode);
 
         /**
          * TODO: explain
@@ -519,6 +530,74 @@ public class SubQueryUnificationTools {
 
         return variableSet.isEmpty();
 
+    }
+
+    public static ImmutableSet<Variable> computeNewProjectedVariables(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> tau, ImmutableSet<Variable> projectedVariables) {
+        ImmutableSet<Variable> tauDomain = tau.getDomain();
+
+        Stream<Variable> remainingVariableStream = projectedVariables.stream()
+                .filter(v -> !tauDomain.contains(v));
+
+        Stream<Variable> newVariableStream = tau.getMap().values().stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t);
+
+        return Stream.concat(newVariableStream, remainingVariableStream)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    /**
+     * TODO: find a proper name
+     *
+     * TODO: explain
+     *
+     */
+    public static NewSubstitutionPair traverseConstructionNode(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> formerTheta) {
+
+        Var2VarSubstitution tauR = tau.getVar2VarFragment();
+        ImmutableSubstitution<GroundTerm> tauG = tau.getVar2GroundTermFragment();
+
+        Var2VarSubstitution tauEq = extractTauEq(tauR);
+
+        ImmutableSubstitution<? extends ImmutableTerm> tauC = tauG.unionHeterogeneous(tauEq)
+                .orElseThrow(() -> new IllegalStateException("Bug: dom(tauG) must be disjoint with dom(tauEq)"));
+
+        throw new RuntimeException("TODO: continue traverseConstructionNode()");
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Var2VarSubstitution extractTauEq(Var2VarSubstitution tauR) {
+        int domainVariableCount = tauR.getDomain().size();
+        if (domainVariableCount <= 1) {
+            return tauR;
+        }
+
+        ImmutableMultimap<Variable, Variable> inverseMultimap = tauR.getImmutableMap().entrySet().stream()
+                // Inverse
+                .map(e -> (Map.Entry<Variable, Variable>) new AbstractMap.SimpleImmutableEntry<>(e.getValue(), e.getKey()))
+                .collect(ImmutableCollectors.toMultimap());
+
+        ImmutableMap<Variable, Variable> newMap = inverseMultimap.asMap().values().stream()
+                // TODO: explain
+                .filter(vars -> vars.size() <= 1)
+                //
+                .flatMap(vars -> {
+                    List<Variable> sortedVariables = vars.stream()
+                            .sorted()
+                            .collect(Collectors.toList());
+                    Variable largerVariable = sortedVariables.get(sortedVariables.size() - 1);
+                    return sortedVariables.stream()
+                            .limit(sortedVariables.size() - 1)
+                            .map(v -> (Map.Entry<Variable, Variable>) new AbstractMap.SimpleEntry<>(v, largerVariable));
+                })
+                .collect(ImmutableCollectors.toMap());
+
+        return new Var2VarSubstitutionImpl(newMap);
     }
 
 

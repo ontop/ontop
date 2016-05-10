@@ -102,34 +102,28 @@ public class DatalogRule2QueryConverter {
                                                        Optional<ImmutableQueryModifiers> optionalModifiers)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
-        ConstructionNode rootNode = createConstructionNode(datalogRule, optionalModifiers);
+        P2<DistinctVariableDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
+                DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+
+        DistinctVariableDataAtom projectionAtom = decomposition._1();
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), decomposition._2(),
+                optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-        return createDefinition(metadata, rootNode, tablePredicates, atomClassification.dataAndCompositeAtoms,
-                atomClassification.booleanAtoms, atomClassification.optionalGroupAtom);
+        return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
+                atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
+                atomClassification.optionalGroupAtom);
     }
 
-    /**
-     * For non-top datalog rules (that do not access to query modifiers)
-     *
-     * TODO: make sure the GROUP atom cannot be used for such rules.
-     *
-     */
-    private static ConstructionNode createConstructionNode(CQIE datalogRule,
-                                                           Optional<ImmutableQueryModifiers> optionalModifiers)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
-        P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
-
-        return new ConstructionNodeImpl(decomposition._1(), decomposition._2(), optionalModifiers);
-    }
 
     /**
      * TODO: explain
      */
     private static IntermediateQuery createDefinition(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+                                                      DistinctVariableDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom)
@@ -143,7 +137,7 @@ public class DatalogRule2QueryConverter {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
         try {
-            queryBuilder.init(rootNode);
+            queryBuilder.init(projectionAtom, rootNode);
 
             /**
              * Intermediate node: ConstructionNode root or GROUP node
@@ -277,7 +271,7 @@ public class DatalogRule2QueryConverter {
                 /**
                  * Creates the node
                  */
-                P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
+                P2<DistinctVariableDataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
                 ImmutableSubstitution<ImmutableTerm> bindings = convertionResults._2();
                 DataAtom dataAtom = bindings.applyToDataAtom(convertionResults._1());
                 DataNode currentNode = DatalogConversionTools.createDataNode(dataAtom, tablePredicates);

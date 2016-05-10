@@ -14,6 +14,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     boolean isDefining(Variable variable);
 
+    ImmutableSet<Variable> getDomain();
+
     @Override
     T get(Variable variable);
 
@@ -63,6 +65,12 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution);
 
     /**
+     * TODO: explain
+     */
+    Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
+            ImmutableSubstitution<? extends ImmutableTerm> other);
+
+    /**
      * Applies the current substitution to the "target" part of another substitution
      */
     ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution);
@@ -73,4 +81,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
 
     Optional<ImmutableExpression> convertIntoBooleanExpression();
+
+    Var2VarSubstitution getVar2VarFragment();
+
+    ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
 }

@@ -4,18 +4,12 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PredicateRenamingProposalImpl;
-import it.unibz.inf.ontop.executor.renaming.AlreadyExistingPredicateException;
-import it.unibz.inf.ontop.executor.renaming.PredicateRenamingChecker;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VariableDispatcher;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PredicateRenamingProposal;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * TODO: explain
@@ -50,6 +44,8 @@ public class IntermediateQueryUtils {
     /**
      * TODO: describe
      * The optional modifiers are for the top construction node above the UNION (if any).
+     *
+     * TODO: refactor this because renaming is not needed anymore
      */
     public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions,
                                                                Optional<ImmutableQueryModifiers> optionalTopModifiers)
@@ -62,10 +58,8 @@ public class IntermediateQueryUtils {
             return Optional.of(firstDefinition);
         }
 
-        DataAtom headAtom = createTopProjectionAtom(firstDefinition.getRootConstructionNode().getProjectionAtom());
+        DataAtom headAtom = createTopProjectionAtom(firstDefinition.getProjectionAtom());
         AtomPredicate normalPredicate = headAtom.getPredicate();
-        AtomPredicate subQueryPredicate = createSubQueryPredicate(predicateDefinitions, normalPredicate);
-        DataAtom subQueryAtom = DATA_FACTORY.getDataAtom(subQueryPredicate, headAtom.getArguments());
 
         // Non final definition
         IntermediateQuery mergedDefinition = null;
@@ -76,46 +70,14 @@ public class IntermediateQueryUtils {
                 mergedDefinition = utils.initMergedDefinition(originalDefinition.getMetadata(), headAtom, subQueryAtom,
                         optionalTopModifiers);
             } else {
-                mergedDefinition = prepareForMergingNewDefinition(mergedDefinition, subQueryAtom);
+                mergedDefinition = prepareForMergingNewDefinition(mergedDefinition);
             }
-
             checkDefinitionRootProjections(mergedDefinition, originalDefinition);
 
-            PredicateRenamingProposal renamingProposal = new PredicateRenamingProposalImpl(normalPredicate,
-                    subQueryPredicate);
+            mergedDefinition.mergeSubQuery(originalDefinition);
 
-            IntermediateQuery renamedDefinition;
-            try {
-                renamedDefinition = originalDefinition.applyProposal(renamingProposal).getResultingQuery();
-            } catch (EmptyQueryException e) {
-                throw new RuntimeException("Inconsistency: a bad renaming proposal should not empty the query");
-            }
-            mergedDefinition.mergeSubQuery(renamedDefinition);
         }
         return Optional.of(mergedDefinition);
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static AtomPredicate createSubQueryPredicate(List<IntermediateQuery> predicateDefinitions,
-                                                         AtomPredicate predicate) {
-        AtomPredicate newPredicate = new AtomPredicateImpl(predicate.getName()+ SUB_QUERY_SUFFIX, predicate.getArity());
-
-        for (IntermediateQuery definition : predicateDefinitions) {
-            try {
-                PredicateRenamingChecker.checkNonExistence(definition, newPredicate);
-            }
-            /**
-             * If the proposed predicate is already used,
-             * creates one by using UUID4
-             */
-            catch (AlreadyExistingPredicateException e) {
-                newPredicate = new AtomPredicateImpl(predicate.getName()+ UUID.randomUUID(), predicate.getArity());
-                break;
-            }
-        }
-        return newPredicate;
     }
 
     /**
@@ -157,7 +119,7 @@ public class IntermediateQueryUtils {
 
         IntermediateQueryBuilder queryBuilder = newBuilder(metadata);
         try {
-            queryBuilder.init(rootNode);
+            queryBuilder.init(projectionAtom, rootNode);
             queryBuilder.addChild(rootNode, unionNode);
             queryBuilder.addChild(unionNode, dataNode);
             return queryBuilder.build();
@@ -252,7 +214,7 @@ public class IntermediateQueryUtils {
             newRootNode = originalRootNode.clone();
         }
 
-        queryBuilder.init(newRootNode);
+        queryBuilder.init(projectionAtom, newRootNode);
 
         return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, optionalTransformer);
     }

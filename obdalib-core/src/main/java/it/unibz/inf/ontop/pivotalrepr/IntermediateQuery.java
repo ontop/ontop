@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.DataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.model.Variable;
@@ -96,4 +98,5 @@ public interface IntermediateQuery {
     Variable generateNewVariable(Variable formerVariable);
 
 
+    DistinctVariableDataAtom getProjectionAtom();
 }

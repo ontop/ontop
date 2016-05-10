@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
 
 /**
  * TODO: describe
@@ -10,7 +11,8 @@ import com.google.common.collect.ImmutableList;
  */
 public interface IntermediateQueryBuilder {
 
-    void init(ConstructionNode rootConstructionNode) throws IntermediateQueryBuilderException;
+    void init(DistinctVariableDataAtom projectionAtom, ConstructionNode rootConstructionNode)
+            throws IntermediateQueryBuilderException;
 
     /**
      * When the parent is NOT a BinaryAsymetricOperatorNode

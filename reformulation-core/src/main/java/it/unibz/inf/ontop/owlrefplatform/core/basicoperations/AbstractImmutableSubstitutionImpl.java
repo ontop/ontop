@@ -6,8 +6,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
@@ -221,6 +223,36 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return Optional.of(unionSubstitution);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
+            ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
+        if (otherSubstitution.isEmpty())
+            return Optional.of((ImmutableSubstitution<? extends ImmutableTerm>)this);
+        else if(isEmpty())
+            return Optional.of(otherSubstitution);
+
+        ImmutableMap<Variable, T> localMap = getImmutableMap();
+        ImmutableSet<? extends Map.Entry<Variable, ? extends ImmutableTerm>> otherEntrySet = otherSubstitution.getImmutableMap().entrySet();
+
+        /**
+         * Checks for multiple entries of the same variable
+         */
+        if (otherEntrySet.stream()
+                .filter(e -> localMap.containsKey(e.getKey()))
+                .anyMatch(e -> !localMap.get(e.getKey()).equals(e.getValue()))) {
+            return Optional.empty();
+        }
+        else {
+            ImmutableMap<Variable, ? extends ImmutableTerm> newMap = Stream.concat(localMap.entrySet().stream(),
+                    otherEntrySet.stream())
+                    .distinct()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue));
+            return Optional.of(new ImmutableSubstitutionImpl<>(newMap));
+        }
     }
 
     @Override

@@ -39,9 +39,10 @@ public class DatalogConversionTools {
     /**
      * TODO: explain
      *
-     * TODO: should we simplify it?
+     * TODO: deal with multiple occurences of the same variable in the head of the DatalogProgram
      */
-    public static P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(Function datalogDataAtom)
+    public static P2<DistinctVariableDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(
+            Function datalogDataAtom)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
@@ -92,7 +93,7 @@ public class DatalogConversionTools {
             argListBuilder.add(newArgument);
         }
 
-        DataAtom dataAtom = DATA_FACTORY.getDataAtom(atomPredicate, argListBuilder.build());
+        DistinctVariableDataAtom dataAtom = DATA_FACTORY.getDistinctVariableDataAtom(atomPredicate, argListBuilder.build());
         ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
 
 

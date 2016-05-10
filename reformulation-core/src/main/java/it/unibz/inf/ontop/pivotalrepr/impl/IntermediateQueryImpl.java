@@ -9,10 +9,10 @@ import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
-import it.unibz.inf.ontop.executor.renaming.PredicateRenamingExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -55,14 +55,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final MetadataForQueryOptimization metadata;
 
+    private final DistinctVariableDataAtom projectionAtom;
+
+
     /**
      * TODO: explain
      */
     private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
     static {
         STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                UnionLiftProposal.class, UnionLiftProposalExecutor.class,
-                PredicateRenamingProposal.class, PredicateRenamingExecutor.class);
+                UnionLiftProposal.class, UnionLiftProposalExecutor.class);
     }
 
     /**
@@ -86,10 +88,18 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, QueryTreeComponent treeComponent) {
+    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableDataAtom projectionAtom,
+                                 QueryTreeComponent treeComponent) {
         this.metadata = metadata;
+        this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
     }
+
+    @Override
+    public DistinctVariableDataAtom getProjectionAtom() {
+        return projectionAtom;
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
@@ -258,9 +268,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * TODO: explain
          */
-        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
+        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getProjectionAtom());
         if (localDataNodes.isEmpty())
-            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootConstructionNode().getProjectionAtom());
+            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getProjectionAtom());
 
 
         for (IntensionalDataNode localDataNode : localDataNodes) {

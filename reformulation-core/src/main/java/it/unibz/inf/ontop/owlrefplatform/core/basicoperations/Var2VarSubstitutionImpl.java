@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
@@ -37,6 +38,16 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         if (map.containsKey(variable))
             return map.get(variable);
         return variable;
+    }
+
+    @Override
+    public Var2VarSubstitution getVar2VarFragment() {
+        return this;
+    }
+
+    @Override
+    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
     }
 
     @Override
@@ -99,6 +110,11 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     public boolean isDefining(Variable variable) {
         return map.containsKey(variable);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getDomain() {
+        return map.keySet();
     }
 
     @Override
