@@ -98,7 +98,7 @@ public class H2ComplexSameAsTest {
 		QuestOWLFactory factory = new QuestOWLFactory();
 		QuestOWLConfiguration config;
 
-		config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+		config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(true).build();
 
 
 		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
@@ -205,7 +205,7 @@ public class H2ComplexSameAsTest {
     public void testSameAs5() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
                 "SELECT * WHERE { " +
-                "?x a :Wellbore .\n" +
+
                 " ?x :hasOwner ?y .}\n";
 
         runTests(query);

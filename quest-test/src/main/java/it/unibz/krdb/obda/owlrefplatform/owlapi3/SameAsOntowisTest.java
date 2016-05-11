@@ -305,7 +305,7 @@ public class SameAsOntowisTest {
 
         QuestOWLConfiguration config;
 
-        config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(true).build();
 
 
 

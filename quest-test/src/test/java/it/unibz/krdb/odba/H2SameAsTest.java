@@ -98,7 +98,7 @@ public class H2SameAsTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(true).build();
 
 		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
 
