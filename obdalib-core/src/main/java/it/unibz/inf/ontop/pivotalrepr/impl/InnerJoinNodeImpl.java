@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
@@ -36,15 +36,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public SubstitutionResults<InnerJoinNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    public SubstitutionResults<InnerJoinNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendentSubstitution(substitution);
+        return applyDescendingSubstitution(substitution);
     }
 
     @Override
-    public SubstitutionResults<InnerJoinNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    public SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
         Optional<ImmutableExpression> newOptionalCondition = transformOptionalBooleanExpression(substitution, getOptionalFilterCondition());
         InnerJoinNode newNode = new InnerJoinNodeImpl(newOptionalCondition);

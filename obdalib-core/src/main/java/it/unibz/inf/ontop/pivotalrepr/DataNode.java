@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
@@ -20,11 +21,11 @@ public interface DataNode extends ConstructionOrDataNode {
     DataNode newAtom(DataAtom newAtom);
 
     @Override
-    SubstitutionResults<? extends DataNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<? extends DataNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query);
 
     @Override
-    SubstitutionResults<? extends DataNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+    SubstitutionResults<? extends DataNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution);
 }

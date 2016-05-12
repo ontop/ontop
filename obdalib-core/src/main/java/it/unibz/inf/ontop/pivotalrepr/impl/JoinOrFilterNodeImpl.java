@@ -3,11 +3,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.JoinOrFilterNode;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
 public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements JoinOrFilterNode {
 
@@ -41,7 +38,7 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     }
 
     protected ImmutableExpression transformBooleanExpression(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             ImmutableExpression booleanExpression) {
         return substitution.applyToBooleanExpression(booleanExpression);
     }

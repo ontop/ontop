@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -37,8 +37,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public SubstitutionResults<LeftJoinNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    public SubstitutionResults<LeftJoinNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
         if (isFromRightBranch(descendantNode, query)) {
             /**
@@ -50,14 +50,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * Left-branch
          */
         else {
-            return applyDescendentSubstitution(substitution);
+            return applyDescendingSubstitution(substitution);
         }
     }
 
     /**
      * TODO: explain
      */
-    private LeftJoinNode integrateSubstitutionAsLeftJoinCondition(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    private LeftJoinNode integrateSubstitutionAsLeftJoinCondition(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         if (substitution.isEmpty()) {
             return clone();
         }
@@ -77,7 +78,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public SubstitutionResults<LeftJoinNode> applyDescendentSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    public SubstitutionResults<LeftJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         LeftJoinNode newNode = new LeftJoinNodeImpl(transformOptionalBooleanExpression(substitution,
                 getOptionalFilterCondition()));
         return new SubstitutionResultsImpl<>(newNode, substitution);

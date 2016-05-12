@@ -130,15 +130,15 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * Stops the propagation.
      */
     @Override
-    public SubstitutionResults<ConstructionNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToApply,
+    public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply,
             QueryNode descendantNode, IntermediateQuery query) {
 
         ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
         ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
 
         if (substitutionToApply.getImmutableMap().keySet().stream().anyMatch(boundVariables::contains)) {
-            throw new IllegalArgumentException("An ascendent substitution MUST NOT include variables bound by" +
+            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by" +
                     "the substitution of the current construction node");
         }
 
@@ -169,21 +169,21 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * TODO: explain
      */
     @Override
-    public SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> upstreamSubstitution)
+    public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution)
             throws QueryNodeSubstitutionException {
 
-        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(upstreamSubstitution,
+        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(descendingSubstitution,
                 getProjectedVariables());
 
         try {
-            NewSubstitutionPair newSubstitutions = traverseConstructionNode(upstreamSubstitution, substitution,
+            NewSubstitutionPair newSubstitutions = traverseConstructionNode(descendingSubstitution, substitution,
                     projectedVariables);
 
             ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = newSubstitutions.propagatedSubstitution;
 
             Optional<ImmutableQueryModifiers> newOptionalModifiers = updateOptionalModifiers(optionalModifiers,
-                    upstreamSubstitution, substitutionToPropagate);
+                    descendingSubstitution, substitutionToPropagate);
 
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
                     newSubstitutions.bindings, newOptionalModifiers);
@@ -192,7 +192,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
 
         } catch (SubQueryUnificationTools.UnificationException e) {
-            throw new QueryNodeSubstitutionException("The upstream substitution " + upstreamSubstitution
+            throw new QueryNodeSubstitutionException("The descending substitution " + descendingSubstitution
                     + " is incompatible with " + this);
         }
     }

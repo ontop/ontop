@@ -147,7 +147,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
 
             // May throw an exception
             SubstitutionResults<? extends QueryNode> substitutionResults =
-                    descendantNode.applyDescendentSubstitution(substitutionToPropagate);
+                    descendantNode.applyDescendingSubstitution(substitutionToPropagate);
 
             Optional<? extends QueryNode> optionalNewDescendantNode = substitutionResults.getOptionalNewNode();
             Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution

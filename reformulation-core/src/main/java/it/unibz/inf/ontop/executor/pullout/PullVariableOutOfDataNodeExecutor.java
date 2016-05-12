@@ -309,7 +309,7 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
 //        InjectiveVar2VarSubstitution substitution = new InjectiveVar2VarSubstitutionImpl(variableBuilder.build());
 //
 //        SubstitutionResults<? extends DelimiterCommutativeJoinNode> substitutionResults =
-//                originalFocusNode.applyDescendentSubstitution(substitution);
+//                originalFocusNode.applyDescendingSubstitution(substitution);
 //
 //        Optional<? extends DelimiterCommutativeJoinNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
 //        Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution =

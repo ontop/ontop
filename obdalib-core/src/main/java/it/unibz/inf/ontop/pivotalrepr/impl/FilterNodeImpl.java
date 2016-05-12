@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
@@ -47,15 +47,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public SubstitutionResults<FilterNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    public SubstitutionResults<FilterNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendentSubstitution(substitution);
+        return applyDescendingSubstitution(substitution);
     }
 
     @Override
-    public SubstitutionResults<FilterNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    public SubstitutionResults<FilterNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableExpression newFilterCondition = transformBooleanExpression(substitution, getFilterCondition());
         FilterNode newNode = new FilterNodeImpl(newFilterCondition);
 

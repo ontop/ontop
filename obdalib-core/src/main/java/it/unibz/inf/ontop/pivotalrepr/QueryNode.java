@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
@@ -39,7 +40,8 @@ public interface QueryNode extends Cloneable {
      * throw a QueryNodeTransformationException
      *
      */
-    QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException, NotNeededNodeException;
+    QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException, NotNeededNodeException;
 
     /**
      * "Accept" method for the "Visitor" pattern.
@@ -60,16 +62,16 @@ public interface QueryNode extends Cloneable {
     /**
      * Applies a substitution coming from below
      */
-    SubstitutionResults<? extends QueryNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query)
             throws QueryNodeSubstitutionException;
 
     /**
      * Applies a substitution coming from above
      */
-    SubstitutionResults<? extends QueryNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution)
+    SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution)
             throws QueryNodeSubstitutionException;
 
     /**

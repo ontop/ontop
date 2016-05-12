@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.NonGroundTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
  * GROUP BY query node.
@@ -20,11 +20,11 @@ public interface GroupNode extends QueryNode {
             throws QueryNodeTransformationException, NotNeededNodeException;
 
     @Override
-    SubstitutionResults<GroupNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<GroupNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) ;
 
     @Override
-    SubstitutionResults<GroupNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) ;
+    SubstitutionResults<GroupNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) ;
 }

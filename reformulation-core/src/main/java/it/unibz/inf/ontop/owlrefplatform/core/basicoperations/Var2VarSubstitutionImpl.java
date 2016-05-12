@@ -93,11 +93,11 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
      * TODO: directly build an ImmutableMap
      */
     @Override
-    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> applyToSubstitution(
+    public Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
         if (isEmpty()) {
-            return Optional.of(substitution);
+            return Optional.of(new ImmutableSubstitutionImpl<>(substitution.getImmutableMap()));
         }
 
         try {

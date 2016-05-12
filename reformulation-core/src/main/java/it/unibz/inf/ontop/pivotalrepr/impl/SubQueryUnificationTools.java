@@ -204,7 +204,7 @@ public class SubQueryUnificationTools {
 
             try {
                 SubstitutionResults<? extends QueryNode> substitutionResults =
-                        renamedChild.applyDescendentSubstitution(substitution);
+                        renamedChild.applyDescendingSubstitution(substitution);
 
                 optionalNewChild = substitutionResults.getOptionalNewNode();
                 optionalSubstitutionForChild = substitutionResults.getSubstitutionToPropagate();
@@ -552,7 +552,7 @@ public class SubQueryUnificationTools {
     }
 
     public static ImmutableSet<Variable> computeNewProjectedVariables(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> tau, ImmutableSet<Variable> projectedVariables) {
+            ImmutableSubstitution<? extends ImmutableTerm> tau, ImmutableSet<Variable> projectedVariables) {
         ImmutableSet<Variable> tauDomain = tau.getDomain();
 
         Stream<Variable> remainingVariableStream = projectedVariables.stream()
@@ -573,7 +573,7 @@ public class SubQueryUnificationTools {
      *
      */
     public static NewSubstitutionPair traverseConstructionNode(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
+            ImmutableSubstitution<? extends ImmutableTerm> tau,
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSet<Variable> formerV) throws UnificationException {
 
@@ -591,7 +591,7 @@ public class SubQueryUnificationTools {
 
         ImmutableSubstitution<ImmutableTerm> etaB = extractEtaB(eta, formerV, tauC);
 
-        ImmutableSubstitution<? extends ImmutableTerm> newTheta = tauR.applyToSubstitution(etaB)
+        ImmutableSubstitution<ImmutableTerm> newTheta = tauR.applyToSubstitution(etaB)
                 .orElseThrow(() -> new IllegalStateException("Bug: tauR does not rename etaB safely as excepted"));
 
         ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, eta, tauR, tauEq);
@@ -646,7 +646,7 @@ public class SubQueryUnificationTools {
     }
 
     private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> formerTheta,
+            ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSubstitution<? extends ImmutableTerm> newTheta,
             ImmutableSubstitution<ImmutableTerm> eta, Var2VarSubstitution tauR,
             Var2VarSubstitution tauEq) {

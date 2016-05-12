@@ -87,6 +87,12 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
+            ImmutableSubstitution<? extends ImmutableTerm> other) {
+        return Optional.of(other);
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
         ImmutableMap<Variable, ImmutableTerm> map = ImmutableMap.copyOf(otherSubstitution.getImmutableMap());
         return new ImmutableSubstitutionImpl<>(map);

@@ -23,6 +23,6 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      *
      * Returns Optional.empty() if the results is not a substitution (incompatible entries)
      */
-    Optional<ImmutableSubstitution<? extends ImmutableTerm>> applyToSubstitution(
+    Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution);
 }

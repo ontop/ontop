@@ -48,11 +48,11 @@ public interface ConstructionNode extends ConstructionOrDataNode {
     ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution();
 
     @Override
-    SubstitutionResults<ConstructionNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query);
 
     @Override
-    SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) throws QueryNodeSubstitutionException;
+    SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) throws QueryNodeSubstitutionException;
 }
