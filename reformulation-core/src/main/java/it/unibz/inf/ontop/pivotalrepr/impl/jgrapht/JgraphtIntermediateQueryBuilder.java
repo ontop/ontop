@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.jgrapht;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryImpl;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final MetadataForQueryOptimization metadata;
-    private DistinctVariableDataAtom projectionAtom;
+    private DistinctVariableOnlyDataAtom projectionAtom;
     private DirectedAcyclicGraph<QueryNode,JgraphtQueryTreeComponent.LabeledEdge> queryDAG;
     private ConstructionNode rootConstructionNode;
     private boolean canEdit;
@@ -30,7 +30,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
-    public void init(DistinctVariableDataAtom projectionAtom, ConstructionNode rootConstructionNode){
+    public void init(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode rootConstructionNode){
         if (hasBeenInitialized)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
         hasBeenInitialized = true;

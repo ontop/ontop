@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
@@ -55,7 +56,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final MetadataForQueryOptimization metadata;
 
-    private final DistinctVariableDataAtom projectionAtom;
+    private final DistinctVariableOnlyDataAtom projectionAtom;
 
 
     /**
@@ -88,7 +89,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableDataAtom projectionAtom,
+    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
                                  QueryTreeComponent treeComponent) {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
@@ -96,7 +97,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public DistinctVariableDataAtom getProjectionAtom() {
+    public DistinctVariableOnlyDataAtom getProjectionAtom() {
         return projectionAtom;
     }
 

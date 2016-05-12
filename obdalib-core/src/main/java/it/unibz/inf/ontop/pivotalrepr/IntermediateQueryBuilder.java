@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 
 /**
  * TODO: describe
@@ -11,7 +12,7 @@ import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
  */
 public interface IntermediateQueryBuilder {
 
-    void init(DistinctVariableDataAtom projectionAtom, ConstructionNode rootConstructionNode)
+    void init(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode rootConstructionNode)
             throws IntermediateQueryBuilderException;
 
     /**

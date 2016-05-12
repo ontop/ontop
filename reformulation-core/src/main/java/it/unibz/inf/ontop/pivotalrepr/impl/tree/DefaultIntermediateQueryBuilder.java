@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryImpl;
@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final MetadataForQueryOptimization metadata;
-    private DistinctVariableDataAtom projectionAtom;
+    private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
 
@@ -26,7 +26,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
 
     @Override
-    public void init(DistinctVariableDataAtom projectionAtom, ConstructionNode rootConstructionNode){
+    public void init(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode rootConstructionNode){
         if (tree != null)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
 
@@ -83,7 +83,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
      * Can be overwritten to use another constructor
      */
     protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
-                                           DistinctVariableDataAtom projectionAtom,
+                                           DistinctVariableOnlyDataAtom projectionAtom,
                                            QueryTreeComponent treeComponent) {
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent);
     }
