@@ -17,6 +17,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
+
 /**
  * TODO: explain
  */
@@ -30,6 +32,23 @@ public class SubQueryUnificationTools {
             super(message);
         }
     }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: better integrate in the Ontop exception hierarchy
+     */
+    public static class UnificationException extends Exception {
+
+        protected  UnificationException() {
+            super();
+        }
+
+        protected  UnificationException(String message) {
+            super(message);
+        }
+    }
+
 
     /**
      * TODO: find a better name
@@ -285,7 +304,7 @@ public class SubQueryUnificationTools {
 
         AtomSubstitutionSplit atomSubstitutionSplit = new AtomSubstitutionSplit(atomSubstitution);
 
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = ImmutableUnificationTools.computeMGUS(
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalConstraintUnifier = computeMGUS(
                 atomSubstitutionSplit.constraintSubstitution, renamedConstructionNode.getSubstitution());
 
         if (!optionalConstraintUnifier.isPresent()) {
@@ -555,7 +574,8 @@ public class SubQueryUnificationTools {
      */
     public static NewSubstitutionPair traverseConstructionNode(
             ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
-            ImmutableSubstitution<? extends VariableOrGroundTerm> formerTheta) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> formerTheta,
+            ImmutableSet<Variable> formerV) throws UnificationException {
 
         Var2VarSubstitution tauR = tau.getVar2VarFragment();
         ImmutableSubstitution<GroundTerm> tauG = tau.getVar2GroundTermFragment();
@@ -565,7 +585,28 @@ public class SubQueryUnificationTools {
         ImmutableSubstitution<? extends ImmutableTerm> tauC = tauG.unionHeterogeneous(tauEq)
                 .orElseThrow(() -> new IllegalStateException("Bug: dom(tauG) must be disjoint with dom(tauEq)"));
 
+
+        ImmutableSubstitution<ImmutableTerm> eta = computeMGUS(formerTheta, tauC)
+                .orElseThrow(UnificationException::new);
+
+        ImmutableSubstitution<ImmutableTerm> etaB = extractEtaB(eta, formerV, tauC);
+
+
         throw new RuntimeException("TODO: continue traverseConstructionNode()");
+    }
+
+    private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
+                                                                    ImmutableSet<Variable> formerV,
+                                                                    ImmutableSubstitution<? extends ImmutableTerm> tauC) {
+
+        ImmutableSet<Variable> tauCDomain = tauC.getDomain();
+
+        ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
+                .filter(e -> formerV.contains(e.getKey()))
+                .filter(e -> !tauCDomain.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newMap);
     }
 
     /**
