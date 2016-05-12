@@ -54,10 +54,10 @@ public class SubQueryUnificationTools {
      * TODO: find a better name
      */
     public static class NewSubstitutionPair {
-        public final ImmutableSubstitution<? extends ImmutableTerm> bindings;
+        public final ImmutableSubstitution<ImmutableTerm> bindings;
         public final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
 
-        private NewSubstitutionPair(ImmutableSubstitution<? extends ImmutableTerm> bindings,
+        private NewSubstitutionPair(ImmutableSubstitution<ImmutableTerm> bindings,
                                    ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution) {
             this.bindings = bindings;
             this.propagatedSubstitution = propagatedSubstitution;
@@ -375,10 +375,10 @@ public class SubQueryUnificationTools {
     /**
      * TODO: explain
      */
-    private static Optional<ImmutableQueryModifiers> updateOptionalModifiers(
+    public static Optional<ImmutableQueryModifiers> updateOptionalModifiers(
             Optional<ImmutableQueryModifiers> optionalModifiers,
-            ImmutableSubstitution<VariableOrGroundTerm> substitution1,
-            ImmutableSubstitution<ImmutableTerm> substitution2) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution1,
+            ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
         if (!optionalModifiers.isPresent()) {
             return Optional.empty();
         }
@@ -574,7 +574,7 @@ public class SubQueryUnificationTools {
      */
     public static NewSubstitutionPair traverseConstructionNode(
             ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
-            ImmutableSubstitution<? extends VariableOrGroundTerm> formerTheta,
+            ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSet<Variable> formerV) throws UnificationException {
 
         Var2VarSubstitution tauR = tau.getVar2VarFragment();
@@ -591,22 +591,12 @@ public class SubQueryUnificationTools {
 
         ImmutableSubstitution<ImmutableTerm> etaB = extractEtaB(eta, formerV, tauC);
 
+        ImmutableSubstitution<? extends ImmutableTerm> newTheta = tauR.applyToSubstitution(etaB)
+                .orElseThrow(() -> new IllegalStateException("Bug: tauR does not rename etaB safely as excepted"));
 
-        throw new RuntimeException("TODO: continue traverseConstructionNode()");
-    }
+        ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, eta, tauR, tauEq);
 
-    private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
-                                                                    ImmutableSet<Variable> formerV,
-                                                                    ImmutableSubstitution<? extends ImmutableTerm> tauC) {
-
-        ImmutableSet<Variable> tauCDomain = tauC.getDomain();
-
-        ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
-                .filter(e -> formerV.contains(e.getKey()))
-                .filter(e -> !tauCDomain.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap());
-
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return new NewSubstitutionPair(newTheta, delta);
     }
 
     /**
@@ -639,6 +629,40 @@ public class SubQueryUnificationTools {
                 .collect(ImmutableCollectors.toMap());
 
         return new Var2VarSubstitutionImpl(newMap);
+    }
+
+    private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
+                                                                    ImmutableSet<Variable> formerV,
+                                                                    ImmutableSubstitution<? extends ImmutableTerm> tauC) {
+
+        ImmutableSet<Variable> tauCDomain = tauC.getDomain();
+
+        ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
+                .filter(e -> formerV.contains(e.getKey()))
+                .filter(e -> !tauCDomain.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newMap);
+    }
+
+    private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> formerTheta,
+            ImmutableSubstitution<? extends ImmutableTerm> newTheta,
+            ImmutableSubstitution<ImmutableTerm> eta, Var2VarSubstitution tauR,
+            Var2VarSubstitution tauEq) {
+
+        ImmutableSet<Map.Entry<Variable, Variable>> tauEqEntries = tauEq.getImmutableMap().entrySet();
+        ImmutableSet<Variable> formerThetaDomain = formerTheta.getDomain();
+
+        ImmutableMap<Variable, ImmutableTerm> newMap = Stream.concat(
+                eta.getImmutableMap().entrySet().stream(),
+                tauR.getImmutableMap().entrySet().stream())
+                .filter(e -> !tauEqEntries.contains(e))
+                .filter(e -> !formerThetaDomain.contains(e.getKey()))
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), newTheta.apply(e.getValue())))
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newMap);
     }
 
 

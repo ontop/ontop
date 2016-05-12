@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.isInjective;
 
@@ -51,6 +52,15 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
         }
 
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+    }
+
+    /**
+     * More efficient implementation
+     */
+    @Override
+    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> applyToSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        return Optional.of(applyRenaming(substitution));
     }
 
 }

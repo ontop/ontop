@@ -2,18 +2,19 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.NewSubstitutionPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.computeNewProjectedVariables;
+import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.traverseConstructionNode;
+import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.updateOptionalModifiers;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -169,45 +170,31 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> tau)
+            ImmutableSubstitution<? extends VariableOrGroundTerm> upstreamSubstitution)
             throws QueryNodeSubstitutionException {
 
-        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(tau, getProjectedVariables());
+        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(upstreamSubstitution,
+                getProjectedVariables());
+
+        try {
+            NewSubstitutionPair newSubstitutions = traverseConstructionNode(upstreamSubstitution, substitution,
+                    projectedVariables);
+
+            ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = newSubstitutions.propagatedSubstitution;
+
+            Optional<ImmutableQueryModifiers> newOptionalModifiers = updateOptionalModifiers(optionalModifiers,
+                    upstreamSubstitution, substitutionToPropagate);
+
+            ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
+                    newSubstitutions.bindings, newOptionalModifiers);
+
+            return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
 
 
-
-
-
-//        DataAtom newProjectionAtom = substitution.applyToDataAtom(getProjectionAtom());
-//
-//        try {
-//            /**
-//             * TODO: explain why it makes sense (interface)
-//             */
-//            SubQueryUnificationTools.ConstructionNodeUnification constructionNodeUnification =
-//                    SubQueryUnificationTools.unifyConstructionNode(this, newProjectionAtom);
-//
-//            ConstructionNode newConstructionNode = constructionNodeUnification.getUnifiedNode();
-//            ImmutableSubstitution<VariableOrGroundTerm> newSubstitutionToPropagate =
-//                    constructionNodeUnification.getSubstitutionToPropagate();
-//
-//            /**
-//             * If the substitution has changed, throws the new substitution
-//             * and the new construction node so that the "client" can continue
-//             * with the new substitution (for the children nodes).
-//             */
-//            if (!getSubstitution().equals(newSubstitutionToPropagate)) {
-//                return new SubstitutionResultsImpl<>(newConstructionNode, newSubstitutionToPropagate);
-//            }
-//
-//            /**
-//             * Otherwise, continues with the current substitution
-//             */
-//            return new SubstitutionResultsImpl<>(newConstructionNode, substitution);
-//
-//        } catch (SubQueryUnificationTools.SubQueryUnificationException e) {
-//            throw new QueryNodeSubstitutionException(e.getMessage());
-//        }
+        } catch (SubQueryUnificationTools.UnificationException e) {
+            throw new QueryNodeSubstitutionException("The upstream substitution " + upstreamSubstitution
+                    + " is incompatible with " + this);
+        }
     }
 
     @Override

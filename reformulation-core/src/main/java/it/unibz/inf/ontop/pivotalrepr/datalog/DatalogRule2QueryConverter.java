@@ -102,10 +102,10 @@ public class DatalogRule2QueryConverter {
                                                        Optional<ImmutableQueryModifiers> optionalModifiers)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
-        P2<DistinctVariableDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
+        P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                 DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
 
-        DistinctVariableDataAtom projectionAtom = decomposition._1();
+        DistinctVariableOnlyDataAtom projectionAtom = decomposition._1();
 
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), decomposition._2(),
                 optionalModifiers);
@@ -123,7 +123,7 @@ public class DatalogRule2QueryConverter {
      * TODO: explain
      */
     private static IntermediateQuery createDefinition(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
-                                                      DistinctVariableDataAtom projectionAtom,
+                                                      DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom)
@@ -271,7 +271,7 @@ public class DatalogRule2QueryConverter {
                 /**
                  * Creates the node
                  */
-                P2<DistinctVariableDataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
+                P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
                 ImmutableSubstitution<ImmutableTerm> bindings = convertionResults._2();
                 DataAtom dataAtom = bindings.applyToDataAtom(convertionResults._1());
                 DataNode currentNode = DatalogConversionTools.createDataNode(dataAtom, tablePredicates);

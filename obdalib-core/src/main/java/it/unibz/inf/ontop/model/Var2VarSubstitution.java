@@ -17,4 +17,12 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
     NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
 
     Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers);
+
+    /**
+     * Applies the substitution to the domain and co-domain terns
+     *
+     * Returns Optional.empty() if the results is not a substitution (incompatible entries)
+     */
+    Optional<ImmutableSubstitution<? extends ImmutableTerm>> applyToSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution);
 }

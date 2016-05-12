@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Joiner;
+
+import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -11,11 +13,16 @@ import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Immutable { Variable --> Variable } substitution.
  */
 public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<Variable> implements Var2VarSubstitution {
+
+    private static class NotASubstitutionException extends RuntimeException  {
+    }
+
 
     private final ImmutableMap<Variable, Variable> map;
 
@@ -80,6 +87,31 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
             orderConditionBuilder.add(orderCondition.newVariable(newVariable));
         }
         return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());
+    }
+
+    /**
+     * TODO: directly build an ImmutableMap
+     */
+    @Override
+    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> applyToSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+
+        if (isEmpty()) {
+            return Optional.of(substitution);
+        }
+
+        try {
+            ImmutableMap<Variable, ImmutableTerm> newMap = ImmutableMap.copyOf(substitution.getImmutableMap().entrySet().stream()
+                    .map(e -> new AbstractMap.SimpleEntry<>(applyToVariable(e.getKey()), apply(e.getValue())))
+                    .distinct()
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (e1, e2) -> {
+                                throw new NotASubstitutionException();
+                            })));
+            return Optional.of(new ImmutableSubstitutionImpl<>(newMap));
+        } catch (NotASubstitutionException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

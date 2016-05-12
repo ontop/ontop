@@ -41,7 +41,7 @@ public class DatalogConversionTools {
      *
      * TODO: deal with multiple occurences of the same variable in the head of the DatalogProgram
      */
-    public static P2<DistinctVariableDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(
+    public static P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(
             Function datalogDataAtom)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
@@ -54,7 +54,7 @@ public class DatalogConversionTools {
             atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
         }
 
-        ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
 
         /**
@@ -65,7 +65,7 @@ public class DatalogConversionTools {
          */
         VariableDispatcher variableDispatcher = new VariableDispatcher();
         for (Term term : datalogDataAtom.getTerms()) {
-            VariableOrGroundTerm newArgument;
+            Variable newArgument;
 
             /**
              * Keep the same variable.
@@ -93,7 +93,7 @@ public class DatalogConversionTools {
             argListBuilder.add(newArgument);
         }
 
-        DistinctVariableDataAtom dataAtom = DATA_FACTORY.getDistinctVariableDataAtom(atomPredicate, argListBuilder.build());
+        DistinctVariableOnlyDataAtom dataAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
         ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
 
 

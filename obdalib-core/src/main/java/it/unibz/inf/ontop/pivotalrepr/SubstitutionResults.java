@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
@@ -18,6 +19,6 @@ public interface SubstitutionResults<T extends QueryNode> {
     /**
      * If absent, stop propagating to the parent/children (depending on the propagation direction).
      */
-    Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> getSubstitutionToPropagate();
+    Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate();
 
 }
