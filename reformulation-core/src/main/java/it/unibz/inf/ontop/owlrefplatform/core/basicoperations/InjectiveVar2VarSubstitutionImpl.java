@@ -2,12 +2,17 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.Var2VarSubstitution;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.isInjective;
 
@@ -54,11 +59,23 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
     }
 
+    @Override
+    public Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(
+            InjectiveVar2VarSubstitution g) {
+        ImmutableMap<Variable, Variable> newMap = composeRenaming(g);
+
+        return Optional.of(newMap)
+                .filter(ImmutableSubstitutionTools::isInjective)
+                .map(map -> (InjectiveVar2VarSubstitution) new InjectiveVar2VarSubstitutionImpl(map));
+    }
+
+
+
     /**
      * More efficient implementation
      */
     @Override
-    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> applyToSubstitution(
+    public Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return Optional.of(applyRenaming(substitution));
     }

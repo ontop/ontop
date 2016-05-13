@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.*;
@@ -90,9 +91,9 @@ public class DatalogRule2QueryConverter {
 
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> NO_POSITION = Optional.empty();
-    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> LEFT_POSITION = Optional.of(NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> RIGHT_POSITION = Optional.of(NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+    private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
+    private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
+    private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
 
     /**
      * TODO: describe
@@ -236,7 +237,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
                                                                         IntermediateQueryBuilder queryBuilder,
                                                                         final QueryNode parentNode,
-                                                                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                                                                        Optional<ArgumentPosition> optionalPosition,
                                                                         Collection<Predicate> tablePredicates)
             throws IntermediateQueryBuilderException, DatalogProgram2QueryConverter.InvalidDatalogProgramException {
         /**
@@ -288,7 +289,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                                 QueryNode parentNodeOfTheLJ,
                                                                 List<Function> subAtomsOfTheLJ,
-                                                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                                                                Optional<ArgumentPosition> optionalPosition,
                                                                 Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
@@ -326,7 +327,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                             QueryNode parentNodeOfTheJoinNode,
                                                             List<Function> subAtomsOfTheJoin,
-                                                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                                                            Optional<ArgumentPosition> optionalPosition,
                                                             Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 

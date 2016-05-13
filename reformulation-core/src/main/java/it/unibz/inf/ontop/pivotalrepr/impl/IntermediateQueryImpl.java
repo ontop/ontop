@@ -101,6 +101,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return projectionAtom;
     }
 
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return treeComponent.getKnownVariables();
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {

@@ -25,4 +25,6 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      */
     Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution);
+
+    Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g);
 }
