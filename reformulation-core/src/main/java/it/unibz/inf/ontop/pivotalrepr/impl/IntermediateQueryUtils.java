@@ -149,7 +149,7 @@ public class IntermediateQueryUtils {
                         .orElseThrow(()-> new IllegalStateException("Unknown parent")), node));
     }
 
-    private static InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
+    public static InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
                                                                                ImmutableSet<Variable> variables) {
         ImmutableMap<Variable, Variable> newMap = variables.stream()
                 .map(v -> new AbstractMap.SimpleEntry<>(v, variableGenerator.generateNewVariableIfConflicting(v)))

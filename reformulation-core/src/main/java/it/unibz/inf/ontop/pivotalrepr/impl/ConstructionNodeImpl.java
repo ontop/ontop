@@ -7,14 +7,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.NewSubstitutionPair;
+import it.unibz.inf.ontop.pivotalrepr.impl.SubQuerySpecializationTools.NewSubstitutionPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
-import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.computeNewProjectedVariables;
-import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.traverseConstructionNode;
-import static it.unibz.inf.ontop.pivotalrepr.impl.SubQueryUnificationTools.updateOptionalModifiers;
+import static it.unibz.inf.ontop.pivotalrepr.impl.SubQuerySpecializationTools.computeNewProjectedVariables;
+import static it.unibz.inf.ontop.pivotalrepr.impl.SubQuerySpecializationTools.traverseConstructionNode;
+import static it.unibz.inf.ontop.pivotalrepr.impl.SubQuerySpecializationTools.updateOptionalModifiers;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -191,7 +191,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
 
 
-        } catch (SubQueryUnificationTools.UnificationException e) {
+        } catch (SubQuerySpecializationTools.SpecializationException e) {
             throw new QueryNodeSubstitutionException("The descending substitution " + descendingSubstitution
                     + " is incompatible with " + this);
         }

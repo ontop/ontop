@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
@@ -284,7 +283,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             ImmutableSet<Variable> localVariables = treeComponent.getKnownVariables();
 
             try {
-                IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
+                IntermediateQuery cloneSubQuery = SubQuerySpecializationTools.specializeSubQuery(originalSubQuery,
                             localDataNode.getProjectionAtom(), localVariables);
 
                 ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
@@ -292,7 +291,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 treeComponent.replaceNode(localDataNode, localSubTreeRootNode);
 
                 treeComponent.addSubTree(cloneSubQuery, subQueryRootNode, localSubTreeRootNode);
-            } catch (SubQueryUnificationTools.SubQueryUnificationException | IllegalTreeUpdateException e) {
+            } catch (SubQuerySpecializationTools.SubQuerySpecializationException | IllegalTreeUpdateException e) {
                 throw new QueryMergingException(e.getMessage());
             }
         }

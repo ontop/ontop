@@ -40,4 +40,9 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     public GroupNode transform(GroupNode groupNode) {
         return groupNode.clone();
     }
+
+    @Override
+    public UnsatisfiedNode transform(UnsatisfiedNode unsatisfiedNode) {
+        return unsatisfiedNode.clone();
+    }
 }

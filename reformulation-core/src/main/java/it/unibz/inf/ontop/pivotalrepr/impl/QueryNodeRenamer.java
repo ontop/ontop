@@ -41,7 +41,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public UnionNode transform(UnionNode unionNode){
-        return unionNode;
+        return unionNode.clone();
     }
 
     @Override
@@ -76,6 +76,11 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
             renamedTermBuilder.add(renamingSubstitution.applyToNonGroundTerm(term));
         }
         return new GroupNodeImpl(renamedTermBuilder.build());
+    }
+
+    @Override
+    public UnsatisfiedNode transform(UnsatisfiedNode unsatisfiedNode) {
+        return unsatisfiedNode.clone();
     }
 
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
