@@ -81,8 +81,6 @@ public class ConstructionNodeTools {
         }
     }
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-
 
     /**
      * TODO: explain
@@ -340,24 +338,6 @@ public class ConstructionNodeTools {
             return Optional.empty();
 
         throw new RuntimeException("TODO: support the update of modifiers");
-    }
-
-    /**
-     * TODO: explain
-     *
-     * TODO: check if the use of a set for ordering is safe
-     */
-    private static DataAtom computeNewDataAtom(DataAtom projectionAtom, ImmutableSet<Variable> variablesToRemove,
-                                               ImmutableSet<Variable> newVariablesToProject) {
-        // Mutable
-        List<VariableOrGroundTerm> newArguments = new LinkedList<>(projectionAtom.getArguments());
-        newArguments.removeAll(variablesToRemove);
-        for (Variable newVariable : newVariablesToProject) {
-            if (!newArguments.contains(newVariable)) {
-                newArguments.add(newVariable);
-            }
-        }
-        return DATA_FACTORY.getDataAtom(projectionAtom.getPredicate(), ImmutableList.copyOf(newArguments));
     }
 
     private static ImmutableSubstitution<VariableOrGroundTerm> convertToVarOrGroundTermSubstitution(

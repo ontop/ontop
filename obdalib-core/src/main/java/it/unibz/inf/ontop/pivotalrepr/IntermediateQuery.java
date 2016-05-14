@@ -76,9 +76,14 @@ public interface IntermediateQuery {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
-     * TODO: find an exception to throw
+     * Useful when converting a DatalogProgram into an IntermediateQuery.
+     *
+     * However, for unfolding IQ mappings, another method should be created.
+     *
+     * If the subQuery is irrelevant (cannot be merged in), it is simply ignored.
+     *
      */
-    void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
+    void mergeSubQuery(IntermediateQuery subQuery) throws EmptyQueryException;
 
     /**
      *

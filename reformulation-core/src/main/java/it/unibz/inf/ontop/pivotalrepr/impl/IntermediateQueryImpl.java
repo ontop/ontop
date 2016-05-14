@@ -266,36 +266,17 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     /**
-     * TODO: explain
+     * TODO: replace that by a proposal
      */
     @Override
-    public void mergeSubQuery(final IntermediateQuery originalSubQuery) throws QueryMergingException {
-        /**
-         * TODO: explain
-         */
+    public void mergeSubQuery(IntermediateQuery originalSubQuery) throws EmptyQueryException {
         List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getProjectionAtom());
-        if (localDataNodes.isEmpty())
-            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getProjectionAtom());
-
 
         for (IntensionalDataNode localDataNode : localDataNodes) {
-
-            ImmutableSet<Variable> localVariables = treeComponent.getKnownVariables();
-
-            try {
-                IntermediateQuery cloneSubQuery = SubQuerySpecializationTools.specializeSubQuery(originalSubQuery,
-                            localDataNode.getProjectionAtom(), localVariables);
-
-                ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
-                ConstructionNode localSubTreeRootNode = subQueryRootNode.clone();
-                treeComponent.replaceNode(localDataNode, localSubTreeRootNode);
-
-                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode, localSubTreeRootNode);
-            } catch (SubQuerySpecializationTools.SubQuerySpecializationException | IllegalTreeUpdateException e) {
-                throw new QueryMergingException(e.getMessage());
-            }
+            SubQueryMergingTools.mergeSubQuery(treeComponent, originalSubQuery, localDataNode);
         }
     }
+
 
     @Override
     public ConstructionNode getClosestConstructionNode(QueryNode node) {

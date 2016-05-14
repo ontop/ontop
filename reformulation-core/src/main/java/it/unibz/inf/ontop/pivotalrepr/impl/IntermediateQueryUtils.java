@@ -42,8 +42,7 @@ public class IntermediateQueryUtils {
     /**
      * TODO: describe
      */
-    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions)
-            throws QueryMergingException {
+    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions) {
         return mergeDefinitions(predicateDefinitions, Optional.<ImmutableQueryModifiers>empty());
     }
 
@@ -55,8 +54,7 @@ public class IntermediateQueryUtils {
      * TODO: refactor it so that the definitive intermediate query is directly constructed.
      */
     public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions,
-                                                               Optional<ImmutableQueryModifiers> optionalTopModifiers)
-            throws QueryMergingException {
+                                                               Optional<ImmutableQueryModifiers> optionalTopModifiers) {
         if (predicateDefinitions.isEmpty())
             return Optional.empty();
 

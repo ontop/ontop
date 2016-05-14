@@ -12,10 +12,10 @@ import java.util.stream.IntStream;
  */
 public class FunctionalTools {
 
-    public static <T> ImmutableList<Map.Entry<T, T>> zip(List<T> list1, List<T> list2) {
+    public static <S, T> ImmutableList<Map.Entry<S, T>> zip(List<S> list1, List<T> list2) {
         int length = Math.min(list1.size(), list2.size());
 
-        ImmutableList.Builder<Map.Entry<T, T>> listBuilder = ImmutableList.builder();
+        ImmutableList.Builder<Map.Entry<S, T>> listBuilder = ImmutableList.builder();
 
         IntStream.range(0, length)
                 .forEach(i -> listBuilder.add(new AbstractMap.SimpleEntry<>(list1.get(i), list2.get(i))));
