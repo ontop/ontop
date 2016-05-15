@@ -101,6 +101,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         InnerJoinNode innerJoinNode1 = new InnerJoinNodeImpl(Optional.empty());
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
+        queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, innerJoinNode1);
         ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
