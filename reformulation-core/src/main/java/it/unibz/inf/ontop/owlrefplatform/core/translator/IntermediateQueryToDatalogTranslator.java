@@ -62,15 +62,23 @@ public class IntermediateQueryToDatalogTranslator {
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQueryToDatalogTranslator.class);
 
+	// Incremented
+	private int subQueryCounter;
+
+	private IntermediateQueryToDatalogTranslator() {
+		subQueryCounter = 0;
+	}
+
 	/**
 	 * Translate an intermediate query tree into a Datalog program 
 	 * 
 	 */
 	public static DatalogProgram translate(IntermediateQuery query) {
-		
+		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator();
+		return translator.translateQuery(query);
+	}
 
-		
-
+	private DatalogProgram translateQuery(IntermediateQuery query) {
 		ConstructionNode root = query.getRootConstructionNode();
 		
 		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
@@ -104,7 +112,7 @@ public class IntermediateQueryToDatalogTranslator {
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private static void translate(IntermediateQuery query, DatalogProgram pr, ConstructionNode root) {
+	private void translate(IntermediateQuery query, DatalogProgram pr, ConstructionNode root) {
 
 		Queue<RuleHead> heads = new LinkedList<>();
 		heads.add(new RuleHead(root, query.getProjectionAtom()));
@@ -146,7 +154,7 @@ public class IntermediateQueryToDatalogTranslator {
 	 * Takes a node and return the list of functions (atoms) that it represents.
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
-	private static List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
+	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
 											  Map<ConstructionNode, DataAtom> subQueryProjectionAtoms) {
 		
 		List<Function> body = new ArrayList<>();
@@ -263,7 +271,7 @@ public class IntermediateQueryToDatalogTranslator {
 	
 	}
 
-	private static DataAtom adaptProjectionAtom(DataAtom idealProjectionAtom, ConstructionNode constructionNode) {
+	private DataAtom adaptProjectionAtom(DataAtom idealProjectionAtom, ConstructionNode constructionNode) {
 		ImmutableList<? extends VariableOrGroundTerm> arguments = idealProjectionAtom.getArguments();
 		ImmutableSet<Variable> projectedVariables = constructionNode.getProjectedVariables();
 
@@ -281,8 +289,8 @@ public class IntermediateQueryToDatalogTranslator {
 		}
 	}
 
-	private static DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = new AtomPredicateImpl("ans" + UUID.randomUUID(), projectedVariables.size());
+	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
+		AtomPredicate newPredicate = new AtomPredicateImpl("ansSQ" + ++subQueryCounter, projectedVariables.size());
 		return ofac.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 
