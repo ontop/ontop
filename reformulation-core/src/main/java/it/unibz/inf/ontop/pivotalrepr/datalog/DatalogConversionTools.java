@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
@@ -46,13 +47,9 @@ public class DatalogConversionTools {
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
-        AtomPredicate atomPredicate;
-        if (datalogAtomPredicate instanceof AtomPredicate) {
-            atomPredicate = (AtomPredicate) datalogAtomPredicate;
-        }
-        else {
-            atomPredicate = new AtomPredicateImpl(datalogAtomPredicate);
-        }
+        AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)
+                ? (AtomPredicate) datalogAtomPredicate
+                : new AtomPredicateImpl(datalogAtomPredicate);
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
@@ -63,22 +60,27 @@ public class DatalogConversionTools {
          *
          * Creates allBindings entries if needed (in case of constant of a functional term)
          */
-        VariableDispatcher variableDispatcher = new VariableDispatcher();
+        VariableGenerator variableGenerator = new VariableGenerator(ImmutableSet.of());
         for (Term term : datalogDataAtom.getTerms()) {
             Variable newArgument;
 
             /**
-             * Keep the same variable.
+             * If a variable occurs multiple times, rename it and keep track of the equivalence.
+             *
              */
             if (term instanceof Variable) {
-                newArgument = (Variable) term;
+                Variable originalVariable = (Variable) term;
+                newArgument = variableGenerator.generateNewVariableIfConflicting(originalVariable);
+                if (!newArgument.equals(originalVariable)) {
+                    allBindingBuilder.put(newArgument, originalVariable);
+                }
             }
             /**
              * Ground-term: replace by a variable and add a binding.
              * (easier to merge than putting the ground term in the data atom).
              */
             else if (isGroundTerm(term)) {
-                Variable newVariable = variableDispatcher.generateNewVariable();
+                Variable newVariable = variableGenerator.generateNewVariable();
                 newArgument = newVariable;
                 allBindingBuilder.put(newVariable, castIntoGroundTerm(term));
             }
@@ -86,7 +88,7 @@ public class DatalogConversionTools {
              * Non-ground functional term
              */
             else {
-                Variable newVariable = variableDispatcher.generateNewVariable();
+                Variable newVariable = variableGenerator.generateNewVariable();
                 newArgument = newVariable;
                 allBindingBuilder.put(newVariable, convertIntoImmutableTerm(term));
             }
