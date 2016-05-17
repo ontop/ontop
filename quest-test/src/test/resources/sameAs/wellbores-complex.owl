@@ -18,7 +18,6 @@
     <owl:Ontology rdf:about="http://ontop.inf.unibz.it/test/wellbore"/>
     
 
-
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -82,6 +81,25 @@
     <!-- http://ontop.inf.unibz.it/test/wellbore#Wellbore -->
 
     <owl:Class rdf:about="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+
+
+     <!--
+     ///////////////////////////////////////////////////////////////////////////////////////
+     //
+     // Individuals
+     //
+     ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:NamedIndividual rdf:about="http://ontop.inf.unibz.it/test/wellbore/Bill">
+    <rdf:type rdf:resource="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+    </owl:NamedIndividual>
+
+    <owl:NamedIndividual rdf:about="http://ontop.inf.unibz.it/test/wellbore/Katian">
+        <rdf:type rdf:resource="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+        <owl:sameAs rdf:resource="http://ontop.inf.unibz.it/test/wellbore/Bill"/>
+    </owl:NamedIndividual>
+
 
 
 

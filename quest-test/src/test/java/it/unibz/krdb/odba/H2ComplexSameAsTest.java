@@ -31,6 +31,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -126,20 +128,32 @@ public class H2ComplexSameAsTest {
 			}
 		}
 	}
-	
 
-	
-	private void runTests(String query) throws Exception {
+
+
+	private void runTests(String query, boolean sameAs) throws Exception {
+
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(sameAs).build();
+
+		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
+
+		// Now we are ready for querying
+		conn = reasoner.getConnection();
+
 		QuestOWLStatement st = conn.createStatement();
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while(rs.nextRow()) {
-                for (String s : rs.getSignature()) {
-                    log.debug(s + ":  " + rs.getOWLObject(s));
+				for (String s : rs.getSignature()) {
+					OWLObject binding = rs.getOWLObject(s);
+					log.debug((s + ":  " + ToStringRenderer.getInstance().getRendering(binding)));
 
-                }
-            }
+				}
+			}
 
 		} catch (Exception e) {
 			throw e;
@@ -164,19 +178,30 @@ public class H2ComplexSameAsTest {
                 "   ?x  a :Wellbore . \n" +
                 "}";
 
-        runTests(query);
+        runTests(query, true);
 
     }
 
 	@Test
+	public void testNoSameAs1() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
+				"WHERE {\n" +
+				" {  ?x  a :Wellbore . \n" +
+				"} UNION {?x owl:sameAs [ a :Wellbore ] }} ";
+
+		runTests(query, false);
+
+	}
+
+	@Test
 	public void testSameAs2() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x \n" +
                 "WHERE {\n" +
                 "   ?x  a :Wellbore . \n" +
                 "   ?x  :hasName ?y . \n" +
                 "}";
 
-		 runTests(query);
+		 runTests(query, true);
 
 	}
 
@@ -187,9 +212,19 @@ public class H2ComplexSameAsTest {
                 " ?x :hasName ?y .\n" +
                 " ?x :isActive ?z .}\n";
 
-        runTests(query);
+        runTests(query, true);
 
     }
+
+	@Test
+	public void testSameAs3b() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
+				"SELECT * WHERE { ?x a :Wellbore .\n" +
+				" ?x :isActive ?z .}\n";
+
+		runTests(query, true);
+
+	}
 
     @Test
     public void testSameAs4() throws Exception {
@@ -197,7 +232,7 @@ public class H2ComplexSameAsTest {
                 "SELECT * WHERE { ?x a :Wellbore .\n" +
                 " ?x :isHappy ?z .}\n";
 
-        runTests(query);
+        runTests(query, true);
 
     }
 
@@ -205,13 +240,22 @@ public class H2ComplexSameAsTest {
     public void testSameAs5() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
                 "SELECT * WHERE { " +
-
                 " ?x :hasOwner ?y .}\n";
 
-        runTests(query);
+        runTests(query, true);
 
     }
 
+	@Test
+	public void testSameAs6() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
+				"SELECT * WHERE { " +
+				"?x  a :Wellbore ." +
+				" ?x :hasOwner ?y .}\n";
+
+		runTests(query, true);
+
+	}
 
 
 

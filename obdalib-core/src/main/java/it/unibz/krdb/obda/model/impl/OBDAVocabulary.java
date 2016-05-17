@@ -20,8 +20,9 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.ValueConstant;
 
 public class OBDAVocabulary {
 
@@ -32,6 +33,8 @@ public class OBDAVocabulary {
 	public static final ValueConstant FALSE = new ValueConstantImpl("false", COL_TYPE.BOOLEAN);
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+
+	public static final String SAME_AS = "http://www.w3.org/2002/07/owl#sameAs";
 
 	/* Common namespaces and prefixes */
 

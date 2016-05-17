@@ -22,9 +22,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.utils.IDGenerator;
 
-import java.net.URI;
 import java.util.*;
 
 public class MappingSameAs {
@@ -49,15 +49,15 @@ public class MappingSameAs {
         dataPropertiesAndClassesMapped = new HashSet<Predicate>();
         objectPropertiesMapped = new HashSet<Predicate>();
 
-        getSameAs();
+        retrieveSameAsMappingsURIs();
 
-        getPropertiesWithSameAs();
+        retrievePredicatesWithSameAs();
     }
 
     /**
      * method that gets the uris from the mappings of same as and store it in a map
      */
-    private void getSameAs() throws OBDAException {
+    private void retrieveSameAsMappingsURIs() throws OBDAException {
 
     	 sameAsMap= new HashMap<>();
 
@@ -66,7 +66,7 @@ public class MappingSameAs {
             Function atom = rule.getHead();
 
             Predicate predicate = atom.getFunctionSymbol();
-            if (predicate.getArity() == 2 && predicate.getName().equals("http://www.w3.org/2002/07/owl#sameAs")) { // we check for owl same as
+            if (predicate.getArity() == 2 && predicate.getName().equals(OBDAVocabulary.SAME_AS)) { // we check for owl same as
 
 
                 Term term1 = atom.getTerm(0);
@@ -86,60 +86,50 @@ public class MappingSameAs {
                 else
                     throw new OBDAException("owl:samesAs is not built properly");
 
-
-
-
             }
 
         }
 
-
     }
 
     /*
-    get data and object predicate that needs the same as
+    Get class data and object predicate that could refer to a same as
      */
-    private void getPropertiesWithSameAs() throws OBDAException {
-
+    private void retrievePredicatesWithSameAs() throws OBDAException {
 
 
         for (CQIE rule : rules) {
 
             Function atom = rule.getHead();
 
-            Predicate functionSymbol = atom.getFunctionSymbol();
-
+            Predicate predicate = atom.getFunctionSymbol();
 
 
             if (atom.getArity() == 2) {
-
 
                 Function term1 = (Function) atom.getTerm(0);
                 Function term2 = (Function) atom.getTerm(1);
                 boolean t1uri = (term1.getFunctionSymbol() instanceof URITemplatePredicate);
                 boolean t2uri = (term2.getFunctionSymbol() instanceof URITemplatePredicate);
 
-
+                //predicate is object property
                 if (t1uri && t2uri ) {
 
-                    //TODO use constants
-                    if(!functionSymbol.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
+                    if(!predicate.getName().equals(OBDAVocabulary.SAME_AS)){
 
                         Term prefix1 = term1.getTerm(0);
                         Term prefix2 =  term2.getTerm(0);
 
                         if (sameAsMap.containsKey(prefix1) ||  (sameAsMap.containsKey(prefix2))) {
 
-                            objectPropertiesMapped.add(functionSymbol);
+                            objectPropertiesMapped.add(predicate);
 
                         }
 
-
-
                     }
 
-
                 }
+                //predicate is data property or a class
                 else
                 {
 
@@ -148,7 +138,7 @@ public class MappingSameAs {
 
                     if (sameAsMap.containsKey(prefix1)) {
 //                        Function dataProperty = fac.getFunction(functionSymbol,prefix1, term2);
-                        dataPropertiesAndClassesMapped.add(functionSymbol);
+                        dataPropertiesAndClassesMapped.add(predicate);
                     }
 
 
@@ -165,7 +155,7 @@ public class MappingSameAs {
                         Term prefix1 = uri1.getTerm(0);
 
                         if (sameAsMap.containsKey(prefix1)) {
-                            dataPropertiesAndClassesMapped.add(functionSymbol);
+                            dataPropertiesAndClassesMapped.add(predicate);
                         }
                     }
                 }
@@ -191,28 +181,25 @@ public class MappingSameAs {
     }
 
 
+    /* add the inverse of the same as present in the mapping */
 
-    public static Collection<OBDAMappingAxiom> addSameAsInverse(OBDAModel model) {
-        OBDADataSource datasource = model.getSources().get(0);
-        URI sourceId = datasource.getSourceID();
-        Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(sourceId));
+    public static Collection<OBDAMappingAxiom> addSameAsInverse(Collection<OBDAMappingAxiom> mappings) {
+
 
         Collection<OBDAMappingAxiom> results = new LinkedList<>();
         for (OBDAMappingAxiom mapping : mappings) {
-            CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+            List<Function> body  = mapping.getTargetQuery();
             List<Function> newTargetBody = new LinkedList<>();
 
 
-            for (Function atom : targetQuery.getBody()) {
+            for (Function atom : body) {
                 Predicate p = atom.getFunctionSymbol();
 
-                if(p.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
+                if(p.getName().equals(OBDAVocabulary.SAME_AS)){
                     Predicate pred = fac.getObjectPropertyPredicate(p.getName());
                     //need to add also the inverse
                     Function inverseAtom = fac.getFunction(pred, atom.getTerm(1), atom.getTerm(0));
                     newTargetBody.add(inverseAtom);
-
-
 
                 }
 

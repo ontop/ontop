@@ -31,9 +31,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,15 +96,7 @@ public class H2SameAsTest {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(true).build();
-
-		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
 
 		
 	}
@@ -128,14 +121,26 @@ public class H2SameAsTest {
 	
 
 	
-	private void runTests(String query) throws Exception {
+	private void runTests(String query, boolean sameAs) throws Exception {
+
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(sameAs).build();
+
+		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
+
+		// Now we are ready for querying
+		conn = reasoner.getConnection();
+
 		QuestOWLStatement st = conn.createStatement();
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while(rs.nextRow()) {
                 for (String s : rs.getSignature()) {
-                    log.debug(s + ":  " + rs.getOWLObject(s));
+					OWLObject binding = rs.getOWLObject(s);
+					log.debug((s + ":  " + ToStringRenderer.getInstance().getRendering(binding)));
 
                 }
             }
@@ -176,7 +181,18 @@ public class H2SameAsTest {
                 "   ?x  :hasName ?y . \n" +
                 "}";
 
-		 runTests(query);
+		 runTests(query, true);
+
+	}
+
+	@Test
+	public void testNoSameAs1() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
+				"PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+				"SELECT ?x ?y WHERE { { ?x :hasName ?y .} UNION {?x owl:sameAs [ :hasName ?y]} }\n";
+
+		// Bind (?n ?y)
+		runTests(query, false);
 
 	}
 
@@ -184,9 +200,16 @@ public class H2SameAsTest {
      * Test use of sameAs
      * the expected results
      * 911 'Amerigo' 13
-     * 911 Aleksi 13
      * 1 Aleksi 13
-     * 1 'Amerigo' 13
+     * 2 'Eljas' 100
+	 * Results as testNoSameAs2a()
+	 * what we get is
+	 * 911 'Amerigo' 13
+	 * 911 Aleksi 13
+	 * 1 'Amerigo' 13
+	 * 1 Aleksi 13
+	 * 2 'Eljas' 100
+	 * Results as testNoSameAs2b()
      * @throws Exception
      */
 
@@ -199,53 +222,54 @@ public class H2SameAsTest {
 
                 "}";
 
-         runTests(query);
+         runTests(query, true);
 
     }
 
-    @Test
-    public void testSameAs2b() throws Exception {
+	@Test
+	public void testNoSameAs2a() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
+				"PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+				"SELECT ?x ?y ?z WHERE { { ?x :hasName ?y .  ?x  :hasValue ?z . } UNION {?x owl:sameAs [ :hasName ?y ; :hasValue ?z ]} }\n";
+
+		// Bind (?n ?y)
+		runTests(query, false);
+
+	}
+
+	@Test
+	public void testNoSameAs2b() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
+				"PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+				"SELECT ?x ?y ?z WHERE { { ?x :hasName ?y .  ?x  :hasValue ?z . } UNION {?x owl:sameAs [ :hasName ?y ] . ?x :hasValue ?z } UNION {?x :hasName ?y . ?x owl:sameAs [ :hasValue ?z ]}  UNION {?x owl:sameAs  [ :hasName ?y ]. ?x owl:sameAs [ :hasValue ?z ]} }\n";
+
+		// Bind (?n ?y)
+		runTests(query, false);
+
+	}
+
+//	@Test
+	public void testSameAs3() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y\n" +
+				"WHERE {\n" +
+				"   ?x :hasOwner ?y . \n" +
+				"}";
+
+		runTests(query, true);
+
+	}
+
+
+//	@Test
+    public void testNoSameAs3() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>  \n" +
                 "SELECT ?x ?y WHERE { { ?x :hasOwner ?y . } UNION {?x :hasOwner [owl:samesAs ?y]} UNION {?x owl:sameAs [:hasOwner ?y]  } UNION {?x owl:sameAs [ owl:hasOwner [owl:samesAs ?y]]} }";
 
-        runTests(query);
+        runTests(query, false);
 
     }
 
-    @Test
-    public void testSameAs3() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "SELECT ?x ?y  WHERE { {?x a :Wellbore. }UNION {?x owl:sameAs [ a :Wellbore] } { ?x :hasName ?y . } UNION {?x owl:sameAs [  :hasName ?y]  } }\n";
 
-
-         runTests(query);
-
-    }
-
-    @Test
-    public void testSameAs4() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "SELECT ?x ?y WHERE { { ?x :hasName ?y .} UNION {?x owl:sameAs [ :hasName ?y]} }\n";
-
-        // Bind (?n ?y)
-         runTests(query);
-
-    }
-
-    @Test
-    public void testSameAs5() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "SELECT ?x ?y WHERE { ?x a :Wellbore . { ?x :hasName ?y . } UNION {\n" +
-                "?x owl:sameAs [ :hasName ?y ] .\n" +
-                "} }\n";
-
-        // Bind (?n ?y)
-        runTests(query);
-
-    }
 
 
 

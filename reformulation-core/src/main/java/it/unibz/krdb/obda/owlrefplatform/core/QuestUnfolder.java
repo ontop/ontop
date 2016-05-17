@@ -71,6 +71,11 @@ public class QuestUnfolder {
 					throws SQLException, JSQLParserException, OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
+
+		/**
+		 * add sameAsInverse
+		 */
+		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
 		
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
