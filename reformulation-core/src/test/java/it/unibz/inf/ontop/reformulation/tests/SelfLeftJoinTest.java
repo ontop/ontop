@@ -86,8 +86,9 @@ public class SelfLeftJoinTest {
     public void testSelfJoinElimination1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(ANS1_PREDICATE, M,N,O));
-        queryBuilder.init(constructionNode);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(
                 //Optional.of(DATA_FACTORY.getImmutableExpression(
                 //ExpressionOperation.EQ, M, M)));
@@ -109,8 +110,9 @@ public class SelfLeftJoinTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(ANS1_PREDICATE, M,N,O));
-        expectedQueryBuilder.init(constructionNode1);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
         expectedQueryBuilder.addChild(constructionNode1, dataNode5);

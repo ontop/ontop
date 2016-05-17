@@ -71,7 +71,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
          * The filter condition can be satisfied --> the join node and its sub-tree is thus removed from the tree.
          * Returns no join node.
          */
-        catch (InsatisfiedExpressionException e) {
+        catch (UnsatisfiableExpressionException e) {
             treeComponent.removeSubTree(topJoinNode);
             return Optional.empty();
         }
