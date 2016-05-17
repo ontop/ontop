@@ -345,18 +345,20 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
                 } else {
                     JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
                 }
-                action.run(query.getQueryString());
-                execTime = action.getExecutionTime();
-                do {
-                    int rows = action.getNumberOfRows();
-                    updateStatus(rows);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                } while (action.isRunning());
-                updateStatus(action.getNumberOfRows());
+				if(action!=null) {
+					action.run(query.getQueryString());
+					execTime = action.getExecutionTime();
+					do {
+						int rows = action.getNumberOfRows();
+						updateStatus(rows);
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							break;
+						}
+					} while (action.isRunning());
+					updateStatus(action.getNumberOfRows());
+				}
             });
 			queryRunnerThread.start();
 		} catch (Exception e) {
