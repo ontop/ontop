@@ -420,6 +420,12 @@ public class QuestUnfolder {
 				
 				newhead = fac.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
 			}
+			else {
+				/*
+				 * head is triple(x,uri(Property),y)
+				 */
+				newhead = (Function) currenthead.clone();
+			}
 			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());
 			newmappings.add(newmapping);
 		}
