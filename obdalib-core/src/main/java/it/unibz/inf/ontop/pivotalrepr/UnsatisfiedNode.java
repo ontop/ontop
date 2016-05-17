@@ -1,30 +1,28 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.NonGroundTerm;
 
 /**
- * GROUP BY query node.
+ * Temporary QueryNode that says that replace a non-satisfied sub-tree.
+ *
+ * Is expected to remove quickly.
  */
-public interface GroupNode extends QueryNode {
-
-    ImmutableList<NonGroundTerm> getGroupingTerms();
+public interface UnsatisfiedNode extends QueryNode {
 
     @Override
-    GroupNode clone();
+    UnsatisfiedNode clone();
 
     @Override
-    GroupNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+    UnsatisfiedNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException, NotNeededNodeException;
 
     @Override
-    SubstitutionResults<GroupNode> applyAscendingSubstitution(
+    SubstitutionResults<UnsatisfiedNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) ;
 
     @Override
-    SubstitutionResults<GroupNode> applyDescendingSubstitution(
+    SubstitutionResults<UnsatisfiedNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) ;
 }

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.*;
@@ -90,9 +91,9 @@ public class DatalogRule2QueryConverter {
 
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> NO_POSITION = Optional.empty();
-    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> LEFT_POSITION = Optional.of(NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> RIGHT_POSITION = Optional.of(NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+    private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
+    private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
+    private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
 
     /**
      * TODO: describe
@@ -102,34 +103,28 @@ public class DatalogRule2QueryConverter {
                                                        Optional<ImmutableQueryModifiers> optionalModifiers)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
-        ConstructionNode rootNode = createConstructionNode(datalogRule, optionalModifiers);
+        P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
+                DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+
+        DistinctVariableOnlyDataAtom projectionAtom = decomposition._1();
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), decomposition._2(),
+                optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-        return createDefinition(metadata, rootNode, tablePredicates, atomClassification.dataAndCompositeAtoms,
-                atomClassification.booleanAtoms, atomClassification.optionalGroupAtom);
+        return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
+                atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
+                atomClassification.optionalGroupAtom);
     }
 
-    /**
-     * For non-top datalog rules (that do not access to query modifiers)
-     *
-     * TODO: make sure the GROUP atom cannot be used for such rules.
-     *
-     */
-    private static ConstructionNode createConstructionNode(CQIE datalogRule,
-                                                           Optional<ImmutableQueryModifiers> optionalModifiers)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
-        P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
-
-        return new ConstructionNodeImpl(decomposition._1(), decomposition._2(), optionalModifiers);
-    }
 
     /**
      * TODO: explain
      */
     private static IntermediateQuery createDefinition(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+                                                      DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom)
@@ -143,7 +138,7 @@ public class DatalogRule2QueryConverter {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
         try {
-            queryBuilder.init(rootNode);
+            queryBuilder.init(projectionAtom, rootNode);
 
             /**
              * Intermediate node: ConstructionNode root or GROUP node
@@ -242,7 +237,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
                                                                         IntermediateQueryBuilder queryBuilder,
                                                                         final QueryNode parentNode,
-                                                                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                                                                        Optional<ArgumentPosition> optionalPosition,
                                                                         Collection<Predicate> tablePredicates)
             throws IntermediateQueryBuilderException, DatalogProgram2QueryConverter.InvalidDatalogProgramException {
         /**
@@ -277,7 +272,7 @@ public class DatalogRule2QueryConverter {
                 /**
                  * Creates the node
                  */
-                P2<DataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
+                P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
                 ImmutableSubstitution<ImmutableTerm> bindings = convertionResults._2();
                 DataAtom dataAtom = bindings.applyToDataAtom(convertionResults._1());
                 DataNode currentNode = DatalogConversionTools.createDataNode(dataAtom, tablePredicates);
@@ -294,7 +289,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                                 QueryNode parentNodeOfTheLJ,
                                                                 List<Function> subAtomsOfTheLJ,
-                                                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                                                                Optional<ArgumentPosition> optionalPosition,
                                                                 Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
@@ -332,7 +327,7 @@ public class DatalogRule2QueryConverter {
     private static IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                             QueryNode parentNodeOfTheJoinNode,
                                                             List<Function> subAtomsOfTheJoin,
-                                                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                                                            Optional<ArgumentPosition> optionalPosition,
                                                             Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 

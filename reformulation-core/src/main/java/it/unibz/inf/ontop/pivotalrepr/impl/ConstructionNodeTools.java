@@ -81,8 +81,6 @@ public class ConstructionNodeTools {
         }
     }
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-
 
     /**
      * TODO: explain
@@ -91,8 +89,7 @@ public class ConstructionNodeTools {
                                                                  ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution)
             throws InconsistentBindingException {
 
-        DataAtom projectionAtom = formerConstructionNode.getProjectionAtom();
-        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
 
         /**
          * TODO: explain why the composition is too rich
@@ -125,13 +122,15 @@ public class ConstructionNodeTools {
             substitutionMapBuilder.put(variable, term);
         }
 
-        return new ConstructionNodeImpl(projectionAtom, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
+        return new ConstructionNodeImpl(projectedVariables, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
                 formerConstructionNode.getOptionalModifiers());
 
     }
 
     /**
      * TODO: explain
+     *
+     * TODO: refactor
      *
      */
     public static BindingRemoval newNodeWithLessBindings(ConstructionNode formerConstructionNode,
@@ -148,13 +147,11 @@ public class ConstructionNodeTools {
         ImmutableSubstitution<ImmutableTerm> newBindingSubstitution = computeNewBindingSubstitution(formerConstructionNode, variablesToRemove,
                 newSubstitutions.getNewBindings());
 
-        DataAtom dataAtom = computeNewDataAtom(formerConstructionNode.getProjectionAtom(), variablesToRemove, newVariablesToProject);
-
 
         Optional<ImmutableQueryModifiers> newOptionalModifiers = computeNewOptionalModifiers(formerConstructionNode.getOptionalModifiers(),
                 bindingsToRemove);
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(dataAtom, newBindingSubstitution, newOptionalModifiers);
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(newVariablesToProject, newBindingSubstitution, newOptionalModifiers);
 
         return new BindingRemoval(newConstructionNode, newSubstitutions.getOptionalSubstitutionToPropagate());
     }
@@ -299,7 +296,7 @@ public class ConstructionNodeTools {
         /**
          * Checks that no projected but not-bound variable was proposed to be removed.
          */
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectionAtom().getVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
         for (Variable variable : allVariablesToRemove) {
             if ((!localVariablesToRemove.contains(variable)) && projectedVariables.contains(variable)) {
                 throw new InconsistentBindingException("The variable to remove " + variable + " is projected but" +
@@ -341,24 +338,6 @@ public class ConstructionNodeTools {
             return Optional.empty();
 
         throw new RuntimeException("TODO: support the update of modifiers");
-    }
-
-    /**
-     * TODO: explain
-     *
-     * TODO: check if the use of a set for ordering is safe
-     */
-    private static DataAtom computeNewDataAtom(DataAtom projectionAtom, ImmutableSet<Variable> variablesToRemove,
-                                               ImmutableSet<Variable> newVariablesToProject) {
-        // Mutable
-        List<VariableOrGroundTerm> newArguments = new LinkedList<>(projectionAtom.getArguments());
-        newArguments.removeAll(variablesToRemove);
-        for (Variable newVariable : newVariablesToProject) {
-            if (!newArguments.contains(newVariable)) {
-                newArguments.add(newVariable);
-            }
-        }
-        return DATA_FACTORY.getDataAtom(projectionAtom.getPredicate(), ImmutableList.copyOf(newArguments));
     }
 
     private static ImmutableSubstitution<VariableOrGroundTerm> convertToVarOrGroundTermSubstitution(

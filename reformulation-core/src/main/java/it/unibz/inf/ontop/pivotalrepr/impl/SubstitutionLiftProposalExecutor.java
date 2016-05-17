@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
@@ -147,10 +148,10 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
 
             // May throw an exception
             SubstitutionResults<? extends QueryNode> substitutionResults =
-                    descendantNode.applyDescendentSubstitution(substitutionToPropagate);
+                    descendantNode.applyDescendingSubstitution(substitutionToPropagate);
 
             Optional<? extends QueryNode> optionalNewDescendantNode = substitutionResults.getOptionalNewNode();
-            Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution
+            Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution
                     = substitutionResults.getSubstitutionToPropagate();
 
             /**

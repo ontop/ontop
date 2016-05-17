@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
 public interface LeftJoinNode extends JoinLikeNode, NonCommutativeOperatorNode {
@@ -18,11 +18,11 @@ public interface LeftJoinNode extends JoinLikeNode, NonCommutativeOperatorNode {
     @Override
     LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
-    SubstitutionResults<LeftJoinNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<LeftJoinNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query);
 
     @Override
-    SubstitutionResults<LeftJoinNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+    SubstitutionResults<LeftJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution);
 }

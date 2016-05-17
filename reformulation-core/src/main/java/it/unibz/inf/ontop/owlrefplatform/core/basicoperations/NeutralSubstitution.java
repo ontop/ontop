@@ -87,6 +87,12 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
+            ImmutableSubstitution<? extends ImmutableTerm> other) {
+        return Optional.of(other);
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
         ImmutableMap<Variable, ImmutableTerm> map = ImmutableMap.copyOf(otherSubstitution.getImmutableMap());
         return new ImmutableSubstitutionImpl<>(map);
@@ -103,6 +109,16 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public Var2VarSubstitution getVar2VarFragment() {
+        return new Var2VarSubstitutionImpl(ImmutableMap.of());
+    }
+
+    @Override
+    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
+    }
+
+    @Override
     public final ImmutableMap<Variable, Term> getMap() {
         return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) getImmutableMap();
     }
@@ -115,6 +131,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     @Override
     public boolean isDefining(Variable variable) {
         return false;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getDomain() {
+        return ImmutableSet.of();
     }
 
     @Override

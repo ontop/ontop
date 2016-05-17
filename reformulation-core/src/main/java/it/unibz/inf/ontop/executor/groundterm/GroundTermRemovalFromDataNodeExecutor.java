@@ -189,7 +189,7 @@ public class GroundTermRemovalFromDataNodeExecutor implements
                     throw new IllegalStateException("Inconsistent tree: a LJ without positions for its children found");
                 }
             }
-            else if (ancestor instanceof SubTreeDelimiterNode) {
+            else if (ancestor instanceof ConstructionNode) {
                 return Optional.empty();
             }
 

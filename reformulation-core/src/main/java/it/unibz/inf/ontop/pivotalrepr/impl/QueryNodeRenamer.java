@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
@@ -38,7 +41,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public UnionNode transform(UnionNode unionNode){
-        return unionNode;
+        return unionNode.clone();
     }
 
     @Override
@@ -54,10 +57,16 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        return new ConstructionNodeImpl(renameDataAtom(constructionNode.getProjectionAtom()),
+        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getProjectedVariables()),
                 renameSubstitution(constructionNode.getSubstitution()),
                 renameOptionalModifiers(constructionNode.getOptionalModifiers())
                 );
+    }
+
+    private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
+        return projectedVariables.stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(Collectors.collectingAndThen(Collectors.toSet(), ImmutableSet::copyOf));
     }
 
     @Override
@@ -67,6 +76,11 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
             renamedTermBuilder.add(renamingSubstitution.applyToNonGroundTerm(term));
         }
         return new GroupNodeImpl(renamedTermBuilder.build());
+    }
+
+    @Override
+    public UnsatisfiedNode transform(UnsatisfiedNode unsatisfiedNode) {
+        return unsatisfiedNode.clone();
     }
 
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
