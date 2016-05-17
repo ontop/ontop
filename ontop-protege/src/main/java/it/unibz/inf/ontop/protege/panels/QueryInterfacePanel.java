@@ -23,11 +23,11 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -336,7 +336,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			Thread queryRunnerThread = new Thread(() -> {
                 SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
                 OBDADataQueryAction<?> action = null;
-                if (query.isSelectQuery() || query.isAskQuery()) {
+				if (query.isEmpty()){
+					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
+				} else if (query.isSelectQuery() || query.isAskQuery()) {
                     action = QueryInterfacePanel.this.getExecuteSelectAction();
                 } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
                     action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
