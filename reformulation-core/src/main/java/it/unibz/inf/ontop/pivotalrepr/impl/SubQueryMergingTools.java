@@ -4,8 +4,6 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fj.P;
-import fj.P2;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -55,7 +53,7 @@ public class SubQueryMergingTools {
                      */
                     transformedNode = results.getOptionalNewNode()
                             .map(n -> (QueryNode) n)
-                            .orElseGet(UnsatisfiedNodeImpl::new);
+                            .orElseGet(UnsatisfiableNodeImpl::new);
                 }
                 else {
                     // Empty
@@ -161,7 +159,7 @@ public class SubQueryMergingTools {
             /**
              * Puts the children into the queue except if the transformed node is unsatisfied
              */
-            if (!(nodeToInsert instanceof UnsatisfiedNode)) {
+            if (!(nodeToInsert instanceof UnsatisfiableNode)) {
                 QueryNode originalNode = transformation.getOriginalNode();
 
                 subQuery.getChildren(originalNode).stream()

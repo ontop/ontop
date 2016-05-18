@@ -42,7 +42,7 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public UnsatisfiedNode transform(UnsatisfiedNode unsatisfiedNode) {
-        return unsatisfiedNode.clone();
+    public UnsatisfiableNode transform(UnsatisfiableNode unsatisfiableNode) {
+        return unsatisfiableNode.clone();
     }
 }

@@ -8,21 +8,21 @@ import it.unibz.inf.ontop.model.ImmutableTerm;
  *
  * Is expected to remove quickly.
  */
-public interface UnsatisfiedNode extends QueryNode {
+public interface UnsatisfiableNode extends QueryNode {
 
     @Override
-    UnsatisfiedNode clone();
+    UnsatisfiableNode clone();
 
     @Override
-    UnsatisfiedNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+    UnsatisfiableNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException, NotNeededNodeException;
 
     @Override
-    SubstitutionResults<UnsatisfiedNode> applyAscendingSubstitution(
+    SubstitutionResults<UnsatisfiableNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) ;
 
     @Override
-    SubstitutionResults<UnsatisfiedNode> applyDescendingSubstitution(
+    SubstitutionResults<UnsatisfiableNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) ;
 }

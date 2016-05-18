@@ -89,8 +89,8 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
     }
 
     @Override
-    public UnsatisfiedNode transform(UnsatisfiedNode unsatisfiedNode) {
-        return unsatisfiedNode;
+    public UnsatisfiableNode transform(UnsatisfiableNode unsatisfiableNode) {
+        return unsatisfiableNode;
     }
 
     private Optional<ImmutableExpression> transformOptionalFilterCondition(

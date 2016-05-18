@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
-public class UnsatisfiedNodeImpl extends QueryNodeImpl implements UnsatisfiedNode {
+public class UnsatisfiableNodeImpl extends QueryNodeImpl implements UnsatisfiableNode {
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
@@ -14,7 +14,7 @@ public class UnsatisfiedNodeImpl extends QueryNodeImpl implements UnsatisfiedNod
     }
 
     @Override
-    public UnsatisfiedNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+    public UnsatisfiableNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException, NotNeededNodeException {
         return transformer.transform(this);
     }
@@ -30,25 +30,25 @@ public class UnsatisfiedNodeImpl extends QueryNodeImpl implements UnsatisfiedNod
     }
 
     @Override
-    public SubstitutionResults<UnsatisfiedNode> applyAscendingSubstitution(
+    public SubstitutionResults<UnsatisfiableNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
         return new SubstitutionResultsImpl<>(this);
     }
 
     @Override
-    public SubstitutionResults<UnsatisfiedNode> applyDescendingSubstitution(
+    public SubstitutionResults<UnsatisfiableNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return new SubstitutionResultsImpl<>(this);
     }
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof UnsatisfiedNode);
+        return (node instanceof UnsatisfiableNode);
     }
 
     @Override
-    public UnsatisfiedNode clone() {
-        return new UnsatisfiedNodeImpl();
+    public UnsatisfiableNode clone() {
+        return new UnsatisfiableNodeImpl();
     }
 }
