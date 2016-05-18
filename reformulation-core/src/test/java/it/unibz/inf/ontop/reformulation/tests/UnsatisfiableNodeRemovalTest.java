@@ -36,9 +36,8 @@ public class UnsatisfiableNodeRemovalTest {
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 1);
-    private static boolean REQUIRE_USING_INPLACE_EXECUTOR = true;
+    private static boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
 
-    @Ignore
     @Test
     public void testUnionRemoval() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -65,7 +64,7 @@ public class UnsatisfiableNodeRemovalTest {
         IntermediateQuery query = queryBuilder.build();
 
         // Updates the query (in-place optimization)
-        query.applyProposal(new RemoveUnsatisfiableNodesProposalImpl(), REQUIRE_USING_INPLACE_EXECUTOR);
+        query.applyProposal(new RemoveUnsatisfiableNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
 
 
         /**
