@@ -48,7 +48,7 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.sql.Statement;
 import java.io.Serializable;
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -146,6 +146,8 @@ public class Quest implements Serializable {
 	private boolean distinctResultSet = false;
 
 	private boolean queryingAnnotationsInOntology = false;
+
+	private boolean sameAsInMapping =  false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -268,7 +270,19 @@ public class Quest implements Serializable {
 
 	}
 
-	
+	/**
+	 * Enable/Disable querying annotation properties defined in the ontology
+	 * It overrides the value defined in QuestPreferences
+	 *
+	 * @param queryingAnnotationsInOntology
+	 */
+
+	public void setSameAsInMapping(boolean sameAsInMapping) {
+		this.sameAsInMapping = sameAsInMapping;
+
+	}
+
+
 	// TEST ONLY
 	public List<CQIE> getUnfolderRules() {
 		return engine.unfolder.ufp;
@@ -324,6 +338,7 @@ public class Quest implements Serializable {
 		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 		queryingAnnotationsInOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.ANNOTATIONS_IN_ONTO));
+		sameAsInMapping = Boolean.valueOf((String) preferences.get(QuestPreferences.SAME_AS));
 
                 
 		if (!inmemory) {
@@ -591,7 +606,7 @@ public class Quest implements Serializable {
 			 * T-Mappings and Fact mappings
 			 */
 			if (aboxMode.equals(QuestConstants.VIRTUAL)) 
-				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings, queryingAnnotationsInOntology);
+				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings, queryingAnnotationsInOntology, sameAsInMapping);
 			else
 				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 

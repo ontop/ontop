@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import javax.swing.*;
 import java.util.Vector;
-
-import javax.swing.JDialog;
-import javax.swing.SwingUtilities;
 
 public class OBDAProgressMonitor {
 

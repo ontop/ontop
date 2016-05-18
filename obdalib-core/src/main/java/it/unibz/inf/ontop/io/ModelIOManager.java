@@ -465,7 +465,7 @@ public class ModelIOManager {
 
     private void saveMapping(URI dataSourceUri, String mappingId, String sourceQuery, List<Function> targetQuery) {
         try {
-            OBDAMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(mappingId, 
+            OBDAMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(mappingId,
             		dataFactory.getSQLQuery(sourceQuery), targetQuery);
             model.addMapping(dataSourceUri, mapping);
         } catch (DuplicateMappingException e) {

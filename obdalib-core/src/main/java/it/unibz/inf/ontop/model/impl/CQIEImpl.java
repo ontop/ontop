@@ -28,12 +28,7 @@ import it.unibz.inf.ontop.utils.EventGeneratingLinkedList;
 import it.unibz.inf.ontop.utils.EventGeneratingList;
 import it.unibz.inf.ontop.utils.ListListener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This is a rule implementation that keeps track of changes in the query by

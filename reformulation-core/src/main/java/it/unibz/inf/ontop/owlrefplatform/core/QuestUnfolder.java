@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -49,6 +50,13 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
+	private Set<Predicate> dataPropertiesAndClassesMapped = new HashSet<>();
+	private Set<Predicate> objectPropertiesMapped = new HashSet<>();
+
+	/**
+	 * @throws SQLException
+	 * @throws JSQLParserException
+	 */
 	public QuestUnfolder(DBMetadata metadata)  {
 
 		this.metadata = metadata;
@@ -59,11 +67,16 @@ public class QuestUnfolder {
 		this.foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 	}
 
-	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings, boolean queryingAnnotationsInOntology)
+	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings, boolean queryingAnnotationsInOntology, boolean sameAs)
 					throws SQLException, JSQLParserException, OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
-		
+
+		/**
+		 * add sameAsInverse
+		 */
+		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
+
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
@@ -106,6 +119,10 @@ public class QuestUnfolder {
 		}
 		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
 				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), annotationAssertions);
+
+		if (sameAs) {
+			addSameAsMapping(unfoldingProgram);
+		}
 
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
@@ -413,4 +430,34 @@ public class QuestUnfolder {
 			}
 		}
 	}
+
+
+    /**
+     * Store information about owl:sameAs
+     */
+    public void addSameAsMapping(List<CQIE> unfoldingProgram) throws OBDAException{
+
+
+        MappingSameAs msa = new MappingSameAs(unfoldingProgram);
+
+        dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
+        objectPropertiesMapped =  msa.getObjectPropertiesWithSameAs();
+
+
+    }
+
+    public Set<Predicate> getSameAsDataPredicatesAndClasses(){
+
+        return dataPropertiesAndClassesMapped;
+    }
+
+    public Set<Predicate> getSameAsObjectPredicates(){
+
+        return objectPropertiesMapped;
+    }
+
+
+
+
+
 }

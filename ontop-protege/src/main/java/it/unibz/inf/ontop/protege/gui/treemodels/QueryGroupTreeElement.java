@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import java.util.Vector;
-
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Vector;
 
 public class QueryGroupTreeElement extends DefaultMutableTreeNode implements TreeElement {
 

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,7 +53,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
-	
+
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
@@ -146,7 +147,7 @@ public class QuestStatement implements OBDAStatement {
 						case SELECT:
 							if (questInstance.hasDistinctResultSet()) 
 								tupleResult = new QuestDistinctTupleResultSet(set, signature, QuestStatement.this);
-							else 
+							else
 								tupleResult = new QuestTupleResultSet(set, signature, QuestStatement.this);
 							break;
 						
@@ -164,24 +165,45 @@ public class QuestStatement implements OBDAStatement {
 							graphResult = new QuestGraphResultSet(tuples, templ, true);
 							break;
 						}
-					} 
+					}
+					catch (SQLTimeoutException e) {
+						log.warn("SQL execution is time out");
+//						if( set == null ){ // Exception SQLTimeout
+							tupleResult = new EmptyTupleResultSet(signature, QuestStatement.this);
+//						}
+					}
 					catch (SQLException e) {
+						final String MySQLTimeoutExceptionClassName = "com.mysql.jdbc.exceptions.MySQLTimeoutException";
+						final String PSQLExceptionClassName = "org.postgresql.util.PSQLException";
+
+						String exceptionClassName = e.getClass().getName();
+
+						// Since the exceptions of MySQL and Postgres are not extending SQLTimeoutException,
+						// the following hack is needed.
+						// See <http://bugs.mysql.com/bug.php?id=71589>
+						if(exceptionClassName.equals(MySQLTimeoutExceptionClassName)
+								|| exceptionClassName.equals(PSQLExceptionClassName)){
+							log.warn("SQL execution is time out");
+						} else {
 						exception = e;
 						log.error(e.getMessage(), e);
 						throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
+						}
 					}
 				}
 				log.debug("Execution finished.\n");
-			} 
+			}
 			catch (Exception e) {
 				e.printStackTrace();
 				exception = e;
 				log.error(e.getMessage(), e);
-			} 
+			}
 			finally {
 				monitor.countDown();
 			}
 		}
+
+
 	}
 
 	/**

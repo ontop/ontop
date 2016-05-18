@@ -47,6 +47,7 @@ public class QuestPreferences extends Properties {
 	public static final String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
 	public static final String  ANNOTATIONS_IN_ONTO     = "org.obda.owlreformulationplatform.queryingAnnotationsInOntology";
+	public static final String  SAME_AS   				= "org.obda.owlreformulationplatform.sameAs";
 
 	/**
 	 * Options to specify base IRI.
