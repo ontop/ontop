@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 TurtleOBDA.g 2016-04-20 15:22:59
+// $ANTLR 3.5.2 TurtleOBDA.g 2016-05-18 17:11:52
 
 package it.unibz.inf.ontop.parser;
 
@@ -170,7 +170,7 @@ public class TurtleOBDAParser extends Parser {
 	   error = msg;
 	}
 	    
-	public Object recoverFromMismatchedTokenrecoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
+	public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
 	   throw new RecognitionException(input);
 	}
 

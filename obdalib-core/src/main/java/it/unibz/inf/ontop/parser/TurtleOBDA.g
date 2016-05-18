@@ -152,7 +152,7 @@ public void emitErrorMessage(String msg) {
    error = msg;
 }
     
-public Object recoverFromMismatchedTokenrecoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
+public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
    throw new RecognitionException(input);
 }
 

@@ -209,7 +209,8 @@ public class QueryPainter {
 				parent.setToolTipText("Syntax error");
 			}
 			else {
-				String errorstring = e.getMessage();
+				String errorstring = e.getCause().getMessage();
+
 				int index = errorstring.indexOf("Location: line");
 				if (index != -1) {
 					String location = errorstring.substring(index + 15);
